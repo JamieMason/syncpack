@@ -1,0 +1,53 @@
+{
+  "name": "syncpack",
+  "description": "Normalise differences in packages/*/package.json files in Lerna Monorepos",
+  "version": "0.0.0",
+  "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
+  "bin": {
+    "syncpack": "dist/bin.js"
+  },
+  "bugs": "https://github.com/JamieMason/syncpack/issues",
+  "dependencies": {
+    "bluebird": "3.5.0",
+    "chalk": "1.1.3",
+    "commander": "2.9.0",
+    "glob": "7.1.2",
+    "nodent-runtime": "3.0.4",
+    "semver": "5.4.1"
+  },
+  "devDependencies": {
+    "babel-cli": "6.24.1",
+    "babel-preset-es2015": "6.22.0",
+    "fast-async": "6.3.0",
+    "rimraf": "2.5.4",
+    "xo": "0.17.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/JamieMason/syncpack#readme",
+  "keywords": [],
+  "license": "MIT",
+  "main": "syncpack",
+  "repository": "JamieMason/syncpack",
+  "scripts": {
+    "build": "babel --out-dir ./dist --ignore node_modules ./src",
+    "lint": "xo",
+    "prebuild": "rimraf dist",
+    "prepack": "npm run build",
+    "test": "npm run lint"
+  },
+  "xo": {
+    "envs": [
+      "node"
+    ],
+    "esnext": true,
+    "rules": {
+      "guard-for-in": 0,
+      "import/extensions": 0,
+      "object-curly-spacing": 0,
+      "unicorn/no-process-exit": 0
+    },
+    "space": 2
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "presets": ["es2015"],
+  "plugins": [
+    [
+      "fast-async",
+      {
+        "useRuntimeModule": true
+      }
+    ]
+  ]
+}
