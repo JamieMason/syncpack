@@ -1,11 +1,7 @@
 {
   "presets": ["es2015"],
   "plugins": [
-    [
-      "fast-async",
-      {
-        "useRuntimeModule": true
-      }
-    ]
+    ["fast-async", { "useRuntimeModule": true }],
+    "transform-object-rest-spread"
   ]
 }

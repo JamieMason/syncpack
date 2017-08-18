@@ -6,10 +6,17 @@ import { version } from '../package.json';
 import * as log from './lib/log';
 import syncpack from './index';
 
-program.version(version);
+let patternValue;
+
+program.version(version).arguments('[pattern]').action(pattern => {
+  patternValue = pattern;
+});
+
 program.parse(process.argv);
 
-syncpack({}).catch(err => {
+syncpack({
+  pattern: patternValue
+}).catch(err => {
   log.bug('uncaught error in syncpack', err);
   process.exit(1);
 });
