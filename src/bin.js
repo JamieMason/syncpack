@@ -3,20 +3,13 @@
 import 'nodent-runtime';
 import program from 'commander';
 import { version } from '../package.json';
-import * as log from './lib/log';
-import syncpack from './index';
+import { DEFAULT_PACKAGES, DEFAULT_SOURCE } from './constants';
 
-let patternValue;
-
-program.version(version).arguments('[pattern]').action(pattern => {
-  patternValue = pattern;
-});
+program
+  .version(version)
+  .command('sync-versions', 'synchronise dependency versions between packages', {
+    isDefault: true
+  })
+  .command('copy-values <keys...>', `copy values from eg. ${DEFAULT_SOURCE} to ${DEFAULT_PACKAGES}`);
 
 program.parse(process.argv);
-
-syncpack({
-  pattern: patternValue
-}).catch(err => {
-  log.bug('uncaught error in syncpack', err);
-  process.exit(1);
-});

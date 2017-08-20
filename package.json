@@ -4,7 +4,9 @@
   "version": "0.2.1",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
-    "syncpack": "dist/bin.js"
+    "syncpack": "dist/bin.js",
+    "syncpack-sync-versions": "dist/bin-sync-versions.js",
+    "syncpack-copy-values": "dist/bin-copy-values.js"
   },
   "bugs": "https://github.com/JamieMason/syncpack/issues",
   "dependencies": {
@@ -12,6 +14,7 @@
     "chalk": "2.1.0",
     "commander": "2.11.0",
     "glob": "7.1.2",
+    "lodash": "4.17.4",
     "nodent-runtime": "3.0.4",
     "semver": "5.4.1"
   },

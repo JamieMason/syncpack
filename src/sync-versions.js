@@ -55,8 +55,8 @@ const reportChanges = (key, pkg, changes) => {
   }
 };
 
-export default async ({ pattern = './packages/*/package.json' }) => {
-  const packages = (await getFiles(pattern)).map(getPackage);
+export default async ({ packagesPattern }) => {
+  const packages = (await getFiles(packagesPattern)).map(getPackage);
   const changedDeps = getChangedDeps('dependencies', packages);
   const changedDevDeps = getChangedDeps('devDependencies', packages);
   const changedPeerDeps = getChangedDeps('peerDependencies', packages);
