@@ -1,20 +1,18 @@
+import path from 'path';
 import bluebird from 'bluebird';
 import chalk from 'chalk';
-import path from 'path';
 import semver from 'semver';
-import * as log from './lib/log';
 import getFiles from './lib/get-files';
 import writeJson from './lib/write-json';
 
 const keys = (object = {}) => Object.keys(object);
-const clone = object => JSON.parse(JSON.stringify(object));
 const concatAll = arrayOfArrays => [].concat.apply([], arrayOfArrays);
 const entries = object => keys(object).map(key => [key, object[key]]);
 const isEmptyObject = object => keys(object).length === 0;
 const pluck = key => object => object[key];
 
 const stripWildCards = version => version.replace(/[*^=><]/g, '');
-const getPackage = location => ({ location: location, json: require(location) });
+const getPackage = location => ({ location, json: require(location) });
 const takeNewest = (max, next) =>
   !semver.valid(stripWildCards(next)) || semver.gt(stripWildCards(next), stripWildCards(max))
     ? next
@@ -48,7 +46,7 @@ const getChangedDeps = (key, packages) =>
 
 const reportChanges = (key, pkg, changes) => {
   const changedEntries = entries(changes);
-  if (changedEntries.length) {
+  if (changedEntries.length > 0) {
     changedEntries.forEach(([name, version]) => {
       console.log(`${key} ${name} ${chalk.red(pkg.json[key][name])} → ${chalk.green(version)}`);
     });

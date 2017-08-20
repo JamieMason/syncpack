@@ -9,19 +9,23 @@
   "bugs": "https://github.com/JamieMason/syncpack/issues",
   "dependencies": {
     "bluebird": "3.5.0",
-    "chalk": "1.1.3",
-    "commander": "2.9.0",
+    "chalk": "2.1.0",
+    "commander": "2.11.0",
     "glob": "7.1.2",
     "nodent-runtime": "3.0.4",
     "semver": "5.4.1"
   },
   "devDependencies": {
-    "babel-cli": "6.24.1",
+    "babel-cli": "6.26.0",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
-    "babel-preset-es2015": "6.22.0",
+    "babel-preset-es2015": "6.24.1",
+    "cz-conventional-changelog": "2.0.0",
+    "eslint-config-xo": "0.18.2",
+    "eslint-plugin-ava": "4.2.1",
+    "eslint-plugin-unicorn": "2.1.2",
     "fast-async": "6.3.0",
-    "rimraf": "2.5.4",
-    "xo": "0.17.1"
+    "rimraf": "2.6.1",
+    "xo": "0.18.2"
   },
   "files": [
     "dist"
@@ -44,11 +48,16 @@
     ],
     "esnext": true,
     "rules": {
-      "guard-for-in": 0,
       "import/extensions": 0,
+      "import/no-unassigned-import": 0,
       "object-curly-spacing": 0,
       "unicorn/no-process-exit": 0
     },
     "space": 2
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

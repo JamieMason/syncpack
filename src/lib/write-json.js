@@ -1,8 +1,8 @@
-import bluebird from 'bluebird';
 import fs from 'fs';
+import bluebird from 'bluebird';
 
-export default async (location, contents) => {
+export default (location, contents) => {
   const json = JSON.stringify(contents, null, 2);
   const writeFile = bluebird.promisify(fs.writeFile);
-  return await writeFile(location, `${json}\n`, { encoding: 'utf8' });
+  return writeFile(location, `${json}\n`, { encoding: 'utf8' });
 };
