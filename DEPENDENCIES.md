@@ -30,6 +30,7 @@ npm test
 ## Dev Dependencies
 
 - [babel-cli](https://github.com/babel/babel/tree/master/packages): Babel command line.
+- [babel-plugin-transform-object-rest-spread](https://github.com/babel/babel/tree/master/packages): Compile object rest and spread to ES5
 - [babel-preset-es2015](https://github.com/babel/babel/tree/master/packages): Babel preset for all es2015 plugins.
 - [fast-async](https://github.com/MatAtBread/fast-async): fast-async/await transformer Babel plugin
 - [rimraf](https://github.com/isaacs/rimraf): A deep deletion module for node (like `rm -rf`)
