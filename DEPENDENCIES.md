@@ -24,6 +24,7 @@ npm test
 - [chalk](https://github.com/chalk/chalk): Terminal string styling done right
 - [commander](https://github.com/tj/commander.js): the complete solution for node.js command-line programs
 - [glob](https://github.com/isaacs/node-glob): a little globber
+- [lodash](https://github.com/lodash/lodash): Lodash modular utilities.
 - [nodent-runtime](https://github.com/MatAtBread/nodent-runtime): Runtime component of nodent
 - [semver](https://github.com/npm/node-semver): The semantic version parser used by npm.
 
