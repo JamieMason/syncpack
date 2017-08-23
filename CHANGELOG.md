@@ -1,3 +1,13 @@
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/JamieMason/syncpack/compare/0.3.0...0.3.1) (2017-08-23)
+
+
+### Bug Fixes
+
+* **copy-values:** write results to disk ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de4))
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/JamieMason/syncpack/compare/0.2.1...0.3.0) (2017-08-22)
 
