@@ -1,8 +1,8 @@
-import glob from 'glob';
+import * as glob from 'glob';
 import * as log from './log';
 
-export default pattern =>
-  new Promise(resolve =>
+export const getFiles = (pattern: string): Promise<string[]> =>
+  new Promise((resolve) =>
     glob(pattern, { absolute: true }, (err, files) => {
       if (err) {
         log.bug(`failed to search for files using pattern "${pattern}"`, err);
