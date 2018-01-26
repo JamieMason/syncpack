@@ -18,17 +18,12 @@ export interface IPackage {
   json: IPackageJson;
 }
 
-export type GetVersions = (property: IPackageJsonKey, manifests: IPackageJson[]) => IDictionary<string[]>;
-export type GetMismatchedVersions = (property: IPackageJsonKey, manifests: IPackageJson[]) => IDictionary<string[]>;
-export type SetVersion = (
-  property: IPackageJsonKey,
-  name: string,
-  version: string,
-  manifests: IPackageJson[]
-) => IPackageJson[];
-export type SetVersionRange = (property: IPackageJsonKey, range: string, manifests: IPackageJson[]) => IPackageJson[];
+export type GetVersions = (manifests: IPackageJson[]) => IDictionary<string[]>;
+export type GetMismatchedVersions = (manifests: IPackageJson[]) => IDictionary<string[]>;
+export type SetVersion = (name: string, version: string, manifests: IPackageJson[]) => IPackageJson[];
+export type SetVersionRange = (range: string, manifests: IPackageJson[]) => IPackageJson[];
 export type GetVersionRange = (version: string) => string;
 export type GetVersionNumber = (version: string) => string;
 export type SortBySemver = (versions: string[]) => string[];
 export type GetNewest = (versions: string[]) => string | undefined;
-export type SetVersionsToNewestMismatch = (property: IPackageJsonKey, manifests: IPackageJson[]) => IPackageJson[];
+export type SetVersionsToNewestMismatch = (manifests: IPackageJson[]) => IPackageJson[];
