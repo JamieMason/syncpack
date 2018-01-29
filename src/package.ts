@@ -2,13 +2,13 @@ import * as _ from 'lodash';
 import * as semver from 'semver';
 import { DEPENDENCY_TYPES } from './constants';
 import {
-  GetMismatchedVersions,
-  GetVersions,
+  GetMismatchedPackageVersions,
+  GetPackageVersions,
   IDictionary,
   IPackageJson,
-  SetVersion,
-  SetVersionRange,
-  SetVersionsToNewestMismatch
+  SetPackageVersion,
+  SetPackageVersionRange,
+  SetPackageVersionsToNewestMismatch
 } from './typings';
 import { getNewest } from './version';
 
@@ -20,7 +20,16 @@ const gatherDependencies = (manifest: IPackageJson) =>
     .flatMap((dependencies) => _.map(dependencies, (version, name) => ({ name, version })))
     .value();
 
-export const getMismatchedVersions: GetMismatchedVersions = (manifests) =>
+export const isPackageJson = (value: any): boolean =>
+  Boolean(
+    value &&
+      typeof value === 'object' &&
+      'dependencies' in value &&
+      'devDependencies' in value &&
+      'peerDependencies' in value
+  );
+
+export const getMismatchedPackageVersions: GetMismatchedPackageVersions = (manifests) =>
   _.chain(manifests)
     .map(gatherDependencies)
     .flatten()
@@ -35,7 +44,7 @@ export const getMismatchedVersions: GetMismatchedVersions = (manifests) =>
     }, {})
     .value();
 
-export const getVersions: GetVersions = (manifests) =>
+export const getPackageVersions: GetPackageVersions = (manifests) =>
   _.chain(manifests)
     .map(gatherDependencies)
     .flatten()
@@ -48,7 +57,7 @@ export const getVersions: GetVersions = (manifests) =>
     }, {})
     .value();
 
-export const setVersion: SetVersion = (name, version, manifests) => {
+export const setPackageVersion: SetPackageVersion = (name, version, manifests) => {
   _(manifests).each((manifest) =>
     _(DEPENDENCY_TYPES)
       .map((property) => manifest[property])
@@ -60,7 +69,7 @@ export const setVersion: SetVersion = (name, version, manifests) => {
   return manifests;
 };
 
-export const setVersionRange: SetVersionRange = (range, manifests) => {
+export const setPackageVersionRange: SetPackageVersionRange = (range, manifests) => {
   _(manifests).each((manifest) =>
     _(DEPENDENCY_TYPES)
       .map((property) => manifest[property])
@@ -75,12 +84,12 @@ export const setVersionRange: SetVersionRange = (range, manifests) => {
   return manifests;
 };
 
-export const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (manifests) => {
-  _(getMismatchedVersions(manifests))
+export const setPackageVersionsToNewestMismatch: SetPackageVersionsToNewestMismatch = (manifests) => {
+  _(getMismatchedPackageVersions(manifests))
     .map((versions, name) => ({ name, newest: getNewest(versions) }))
     .filter(({ newest }) => typeof newest === 'string')
     .each(({ name, newest }) => {
-      setVersion(name, newest as string, manifests);
+      setPackageVersion(name, newest as string, manifests);
     });
   return manifests;
 };

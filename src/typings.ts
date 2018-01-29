@@ -18,12 +18,19 @@ export interface IPackage {
   json: IPackageJson;
 }
 
-export type GetVersions = (manifests: IPackageJson[]) => IDictionary<string[]>;
-export type GetMismatchedVersions = (manifests: IPackageJson[]) => IDictionary<string[]>;
-export type SetVersion = (name: string, version: string, manifests: IPackageJson[]) => IPackageJson[];
-export type SetVersionRange = (range: string, manifests: IPackageJson[]) => IPackageJson[];
-export type GetVersionRange = (version: string) => string;
-export type GetVersionNumber = (version: string) => string;
-export type SortBySemver = (versions: string[]) => string[];
+export type GetMismatchedFileVersions = (pattern: string) => Promise<IDictionary<string[]>>;
+export type GetFileVersions = (pattern: string) => Promise<IDictionary<string[]>>;
+export type SetFileVersion = (name: string, version: string, pattern: string) => Promise<IPackageJson[]>;
+export type SetFileVersionRange = (range: string, pattern: string) => Promise<IPackageJson[]>;
+export type SetFileVersionsToNewestMismatch = (pattern: string) => Promise<IPackageJson[]>;
+
+export type GetMismatchedPackageVersions = (manifests: IPackageJson[]) => IDictionary<string[]>;
+export type GetPackageVersions = (manifests: IPackageJson[]) => IDictionary<string[]>;
+export type SetPackageVersion = (name: string, version: string, manifests: IPackageJson[]) => IPackageJson[];
+export type SetPackageVersionRange = (range: string, manifests: IPackageJson[]) => IPackageJson[];
+export type SetPackageVersionsToNewestMismatch = (manifests: IPackageJson[]) => IPackageJson[];
+
 export type GetNewest = (versions: string[]) => string | undefined;
-export type SetVersionsToNewestMismatch = (manifests: IPackageJson[]) => IPackageJson[];
+export type GetVersionNumber = (version: string) => string;
+export type GetVersionRange = (version: string) => string;
+export type SortBySemver = (versions: string[]) => string[];
