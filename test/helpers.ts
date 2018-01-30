@@ -1,22 +1,22 @@
-import { IDictionary, IPackageJson } from '../src/typings';
+import { IDictionary, IManifest } from '../src/typings';
 
 export const createMockProject = (
   name: string,
-  dependencies: IPackageJson['dependencies'] = {},
-  devDependencies: IPackageJson['devDependencies'] = {},
-  peerDependencies: IPackageJson['peerDependencies'] = {}
+  dependencies: IManifest['dependencies'] = {},
+  devDependencies: IManifest['devDependencies'] = {},
+  peerDependencies: IManifest['peerDependencies'] = {}
 ): { [path: string]: string } => ({
   [`/Users/you/Dev/monorepo/packages/${name}/package.json`]: JSON.stringify(
-    createPackage(name, dependencies, devDependencies, peerDependencies)
+    createManifest(name, dependencies, devDependencies, peerDependencies)
   )
 });
 
-export const createPackage = (
+export const createManifest = (
   name: string,
-  dependencies: IPackageJson['dependencies'] = {},
-  devDependencies: IPackageJson['devDependencies'] = {},
-  peerDependencies: IPackageJson['peerDependencies'] = {}
-): IPackageJson => ({
+  dependencies: IManifest['dependencies'] = {},
+  devDependencies: IManifest['devDependencies'] = {},
+  peerDependencies: IManifest['peerDependencies'] = {}
+): IManifest => ({
   dependencies,
   devDependencies,
   name,

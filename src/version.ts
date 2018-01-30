@@ -1,7 +1,11 @@
 import * as _ from 'lodash';
 import * as semver from 'semver';
 import { GREATER, LESSER, SAME, SEMVER_ORDER } from './constants';
-import { GetNewest, GetVersionNumber, GetVersionRange, SortBySemver } from './typings';
+
+export type GetNewest = (versions: string[]) => string | undefined;
+export type GetVersionNumber = (version: string) => string;
+export type GetVersionRange = (version: string) => string;
+export type SortBySemver = (versions: string[]) => string[];
 
 export const getVersionNumber: GetVersionNumber = (version) => version.slice(version.search(/[0-9]/), version.length);
 export const getVersionRange: GetVersionRange = (version) => version.split(/[0-9]/)[0];

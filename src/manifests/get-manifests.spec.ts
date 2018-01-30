@@ -1,5 +1,5 @@
 import * as mock from 'mock-fs';
-import { createMockProject, createPackage } from '../../test/helpers';
+import { createManifest, createMockProject } from '../../test/helpers';
 import { getManifests } from './get-manifests';
 
 const pattern = '/Users/you/Dev/monorepo/packages/*/package.json';

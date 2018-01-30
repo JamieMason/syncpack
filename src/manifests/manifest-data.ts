@@ -1,26 +1,24 @@
 import * as _ from 'lodash';
 import * as semver from 'semver';
-import { DEPENDENCY_TYPES } from './constants';
-import {
-  GetMismatchedPackageVersions,
-  GetPackageVersions,
-  IDictionary,
-  IPackageJson,
-  SetPackageVersion,
-  SetPackageVersionRange,
-  SetPackageVersionsToNewestMismatch
-} from './typings';
-import { getNewest } from './version';
+import { DEPENDENCY_TYPES } from '../constants';
+import { IDictionary, IManifest } from '../typings';
+import { getNewest } from '../version';
+
+export type GetMismatchedVersions = (manifests: IManifest[]) => IDictionary<string[]>;
+export type GetVersions = (manifests: IManifest[]) => IDictionary<string[]>;
+export type SetVersion = (name: string, version: string, manifests: IManifest[]) => IManifest[];
+export type SetVersionRange = (range: string, manifests: IManifest[]) => IManifest[];
+export type SetVersionsToNewestMismatch = (manifests: IManifest[]) => IManifest[];
 
 const isValid = (version: string) => semver.valid(version) !== null;
 const join = ({ name, version }: IDictionary<string>) => `${name}@${version}`;
-const gatherDependencies = (manifest: IPackageJson) =>
+const gatherDependencies = (manifest: IManifest) =>
   _.chain(DEPENDENCY_TYPES)
     .map((property) => manifest[property])
     .flatMap((dependencies) => _.map(dependencies, (version, name) => ({ name, version })))
     .value();
 
-export const isPackageJson = (value: any): boolean =>
+const isManifest = (value: any): boolean =>
   Boolean(
     value &&
       typeof value === 'object' &&
@@ -29,7 +27,7 @@ export const isPackageJson = (value: any): boolean =>
       'peerDependencies' in value
   );
 
-export const getMismatchedPackageVersions: GetMismatchedPackageVersions = (manifests) =>
+const getMismatchedVersions: GetMismatchedVersions = (manifests) =>
   _.chain(manifests)
     .map(gatherDependencies)
     .flatten()
@@ -44,7 +42,7 @@ export const getMismatchedPackageVersions: GetMismatchedPackageVersions = (manif
     }, {})
     .value();
 
-export const getPackageVersions: GetPackageVersions = (manifests) =>
+const getVersions: GetVersions = (manifests) =>
   _.chain(manifests)
     .map(gatherDependencies)
     .flatten()
@@ -57,7 +55,7 @@ export const getPackageVersions: GetPackageVersions = (manifests) =>
     }, {})
     .value();
 
-export const setPackageVersion: SetPackageVersion = (name, version, manifests) => {
+const setVersion: SetVersion = (name, version, manifests) => {
   _(manifests).each((manifest) =>
     _(DEPENDENCY_TYPES)
       .map((property) => manifest[property])
@@ -69,7 +67,7 @@ export const setPackageVersion: SetPackageVersion = (name, version, manifests) =
   return manifests;
 };
 
-export const setPackageVersionRange: SetPackageVersionRange = (range, manifests) => {
+const setVersionRange: SetVersionRange = (range, manifests) => {
   _(manifests).each((manifest) =>
     _(DEPENDENCY_TYPES)
       .map((property) => manifest[property])
@@ -84,12 +82,21 @@ export const setPackageVersionRange: SetPackageVersionRange = (range, manifests)
   return manifests;
 };
 
-export const setPackageVersionsToNewestMismatch: SetPackageVersionsToNewestMismatch = (manifests) => {
-  _(getMismatchedPackageVersions(manifests))
+const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (manifests) => {
+  _(getMismatchedVersions(manifests))
     .map((versions, name) => ({ name, newest: getNewest(versions) }))
     .filter(({ newest }) => typeof newest === 'string')
     .each(({ name, newest }) => {
-      setPackageVersion(name, newest as string, manifests);
+      setVersion(name, newest as string, manifests);
     });
   return manifests;
+};
+
+export const manifestData = {
+  getMismatchedVersions,
+  getVersions,
+  isManifest,
+  setVersion,
+  setVersionRange,
+  setVersionsToNewestMismatch
 };
