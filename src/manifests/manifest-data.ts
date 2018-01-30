@@ -10,6 +10,7 @@ export type SetVersion = (name: string, version: string, manifests: IManifest[])
 export type SetVersionRange = (range: string, manifests: IManifest[]) => IManifest[];
 export type SetVersionsToNewestMismatch = (manifests: IManifest[]) => IManifest[];
 
+const isObject = (value: any) => Boolean(value && typeof value === 'object');
 const isValid = (version: string) => semver.valid(version) !== null;
 const join = ({ name, version }: IDictionary<string>) => `${name}@${version}`;
 const gatherDependencies = (manifest: IManifest) =>
@@ -20,11 +21,9 @@ const gatherDependencies = (manifest: IManifest) =>
 
 const isManifest = (value: any): boolean =>
   Boolean(
-    value &&
-      typeof value === 'object' &&
-      'dependencies' in value &&
-      'devDependencies' in value &&
-      'peerDependencies' in value
+    isObject(value) &&
+      'name' in value &&
+      ('dependencies' in value || 'devDependencies' in value || 'peerDependencies' in value)
   );
 
 const getMismatchedVersions: GetMismatchedVersions = (manifests) =>
