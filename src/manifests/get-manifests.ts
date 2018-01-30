@@ -1,11 +1,22 @@
 import { readJson } from 'fs-extra';
 import * as globby from 'globby';
-import { IManifest } from '../typings';
+import { IFileDescriptor, IManifestDescriptor } from '../typings';
 import { manifestData } from './manifest-data';
+
+type GetDescriptor = (path: string) => Promise<IFileDescriptor>;
+type GetDescriptors = (paths: string[]) => Promise<IFileDescriptor[]>;
+type FilterDescriptors = (descriptors: IFileDescriptor[]) => IManifestDescriptor[];
 
 const { isManifest } = manifestData;
 
-export const getManifests = (...patterns: string[]): Promise<IManifest[]> =>
+const getDescriptor: GetDescriptor = (path) => readJson(path).then((data) => ({ data, path }));
+const getDescriptors: GetDescriptors = (paths) => Promise.all(paths.map(getDescriptor));
+const filterDescriptors: FilterDescriptors = (descriptors) =>
+  descriptors
+    .filter((descriptor) => isManifest(descriptor.data))
+    .map((descriptor) => descriptor as IManifestDescriptor);
+
+export const getManifests = (...patterns: string[]): Promise<IManifestDescriptor[]> =>
   globby(patterns, { absolute: true })
-    .then((paths) => Promise.all(paths.map((path) => readJson(path))))
-    .then((files) => files.filter(isManifest));
+    .then(getDescriptors)
+    .then(filterDescriptors);

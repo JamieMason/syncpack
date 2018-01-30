@@ -1,4 +1,4 @@
-import { IDictionary, IManifest } from '../typings';
+import { IDictionary, IManifest, IManifestDescriptor } from '../typings';
 import { getManifests } from './get-manifests';
 import { manifestData } from './manifest-data';
 
@@ -8,16 +8,29 @@ export type SetVersion = (name: string, version: string, pattern: string) => Pro
 export type SetVersionRange = (range: string, pattern: string) => Promise<IManifest[]>;
 export type SetVersionsToNewestMismatch = (pattern: string) => Promise<IManifest[]>;
 
-export const getVersions: GetVersions = (pattern) => getManifests(pattern).then(manifestData.getVersions);
+const unwrap = (descriptors: IManifestDescriptor[]) => descriptors.map((descriptor) => descriptor.data);
+
+export const getVersions: GetVersions = (pattern) =>
+  getManifests(pattern)
+    .then(unwrap)
+    .then(manifestData.getVersions);
 
 export const getMismatchedVersions: GetMismatchedVersions = (pattern) =>
-  getManifests(pattern).then(manifestData.getMismatchedVersions);
+  getManifests(pattern)
+    .then(unwrap)
+    .then(manifestData.getMismatchedVersions);
 
 export const setVersion: SetVersion = (name, version, pattern) =>
-  getManifests(pattern).then(manifestData.setVersion.bind(null, name, version));
+  getManifests(pattern)
+    .then(unwrap)
+    .then(manifestData.setVersion.bind(null, name, version));
 
 export const setVersionRange: SetVersionRange = (range, pattern) =>
-  getManifests(pattern).then(manifestData.setVersionRange.bind(null, range));
+  getManifests(pattern)
+    .then(unwrap)
+    .then(manifestData.setVersionRange.bind(null, range));
 
 export const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (pattern) =>
-  getManifests(pattern).then(manifestData.setVersionsToNewestMismatch);
+  getManifests(pattern)
+    .then(unwrap)
+    .then(manifestData.setVersionsToNewestMismatch);

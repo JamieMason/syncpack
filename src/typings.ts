@@ -11,6 +11,11 @@ export interface IManifest {
   [otherProps: string]: string | IDictionary<string>;
 }
 
+export interface IFileDescriptor {
+  path: string;
+  data: object;
+}
+
 export interface IManifestDescriptor {
   path: string;
   data: IManifest;

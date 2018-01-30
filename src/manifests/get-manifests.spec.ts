@@ -22,8 +22,14 @@ describe('getManifests', () => {
   it('returns all valid package.json which match the provided globs', async () => {
     const result = await getManifests(pattern);
     expect(result).toEqual([
-      { dependencies: { rimraf: '0.1.2' }, devDependencies: {}, name: 'bar', peerDependencies: {} },
-      { dependencies: { chalk: '1.0.0' }, devDependencies: {}, name: 'foo', peerDependencies: {} }
+      {
+        data: { dependencies: { rimraf: '0.1.2' }, devDependencies: {}, name: 'bar', peerDependencies: {} },
+        path: '/Users/you/Dev/monorepo/packages/bar/package.json'
+      },
+      {
+        data: { dependencies: { chalk: '1.0.0' }, devDependencies: {}, name: 'foo', peerDependencies: {} },
+        path: '/Users/you/Dev/monorepo/packages/foo/package.json'
+      }
     ]);
   });
 });
