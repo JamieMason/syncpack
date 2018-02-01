@@ -1,6 +1,6 @@
-import { IDictionary, IManifest } from '../src/typings';
+import { IDictionary, IManifest, IManifestDescriptor } from '../src/typings';
 
-export const createMockProject = (
+export const createMockFs = (
   name: string,
   dependencies: IManifest['dependencies'] = {},
   devDependencies: IManifest['devDependencies'] = {},
@@ -9,6 +9,16 @@ export const createMockProject = (
   [`/Users/you/Dev/monorepo/packages/${name}/package.json`]: JSON.stringify(
     createManifest(name, dependencies, devDependencies, peerDependencies)
   )
+});
+
+export const createMockDescriptor = (
+  name: string,
+  dependencies: IManifest['dependencies'] = {},
+  devDependencies: IManifest['devDependencies'] = {},
+  peerDependencies: IManifest['peerDependencies'] = {}
+): IManifestDescriptor => ({
+  data: createManifest(name, dependencies, devDependencies, peerDependencies),
+  path: `/Users/you/Dev/monorepo/packages/${name}/package.json`
 });
 
 export const createManifest = (

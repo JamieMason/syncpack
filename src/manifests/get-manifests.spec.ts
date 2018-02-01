@@ -1,5 +1,5 @@
 import * as mock from 'mock-fs';
-import { createManifest, createMockProject } from '../../test/helpers';
+import { createManifest, createMockFs } from '../../test/helpers';
 import { getManifests } from './get-manifests';
 
 const pattern = '/Users/you/Dev/monorepo/packages/*/package.json';
@@ -10,8 +10,8 @@ afterEach(() => {
 
 beforeEach(() => {
   mock({
-    ...createMockProject('foo', { chalk: '1.0.0' }),
-    ...createMockProject('bar', { rimraf: '0.1.2' }),
+    ...createMockFs('foo', { chalk: '1.0.0' }),
+    ...createMockFs('bar', { rimraf: '0.1.2' }),
     '/Users/you/Dev/monorepo/packages/invalid/package.json': JSON.stringify({
       some: 'incorrect shape'
     })

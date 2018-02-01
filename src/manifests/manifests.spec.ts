@@ -1,5 +1,5 @@
 import * as mock from 'mock-fs';
-import { createManifest, createMockProject } from '../../test/helpers';
+import { createManifest, createMockDescriptor, createMockFs } from '../../test/helpers';
 import { IManifest } from '../typings';
 import { getMismatchedVersions, getVersions, setVersion, setVersionRange, setVersionsToNewestMismatch } from './index';
 
@@ -11,14 +11,14 @@ afterEach(() => {
 
 beforeEach(() => {
   mock({
-    ...createMockProject(
+    ...createMockFs(
       'foo',
       { chalk: '2.3.0', commander: '2.13.0' },
       { jest: '22.1.3', prettier: '1.10.2', rimraf: '2.6.2' },
       { gulp: '3.9.1' }
     ),
-    ...createMockProject('bar', { chalk: '1.0.0' }, { jest: '22.1.4' }),
-    ...createMockProject('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+    ...createMockFs('bar', { chalk: '1.0.0' }, { jest: '22.1.4' }),
+    ...createMockFs('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
   });
 });
 
@@ -53,14 +53,14 @@ describe('setVersion', () => {
     const result = await setVersion('jest', '25.0.0', pattern);
     expect(result).toEqual(
       expect.arrayContaining([
-        createManifest(
+        createMockDescriptor(
           'foo',
           { chalk: '2.3.0', commander: '2.13.0' },
           { jest: '25.0.0', prettier: '1.10.2', rimraf: '2.6.2' },
           { gulp: '3.9.1' }
         ),
-        createManifest('bar', { chalk: '1.0.0' }, { jest: '25.0.0' }),
-        createManifest('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+        createMockDescriptor('bar', { chalk: '1.0.0' }, { jest: '25.0.0' }),
+        createMockDescriptor('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
       ])
     );
   });
@@ -71,14 +71,14 @@ describe('setVersionRange', () => {
     const result = await setVersionRange('^', pattern);
     expect(result).toEqual(
       expect.arrayContaining([
-        createManifest(
+        createMockDescriptor(
           'foo',
           { chalk: '^2.3.0', commander: '^2.13.0' },
           { jest: '^22.1.3', prettier: '^1.10.2', rimraf: '^2.6.2' },
           { gulp: '^3.9.1' }
         ),
-        createManifest('bar', { chalk: '^1.0.0' }, { jest: '^22.1.4' }),
-        createManifest('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
+        createMockDescriptor('bar', { chalk: '^1.0.0' }, { jest: '^22.1.4' }),
+        createMockDescriptor('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
       ])
     );
   });
@@ -89,14 +89,14 @@ describe('setVersionsToNewestMismatch', () => {
     const result = await setVersionsToNewestMismatch(pattern);
     expect(result).toEqual(
       expect.arrayContaining([
-        createManifest(
+        createMockDescriptor(
           'foo',
           { chalk: '2.3.0', commander: '2.13.0' },
           { jest: '22.1.4', prettier: '1.10.2', rimraf: '2.6.2' },
           { gulp: '*' }
         ),
-        createManifest('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }),
-        createManifest('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+        createMockDescriptor('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }),
+        createMockDescriptor('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
       ])
     );
   });
