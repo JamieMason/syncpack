@@ -4,6 +4,10 @@ export const COMMAND_LIST = {
   description: 'list every dependency used in your packages',
   name: 'list'
 };
+export const COMMAND_LIST_MISMATCHES = {
+  description: 'list every dependency used with different versions in your packages',
+  name: 'list-mismatches'
+};
 export const DEFAULT_PATTERN = './packages/*/package.json';
 export const DEPENDENCY_TYPES: IManifestKey[] = ['dependencies', 'devDependencies', 'peerDependencies'];
 export const GREATER = 1;
