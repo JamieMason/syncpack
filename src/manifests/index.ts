@@ -1,4 +1,5 @@
 import { DEFAULT_PATTERN } from '../constants';
+import { writeJson } from '../lib/write-json';
 import { IDictionary, IManifest, IManifestDescriptor } from '../typings';
 import { getManifests } from './get-manifests';
 import { manifestData } from './manifest-data';
@@ -34,7 +35,15 @@ export const setVersionRange: SetVersionRange = (range, pattern = DEFAULT_PATTER
   });
 
 export const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (pattern = DEFAULT_PATTERN) =>
-  getManifests(pattern).then((descriptors) => {
-    manifestData.setVersionsToNewestMismatch(unwrap(descriptors));
-    return descriptors;
-  });
+  getManifests(pattern)
+    .then((descriptors) => {
+      const data = unwrap(descriptors);
+      const nextData = manifestData.setVersionsToNewestMismatch(data);
+      return descriptors.map((descriptor, i) => ({
+        data: nextData[i],
+        path: descriptor.path
+      }));
+    })
+    .then((descriptors) =>
+      Promise.all(descriptors.map((descriptor) => writeJson(descriptor.path, descriptor.data))).then(() => descriptors)
+    );

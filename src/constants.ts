@@ -1,10 +1,14 @@
 import { IManifestKey } from './typings';
 
-export const COMMAND_LIST = {
+export const FIX_MISMATCHES = {
+  description: 'set dependencies used with different versions to the same version',
+  name: 'fix-mismatches'
+};
+export const LIST = {
   description: 'list every dependency used in your packages',
   name: 'list'
 };
-export const COMMAND_LIST_MISMATCHES = {
+export const LIST_MISMATCHES = {
   description: 'list every dependency used with different versions in your packages',
   name: 'list-mismatches'
 };

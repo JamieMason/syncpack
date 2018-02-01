@@ -1,6 +1,7 @@
+import { readFileSync } from 'fs';
 import * as mock from 'mock-fs';
-import { createManifest, createMockDescriptor, createMockFs } from '../../test/helpers';
-import { IManifest } from '../typings';
+import { createFile, createManifest, createMockDescriptor, createMockFs } from '../../test/helpers';
+import { IManifest, IManifestDescriptor } from '../typings';
 import { getMismatchedVersions, getVersions, setVersion, setVersionRange, setVersionsToNewestMismatch } from './index';
 
 const pattern = '/Users/you/Dev/monorepo/packages/*/package.json';
@@ -85,7 +86,7 @@ describe('setVersionRange', () => {
 });
 
 describe('setVersionsToNewestMismatch', () => {
-  it('sets the version of dependencies with different versions to the newest of those versions found', async () => {
+  it('sets all dependencies used with different versions to the newest of those versions', async () => {
     const result = await setVersionsToNewestMismatch(pattern);
     expect(result).toEqual(
       expect.arrayContaining([
@@ -98,6 +99,23 @@ describe('setVersionsToNewestMismatch', () => {
         createMockDescriptor('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }),
         createMockDescriptor('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
       ])
+    );
+  });
+  it('rewrites the updated manifests with the correct data', async () => {
+    await setVersionsToNewestMismatch(pattern);
+    expect(readFileSync('/Users/you/Dev/monorepo/packages/foo/package.json', 'utf8')).toEqual(
+      createFile(
+        'foo',
+        { chalk: '2.3.0', commander: '2.13.0' },
+        { jest: '22.1.4', prettier: '1.10.2', rimraf: '2.6.2' },
+        { gulp: '*' }
+      )
+    );
+    expect(readFileSync('/Users/you/Dev/monorepo/packages/bar/package.json', 'utf8')).toEqual(
+      createFile('bar', { chalk: '2.3.0' }, { jest: '22.1.4' })
+    );
+    expect(readFileSync('/Users/you/Dev/monorepo/packages/baz/package.json', 'utf8')).toEqual(
+      createFile('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
     );
   });
 });
