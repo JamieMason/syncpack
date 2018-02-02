@@ -5,8 +5,9 @@
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
     "syncpack": "dist/bin.js",
-    "syncpack-sync-versions": "dist/bin-sync-versions.js",
-    "syncpack-copy-values": "dist/bin-copy-values.js"
+    "syncpack-fix-mismatches": "dist/bin-fix-mismatches.js",
+    "syncpack-list-mismatches": "dist/bin-list-mismatches.js",
+    "syncpack-list": "dist/bin-list.js"
   },
   "bugs": "https://github.com/JamieMason/syncpack/issues",
   "dependencies": {
