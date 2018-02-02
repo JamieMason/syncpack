@@ -1,7 +1,7 @@
 {
   "name": "syncpack",
   "description": "Normalise differences in packages/*/package.json files in Lerna Monorepos",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
     "syncpack": "dist/src/bin.js",
