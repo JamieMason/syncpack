@@ -10,6 +10,8 @@ export type SortBySemver = (versions: string[]) => string[];
 export const getVersionNumber: GetVersionNumber = (version) => version.slice(version.search(/[0-9]/), version.length);
 export const getVersionRange: GetVersionRange = (version) => version.split(/[0-9]/)[0];
 
+export const isValid = (version: string) => semver.valid(version) !== null;
+
 export const sortBySemver: SortBySemver = (versions: string[]) =>
   versions.concat().sort((a: string, b: string) => {
     const ar = getVersionRange(a);

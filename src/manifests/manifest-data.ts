@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as semver from 'semver';
 import { DEPENDENCY_TYPES } from '../constants';
 import { IDictionary, IManifest } from '../typings';
-import { getNewest } from '../version';
+import { getNewest, isValid } from '../version';
 
 export type GetMismatchedVersions = (manifests: IManifest[]) => IDictionary<string[]>;
 export type GetVersions = (manifests: IManifest[]) => IDictionary<string[]>;
@@ -11,7 +11,6 @@ export type SetVersionRange = (range: string, manifests: IManifest[]) => IManife
 export type SetVersionsToNewestMismatch = (manifests: IManifest[]) => IManifest[];
 
 const isObject = (value: any) => Boolean(value && typeof value === 'object');
-const isValid = (version: string) => semver.valid(version) !== null;
 const join = ({ name, version }: IDictionary<string>) => `${name}@${version}`;
 const gatherDependencies = (manifest: IManifest) =>
   _.chain(DEPENDENCY_TYPES)
