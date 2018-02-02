@@ -1,3 +1,11 @@
+<a name="1.0.1"></a>
+
+## [1.0.1](https://github.com/JamieMason/syncpack/compare/1.0.0...1.0.1) (2018-02-02)
+
+### Bug Fixes
+
+* **core:** correct paths to binaries ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd6))
+
 <a name="1.0.0"></a>
 
 # [1.0.0](https://github.com/JamieMason/syncpack/compare/0.3.1...1.0.0) (2018-02-02)
