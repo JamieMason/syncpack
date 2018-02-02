@@ -15,6 +15,7 @@ const join = ({ name, version }: IDictionary<string>) => `${name}@${version}`;
 const gatherDependencies = (manifest: IManifest) =>
   _.chain(DEPENDENCY_TYPES)
     .map((property) => manifest[property])
+    .filter(Boolean)
     .flatMap((dependencies) => _.map(dependencies, (version, name) => ({ name, version })))
     .value();
 
@@ -57,6 +58,7 @@ const setVersion: SetVersion = (name, version, manifests) => {
   _(manifests).each((manifest) =>
     _(DEPENDENCY_TYPES)
       .map((property) => manifest[property])
+      .filter(Boolean)
       .filter((dependencies) => name in dependencies)
       .each((dependencies) => {
         dependencies[name] = version;
@@ -69,6 +71,7 @@ const setVersionRange: SetVersionRange = (range, manifests) => {
   _(manifests).each((manifest) =>
     _(DEPENDENCY_TYPES)
       .map((property) => manifest[property])
+      .filter(Boolean)
       .each((dependencies) => {
         _(dependencies).each((version, name) => {
           if (isValid(version)) {
