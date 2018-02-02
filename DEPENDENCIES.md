@@ -4,7 +4,12 @@ Normalise differences in packages/\*/package.json files in Lerna Monorepos
 
 ## Installation
 
-Download node at [nodejs.org](http://nodejs.org) and install it, if you haven't already.
+This is a [Node.js](https://nodejs.org/) module available through the
+[npm registry](https://www.npmjs.com/). It can be installed using the
+[`npm`](https://docs.npmjs.com/getting-started/installing-npm-packages-locally)
+or
+[`yarn`](https://yarnpkg.com/en/)
+command line tools.
 
 ```sh
 npm install syncpack --save
@@ -19,26 +24,30 @@ npm test
 
 ## Dependencies
 
-* [bluebird](https://github.com/petkaantonov/bluebird): Full featured Promises/A+ implementation with exceptionally good performance
-* [chalk](https://github.com/chalk/chalk): Terminal string styling done right
-* [commander](https://github.com/tj/commander.js): the complete solution for node.js command-line programs
-* [glob](https://github.com/isaacs/node-glob): a little globber
-* [lodash](https://github.com/lodash/lodash): Lodash modular utilities.
-* [nodent-runtime](https://github.com/MatAtBread/nodent-runtime): Runtime component of nodent
-* [semver](https://github.com/npm/node-semver): The semantic version parser used by npm.
+* [@types/fs-extra](http://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
+* [@types/globby](http://ghub.io/@types/globby): TypeScript definitions for globby
+* [@types/jest](http://ghub.io/@types/jest): TypeScript definitions for Jest
+* [@types/lodash](http://ghub.io/@types/lodash): TypeScript definitions for Lo-Dash
+* [@types/mock-fs](http://ghub.io/@types/mock-fs): TypeScript definitions for mock-fs
+* [@types/node](http://ghub.io/@types/node): TypeScript definitions for Node.js
+* [@types/semver](http://ghub.io/@types/semver): TypeScript definitions for semver
+* [chalk](http://ghub.io/chalk): Terminal string styling done right
+* [commander](http://ghub.io/commander): the complete solution for node.js command-line programs
+* [fs-extra](http://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as mkdir -p, cp -r, and rm -rf.
+* [globby](http://ghub.io/globby): Extends `glob` with support for multiple patterns and exposes a Promise API
+* [lodash](http://ghub.io/lodash): Lodash modular utilities.
+* [semver](http://ghub.io/semver): The semantic version parser used by npm.
 
 ## Dev Dependencies
 
-* [babel-cli](https://github.com/babel/babel/tree/master/packages): Babel command line.
-* [babel-plugin-transform-object-rest-spread](https://github.com/babel/babel/tree/master/packages): Compile object rest and spread to ES5
-* [babel-preset-es2015](https://github.com/babel/babel/tree/master/packages): Babel preset for all es2015 plugins.
-* [cz-conventional-changelog](https://github.com/commitizen/cz-conventional-changelog): Commitizen adapter following the conventional-changelog format.
-* [eslint-config-xo](https://github.com/sindresorhus/eslint-config-xo): ESLint shareable config for XO
-* [eslint-plugin-ava](https://github.com/avajs/eslint-plugin-ava): ESLint rules for AVA
-* [eslint-plugin-unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn): Various awesome ESLint rules
-* [fast-async](https://github.com/MatAtBread/fast-async): fast-async/await transformer Babel plugin
-* [rimraf](https://github.com/isaacs/rimraf): A deep deletion module for node (like `rm -rf`)
-* [xo](https://github.com/sindresorhus/xo): JavaScript happiness style linter ❤️
+* [expect-more-jest](http://ghub.io/expect-more-jest): Write Beautiful Specs with Custom Matchers
+* [jest](http://ghub.io/jest): Delightful JavaScript Testing.
+* [mock-fs](http://ghub.io/mock-fs): A configurable mock file system. You know, for testing.
+* [prettier](http://ghub.io/prettier): Prettier is an opinionated code formatter
+* [rimraf](http://ghub.io/rimraf): A deep deletion module for node (like `rm -rf`)
+* [ts-jest](http://ghub.io/ts-jest): A preprocessor with sourcemap support to help use Typescript with Jest
+* [tslint](http://ghub.io/tslint): An extensible static analysis linter for the TypeScript language
+* [typescript](http://ghub.io/typescript): TypeScript is a language for application scale JavaScript development
 
 ## License
 
