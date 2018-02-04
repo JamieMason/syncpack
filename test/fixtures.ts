@@ -1,0 +1,55 @@
+import { IManifest } from '../src/typings';
+
+export const getUntidyManifest = (): IManifest =>
+  JSON.parse(`{
+  "files": [
+    "assets",
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/JaneDoe/do-it/issues"
+  },
+  "author": "Jane Doe <jane@doe.io>",
+  "devDependencies": {
+    "waldorf": "22.1.4",
+    "stroopwafel": "4.4.2"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "tsc",
+    "lint": "tslint",
+    "format": "prettier"
+  },
+  "version": "1.0.2",
+  "main": "do-it",
+  "license": "MIT",
+  "description": "Does the thing",
+  "homepage": "https://github.com/JaneDoe/do-it#readme",
+  "dependencies": {
+    "guybrush": "7.1.1",
+    "arnold": "5.0.0",
+    "dog": "2.13.0",
+    "mango": "2.3.0"
+  },
+  "name": "do-it",
+  "repository": {
+    "url": "git://github.com/JaneDoe/do-it",
+    "type": "git"
+  },
+  "keywords": [
+    "those",
+    "whatsits",
+    "thing"
+  ],
+  "bin": {
+    "zoo": "dist/zoo.js",
+    "moose": "dist/moose.js",
+    "apple": "dist/apple.js"
+  },
+  "peerDependencies": {
+    "jambalaya": "6.1.4",
+    "giftwrap": "0.1.2",
+    "zoolander": "1.4.25"
+  }
+}
+`);

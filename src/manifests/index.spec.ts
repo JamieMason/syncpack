@@ -2,7 +2,14 @@ import { readFileSync } from 'fs';
 import * as mock from 'mock-fs';
 import { createFile, createManifest, createMockDescriptor, createMockFs } from '../../test/helpers';
 import { IManifest, IManifestDescriptor } from '../typings';
-import { getMismatchedVersions, getVersions, setVersion, setVersionRange, setVersionsToNewestMismatch } from './index';
+import {
+  format,
+  getMismatchedVersions,
+  getVersions,
+  setVersion,
+  setVersionRange,
+  setVersionsToNewestMismatch
+} from './index';
 
 const pattern = '/Users/you/Dev/monorepo/packages/*/package.json';
 
@@ -20,6 +27,15 @@ beforeEach(() => {
     ),
     ...createMockFs('bar', { chalk: '1.0.0' }, { jest: '22.1.4' }),
     ...createMockFs('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+  });
+});
+
+describe('format', () => {
+  it('sorts and shortens properties according to a convention', async () => {
+    const result = await format(pattern);
+    result.forEach((descriptor: IManifestDescriptor) => {
+      expect(Object.keys(descriptor.data)).toEqual(['name', 'dependencies', 'devDependencies', 'peerDependencies']);
+    });
   });
 });
 

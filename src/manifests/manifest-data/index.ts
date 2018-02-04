@@ -1,8 +1,9 @@
 import * as _ from 'lodash';
 import * as semver from 'semver';
-import { DEPENDENCY_TYPES } from '../constants';
-import { IDictionary, IManifest } from '../typings';
-import { getNewest, isValid } from '../version';
+import { DEPENDENCY_TYPES } from '../../constants';
+import { IDictionary, IManifest } from '../../typings';
+import { getNewest, isValid } from '../../version';
+import { format } from './format';
 
 export type GetMismatchedVersions = (manifests: IManifest[]) => IDictionary<string[]>;
 export type GetVersions = (manifests: IManifest[]) => IDictionary<string[]>;
@@ -94,6 +95,7 @@ const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (manifests) => 
 };
 
 export const manifestData = {
+  format,
   getMismatchedVersions,
   getVersions,
   isManifest,

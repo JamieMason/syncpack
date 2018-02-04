@@ -1,6 +1,6 @@
-import { createManifest } from '../../test/helpers';
-import { IManifest } from '../typings';
-import { manifestData } from './manifest-data';
+import { createManifest } from '../../../test/helpers';
+import { IManifest } from '../../typings';
+import { manifestData } from './index';
 
 const { getMismatchedVersions, getVersions, setVersion, setVersionRange, setVersionsToNewestMismatch } = manifestData;
 

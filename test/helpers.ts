@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { formatJson } from '../src/lib/write-json';
 import { IDictionary, IManifest, IManifestDescriptor } from '../src/typings';
 
@@ -43,3 +44,13 @@ export const createManifest = (
   name,
   peerDependencies
 });
+
+const shuffle = (value: any): typeof value =>
+  _.isArray(value) ? _.shuffle(value) : _.isObject(value) ? shuffleObject(value) : value;
+
+export const shuffleObject = (obj: object): object =>
+  _(obj)
+    .entries()
+    .map(([key, value]) => [key, shuffle(value)])
+    .shuffle()
+    .reduce((next, [key, value]) => ({ ...next, [key]: value }), {});

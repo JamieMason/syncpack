@@ -3,6 +3,7 @@ import { IDictionary, IManifest, IManifestDescriptor } from '../typings';
 import { getManifests } from './get-manifests';
 import { manifestData } from './manifest-data';
 
+export type Format = (pattern: string) => Promise<IManifestDescriptor[]>;
 export type GetMismatchedVersions = (pattern: string) => Promise<IDictionary<string[]>>;
 export type GetVersions = (pattern: string) => Promise<IDictionary<string[]>>;
 export type SetVersion = (name: string, version: string, pattern: string) => Promise<IManifestDescriptor[]>;
@@ -10,6 +11,20 @@ export type SetVersionRange = (range: string, pattern: string) => Promise<IManif
 export type SetVersionsToNewestMismatch = (pattern: string) => Promise<IManifestDescriptor[]>;
 
 const unwrap = (descriptors: IManifestDescriptor[]) => descriptors.map((descriptor) => descriptor.data);
+
+export const format: Format = (pattern) =>
+  getManifests(pattern)
+    .then((descriptors) => {
+      const data = unwrap(descriptors);
+      const nextData = manifestData.format(data);
+      return descriptors.map((descriptor, i) => ({
+        data: nextData[i],
+        path: descriptor.path
+      }));
+    })
+    .then((descriptors) =>
+      Promise.all(descriptors.map((descriptor) => writeJson(descriptor.path, descriptor.data))).then(() => descriptors)
+    );
 
 export const getMismatchedVersions: GetMismatchedVersions = (pattern) =>
   getManifests(pattern)
