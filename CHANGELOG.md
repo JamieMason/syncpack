@@ -1,3 +1,12 @@
+<a name="1.2.2"></a>
+
+## [1.2.2](https://github.com/JamieMason/syncpack/compare/1.0.2...1.2.2) (2018-02-10)
+
+### Features
+
+* **core:** add format command ([bae1133](https://github.com/JamieMason/syncpack/commit/bae1133))
+* **core:** output current version ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99))
+
 <a name="1.0.2"></a>
 
 ## [1.0.2](https://github.com/JamieMason/syncpack/compare/1.0.1...1.0.2) (2018-02-02)

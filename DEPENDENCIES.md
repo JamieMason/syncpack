@@ -1,6 +1,6 @@
 # syncpack
 
-Normalise differences in packages/\*/package.json files in Lerna Monorepos
+Manage multiple package.json files in Lerna Monorepos
 
 ## Installation
 
