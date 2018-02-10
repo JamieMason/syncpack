@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import * as _ from 'lodash';
 import * as mock from 'mock-fs';
 import { createFile, createManifest, createMockDescriptor, createMockFs } from '../../test/helpers';
 import { IManifest, IManifestDescriptor } from '../typings';
@@ -26,16 +27,17 @@ beforeEach(() => {
       { gulp: '3.9.1' }
     ),
     ...createMockFs('bar', { chalk: '1.0.0' }, { jest: '22.1.4' }),
-    ...createMockFs('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+    ...createMockFs('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
   });
 });
 
 describe('format', () => {
   it('sorts and shortens properties according to a convention', async () => {
     const result = await format(pattern);
-    result.forEach((descriptor: IManifestDescriptor) => {
-      expect(Object.keys(descriptor.data)).toEqual(['name', 'dependencies', 'devDependencies', 'peerDependencies']);
-    });
+    const getByName = (name) => Object.keys(_.find(result, (v) => v.data.name === name).data);
+    expect(getByName('foo')).toEqual(['name', 'dependencies', 'devDependencies', 'peerDependencies']);
+    expect(getByName('bar')).toEqual(['name', 'dependencies', 'devDependencies']);
+    expect(getByName('baz')).toEqual(['name', 'devDependencies', 'peerDependencies']);
   });
 });
 
@@ -77,7 +79,7 @@ describe('setVersion', () => {
           { gulp: '3.9.1' }
         ),
         createMockDescriptor('bar', { chalk: '1.0.0' }, { jest: '25.0.0' }),
-        createMockDescriptor('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+        createMockDescriptor('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
       ])
     );
   });
@@ -95,7 +97,7 @@ describe('setVersionRange', () => {
           { gulp: '^3.9.1' }
         ),
         createMockDescriptor('bar', { chalk: '^1.0.0' }, { jest: '^22.1.4' }),
-        createMockDescriptor('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
+        createMockDescriptor('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
       ])
     );
   });
@@ -113,7 +115,7 @@ describe('setVersionsToNewestMismatch', () => {
           { gulp: '*' }
         ),
         createMockDescriptor('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }),
-        createMockDescriptor('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+        createMockDescriptor('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
       ])
     );
   });
@@ -131,7 +133,7 @@ describe('setVersionsToNewestMismatch', () => {
       createFile('bar', { chalk: '2.3.0' }, { jest: '22.1.4' })
     );
     expect(readFileSync('/Users/you/Dev/monorepo/packages/baz/package.json', 'utf8')).toEqual(
-      createFile('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+      createFile('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
     );
   });
 });

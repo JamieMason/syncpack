@@ -15,7 +15,7 @@ beforeEach(() => {
       { gulp: '3.9.1' }
     ),
     createManifest('bar', { chalk: '1.0.0' }, { jest: '22.1.4' }),
-    createManifest('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+    createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
   ];
 });
 
@@ -53,7 +53,7 @@ describe('setVersion', () => {
         { gulp: '3.9.1' }
       ),
       createManifest('bar', { chalk: '1.0.0' }, { jest: '25.0.0' }),
-      createManifest('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+      createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
     ]);
   });
 });
@@ -68,7 +68,7 @@ describe('setVersionRange', () => {
         { gulp: '^3.9.1' }
       ),
       createManifest('bar', { chalk: '^1.0.0' }, { jest: '^22.1.4' }),
-      createManifest('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
+      createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
     ]);
   });
 });
@@ -83,7 +83,7 @@ describe('setVersionsToNewestMismatch', () => {
         { gulp: '*' }
       ),
       createManifest('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }),
-      createManifest('baz', {}, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+      createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
     ]);
   });
 });

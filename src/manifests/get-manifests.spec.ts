@@ -23,11 +23,11 @@ describe('getManifests', () => {
     const result = await getManifests(pattern);
     expect(result).toEqual([
       {
-        data: { dependencies: { rimraf: '0.1.2' }, devDependencies: {}, name: 'bar', peerDependencies: {} },
+        data: { dependencies: { rimraf: '0.1.2' }, name: 'bar' },
         path: '/Users/you/Dev/monorepo/packages/bar/package.json'
       },
       {
-        data: { dependencies: { chalk: '1.0.0' }, devDependencies: {}, name: 'foo', peerDependencies: {} },
+        data: { dependencies: { chalk: '1.0.0' }, name: 'foo' },
         path: '/Users/you/Dev/monorepo/packages/foo/package.json'
       }
     ]);
