@@ -28,4 +28,4 @@ export const SAME = 0;
 export const SEMVER_ORDER = ['<', '<=', '', '~', '^', '>=', '>', '*'];
 export const SORT_AZ = ['dependencies', 'devDependencies', 'files', 'keywords', 'peerDependencies', 'scripts'];
 export const SORT_FIRST = ['name', 'description', 'version', 'author'];
-export const VERSION = execSync(`npm view ${__dirname} version`, { encoding: 'utf8' });
+export const VERSION = require('../package.json').version;
