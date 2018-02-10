@@ -12,6 +12,9 @@ export type SetVersionsToNewestMismatch = (pattern: string) => Promise<IManifest
 
 const unwrap = (descriptors: IManifestDescriptor[]) => descriptors.map((descriptor) => descriptor.data);
 
+const writeDescriptors = (descriptors: IManifestDescriptor[]): Promise<IManifestDescriptor[]> =>
+  Promise.all(descriptors.map((descriptor) => writeJson(descriptor.path, descriptor.data))).then(() => descriptors);
+
 export const format: Format = (pattern) =>
   getManifests(pattern)
     .then((descriptors) => {
@@ -22,9 +25,7 @@ export const format: Format = (pattern) =>
         path: descriptor.path
       }));
     })
-    .then((descriptors) =>
-      Promise.all(descriptors.map((descriptor) => writeJson(descriptor.path, descriptor.data))).then(() => descriptors)
-    );
+    .then(writeDescriptors);
 
 export const getMismatchedVersions: GetMismatchedVersions = (pattern) =>
   getManifests(pattern)
@@ -43,10 +44,12 @@ export const setVersion: SetVersion = (name, version, pattern) =>
   });
 
 export const setVersionRange: SetVersionRange = (range, pattern) =>
-  getManifests(pattern).then((descriptors) => {
-    manifestData.setVersionRange(range, unwrap(descriptors));
-    return descriptors;
-  });
+  getManifests(pattern)
+    .then((descriptors) => {
+      manifestData.setVersionRange(range, unwrap(descriptors));
+      return descriptors;
+    })
+    .then(writeDescriptors);
 
 export const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (pattern) =>
   getManifests(pattern)
@@ -58,6 +61,4 @@ export const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (pattern
         path: descriptor.path
       }));
     })
-    .then((descriptors) =>
-      Promise.all(descriptors.map((descriptor) => writeJson(descriptor.path, descriptor.data))).then(() => descriptors)
-    );
+    .then(writeDescriptors);

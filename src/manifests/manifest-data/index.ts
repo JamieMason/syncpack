@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
 import * as semver from 'semver';
-import { DEPENDENCY_TYPES } from '../../constants';
+import { DEPENDENCY_TYPES, RANGE_ANY, RANGE_LOOSE } from '../../constants';
 import { IDictionary, IManifest } from '../../typings';
-import { getNewest, isValid } from '../../version';
+import { getNewest, getVersionNumber } from '../../version';
 import { format } from './format';
 
 export type GetMismatchedVersions = (manifests: IManifest[]) => IDictionary<string[]>;
@@ -75,8 +75,18 @@ const setVersionRange: SetVersionRange = (range, manifests) => {
       .filter(Boolean)
       .each((dependencies) => {
         _(dependencies).each((version, name) => {
-          if (isValid(version)) {
-            dependencies[name] = `${range}${semver.clean(version)}`;
+          const versionNumber = getVersionNumber(version);
+          if (version !== '*' && semver.validRange(version)) {
+            if (range === RANGE_ANY) {
+              dependencies[name] = '*';
+            } else if (range === RANGE_LOOSE) {
+              dependencies[name] =
+                semver.major(versionNumber) === 0
+                  ? `${semver.major(versionNumber)}.${semver.minor(versionNumber)}.x`
+                  : `${semver.major(versionNumber)}.x.x`;
+            } else {
+              dependencies[name] = `${range}${versionNumber}`;
+            }
           }
         });
       })

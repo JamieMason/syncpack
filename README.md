@@ -22,15 +22,17 @@ npm install --global syncpack
 ```
 Usage: syncpack [options] [command]
 
-Options:
+  Options:
 
-  -V, --version  output the version number
-  -h, --help     output usage information
+    -V, --version      output the version number
+    -h, --help         output usage information
 
-Commands:
+  Commands:
 
-  fix-mismatches   set dependencies used with different versions to the same version
-  list             list every dependency used in your packages
-  list-mismatches  list every dependency used with different versions in your packages
-  help [cmd]       display help for [cmd]
+    fix-mismatches     set dependencies used with different versions to the same version
+    format             sort and shorten properties according to a convention
+    list               list every dependency used in your packages
+    list-mismatches    list every dependency used with different versions in your packages
+    set-semver-ranges  set semver ranges to the given format
+    help [cmd]         display help for [cmd]
 ```
