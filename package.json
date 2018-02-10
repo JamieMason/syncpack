@@ -4,10 +4,10 @@
   "version": "1.0.2",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
-    "syncpack": "dist/src/bin.js",
-    "syncpack-fix-mismatches": "dist/src/bin-fix-mismatches.js",
-    "syncpack-list-mismatches": "dist/src/bin-list-mismatches.js",
-    "syncpack-list": "dist/src/bin-list.js"
+    "syncpack": "dist/bin.js",
+    "syncpack-fix-mismatches": "dist/bin-fix-mismatches.js",
+    "syncpack-list-mismatches": "dist/bin-list-mismatches.js",
+    "syncpack-list": "dist/bin-list.js"
   },
   "bugs": "https://github.com/JamieMason/syncpack/issues",
   "dependencies": {

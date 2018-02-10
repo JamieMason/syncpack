@@ -8,5 +8,6 @@
     "strict": true,
     "target": "es3"
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./package.json", "./src/**/*.ts"],
+  "exclude": ["./src/**/*.spec.ts"]
 }
