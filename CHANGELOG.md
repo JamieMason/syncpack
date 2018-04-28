@@ -1,3 +1,11 @@
+<a name="1.3.2"></a>
+
+## [1.3.2](https://github.com/JamieMason/syncpack/compare/1.2.2...1.3.2) (2018-04-28)
+
+### Features
+
+* **core:** add set-semver-ranges command ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9))
+
 <a name="1.2.2"></a>
 
 ## [1.2.2](https://github.com/JamieMason/syncpack/compare/1.0.2...1.2.2) (2018-02-10)
