@@ -10,7 +10,6 @@ module.exports = {
       statements: 95
     }
   },
-  mapCoverage: true,
   moduleFileExtensions: ['ts', 'tsx', 'js'],
   setupTestFrameworkScriptFile: '<rootDir>/test/setup.ts',
   testMatch: ['<rootDir>/src/**/*.spec.(ts|tsx|js)'],
