@@ -1,3 +1,11 @@
+<a name="2.0.1"></a>
+
+## [2.0.1](https://github.com/JamieMason/syncpack/compare/2.0.0...2.0.1) (2018-04-29)
+
+### Bug Fixes
+
+* **core:** ensure pattern overrides are read ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5))
+
 <a name="2.0.0"></a>
 
 # [2.0.0](https://github.com/JamieMason/syncpack/compare/1.3.2...2.0.0) (2018-04-29)
