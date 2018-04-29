@@ -9,7 +9,6 @@ import { getMismatchedVersions } from './manifests';
 let packages: string[] = [];
 
 program
-  .command(`${LIST_MISMATCHES.command} ${LIST_MISMATCHES.args}`)
   .action((...args) => {
     packages = args.filter((arg) => arg && typeof arg === 'string');
   })

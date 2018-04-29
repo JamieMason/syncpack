@@ -10,7 +10,6 @@ import { setVersionRange } from './manifests';
 let packages: string[] = [];
 
 program
-  .command(`${SET_SEMVER_RANGES.command} ${SET_SEMVER_RANGES.args}`)
   .option(OPTION_SEMVER_RANGE.spec, OPTION_SEMVER_RANGE.description)
   .action((...args) => {
     packages = args.filter((arg) => arg && typeof arg === 'string');

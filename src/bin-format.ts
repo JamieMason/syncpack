@@ -10,7 +10,6 @@ import { format } from './manifests';
 let packages: string[] = [];
 
 program
-  .command(`${FORMAT.command} ${FORMAT.args}`)
   .action((...args) => {
     packages = args.filter((arg) => arg && typeof arg === 'string');
   })

@@ -9,7 +9,6 @@ import { getVersions } from './manifests';
 let packages: string[] = [];
 
 program
-  .command(`${LIST.command} ${LIST.args}`)
   .action((...args) => {
     packages = args.filter((arg) => arg && typeof arg === 'string');
   })

@@ -10,7 +10,6 @@ import { setVersionsToNewestMismatch } from './manifests';
 let packages: string[] = [];
 
 program
-  .command(`${FIX_MISMATCHES.command} ${FIX_MISMATCHES.args}`)
   .action((...args) => {
     packages = args.filter((arg) => arg && typeof arg === 'string');
   })

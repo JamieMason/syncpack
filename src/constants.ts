@@ -35,36 +35,31 @@ const PACKAGES_PATTERNS = [PACKAGES_PATTERN];
 const ALL_PATTERNS = [MONOREPO_PATTERN, PACKAGES_PATTERN];
 
 export const FIX_MISMATCHES = {
-  args: '[packages...]',
-  command: 'fix-mismatches',
+  command: 'fix-mismatches [packages...]',
   defaultPatterns: PACKAGES_PATTERNS,
   description: 'set dependencies used with different versions to the same version'
 };
 
 export const FORMAT = {
-  args: '[packages...]',
-  command: 'format',
+  command: 'format [packages...]',
   defaultPatterns: ALL_PATTERNS,
   description: 'sort and shorten properties according to a convention'
 };
 
 export const LIST = {
-  args: '[packages...]',
-  command: 'list',
-  defaultPatterns: PACKAGES_PATTERNS,
+  command: 'list [packages...]',
+  defaultPatterns: ALL_PATTERNS,
   description: 'list every dependency used in your packages'
 };
 
 export const LIST_MISMATCHES = {
-  args: '[packages...]',
-  command: 'list-mismatches',
+  command: 'list-mismatches [packages...]',
   defaultPatterns: PACKAGES_PATTERNS,
   description: 'list every dependency used with different versions in your packages'
 };
 
 export const SET_SEMVER_RANGES = {
-  args: '[packages...]',
-  command: 'set-semver-ranges',
+  command: 'set-semver-ranges [packages...]',
   defaultPatterns: ALL_PATTERNS,
   description: 'set semver ranges to the given format'
 };
