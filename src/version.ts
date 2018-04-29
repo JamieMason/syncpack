@@ -12,8 +12,8 @@ export const getVersionRange: GetVersionRange = (version) => version.split(/[0-9
 
 export const isValid = (version: string) => semver.valid(version) !== null;
 
-export const sortBySemver: SortBySemver = (versions: string[]) => {
-  return versions
+export const sortBySemver: SortBySemver = (versions: string[]) =>
+  versions
     .concat()
     .sort()
     .sort((a: string, b: string) => {
@@ -52,6 +52,5 @@ export const sortBySemver: SortBySemver = (versions: string[]) => {
       }
       return SAME;
     });
-};
 
 export const getNewest: GetNewest = (versions: string[]) => _(sortBySemver(versions)).last();

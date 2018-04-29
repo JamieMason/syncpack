@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { SORT_AZ, SORT_FIRST } from '../../constants';
-import { IDictionary, IManifest } from '../../typings';
+import { IManifest } from '../../typings';
 
 export type Format = (manifests: IManifest[]) => IManifest[];
 export type ManifestMapper = (manifest: IManifest) => IManifest;

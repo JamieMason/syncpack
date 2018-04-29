@@ -3,14 +3,21 @@
 import chalk from 'chalk';
 import * as program from 'commander';
 import * as _ from 'lodash';
-import { DEFAULT_PATTERN, OPTION_PACKAGES } from './constants';
+import { LIST_MISMATCHES } from './constants';
 import { getMismatchedVersions } from './manifests';
 
-program.option(OPTION_PACKAGES.spec, OPTION_PACKAGES.description).parse(process.argv);
+let packages: string[] = [];
 
-const { packages = DEFAULT_PATTERN } = program;
+program
+  .command(`${LIST_MISMATCHES.command} ${LIST_MISMATCHES.args}`)
+  .action((...args) => {
+    packages = args.filter((arg) => arg && typeof arg === 'string');
+  })
+  .parse(process.argv);
 
-getMismatchedVersions(packages).then((versionByName) => {
+const patterns: string[] = packages.length ? packages : LIST_MISMATCHES.defaultPatterns;
+
+getMismatchedVersions(...patterns).then((versionByName) => {
   _.each(versionByName, (versions, name) => {
     console.log(chalk.yellow(name), chalk.dim(versions.join(', ')));
   });
