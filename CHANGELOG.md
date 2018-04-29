@@ -1,3 +1,15 @@
+<a name="2.0.0"></a>
+
+# [2.0.0](https://github.com/JamieMason/syncpack/compare/1.3.2...2.0.0) (2018-04-29)
+
+### Features
+
+* **core:** support multiple glob patterns ([a2b5af0](https://github.com/JamieMason/syncpack/commit/a2b5af0)), closes [#5](https://github.com/JamieMason/syncpack/issues/5) [#6](https://github.com/JamieMason/syncpack/issues/6)
+
+### BREAKING CHANGES
+
+* **core:** --packages option replaced with variadic arguments
+
 <a name="1.3.2"></a>
 
 ## [1.3.2](https://github.com/JamieMason/syncpack/compare/1.2.2...1.3.2) (2018-04-28)
