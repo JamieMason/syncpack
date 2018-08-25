@@ -20,4 +20,8 @@ getMismatchedVersions(...patterns).then((versionByName) => {
   _.each(versionByName, (versions, name) => {
     console.log(chalk.yellow(name), chalk.dim(versions.join(', ')));
   });
+
+  if (versionByName.length) {
+    process.exit(1);
+  }
 });
