@@ -1,3 +1,29 @@
+<a name="3.0.0"></a>
+
+# [3.0.0](https://github.com/JamieMason/syncpack/compare/2.0.1...3.0.0) (2018-08-25)
+
+### Features
+
+- **bin:** override package locations using repeatable --source options ([5dbcfd4](https://github.com/JamieMason/syncpack/commit/5dbcfd4))
+- **list-mismatches:** return exit code on finding mismatches ([06958c6](https://github.com/JamieMason/syncpack/commit/06958c6))
+
+### BREAKING CHANGES
+
+- **bin:** Previously the location of package.json files could be overridden like so:
+
+```
+syncpack list './package.json' './packages/*/package.json'
+```
+
+This is now done using a repeatable `--source` option:
+
+```
+syncpack list --source './package.json' --source './packages/*/package.json'
+```
+
+This change is to make way for new commands which will also require an
+overridable `--target` option.
+
 <a name="2.0.1"></a>
 
 ## [2.0.1](https://github.com/JamieMason/syncpack/compare/2.0.0...2.0.1) (2018-04-29)
