@@ -4,7 +4,7 @@
 
 ### Bug Fixes
 
-* **core:** ensure pattern overrides are read ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5))
+- **core:** ensure pattern overrides are read ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5))
 
 <a name="2.0.0"></a>
 
@@ -12,11 +12,11 @@
 
 ### Features
 
-* **core:** support multiple glob patterns ([a2b5af0](https://github.com/JamieMason/syncpack/commit/a2b5af0)), closes [#5](https://github.com/JamieMason/syncpack/issues/5) [#6](https://github.com/JamieMason/syncpack/issues/6)
+- **core:** support multiple glob patterns ([a2b5af0](https://github.com/JamieMason/syncpack/commit/a2b5af0)), closes [#5](https://github.com/JamieMason/syncpack/issues/5) [#6](https://github.com/JamieMason/syncpack/issues/6)
 
 ### BREAKING CHANGES
 
-* **core:** --packages option replaced with variadic arguments
+- **core:** --packages option replaced with variadic arguments
 
 <a name="1.3.2"></a>
 
@@ -24,7 +24,7 @@
 
 ### Features
 
-* **core:** add set-semver-ranges command ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9))
+- **core:** add set-semver-ranges command ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9))
 
 <a name="1.2.2"></a>
 
@@ -32,8 +32,8 @@
 
 ### Features
 
-* **core:** add format command ([bae1133](https://github.com/JamieMason/syncpack/commit/bae1133))
-* **core:** output current version ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99))
+- **core:** add format command ([bae1133](https://github.com/JamieMason/syncpack/commit/bae1133))
+- **core:** output current version ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99))
 
 <a name="1.0.2"></a>
 
@@ -45,7 +45,7 @@
 
 ### Bug Fixes
 
-* **core:** correct paths to binaries ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd6))
+- **core:** correct paths to binaries ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd6))
 
 <a name="1.0.0"></a>
 
@@ -53,20 +53,20 @@
 
 ### Bug Fixes
 
-* **core:** correctly check a file is package.json ([d1da609](https://github.com/JamieMason/syncpack/commit/d1da609))
-* **core:** handle missing dependency maps ([372aa68](https://github.com/JamieMason/syncpack/commit/372aa68))
-* **core:** handle semver ranges containing 1.x.x ([a0f8f56](https://github.com/JamieMason/syncpack/commit/a0f8f56))
+- **core:** correctly check a file is package.json ([d1da609](https://github.com/JamieMason/syncpack/commit/d1da609))
+- **core:** handle missing dependency maps ([372aa68](https://github.com/JamieMason/syncpack/commit/372aa68))
+- **core:** handle semver ranges containing 1.x.x ([a0f8f56](https://github.com/JamieMason/syncpack/commit/a0f8f56))
 
 ### Features
 
-* **core:** add fix-mismatches command ([4793f1f](https://github.com/JamieMason/syncpack/commit/4793f1f))
-* **core:** add list command ([3b29176](https://github.com/JamieMason/syncpack/commit/3b29176))
-* **core:** add list-mismatches command ([735ad2b](https://github.com/JamieMason/syncpack/commit/735ad2b))
-* **core:** update command line API ([de8dcb2](https://github.com/JamieMason/syncpack/commit/de8dcb2))
+- **core:** add fix-mismatches command ([4793f1f](https://github.com/JamieMason/syncpack/commit/4793f1f))
+- **core:** add list command ([3b29176](https://github.com/JamieMason/syncpack/commit/3b29176))
+- **core:** add list-mismatches command ([735ad2b](https://github.com/JamieMason/syncpack/commit/735ad2b))
+- **core:** update command line API ([de8dcb2](https://github.com/JamieMason/syncpack/commit/de8dcb2))
 
 ### BREAKING CHANGES
 
-* **core:** The previous commands have been replaced.
+- **core:** The previous commands have been replaced.
 
 <a name="0.3.1"></a>
 
@@ -74,7 +74,7 @@
 
 ### Bug Fixes
 
-* **copy-values:** write results to disk ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de4))
+- **copy-values:** write results to disk ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de4))
 
 <a name="0.3.0"></a>
 
@@ -82,7 +82,7 @@
 
 ### Features
 
-* **cli:** add copy-values command ([b51a2c9](https://github.com/JamieMason/syncpack/commit/b51a2c9))
+- **cli:** add copy-values command ([b51a2c9](https://github.com/JamieMason/syncpack/commit/b51a2c9))
 
 <a name="0.2.1"></a>
 
@@ -90,7 +90,7 @@
 
 ### Bug Fixes
 
-* **core:** update dependencies, fix lint warnings ([a65eef7](https://github.com/JamieMason/syncpack/commit/a65eef7))
+- **core:** update dependencies, fix lint warnings ([a65eef7](https://github.com/JamieMason/syncpack/commit/a65eef7))
 
 <a name="0.2.0"></a>
 
@@ -98,7 +98,7 @@
 
 ### Features
 
-* **sync:** synchronise versions across multiple package.json ([7d5848a](https://github.com/JamieMason/syncpack/commit/7d5848a))
+- **sync:** synchronise versions across multiple package.json ([7d5848a](https://github.com/JamieMason/syncpack/commit/7d5848a))
 
 <a name="0.1.0"></a>
 
@@ -106,4 +106,4 @@
 
 ### Features
 
-* **cli:** create scaffold cli ([f6dada7](https://github.com/JamieMason/syncpack/commit/f6dada7))
+- **cli:** create scaffold cli ([f6dada7](https://github.com/JamieMason/syncpack/commit/f6dada7))
