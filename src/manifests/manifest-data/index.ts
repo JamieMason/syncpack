@@ -1,5 +1,5 @@
-import * as _ from 'lodash';
-import * as semver from 'semver';
+import _ = require('lodash');
+import semver = require('semver');
 import { DEPENDENCY_TYPES, RANGE_ANY, RANGE_LOOSE } from '../../constants';
 import { IDictionary, IManifest } from '../../typings';
 import { getNewest, getVersionNumber } from '../../version';

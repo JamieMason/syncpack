@@ -1,5 +1,5 @@
-import * as _ from 'lodash';
-import * as semver from 'semver';
+import _ = require('lodash');
+import semver = require('semver');
 import { GREATER, LESSER, SAME, SEMVER_ORDER } from './constants';
 
 export type GetNewest = (versions: string[]) => string | undefined;

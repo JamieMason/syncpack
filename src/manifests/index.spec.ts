@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import * as _ from 'lodash';
-import * as mock from 'mock-fs';
+import _ = require('lodash');
+import mock = require('mock-fs');
 import { createFile, createManifest, createMockDescriptor, createMockFs } from '../../test/helpers';
 import { IManifest, IManifestDescriptor } from '../typings';
 import {

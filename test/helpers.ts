@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ = require('lodash');
 import { formatJson } from '../src/lib/write-json';
 import { IDictionary, IManifest, IManifestDescriptor } from '../src/typings';
 

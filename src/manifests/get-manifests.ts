@@ -1,5 +1,5 @@
 import { readJson } from 'fs-extra';
-import * as globby from 'globby';
+import globby = require('globby');
 import { IFileDescriptor, IManifestDescriptor } from '../typings';
 import { manifestData } from './manifest-data';
 

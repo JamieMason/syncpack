@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ = require('lodash');
 import { SORT_AZ, SORT_FIRST } from '../../constants';
 import { IManifest } from '../../typings';
 

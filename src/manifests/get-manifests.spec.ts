@@ -1,4 +1,4 @@
-import * as mock from 'mock-fs';
+import mock = require('mock-fs');
 import { createManifest, createMockFs } from '../../test/helpers';
 import { getManifests } from './get-manifests';
 
