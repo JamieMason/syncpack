@@ -1,23 +1,19 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import * as program from 'commander';
-import * as _ from 'lodash';
+import program = require('commander');
+import _ = require('lodash');
 import { relative } from 'path';
-import { FIX_MISMATCHES } from './constants';
+import { OPTION_SOURCES } from './constants';
 import { setVersionsToNewestMismatch } from './manifests';
 
-let packages: string[] = [];
+const collect = (value: string, values: string[] = []) => values.concat(value);
 
-program
-  .action((...args) => {
-    packages = args.filter((arg) => arg && typeof arg === 'string');
-  })
-  .parse(process.argv);
+program.option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect).parse(process.argv);
 
-const patterns: string[] = packages.length ? packages : FIX_MISMATCHES.defaultPatterns;
+const sources: string[] = program.source && program.source.length ? program.source : OPTION_SOURCES.default;
 
-setVersionsToNewestMismatch(...patterns).then((descriptors) => {
+setVersionsToNewestMismatch(...sources).then((descriptors) => {
   _.each(descriptors, (descriptor) => {
     console.log(chalk.blue(`./${relative('.', descriptor.path)}`));
   });

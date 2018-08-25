@@ -1,22 +1,18 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import * as program from 'commander';
-import * as _ from 'lodash';
-import { LIST_MISMATCHES } from './constants';
+import program = require('commander');
+import _ = require('lodash');
+import { OPTION_SOURCES } from './constants';
 import { getMismatchedVersions } from './manifests';
 
-let packages: string[] = [];
+const collect = (value: string, values: string[] = []) => values.concat(value);
 
-program
-  .action((...args) => {
-    packages = args.filter((arg) => arg && typeof arg === 'string');
-  })
-  .parse(process.argv);
+program.option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect).parse(process.argv);
 
-const patterns: string[] = packages.length ? packages : LIST_MISMATCHES.defaultPatterns;
+const sources: string[] = program.source && program.source.length ? program.source : OPTION_SOURCES.default;
 
-getMismatchedVersions(...patterns).then((versionByName) => {
+getMismatchedVersions(...sources).then((versionByName) => {
   _.each(versionByName, (versions, name) => {
     console.log(chalk.yellow(name), chalk.dim(versions.join(', ')));
   });

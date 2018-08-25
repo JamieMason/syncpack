@@ -31,36 +31,30 @@ export const SEMVER_ORDER = [
 const DEFAULT_SEMVER_RANGE = RANGE_EXACT;
 const MONOREPO_PATTERN = './package.json';
 const PACKAGES_PATTERN = './packages/*/package.json';
-const PACKAGES_PATTERNS = [PACKAGES_PATTERN];
 const ALL_PATTERNS = [MONOREPO_PATTERN, PACKAGES_PATTERN];
 
 export const FIX_MISMATCHES = {
-  command: 'fix-mismatches [packages...]',
-  defaultPatterns: PACKAGES_PATTERNS,
+  command: 'fix-mismatches',
   description: 'set dependencies used with different versions to the same version'
 };
 
 export const FORMAT = {
-  command: 'format [packages...]',
-  defaultPatterns: ALL_PATTERNS,
+  command: 'format',
   description: 'sort and shorten properties according to a convention'
 };
 
 export const LIST = {
-  command: 'list [packages...]',
-  defaultPatterns: ALL_PATTERNS,
+  command: 'list',
   description: 'list every dependency used in your packages'
 };
 
 export const LIST_MISMATCHES = {
-  command: 'list-mismatches [packages...]',
-  defaultPatterns: PACKAGES_PATTERNS,
+  command: 'list-mismatches',
   description: 'list every dependency used with different versions in your packages'
 };
 
 export const SET_SEMVER_RANGES = {
-  command: 'set-semver-ranges [packages...]',
-  defaultPatterns: ALL_PATTERNS,
+  command: 'set-semver-ranges',
   description: 'set semver ranges to the given format'
 };
 
@@ -70,4 +64,10 @@ export const OPTION_SEMVER_RANGE = {
     `${RANGE_LT}, ${RANGE_LTE}, "${RANGE_EXACT}", ${RANGE_PATCH}, ${RANGE_MINOR}, ` +
     `${RANGE_GTE}, ${RANGE_GT}, or ${RANGE_ANY}. defaults to "${DEFAULT_SEMVER_RANGE}"`,
   spec: '-r, --semver-range <range>'
+};
+
+export const OPTION_SOURCES = {
+  default: ALL_PATTERNS,
+  description: 'glob pattern for package.json files to read from',
+  spec: '-s, --source [pattern]'
 };

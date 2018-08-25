@@ -1,25 +1,23 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import * as program from 'commander';
-import * as _ from 'lodash';
+import program = require('commander');
+import _ = require('lodash');
 import { relative } from 'path';
-import { OPTION_SEMVER_RANGE, SET_SEMVER_RANGES } from './constants';
+import { OPTION_SEMVER_RANGE, OPTION_SOURCES } from './constants';
 import { setVersionRange } from './manifests';
 
-let packages: string[] = [];
+const collect = (value: string, values: string[] = []) => values.concat(value);
 
 program
   .option(OPTION_SEMVER_RANGE.spec, OPTION_SEMVER_RANGE.description)
-  .action((...args) => {
-    packages = args.filter((arg) => arg && typeof arg === 'string');
-  })
+  .option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect)
   .parse(process.argv);
 
 const semverRange: string = program.semverRange || OPTION_SEMVER_RANGE.default;
-const patterns: string[] = packages.length ? packages : SET_SEMVER_RANGES.defaultPatterns;
+const sources: string[] = program.source && program.source.length ? program.source : OPTION_SOURCES.default;
 
-setVersionRange(semverRange, ...patterns).then((descriptors) => {
+setVersionRange(semverRange, ...sources).then((descriptors) => {
   _.each(descriptors, (descriptor) => {
     console.log(chalk.blue(`./${relative('.', descriptor.path)}`));
   });
