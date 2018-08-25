@@ -12,6 +12,10 @@
     "syncpack-set-semver-ranges": "dist/bin-set-semver-ranges.js"
   },
   "bugs": "https://github.com/JamieMason/syncpack/issues",
+  "contributors": [
+    "Alex Hayton (https://github.com/AlexHayton)",
+    "Jamie Mason (https://github.com/JamieMason)"
+  ],
   "dependencies": {
     "@types/fs-extra": "5.0.4",
     "@types/globby": "8.0.0",
