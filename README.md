@@ -36,3 +36,69 @@ Usage: syncpack [options] [command]
     set-semver-ranges  set semver ranges to the given format
     help [cmd]         display help for [cmd]
 ```
+
+### fix-mismatches
+
+Set dependencies used with different versions to the same version.
+
+```
+Usage: syncpack fix-mismatches [options]
+
+Options:
+
+  -s, --source [pattern]  glob pattern for package.json files to read from
+  -h, --help              output usage information
+```
+
+### format
+
+Sort and shorten properties according to a convention.
+
+```
+Usage: syncpack format [options]
+
+Options:
+
+  -s, --source [pattern]  glob pattern for package.json files to read from
+  -h, --help              output usage information
+```
+
+### list
+
+List every dependency used in your packages.
+
+```
+Usage: syncpack list [options]
+
+Options:
+
+  -s, --source [pattern]  glob pattern for package.json files to read from
+  -h, --help              output usage information
+```
+
+### list-mismatches
+
+List every dependency used with different versions in your packages.
+
+```
+Usage: syncpack list-mismatches [options]
+
+Options:
+
+  -s, --source [pattern]  glob pattern for package.json files to read from
+  -h, --help              output usage information
+```
+
+### set-semver-ranges
+
+Set semver ranges to the given format.
+
+```
+Usage: syncpack set-semver-ranges [options]
+
+Options:
+
+  -r, --semver-range <range>  <, <=, "", ~, ^, >=, >, or *. defaults to ""
+  -s, --source [pattern]      glob pattern for package.json files to read from
+  -h, --help                  output usage information
+```
