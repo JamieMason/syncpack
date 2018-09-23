@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
 import program = require('commander');
-import { FIX_MISMATCHES, FORMAT, LIST, LIST_MISMATCHES, SET_SEMVER_RANGES, VERSION } from './constants';
+import {
+  FIX_MISMATCHES,
+  FORMAT,
+  LIST,
+  LIST_MISMATCHES,
+  SET_SEMVER_RANGES,
+  VERSION
+} from './constants';
 
 program
   .version(VERSION)

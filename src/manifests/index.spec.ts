@@ -1,7 +1,12 @@
 import { readFileSync } from 'fs';
 import _ = require('lodash');
 import mock = require('mock-fs');
-import { createFile, createManifest, createMockDescriptor, createMockFs } from '../../test/helpers';
+import {
+  createFile,
+  createManifest,
+  createMockDescriptor,
+  createMockFs
+} from '../../test/helpers';
 import { IManifest, IManifestDescriptor } from '../typings';
 import {
   format,
@@ -27,17 +32,36 @@ beforeEach(() => {
       { gulp: '3.9.1' }
     ),
     ...createMockFs('bar', { chalk: '1.0.0' }, { jest: '22.1.4' }),
-    ...createMockFs('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+    ...createMockFs(
+      'baz',
+      null,
+      { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' },
+      { gulp: '*' }
+    )
   });
 });
 
 describe('format', () => {
   it('sorts and shortens properties according to a convention', async () => {
     const result = await format(pattern);
-    const getByName = (name) => Object.keys(_.find(result, (v) => v.data.name === name).data);
-    expect(getByName('foo')).toEqual(['name', 'dependencies', 'devDependencies', 'peerDependencies']);
-    expect(getByName('bar')).toEqual(['name', 'dependencies', 'devDependencies']);
-    expect(getByName('baz')).toEqual(['name', 'devDependencies', 'peerDependencies']);
+    const getByName = (name) =>
+      Object.keys(_.find(result, (v) => v.data.name === name).data);
+    expect(getByName('foo')).toEqual([
+      'name',
+      'dependencies',
+      'devDependencies',
+      'peerDependencies'
+    ]);
+    expect(getByName('bar')).toEqual([
+      'name',
+      'dependencies',
+      'devDependencies'
+    ]);
+    expect(getByName('baz')).toEqual([
+      'name',
+      'devDependencies',
+      'peerDependencies'
+    ]);
   });
 });
 
@@ -79,7 +103,12 @@ describe('setVersion', () => {
           { gulp: '3.9.1' }
         ),
         createMockDescriptor('bar', { chalk: '1.0.0' }, { jest: '25.0.0' }),
-        createMockDescriptor('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+        createMockDescriptor(
+          'baz',
+          null,
+          { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' },
+          { gulp: '*' }
+        )
       ])
     );
   });
@@ -97,7 +126,12 @@ describe('setVersionRange', () => {
           { gulp: '^3.9.1' }
         ),
         createMockDescriptor('bar', { chalk: '^1.0.0' }, { jest: '^22.1.4' }),
-        createMockDescriptor('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
+        createMockDescriptor(
+          'baz',
+          null,
+          { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' },
+          { gulp: '*' }
+        )
       ])
     );
   });
@@ -115,13 +149,20 @@ describe('setVersionsToNewestMismatch', () => {
           { gulp: '*' }
         ),
         createMockDescriptor('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }),
-        createMockDescriptor('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+        createMockDescriptor(
+          'baz',
+          null,
+          { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' },
+          { gulp: '*' }
+        )
       ])
     );
   });
   it('rewrites the updated manifests with the correct data', async () => {
     await setVersionsToNewestMismatch(pattern);
-    expect(readFileSync('/Users/you/Dev/monorepo/packages/foo/package.json', 'utf8')).toEqual(
+    expect(
+      readFileSync('/Users/you/Dev/monorepo/packages/foo/package.json', 'utf8')
+    ).toEqual(
       createFile(
         'foo',
         { chalk: '2.3.0', commander: '2.13.0' },
@@ -129,11 +170,18 @@ describe('setVersionsToNewestMismatch', () => {
         { gulp: '*' }
       )
     );
-    expect(readFileSync('/Users/you/Dev/monorepo/packages/bar/package.json', 'utf8')).toEqual(
-      createFile('bar', { chalk: '2.3.0' }, { jest: '22.1.4' })
-    );
-    expect(readFileSync('/Users/you/Dev/monorepo/packages/baz/package.json', 'utf8')).toEqual(
-      createFile('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+    expect(
+      readFileSync('/Users/you/Dev/monorepo/packages/bar/package.json', 'utf8')
+    ).toEqual(createFile('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }));
+    expect(
+      readFileSync('/Users/you/Dev/monorepo/packages/baz/package.json', 'utf8')
+    ).toEqual(
+      createFile(
+        'baz',
+        null,
+        { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' },
+        { gulp: '*' }
+      )
     );
   });
 });

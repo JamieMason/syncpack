@@ -37,7 +37,11 @@ const sortObject = (obj: IManifest) =>
     .reduce((next, [key, value]) => ({ ...next, [key]: value }), {});
 
 const sortValue = (value: any) =>
-  _.isArray(value) ? value.slice(0).sort() : _.isObject(value) ? sortObject(value) : value;
+  _.isArray(value)
+    ? value.slice(0).sort()
+    : _.isObject(value)
+      ? sortObject(value)
+      : value;
 
 const sortManifest: ManifestMapper = (manifest) => {
   const [first, rest] = _(manifest)
@@ -45,12 +49,22 @@ const sortManifest: ManifestMapper = (manifest) => {
     .sortBy('0')
     .partition(([key, value]) => SORT_FIRST.indexOf(key) !== -1)
     .value();
-  const firstSorted = [...first].sort(([keyA], [keyB]) => SORT_FIRST.indexOf(keyA) - SORT_FIRST.indexOf(keyB));
+  const firstSorted = [...first].sort(
+    ([keyA], [keyB]) => SORT_FIRST.indexOf(keyA) - SORT_FIRST.indexOf(keyB)
+  );
   const restSorted = _(rest)
-    .map(([key, value]) => [key, SORT_AZ.indexOf(key) !== -1 ? sortValue(value) : value])
+    .map(([key, value]) => [
+      key,
+      SORT_AZ.indexOf(key) !== -1 ? sortValue(value) : value
+    ])
     .value();
-  return _([...firstSorted, ...restSorted]).reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {} as IManifest);
+  return _([...firstSorted, ...restSorted]).reduce(
+    (obj, [key, value]) => ({ ...obj, [key]: value }),
+    {} as IManifest
+  );
 };
 
 export const format: Format = (manifests) =>
-  _.map(manifests, (manifest) => sortManifest(shortenBugs(shortenRepository(manifest))));
+  _.map(manifests, (manifest) =>
+    sortManifest(shortenBugs(shortenRepository(manifest)))
+  );

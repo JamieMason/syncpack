@@ -15,7 +15,10 @@ program
   .parse(process.argv);
 
 const semverRange: string = program.semverRange || OPTION_SEMVER_RANGE.default;
-const sources: string[] = program.source && program.source.length ? program.source : OPTION_SOURCES.default;
+const sources: string[] =
+  program.source && program.source.length
+    ? program.source
+    : OPTION_SOURCES.default;
 
 setVersionRange(semverRange, ...sources).then((descriptors) => {
   _.each(descriptors, (descriptor) => {

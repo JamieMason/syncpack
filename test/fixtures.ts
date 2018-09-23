@@ -2,9 +2,19 @@ import { IManifest } from '../src/typings';
 import { createManifest } from './helpers';
 
 export const getAnyVersionManifests = () => [
-  createManifest('foo', { chalk: '*', commander: '*' }, { jest: '*', prettier: '*', rimraf: '*' }, { gulp: '*' }),
+  createManifest(
+    'foo',
+    { chalk: '*', commander: '*' },
+    { jest: '*', prettier: '*', rimraf: '*' },
+    { gulp: '*' }
+  ),
   createManifest('bar', { chalk: '*' }, { jest: '*' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '*' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '*' },
+    { gulp: '*' }
+  )
 ];
 
 export const getExactVersionManifests = () => [
@@ -15,7 +25,12 @@ export const getExactVersionManifests = () => [
     { gulp: '0.9.1' }
   ),
   createManifest('bar', { chalk: '1.0.0' }, { jest: '22.1.4' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' },
+    { gulp: '*' }
+  )
 ];
 
 export const getGreaterThanOrEqualVersionManifests = () => [
@@ -26,7 +41,12 @@ export const getGreaterThanOrEqualVersionManifests = () => [
     { gulp: '>=0.9.1' }
   ),
   createManifest('bar', { chalk: '>=1.0.0' }, { jest: '>=22.1.4' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '>=1.10.2' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '>=1.10.2' },
+    { gulp: '*' }
+  )
 ];
 
 export const getGreaterThanVersionManifests = () => [
@@ -37,7 +57,12 @@ export const getGreaterThanVersionManifests = () => [
     { gulp: '>0.9.1' }
   ),
   createManifest('bar', { chalk: '>1.0.0' }, { jest: '>22.1.4' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '>1.10.2' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '>1.10.2' },
+    { gulp: '*' }
+  )
 ];
 
 export const getLessThanOrEqualVersionManifests = () => [
@@ -48,7 +73,12 @@ export const getLessThanOrEqualVersionManifests = () => [
     { gulp: '<=0.9.1' }
   ),
   createManifest('bar', { chalk: '<=1.0.0' }, { jest: '<=22.1.4' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '<=1.10.2' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '<=1.10.2' },
+    { gulp: '*' }
+  )
 ];
 
 export const getLessThanVersionManifests = () => [
@@ -59,7 +89,12 @@ export const getLessThanVersionManifests = () => [
     { gulp: '<0.9.1' }
   ),
   createManifest('bar', { chalk: '<1.0.0' }, { jest: '<22.1.4' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '<1.10.2' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '<1.10.2' },
+    { gulp: '*' }
+  )
 ];
 
 export const getLooseVersionManifests = () => [
@@ -70,7 +105,12 @@ export const getLooseVersionManifests = () => [
     { gulp: '0.9.x' }
   ),
   createManifest('bar', { chalk: '1.x.x' }, { jest: '22.x.x' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.x.x' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '1.x.x' },
+    { gulp: '*' }
+  )
 ];
 
 export const getMinorVersionManifests = () => [
@@ -81,7 +121,12 @@ export const getMinorVersionManifests = () => [
     { gulp: '^0.9.1' }
   ),
   createManifest('bar', { chalk: '^1.0.0' }, { jest: '^22.1.4' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '^1.10.2' },
+    { gulp: '*' }
+  )
 ];
 
 export const getPatchVersionManifests = () => [
@@ -92,7 +137,12 @@ export const getPatchVersionManifests = () => [
     { gulp: '~0.9.1' }
   ),
   createManifest('bar', { chalk: '~1.0.0' }, { jest: '~22.1.4' }),
-  createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '~1.10.2' }, { gulp: '*' })
+  createManifest(
+    'baz',
+    null,
+    { npm: 'https://github.com/npm/npm.git', prettier: '~1.10.2' },
+    { gulp: '*' }
+  )
 ];
 
 export const getUntidyManifest = (): IManifest =>

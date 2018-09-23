@@ -7,8 +7,10 @@ export type GetVersionNumber = (version: string) => string;
 export type GetVersionRange = (version: string) => string;
 export type SortBySemver = (versions: string[]) => string[];
 
-export const getVersionNumber: GetVersionNumber = (version) => version.slice(version.search(/[0-9]/), version.length);
-export const getVersionRange: GetVersionRange = (version) => version.split(/[0-9]/)[0];
+export const getVersionNumber: GetVersionNumber = (version) =>
+  version.slice(version.search(/[0-9]/), version.length);
+export const getVersionRange: GetVersionRange = (version) =>
+  version.split(/[0-9]/)[0];
 
 export const isValid = (version: string) => semver.valid(version) !== null;
 
@@ -53,4 +55,5 @@ export const sortBySemver: SortBySemver = (versions: string[]) =>
       return SAME;
     });
 
-export const getNewest: GetNewest = (versions: string[]) => _(sortBySemver(versions)).last();
+export const getNewest: GetNewest = (versions: string[]) =>
+  _(sortBySemver(versions)).last();

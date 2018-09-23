@@ -7,7 +7,10 @@ export const createFile = (
   dependencies?: IManifest['dependencies'],
   devDependencies?: IManifest['devDependencies'],
   peerDependencies?: IManifest['peerDependencies']
-) => formatJson(createManifest(name, dependencies, devDependencies, peerDependencies));
+) =>
+  formatJson(
+    createManifest(name, dependencies, devDependencies, peerDependencies)
+  );
 
 export const createMockFs = (
   name?: string,
@@ -56,7 +59,11 @@ export const createManifest = (
 };
 
 const shuffle = (value: any): typeof value =>
-  _.isArray(value) ? _.shuffle(value) : _.isObject(value) ? shuffleObject(value) : value;
+  _.isArray(value)
+    ? _.shuffle(value)
+    : _.isObject(value)
+      ? shuffleObject(value)
+      : value;
 
 export const shuffleObject = (obj: object): object =>
   _(obj)

@@ -4,16 +4,34 @@ import { getManifests } from './get-manifests';
 import { manifestData } from './manifest-data';
 
 export type Format = (...sources: string[]) => Promise<IManifestDescriptor[]>;
-export type GetMismatchedVersions = (...sources: string[]) => Promise<IDictionary<string[]>>;
-export type GetVersions = (...sources: string[]) => Promise<IDictionary<string[]>>;
-export type SetVersion = (name: string, version: string, ...sources: string[]) => Promise<IManifestDescriptor[]>;
-export type SetVersionRange = (range: string, ...sources: string[]) => Promise<IManifestDescriptor[]>;
-export type SetVersionsToNewestMismatch = (...sources: string[]) => Promise<IManifestDescriptor[]>;
+export type GetMismatchedVersions = (
+  ...sources: string[]
+) => Promise<IDictionary<string[]>>;
+export type GetVersions = (
+  ...sources: string[]
+) => Promise<IDictionary<string[]>>;
+export type SetVersion = (
+  name: string,
+  version: string,
+  ...sources: string[]
+) => Promise<IManifestDescriptor[]>;
+export type SetVersionRange = (
+  range: string,
+  ...sources: string[]
+) => Promise<IManifestDescriptor[]>;
+export type SetVersionsToNewestMismatch = (
+  ...sources: string[]
+) => Promise<IManifestDescriptor[]>;
 
-const unwrap = (descriptors: IManifestDescriptor[]) => descriptors.map((descriptor) => descriptor.data);
+const unwrap = (descriptors: IManifestDescriptor[]) =>
+  descriptors.map((descriptor) => descriptor.data);
 
-const writeDescriptors = (descriptors: IManifestDescriptor[]): Promise<IManifestDescriptor[]> =>
-  Promise.all(descriptors.map((descriptor) => writeJson(descriptor.path, descriptor.data))).then(() => descriptors);
+const writeDescriptors = (
+  descriptors: IManifestDescriptor[]
+): Promise<IManifestDescriptor[]> =>
+  Promise.all(
+    descriptors.map((descriptor) => writeJson(descriptor.path, descriptor.data))
+  ).then(() => descriptors);
 
 export const format: Format = (...sources) =>
   getManifests(...sources)
@@ -51,7 +69,9 @@ export const setVersionRange: SetVersionRange = (range, ...sources) =>
     })
     .then(writeDescriptors);
 
-export const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (...sources) =>
+export const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (
+  ...sources
+) =>
   getManifests(...sources)
     .then((descriptors) => {
       const data = unwrap(descriptors);

@@ -2,7 +2,10 @@ export interface IDictionary<T> {
   [key: string]: T;
 }
 
-export type IManifestKey = 'dependencies' | 'devDependencies' | 'peerDependencies';
+export type IManifestKey =
+  | 'dependencies'
+  | 'devDependencies'
+  | 'peerDependencies';
 
 export interface IManifest {
   dependencies: IDictionary<string>;

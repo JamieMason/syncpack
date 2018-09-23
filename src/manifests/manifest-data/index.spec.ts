@@ -24,7 +24,13 @@ import {
 import { IManifest } from '../../typings';
 import { manifestData } from './index';
 
-const { getMismatchedVersions, getVersions, setVersion, setVersionRange, setVersionsToNewestMismatch } = manifestData;
+const {
+  getMismatchedVersions,
+  getVersions,
+  setVersion,
+  setVersionRange,
+  setVersionsToNewestMismatch
+} = manifestData;
 
 describe('getMismatchedVersions', () => {
   it('returns an index of dependencies used with different versions', () => {
@@ -60,7 +66,12 @@ describe('setVersion', () => {
         { gulp: '0.9.1' }
       ),
       createManifest('bar', { chalk: '1.0.0' }, { jest: '25.0.0' }),
-      createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+      createManifest(
+        'baz',
+        null,
+        { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' },
+        { gulp: '*' }
+      )
     ]);
   });
 });
@@ -76,7 +87,9 @@ describe('setVersionRange', () => {
       getMinorVersionManifests(),
       getPatchVersionManifests()
     ].forEach((inputManifests) => {
-      expect(setVersionRange(inputRange, inputManifests)).toEqual(expectedManifests);
+      expect(setVersionRange(inputRange, inputManifests)).toEqual(
+        expectedManifests
+      );
     });
   };
 
@@ -119,7 +132,12 @@ describe('setVersionsToNewestMismatch', () => {
         { gulp: '*' }
       ),
       createManifest('bar', { chalk: '2.3.0' }, { jest: '22.1.4' }),
-      createManifest('baz', null, { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' }, { gulp: '*' })
+      createManifest(
+        'baz',
+        null,
+        { npm: 'https://github.com/npm/npm.git', prettier: '1.10.2' },
+        { gulp: '*' }
+      )
     ]);
   });
 });

@@ -1,6 +1,10 @@
 import { IManifestKey } from './typings';
 
-export const DEPENDENCY_TYPES: IManifestKey[] = ['dependencies', 'devDependencies', 'peerDependencies'];
+export const DEPENDENCY_TYPES: IManifestKey[] = [
+  'dependencies',
+  'devDependencies',
+  'peerDependencies'
+];
 export const SORT_AZ = [
   'contributors',
   'dependencies',
@@ -43,7 +47,8 @@ const ALL_PATTERNS = [MONOREPO_PATTERN, PACKAGES_PATTERN];
 
 export const FIX_MISMATCHES = {
   command: 'fix-mismatches',
-  description: 'set dependencies used with different versions to the same version'
+  description:
+    'set dependencies used with different versions to the same version'
 };
 
 export const FORMAT = {
@@ -58,7 +63,8 @@ export const LIST = {
 
 export const LIST_MISMATCHES = {
   command: 'list-mismatches',
-  description: 'list every dependency used with different versions in your packages'
+  description:
+    'list every dependency used with different versions in your packages'
 };
 
 export const SET_SEMVER_RANGES = {

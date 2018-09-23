@@ -9,9 +9,14 @@ import { format } from './manifests';
 
 const collect = (value: string, values: string[] = []) => values.concat(value);
 
-program.option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect).parse(process.argv);
+program
+  .option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect)
+  .parse(process.argv);
 
-const sources: string[] = program.source && program.source.length ? program.source : OPTION_SOURCES.default;
+const sources: string[] =
+  program.source && program.source.length
+    ? program.source
+    : OPTION_SOURCES.default;
 
 format(...sources).then((descriptors) => {
   _.each(descriptors, (descriptor) => {

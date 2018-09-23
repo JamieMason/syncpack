@@ -5,11 +5,22 @@ import { IDictionary, IManifest } from '../../typings';
 import { getNewest, getVersionNumber } from '../../version';
 import { format } from './format';
 
-export type GetMismatchedVersions = (manifests: IManifest[]) => IDictionary<string[]>;
+export type GetMismatchedVersions = (
+  manifests: IManifest[]
+) => IDictionary<string[]>;
 export type GetVersions = (manifests: IManifest[]) => IDictionary<string[]>;
-export type SetVersion = (name: string, version: string, manifests: IManifest[]) => IManifest[];
-export type SetVersionRange = (range: string, manifests: IManifest[]) => IManifest[];
-export type SetVersionsToNewestMismatch = (manifests: IManifest[]) => IManifest[];
+export type SetVersion = (
+  name: string,
+  version: string,
+  manifests: IManifest[]
+) => IManifest[];
+export type SetVersionRange = (
+  range: string,
+  manifests: IManifest[]
+) => IManifest[];
+export type SetVersionsToNewestMismatch = (
+  manifests: IManifest[]
+) => IManifest[];
 
 const isObject = (value: any) => Boolean(value && typeof value === 'object');
 const join = ({ name, version }: IDictionary<string>) => `${name}@${version}`;
@@ -17,14 +28,18 @@ const gatherDependencies = (manifest: IManifest) =>
   _.chain(DEPENDENCY_TYPES)
     .map((property) => manifest[property])
     .filter(Boolean)
-    .flatMap((dependencies) => _.map(dependencies, (version, name) => ({ name, version })))
+    .flatMap((dependencies) =>
+      _.map(dependencies, (version, name) => ({ name, version }))
+    )
     .value();
 
 const isManifest = (value: any): boolean =>
   Boolean(
     isObject(value) &&
       'name' in value &&
-      ('dependencies' in value || 'devDependencies' in value || 'peerDependencies' in value)
+      ('dependencies' in value ||
+        'devDependencies' in value ||
+        'peerDependencies' in value)
   );
 
 const getMismatchedVersions: GetMismatchedVersions = (manifests) =>
@@ -82,7 +97,9 @@ const setVersionRange: SetVersionRange = (range, manifests) => {
             } else if (range === RANGE_LOOSE) {
               dependencies[name] =
                 semver.major(versionNumber) === 0
-                  ? `${semver.major(versionNumber)}.${semver.minor(versionNumber)}.x`
+                  ? `${semver.major(versionNumber)}.${semver.minor(
+                      versionNumber
+                    )}.x`
                   : `${semver.major(versionNumber)}.x.x`;
             } else {
               dependencies[name] = `${range}${versionNumber}`;
@@ -94,7 +111,9 @@ const setVersionRange: SetVersionRange = (range, manifests) => {
   return manifests;
 };
 
-const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (manifests) => {
+const setVersionsToNewestMismatch: SetVersionsToNewestMismatch = (
+  manifests
+) => {
   _(getMismatchedVersions(manifests))
     .map((versions, name) => ({ name, newest: getNewest(versions) }))
     .filter(({ newest }) => typeof newest === 'string')
