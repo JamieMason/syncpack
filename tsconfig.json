@@ -2,7 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es6"],
+    "lib": ["es2017", "es6"],
     "outDir": "./dist",
     "skipLibCheck": true,
     "strict": true,
