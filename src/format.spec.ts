@@ -1,8 +1,8 @@
-import { getUntidyManifest } from '../../../test/fixtures';
-import { shuffleObject } from '../../../test/helpers';
-import { SORT_FIRST } from '../../constants';
-import { IManifest } from '../../typings';
-import { manifestData } from './index';
+import { getUntidyManifest } from '../test/fixtures';
+import { shuffleObject } from '../test/helpers';
+import { SORT_FIRST } from './constants';
+import { IManifest } from './typings';
+import { manifestData } from './manifests/manifest-data';
 
 describe('format', () => {
   let results: IManifest[];

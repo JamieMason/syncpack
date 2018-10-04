@@ -1,20 +1,20 @@
 import _ = require('lodash');
 import semver = require('semver');
-import { GREATER, LESSER, SAME, SEMVER_ORDER } from './constants';
+import { GREATER, LESSER, SAME, SEMVER_ORDER } from '../constants';
 
-export type GetNewest = (versions: string[]) => string | undefined;
-export type GetVersionNumber = (version: string) => string;
-export type GetVersionRange = (version: string) => string;
-export type SortBySemver = (versions: string[]) => string[];
+export const getNewest = (versions: string[]): string | undefined =>
+  _(sortBySemver(versions)).last();
 
-export const getVersionNumber: GetVersionNumber = (version) =>
+export const isValid = (version: string): boolean =>
+  semver.valid(version) !== null;
+
+export const getVersionNumber = (version: string): string =>
   version.slice(version.search(/[0-9]/), version.length);
-export const getVersionRange: GetVersionRange = (version) =>
+
+export const getVersionRange = (version: string): string =>
   version.split(/[0-9]/)[0];
 
-export const isValid = (version: string) => semver.valid(version) !== null;
-
-export const sortBySemver: SortBySemver = (versions: string[]) =>
+export const sortBySemver = (versions: string[]): string[] =>
   versions
     .concat()
     .sort()
@@ -54,6 +54,3 @@ export const sortBySemver: SortBySemver = (versions: string[]) =>
       }
       return SAME;
     });
-
-export const getNewest: GetNewest = (versions: string[]) =>
-  _(sortBySemver(versions)).last();

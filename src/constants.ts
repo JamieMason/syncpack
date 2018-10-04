@@ -85,3 +85,18 @@ export const OPTION_SOURCES = {
   description: 'glob pattern for package.json files to read from',
   spec: '-s, --source [pattern]'
 };
+
+export const OPTIONS_PROD = {
+  description: 'include dependencies',
+  spec: '-p, --prod'
+};
+
+export const OPTIONS_DEV = {
+  description: 'include devDependencies',
+  spec: '-d, --dev'
+};
+
+export const OPTIONS_PEER = {
+  description: 'include peerDependencies',
+  spec: '-P, --peer'
+};
