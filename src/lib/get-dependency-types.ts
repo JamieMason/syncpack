@@ -1,8 +1,7 @@
-import { CommanderStatic } from 'commander';
 import { DEPENDENCY_TYPES } from '../constants';
-import { IManifestKey } from '../typings';
+import { CommanderApi, IManifestKey } from '../typings';
 
-export type GetDependencyTypes = (program: CommanderStatic) => IManifestKey[];
+export type GetDependencyTypes = (program: CommanderApi) => IManifestKey[];
 
 export const getDependencyTypes: GetDependencyTypes = (program) =>
   program.prod || program.dev || program.peer

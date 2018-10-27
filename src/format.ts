@@ -1,41 +1,23 @@
 import chalk from 'chalk';
-import { CommanderStatic } from 'commander';
+import { writeJson } from 'fs-extra';
 import _ = require('lodash');
 import { relative } from 'path';
 import { OPTION_SOURCES, SORT_AZ, SORT_FIRST } from './constants';
 import { collect } from './lib/collect';
 import { getPackages } from './lib/get-packages';
-import { writeJson } from './lib/write-json';
-import { IManifest } from './typings';
+import { CommanderApi, IManifest } from './typings';
 
-export const run = async (program: CommanderStatic) => {
+export const run = async (program: CommanderApi) => {
   const shortenBugs = (manifest: IManifest): IManifest => {
-    if (
-      manifest.bugs &&
-      typeof manifest.bugs === 'object' &&
-      manifest.bugs.url
-    ) {
-      return {
-        ...manifest,
-        bugs: manifest.bugs.url
-      };
-    }
-    return manifest;
+    const bugsUrl = _.get(manifest, 'bugs.url') as string;
+    return bugsUrl ? { ...manifest, bugs: bugsUrl } : manifest;
   };
 
   const shortenRepository = (manifest: IManifest): IManifest => {
-    if (
-      manifest.repository &&
-      typeof manifest.repository === 'object' &&
-      manifest.repository.url &&
-      manifest.repository.url.indexOf('github.com') !== -1
-    ) {
-      return {
-        ...manifest,
-        repository: manifest.repository.url.split('github.com/')[1]
-      };
-    }
-    return manifest;
+    const repoUrl = _.get(manifest, 'repository.url', '') as string;
+    return repoUrl.includes('github.com')
+      ? { ...manifest, repository: repoUrl.split('github.com/')[1] }
+      : manifest;
   };
 
   const sortObject = (obj: IManifest) =>
@@ -82,12 +64,10 @@ export const run = async (program: CommanderStatic) => {
   const pkgs = await getPackages(program);
 
   await Promise.all(
-    pkgs.map(({ data, path }) =>
-      writeJson(path, sortManifest(shortenBugs(shortenRepository(data))))
-    )
+    pkgs.map(({ data, path }) => {
+      console.log(chalk.blue(`./${relative('.', path)}`));
+      const nextData = sortManifest(shortenBugs(shortenRepository(data)));
+      return writeJson(path, nextData, { spaces: 2 });
+    })
   );
-
-  _.each(pkgs, (pkg) => {
-    console.log(chalk.blue(`./${relative('.', pkg.path)}`));
-  });
 };

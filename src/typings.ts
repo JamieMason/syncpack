@@ -1,3 +1,5 @@
+import { CommanderStatic } from 'commander';
+
 export interface IDictionary<T> {
   [key: string]: T;
 }
@@ -23,3 +25,12 @@ export interface IManifestDescriptor {
   path: string;
   data: IManifest;
 }
+
+// export interface IMockCommander {
+//   command: (...args: any[]) => jest.SpyInstance;
+//   option: (...args: any[]) => jest.SpyInstance;
+//   parse: (...args: any[]) => jest.SpyInstance;
+//   source: string[];
+// }
+
+export type CommanderApi = CommanderStatic; // | IMockCommander;

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { CommanderStatic } from 'commander';
+import { writeJson } from 'fs-extra';
 import _ = require('lodash');
 import { relative } from 'path';
 import semver = require('semver');
@@ -16,9 +16,9 @@ import { collect } from './lib/collect';
 import { getDependencyTypes } from './lib/get-dependency-types';
 import { getPackages } from './lib/get-packages';
 import { getVersionNumber } from './lib/version';
-import { writeJson } from './lib/write-json';
+import { CommanderApi } from './typings';
 
-export const run = async (program: CommanderStatic) => {
+export const run = async (program: CommanderApi) => {
   program
     .option(OPTION_SEMVER_RANGE.spec, OPTION_SEMVER_RANGE.description)
     .option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect)
@@ -39,7 +39,9 @@ export const run = async (program: CommanderStatic) => {
       .filter(Boolean)
       .each((dependencies) => {
         _(dependencies).each((version, name) => {
-          const versionNumber = getVersionNumber(version);
+          const versionNumber = getVersionNumber(version)
+            .split('.x')
+            .join('.0');
           if (version !== '*' && semver.validRange(version)) {
             if (semverRange === RANGE_ANY) {
               dependencies[name] = '*';
@@ -58,7 +60,9 @@ export const run = async (program: CommanderStatic) => {
       })
   );
 
-  await Promise.all(pkgs.map(({ data, path }) => writeJson(path, data)));
+  await Promise.all(
+    pkgs.map(({ data, path }) => writeJson(path, data, { spaces: 2 }))
+  );
 
   _.each(pkgs, (pkg) => {
     console.log(chalk.blue(`./${relative('.', pkg.path)}`));

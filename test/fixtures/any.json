@@ -1,0 +1,36 @@
+[
+  {
+    "dependencies": {
+      "chalk": "*",
+      "commander": "*"
+    },
+    "devDependencies": {
+      "jest": "*",
+      "prettier": "*",
+      "rimraf": "*"
+    },
+    "name": "foo",
+    "peerDependencies": {
+      "gulp": "*"
+    }
+  },
+  {
+    "dependencies": {
+      "chalk": "*"
+    },
+    "devDependencies": {
+      "jest": "*"
+    },
+    "name": "bar"
+  },
+  {
+    "devDependencies": {
+      "npm": "https://github.com/npm/npm.git",
+      "prettier": "*"
+    },
+    "name": "baz",
+    "peerDependencies": {
+      "gulp": "*"
+    }
+  }
+]
