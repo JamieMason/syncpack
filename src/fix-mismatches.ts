@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { CommanderStatic } from 'commander';
+import { writeJson } from 'fs-extra';
 import _ = require('lodash');
 import { relative } from 'path';
 import {
@@ -13,9 +13,9 @@ import { getDependencyTypes } from './lib/get-dependency-types';
 import { getPackages } from './lib/get-packages';
 import { getMismatchedVersionsByName } from './lib/get-versions-by-name';
 import { getNewest } from './lib/version';
-import { writeJson } from './lib/write-json';
+import { CommanderApi } from './typings';
 
-export const run = async (program: CommanderStatic) => {
+export const run = async (program: CommanderApi) => {
   program
     .option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect)
     .option(OPTIONS_PROD.spec, OPTIONS_PROD.description)
@@ -32,25 +32,25 @@ export const run = async (program: CommanderStatic) => {
 
   Object.entries(mismatchedVersionsByName).forEach(([name, versions]) => {
     const newest = getNewest(versions);
-    if (typeof newest === 'string') {
-      pkgs.forEach(({ data, path }) => {
-        dependencyTypes.forEach((type) => {
-          if (data[type] && data[type][name] && data[type][name] !== newest) {
-            console.log(
-              relative(process.cwd(), path),
-              name,
-              data[type][name],
-              '->',
-              newest
-            );
-            data[type][name] = newest;
-          }
-        });
+    pkgs.forEach(({ data, path }) => {
+      dependencyTypes.forEach((type) => {
+        if (data[type] && data[type][name] && data[type][name] !== newest) {
+          console.log(
+            relative(process.cwd(), path),
+            name,
+            data[type][name],
+            '->',
+            newest
+          );
+          data[type][name] = newest;
+        }
       });
-    }
+    });
   });
 
-  await Promise.all(pkgs.map(({ data, path }) => writeJson(path, data)));
+  await Promise.all(
+    pkgs.map(({ data, path }) => writeJson(path, data, { spaces: 2 }))
+  );
 
   _.each(pkgs, (pkg) => {
     console.log(chalk.blue(`./${relative('.', pkg.path)}`));

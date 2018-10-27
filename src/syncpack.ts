@@ -1,4 +1,3 @@
-import { CommanderStatic } from 'commander';
 import {
   FIX_MISMATCHES,
   FORMAT,
@@ -7,8 +6,9 @@ import {
   SET_SEMVER_RANGES,
   VERSION
 } from './constants';
+import { CommanderApi } from './typings';
 
-export const run = (program: CommanderStatic) => {
+export const run = (program: CommanderApi) => {
   program
     .version(VERSION)
     .command(FIX_MISMATCHES.command, FIX_MISMATCHES.description)

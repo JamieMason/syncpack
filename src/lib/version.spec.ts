@@ -31,6 +31,7 @@ describe('getVersionRange', () => {
     expect(getVersionRange('>=1.0.0')).toEqual('>=');
     expect(getVersionRange('^1.0.0')).toEqual('^');
     expect(getVersionRange('~1.0.0')).toEqual('~');
+    expect(getVersionRange('1.x.x')).toEqual('.x');
     expect(getVersionRange('1.0.0')).toEqual('');
     expect(getVersionRange('<=1.0.0')).toEqual('<=');
     expect(getVersionRange('<1.0.0')).toEqual('<');
@@ -48,6 +49,7 @@ describe('sortBySemver', () => {
         '1.0.1',
         '1.0.0',
         '*',
+        '1.x.x',
         '*',
         '<=1.0.0',
         '<=1.0.1',
@@ -76,6 +78,7 @@ describe('sortBySemver', () => {
         '~1.0.0',
         '^1.0.0',
         '^1.0.0',
+        '1.x.x',
         '>=1.0.0',
         '>=1.0.0',
         '>1.0.0',
