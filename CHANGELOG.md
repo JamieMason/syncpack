@@ -1,3 +1,11 @@
+<a name="3.4.0"></a>
+
+# [3.4.0](https://github.com/JamieMason/syncpack/compare/3.3.0...3.4.0) (2018-10-28)
+
+### Features
+
+- **cli:** read sources from lerna.json if present ([77b90eb](https://github.com/JamieMason/syncpack/commit/77b90eb)), closes [#11](https://github.com/JamieMason/syncpack/issues/11)
+
 <a name="3.3.0"></a>
 
 # [3.3.0](https://github.com/JamieMason/syncpack/compare/3.0.0...3.3.0) (2018-10-28)
