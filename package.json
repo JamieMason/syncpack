@@ -1,6 +1,6 @@
 {
   "name": "syncpack",
-  "description": "Manage multiple package.json files in Lerna Monorepos",
+  "description": "Manage multiple package.json files, such as in Lerna Monorepos",
   "version": "3.0.0",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
@@ -46,7 +46,15 @@
     "dist"
   ],
   "homepage": "https://github.com/JamieMason/syncpack#readme",
-  "keywords": [],
+  "keywords": [
+    "cleanup",
+    "lerna",
+    "monorepo",
+    "multi-package",
+    "package",
+    "package.json",
+    "packagejson"
+  ],
   "license": "MIT",
   "main": "syncpack",
   "repository": "JamieMason/syncpack",

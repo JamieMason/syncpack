@@ -47,6 +47,9 @@ Usage: syncpack fix-mismatches [options]
 Options:
 
   -s, --source [pattern]  glob pattern for package.json files to read from
+  -p, --prod              include dependencies
+  -d, --dev               include devDependencies
+  -P, --peer              include peerDependencies
   -h, --help              output usage information
 ```
 
@@ -73,6 +76,9 @@ Usage: syncpack list [options]
 Options:
 
   -s, --source [pattern]  glob pattern for package.json files to read from
+  -p, --prod              include dependencies
+  -d, --dev               include devDependencies
+  -P, --peer              include peerDependencies
   -h, --help              output usage information
 ```
 
@@ -86,6 +92,9 @@ Usage: syncpack list-mismatches [options]
 Options:
 
   -s, --source [pattern]  glob pattern for package.json files to read from
+  -p, --prod              include dependencies
+  -d, --dev               include devDependencies
+  -P, --peer              include peerDependencies
   -h, --help              output usage information
 ```
 
@@ -100,5 +109,8 @@ Options:
 
   -r, --semver-range <range>  <, <=, "", ~, ^, >=, >, or *. defaults to ""
   -s, --source [pattern]      glob pattern for package.json files to read from
+  -p, --prod                  include dependencies
+  -d, --dev                   include devDependencies
+  -P, --peer                  include peerDependencies
   -h, --help                  output usage information
 ```
