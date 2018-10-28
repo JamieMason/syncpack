@@ -1,3 +1,17 @@
+<a name="3.3.0"></a>
+
+# [3.3.0](https://github.com/JamieMason/syncpack/compare/3.0.0...3.3.0) (2018-10-28)
+
+### Features
+
+- **cli:** specify dependency types as options ([ec5ef6b](https://github.com/JamieMason/syncpack/commit/ec5ef6b)), closes [#10](https://github.com/JamieMason/syncpack/issues/10)
+- **cli:** specify indentation as option ([8b408bd](https://github.com/JamieMason/syncpack/commit/8b408bd)), closes [#12](https://github.com/JamieMason/syncpack/issues/12)
+- **format:** sort contributors alphabetically ([935ffcf](https://github.com/JamieMason/syncpack/commit/935ffcf))
+
+### Performance Improvements
+
+- **npm:** move [@types](https://github.com/types) to devDependencies ([ad5951c](https://github.com/JamieMason/syncpack/commit/ad5951c)), closes [#13](https://github.com/JamieMason/syncpack/issues/13)
+
 <a name="3.0.0"></a>
 
 # [3.0.0](https://github.com/JamieMason/syncpack/compare/2.0.1...3.0.0) (2018-08-25)
