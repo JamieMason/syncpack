@@ -5,6 +5,7 @@ export const DEPENDENCY_TYPES: IManifestKey[] = [
   'devDependencies',
   'peerDependencies'
 ];
+
 export const SORT_AZ = [
   'contributors',
   'dependencies',
@@ -14,6 +15,7 @@ export const SORT_AZ = [
   'peerDependencies',
   'scripts'
 ];
+
 export const SORT_FIRST = ['name', 'description', 'version', 'author'];
 export const VERSION = require('../package.json').version;
 export const GREATER = 1;
@@ -40,6 +42,7 @@ export const SEMVER_ORDER = [
   RANGE_ANY
 ];
 
+const DEFAULT_INDENT = '  ';
 const DEFAULT_SEMVER_RANGE = RANGE_EXACT;
 const MONOREPO_PATTERN = './package.json';
 const PACKAGES_PATTERN = './packages/*/package.json';
@@ -99,4 +102,10 @@ export const OPTIONS_DEV = {
 export const OPTIONS_PEER = {
   description: 'include peerDependencies',
   spec: '-P, --peer'
+};
+
+export const OPTION_INDENT = {
+  default: DEFAULT_INDENT,
+  description: `override indentation. defaults to "${DEFAULT_INDENT}"`,
+  spec: '-i, --indent [value]'
 };

@@ -2,8 +2,14 @@ import chalk from 'chalk';
 import { writeJson } from 'fs-extra';
 import _ = require('lodash');
 import { relative } from 'path';
-import { OPTION_SOURCES, SORT_AZ, SORT_FIRST } from './constants';
+import {
+  OPTION_INDENT,
+  OPTION_SOURCES,
+  SORT_AZ,
+  SORT_FIRST
+} from './constants';
 import { collect } from './lib/collect';
+import { getIndent } from './lib/get-indent';
 import { getPackages } from './lib/get-packages';
 import { CommanderApi, IManifest } from './typings';
 
@@ -59,15 +65,17 @@ export const run = async (program: CommanderApi) => {
 
   program
     .option(OPTION_SOURCES.spec, OPTION_SOURCES.description, collect)
+    .option(OPTION_INDENT.spec, OPTION_INDENT.description)
     .parse(process.argv);
 
   const pkgs = await getPackages(program);
+  const indent = getIndent(program);
 
   await Promise.all(
     pkgs.map(({ data, path }) => {
       console.log(chalk.blue(`./${relative('.', path)}`));
       const nextData = sortManifest(shortenBugs(shortenRepository(data)));
-      return writeJson(path, nextData, { spaces: 2 });
+      return writeJson(path, nextData, { spaces: indent });
     })
   );
 };

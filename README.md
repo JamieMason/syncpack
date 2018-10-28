@@ -50,6 +50,7 @@ Options:
   -p, --prod              include dependencies
   -d, --dev               include devDependencies
   -P, --peer              include peerDependencies
+  -i, --indent [value]    override indentation. defaults to "  "
   -h, --help              output usage information
 ```
 
@@ -63,6 +64,7 @@ Usage: syncpack format [options]
 Options:
 
   -s, --source [pattern]  glob pattern for package.json files to read from
+  -i, --indent [value]    override indentation. defaults to "  "
   -h, --help              output usage information
 ```
 
@@ -112,5 +114,6 @@ Options:
   -p, --prod                  include dependencies
   -d, --dev                   include devDependencies
   -P, --peer                  include peerDependencies
+  -i, --indent [value]    override indentation. defaults to "  "
   -h, --help                  output usage information
 ```

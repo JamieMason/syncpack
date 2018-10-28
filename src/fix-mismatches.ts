@@ -3,6 +3,7 @@ import { writeJson } from 'fs-extra';
 import _ = require('lodash');
 import { relative } from 'path';
 import {
+  OPTION_INDENT,
   OPTION_SOURCES,
   OPTIONS_DEV,
   OPTIONS_PEER,
@@ -10,6 +11,7 @@ import {
 } from './constants';
 import { collect } from './lib/collect';
 import { getDependencyTypes } from './lib/get-dependency-types';
+import { getIndent } from './lib/get-indent';
 import { getPackages } from './lib/get-packages';
 import { getMismatchedVersionsByName } from './lib/get-versions-by-name';
 import { getNewest } from './lib/version';
@@ -21,10 +23,12 @@ export const run = async (program: CommanderApi) => {
     .option(OPTIONS_PROD.spec, OPTIONS_PROD.description)
     .option(OPTIONS_DEV.spec, OPTIONS_DEV.description)
     .option(OPTIONS_PEER.spec, OPTIONS_PEER.description)
+    .option(OPTION_INDENT.spec, OPTION_INDENT.description)
     .parse(process.argv);
 
-  const dependencyTypes = getDependencyTypes(program);
   const pkgs = await getPackages(program);
+  const dependencyTypes = getDependencyTypes(program);
+  const indent = getIndent(program);
   const mismatchedVersionsByName = getMismatchedVersionsByName(
     dependencyTypes,
     pkgs
@@ -49,7 +53,7 @@ export const run = async (program: CommanderApi) => {
   });
 
   await Promise.all(
-    pkgs.map(({ data, path }) => writeJson(path, data, { spaces: 2 }))
+    pkgs.map(({ data, path }) => writeJson(path, data, { spaces: indent }))
   );
 
   _.each(pkgs, (pkg) => {
