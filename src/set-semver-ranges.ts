@@ -33,7 +33,7 @@ export const run = async (program: CommanderApi) => {
   const semverRange: string =
     program.semverRange || OPTION_SEMVER_RANGE.default;
 
-  const pkgs = await getPackages(program);
+  const pkgs = getPackages(program);
   const dependencyTypes = getDependencyTypes(program);
   const indent = getIndent(program);
 

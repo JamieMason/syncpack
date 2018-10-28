@@ -21,7 +21,7 @@ export const run = async (program: CommanderApi) => {
     .parse(process.argv);
 
   const dependencyTypes = getDependencyTypes(program);
-  const pkgs = await getPackages(program);
+  const pkgs = getPackages(program);
   const versionsByName = getVersionsByName(dependencyTypes, pkgs);
 
   _.each(versionsByName, (versions, name) => {

@@ -44,8 +44,8 @@ export const SEMVER_ORDER = [
 
 const DEFAULT_INDENT = '  ';
 const DEFAULT_SEMVER_RANGE = RANGE_EXACT;
-const MONOREPO_PATTERN = './package.json';
-const PACKAGES_PATTERN = './packages/*/package.json';
+const MONOREPO_PATTERN = 'package.json';
+const PACKAGES_PATTERN = 'packages/*/package.json';
 const ALL_PATTERNS = [MONOREPO_PATTERN, PACKAGES_PATTERN];
 
 export const FIX_MISMATCHES = {

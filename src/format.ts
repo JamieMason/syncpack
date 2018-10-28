@@ -68,7 +68,7 @@ export const run = async (program: CommanderApi) => {
     .option(OPTION_INDENT.spec, OPTION_INDENT.description)
     .parse(process.argv);
 
-  const pkgs = await getPackages(program);
+  const pkgs = getPackages(program);
   const indent = getIndent(program);
 
   await Promise.all(
