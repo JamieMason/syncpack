@@ -4,7 +4,9 @@
 
 ### Features
 
-- **cli:** read sources from lerna.json if present ([77b90eb](https://github.com/JamieMason/syncpack/commit/77b90eb)), closes [#11](https://github.com/JamieMason/syncpack/issues/11)
+- **cli:** read sources from lerna.json if present
+  ([77b90eb](https://github.com/JamieMason/syncpack/commit/77b90eb)), closes
+  [#11](https://github.com/JamieMason/syncpack/issues/11)
 
 <a name="3.3.0"></a>
 
@@ -12,13 +14,20 @@
 
 ### Features
 
-- **cli:** specify dependency types as options ([ec5ef6b](https://github.com/JamieMason/syncpack/commit/ec5ef6b)), closes [#10](https://github.com/JamieMason/syncpack/issues/10)
-- **cli:** specify indentation as option ([8b408bd](https://github.com/JamieMason/syncpack/commit/8b408bd)), closes [#12](https://github.com/JamieMason/syncpack/issues/12)
-- **format:** sort contributors alphabetically ([935ffcf](https://github.com/JamieMason/syncpack/commit/935ffcf))
+- **cli:** specify dependency types as options
+  ([ec5ef6b](https://github.com/JamieMason/syncpack/commit/ec5ef6b)), closes
+  [#10](https://github.com/JamieMason/syncpack/issues/10)
+- **cli:** specify indentation as option
+  ([8b408bd](https://github.com/JamieMason/syncpack/commit/8b408bd)), closes
+  [#12](https://github.com/JamieMason/syncpack/issues/12)
+- **format:** sort contributors alphabetically
+  ([935ffcf](https://github.com/JamieMason/syncpack/commit/935ffcf))
 
 ### Performance Improvements
 
-- **npm:** move [@types](https://github.com/types) to devDependencies ([ad5951c](https://github.com/JamieMason/syncpack/commit/ad5951c)), closes [#13](https://github.com/JamieMason/syncpack/issues/13)
+- **npm:** move [@types](https://github.com/types) to devDependencies
+  ([ad5951c](https://github.com/JamieMason/syncpack/commit/ad5951c)), closes
+  [#13](https://github.com/JamieMason/syncpack/issues/13)
 
 <a name="3.0.0"></a>
 
@@ -26,12 +35,15 @@
 
 ### Features
 
-- **bin:** override package locations using repeatable --source options ([5dbcfd4](https://github.com/JamieMason/syncpack/commit/5dbcfd4))
-- **list-mismatches:** return exit code on finding mismatches ([06958c6](https://github.com/JamieMason/syncpack/commit/06958c6))
+- **bin:** override package locations using repeatable --source options
+  ([5dbcfd4](https://github.com/JamieMason/syncpack/commit/5dbcfd4))
+- **list-mismatches:** return exit code on finding mismatches
+  ([06958c6](https://github.com/JamieMason/syncpack/commit/06958c6))
 
 ### BREAKING CHANGES
 
-- **bin:** Previously the location of package.json files could be overridden like so:
+- **bin:** Previously the location of package.json files could be overridden
+  like so:
 
 ```
 syncpack list './package.json' './packages/*/package.json'
@@ -52,7 +64,8 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-- **core:** ensure pattern overrides are read ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5))
+- **core:** ensure pattern overrides are read
+  ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5))
 
 <a name="2.0.0"></a>
 
@@ -60,7 +73,10 @@ overridable `--target` option.
 
 ### Features
 
-- **core:** support multiple glob patterns ([a2b5af0](https://github.com/JamieMason/syncpack/commit/a2b5af0)), closes [#5](https://github.com/JamieMason/syncpack/issues/5) [#6](https://github.com/JamieMason/syncpack/issues/6)
+- **core:** support multiple glob patterns
+  ([a2b5af0](https://github.com/JamieMason/syncpack/commit/a2b5af0)), closes
+  [#5](https://github.com/JamieMason/syncpack/issues/5)
+  [#6](https://github.com/JamieMason/syncpack/issues/6)
 
 ### BREAKING CHANGES
 
@@ -72,7 +88,8 @@ overridable `--target` option.
 
 ### Features
 
-- **core:** add set-semver-ranges command ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9))
+- **core:** add set-semver-ranges command
+  ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9))
 
 <a name="1.2.2"></a>
 
@@ -80,8 +97,10 @@ overridable `--target` option.
 
 ### Features
 
-- **core:** add format command ([bae1133](https://github.com/JamieMason/syncpack/commit/bae1133))
-- **core:** output current version ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99))
+- **core:** add format command
+  ([bae1133](https://github.com/JamieMason/syncpack/commit/bae1133))
+- **core:** output current version
+  ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99))
 
 <a name="1.0.2"></a>
 
@@ -93,7 +112,8 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-- **core:** correct paths to binaries ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd6))
+- **core:** correct paths to binaries
+  ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd6))
 
 <a name="1.0.0"></a>
 
@@ -101,16 +121,23 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-- **core:** correctly check a file is package.json ([d1da609](https://github.com/JamieMason/syncpack/commit/d1da609))
-- **core:** handle missing dependency maps ([372aa68](https://github.com/JamieMason/syncpack/commit/372aa68))
-- **core:** handle semver ranges containing 1.x.x ([a0f8f56](https://github.com/JamieMason/syncpack/commit/a0f8f56))
+- **core:** correctly check a file is package.json
+  ([d1da609](https://github.com/JamieMason/syncpack/commit/d1da609))
+- **core:** handle missing dependency maps
+  ([372aa68](https://github.com/JamieMason/syncpack/commit/372aa68))
+- **core:** handle semver ranges containing 1.x.x
+  ([a0f8f56](https://github.com/JamieMason/syncpack/commit/a0f8f56))
 
 ### Features
 
-- **core:** add fix-mismatches command ([4793f1f](https://github.com/JamieMason/syncpack/commit/4793f1f))
-- **core:** add list command ([3b29176](https://github.com/JamieMason/syncpack/commit/3b29176))
-- **core:** add list-mismatches command ([735ad2b](https://github.com/JamieMason/syncpack/commit/735ad2b))
-- **core:** update command line API ([de8dcb2](https://github.com/JamieMason/syncpack/commit/de8dcb2))
+- **core:** add fix-mismatches command
+  ([4793f1f](https://github.com/JamieMason/syncpack/commit/4793f1f))
+- **core:** add list command
+  ([3b29176](https://github.com/JamieMason/syncpack/commit/3b29176))
+- **core:** add list-mismatches command
+  ([735ad2b](https://github.com/JamieMason/syncpack/commit/735ad2b))
+- **core:** update command line API
+  ([de8dcb2](https://github.com/JamieMason/syncpack/commit/de8dcb2))
 
 ### BREAKING CHANGES
 
@@ -122,7 +149,8 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-- **copy-values:** write results to disk ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de4))
+- **copy-values:** write results to disk
+  ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de4))
 
 <a name="0.3.0"></a>
 
@@ -130,7 +158,8 @@ overridable `--target` option.
 
 ### Features
 
-- **cli:** add copy-values command ([b51a2c9](https://github.com/JamieMason/syncpack/commit/b51a2c9))
+- **cli:** add copy-values command
+  ([b51a2c9](https://github.com/JamieMason/syncpack/commit/b51a2c9))
 
 <a name="0.2.1"></a>
 
@@ -138,7 +167,8 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-- **core:** update dependencies, fix lint warnings ([a65eef7](https://github.com/JamieMason/syncpack/commit/a65eef7))
+- **core:** update dependencies, fix lint warnings
+  ([a65eef7](https://github.com/JamieMason/syncpack/commit/a65eef7))
 
 <a name="0.2.0"></a>
 
@@ -146,7 +176,8 @@ overridable `--target` option.
 
 ### Features
 
-- **sync:** synchronise versions across multiple package.json ([7d5848a](https://github.com/JamieMason/syncpack/commit/7d5848a))
+- **sync:** synchronise versions across multiple package.json
+  ([7d5848a](https://github.com/JamieMason/syncpack/commit/7d5848a))
 
 <a name="0.1.0"></a>
 
@@ -154,4 +185,5 @@ overridable `--target` option.
 
 ### Features
 
-- **cli:** create scaffold cli ([f6dada7](https://github.com/JamieMason/syncpack/commit/f6dada7))
+- **cli:** create scaffold cli
+  ([f6dada7](https://github.com/JamieMason/syncpack/commit/f6dada7))

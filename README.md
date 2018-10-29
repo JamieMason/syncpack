@@ -9,7 +9,10 @@
 [![Follow JamieMason on GitHub](https://img.shields.io/github/followers/JamieMason.svg?style=social&label=Follow)](https://github.com/JamieMason)
 [![Follow fold_left on Twitter](https://img.shields.io/twitter/follow/fold_left.svg?style=social&label=Follow)](https://twitter.com/fold_left)
 
-Manage multiple `package.json` files, such as `packages/*/package.json` in [Lerna](https://lernajs.io) Monorepos.
+## Summary
+
+Manage multiple `package.json` files, such as `packages/*/package.json` in
+[Lerna](https://lernajs.io) Monorepos.
 
 ## Installation
 
@@ -17,103 +20,174 @@ Manage multiple `package.json` files, such as `packages/*/package.json` in [Lern
 npm install --global syncpack
 ```
 
-## Usage
-
-```
-Usage: syncpack [options] [command]
-
-  Options:
-
-    -V, --version      output the version number
-    -h, --help         output usage information
-
-  Commands:
-
-    fix-mismatches     set dependencies used with different versions to the same version
-    format             sort and shorten properties according to a convention
-    list               list every dependency used in your packages
-    list-mismatches    list every dependency used with different versions in your packages
-    set-semver-ranges  set semver ranges to the given format
-    help [cmd]         display help for [cmd]
-```
+## Commands
 
 ### fix-mismatches
 
-Set dependencies used with different versions to the same version.
+Ensure that multiple packages requiring the same dependency define the same
+version, so that every package requires eg. `react@16.4.2`, instead of a
+combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
+
+#### Options
 
 ```
-Usage: syncpack fix-mismatches [options]
+-s, --source [pattern]  glob pattern for package.json files to read from
+-p, --prod              include dependencies
+-d, --dev               include devDependencies
+-P, --peer              include peerDependencies
+-i, --indent [value]    override indentation. defaults to "  "
+-h, --help              output usage information
+```
 
-Options:
+#### Examples
 
-  -s, --source [pattern]  glob pattern for package.json files to read from
-  -p, --prod              include dependencies
-  -d, --dev               include devDependencies
-  -P, --peer              include peerDependencies
-  -i, --indent [value]    override indentation. defaults to "  "
-  -h, --help              output usage information
+```bash
+# uses packages defined in lerna.json by default
+syncpack fix-mismatches
+# uses packages defined by --source when provided
+syncpack fix-mismatches --source "apps/*/package.json"
+# multiple globs can be provided like this
+syncpack fix-mismatches --source "apps/*/package.json" --source "core/*/package.json"
+# only fix "devDependencies"
+syncpack fix-mismatches --dev
+# only fix "devDependencies" and "peerDependencies"
+syncpack fix-mismatches --dev --peer
+# indent package.json with 4 spaces instead of 2
+syncpack fix-mismatches --indent "    "
 ```
 
 ### format
 
-Sort and shorten properties according to a convention.
+Organise package.json files according to a conventional format, where fields
+appear in a predictable order and nested fields are ordered alphabetically.
+Shorthand properties are used where available, such as the `"repository"` and
+`"bugs"` fields.
+
+#### Options
 
 ```
-Usage: syncpack format [options]
+-s, --source [pattern]  glob pattern for package.json files to read from
+-i, --indent [value]    override indentation. defaults to "  "
+-h, --help              output usage information
+```
 
-Options:
+#### Examples
 
-  -s, --source [pattern]  glob pattern for package.json files to read from
-  -i, --indent [value]    override indentation. defaults to "  "
-  -h, --help              output usage information
+```bash
+# uses packages defined in lerna.json by default
+syncpack format
+# uses packages defined by --source when provided
+syncpack format --source "apps/*/package.json"
+# multiple globs can be provided like this
+syncpack format --source "apps/*/package.json" --source "core/*/package.json"
+# indent package.json with 4 spaces instead of 2
+syncpack format --indent "    "
 ```
 
 ### list
 
-List every dependency used in your packages.
+List all dependencies required by your packages.
+
+#### Options
 
 ```
-Usage: syncpack list [options]
+-s, --source [pattern]  glob pattern for package.json files to read from
+-p, --prod              include dependencies
+-d, --dev               include devDependencies
+-P, --peer              include peerDependencies
+-h, --help              output usage information
+```
 
-Options:
+#### Examples
 
-  -s, --source [pattern]  glob pattern for package.json files to read from
-  -p, --prod              include dependencies
-  -d, --dev               include devDependencies
-  -P, --peer              include peerDependencies
-  -h, --help              output usage information
+```bash
+# uses packages defined in lerna.json by default
+syncpack list
+# uses packages defined by --source when provided
+syncpack list --source "apps/*/package.json"
+# multiple globs can be provided like this
+syncpack list --source "apps/*/package.json" --source "core/*/package.json"
+# only inspect "devDependencies"
+syncpack list --dev
+# only inspect "devDependencies" and "peerDependencies"
+syncpack list --dev --peer
 ```
 
 ### list-mismatches
 
-List every dependency used with different versions in your packages.
+List dependencies which are required by multiple packages, where the version is
+not the same across every package.
+
+#### Options
 
 ```
-Usage: syncpack list-mismatches [options]
+-s, --source [pattern]  glob pattern for package.json files to read from
+-p, --prod              include dependencies
+-d, --dev               include devDependencies
+-P, --peer              include peerDependencies
+-h, --help              output usage information
+```
 
-Options:
+#### Examples
 
-  -s, --source [pattern]  glob pattern for package.json files to read from
-  -p, --prod              include dependencies
-  -d, --dev               include devDependencies
-  -P, --peer              include peerDependencies
-  -h, --help              output usage information
+```bash
+# uses packages defined in lerna.json by default
+syncpack list-mismatches
+# uses packages defined by --source when provided
+syncpack list-mismatches --source "apps/*/package.json"
+# multiple globs can be provided like this
+syncpack list-mismatches --source "apps/*/package.json" --source "core/*/package.json"
+# only list "devDependencies"
+syncpack list-mismatches --dev
+# only list "devDependencies" and "peerDependencies"
+syncpack list-mismatches --dev --peer
 ```
 
 ### set-semver-ranges
 
-Set semver ranges to the given format.
+Ensure dependency versions used within `"dependencies"`, `"devDependencies"`,
+and `"peerDependencies"` follow a consistent format.
+
+#### Options
 
 ```
-Usage: syncpack set-semver-ranges [options]
+-r, --semver-range <range>  <, <=, "", ~, ^, >=, >, or *. defaults to ""
+-s, --source [pattern]      glob pattern for package.json files to read from
+-p, --prod                  include dependencies
+-d, --dev                   include devDependencies
+-P, --peer                  include peerDependencies
+-i, --indent [value]        override indentation. defaults to "  "
+-h, --help                  output usage information
+```
 
-Options:
+#### Examples
 
-  -r, --semver-range <range>  <, <=, "", ~, ^, >=, >, or *. defaults to ""
-  -s, --source [pattern]      glob pattern for package.json files to read from
-  -p, --prod                  include dependencies
-  -d, --dev                   include devDependencies
-  -P, --peer                  include peerDependencies
-  -i, --indent [value]    override indentation. defaults to "  "
-  -h, --help                  output usage information
+```bash
+# uses packages defined in lerna.json by default
+syncpack set-semver-ranges
+# uses packages defined by --source when provided
+syncpack set-semver-ranges --source "apps/*/package.json"
+# multiple globs can be provided like this
+syncpack set-semver-ranges --source "apps/*/package.json" --source "core/*/package.json"
+# use ~ range instead of default ""
+syncpack set-semver-ranges --semver-range ~
+# set ~ range in "devDependencies"
+syncpack set-semver-ranges --dev --semver-range ~
+# set ~ range in "devDependencies" and "peerDependencies"
+syncpack set-semver-ranges --dev --peer --semver-range ~
+# indent package.json with 4 spaces instead of 2
+syncpack set-semver-ranges --indent "    "
+```
+
+#### Supported Ranges
+
+```
+<  <1.4.2
+<= <=1.4.2
+"" 1.4.2
+~  ~1.4.2
+^  ^1.4.2
+>= >=1.4.2
+>  >1.4.2
+*  *
 ```
