@@ -1,3 +1,12 @@
+<a name="3.5.0"></a>
+
+# [3.5.0](https://github.com/JamieMason/syncpack/compare/3.4.0...3.5.0) (2018-10-29)
+
+### Features
+
+- **cli:** improve --help output and examples
+  ([dfe6274](https://github.com/JamieMason/syncpack/commit/dfe6274))
+
 <a name="3.4.0"></a>
 
 # [3.4.0](https://github.com/JamieMason/syncpack/compare/3.3.0...3.4.0) (2018-10-28)
