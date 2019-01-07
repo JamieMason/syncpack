@@ -11,5 +11,6 @@ before_script:
   - npm run build
 script:
   - npm run lint
+  - npm run test
 after_script:
   - ./codeclimate-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
