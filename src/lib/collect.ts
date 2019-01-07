@@ -1,2 +1,1 @@
-export const collect = (value: string, values: string[] = []) =>
-  values.concat(value);
+export const collect = (value: string, values: string[]) => [...values, value];

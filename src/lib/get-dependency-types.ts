@@ -1,9 +1,7 @@
 import { DEPENDENCY_TYPES } from '../constants';
 import { CommanderApi, IManifestKey } from '../typings';
 
-export type GetDependencyTypes = (program: CommanderApi) => IManifestKey[];
-
-export const getDependencyTypes: GetDependencyTypes = (program) =>
+export const getDependencyTypes = (program: CommanderApi): IManifestKey[] =>
   program.prod || program.dev || program.peer
     ? DEPENDENCY_TYPES.filter(
         (type) =>
