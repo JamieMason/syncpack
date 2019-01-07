@@ -1,4 +1,12 @@
-<a name="3.5.0"></a>
+## [3.5.2](https://github.com/JamieMason/syncpack/compare/3.5.0...3.5.2) (2019-01-07)
+
+### Bug Fixes
+
+- **core:** improve handling of non-semver versions
+  ([9e1176a](https://github.com/JamieMason/syncpack/commit/9e1176a)), closes
+  [#14](https://github.com/JamieMason/syncpack/issues/14)
+- **npm:** update dependencies
+  ([09d9f04](https://github.com/JamieMason/syncpack/commit/09d9f04))
 
 # [3.5.0](https://github.com/JamieMason/syncpack/compare/3.4.0...3.5.0) (2018-10-29)
 
@@ -7,8 +15,6 @@
 - **cli:** improve --help output and examples
   ([dfe6274](https://github.com/JamieMason/syncpack/commit/dfe6274))
 
-<a name="3.4.0"></a>
-
 # [3.4.0](https://github.com/JamieMason/syncpack/compare/3.3.0...3.4.0) (2018-10-28)
 
 ### Features
@@ -16,8 +22,6 @@
 - **cli:** read sources from lerna.json if present
   ([77b90eb](https://github.com/JamieMason/syncpack/commit/77b90eb)), closes
   [#11](https://github.com/JamieMason/syncpack/issues/11)
-
-<a name="3.3.0"></a>
 
 # [3.3.0](https://github.com/JamieMason/syncpack/compare/3.0.0...3.3.0) (2018-10-28)
 
@@ -37,8 +41,6 @@
 - **npm:** move [@types](https://github.com/types) to devDependencies
   ([ad5951c](https://github.com/JamieMason/syncpack/commit/ad5951c)), closes
   [#13](https://github.com/JamieMason/syncpack/issues/13)
-
-<a name="3.0.0"></a>
 
 # [3.0.0](https://github.com/JamieMason/syncpack/compare/2.0.1...3.0.0) (2018-08-25)
 
@@ -67,16 +69,12 @@ syncpack list --source './package.json' --source './packages/*/package.json'
 This change is to make way for new commands which will also require an
 overridable `--target` option.
 
-<a name="2.0.1"></a>
-
 ## [2.0.1](https://github.com/JamieMason/syncpack/compare/2.0.0...2.0.1) (2018-04-29)
 
 ### Bug Fixes
 
 - **core:** ensure pattern overrides are read
   ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5))
-
-<a name="2.0.0"></a>
 
 # [2.0.0](https://github.com/JamieMason/syncpack/compare/1.3.2...2.0.0) (2018-04-29)
 
@@ -91,16 +89,12 @@ overridable `--target` option.
 
 - **core:** --packages option replaced with variadic arguments
 
-<a name="1.3.2"></a>
-
 ## [1.3.2](https://github.com/JamieMason/syncpack/compare/1.2.2...1.3.2) (2018-04-28)
 
 ### Features
 
 - **core:** add set-semver-ranges command
   ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9))
-
-<a name="1.2.2"></a>
 
 ## [1.2.2](https://github.com/JamieMason/syncpack/compare/1.0.2...1.2.2) (2018-02-10)
 
@@ -111,11 +105,7 @@ overridable `--target` option.
 - **core:** output current version
   ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99))
 
-<a name="1.0.2"></a>
-
 ## [1.0.2](https://github.com/JamieMason/syncpack/compare/1.0.1...1.0.2) (2018-02-02)
-
-<a name="1.0.1"></a>
 
 ## [1.0.1](https://github.com/JamieMason/syncpack/compare/1.0.0...1.0.1) (2018-02-02)
 
@@ -123,8 +113,6 @@ overridable `--target` option.
 
 - **core:** correct paths to binaries
   ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd6))
-
-<a name="1.0.0"></a>
 
 # [1.0.0](https://github.com/JamieMason/syncpack/compare/0.3.1...1.0.0) (2018-02-02)
 
@@ -152,16 +140,12 @@ overridable `--target` option.
 
 - **core:** The previous commands have been replaced.
 
-<a name="0.3.1"></a>
-
 ## [0.3.1](https://github.com/JamieMason/syncpack/compare/0.3.0...0.3.1) (2017-08-23)
 
 ### Bug Fixes
 
 - **copy-values:** write results to disk
   ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de4))
-
-<a name="0.3.0"></a>
 
 # [0.3.0](https://github.com/JamieMason/syncpack/compare/0.2.1...0.3.0) (2017-08-22)
 
@@ -170,8 +154,6 @@ overridable `--target` option.
 - **cli:** add copy-values command
   ([b51a2c9](https://github.com/JamieMason/syncpack/commit/b51a2c9))
 
-<a name="0.2.1"></a>
-
 ## [0.2.1](https://github.com/JamieMason/syncpack/compare/0.2.0...0.2.1) (2017-08-20)
 
 ### Bug Fixes
@@ -179,16 +161,12 @@ overridable `--target` option.
 - **core:** update dependencies, fix lint warnings
   ([a65eef7](https://github.com/JamieMason/syncpack/commit/a65eef7))
 
-<a name="0.2.0"></a>
-
 # [0.2.0](https://github.com/JamieMason/syncpack/compare/0.1.0...0.2.0) (2017-08-20)
 
 ### Features
 
 - **sync:** synchronise versions across multiple package.json
   ([7d5848a](https://github.com/JamieMason/syncpack/commit/7d5848a))
-
-<a name="0.1.0"></a>
 
 # [0.1.0](https://github.com/JamieMason/syncpack/compare/f6dada7...0.1.0) (2017-08-18)
 
