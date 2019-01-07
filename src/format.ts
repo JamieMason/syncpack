@@ -36,8 +36,8 @@ export const run = async (program: CommanderApi) => {
     _.isArray(value)
       ? value.slice(0).sort()
       : _.isObject(value)
-        ? sortObject(value)
-        : value;
+      ? sortObject(value)
+      : value;
 
   const sortManifest = (manifest: IManifest): IManifest => {
     const [first, rest] = _(manifest)

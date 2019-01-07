@@ -6,8 +6,8 @@ const shuffle = (value: any): typeof value =>
   _.isArray(value)
     ? _.shuffle(value)
     : _.isObject(value)
-      ? shuffleObject(value)
-      : value;
+    ? shuffleObject(value)
+    : value;
 
 export const shuffleObject = (obj: object): object =>
   _(obj)
