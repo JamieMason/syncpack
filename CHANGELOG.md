@@ -1,3 +1,18 @@
+# [4.0.0](https://github.com/JamieMason/syncpack/compare/3.5.2...4.0.0) (2019-01-11)
+
+### Bug Fixes
+
+- **node:** support Node.js 8.x or newer
+  ([c71009e](https://github.com/JamieMason/syncpack/commit/c71009e))
+- **npm:** update dependencies
+  ([23b02e3](https://github.com/JamieMason/syncpack/commit/23b02e3)), closes
+  [#15](https://github.com/JamieMason/syncpack/issues/15)
+
+### BREAKING CHANGES
+
+- **node:** Support Node.js 8.x or newer, Transitive Dependency ip-regex@3.0.0
+  supports node ">=8".
+
 ## [3.5.2](https://github.com/JamieMason/syncpack/compare/3.5.0...3.5.2) (2019-01-07)
 
 ### Bug Fixes
