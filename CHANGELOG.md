@@ -1,3 +1,11 @@
+## [4.0.1](https://github.com/JamieMason/syncpack/compare/4.0.0...4.0.1) (2019-01-14)
+
+### Bug Fixes
+
+- **ci:** cannot read property concat of undefined
+  ([46a45e2](https://github.com/JamieMason/syncpack/commit/46a45e2)), closes
+  [#16](https://github.com/JamieMason/syncpack/issues/16)
+
 # [4.0.0](https://github.com/JamieMason/syncpack/compare/3.5.2...4.0.0) (2019-01-11)
 
 ### Bug Fixes
