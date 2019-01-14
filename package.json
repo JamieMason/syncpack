@@ -33,7 +33,7 @@
     "@types/mock-fs": "3.6.30",
     "@types/node": "10.12.18",
     "@types/semver": "5.5.0",
-    "expect-more-jest": "2.3.0",
+    "expect-more-jest": "2.4.0",
     "jest": "23.6.0",
     "mock-fs": "4.7.0",
     "prettier": "1.15.3",
