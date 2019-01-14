@@ -1,1 +1,4 @@
-export const collect = (value: string, values: string[]) => [...values, value];
+export const collect = (value: string, values: string[] = []) => [
+  ...values,
+  value
+];
