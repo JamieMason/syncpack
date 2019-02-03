@@ -35,6 +35,8 @@ npm test
 
 ## Dev Dependencies
 
+- [@types/chalk](https://ghub.io/@types/chalk): Stub TypeScript definitions
+  entry for chalk, which provides its own types definitions
 - [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for
   fs-extra
 - [@types/globby](https://ghub.io/@types/globby): TypeScript definitions for

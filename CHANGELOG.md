@@ -1,3 +1,14 @@
+## [4.3.1](https://github.com/JamieMason/syncpack/compare/4.0.1...4.3.1) (2019-02-03)
+
+### Features
+
+- **fix-mismatches:** output which files are (un)changed
+  ([a79b078](https://github.com/JamieMason/syncpack/commit/a79b078))
+- **format:** output which files are (un)changed
+  ([3a08a7a](https://github.com/JamieMason/syncpack/commit/3a08a7a))
+- **list:** sort output alphabetically
+  ([f61bde4](https://github.com/JamieMason/syncpack/commit/f61bde4))
+
 ## [4.0.1](https://github.com/JamieMason/syncpack/compare/4.0.0...4.0.1) (2019-01-14)
 
 ### Bug Fixes
