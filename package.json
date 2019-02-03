@@ -26,6 +26,7 @@
     "semver": "5.6.0"
   },
   "devDependencies": {
+    "@types/chalk": "2.2.0",
     "@types/fs-extra": "5.0.4",
     "@types/globby": "8.0.0",
     "@types/jest": "23.3.13",
