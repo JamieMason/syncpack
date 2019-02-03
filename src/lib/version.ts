@@ -1,5 +1,5 @@
-import _ = require('lodash');
-import semver = require('semver');
+import * as _ from 'lodash';
+import * as semver from 'semver';
 import { GREATER, LESSER, SAME, SEMVER_ORDER } from '../constants';
 
 const isSemver = (version: string) =>

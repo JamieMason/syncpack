@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import program = require('commander');
+import * as program from 'commander';
 import { run } from './syncpack';
 
 run(program);

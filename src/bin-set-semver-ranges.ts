@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import program = require('commander');
+import * as program from 'commander';
 import { run } from './set-semver-ranges';
 
 program.description(

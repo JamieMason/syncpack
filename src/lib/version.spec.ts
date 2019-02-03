@@ -1,4 +1,4 @@
-import _ = require('lodash');
+import * as _ from 'lodash';
 import { getNewest, getVersionRange, sortBySemver } from './version';
 
 describe('getNewest', () => {

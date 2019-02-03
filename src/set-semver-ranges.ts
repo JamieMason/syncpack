@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import { writeJson } from 'fs-extra';
-import _ = require('lodash');
+import * as _ from 'lodash';
 import { relative } from 'path';
-import semver = require('semver');
+import * as semver from 'semver';
 import {
   OPTION_INDENT,
   OPTION_SEMVER_RANGE,
