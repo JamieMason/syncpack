@@ -24,11 +24,14 @@ export const run = async (program: CommanderApi) => {
   const pkgs = getPackages(program);
   const versionsByName = getVersionsByName(dependencyTypes, pkgs);
 
-  _.each(versionsByName, (versions, name) => {
-    if (versions.length > 1) {
-      console.log(chalk.yellow(name), chalk.dim(versions.join(', ')));
-    } else {
-      console.log(chalk.blue(name), chalk.dim(versions[0]));
-    }
-  });
+  _(versionsByName)
+    .entries()
+    .sortBy('0')
+    .each(([name, versions]) => {
+      if (versions.length > 1) {
+        console.log(chalk.yellow(name), chalk.dim(versions.join(', ')));
+      } else {
+        console.log(chalk.blue(name), chalk.dim(versions[0]));
+      }
+    });
 };
