@@ -51,13 +51,20 @@
   ],
   "homepage": "https://github.com/JamieMason/syncpack#readme",
   "keywords": [
-    "cleanup",
+    "cli",
+    "dependency-manager",
     "lerna",
+    "lernajs",
     "monorepo",
     "multi-package",
+    "nodejs",
+    "npm",
     "package",
-    "package.json",
-    "packagejson"
+    "package-json",
+    "packages",
+    "semver",
+    "workspace",
+    "yarn"
   ],
   "license": "MIT",
   "main": "syncpack",
