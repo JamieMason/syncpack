@@ -28,19 +28,19 @@
   "devDependencies": {
     "@types/fs-extra": "5.0.4",
     "@types/globby": "8.0.0",
-    "@types/jest": "23.3.12",
-    "@types/lodash": "4.14.119",
+    "@types/jest": "23.3.13",
+    "@types/lodash": "4.14.120",
     "@types/mock-fs": "3.6.30",
-    "@types/node": "10.12.18",
+    "@types/node": "10.12.21",
     "@types/semver": "5.5.0",
-    "expect-more-jest": "2.4.0",
-    "jest": "23.6.0",
+    "expect-more-jest": "2.4.1",
+    "jest": "24.0.0",
     "mock-fs": "4.7.0",
-    "prettier": "1.15.3",
+    "prettier": "1.16.3",
     "rimraf": "2.6.3",
     "ts-jest": "23.10.5",
     "tslint": "5.12.1",
-    "typescript": "3.2.2"
+    "typescript": "3.3.1"
   },
   "engines": {
     "node": ">=8.0.0"

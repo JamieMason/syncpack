@@ -11,7 +11,7 @@ module.exports = {
     }
   },
   moduleFileExtensions: ['ts', 'tsx', 'js'],
-  setupTestFrameworkScriptFile: '<rootDir>/test/setup.ts',
+  setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   testMatch: ['<rootDir>/src/**/*.spec.(ts|tsx|js)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
