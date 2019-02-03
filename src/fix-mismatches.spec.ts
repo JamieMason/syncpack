@@ -1,5 +1,5 @@
 import { readJsonSync } from 'fs-extra';
-import mock = require('mock-fs');
+import * as mock from 'mock-fs';
 import { getFixture, getMockCommander } from '../test/helpers';
 import { run } from './fix-mismatches';
 import { IManifest } from './typings';

@@ -1,4 +1,4 @@
-import mock = require('mock-fs');
+import * as mock from 'mock-fs';
 import { getFixture, getMockCommander } from '../test/helpers';
 import { run } from './list';
 import { IManifest } from './typings';
