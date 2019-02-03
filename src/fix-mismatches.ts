@@ -15,7 +15,7 @@ import { getIndent } from './lib/get-indent';
 import { getPackages } from './lib/get-packages';
 import { getMismatchedVersionsByName } from './lib/get-versions-by-name';
 import { getNewest } from './lib/version';
-import { CommanderApi } from './typings';
+import { CommanderApi, IManifest } from './typings';
 
 export const run = async (program: CommanderApi) => {
   program
@@ -34,29 +34,38 @@ export const run = async (program: CommanderApi) => {
     pkgs
   );
 
-  Object.entries(mismatchedVersionsByName).forEach(([name, versions]) => {
-    const newest = getNewest(versions);
-    pkgs.forEach(({ data, path }) => {
-      dependencyTypes.forEach((type) => {
-        if (data[type] && data[type][name] && data[type][name] !== newest) {
-          console.log(
-            relative(process.cwd(), path),
-            name,
-            data[type][name],
-            '->',
-            newest
-          );
-          data[type][name] = newest;
-        }
-      });
-    });
-  });
-
   await Promise.all(
-    pkgs.map(({ data, path }) => writeJson(path, data, { spaces: indent }))
+    pkgs.map(({ data, path }) => {
+      const nextData: IManifest = JSON.parse(JSON.stringify(data));
+      const shortPath = `./${relative('.', path)}`;
+      const changes: string[][] = [];
+      Object.entries(mismatchedVersionsByName).forEach(([name, versions]) => {
+        const newest = getNewest(versions);
+        dependencyTypes.forEach((type) => {
+          if (
+            nextData[type] &&
+            nextData[type][name] &&
+            nextData[type][name] !== newest
+          ) {
+            changes.push([name, nextData[type][name], newest]);
+            nextData[type][name] = newest;
+          }
+        });
+      });
+      if (changes.length > 0) {
+        changes.forEach(([name, from, to]) => {
+          console.log(
+            chalk.bgYellow.black(' FIXED '),
+            chalk.blue(shortPath),
+            name,
+            chalk.red(from),
+            '→',
+            chalk.green(to)
+          );
+        });
+        return writeJson(path, nextData, { spaces: indent });
+      }
+      console.log(chalk.bgGreen.black(' VALID '), chalk.blue(shortPath));
+    })
   );
-
-  _.each(pkgs, (pkg) => {
-    console.log(chalk.blue(`./${relative('.', pkg.path)}`));
-  });
 };
