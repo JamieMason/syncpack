@@ -23,9 +23,13 @@ export const getFixture = (name: string, transform = (a: any | any[]) => a) => {
   return { data, json };
 };
 
-export const getMockCommander = (source: string[]) => {
+export const getMockCommander = (
+  source: string[],
+  dependencyFilterString?: string
+) => {
   const program = ({
     command: () => program,
+    filter: dependencyFilterString,
     option: () => program,
     parse: () => program,
     source,

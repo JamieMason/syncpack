@@ -21,6 +21,10 @@ program.on('--help', () => {
   syncpack fix-mismatches
   ${chalk.grey('# uses packages defined by --source when provided')}
   syncpack fix-mismatches --source ${chalk.yellow('"apps/*/package.json"')}
+  ${chalk.grey(
+    '# uses dependencies regular expression defined by --filter when provided'
+  )}
+  syncpack fix-mismatches --filter ${chalk.yellow('"typescript|tslint"')}
   ${chalk.grey('# multiple globs can be provided like this')}
   syncpack fix-mismatches --source ${chalk.yellow(
     '"apps/*/package.json"'

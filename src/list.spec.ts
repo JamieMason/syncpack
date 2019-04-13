@@ -1,18 +1,17 @@
 import * as mock from 'mock-fs';
-import { getFixture, getMockCommander } from '../test/helpers';
 import { run } from './list';
 import { IManifest } from './typings';
+import { getFixture, getMockCommander } from '../test/helpers';
 
 describe('list', () => {
   let spyConsole: any;
 
   beforeAll(async () => {
     const [one, two, three] = getFixture('exact').data as IManifest[];
-    const program = getMockCommander([
-      '/path/1/package.json',
-      '/path/2/package.json',
-      '/path/3/package.json'
-    ]);
+    const program = getMockCommander(
+      ['/path/1/package.json', '/path/2/package.json', '/path/3/package.json'],
+      '^((?!ignore).)*$'
+    );
     mock({
       '/path/1/package.json': JSON.stringify(one),
       '/path/2/package.json': JSON.stringify(two),
@@ -52,6 +51,9 @@ describe('list', () => {
     expect(spyConsole).toHaveBeenCalledWith(
       expect.stringContaining('gulp'),
       expect.stringContaining('0.9.1, *')
+    );
+    expect(spyConsole).not.toHaveBeenCalledWith(
+      expect.stringContaining('ignore')
     );
   });
 });

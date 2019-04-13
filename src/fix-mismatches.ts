@@ -6,6 +6,7 @@ import {
   OPTION_INDENT,
   OPTION_SOURCES,
   OPTIONS_DEV,
+  OPTIONS_FILTER_DEPENDENCIES,
   OPTIONS_PEER,
   OPTIONS_PROD
 } from './constants';
@@ -24,6 +25,10 @@ export const run = async (program: CommanderApi) => {
     .option(OPTIONS_DEV.spec, OPTIONS_DEV.description)
     .option(OPTIONS_PEER.spec, OPTIONS_PEER.description)
     .option(OPTION_INDENT.spec, OPTION_INDENT.description)
+    .option(
+      OPTIONS_FILTER_DEPENDENCIES.spec,
+      OPTIONS_FILTER_DEPENDENCIES.description
+    )
     .parse(process.argv);
 
   const pkgs = getPackages(program);
@@ -31,7 +36,8 @@ export const run = async (program: CommanderApi) => {
   const indent = getIndent(program);
   const mismatchedVersionsByName = getMismatchedVersionsByName(
     dependencyTypes,
-    pkgs
+    pkgs,
+    program.filter
   );
 
   await Promise.all(

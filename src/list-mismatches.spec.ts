@@ -9,11 +9,10 @@ describe('list-mismatches', () => {
 
   beforeAll(async () => {
     const [one, two, three] = getFixture('exact').data as IManifest[];
-    const program = getMockCommander([
-      '/path/1/package.json',
-      '/path/2/package.json',
-      '/path/3/package.json'
-    ]);
+    const program = getMockCommander(
+      ['/path/1/package.json', '/path/2/package.json', '/path/3/package.json'],
+      '^((?!ignore).)*$'
+    );
     mock({
       '/path/1/package.json': JSON.stringify(one),
       '/path/2/package.json': JSON.stringify(two),
@@ -38,6 +37,9 @@ describe('list-mismatches', () => {
     expect(spyConsole).toHaveBeenCalledWith(
       expect.stringContaining('jest'),
       expect.stringContaining('22.1.3, 22.1.4')
+    );
+    expect(spyConsole).not.toHaveBeenCalledWith(
+      expect.stringContaining('ignore')
     );
   });
 
