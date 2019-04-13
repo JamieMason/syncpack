@@ -104,6 +104,11 @@ export const OPTIONS_PEER = {
   spec: '-P, --peer'
 };
 
+export const OPTIONS_FILTER_DEPENDENCIES = {
+  description: 'regex for depdendency filter',
+  spec: '-f, --filter'
+};
+
 export const OPTION_INDENT = {
   default: DEFAULT_INDENT,
   description: `override indentation. defaults to "${DEFAULT_INDENT}"`,

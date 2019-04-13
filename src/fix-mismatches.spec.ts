@@ -18,7 +18,7 @@ describe('fix-mismatches', () => {
       '/path/2/package.json',
       '/path/3/package.json'
     ];
-    const program = getMockCommander(sources);
+    const program = getMockCommander(sources, '^((?!ignore).)*$');
     mock({
       '/path/1/package.json': JSON.stringify(one),
       '/path/2/package.json': JSON.stringify(two),
@@ -32,7 +32,7 @@ describe('fix-mismatches', () => {
   it('sets the version of dependencies with different versions to the newest of those versions found', () => {
     expect(readJsonSync('/path/1/package.json')).toEqual(
       expect.objectContaining({
-        dependencies: { chalk: '2.3.0', commander: '2.13.0' },
+        dependencies: { chalk: '2.3.0', commander: '2.13.0', ignore: '1.0.0' },
         devDependencies: {
           jest: '22.1.4',
           prettier: '1.10.2',
@@ -43,7 +43,7 @@ describe('fix-mismatches', () => {
     );
     expect(readJsonSync('/path/2/package.json')).toEqual(
       expect.objectContaining({
-        dependencies: { chalk: '2.3.0' },
+        dependencies: { chalk: '2.3.0', ignore: '2.0.0' },
         devDependencies: { jest: '22.1.4' }
       })
     );

@@ -2,7 +2,8 @@
   {
     "dependencies": {
       "chalk": "<=2.3.0",
-      "commander": "<=2.13.0"
+      "commander": "<=2.13.0",
+      "ignore": "1.0.0"
     },
     "devDependencies": {
       "jest": "<=22.1.3",

@@ -21,6 +21,10 @@ program.on('--help', () => {
   syncpack list-mismatches --source ${chalk.yellow(
     '"apps/*/package.json"'
   )} --source ${chalk.yellow('"core/*/package.json"')}
+  ${chalk.grey(
+    '# uses dependencies regular expression defined by --filter when provided'
+  )}
+  syncpack list-mismatches --filter ${chalk.yellow('"typescript|tslint"')}
   ${chalk.grey('# only list "devDependencies"')}
   syncpack list-mismatches --dev
   ${chalk.grey('# only list "devDependencies" and "peerDependencies"')}

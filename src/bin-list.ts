@@ -16,6 +16,10 @@ program.on('--help', () => {
   syncpack list
   ${chalk.grey('# uses packages defined by --source when provided')}
   syncpack list --source ${chalk.yellow('"apps/*/package.json"')}
+  ${chalk.grey(
+    '# uses dependencies regular expression defined by --filter when provided'
+  )}
+  syncpack list --filter ${chalk.yellow('"typescript|tslint"')}
   ${chalk.grey('# multiple globs can be provided like this')}
   syncpack list --source ${chalk.yellow(
     '"apps/*/package.json"'

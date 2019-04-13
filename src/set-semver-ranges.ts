@@ -8,6 +8,7 @@ import {
   OPTION_SEMVER_RANGE,
   OPTION_SOURCES,
   OPTIONS_DEV,
+  OPTIONS_FILTER_DEPENDENCIES,
   OPTIONS_PEER,
   OPTIONS_PROD,
   RANGE_ANY,
@@ -17,6 +18,7 @@ import { collect } from './lib/collect';
 import { getDependencyTypes } from './lib/get-dependency-types';
 import { getIndent } from './lib/get-indent';
 import { getPackages } from './lib/get-packages';
+import { getDependencyFilter } from './lib/get-versions-by-name';
 import { getVersionNumber } from './lib/version';
 import { CommanderApi } from './typings';
 
@@ -27,6 +29,10 @@ export const run = async (program: CommanderApi) => {
     .option(OPTIONS_PROD.spec, OPTIONS_PROD.description)
     .option(OPTIONS_DEV.spec, OPTIONS_DEV.description)
     .option(OPTIONS_PEER.spec, OPTIONS_PEER.description)
+    .option(
+      OPTIONS_FILTER_DEPENDENCIES.spec,
+      OPTIONS_FILTER_DEPENDENCIES.description
+    )
     .option(OPTION_INDENT.spec, OPTION_INDENT.description)
     .parse(process.argv);
 
@@ -36,13 +42,16 @@ export const run = async (program: CommanderApi) => {
   const pkgs = getPackages(program);
   const dependencyTypes = getDependencyTypes(program);
   const indent = getIndent(program);
-
+  const dependencyFilter = getDependencyFilter(program.filter);
   _(pkgs).each((pkg) =>
     _(dependencyTypes)
       .map((property) => pkg.data[property])
       .filter(Boolean)
       .each((dependencies) => {
         _(dependencies).each((version, name) => {
+          if (!dependencyFilter(name)) {
+            return;
+          }
           const versionNumber = getVersionNumber(version)
             .split('.x')
             .join('.0');

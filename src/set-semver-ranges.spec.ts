@@ -43,7 +43,7 @@ describe('set-semver-ranges', () => {
       .filter(({ range: sourceRange }) => !unsupported.includes(sourceRange))
       .forEach(({ filePath, range: sourceRange }) => {
         it(`sets "${sourceRange}" semver ranges to the "${targetRange}" format`, async () => {
-          const program = getMockCommander(sources);
+          const program = getMockCommander(sources, '^((?!ignore).)*$');
           program.semverRange = targetRange;
           mock(filesystem);
           const noop = () => undefined;

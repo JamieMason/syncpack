@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import {
   OPTION_SOURCES,
   OPTIONS_DEV,
+  OPTIONS_FILTER_DEPENDENCIES,
   OPTIONS_PEER,
   OPTIONS_PROD
 } from './constants';
@@ -18,13 +19,17 @@ export const run = async (program: CommanderApi) => {
     .option(OPTIONS_PROD.spec, OPTIONS_PROD.description)
     .option(OPTIONS_DEV.spec, OPTIONS_DEV.description)
     .option(OPTIONS_PEER.spec, OPTIONS_PEER.description)
+    .option(
+      OPTIONS_FILTER_DEPENDENCIES.spec,
+      OPTIONS_FILTER_DEPENDENCIES.description
+    )
     .parse(process.argv);
-
   const dependencyTypes = getDependencyTypes(program);
   const pkgs = getPackages(program);
   const mismatchedVersionsByName = getMismatchedVersionsByName(
     dependencyTypes,
-    pkgs
+    pkgs,
+    program.filter
   );
 
   _.each(mismatchedVersionsByName, (versions, name) => {
