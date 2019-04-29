@@ -39,8 +39,8 @@ npm test
   entry for chalk, which provides its own types definitions
 - [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for
   fs-extra
-- [@types/globby](https://ghub.io/@types/globby): TypeScript definitions for
-  globby
+- [@types/globby](https://ghub.io/@types/globby): Stub TypeScript definitions
+  entry for globby, which provides its own types definitions
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
 - [@types/lodash](https://ghub.io/@types/lodash): TypeScript definitions for
   Lo-Dash

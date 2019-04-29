@@ -1,7 +1,7 @@
 {
   "name": "syncpack",
   "description": "Manage multiple package.json files, such as in Lerna Monorepos",
-  "version": "4.3.1",
+  "version": "4.4.1",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
     "syncpack": "dist/bin.js",
