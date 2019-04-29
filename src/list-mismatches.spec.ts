@@ -20,7 +20,7 @@ describe('list-mismatches', () => {
     });
     const noop = () => undefined;
     spyConsole = jest.spyOn(console, 'log').mockImplementation(noop);
-    spyProcess = jest.spyOn(process, 'exit').mockImplementation(noop);
+    spyProcess = jest.spyOn(process, 'exit').mockImplementation(noop as any);
     await run(program);
     mock.restore();
   });

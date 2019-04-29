@@ -19,29 +19,29 @@
   ],
   "dependencies": {
     "chalk": "2.4.2",
-    "commander": "2.19.0",
+    "commander": "2.20.0",
     "fs-extra": "7.0.1",
-    "globby": "9.0.0",
+    "globby": "9.2.0",
     "lodash": "4.17.11",
-    "semver": "5.6.0"
+    "semver": "6.0.0"
   },
   "devDependencies": {
     "@types/chalk": "2.2.0",
-    "@types/fs-extra": "5.0.4",
-    "@types/globby": "8.0.0",
-    "@types/jest": "23.3.13",
-    "@types/lodash": "4.14.120",
+    "@types/fs-extra": "5.0.5",
+    "@types/globby": "9.1.0",
+    "@types/jest": "24.0.12",
+    "@types/lodash": "4.14.123",
     "@types/mock-fs": "3.6.30",
-    "@types/node": "10.12.21",
-    "@types/semver": "5.5.0",
+    "@types/node": "11.13.8",
+    "@types/semver": "6.0.0",
     "expect-more-jest": "2.4.1",
-    "jest": "24.0.0",
-    "mock-fs": "4.7.0",
-    "prettier": "1.16.3",
+    "jest": "24.7.1",
+    "mock-fs": "4.9.0",
+    "prettier": "1.17.0",
     "rimraf": "2.6.3",
-    "ts-jest": "23.10.5",
-    "tslint": "5.12.1",
-    "typescript": "3.3.1"
+    "ts-jest": "24.0.2",
+    "tslint": "5.16.0",
+    "typescript": "3.4.5"
   },
   "engines": {
     "node": ">=8.0.0"

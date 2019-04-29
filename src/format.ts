@@ -26,7 +26,7 @@ export const run = async (program: CommanderApi) => {
       : manifest;
   };
 
-  const sortObject = (obj: IManifest) =>
+  const sortObject = (obj: object) =>
     _(obj)
       .entries()
       .sortBy('0')
