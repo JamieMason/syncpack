@@ -106,7 +106,7 @@ export const OPTIONS_PEER = {
 
 export const OPTIONS_FILTER_DEPENDENCIES = {
   description: 'regex for depdendency filter',
-  spec: '-f, --filter'
+  spec: '-f, --filter [pattern]'
 };
 
 export const OPTION_INDENT = {
