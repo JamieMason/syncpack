@@ -48,6 +48,8 @@ syncpack fix-mismatches
 syncpack fix-mismatches --source "apps/*/package.json"
 # multiple globs can be provided like this
 syncpack fix-mismatches --source "apps/*/package.json" --source "core/*/package.json"
+# uses packages that pass the regex defined by --filter when provided
+syncpack fix-mismatches --filter "^package_name$"
 # only fix "devDependencies"
 syncpack fix-mismatches --dev
 # only fix "devDependencies" and "peerDependencies"
