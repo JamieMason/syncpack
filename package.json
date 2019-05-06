@@ -15,7 +15,8 @@
   "contributors": [
     "Alex Hayton (https://github.com/AlexHayton)",
     "Jamie Mason (https://github.com/JamieMason)",
-    "Luis Vieira (https://github.com/luisvieiragmr)"
+    "Luis Vieira (https://github.com/luisvieiragmr)",
+    "Matt Sprague (https://github.com/uforic)"
   ],
   "dependencies": {
     "chalk": "2.4.2",
