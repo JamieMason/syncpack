@@ -1,9 +1,17 @@
+## [4.4.2](https://github.com/JamieMason/syncpack/compare/4.4.1...4.4.2) (2019-05-06)
+
+### Bug Fixes
+
+- **filter:** --filter is a string, not a boolean
+  ([5587f2b](https://github.com/JamieMason/syncpack/commit/5587f2b))
+
 ## [4.4.1](https://github.com/JamieMason/syncpack/compare/4.3.1...4.4.1) (2019-04-29)
 
 ### Features
 
 - **options:** add dependency filter regex
-  ([9df5684](https://github.com/JamieMason/syncpack/commit/9df5684))
+  ([bfb1f1d](https://github.com/JamieMason/syncpack/commit/bfb1f1d)), closes
+  [#18](https://github.com/JamieMason/syncpack/issues/18)
 
 ## [4.3.1](https://github.com/JamieMason/syncpack/compare/4.0.1...4.3.1) (2019-02-03)
 
