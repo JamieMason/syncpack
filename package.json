@@ -1,6 +1,6 @@
 {
   "name": "syncpack",
-  "description": "Manage multiple package.json files, such as in Lerna Monorepos",
+  "description": "Manage multiple package.json files, such as in Lerna Monorepos and Yarn Workspaces",
   "version": "4.4.2",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
@@ -16,6 +16,7 @@
     "Alex Hayton (https://github.com/AlexHayton)",
     "Jamie Mason (https://github.com/JamieMason)",
     "Luis Vieira (https://github.com/luisvieiragmr)",
+    "Marais Rossouw (https://github.com/maraisr)",
     "Matt Sprague (https://github.com/uforic)"
   ],
   "dependencies": {

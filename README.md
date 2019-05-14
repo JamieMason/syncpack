@@ -1,6 +1,7 @@
 # syncpack
 
-> Manage multiple package.json files, such as in Lerna Monorepos
+> Manage multiple package.json files, such as in Lerna Monorepos and Yarn
+> Workspaces
 
 [![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
 [![NPM downloads](http://img.shields.io/npm/dm/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
@@ -14,13 +15,25 @@
 [![Follow JamieMason on GitHub](https://img.shields.io/github/followers/JamieMason.svg?style=social&label=Follow)](https://github.com/JamieMason)
 [![Follow fold_left on Twitter](https://img.shields.io/twitter/follow/fold_left.svg?style=social&label=Follow)](https://twitter.com/fold_left)
 
-## :cloud: Installation
+## ☁️ Installation
 
 ```
 npm install --global syncpack
 ```
 
-## :memo: Commands
+## 🕵🏾‍♀️ Resolving Packages
+
+package.json files are resolved in this order of precendence:
+
+1. If `--source`
+   [glob patterns](https://github.com/isaacs/node-glob#glob-primer) are
+   provided, use those.
+1. If using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/),
+   read `workspaces` from `./package.json`.
+1. If using [Lerna](https://lerna.js.org/), read `packages` from `./lerna.json`.
+1. Default to `'package.json'` and `'packages/*/package.json'`.
+
+## 📝 Commands
 
 ### fix-mismatches
 
@@ -28,7 +41,8 @@ Ensure that multiple packages requiring the same dependency define the same
 version, so that every package requires eg. `react@16.4.2`, instead of a
 combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
 
-#### Options
+<details>
+<summary>Options</summary>
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
@@ -39,10 +53,13 @@ combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
 -h, --help              output usage information
 ```
 
-#### Examples
+</details>
+
+<details>
+<summary>Examples</summary>
 
 ```bash
-# uses packages defined in lerna.json by default
+# uses defaults for resolving packages
 syncpack fix-mismatches
 # uses packages defined by --source when provided
 syncpack fix-mismatches --source "apps/*/package.json"
@@ -58,6 +75,8 @@ syncpack fix-mismatches --dev --peer
 syncpack fix-mismatches --indent "    "
 ```
 
+</details>
+
 ### format
 
 Organise package.json files according to a conventional format, where fields
@@ -65,7 +84,8 @@ appear in a predictable order and nested fields are ordered alphabetically.
 Shorthand properties are used where available, such as the `"repository"` and
 `"bugs"` fields.
 
-#### Options
+<details>
+<summary>Options</summary>
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
@@ -73,10 +93,13 @@ Shorthand properties are used where available, such as the `"repository"` and
 -h, --help              output usage information
 ```
 
-#### Examples
+</details>
+
+<details>
+<summary>Examples</summary>
 
 ```bash
-# uses packages defined in lerna.json by default
+# uses defaults for resolving packages
 syncpack format
 # uses packages defined by --source when provided
 syncpack format --source "apps/*/package.json"
@@ -86,11 +109,14 @@ syncpack format --source "apps/*/package.json" --source "core/*/package.json"
 syncpack format --indent "    "
 ```
 
+</details>
+
 ### list
 
 List all dependencies required by your packages.
 
-#### Options
+<details>
+<summary>Options</summary>
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
@@ -100,10 +126,13 @@ List all dependencies required by your packages.
 -h, --help              output usage information
 ```
 
-#### Examples
+</details>
+
+<details>
+<summary>Examples</summary>
 
 ```bash
-# uses packages defined in lerna.json by default
+# uses defaults for resolving packages
 syncpack list
 # uses packages defined by --source when provided
 syncpack list --source "apps/*/package.json"
@@ -115,12 +144,15 @@ syncpack list --dev
 syncpack list --dev --peer
 ```
 
+</details>
+
 ### list-mismatches
 
 List dependencies which are required by multiple packages, where the version is
 not the same across every package.
 
-#### Options
+<details>
+<summary>Options</summary>
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
@@ -130,10 +162,13 @@ not the same across every package.
 -h, --help              output usage information
 ```
 
-#### Examples
+</details>
+
+<details>
+<summary>Examples</summary>
 
 ```bash
-# uses packages defined in lerna.json by default
+# uses defaults for resolving packages
 syncpack list-mismatches
 # uses packages defined by --source when provided
 syncpack list-mismatches --source "apps/*/package.json"
@@ -145,12 +180,15 @@ syncpack list-mismatches --dev
 syncpack list-mismatches --dev --peer
 ```
 
+</details>
+
 ### set-semver-ranges
 
 Ensure dependency versions used within `"dependencies"`, `"devDependencies"`,
 and `"peerDependencies"` follow a consistent format.
 
-#### Options
+<details>
+<summary>Options</summary>
 
 ```
 -r, --semver-range <range>  <, <=, "", ~, ^, >=, >, or *. defaults to ""
@@ -162,10 +200,13 @@ and `"peerDependencies"` follow a consistent format.
 -h, --help                  output usage information
 ```
 
-#### Examples
+</details>
+
+<details>
+<summary>Examples</summary>
 
 ```bash
-# uses packages defined in lerna.json by default
+# uses defaults for resolving packages
 syncpack set-semver-ranges
 # uses packages defined by --source when provided
 syncpack set-semver-ranges --source "apps/*/package.json"
@@ -181,7 +222,10 @@ syncpack set-semver-ranges --dev --peer --semver-range ~
 syncpack set-semver-ranges --indent "    "
 ```
 
-#### Supported Ranges
+</details>
+
+<details>
+<summary>Supported Ranges</summary>
 
 ```
 <  <1.4.2
@@ -194,9 +238,11 @@ syncpack set-semver-ranges --indent "    "
 *  *
 ```
 
-## :raising_hand: Get Help
+</details>
 
-There are few ways to get help:
+## 🙋 Get Help
 
-1.  For bug reports and feature requests, open issues :bug:
-1.  For direct and quick help, you can use Gitter :rocket:
+There are a few ways to get help:
+
+1.  For bug reports and feature requests, open issues 🐛
+1.  For direct and quick help, you can use Gitter 🚀

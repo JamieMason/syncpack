@@ -13,7 +13,7 @@ program.description(
 program.on('--help', () => {
   console.log('');
   console.log(`Examples:
-  ${chalk.grey('# uses packages defined in lerna.json by default')}
+  ${chalk.grey('# uses defaults for resolving packages')}
   syncpack list-mismatches
   ${chalk.grey('# uses packages defined by --source when provided')}
   syncpack list-mismatches --source ${chalk.yellow('"apps/*/package.json"')}
@@ -30,11 +30,28 @@ program.on('--help', () => {
   ${chalk.grey('# only list "devDependencies" and "peerDependencies"')}
   syncpack list-mismatches --dev --peer
   `);
+  console.log(`Resolving Packages:
+  1. If ${chalk.yellow(`--source`)} globs are provided, use those.
+  2. If using Yarn Workspaces, read ${chalk.yellow(
+    `workspaces`
+  )} from ${chalk.yellow(`package.json`)}.
+  3. If using Lerna, read ${chalk.yellow(`packages`)} from ${chalk.yellow(
+    `lerna.json`
+  )}.
+  4. Default to ${chalk.yellow(`"package.json"`)} and ${chalk.yellow(
+    `"packages/*/package.json"`
+  )}.
+  `);
   console.log(`Reference:
-  lerna.json
-  ${chalk.blue.underline('https://github.com/lerna/lerna#lernajson')}
-  globs
-  ${chalk.blue.underline('https://github.com/isaacs/node-glob#glob-primer')}`);
+  globs            ${chalk.blue.underline(
+    'https://github.com/isaacs/node-glob#glob-primer'
+  )}
+  lerna.json       ${chalk.blue.underline(
+    'https://github.com/lerna/lerna#lernajson'
+  )}
+  Yarn Workspaces  ${chalk.blue.underline(
+    'https://yarnpkg.com/lang/en/docs/workspaces'
+  )}`);
 });
 
 run(program);

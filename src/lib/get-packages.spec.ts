@@ -1,6 +1,5 @@
 import { removeSync } from 'fs-extra';
 import * as mock from 'mock-fs';
-import { resolve } from 'path';
 import { getMockCommander } from '../../test/helpers';
 import { getPackages } from './get-packages';
 
@@ -44,5 +43,27 @@ describe('getPackages', () => {
       { data: { name: 'packages-a' }, path: 'packages/a/package.json' },
       { data: { name: 'packages-b' }, path: 'packages/b/package.json' }
     ]);
+  });
+
+  describe('yarn workspaces', () => {
+    afterEach(() => {
+      mock.restore();
+    });
+
+    beforeEach(() => {
+      mock({
+        'packages/a/package.json': JSON.stringify({ name: 'packages-a' }),
+        'packages/b/package.json': JSON.stringify({ name: 'packages-b' }),
+        'package.json': JSON.stringify({ workspaces: ['packages/*'] })
+      });
+    });
+
+    it('should resolve correctly', () => {
+      const program = getMockCommander([]);
+      expect(getPackages(program)).toEqual([
+        { data: { name: 'packages-a' }, path: 'packages/a/package.json' },
+        { data: { name: 'packages-b' }, path: 'packages/b/package.json' }
+      ]);
+    });
   });
 });
