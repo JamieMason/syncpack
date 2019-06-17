@@ -1,3 +1,12 @@
+## [4.5.3](https://github.com/JamieMason/syncpack/compare/4.5.2...4.5.3) (2019-06-17)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([10834a9](https://github.com/JamieMason/syncpack/commit/10834a9))
+
+
+
 ## [4.5.2](https://github.com/JamieMason/syncpack/compare/4.4.2...4.5.2) (2019-05-14)
 
 
