@@ -23,12 +23,13 @@
     "chalk": "2.4.2",
     "commander": "2.20.0",
     "fs-extra": "8.1.0",
-    "globby": "9.2.0",
+    "glob": "7.1.4",
     "lodash": "4.17.14",
     "semver": "6.2.0"
   },
   "devDependencies": {
     "@types/fs-extra": "8.0.0",
+    "@types/glob": "7.1.1",
     "@types/jest": "24.0.15",
     "@types/lodash": "4.14.136",
     "@types/mock-fs": "3.6.30",

@@ -1,5 +1,5 @@
 import { readJsonSync } from 'fs-extra';
-import globby = require('globby');
+import { sync } from 'glob';
 import { join, resolve } from 'path';
 import { OPTION_SOURCES } from '../constants';
 import { CommanderApi, IManifestDescriptor } from '../typings';
@@ -30,7 +30,12 @@ export const getSources = (program: CommanderApi): string[] => {
 };
 
 export const getPackages = (program: CommanderApi): IManifestDescriptor[] =>
-  globby.sync(getSources(program)).map((filePath) => ({
-    data: readJsonSync(filePath),
-    path: filePath
-  }));
+  getSources(program)
+    .reduce<string[]>(
+      (filePaths, pattern) => filePaths.concat(sync(pattern)),
+      []
+    )
+    .map((filePath) => ({
+      data: readJsonSync(filePath),
+      path: filePath
+    }));

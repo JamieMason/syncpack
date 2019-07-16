@@ -1,9 +1,12 @@
-import globby = require('globby');
+import { sync } from 'glob';
 import { getMockCommander } from '../test/helpers';
 import { run } from './syncpack';
 
 it('registers each command', () => {
-  const commands = globby.sync(['bin-*.ts', '!*.spec.ts'], { cwd: __dirname });
+  const commands = [
+    ...sync('bin-*.ts', { cwd: __dirname }),
+    ...sync('!*.spec.ts', { cwd: __dirname })
+  ];
   const program = getMockCommander([]);
   const spy = jest.spyOn(program, 'command');
   const commandNames = commands.map((basename) =>
