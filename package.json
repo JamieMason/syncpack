@@ -72,7 +72,7 @@
   "repository": "JamieMason/syncpack",
   "scripts": {
     "build": "tsc --project .",
-    "format": "prettier --write '**/*.md' './src/**/*.ts' './test/**/*.ts'",
+    "format": "prettier --write './src/**/*.ts' './test/**/*.ts'",
     "lint": "tslint --fix --project ./tsconfig.json",
     "prebuild": "rimraf dist ./test/dist",
     "prelint": "npm run format",
