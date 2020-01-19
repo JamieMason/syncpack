@@ -7,7 +7,7 @@ import { run } from './set-semver-ranges';
 program.description(
   `
   Ensure dependency versions used within "dependencies", "devDependencies", and
-  "peerDependencies" follow a consistent format.`.replace(/^\n/, '')
+  "peerDependencies" follow a consistent format.`.replace(/^\n/, ''),
 );
 
 program.on('--help', () => {
@@ -19,7 +19,7 @@ program.on('--help', () => {
   syncpack set-semver-ranges --source ${chalk.yellow('"apps/*/package.json"')}
   ${chalk.grey('# multiple globs can be provided like this')}
   syncpack set-semver-ranges --source ${chalk.yellow(
-    '"apps/*/package.json"'
+    '"apps/*/package.json"',
   )} --source ${chalk.yellow('"core/*/package.json"')}
   ${chalk.grey('# use ~ range instead of default ""')}
   syncpack set-semver-ranges --semver-range ~
@@ -43,24 +43,24 @@ program.on('--help', () => {
   console.log(`Resolving Packages:
   1. If ${chalk.yellow(`--source`)} globs are provided, use those.
   2. If using Yarn Workspaces, read ${chalk.yellow(
-    `workspaces`
+    `workspaces`,
   )} from ${chalk.yellow(`package.json`)}.
   3. If using Lerna, read ${chalk.yellow(`packages`)} from ${chalk.yellow(
-    `lerna.json`
+    `lerna.json`,
   )}.
   4. Default to ${chalk.yellow(`"package.json"`)} and ${chalk.yellow(
-    `"packages/*/package.json"`
+    `"packages/*/package.json"`,
   )}.
   `);
   console.log(`Reference:
   globs            ${chalk.blue.underline(
-    'https://github.com/isaacs/node-glob#glob-primer'
+    'https://github.com/isaacs/node-glob#glob-primer',
   )}
   lerna.json       ${chalk.blue.underline(
-    'https://github.com/lerna/lerna#lernajson'
+    'https://github.com/lerna/lerna#lernajson',
   )}
   Yarn Workspaces  ${chalk.blue.underline(
-    'https://yarnpkg.com/lang/en/docs/workspaces'
+    'https://yarnpkg.com/lang/en/docs/workspaces',
   )}`);
 });
 

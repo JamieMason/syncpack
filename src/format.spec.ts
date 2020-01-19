@@ -1,9 +1,9 @@
 import { readJsonSync } from 'fs-extra';
-import mock = require('mock-fs');
 import { getFixture, getMockCommander, shuffleObject } from '../test/helpers';
 import { SORT_FIRST } from './constants';
 import { run } from './format';
 import { IManifest } from './typings';
+import mock = require('mock-fs');
 
 describe('format', () => {
   let minimal: IManifest;
@@ -12,14 +12,14 @@ describe('format', () => {
   beforeAll(async () => {
     const program = getMockCommander([
       '/minimal/package.json',
-      '/untidy/package.json'
+      '/untidy/package.json',
     ]);
     mock({
       '/minimal/package.json': JSON.stringify({
         name: 'minimal',
-        version: '0.0.0'
+        version: '0.0.0',
       }),
-      '/untidy/package.json': getFixture('untidy', shuffleObject).json
+      '/untidy/package.json': getFixture('untidy', shuffleObject).json,
     });
     await run(program);
     minimal = readJsonSync('/minimal/package.json');
@@ -45,7 +45,7 @@ describe('format', () => {
       'main',
       'peerDependencies',
       'repository',
-      'scripts'
+      'scripts',
     ]);
   });
 
@@ -55,7 +55,7 @@ describe('format', () => {
       arnold: '5.0.0',
       dog: '2.13.0',
       guybrush: '7.1.1',
-      mango: '2.3.0'
+      mango: '2.3.0',
     });
   });
 
@@ -63,7 +63,7 @@ describe('format', () => {
     expect(minimal).not.toHaveProperty('devDependencies');
     expect(untidy.devDependencies).toEqual({
       stroopwafel: '4.4.2',
-      waldorf: '22.1.4'
+      waldorf: '22.1.4',
     });
   });
 
@@ -82,7 +82,7 @@ describe('format', () => {
     expect(untidy.peerDependencies).toEqual({
       giftwrap: '0.1.2',
       jambalaya: '6.1.4',
-      zoolander: '1.4.25'
+      zoolander: '1.4.25',
     });
   });
 
@@ -92,7 +92,7 @@ describe('format', () => {
       build: 'tsc',
       format: 'prettier',
       lint: 'tslint',
-      test: 'jest'
+      test: 'jest',
     });
   });
 

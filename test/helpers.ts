@@ -25,7 +25,7 @@ export const getFixture = (name: string, transform = (a: any | any[]) => a) => {
 
 export const getMockCommander = (
   source: string[],
-  dependencyFilterString?: string
+  dependencyFilterString?: string,
 ) => {
   const program = ({
     command: () => program,
@@ -33,7 +33,7 @@ export const getMockCommander = (
     option: () => program,
     parse: () => program,
     source,
-    version: () => program
+    version: () => program,
   } as unknown) as CommanderApi;
   return program;
 };

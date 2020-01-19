@@ -7,7 +7,7 @@ export interface IVersionsByName {
 export type GetVersionsByName = (
   dependencyTypes: IManifestKey[],
   pkgs: IManifestDescriptor[],
-  dependencyFilterPattern?: string
+  dependencyFilterPattern?: string,
 ) => IVersionsByName;
 
 export const getDependencyFilter = (dependencyFilterPattern?: string) => {
@@ -22,7 +22,7 @@ export const getDependencyFilter = (dependencyFilterPattern?: string) => {
 export const getVersionsByName: GetVersionsByName = (
   dependencyTypes,
   pkgs,
-  dependencyFilterPattern
+  dependencyFilterPattern,
 ) => {
   const dependencyFilter = getDependencyFilter(dependencyFilterPattern);
   const versionsByName: IVersionsByName = {};
@@ -51,14 +51,14 @@ export const getVersionsByName: GetVersionsByName = (
 export const getMismatchedVersionsByName: GetVersionsByName = (
   dependencyTypes,
   pkgs,
-  dependencyFilterPattern
+  dependencyFilterPattern,
 ) => {
   const dependencyFilter = getDependencyFilter(dependencyFilterPattern);
   const mismatchedVersionsByName: IVersionsByName = {};
   const versionsByName = getVersionsByName(
     dependencyTypes,
     pkgs,
-    dependencyFilterPattern
+    dependencyFilterPattern,
   );
   for (const type of dependencyTypes) {
     for (const pkg of pkgs) {

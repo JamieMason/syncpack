@@ -6,14 +6,14 @@ describe('getDependencyTypes', () => {
     [
       [
         { dev: false, peer: false, prod: false },
-        ['dependencies', 'devDependencies', 'peerDependencies']
+        ['dependencies', 'devDependencies', 'peerDependencies'],
       ],
       [{ dev: true, peer: false, prod: false }, ['devDependencies']],
       [{ dev: false, peer: true, prod: false }, ['peerDependencies']],
-      [{ dev: false, peer: false, prod: true }, ['dependencies']]
+      [{ dev: false, peer: false, prod: true }, ['dependencies']],
     ].forEach(([program, expected]) => {
       expect(getDependencyTypes((program as unknown) as CommanderApi)).toEqual(
-        expected
+        expected,
       );
     });
   });

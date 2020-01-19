@@ -5,7 +5,7 @@ import {
   OPTIONS_DEV,
   OPTIONS_FILTER_DEPENDENCIES,
   OPTIONS_PEER,
-  OPTIONS_PROD
+  OPTIONS_PROD,
 } from './constants';
 import { collect } from './lib/collect';
 import { getDependencyTypes } from './lib/get-dependency-types';
@@ -21,7 +21,7 @@ export const run = async (program: CommanderApi) => {
     .option(OPTIONS_PEER.spec, OPTIONS_PEER.description)
     .option(
       OPTIONS_FILTER_DEPENDENCIES.spec,
-      OPTIONS_FILTER_DEPENDENCIES.description
+      OPTIONS_FILTER_DEPENDENCIES.description,
     )
     .parse(process.argv);
   const dependencyTypes = getDependencyTypes(program);
@@ -29,7 +29,7 @@ export const run = async (program: CommanderApi) => {
   const mismatchedVersionsByName = getMismatchedVersionsByName(
     dependencyTypes,
     pkgs,
-    program.filter
+    program.filter,
   );
 
   _.each(mismatchedVersionsByName, (versions, name) => {

@@ -1,8 +1,8 @@
 import { readJsonSync } from 'fs-extra';
-import mock = require('mock-fs');
 import { getFixture, getMockCommander } from '../test/helpers';
 import { run } from './fix-mismatches';
 import { IManifest } from './typings';
+import mock = require('mock-fs');
 
 describe('fix-mismatches', () => {
   let spyConsole: any;
@@ -16,13 +16,13 @@ describe('fix-mismatches', () => {
     const sources = [
       '/path/1/package.json',
       '/path/2/package.json',
-      '/path/3/package.json'
+      '/path/3/package.json',
     ];
     const program = getMockCommander(sources, '^((?!ignore).)*$');
     mock({
       '/path/1/package.json': JSON.stringify(one),
       '/path/2/package.json': JSON.stringify(two),
-      '/path/3/package.json': JSON.stringify(three)
+      '/path/3/package.json': JSON.stringify(three),
     });
     const noop = () => undefined;
     spyConsole = jest.spyOn(console, 'log').mockImplementation(noop);
@@ -36,25 +36,25 @@ describe('fix-mismatches', () => {
         devDependencies: {
           jest: '22.1.4',
           prettier: '1.10.2',
-          rimraf: '2.6.2'
+          rimraf: '2.6.2',
         },
-        peerDependencies: { gulp: '*' }
-      })
+        peerDependencies: { gulp: '*' },
+      }),
     );
     expect(readJsonSync('/path/2/package.json')).toEqual(
       expect.objectContaining({
         dependencies: { chalk: '2.3.0', ignore: '2.0.0' },
-        devDependencies: { jest: '22.1.4' }
-      })
+        devDependencies: { jest: '22.1.4' },
+      }),
     );
     expect(readJsonSync('/path/3/package.json')).toEqual(
       expect.objectContaining({
         devDependencies: {
           npm: 'https://github.com/npm/npm.git',
-          prettier: '1.10.2'
+          prettier: '1.10.2',
         },
-        peerDependencies: { gulp: '*' }
-      })
+        peerDependencies: { gulp: '*' },
+      }),
     );
   });
 });

@@ -1,7 +1,7 @@
 import { removeSync } from 'fs-extra';
-import mock = require('mock-fs');
 import { getMockCommander } from '../../test/helpers';
 import { getPackages } from './get-packages';
+import mock = require('mock-fs');
 
 describe('getPackages', () => {
   afterEach(() => {
@@ -16,7 +16,7 @@ describe('getPackages', () => {
       'lerna/a/package.json': JSON.stringify({ name: 'lerna-a' }),
       'lerna/b/package.json': JSON.stringify({ name: 'lerna-b' }),
       'packages/a/package.json': JSON.stringify({ name: 'packages-a' }),
-      'packages/b/package.json': JSON.stringify({ name: 'packages-b' })
+      'packages/b/package.json': JSON.stringify({ name: 'packages-b' }),
     });
   });
 
@@ -24,7 +24,7 @@ describe('getPackages', () => {
     const program = getMockCommander(['cli/*/package.json']);
     expect(getPackages(program)).toEqual([
       { data: { name: 'cli-a' }, path: 'cli/a/package.json' },
-      { data: { name: 'cli-b' }, path: 'cli/b/package.json' }
+      { data: { name: 'cli-b' }, path: 'cli/b/package.json' },
     ]);
   });
 
@@ -32,7 +32,7 @@ describe('getPackages', () => {
     const program = getMockCommander([]);
     expect(getPackages(program)).toEqual([
       { data: { name: 'lerna-a' }, path: 'lerna/a/package.json' },
-      { data: { name: 'lerna-b' }, path: 'lerna/b/package.json' }
+      { data: { name: 'lerna-b' }, path: 'lerna/b/package.json' },
     ]);
   });
 
@@ -41,7 +41,7 @@ describe('getPackages', () => {
     removeSync('lerna.json');
     expect(getPackages(program)).toEqual([
       { data: { name: 'packages-a' }, path: 'packages/a/package.json' },
-      { data: { name: 'packages-b' }, path: 'packages/b/package.json' }
+      { data: { name: 'packages-b' }, path: 'packages/b/package.json' },
     ]);
   });
 
@@ -54,7 +54,7 @@ describe('getPackages', () => {
       mock({
         'packages/a/package.json': JSON.stringify({ name: 'packages-a' }),
         'packages/b/package.json': JSON.stringify({ name: 'packages-b' }),
-        'package.json': JSON.stringify({ workspaces: ['packages/*'] })
+        'package.json': JSON.stringify({ workspaces: ['packages/*'] }),
       });
     });
 
@@ -62,7 +62,7 @@ describe('getPackages', () => {
       const program = getMockCommander([]);
       expect(getPackages(program)).toEqual([
         { data: { name: 'packages-a' }, path: 'packages/a/package.json' },
-        { data: { name: 'packages-b' }, path: 'packages/b/package.json' }
+        { data: { name: 'packages-b' }, path: 'packages/b/package.json' },
       ]);
     });
   });

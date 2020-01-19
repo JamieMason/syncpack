@@ -7,6 +7,6 @@ export const getDependencyTypes = (program: CommanderApi): IManifestKey[] =>
         (type) =>
           (type === 'dependencies' && program.prod) ||
           (type === 'devDependencies' && program.dev) ||
-          (type === 'peerDependencies' && program.peer)
+          (type === 'peerDependencies' && program.peer),
       )
     : DEPENDENCY_TYPES;

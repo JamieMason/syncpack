@@ -33,9 +33,9 @@ export const getPackages = (program: CommanderApi): IManifestDescriptor[] =>
   getSources(program)
     .reduce<string[]>(
       (filePaths, pattern) => filePaths.concat(sync(pattern)),
-      []
+      [],
     )
     .map((filePath) => ({
       data: readJsonSync(filePath),
-      path: filePath
+      path: filePath,
     }));

@@ -67,7 +67,7 @@ describe('getVersionRange', () => {
       ['git://github.com/npm/cli.git#v1.0.27', ''],
       ['expressjs/express"', ''],
       ['mochajs/mocha#4727d357ea"', ''],
-      ['user/repo#feature/branch', '']
+      ['user/repo#feature/branch', ''],
     ].forEach(([version, expected]) => {
       expect(getVersionRange(version)).toEqual(expected);
     });
@@ -111,7 +111,7 @@ describe('sortBySemver', () => {
         '<1.0.0',
         '~1.0.0',
         '~1.0.1',
-        '~1.0.0'
+        '~1.0.0',
       ];
       const expectedOrder = [
         '<1.0.0',
@@ -137,7 +137,7 @@ describe('sortBySemver', () => {
         '>=1.0.1',
         '>1.0.1',
         '*',
-        '*'
+        '*',
       ];
       const shuffled = _.shuffle(unordered);
       expect(sortBySemver(shuffled)).toEqual(expectedOrder);

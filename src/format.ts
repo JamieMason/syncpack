@@ -6,7 +6,7 @@ import {
   OPTION_INDENT,
   OPTION_SOURCES,
   SORT_AZ,
-  SORT_FIRST
+  SORT_FIRST,
 } from './constants';
 import { collect } from './lib/collect';
 import { getIndent } from './lib/get-indent';
@@ -47,19 +47,19 @@ export const run = async (program: CommanderApi) => {
       .value();
 
     const firstSorted = [...first].sort(
-      ([keyA], [keyB]) => SORT_FIRST.indexOf(keyA) - SORT_FIRST.indexOf(keyB)
+      ([keyA], [keyB]) => SORT_FIRST.indexOf(keyA) - SORT_FIRST.indexOf(keyB),
     );
 
     const restSorted = _(rest)
       .map(([key, value]) => [
         key,
-        SORT_AZ.indexOf(key) !== -1 ? sortValue(value) : value
+        SORT_AZ.indexOf(key) !== -1 ? sortValue(value) : value,
       ])
       .value();
 
     return _([...firstSorted, ...restSorted]).reduce(
       (obj, [key, value]) => ({ ...obj, [key]: value }),
-      {} as IManifest
+      {} as IManifest,
     );
   };
 
@@ -81,6 +81,6 @@ export const run = async (program: CommanderApi) => {
         return writeJson(path, nextData, { spaces: indent });
       }
       console.log(chalk.bgGreen.black(' VALID '), chalk.blue(shortPath));
-    })
+    }),
   );
 };

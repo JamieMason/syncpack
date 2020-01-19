@@ -1,5 +1,4 @@
 import { readJsonSync } from 'fs-extra';
-import mock = require('mock-fs');
 import { getFixture, getMockCommander } from '../test/helpers';
 import {
   RANGE_ANY,
@@ -10,9 +9,10 @@ import {
   RANGE_LT,
   RANGE_LTE,
   RANGE_MINOR,
-  RANGE_PATCH
+  RANGE_PATCH,
 } from './constants';
 import { run } from './set-semver-ranges';
+import mock = require('mock-fs');
 
 describe('set-semver-ranges', () => {
   const ranges = [
@@ -24,17 +24,17 @@ describe('set-semver-ranges', () => {
     [RANGE_LT, 'lt'],
     [RANGE_LTE, 'lte'],
     [RANGE_MINOR, 'minor'],
-    [RANGE_PATCH, 'patch']
+    [RANGE_PATCH, 'patch'],
   ].map(([range, name]) => ({
     data: getFixture(name).data[0],
     filePath: `/path/${name}/package.json`,
-    range
+    range,
   }));
   const unsupported = [RANGE_ANY, RANGE_LOOSE];
   const sources = ranges.map(({ filePath }) => filePath);
   const filesystem = ranges.reduce(
     (obj, { filePath, data }) => ({ ...obj, [filePath]: JSON.stringify(data) }),
-    {}
+    {},
   );
 
   ranges.forEach(({ data: expectedData, range: targetRange }) => {

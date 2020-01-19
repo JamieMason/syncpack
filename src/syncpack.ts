@@ -4,7 +4,7 @@ import {
   LIST,
   LIST_MISMATCHES,
   SET_SEMVER_RANGES,
-  VERSION
+  VERSION,
 } from './constants';
 import { CommanderApi } from './typings';
 

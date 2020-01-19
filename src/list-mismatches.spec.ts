@@ -11,12 +11,12 @@ describe('list-mismatches', () => {
     const [one, two, three] = getFixture('exact').data as IManifest[];
     const program = getMockCommander(
       ['/path/1/package.json', '/path/2/package.json', '/path/3/package.json'],
-      '^((?!ignore).)*$'
+      '^((?!ignore).)*$',
     );
     mock({
       '/path/1/package.json': JSON.stringify(one),
       '/path/2/package.json': JSON.stringify(two),
-      '/path/3/package.json': JSON.stringify(three)
+      '/path/3/package.json': JSON.stringify(three),
     });
     const noop = () => undefined;
     spyConsole = jest.spyOn(console, 'log').mockImplementation(noop);
@@ -28,18 +28,18 @@ describe('list-mismatches', () => {
   it('returns an index of dependencies used with different versions', () => {
     expect(spyConsole).toHaveBeenCalledWith(
       expect.stringContaining('gulp'),
-      expect.stringContaining('0.9.1, *')
+      expect.stringContaining('0.9.1, *'),
     );
     expect(spyConsole).toHaveBeenCalledWith(
       expect.stringContaining('chalk'),
-      expect.stringContaining('2.3.0, 1.0.0')
+      expect.stringContaining('2.3.0, 1.0.0'),
     );
     expect(spyConsole).toHaveBeenCalledWith(
       expect.stringContaining('jest'),
-      expect.stringContaining('22.1.3, 22.1.4')
+      expect.stringContaining('22.1.3, 22.1.4'),
     );
     expect(spyConsole).not.toHaveBeenCalledWith(
-      expect.stringContaining('ignore')
+      expect.stringContaining('ignore'),
     );
   });
 
@@ -50,17 +50,17 @@ describe('list-mismatches', () => {
   it('returns exit code 0 when no mismatches are found', async () => {
     const program = getMockCommander([
       '/bar/package.json',
-      '/foo/package.json'
+      '/foo/package.json',
     ]);
     mock({
       '/bar/package.json': JSON.stringify({
         dependencies: { bar: '1.0.0' },
-        name: 'bar'
+        name: 'bar',
       }),
       '/foo/package.json': JSON.stringify({
         dependencies: { bar: '1.0.0' },
-        name: 'foo'
-      })
+        name: 'foo',
+      }),
     });
     spyProcess.mockClear();
     await run(program);

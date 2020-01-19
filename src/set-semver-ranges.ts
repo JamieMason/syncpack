@@ -12,7 +12,7 @@ import {
   OPTIONS_PEER,
   OPTIONS_PROD,
   RANGE_ANY,
-  RANGE_LOOSE
+  RANGE_LOOSE,
 } from './constants';
 import { collect } from './lib/collect';
 import { getDependencyTypes } from './lib/get-dependency-types';
@@ -31,7 +31,7 @@ export const run = async (program: CommanderApi) => {
     .option(OPTIONS_PEER.spec, OPTIONS_PEER.description)
     .option(
       OPTIONS_FILTER_DEPENDENCIES.spec,
-      OPTIONS_FILTER_DEPENDENCIES.description
+      OPTIONS_FILTER_DEPENDENCIES.description,
     )
     .option(OPTION_INDENT.spec, OPTION_INDENT.description)
     .parse(process.argv);
@@ -62,7 +62,7 @@ export const run = async (program: CommanderApi) => {
               dependencies[name] =
                 semver.major(versionNumber) === 0
                   ? `${semver.major(versionNumber)}.${semver.minor(
-                      versionNumber
+                      versionNumber,
                     )}.x`
                   : `${semver.major(versionNumber)}.x.x`;
             } else {
@@ -70,11 +70,11 @@ export const run = async (program: CommanderApi) => {
             }
           }
         });
-      })
+      }),
   );
 
   await Promise.all(
-    pkgs.map(({ data, path }) => writeJson(path, data, { spaces: indent }))
+    pkgs.map(({ data, path }) => writeJson(path, data, { spaces: indent })),
   );
 
   _.each(pkgs, (pkg) => {
