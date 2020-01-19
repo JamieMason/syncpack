@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import * as program from 'commander';
+import program = require('commander');
 import { run } from './list';
 
 program.description(

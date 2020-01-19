@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { writeJson } from 'fs-extra';
-import * as _ from 'lodash';
+import _ = require('lodash');
 import { relative } from 'path';
 import {
   OPTION_INDENT,

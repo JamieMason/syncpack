@@ -1,5 +1,5 @@
 import { removeSync } from 'fs-extra';
-import * as mock from 'mock-fs';
+import mock = require('mock-fs');
 import { getMockCommander } from '../../test/helpers';
 import { getPackages } from './get-packages';
 

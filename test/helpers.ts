@@ -1,5 +1,5 @@
 import { readJsonSync } from 'fs-extra';
-import * as _ from 'lodash';
+import _ = require('lodash');
 import { CommanderApi } from '../src/typings';
 
 const shuffle = (value: any): typeof value =>

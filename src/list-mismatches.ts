@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import * as _ from 'lodash';
+import _ = require('lodash');
 import {
   OPTION_SOURCES,
   OPTIONS_DEV,

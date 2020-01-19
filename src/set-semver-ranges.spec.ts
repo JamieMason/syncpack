@@ -1,5 +1,5 @@
 import { readJsonSync } from 'fs-extra';
-import * as mock from 'mock-fs';
+import mock = require('mock-fs');
 import { getFixture, getMockCommander } from '../test/helpers';
 import {
   RANGE_ANY,

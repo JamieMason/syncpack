@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ = require('lodash');
 import * as semver from 'semver';
 import { GREATER, LESSER, SAME, SEMVER_ORDER } from '../constants';
 
