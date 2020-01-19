@@ -1,9 +1,18 @@
+## [4.5.5](https://github.com/JamieMason/syncpack/compare/4.5.4...4.5.5) (2020-01-19)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([1776b5f](https://github.com/JamieMason/syncpack/commit/1776b5fdbbc79315dd5ab8700f25daeb3ec46b05))
+
+
+
 ## [4.5.4](https://github.com/JamieMason/syncpack/compare/4.5.3...4.5.4) (2019-07-16)
 
 
 ### Bug Fixes
 
-* **npm:** update dependencies ([e07cc44](https://github.com/JamieMason/syncpack/commit/e07cc44)), closes [#28](https://github.com/JamieMason/syncpack/issues/28)
+* **npm:** update dependencies ([e07cc44](https://github.com/JamieMason/syncpack/commit/e07cc44add6e9ae2d7775496f5585ac6f46e58e9)), closes [#28](https://github.com/JamieMason/syncpack/issues/28)
 
 
 
@@ -12,7 +21,7 @@
 
 ### Bug Fixes
 
-* **npm:** update dependencies ([10834a9](https://github.com/JamieMason/syncpack/commit/10834a9))
+* **npm:** update dependencies ([10834a9](https://github.com/JamieMason/syncpack/commit/10834a905812aadd4e13b2420bf3dc1549939dab))
 
 
 
@@ -21,7 +30,7 @@
 
 ### Features
 
-* **cli:** add support for yarn workspaces ([a5a45dd](https://github.com/JamieMason/syncpack/commit/a5a45dd)), closes [#20](https://github.com/JamieMason/syncpack/issues/20) [#22](https://github.com/JamieMason/syncpack/issues/22)
+* **cli:** add support for yarn workspaces ([a5a45dd](https://github.com/JamieMason/syncpack/commit/a5a45ddc937020b54c33a13d554fb871fee50e05)), closes [#20](https://github.com/JamieMason/syncpack/issues/20) [#22](https://github.com/JamieMason/syncpack/issues/22)
 
 
 
@@ -30,7 +39,7 @@
 
 ### Bug Fixes
 
-* **filter:** --filter is a string, not a boolean ([5587f2b](https://github.com/JamieMason/syncpack/commit/5587f2b))
+* **filter:** --filter is a string, not a boolean ([5587f2b](https://github.com/JamieMason/syncpack/commit/5587f2bdaef0dcc50022c9ae9e98b1c34ce9e164))
 
 
 
@@ -39,7 +48,7 @@
 
 ### Features
 
-* **options:** add dependency filter regex ([bfb1f1d](https://github.com/JamieMason/syncpack/commit/bfb1f1d)), closes [#18](https://github.com/JamieMason/syncpack/issues/18)
+* **options:** add dependency filter regex ([bfb1f1d](https://github.com/JamieMason/syncpack/commit/bfb1f1dde0ee3cbd11a0ef5cef80a0f53b28083a)), closes [#18](https://github.com/JamieMason/syncpack/issues/18)
 
 
 
@@ -48,9 +57,9 @@
 
 ### Features
 
-* **fix-mismatches:** output which files are (un)changed ([a79b078](https://github.com/JamieMason/syncpack/commit/a79b078))
-* **format:** output which files are (un)changed ([3a08a7a](https://github.com/JamieMason/syncpack/commit/3a08a7a))
-* **list:** sort output alphabetically ([f61bde4](https://github.com/JamieMason/syncpack/commit/f61bde4))
+* **fix-mismatches:** output which files are (un)changed ([a79b078](https://github.com/JamieMason/syncpack/commit/a79b078d7527a27a6e1343dab06e901f0c0a0530))
+* **format:** output which files are (un)changed ([3a08a7a](https://github.com/JamieMason/syncpack/commit/3a08a7a5a0bebfdf2d10503ce2cd1920ef94367e))
+* **list:** sort output alphabetically ([f61bde4](https://github.com/JamieMason/syncpack/commit/f61bde46a08550daf96cca596cbd1e00c13c7564))
 
 
 
@@ -59,7 +68,7 @@
 
 ### Bug Fixes
 
-* **ci:** cannot read property concat of undefined ([46a45e2](https://github.com/JamieMason/syncpack/commit/46a45e2)), closes [#16](https://github.com/JamieMason/syncpack/issues/16)
+* **ci:** cannot read property concat of undefined ([46a45e2](https://github.com/JamieMason/syncpack/commit/46a45e26b51b9f81076148ff7483b19cd34aef73)), closes [#16](https://github.com/JamieMason/syncpack/issues/16)
 
 
 
@@ -68,8 +77,8 @@
 
 ### Bug Fixes
 
-* **node:** support Node.js 8.x or newer ([c71009e](https://github.com/JamieMason/syncpack/commit/c71009e))
-* **npm:** update dependencies ([23b02e3](https://github.com/JamieMason/syncpack/commit/23b02e3)), closes [#15](https://github.com/JamieMason/syncpack/issues/15)
+* **node:** support Node.js 8.x or newer ([c71009e](https://github.com/JamieMason/syncpack/commit/c71009e1507cd66c735112a0ae685cd3e51ab2fe))
+* **npm:** update dependencies ([23b02e3](https://github.com/JamieMason/syncpack/commit/23b02e3d72e51e8b069a336357e6cddcdc4979c1)), closes [#15](https://github.com/JamieMason/syncpack/issues/15)
 
 
 ### BREAKING CHANGES
@@ -84,8 +93,8 @@ supports node ">=8".
 
 ### Bug Fixes
 
-* **core:** improve handling of non-semver versions ([9e1176a](https://github.com/JamieMason/syncpack/commit/9e1176a)), closes [#14](https://github.com/JamieMason/syncpack/issues/14)
-* **npm:** update dependencies ([09d9f04](https://github.com/JamieMason/syncpack/commit/09d9f04))
+* **core:** improve handling of non-semver versions ([9e1176a](https://github.com/JamieMason/syncpack/commit/9e1176a3495ea97648c61ab5869a12c3ff539c5f)), closes [#14](https://github.com/JamieMason/syncpack/issues/14)
+* **npm:** update dependencies ([09d9f04](https://github.com/JamieMason/syncpack/commit/09d9f04480252edd0fd3b6af3cd8dce36c66d96b))
 
 
 
@@ -94,7 +103,7 @@ supports node ">=8".
 
 ### Features
 
-* **cli:** improve --help output and examples ([dfe6274](https://github.com/JamieMason/syncpack/commit/dfe6274))
+* **cli:** improve --help output and examples ([dfe6274](https://github.com/JamieMason/syncpack/commit/dfe6274c50d6ba3ea3ec419cabd1ccf0bb73f8fb))
 
 
 
@@ -103,7 +112,7 @@ supports node ">=8".
 
 ### Features
 
-* **cli:** read sources from lerna.json if present ([77b90eb](https://github.com/JamieMason/syncpack/commit/77b90eb)), closes [#11](https://github.com/JamieMason/syncpack/issues/11)
+* **cli:** read sources from lerna.json if present ([77b90eb](https://github.com/JamieMason/syncpack/commit/77b90eb3d656c50ff7b9d1317dc2cdad469b15a5)), closes [#11](https://github.com/JamieMason/syncpack/issues/11)
 
 
 
@@ -112,14 +121,14 @@ supports node ">=8".
 
 ### Features
 
-* **cli:** specify dependency types as options ([ec5ef6b](https://github.com/JamieMason/syncpack/commit/ec5ef6b)), closes [#10](https://github.com/JamieMason/syncpack/issues/10)
-* **cli:** specify indentation as option ([8b408bd](https://github.com/JamieMason/syncpack/commit/8b408bd)), closes [#12](https://github.com/JamieMason/syncpack/issues/12)
-* **format:** sort contributors alphabetically ([935ffcf](https://github.com/JamieMason/syncpack/commit/935ffcf))
+* **cli:** specify dependency types as options ([ec5ef6b](https://github.com/JamieMason/syncpack/commit/ec5ef6b76f3c2fa0fba0f3a364b734f554d32c8a)), closes [#10](https://github.com/JamieMason/syncpack/issues/10)
+* **cli:** specify indentation as option ([8b408bd](https://github.com/JamieMason/syncpack/commit/8b408bd14768fe7b3a2fd5cbb06233ba3b9707b3)), closes [#12](https://github.com/JamieMason/syncpack/issues/12)
+* **format:** sort contributors alphabetically ([935ffcf](https://github.com/JamieMason/syncpack/commit/935ffcf307d0adabe06c04ff1e2b258277f060be))
 
 
 ### Performance Improvements
 
-* **npm:** move [@types](https://github.com/types) to devDependencies ([ad5951c](https://github.com/JamieMason/syncpack/commit/ad5951c)), closes [#13](https://github.com/JamieMason/syncpack/issues/13)
+* **npm:** move [@types](https://github.com/types) to devDependencies ([ad5951c](https://github.com/JamieMason/syncpack/commit/ad5951ceba183761b0b73355a508111e7eb02508)), closes [#13](https://github.com/JamieMason/syncpack/issues/13)
 
 
 
@@ -128,8 +137,8 @@ supports node ">=8".
 
 ### Features
 
-* **bin:** override package locations using repeatable --source options ([5dbcfd4](https://github.com/JamieMason/syncpack/commit/5dbcfd4))
-* **list-mismatches:** return exit code on finding mismatches ([06958c6](https://github.com/JamieMason/syncpack/commit/06958c6))
+* **bin:** override package locations using repeatable --source options ([5dbcfd4](https://github.com/JamieMason/syncpack/commit/5dbcfd4915cf286cba0e665e554c319d717f6651))
+* **list-mismatches:** return exit code on finding mismatches ([06958c6](https://github.com/JamieMason/syncpack/commit/06958c6446646c108fc1dc4e07c714cd08bf58fc))
 
 
 ### BREAKING CHANGES
@@ -156,7 +165,7 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-* **core:** ensure pattern overrides are read ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5))
+* **core:** ensure pattern overrides are read ([7513ba5](https://github.com/JamieMason/syncpack/commit/7513ba5fa644bf445efbdca22d4797b4a973b56f))
 
 
 
@@ -165,7 +174,7 @@ overridable `--target` option.
 
 ### Features
 
-* **core:** support multiple glob patterns ([a2b5af0](https://github.com/JamieMason/syncpack/commit/a2b5af0)), closes [#5](https://github.com/JamieMason/syncpack/issues/5) [#6](https://github.com/JamieMason/syncpack/issues/6)
+* **core:** support multiple glob patterns ([a2b5af0](https://github.com/JamieMason/syncpack/commit/a2b5af017a2152fb40d0522501db64ef739fe5f9)), closes [#5](https://github.com/JamieMason/syncpack/issues/5) [#6](https://github.com/JamieMason/syncpack/issues/6)
 
 
 ### BREAKING CHANGES
@@ -179,7 +188,7 @@ overridable `--target` option.
 
 ### Features
 
-* **core:** add set-semver-ranges command ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9))
+* **core:** add set-semver-ranges command ([4d206b9](https://github.com/JamieMason/syncpack/commit/4d206b9d00c7cf5a9f8ee52b84d7e8b9487fd01a))
 
 
 
@@ -188,8 +197,8 @@ overridable `--target` option.
 
 ### Features
 
-* **core:** add format command ([bae1133](https://github.com/JamieMason/syncpack/commit/bae1133))
-* **core:** output current version ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99))
+* **core:** add format command ([bae1133](https://github.com/JamieMason/syncpack/commit/bae11337f1c68c87299ee3e33120d3dc0fa8643f))
+* **core:** output current version ([e53cd99](https://github.com/JamieMason/syncpack/commit/e53cd99e989b1ea383530bcde78d105b39103a8c))
 
 
 
@@ -202,7 +211,7 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-* **core:** correct paths to binaries ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd6))
+* **core:** correct paths to binaries ([5682cd6](https://github.com/JamieMason/syncpack/commit/5682cd65b8559e9f47c9fe63b6294aebb73ba896))
 
 
 
@@ -211,17 +220,17 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-* **core:** correctly check a file is package.json ([d1da609](https://github.com/JamieMason/syncpack/commit/d1da609))
-* **core:** handle missing dependency maps ([372aa68](https://github.com/JamieMason/syncpack/commit/372aa68))
-* **core:** handle semver ranges containing 1.x.x ([a0f8f56](https://github.com/JamieMason/syncpack/commit/a0f8f56))
+* **core:** correctly check a file is package.json ([d1da609](https://github.com/JamieMason/syncpack/commit/d1da6096c3b7c6b01a05c112ffc1251ec4ba700d))
+* **core:** handle missing dependency maps ([372aa68](https://github.com/JamieMason/syncpack/commit/372aa6877f47df1118c45931391c8b87ca851413))
+* **core:** handle semver ranges containing 1.x.x ([a0f8f56](https://github.com/JamieMason/syncpack/commit/a0f8f5650f3855361914fc6f8303035dc3abfb8d))
 
 
 ### Features
 
-* **core:** add fix-mismatches command ([4793f1f](https://github.com/JamieMason/syncpack/commit/4793f1f))
-* **core:** add list command ([3b29176](https://github.com/JamieMason/syncpack/commit/3b29176))
-* **core:** add list-mismatches command ([735ad2b](https://github.com/JamieMason/syncpack/commit/735ad2b))
-* **core:** update command line API ([de8dcb2](https://github.com/JamieMason/syncpack/commit/de8dcb2))
+* **core:** add fix-mismatches command ([4793f1f](https://github.com/JamieMason/syncpack/commit/4793f1fc6b67cfa1f87f73188944f8dd8d196bc0))
+* **core:** add list command ([3b29176](https://github.com/JamieMason/syncpack/commit/3b291760f4cba611acc3f75034679303c55bf1a7))
+* **core:** add list-mismatches command ([735ad2b](https://github.com/JamieMason/syncpack/commit/735ad2b2a1347b99a3f758b0c797b2fb7a3fc4c3))
+* **core:** update command line API ([de8dcb2](https://github.com/JamieMason/syncpack/commit/de8dcb2b0dbe7bb63c91aeb05e8422696b0bd178))
 
 
 ### BREAKING CHANGES
@@ -235,7 +244,7 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-* **copy-values:** write results to disk ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de4))
+* **copy-values:** write results to disk ([a641de4](https://github.com/JamieMason/syncpack/commit/a641de41faaf6851cf9177ff87acd0d3e16494fb))
 
 
 
@@ -244,7 +253,7 @@ overridable `--target` option.
 
 ### Features
 
-* **cli:** add copy-values command ([b51a2c9](https://github.com/JamieMason/syncpack/commit/b51a2c9))
+* **cli:** add copy-values command ([b51a2c9](https://github.com/JamieMason/syncpack/commit/b51a2c96e133a1b5020577cf3c6bef31e79de850))
 
 
 
@@ -253,7 +262,7 @@ overridable `--target` option.
 
 ### Bug Fixes
 
-* **core:** update dependencies, fix lint warnings ([a65eef7](https://github.com/JamieMason/syncpack/commit/a65eef7))
+* **core:** update dependencies, fix lint warnings ([a65eef7](https://github.com/JamieMason/syncpack/commit/a65eef765d868a27913e173543dcbda43a2202a5))
 
 
 
@@ -262,16 +271,16 @@ overridable `--target` option.
 
 ### Features
 
-* **sync:** synchronise versions across multiple package.json ([7d5848a](https://github.com/JamieMason/syncpack/commit/7d5848a))
+* **sync:** synchronise versions across multiple package.json ([7d5848a](https://github.com/JamieMason/syncpack/commit/7d5848a0edbe0c0a312be323cc8d9a4a8ed0ea30))
 
 
 
-# [0.1.0](https://github.com/JamieMason/syncpack/compare/f6dada7...0.1.0) (2017-08-18)
+# [0.1.0](https://github.com/JamieMason/syncpack/compare/f6dada7aae149b7d0299206308347c8497e249d0...0.1.0) (2017-08-18)
 
 
 ### Features
 
-* **cli:** create scaffold cli ([f6dada7](https://github.com/JamieMason/syncpack/commit/f6dada7))
+* **cli:** create scaffold cli ([f6dada7](https://github.com/JamieMason/syncpack/commit/f6dada7aae149b7d0299206308347c8497e249d0))
 
 
 

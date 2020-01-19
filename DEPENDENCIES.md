@@ -27,19 +27,20 @@ npm test
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as mkdir -p, cp -r, and rm -rf.
-- [globby](https://ghub.io/globby): Extends `glob` with support for multiple patterns and exposes a Promise API
+- [glob](https://ghub.io/glob): a little globber
 - [lodash](https://ghub.io/lodash): Lodash modular utilities.
 - [semver](https://ghub.io/semver): The semantic version parser used by npm.
 
 ## Dev Dependencies
 
 - [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
+- [@types/glob](https://ghub.io/@types/glob): TypeScript definitions for Glob
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
 - [@types/lodash](https://ghub.io/@types/lodash): TypeScript definitions for Lo-Dash
 - [@types/mock-fs](https://ghub.io/@types/mock-fs): TypeScript definitions for mock-fs
 - [@types/node](https://ghub.io/@types/node): TypeScript definitions for Node.js
 - [@types/semver](https://ghub.io/@types/semver): TypeScript definitions for semver
-- [expect-more-jest](https://ghub.io/expect-more-jest): Write Beautiful Specs with Custom Matchers
+- [expect-more-jest](https://ghub.io/expect-more-jest): Write Beautiful Specs with Custom Matchers for Jest
 - [jest](https://ghub.io/jest): Delightful JavaScript Testing.
 - [mock-fs](https://ghub.io/mock-fs): A configurable mock file system.  You know, for testing.
 - [prettier](https://ghub.io/prettier): Prettier is an opinionated code formatter
