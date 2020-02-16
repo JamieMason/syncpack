@@ -31,7 +31,9 @@ const getPatternsFromConfig = (fileName: string, propName: string): string[] | n
   const filePath = resolve(process.cwd(), fileName);
   const config = readJsonSync(filePath, { throws: false });
   const isNonEmptyArray = config && config[propName] && config[propName].length > 0;
-  return isNonEmptyArray ? config[propName].map((dirPath: string) => join(dirPath, 'package.json')) : null;
+  return isNonEmptyArray
+    ? [process.cwd()].concat(config[propName]).map((dirPath: string) => join(dirPath, 'package.json'))
+    : null;
 };
 
 const hasCliPatterns = (program: Options) => program.source && program.source.length > 0;
@@ -39,7 +41,7 @@ const getCliPatterns = (program: Options) => program.source;
 const getYarnPatterns = () => getPatternsFromConfig('package.json', 'workspaces');
 const getLernaPatterns = () => getPatternsFromConfig('lerna.json', 'packages');
 const getDefaultPatterns = () => ALL_PATTERNS;
-const resolvePattern = (pattern: string) => sync(pattern);
+const resolvePattern = (pattern: string) => sync(pattern, { absolute: true });
 const reduceFlatArray = (all: string[], next: string[]) => all.concat(next);
 const createWrapper = (filePath: string) => ({ contents: readJsonSync(filePath), filePath });
 
