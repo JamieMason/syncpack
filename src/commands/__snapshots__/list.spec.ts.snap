@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`list outputs all dependencies 1`] = `
+Array [
+  Array [
+    "[31m✕ foo[39m [2m[31m0.1.0, 0.2.0[39m[22m",
+  ],
+]
+`;

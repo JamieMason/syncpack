@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`listMismatches outputs all dependencies installed with different versions 1`] = `
+Array [
+  Array [
+    "[31m✕ foo[39m",
+  ],
+  Array [
+    "[2m-[22m 0.1.0 [2min dependencies of undefined[22m",
+  ],
+  Array [
+    "[2m-[22m 0.2.0 [2min dependencies of undefined[22m",
+  ],
+]
+`;

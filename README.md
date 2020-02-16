@@ -39,6 +39,7 @@ Ensure that multiple packages requiring the same dependency define the same vers
     -p, --prod              include dependencies
     -d, --dev               include devDependencies
     -P, --peer              include peerDependencies
+    -f, --filter [pattern]  regex for dependency filter
     -i, --indent [value]    override indentation. defaults to "  "
     -h, --help              output usage information
 
@@ -54,11 +55,11 @@ syncpack fix-mismatches
 syncpack fix-mismatches --source "apps/*/package.json"
 # multiple globs can be provided like this
 syncpack fix-mismatches --source "apps/*/package.json" --source "core/*/package.json"
-# uses packages that pass the regex defined by --filter when provided
-syncpack fix-mismatches --filter "^package_name$"
-# only fix "devDependencies"
+# uses dependencies regular expression defined by --filter when provided
+syncpack fix-mismatches --filter "typescript|tslint"
+# only inspect "devDependencies"
 syncpack fix-mismatches --dev
-# only fix "devDependencies" and "peerDependencies"
+# only inspect "devDependencies" and "peerDependencies"
 syncpack fix-mismatches --dev --peer
 # indent package.json with 4 spaces instead of 2
 syncpack fix-mismatches --indent "    "
@@ -106,6 +107,7 @@ List all dependencies required by your packages.
     -p, --prod              include dependencies
     -d, --dev               include devDependencies
     -P, --peer              include peerDependencies
+    -f, --filter [pattern]  regex for dependency filter
     -h, --help              output usage information
 
 </details>
@@ -120,6 +122,8 @@ syncpack list
 syncpack list --source "apps/*/package.json"
 # multiple globs can be provided like this
 syncpack list --source "apps/*/package.json" --source "core/*/package.json"
+# uses dependencies regular expression defined by --filter when provided
+syncpack list --filter "typescript|tslint"
 # only inspect "devDependencies"
 syncpack list --dev
 # only inspect "devDependencies" and "peerDependencies"
@@ -139,6 +143,7 @@ List dependencies which are required by multiple packages, where the version is 
     -p, --prod              include dependencies
     -d, --dev               include devDependencies
     -P, --peer              include peerDependencies
+    -f, --filter [pattern]  regex for dependency filter
     -h, --help              output usage information
 
 </details>
@@ -153,9 +158,11 @@ syncpack list-mismatches
 syncpack list-mismatches --source "apps/*/package.json"
 # multiple globs can be provided like this
 syncpack list-mismatches --source "apps/*/package.json" --source "core/*/package.json"
-# only list "devDependencies"
+# uses dependencies regular expression defined by --filter when provided
+syncpack list-mismatches --filter "typescript|tslint"
+# only inspect "devDependencies"
 syncpack list-mismatches --dev
-# only list "devDependencies" and "peerDependencies"
+# only inspect "devDependencies" and "peerDependencies"
 syncpack list-mismatches --dev --peer
 ```
 
@@ -168,12 +175,13 @@ Ensure dependency versions used within `"dependencies"`, `"devDependencies"`, an
 <details>
 <summary>Options</summary>
 
-    -r, --semver-range <range>  <, <=, "", ~, ^, >=, >, or *. defaults to ""
     -s, --source [pattern]      glob pattern for package.json files to read from
     -p, --prod                  include dependencies
     -d, --dev                   include devDependencies
     -P, --peer                  include peerDependencies
+    -f, --filter [pattern]      regex for dependency filter
     -i, --indent [value]        override indentation. defaults to "  "
+    -r, --semver-range <range>  see supported ranges below. defaults to ""
     -h, --help                  output usage information
 
 </details>
@@ -188,6 +196,8 @@ syncpack set-semver-ranges
 syncpack set-semver-ranges --source "apps/*/package.json"
 # multiple globs can be provided like this
 syncpack set-semver-ranges --source "apps/*/package.json" --source "core/*/package.json"
+# uses dependencies regular expression defined by --filter when provided
+syncpack set-semver-ranges --filter "typescript|tslint"
 # use ~ range instead of default ""
 syncpack set-semver-ranges --semver-range ~
 # set ~ range in "devDependencies"

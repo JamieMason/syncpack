@@ -2,7 +2,8 @@
 
 import chalk from 'chalk';
 import program = require('commander');
-import { run } from './set-semver-ranges';
+import { setSemverRangesToDisk } from './commands/set-semver-ranges';
+import { option } from './constants';
 
 program.description(
   `
@@ -11,57 +12,64 @@ program.description(
 );
 
 program.on('--help', () => {
-  console.log('');
-  console.log(`Examples:
-  ${chalk.grey('# uses defaults for resolving packages')}
+  console.log(chalk`
+Examples:
+  {dim # uses defaults for resolving packages}
   syncpack set-semver-ranges
-  ${chalk.grey('# uses packages defined by --source when provided')}
-  syncpack set-semver-ranges --source ${chalk.yellow('"apps/*/package.json"')}
-  ${chalk.grey('# multiple globs can be provided like this')}
-  syncpack set-semver-ranges --source ${chalk.yellow(
-    '"apps/*/package.json"',
-  )} --source ${chalk.yellow('"core/*/package.json"')}
-  ${chalk.grey('# use ~ range instead of default ""')}
+  {dim # uses packages defined by --source when provided}
+  syncpack set-semver-ranges --source {yellow "apps/*/package.json"}
+  {dim # multiple globs can be provided like this}
+  syncpack set-semver-ranges --source {yellow "apps/*/package.json"} --source {yellow "core/*/package.json"}
+  {dim # uses dependencies regular expression defined by --filter when provided}
+  syncpack set-semver-ranges --filter {yellow "typescript|tslint"}
+  {dim # use ~ range instead of default ""}
   syncpack set-semver-ranges --semver-range ~
-  ${chalk.grey('# set ~ range in "devDependencies"')}
+  {dim # set ~ range in "devDependencies"}
   syncpack set-semver-ranges --dev --semver-range ~
-  ${chalk.grey('# set ~ range in "devDependencies" and "peerDependencies"')}
+  {dim # set ~ range in "devDependencies" and "peerDependencies"}
   syncpack set-semver-ranges --dev --peer --semver-range ~
-  ${chalk.grey('# indent package.json with 4 spaces instead of 2')}
-  syncpack set-semver-ranges --indent ${chalk.yellow('"    "')}
-  `);
-  console.log(`Supported Ranges:
-  <  ${chalk.grey('<1.4.2')}
-  <= ${chalk.grey('<=1.4.2')}
-  "" ${chalk.grey('1.4.2')}
-  ~  ${chalk.grey('~1.4.2')}
-  ^  ${chalk.grey('^1.4.2')}
-  >= ${chalk.grey('>=1.4.2')}
-  >  ${chalk.grey('>1.4.2')}
-  *  ${chalk.grey('*')}
-  `);
-  console.log(`Resolving Packages:
-  1. If ${chalk.yellow(`--source`)} globs are provided, use those.
-  2. If using Yarn Workspaces, read ${chalk.yellow(
-    `workspaces`,
-  )} from ${chalk.yellow(`package.json`)}.
-  3. If using Lerna, read ${chalk.yellow(`packages`)} from ${chalk.yellow(
-    `lerna.json`,
-  )}.
-  4. Default to ${chalk.yellow(`"package.json"`)} and ${chalk.yellow(
-    `"packages/*/package.json"`,
-  )}.
-  `);
-  console.log(`Reference:
-  globs            ${chalk.blue.underline(
-    'https://github.com/isaacs/node-glob#glob-primer',
-  )}
-  lerna.json       ${chalk.blue.underline(
-    'https://github.com/lerna/lerna#lernajson',
-  )}
-  Yarn Workspaces  ${chalk.blue.underline(
-    'https://yarnpkg.com/lang/en/docs/workspaces',
-  )}`);
+  {dim # indent package.json with 4 spaces instead of 2}
+  syncpack set-semver-ranges --indent {yellow "    "}
+
+Supported Ranges:
+  <  {dim <1.4.2}
+  <= {dim <=1.4.2}
+  "" {dim 1.4.2}
+  ~  {dim ~1.4.2}
+  ^  {dim ^1.4.2}
+  >= {dim >=1.4.2}
+  >  {dim >1.4.2}
+  *  {dim *}
+
+Resolving Packages:
+  1. If {yellow --source} globs are provided, use those.
+  2. If using Yarn Workspaces, read {yellow workspaces} from {yellow package.json}.
+  3. If using Lerna, read {yellow packages} from {yellow lerna.json}.
+  4. Default to {yellow "package.json"} and {yellow "packages/*/package.json"}.
+
+Reference:
+  globs            {blue.underline https://github.com/isaacs/node-glob#glob-primer}
+  lerna.json       {blue.underline https://github.com/lerna/lerna#lernajson}
+  Yarn Workspaces  {blue.underline https://yarnpkg.com/lang/en/docs/workspaces}
+`);
 });
 
-run(program);
+program
+  .option(...option.source)
+  .option(...option.prod)
+  .option(...option.dev)
+  .option(...option.peer)
+  .option(...option.filter)
+  .option(...option.indent)
+  .option(...option.semverRange)
+  .parse(process.argv);
+
+setSemverRangesToDisk({
+  dev: Boolean(program.dev),
+  filter: new RegExp(program.filter ? program.filter : '.'),
+  indent: program.indent ? program.indent : '  ',
+  peer: Boolean(program.peer),
+  prod: Boolean(program.prod),
+  semverRange: program.semverRange ? program.semverRange : '',
+  source: Array.isArray(program.source) ? program.source : [],
+});
