@@ -1,3 +1,20 @@
+## [5.0.1](https://github.com/JamieMason/syncpack/compare/4.5.5...5.0.1) (2020-02-16)
+
+
+### Bug Fixes
+
+* **core:** include root package.json when reading yarn & lerna config ([a7875cb](https://github.com/JamieMason/syncpack/commit/a7875cb08e0f8382163e8c9e8a4d3e6772b4c160))
+* **npm:** update dependencies ([5fdcc7b](https://github.com/JamieMason/syncpack/commit/5fdcc7bd112533f891b31dfcf0be79b54989b8d7))
+
+
+### BREAKING CHANGES
+
+* **npm:** engines.node has been increased to >=10 because
+semver@7.1.1 is a hard dependency of syncpack and
+requires node >=10
+
+
+
 ## [4.5.5](https://github.com/JamieMason/syncpack/compare/4.5.4...4.5.5) (2020-01-19)
 
 
