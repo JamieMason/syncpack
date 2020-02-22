@@ -33,14 +33,16 @@
     "@types/mock-fs": "4.10.0",
     "@types/node": "13.7.1",
     "@types/semver": "7.1.0",
+    "@typescript-eslint/eslint-plugin": "2.20.0",
+    "@typescript-eslint/parser": "2.20.0",
+    "eslint": "6.8.0",
     "expect-more-jest": "4.0.0",
     "jest": "25.1.0",
     "mock-fs": "4.10.4",
     "prettier": "1.19.1",
     "rimraf": "3.0.2",
     "ts-jest": "25.2.0",
-    "tslint": "6.0.0",
-    "typescript": "3.7.5"
+    "typescript": "3.8.2"
   },
   "engines": {
     "node": ">=10"
@@ -71,7 +73,7 @@
   "scripts": {
     "build": "tsc --project .",
     "format": "prettier --write './src/**/*.ts' './test/**/*.ts'",
-    "lint": "tslint --fix --project ./tsconfig.json",
+    "lint": "eslint --fix --ext .ts,.tsx .",
     "prebuild": "rimraf dist ./test/dist",
     "prelint": "npm run format",
     "prepack": "npm run build",
