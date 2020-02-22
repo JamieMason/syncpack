@@ -10,7 +10,7 @@ interface Options {
   filter: RegExp;
   peer: boolean;
   prod: boolean;
-  source: string[];
+  sources: string[];
 }
 
 export const listMismatches = (
@@ -31,9 +31,9 @@ export const listMismatches = (
   return mismatches;
 };
 
-export const listMismatchesFromDisk = ({ dev, filter, peer, prod, source }: Options) => {
+export const listMismatchesFromDisk = ({ dev, filter, peer, prod, sources: sources }: Options) => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  const wrappers = getWrappers({ source });
+  const wrappers = getWrappers({ sources });
   const mismatches = listMismatches(dependencyTypes, filter, wrappers);
 
   if (mismatches.length > 0) {

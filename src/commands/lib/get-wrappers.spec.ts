@@ -30,7 +30,7 @@ describe('getWrappers', () => {
   });
 
   it('prefers CLI', () => {
-    const program = { source: ['cli/*/package.json'] };
+    const program = { sources: ['cli/*/package.json'] };
     expect(getWrappers(program)).toEqual([
       getShape('cli-a', 'cli/a/package.json'),
       getShape('cli-b', 'cli/b/package.json'),
@@ -38,7 +38,7 @@ describe('getWrappers', () => {
   });
 
   it('falls back to lerna.json if present', () => {
-    const program = { source: [] };
+    const program = { sources: [] };
     expect(getWrappers(program)).toEqual([
       getShape('root', 'package.json'),
       getShape('lerna-a', 'lerna/a/package.json'),
@@ -47,7 +47,7 @@ describe('getWrappers', () => {
   });
 
   it('resorts to defaults', () => {
-    const program = { source: [] };
+    const program = { sources: [] };
     removeSync('lerna.json');
     expect(getWrappers(program)).toEqual([
       getShape('root', 'package.json'),
@@ -70,7 +70,7 @@ describe('getWrappers', () => {
     });
 
     it('should resolve correctly', () => {
-      const program = { source: [] };
+      const program = { sources: [] };
       expect(getWrappers(program)).toEqual([
         { contents: { workspaces: ['packages/*'] }, filePath: `${process.cwd()}/package.json` },
         getShape('packages-a', 'packages/a/package.json'),

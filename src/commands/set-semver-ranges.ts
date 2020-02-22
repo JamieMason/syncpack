@@ -12,7 +12,7 @@ interface Options {
   peer: boolean;
   prod: boolean;
   semverRange: string;
-  source: string[];
+  sources: string[];
 }
 
 export const setSemverRange = (range: string, version: string) => {
@@ -44,9 +44,9 @@ export const setSemverRanges = (
   }
 };
 
-export const setSemverRangesToDisk = ({ dev, filter, indent, peer, prod, semverRange, source }: Options) => {
+export const setSemverRangesToDisk = ({ dev, filter, indent, peer, prod, semverRange, sources: sources }: Options) => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  getWrappers({ source }).forEach((wrapper) => {
+  getWrappers({ sources }).forEach((wrapper) => {
     writeIfChanged(indent, wrapper, () => {
       setSemverRanges(semverRange, dependencyTypes, filter, wrapper);
     });

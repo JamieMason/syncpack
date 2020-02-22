@@ -15,7 +15,7 @@ interface Options {
   indent: string;
   peer: boolean;
   prod: boolean;
-  source: string[];
+  sources: string[];
 }
 
 export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]) => {
@@ -30,10 +30,10 @@ export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp,
   });
 };
 
-export const fixMismatchesToDisk = ({ dev, filter, indent, peer, prod, source }: Options) => {
+export const fixMismatchesToDisk = ({ dev, filter, indent, peer, prod, sources }: Options) => {
   const toJson = (wrapper: SourceWrapper) => `${JSON.stringify(wrapper.contents, null, indent)}${EOL}`;
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  const wrappers = getWrappers({ source });
+  const wrappers = getWrappers({ sources });
   const allBefore = wrappers.map(toJson);
 
   fixMismatches(dependencyTypes, filter, wrappers);

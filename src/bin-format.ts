@@ -45,5 +45,5 @@ program
 
 formatToDisk({
   indent: program.indent ? program.indent : '  ',
-  source: Array.isArray(program.source) ? program.source : [],
+  sources: Array.isArray(program.source) ? program.source : [],
 });

@@ -4,7 +4,7 @@ import { join, resolve } from 'path';
 import { ALL_PATTERNS } from '../../constants';
 
 interface Options {
-  source: string[];
+  sources: string[];
 }
 
 export interface Source {
@@ -36,8 +36,8 @@ const getPatternsFromConfig = (fileName: string, propName: string): string[] | n
     : null;
 };
 
-const hasCliPatterns = (program: Options) => program.source && program.source.length > 0;
-const getCliPatterns = (program: Options) => program.source;
+const hasCliPatterns = (program: Options) => program.sources && program.sources.length > 0;
+const getCliPatterns = (program: Options) => program.sources;
 const getYarnPatterns = () => getPatternsFromConfig('package.json', 'workspaces');
 const getLernaPatterns = () => getPatternsFromConfig('lerna.json', 'packages');
 const getDefaultPatterns = () => ALL_PATTERNS;

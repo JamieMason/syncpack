@@ -49,5 +49,5 @@ listFromDisk({
   filter: new RegExp(program.filter ? program.filter : '.'),
   peer: Boolean(program.peer),
   prod: Boolean(program.prod),
-  source: Array.isArray(program.source) ? program.source : [],
+  sources: Array.isArray(program.source) ? program.source : [],
 });

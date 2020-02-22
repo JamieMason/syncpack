@@ -71,5 +71,5 @@ setSemverRangesToDisk({
   peer: Boolean(program.peer),
   prod: Boolean(program.prod),
   semverRange: program.semverRange ? program.semverRange : '',
-  source: Array.isArray(program.source) ? program.source : [],
+  sources: Array.isArray(program.source) ? program.source : [],
 });

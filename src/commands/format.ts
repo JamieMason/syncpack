@@ -9,7 +9,7 @@ interface FormatConfig {
 
 interface Options {
   indent: string;
-  source: string[];
+  sources: string[];
 }
 
 const sortObject = (sortedKeys: string[] | Set<string>, obj: any) => {
@@ -50,8 +50,8 @@ export const format = (wrapper: SourceWrapper, { sortAz = SORT_AZ, sortFirst = S
   return contents;
 };
 
-export const formatToDisk = ({ indent, source }: Options) => {
-  getWrappers({ source }).forEach((wrapper) => {
+export const formatToDisk = ({ indent, sources: sources }: Options) => {
+  getWrappers({ sources }).forEach((wrapper) => {
     writeIfChanged(indent, wrapper, () => {
       format(wrapper);
     });
