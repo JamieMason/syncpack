@@ -1,6 +1,6 @@
 import 'expect-more-jest';
 import { DependencyType } from '../../constants';
-import { getDependencies, getMismatchedDependencies, Installation } from './get-installations';
+import { getDependencies, getMismatchedDependencies, Installation, sortByName } from './get-installations';
 import { SourceWrapper } from './get-wrappers';
 
 const mocked = {
@@ -39,5 +39,14 @@ describe('getMismatchedDependencies', () => {
   it('lists dependencies installed with different versions', () => {
     const iterator = getMismatchedDependencies(mocked.types(), mocked.projects());
     expect(Array.from(iterator)).toEqual([getShape('chalk', ['dependencies', '2.3.0'], ['dependencies', '1.0.0'])]);
+  });
+});
+
+describe('sortByName', () => {
+  it('orders installed packages by name', () => {
+    const toShape = (name: string): ExpectedShape => getShape(name);
+    const unordered = ['c', 'a', 'b', 'c'].map(toShape);
+    const ordered = ['a', 'b', 'c', 'c'].map(toShape);
+    expect(unordered.sort(sortByName)).toEqual(ordered);
   });
 });

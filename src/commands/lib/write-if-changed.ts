@@ -15,6 +15,6 @@ export const writeIfChanged = (indent: string, wrapper: SourceWrapper, mutateCon
     writeFileSync(wrapper.filePath, after);
     log(chalk.green('✓'), shortPath);
   } else {
-    log(chalk.dim('-', shortPath));
+    log(chalk.dim('-'), chalk.dim(shortPath));
   }
 };
