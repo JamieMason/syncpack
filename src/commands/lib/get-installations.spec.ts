@@ -1,6 +1,6 @@
 import 'expect-more-jest';
 import { DependencyType } from '../../constants';
-import { getDependencies, getMismatchedDependencies } from './get-installations';
+import { getDependencies, getMismatchedDependencies, Installation } from './get-installations';
 import { SourceWrapper } from './get-wrappers';
 
 const mocked = {
@@ -14,7 +14,12 @@ const mocked = {
   types: (): DependencyType[] => ['dependencies', 'devDependencies', 'peerDependencies'],
 };
 
-const getShape = (name: string, ...installations: Array<[string, string]>) => ({
+type ExpectedShape = {
+  installations: Installation[];
+  name: string;
+};
+
+const getShape = (name: string, ...installations: Array<[string, string]>): ExpectedShape => ({
   installations: installations.map(([type, version]) => expect.objectContaining({ name, type, version })),
   name,
 });

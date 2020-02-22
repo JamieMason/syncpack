@@ -12,7 +12,7 @@ interface Options {
   sources: string[];
 }
 
-const sortObject = (sortedKeys: string[] | Set<string>, obj: any) => {
+const sortObject = (sortedKeys: string[] | Set<string>, obj: Source | { [key: string]: string }): void => {
   sortedKeys.forEach((key: string) => {
     const value = obj[key];
     delete obj[key];
@@ -20,15 +20,18 @@ const sortObject = (sortedKeys: string[] | Set<string>, obj: any) => {
   });
 };
 
-const sortAlphabetically = (value: any) => {
+const sortAlphabetically = (value: Source[keyof Source]): void => {
   if (Array.isArray(value)) {
     value.sort();
-  } else if (Object.prototype.toString.call(value) === '[object Object]') {
+  } else if (value && typeof value === 'object') {
     sortObject(Object.keys(value).sort(), value);
   }
 };
 
-export const format = (wrapper: SourceWrapper, { sortAz = SORT_AZ, sortFirst = SORT_FIRST }: FormatConfig = {}) => {
+export const format = (
+  wrapper: SourceWrapper,
+  { sortAz = SORT_AZ, sortFirst = SORT_FIRST }: FormatConfig = {},
+): Source => {
   const { contents } = wrapper;
   const sortedKeys = Object.keys(contents).sort();
   const keys = new Set<string>(sortFirst.concat(sortedKeys));
@@ -50,7 +53,7 @@ export const format = (wrapper: SourceWrapper, { sortAz = SORT_AZ, sortFirst = S
   return contents;
 };
 
-export const formatToDisk = ({ indent, sources: sources }: Options) => {
+export const formatToDisk = ({ indent, sources: sources }: Options): void => {
   getWrappers({ sources }).forEach((wrapper) => {
     writeIfChanged(indent, wrapper, () => {
       format(wrapper);

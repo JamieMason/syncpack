@@ -1,8 +1,8 @@
 import * as mock from '../../test/mock';
+import * as api from './fix-mismatches';
 
 describe('fixMismatches', () => {
-  let fixMismatches: any;
-  let log: any;
+  let fixMismatches: typeof api.fixMismatches;
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -11,7 +11,6 @@ describe('fixMismatches', () => {
   beforeEach(() => {
     jest.mock('./lib/log', () => ({ log: jest.fn() }));
     fixMismatches = require('./fix-mismatches').fixMismatches;
-    log = require('./lib/log').log;
   });
 
   it('sets all dependencies installed with different versions to the highest version', () => {

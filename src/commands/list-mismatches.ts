@@ -31,7 +31,7 @@ export const listMismatches = (
   return mismatches;
 };
 
-export const listMismatchesFromDisk = ({ dev, filter, peer, prod, sources: sources }: Options) => {
+export const listMismatchesFromDisk = ({ dev, filter, peer, prod, sources: sources }: Options): void | never => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
   const wrappers = getWrappers({ sources });
   const mismatches = listMismatches(dependencyTypes, filter, wrappers);

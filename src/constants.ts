@@ -44,6 +44,8 @@ const MONOREPO_PATTERN = 'package.json';
 const PACKAGES_PATTERN = 'packages/*/package.json';
 export const ALL_PATTERNS = [MONOREPO_PATTERN, PACKAGES_PATTERN];
 
+const collect = (value: string, values: string[] = []): string[] => [...values, value];
+
 interface OptionsByName {
   dev: [string, string];
   filter: [string, string];
@@ -51,7 +53,7 @@ interface OptionsByName {
   peer: [string, string];
   prod: [string, string];
   semverRange: [string, string];
-  source: [string, string, (...args: any) => any];
+  source: [string, string, typeof collect];
 }
 
 export const option: OptionsByName = {
@@ -61,11 +63,5 @@ export const option: OptionsByName = {
   peer: ['-P, --peer', 'include peerDependencies'],
   prod: ['-p, --prod', 'include dependencies'],
   semverRange: ['-r, --semver-range <range>', `see supported ranges below. defaults to "${DEFAULT_SEMVER_RANGE}"`],
-  source: [
-    '-s, --source [pattern]',
-    'glob pattern for package.json files to read from',
-    function collect(value: string, values: string[] = []) {
-      return [...values, value];
-    },
-  ],
+  source: ['-s, --source [pattern]', 'glob pattern for package.json files to read from', collect],
 };

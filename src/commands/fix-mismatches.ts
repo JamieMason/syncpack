@@ -9,7 +9,7 @@ import { getMismatchedDependencies } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { log } from './lib/log';
 
-interface Options {
+export interface Options {
   dev: boolean;
   filter: RegExp;
   indent: string;
@@ -18,20 +18,24 @@ interface Options {
   sources: string[];
 }
 
-export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]) => {
+export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]): void => {
   const iterator = getMismatchedDependencies(dependencyTypes, wrappers);
   const mismatches = Array.from(iterator).filter(({ name }) => name.search(filter) !== -1);
 
   mismatches.forEach((installedPackage) => {
-    const newest = getHighestVersion(installedPackage.installations.map((installation) => installation.version));
+    const versions = installedPackage.installations.map((installation) => installation.version);
+    const newest = getHighestVersion(versions);
     installedPackage.installations.forEach(({ type, name, source }) => {
-      source.contents[type][name] = newest;
+      const dependencies = source.contents[type];
+      if (dependencies) {
+        dependencies[name] = newest;
+      }
     });
   });
 };
 
-export const fixMismatchesToDisk = ({ dev, filter, indent, peer, prod, sources }: Options) => {
-  const toJson = (wrapper: SourceWrapper) => `${JSON.stringify(wrapper.contents, null, indent)}${EOL}`;
+export const fixMismatchesToDisk = ({ dev, filter, indent, peer, prod, sources }: Options): void => {
+  const toJson = (wrapper: SourceWrapper): string => `${JSON.stringify(wrapper.contents, null, indent)}${EOL}`;
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
   const wrappers = getWrappers({ sources });
   const allBefore = wrappers.map(toJson);

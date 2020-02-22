@@ -36,14 +36,14 @@ const getPatternsFromConfig = (fileName: string, propName: string): string[] | n
     : null;
 };
 
-const hasCliPatterns = (program: Options) => program.sources && program.sources.length > 0;
-const getCliPatterns = (program: Options) => program.sources;
-const getYarnPatterns = () => getPatternsFromConfig('package.json', 'workspaces');
-const getLernaPatterns = () => getPatternsFromConfig('lerna.json', 'packages');
-const getDefaultPatterns = () => ALL_PATTERNS;
-const resolvePattern = (pattern: string) => sync(pattern, { absolute: true });
-const reduceFlatArray = (all: string[], next: string[]) => all.concat(next);
-const createWrapper = (filePath: string) => ({ contents: readJsonSync(filePath), filePath });
+const hasCliPatterns = (program: Options): boolean => program.sources && program.sources.length > 0;
+const getCliPatterns = (program: Options): Options['sources'] => program.sources;
+const getYarnPatterns = (): string[] | null => getPatternsFromConfig('package.json', 'workspaces');
+const getLernaPatterns = (): string[] | null => getPatternsFromConfig('lerna.json', 'packages');
+const getDefaultPatterns = (): string[] => ALL_PATTERNS;
+const resolvePattern = (pattern: string): string[] => sync(pattern, { absolute: true });
+const reduceFlatArray = (all: string[], next: string[]): string[] => all.concat(next);
+const createWrapper = (filePath: string): SourceWrapper => ({ contents: readJsonSync(filePath), filePath });
 
 export const getWrappers = (program: Options): SourceWrapper[] =>
   (hasCliPatterns(program) ? getCliPatterns(program) : getYarnPatterns() || getLernaPatterns() || getDefaultPatterns())

@@ -13,7 +13,7 @@ interface Options {
   sources: string[];
 }
 
-export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]) => {
+export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]): void => {
   const iterator = getDependencies(dependencyTypes, wrappers);
   const packages = Array.from(iterator).filter(({ name }) => name.search(filter) !== -1);
 
@@ -29,7 +29,7 @@ export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers
   });
 };
 
-export const listFromDisk = ({ dev, filter, peer, prod, sources: sources }: Options) => {
+export const listFromDisk = ({ dev, filter, peer, prod, sources: sources }: Options): void => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
   const wrappers = getWrappers({ sources });
 

@@ -1,8 +1,9 @@
 import * as mock from '../../test/mock';
+import * as api from './list';
 
 describe('list', () => {
-  let list: any;
-  let log: any;
+  let list: typeof api.list;
+  let log: jest.Mock;
 
   afterEach(() => {
     jest.restoreAllMocks();

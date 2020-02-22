@@ -9,7 +9,7 @@ import {
   RANGE_PATCH,
 } from '../../constants';
 
-export const isValidSemverRange = (range: string) =>
+export const isValidSemverRange = (range: string): boolean =>
   range === RANGE_EXACT ||
   range === RANGE_GT ||
   range === RANGE_GTE ||
@@ -19,10 +19,10 @@ export const isValidSemverRange = (range: string) =>
   range === RANGE_MINOR ||
   range === RANGE_PATCH;
 
-export const isSemver = (version: string) => {
+export const isSemver = (version: string): boolean => {
   return version.search(/^(~|\^|>=|>|<=|<|)?[0-9]+\.[0-9x]+\.[0-9x]+/) !== -1 && version.indexOf(' ') === -1;
 };
 
-export const isLooseSemver = (version: string) => {
+export const isLooseSemver = (version: string): boolean => {
   return isSemver(version) && version.search(/\.x(\.|$)/) !== -1;
 };

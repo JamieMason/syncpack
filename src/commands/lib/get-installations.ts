@@ -7,7 +7,7 @@ export interface Installation {
   /** eg 'lodash' */
   name: string;
   /** package.json file contents */
-  source: any;
+  source: SourceWrapper;
   /** eg '0.1.0' */
   version: string;
 }
@@ -40,7 +40,7 @@ function* getInstallationsOf(
 }
 
 export function* getDependencies(types: DependencyType[], wrappers: SourceWrapper[]): Generator<InstalledPackage> {
-  const visited: any = {};
+  const visited: { [name: string]: boolean } = {};
   for (const type of types) {
     for (const wrapper of wrappers) {
       if (wrapper.contents[type]) {
@@ -77,7 +77,7 @@ export function* getMismatchedDependencies(
   }
 }
 
-export const sortByName = (a: InstalledPackage, b: InstalledPackage) => {
+export const sortByName = (a: InstalledPackage, b: InstalledPackage): 0 | 1 | -1 => {
   if (a.name < b.name) {
     return -1;
   }

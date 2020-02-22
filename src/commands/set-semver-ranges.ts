@@ -15,7 +15,7 @@ interface Options {
   sources: string[];
 }
 
-export const setSemverRange = (range: string, version: string) => {
+export const setSemverRange = (range: string, version: string): string => {
   if (!isSemver(version) || !isValidSemverRange(range)) {
     return version;
   }
@@ -32,19 +32,30 @@ export const setSemverRanges = (
   dependencyTypes: DependencyType[],
   filter: RegExp,
   wrapper: SourceWrapper,
-) => {
+): void => {
   const iterator = getDependencies(dependencyTypes, [wrapper]);
   for (const installedPackage of iterator) {
     if (installedPackage.name.search(filter) !== -1) {
       for (const installation of installedPackage.installations) {
         const { name, type, version } = installation;
-        installation.source.contents[type][name] = setSemverRange(semverRange, version);
+        const dependencies = installation.source.contents[type];
+        if (dependencies) {
+          dependencies[name] = setSemverRange(semverRange, version);
+        }
       }
     }
   }
 };
 
-export const setSemverRangesToDisk = ({ dev, filter, indent, peer, prod, semverRange, sources: sources }: Options) => {
+export const setSemverRangesToDisk = ({
+  dev,
+  filter,
+  indent,
+  peer,
+  prod,
+  semverRange,
+  sources: sources,
+}: Options): void => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
   getWrappers({ sources }).forEach((wrapper) => {
     writeIfChanged(indent, wrapper, () => {

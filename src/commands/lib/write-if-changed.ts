@@ -5,8 +5,8 @@ import { relative } from 'path';
 import { SourceWrapper } from './get-wrappers';
 import { log } from './log';
 
-export const writeIfChanged = (indent: string, wrapper: SourceWrapper, mutateContents: (...args: any[]) => any) => {
-  const toJson = () => `${JSON.stringify(wrapper.contents, null, indent)}${EOL}`;
+export const writeIfChanged = (indent: string, wrapper: SourceWrapper, mutateContents: () => void): void => {
+  const toJson = (): string => `${JSON.stringify(wrapper.contents, null, indent)}${EOL}`;
   const shortPath = relative(process.cwd(), wrapper.filePath);
   const before = toJson();
   mutateContents();

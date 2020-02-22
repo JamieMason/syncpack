@@ -10,9 +10,9 @@ import {
   RANGE_PATCH,
 } from '../../constants';
 
-const getRange = (version: string) => version.slice(0, version.search(/[0-9]/));
+const getRange = (version: string): string => version.slice(0, version.search(/[0-9]/));
 
-const getRangeScore = (version: string | null) => {
+const getRangeScore = (version: string | null): number => {
   if (version === null) return 0;
   if (version === RANGE_ANY) return 8;
   const range = getRange(version);

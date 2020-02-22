@@ -1,7 +1,7 @@
 import { SourceWrapper } from '../src/commands/lib/get-wrappers';
 
-const toObject = (identifiers: string[]) =>
-  identifiers.reduce((memo: any, dep) => {
+const toObject = (identifiers: string[]): { [key: string]: string } =>
+  identifiers.reduce<{ [key: string]: string }>((memo, dep) => {
     const [name, version] = dep.split('@');
     memo[name] = version;
     return memo;

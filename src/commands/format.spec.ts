@@ -1,7 +1,7 @@
 import { format } from './format';
-import { Source } from './lib/get-wrappers';
+import { Source, SourceWrapper } from './lib/get-wrappers';
 
-const createWrapper = (contents: Source) => ({ contents, filePath: '' });
+const createWrapper = (contents: Source): SourceWrapper => ({ contents, filePath: '' });
 
 describe('format', () => {
   it('sorts Array properties alphabetically by value', () => {
