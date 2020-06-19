@@ -1,3 +1,13 @@
+## [5.0.3](https://github.com/JamieMason/syncpack/compare/5.0.1...5.0.3) (2020-06-19)
+
+
+### Bug Fixes
+
+* **format:** leave sort order of "files" array unchanged ([1bd584f](https://github.com/JamieMason/syncpack/commit/1bd584f67054d4a37b91b1e5f285dbe9b53b4489)), closes [#35](https://github.com/JamieMason/syncpack/issues/35)
+* **npm:** update dependencies ([9e0bd7e](https://github.com/JamieMason/syncpack/commit/9e0bd7ea257b3dcc425f306d4fcae195f6d0d126))
+
+
+
 ## [5.0.1](https://github.com/JamieMason/syncpack/compare/4.5.5...5.0.1) (2020-02-16)
 
 
