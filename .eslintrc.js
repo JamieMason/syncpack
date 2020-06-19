@@ -12,6 +12,12 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['*.ts'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 0
+      },
+    },
+    {
       files: ['*.spec.ts'],
       env: {
         jest: true,
