@@ -3,15 +3,7 @@ import { collect } from './lib/collect';
 export type DependencyType = 'dependencies' | 'devDependencies' | 'peerDependencies';
 export const DEPENDENCY_TYPES: DependencyType[] = ['dependencies', 'devDependencies', 'peerDependencies'];
 
-export const SORT_AZ = [
-  'contributors',
-  'dependencies',
-  'devDependencies',
-  'files',
-  'keywords',
-  'peerDependencies',
-  'scripts',
-];
+export const SORT_AZ = ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'scripts'];
 
 export const SORT_FIRST = ['name', 'description', 'version', 'author'];
 export const GREATER = 1;
