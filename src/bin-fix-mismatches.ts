@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import program = require('commander');
 import { fixMismatchesToDisk } from './commands/fix-mismatches';
 import { option } from './constants';
+import { parseFilterArgs } from './lib/parse-filter-args';
 
 program.description(
   `
@@ -29,6 +30,8 @@ Examples:
   syncpack fix-mismatches --source {yellow "apps/*/package.json"} --source {yellow "core/*/package.json"}
   {dim # uses dependencies regular expression defined by --filter when provided}
   syncpack fix-mismatches --filter {yellow "typescript|tslint"}
+  {dim # multiple filters can be provided like this}
+  syncpack fix-mismatches --filter {yellow "@react"} --filter {yellow "webpack"}
   {dim # only inspect "devDependencies"}
   syncpack fix-mismatches --dev
   {dim # only inspect "devDependencies" and "peerDependencies"}
@@ -54,7 +57,7 @@ program
 
 fixMismatchesToDisk({
   dev: Boolean(program.dev),
-  filter: new RegExp(program.filter ? program.filter : '.'),
+  filter: parseFilterArgs(program.filter),
   indent: program.indent ? program.indent : '  ',
   peer: Boolean(program.peer),
   prod: Boolean(program.prod),

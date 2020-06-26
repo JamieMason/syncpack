@@ -57,6 +57,8 @@ syncpack fix-mismatches --source "apps/*/package.json"
 syncpack fix-mismatches --source "apps/*/package.json" --source "core/*/package.json"
 # uses dependencies regular expression defined by --filter when provided
 syncpack fix-mismatches --filter "typescript|tslint"
+# multiple filters can be provided like this
+syncpack fix-mismatches --filter "@react" --filter "webpack"
 # only inspect "devDependencies"
 syncpack fix-mismatches --dev
 # only inspect "devDependencies" and "peerDependencies"
@@ -124,6 +126,8 @@ syncpack list --source "apps/*/package.json"
 syncpack list --source "apps/*/package.json" --source "core/*/package.json"
 # uses dependencies regular expression defined by --filter when provided
 syncpack list --filter "typescript|tslint"
+# multiple filters can be provided like this
+syncpack list --filter "@react" --filter "webpack"
 # only inspect "devDependencies"
 syncpack list --dev
 # only inspect "devDependencies" and "peerDependencies"
@@ -160,6 +164,8 @@ syncpack list-mismatches --source "apps/*/package.json"
 syncpack list-mismatches --source "apps/*/package.json" --source "core/*/package.json"
 # uses dependencies regular expression defined by --filter when provided
 syncpack list-mismatches --filter "typescript|tslint"
+# multiple filters can be provided like this
+syncpack list-mismatches --filter "@react" --filter "webpack"
 # only inspect "devDependencies"
 syncpack list-mismatches --dev
 # only inspect "devDependencies" and "peerDependencies"
@@ -198,6 +204,8 @@ syncpack set-semver-ranges --source "apps/*/package.json"
 syncpack set-semver-ranges --source "apps/*/package.json" --source "core/*/package.json"
 # uses dependencies regular expression defined by --filter when provided
 syncpack set-semver-ranges --filter "typescript|tslint"
+# multiple filters can be provided like this
+syncpack set-semver-ranges --filter "@react" --filter "webpack"
 # use ~ range instead of default ""
 syncpack set-semver-ranges --semver-range ~
 # set ~ range in "devDependencies"
