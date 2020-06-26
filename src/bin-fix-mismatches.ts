@@ -52,11 +52,24 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
+const parseFilterArgs = (filterArgs: string | []) => {
+  if (Array.isArray(filterArgs)) {
+    return filterArgs.map((filter) => new RegExp(filter));
+  } else if (typeof filterArgs === 'string') {
+    [new RegExp('.')];
+  }
+  return [new RegExp(filterArgs)];
+};
+
+const parseSourceArgs = (sourceArgs: string | []) => {
+  return Array.isArray(sourceArgs) ? sourceArgs : [];
+};
+
 fixMismatchesToDisk({
   dev: Boolean(program.dev),
-  filter: new RegExp(program.filter ? program.filter : '.'),
+  filter: parseFilterArgs(program.filter),
   indent: program.indent ? program.indent : '  ',
   peer: Boolean(program.peer),
   prod: Boolean(program.prod),
-  sources: Array.isArray(program.source) ? program.source : [],
+  sources: parseSourceArgs(program.source),
 });

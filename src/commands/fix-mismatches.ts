@@ -11,16 +11,18 @@ import { log } from './lib/log';
 
 export interface Options {
   dev: boolean;
-  filter: RegExp;
+  filter: RegExp[];
   indent: string;
   peer: boolean;
   prod: boolean;
   sources: string[];
 }
 
-export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]): void => {
+export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp[], wrappers: SourceWrapper[]): void => {
   const iterator = getMismatchedDependencies(dependencyTypes, wrappers);
-  const mismatches = Array.from(iterator).filter(({ name }) => name.search(filter) !== -1);
+  const mismatches = Array.from(iterator).filter(({ name }) =>
+    filter.reduce((matchesFilter: Boolean, f) => matchesFilter || name.search(f) !== -1, false),
+  );
 
   mismatches.forEach((installedPackage) => {
     const versions = installedPackage.installations.map((installation) => installation.version);
