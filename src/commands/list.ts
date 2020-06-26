@@ -7,15 +7,17 @@ import { log } from './lib/log';
 
 interface Options {
   dev: boolean;
-  filter: RegExp;
+  filter: RegExp[];
   peer: boolean;
   prod: boolean;
   sources: string[];
 }
 
-export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]): void => {
+export const list = (dependencyTypes: DependencyType[], filter: RegExp[], wrappers: SourceWrapper[]): void => {
   const iterator = getDependencies(dependencyTypes, wrappers);
-  const packages = Array.from(iterator).filter(({ name }) => name.search(filter) !== -1);
+  const packages = Array.from(iterator).filter(({ name }) =>
+    filter.reduce((matchesFilter: boolean, f) => matchesFilter || name.search(f) !== -1, false),
+  );
 
   packages.sort(sortByName).forEach(({ name, installations }) => {
     const versions = installations.map(({ version }) => version);

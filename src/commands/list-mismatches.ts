@@ -7,7 +7,7 @@ import { log } from './lib/log';
 
 interface Options {
   dev: boolean;
-  filter: RegExp;
+  filter: RegExp[];
   peer: boolean;
   prod: boolean;
   sources: string[];
@@ -15,11 +15,13 @@ interface Options {
 
 export const listMismatches = (
   dependencyTypes: DependencyType[],
-  filter: RegExp,
+  filter: RegExp[],
   wrappers: SourceWrapper[],
 ): InstalledPackage[] => {
   const iterator = getMismatchedDependencies(dependencyTypes, wrappers);
-  const mismatches = Array.from(iterator).filter(({ name }) => name.search(filter) !== -1);
+  const mismatches = Array.from(iterator).filter(({ name }) =>
+    filter.reduce((matchesFilter: boolean, f) => matchesFilter || name.search(f) !== -1, false),
+  );
 
   mismatches.sort(sortByName).forEach(({ name, installations }) => {
     log(chalk`{red ✕ ${name}}`);

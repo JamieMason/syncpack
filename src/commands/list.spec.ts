@@ -17,7 +17,7 @@ describe('list', () => {
 
   it('outputs all dependencies', () => {
     const wrappers = [mock.wrapper('a', ['foo@0.1.0']), mock.wrapper('b', ['foo@0.2.0'])];
-    list(['dependencies'], /./, wrappers);
+    list(['dependencies'], [/./], wrappers);
     expect(log.mock.calls).toMatchSnapshot();
   });
 });

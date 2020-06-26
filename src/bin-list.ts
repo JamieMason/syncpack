@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import program = require('commander');
 import { listFromDisk } from './commands/list';
 import { option } from './constants';
+import { parseFilterArgs } from './lib/parse-filter-args';
 
 program.description('  List all dependencies required by your packages.');
 
@@ -46,7 +47,7 @@ program
 
 listFromDisk({
   dev: Boolean(program.dev),
-  filter: new RegExp(program.filter ? program.filter : '.'),
+  filter: parseFilterArgs(program.filter),
   peer: Boolean(program.peer),
   prod: Boolean(program.prod),
   sources: Array.isArray(program.source) ? program.source : [],

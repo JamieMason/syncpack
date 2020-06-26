@@ -41,7 +41,7 @@ export const ALL_PATTERNS = [MONOREPO_PATTERN, PACKAGES_PATTERN];
 
 interface OptionsByName {
   dev: [string, string];
-  filter: [string, string];
+  filter: [string, string, typeof collect, string[]];
   indent: [string, string];
   peer: [string, string];
   prod: [string, string];
@@ -51,7 +51,7 @@ interface OptionsByName {
 
 export const option: OptionsByName = {
   dev: ['-d, --dev', 'include devDependencies'],
-  filter: ['-f, --filter [pattern]', 'regex for dependency filter'],
+  filter: ['-f, --filter [pattern]', 'regex for dependency filter', collect, []],
   indent: ['-i, --indent [value]', `override indentation. defaults to "${DEFAULT_INDENT}"`],
   peer: ['-P, --peer', 'include peerDependencies'],
   prod: ['-p, --prod', 'include dependencies'],

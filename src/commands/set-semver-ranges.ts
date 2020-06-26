@@ -7,7 +7,7 @@ import { writeIfChanged } from './lib/write-if-changed';
 
 interface Options {
   dev: boolean;
-  filter: RegExp;
+  filter: RegExp[];
   indent: string;
   peer: boolean;
   prod: boolean;
@@ -30,12 +30,17 @@ export const setSemverRange = (range: string, version: string): string => {
 export const setSemverRanges = (
   semverRange: string,
   dependencyTypes: DependencyType[],
-  filter: RegExp,
+  filter: RegExp[],
   wrapper: SourceWrapper,
 ): void => {
   const iterator = getDependencies(dependencyTypes, [wrapper]);
   for (const installedPackage of iterator) {
-    if (installedPackage.name.search(filter) !== -1) {
+    const installedPackageNameInFilter = filter.reduce(
+      (matchesFilter: boolean, f) => matchesFilter || installedPackage.name.search(f) !== -1,
+      false,
+    );
+
+    if (installedPackageNameInFilter) {
       for (const installation of installedPackage.installations) {
         const { name, type, version } = installation;
         const dependencies = installation.source.contents[type];

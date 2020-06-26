@@ -6,7 +6,7 @@ describe('setSemverRanges', () => {
   it('sets all versions to use the supplied range', () => {
     const range = '~';
     const wrapper = mock.wrapper('a', ['foo@0.1.0', 'bar@2.0.0']);
-    setSemverRanges(range, ['dependencies'], /./, wrapper);
+    setSemverRanges(range, ['dependencies'], [/./], wrapper);
     expect(wrapper).toEqual(mock.wrapper('a', ['foo@~0.1.0', 'bar@~2.0.0']));
   });
 });

@@ -21,7 +21,7 @@ export interface Options {
 export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp[], wrappers: SourceWrapper[]): void => {
   const iterator = getMismatchedDependencies(dependencyTypes, wrappers);
   const mismatches = Array.from(iterator).filter(({ name }) =>
-    filter.reduce((matchesFilter: Boolean, f) => matchesFilter || name.search(f) !== -1, false),
+    filter.reduce((matchesFilter: boolean, f) => matchesFilter || name.search(f) !== -1, false),
   );
 
   mismatches.forEach((installedPackage) => {
