@@ -1,3 +1,4 @@
+import { getPackagesSync, Package } from '@manypkg/get-packages';
 import { readJsonSync } from 'fs-extra';
 import { sync } from 'glob';
 import { join, resolve } from 'path';
@@ -36,6 +37,18 @@ const getPatternsFromConfig = (fileName: string, propName: string): string[] | n
     : null;
 };
 
+const getPnpmPatterns = (): string[] | null => {
+  try {
+    const config = getPackagesSync(process.cwd());
+    const isNonEmptyArray = config && config.tool === 'pnpm' && config.packages.length > 0;
+    return isNonEmptyArray
+      ? [config.root].concat(config.packages).map((pkg: Package) => join(pkg.dir, 'package.json'))
+      : null;
+  } catch (e) {
+    return null;
+  }
+};
+
 const hasCliPatterns = (program: Options): boolean => program.sources && program.sources.length > 0;
 const getCliPatterns = (program: Options): Options['sources'] => program.sources;
 const getYarnPatterns = (): string[] | null => getPatternsFromConfig('package.json', 'workspaces');
@@ -46,7 +59,10 @@ const reduceFlatArray = (all: string[], next: string[]): string[] => all.concat(
 const createWrapper = (filePath: string): SourceWrapper => ({ contents: readJsonSync(filePath), filePath });
 
 export const getWrappers = (program: Options): SourceWrapper[] =>
-  (hasCliPatterns(program) ? getCliPatterns(program) : getYarnPatterns() || getLernaPatterns() || getDefaultPatterns())
+  (hasCliPatterns(program)
+    ? getCliPatterns(program)
+    : getYarnPatterns() || getPnpmPatterns() || getLernaPatterns() || getDefaultPatterns()
+  )
     .map(resolvePattern)
     .reduce(reduceFlatArray, [])
     .map(createWrapper);

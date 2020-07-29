@@ -78,4 +78,28 @@ describe('getWrappers', () => {
       ]);
     });
   });
+
+  describe('pnpm workspaces', () => {
+    afterEach(() => {
+      mock.restore();
+    });
+
+    beforeEach(() => {
+      mock({
+        'package.json': JSON.stringify({ name: 'root' }),
+        'pnpm-workspace.yaml': ['packages:', '  - "./*"'].join('\n'),
+        'a/package.json': JSON.stringify({ name: 'package-a' }),
+        'b/package.json': JSON.stringify({ name: 'package-b' }),
+      });
+    });
+
+    it('should resolve correctly', () => {
+      const program = { sources: [] };
+      expect(getWrappers(program)).toEqual([
+        { contents: { name: 'root' }, filePath: `${process.cwd()}/package.json` },
+        getShape('package-a', 'a/package.json'),
+        getShape('package-b', 'b/package.json'),
+      ]);
+    });
+  });
 });

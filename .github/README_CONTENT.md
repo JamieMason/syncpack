@@ -11,6 +11,8 @@ package.json files are resolved in this order of precendence:
 1. If `--source`
    [glob patterns](https://github.com/isaacs/node-glob#glob-primer) are
    provided, use those.
+1. If using [Pnpm Workspaces](https://pnpm.js.org/en/workspaces),
+   read `packages` from `pnpm-workspace.yaml` in the root of the current project.
 1. If using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/),
    read `workspaces` from `./package.json`.
 1. If using [Lerna](https://lerna.js.org/), read `packages` from `./lerna.json`.
