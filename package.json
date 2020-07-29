@@ -20,6 +20,7 @@
     "Matt Sprague (https://github.com/uforic)"
   ],
   "dependencies": {
+    "@manypkg/get-packages": "^1.1.0",
     "chalk": "4.1.0",
     "commander": "6.0.0",
     "fs-extra": "9.0.1",

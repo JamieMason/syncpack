@@ -1,12 +1,13 @@
 # syncpack
 
-Manage multiple package.json files, such as in Lerna Monorepos and Yarn Workspaces
+Manage multiple package.json files, such as in Lerna Monorepos and Pnpm/Yarn Workspaces
 
 ## Installation
 
 This is a [Node.js](https://nodejs.org/) module available through the 
 [npm registry](https://www.npmjs.com/). It can be installed using the 
-[`npm`](https://docs.npmjs.com/getting-started/installing-npm-packages-locally)
+[`npm`](https://docs.npmjs.com/getting-started/installing-npm-packages-locally),
+[`pnpm`](https://pnpm.js.org/en/installation)
 or 
 [`yarn`](https://yarnpkg.com/en/)
 command line tools.
@@ -27,6 +28,7 @@ npm test
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
+- [@manypkg/get-packages](https://github.com/Thinkmill/manypkg/tree/master/packages/get-packages): a simple utility to get the packages from a monorepo, whether they're using Yarn, Bolt or pnpm
 - [glob](https://ghub.io/glob): a little globber
 - [semver](https://ghub.io/semver): The semantic version parser used by npm.
 
