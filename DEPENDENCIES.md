@@ -1,6 +1,6 @@
 # syncpack
 
-Manage multiple package.json files, such as in Lerna Monorepos and Pnpm/Yarn Workspaces
+Manage multiple package.json files, such as in Lerna Monorepos and Yarn/Pnpm Workspaces
 
 ## Installation
 

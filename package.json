@@ -1,7 +1,6 @@
 {
   "name": "syncpack",
-  "description": "Manage multiple package.json files, such as in Lerna Monorepos and Yarn Workspaces",
-  "version": "5.0.3",
+  "description": "Manage multiple package.json files, such as in Lerna Monorepos and Yarn/Pnpm Workspaces",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
     "syncpack": "dist/bin.js",
@@ -17,7 +16,8 @@
     "Jamie Mason (https://github.com/JamieMason)",
     "Luis Vieira (https://github.com/luisvieiragmr)",
     "Marais Rossouw (https://github.com/maraisr)",
-    "Matt Sprague (https://github.com/uforic)"
+    "Matt Sprague (https://github.com/uforic)",
+    "Aparajita Fishman (https://github.com/aparajita)"
   ],
   "dependencies": {
     "@manypkg/get-packages": "^1.1.0",
@@ -64,6 +64,7 @@
     "package",
     "package-json",
     "packages",
+    "pnpm",
     "semver",
     "workspace",
     "yarn"
