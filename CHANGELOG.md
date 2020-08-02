@@ -1,3 +1,17 @@
+## [5.1.4](https://github.com/JamieMason/syncpack/compare/5.0.3...5.1.4) (2020-08-02)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([f2cac6a](https://github.com/JamieMason/syncpack/commit/f2cac6a05eaf9f5a7736267a797cf75476292757))
+
+
+### Features
+
+* **core:** add support for pnpm workspaces ([a6112ec](https://github.com/JamieMason/syncpack/commit/a6112ec786fd26699a3734707218cda38baf9f0e)), closes [#42](https://github.com/JamieMason/syncpack/issues/42)
+
+
+
 ## [5.0.3](https://github.com/JamieMason/syncpack/compare/5.0.1...5.0.3) (2020-06-19)
 
 

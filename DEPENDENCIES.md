@@ -1,6 +1,6 @@
 # syncpack
 
-Manage multiple package.json files, such as in Lerna Monorepos and Yarn Workspaces
+Manage multiple package.json files, such as in Lerna Monorepos and Yarn/Pnpm Workspaces
 
 ## Installation
 
@@ -24,6 +24,7 @@ npm test
 
 ## Dependencies
 
+- [@manypkg/get-packages](https://ghub.io/@manypkg/get-packages): Manage multiple package.json files, such as in Lerna Monorepos and Yarn/Pnpm Workspaces
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
