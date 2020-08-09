@@ -1,6 +1,6 @@
 import { removeSync } from 'fs-extra';
-import mock = require('mock-fs');
 import { getWrappers, SourceWrapper } from './get-wrappers';
+import mock = require('mock-fs');
 
 describe('getWrappers', () => {
   afterEach(() => {

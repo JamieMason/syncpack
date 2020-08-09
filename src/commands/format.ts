@@ -1,5 +1,5 @@
 import { SORT_AZ, SORT_FIRST } from '../constants';
-import { getWrappers, SourceWrapper, Source } from './lib/get-wrappers';
+import { getWrappers, Source, SourceWrapper } from './lib/get-wrappers';
 import { writeIfChanged } from './lib/write-if-changed';
 
 interface FormatConfig {

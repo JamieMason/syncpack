@@ -1,5 +1,4 @@
-import { DEPENDENCY_TYPES } from '../../constants';
-import { DependencyType } from '../../constants';
+import { DependencyType, DEPENDENCY_TYPES } from '../../constants';
 
 interface Options {
   prod: boolean;

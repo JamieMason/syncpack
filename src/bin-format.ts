@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import program = require('commander');
 import { formatToDisk } from './commands/format';
 import { option } from './constants';
+import program = require('commander');
 
 program.description(
   `
