@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { formatToDisk } from './commands/format';
 import { option } from './constants';
+import { getConfig } from './lib/get-config';
 import program = require('commander');
 
 program.description(
@@ -45,7 +46,9 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-formatToDisk({
-  indent: program.indent ? program.indent : '  ',
-  sources: Array.isArray(program.source) ? program.source : [],
-});
+formatToDisk(
+  getConfig({
+    indent: program.indent,
+    source: program.source,
+  }),
+);

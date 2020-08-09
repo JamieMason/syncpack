@@ -1,4 +1,4 @@
-import { SORT_AZ, SORT_FIRST } from '../constants';
+import { SORT_AZ, SORT_FIRST, SyncpackConfig } from '../constants';
 import { getWrappers, Source, SourceWrapper } from './lib/get-wrappers';
 import { writeIfChanged } from './lib/write-if-changed';
 
@@ -7,10 +7,7 @@ interface FormatConfig {
   sortFirst?: string[];
 }
 
-interface Options {
-  indent: string;
-  sources: string[];
-}
+type Options = Pick<SyncpackConfig, 'indent' | 'source'>;
 
 const sortObject = (sortedKeys: string[] | Set<string>, obj: Source | { [key: string]: string }): void => {
   sortedKeys.forEach((key: string) => {
@@ -53,8 +50,8 @@ export const format = (
   return contents;
 };
 
-export const formatToDisk = ({ indent, sources: sources }: Options): void => {
-  getWrappers({ sources }).forEach((wrapper) => {
+export const formatToDisk = ({ indent, source: source }: Options): void => {
+  getWrappers({ source }).forEach((wrapper) => {
     writeIfChanged(indent, wrapper, () => {
       format(wrapper);
     });

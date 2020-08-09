@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { setSemverRangesToDisk } from './commands/set-semver-ranges';
 import { option } from './constants';
+import { getConfig } from './lib/get-config';
 import program = require('commander');
 
 program.description(
@@ -66,12 +67,14 @@ program
   .option(...option.semverRange)
   .parse(process.argv);
 
-setSemverRangesToDisk({
-  dev: Boolean(program.dev),
-  filter: new RegExp(program.filter ? program.filter : '.'),
-  indent: program.indent ? program.indent : '  ',
-  peer: Boolean(program.peer),
-  prod: Boolean(program.prod),
-  semverRange: program.semverRange ? program.semverRange : '',
-  sources: Array.isArray(program.source) ? program.source : [],
-});
+setSemverRangesToDisk(
+  getConfig({
+    dev: program.dev,
+    filter: program.filter,
+    indent: program.indent,
+    peer: program.peer,
+    prod: program.prod,
+    semverRange: program.semverRange,
+    source: program.source,
+  }),
+);

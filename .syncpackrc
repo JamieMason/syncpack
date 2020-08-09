@@ -1,0 +1,11 @@
+{
+  "options": {
+    "dev": true,
+    "indent": "  ",
+    "semverRange": "",
+    "peer": true,
+    "prod": true,
+    "filter": "",
+    "source": []
+  }
+}

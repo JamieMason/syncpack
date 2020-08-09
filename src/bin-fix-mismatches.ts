@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { fixMismatchesToDisk } from './commands/fix-mismatches';
 import { option } from './constants';
+import { getConfig } from './lib/get-config';
 import program = require('commander');
 
 program.description(
@@ -54,11 +55,13 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-fixMismatchesToDisk({
-  dev: Boolean(program.dev),
-  filter: new RegExp(program.filter ? program.filter : '.'),
-  indent: program.indent ? program.indent : '  ',
-  peer: Boolean(program.peer),
-  prod: Boolean(program.prod),
-  sources: Array.isArray(program.source) ? program.source : [],
-});
+fixMismatchesToDisk(
+  getConfig({
+    dev: program.dev,
+    filter: program.filter,
+    indent: program.indent,
+    peer: program.peer,
+    prod: program.prod,
+    source: program.source,
+  }),
+);

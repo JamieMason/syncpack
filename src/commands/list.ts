@@ -1,17 +1,11 @@
 import chalk from 'chalk';
-import { DependencyType } from '../constants';
+import { DependencyType, SyncpackConfig } from '../constants';
 import { getDependencyTypes } from './lib/get-dependency-types';
 import { getDependencies, sortByName } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { log } from './lib/log';
 
-interface Options {
-  dev: boolean;
-  filter: RegExp;
-  peer: boolean;
-  prod: boolean;
-  sources: string[];
-}
+type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source'>;
 
 export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]): void => {
   const iterator = getDependencies(dependencyTypes, wrappers);
@@ -29,9 +23,9 @@ export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers
   });
 };
 
-export const listFromDisk = ({ dev, filter, peer, prod, sources: sources }: Options): void => {
+export const listFromDisk = ({ dev, filter, peer, prod, source: source }: Options): void => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  const wrappers = getWrappers({ sources });
+  const wrappers = getWrappers({ source });
 
   list(dependencyTypes, filter, wrappers);
 };

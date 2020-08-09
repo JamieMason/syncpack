@@ -1,36 +1,36 @@
 # syncpack
 
-> Manage multiple package.json files, such as in Lerna Monorepos and Yarn Workspaces
+> Manage multiple package.json files, such as in Lerna Monorepos and Yarn/Pnpm Workspaces
 
-[![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack) [![NPM downloads](http://img.shields.io/npm/dm/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack) [![Build Status](http://img.shields.io/travis/JamieMason/syncpack/master.svg?style=flat-square)](https://travis-ci.org/JamieMason/syncpack) [![Maintainability](https://api.codeclimate.com/v1/badges/516439365fdd0e3c6526/maintainability)](https://codeclimate.com/github/JamieMason/syncpack/maintainability)
+[![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
+[![NPM downloads](http://img.shields.io/npm/dm/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
+[![Build Status](http://img.shields.io/travis/JamieMason/syncpack/master.svg?style=flat-square)](https://travis-ci.org/JamieMason/syncpack)
+[![Maintainability](https://api.codeclimate.com/v1/badges/516439365fdd0e3c6526/maintainability)](https://codeclimate.com/github/JamieMason/syncpack/maintainability)
 
 ## Table of Contents
 
--   [🌩 Installation](#-installation)
--   [🕵🏾‍♀️ Resolving Packages](#♀️-resolving-packages)
--   [📝 Commands](#-commands)
--   [🙋🏿‍♀️ Getting Help](#♀️-getting-help)
--   [👀 Other Projects](#-other-projects)
--   [🤓 Author](#-author)
+- [🌩 Installation](#-installation)
+- [📝 Commands](#-commands)
+  - [fix-mismatches](#fix-mismatches)
+  - [format](#format)
+  - [list](#list)
+  - [list-mismatches](#list-mismatches)
+  - [set-semver-ranges](#set-semver-ranges)
+- [🛠 Configuration File](#-configuration-file)
+- [🕵🏾‍♀️ Resolving Packages](#️-resolving-packages)
+- [🙋🏿‍♀️ Getting Help](#️-getting-help)
+- [👀 Other Projects](#-other-projects)
 
 ## 🌩 Installation
 
     npm install --global syncpack
 
-## 🕵🏾‍♀️ Resolving Packages
-
-package.json files are resolved in this order of precendence:
-
-1.  If `--source` [glob patterns](https://github.com/isaacs/node-glob#glob-primer) are provided, use those.
-2.  If using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/), read `workspaces` from `./package.json`.
-3.  If using [Lerna](https://lerna.js.org/), read `packages` from `./lerna.json`.
-4.  Default to `'package.json'` and `'packages/*/package.json'`.
-
 ## 📝 Commands
 
 ### fix-mismatches
 
-Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg. `react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
+Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg.
+`react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
 
 <details>
 <summary>Options</summary>
@@ -69,7 +69,9 @@ syncpack fix-mismatches --indent "    "
 
 ### format
 
-Organise package.json files according to a conventional format, where fields appear in a predictable order and nested fields are ordered alphabetically. Shorthand properties are used where available, such as the `"repository"` and `"bugs"` fields.
+Organise package.json files according to a conventional format, where fields appear in a predictable order and nested
+fields are ordered alphabetically. Shorthand properties are used where available, such as the `"repository"` and
+`"bugs"` fields.
 
 <details>
 <summary>Options</summary>
@@ -170,7 +172,8 @@ syncpack list-mismatches --dev --peer
 
 ### set-semver-ranges
 
-Ensure dependency versions used within `"dependencies"`, `"devDependencies"`, and `"peerDependencies"` follow a consistent format.
+Ensure dependency versions used within `"dependencies"`, `"devDependencies"`, and `"peerDependencies"` follow a
+consistent format.
 
 <details>
 <summary>Options</summary>
@@ -210,86 +213,97 @@ syncpack set-semver-ranges --indent "    "
 
 </details>
 
-<details>
-<summary>Supported Ranges</summary>
+## 🛠 Configuration File
 
-    <  <1.4.2
-    <= <=1.4.2
-    "" 1.4.2
-    ~  ~1.4.2
-    ^  ^1.4.2
-    >= >=1.4.2
-    >  >1.4.2
-    *  *
+Creating a configuration file is optional, syncpack will search up the directory tree in the following places:
 
-</details>
+- a `syncpack` property in `package.json`
+- a `.syncpackrc` file in JSON or YAML format
+- a `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`, or `.syncpackrc.cjs` file
+- a `syncpack.config.js` or `syncpack.config.cjs` CommonJS module exporting an object
+
+### Default Configuration
+
+```json
+{
+  "dev": true,
+  "filter": ".",
+  "indent": "  ",
+  "peer": true,
+  "prod": true,
+  "semverRange": "",
+  "source": ["package.json", "packages/*/package.json"]
+}
+```
+
+### `dev`, `peer`, and `prod`
+
+Whether to search within `devDependencies`, `peerDependencies`, and `dependencies` respectively. All of these locations
+are searched by default but they can be disabled individually in your config file. If any are set via the command line
+options `--dev`, `--peer`, or `--prod` then only the options you provide will be searched.
+
+### `filter`
+
+A string which will be passed to `new RegExp()` to match against package names that should be included.
+
+### `indent`
+
+The character(s) to be used to indent your package.json files when writing to disk.
+
+### `semverRange`
+
+Defaulted to `""` to ensure that exact dependency versions are used instead of loose ranges, but this can be overridden
+in your config file or via the `--semver-range` command line option.
+
+#### Supported Ranges
+
+```
+<  <1.4.2
+<= <=1.4.2
+"" 1.4.2
+~  ~1.4.2
+^  ^1.4.2
+>= >=1.4.2
+>  >1.4.2
+*  *
+```
+
+### `source`
+
+Defaults to `["package.json", "packages/*/package.json"]` to match most Projects using Lerna or Yarn Workspaces, but
+this can be overridden in your config file or via multiple `--source` command line options. Supports any patterns
+supported by [glob](https://github.com/isaacs/node-glob).
+
+## 🕵🏾‍♀️ Resolving Packages
+
+package.json files are resolved in this order of precendence:
+
+1.  If `--source` [glob patterns](https://github.com/isaacs/node-glob#glob-primer) are provided, use those.
+2.  If using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/), read `workspaces` from `./package.json`.
+3.  If using [Lerna](https://lerna.js.org/), read `packages` from `./lerna.json`.
+4.  If using [Pnpm](https://pnpm.js.org/), read `packages` from `./pnpm-workspace.yaml`.
+5.  Default to `'package.json'` and `'packages/*/package.json'`.
 
 ## 🙋🏿‍♀️ Getting Help
 
 Get help with issues by creating a [Bug Report] or discuss ideas by opening a [Feature Request].
 
 [bug report]: https://github.com/JamieMason/syncpack/issues/new?template=bug_report.md
-
 [feature request]: https://github.com/JamieMason/syncpack/issues/new?template=feature_request.md
 
 ## 👀 Other Projects
 
 If you find my Open Source projects useful, please share them ❤️
 
--   [**eslint-formatter-git-log**](https://github.com/JamieMason/eslint-formatter-git-log)<br>ESLint Formatter featuring Git Author, Date, and Hash
--   [**eslint-plugin-move-files**](https://github.com/JamieMason/eslint-plugin-move-files)<br>Move and rename files while keeping imports up to date
--   [**eslint-plugin-prefer-arrow-functions**](https://github.com/JamieMason/eslint-plugin-prefer-arrow-functions)<br>Convert functions to arrow functions
--   [**ImageOptim-CLI**](https://github.com/JamieMason/ImageOptim-CLI)<br>Automates ImageOptim, ImageAlpha, and JPEGmini for Mac to make batch optimisation of images part of your automated build process.
--   [**Jasmine-Matchers**](https://github.com/JamieMason/Jasmine-Matchers)<br>Write Beautiful Specs with Custom Matchers
--   [**karma-benchmark**](https://github.com/JamieMason/karma-benchmark)<br>Run Benchmark.js over multiple Browsers, with CI compatible output
--   [**self-help**](https://github.com/JamieMason/self-help#readme)<br>Interactive Q&A Guides for Web and the Command Line
-
-## 🤓 Author
-
-<img src="https://www.gravatar.com/avatar/acdf106ce071806278438d8c354adec8?s=100" align="left">
-
-I'm [Jamie Mason] from [Leeds] in England, I began Web Design and Development in 1999 and have been Contracting and offering Consultancy as Fold Left Ltd since 2012. Who I've worked with includes [Sky Sports], [Sky Bet], [Sky Poker], The [Premier League], [William Hill], [Shell], [Betfair], and Football Clubs including [Leeds United], [Spurs], [West Ham], [Arsenal], and more.
-
-<div align="center">
-
-[![Follow JamieMason on GitHub][github badge]][github]      [![Follow fold_left on Twitter][twitter badge]][twitter]
-
-</div>
-
-<!-- images -->
-
-[github badge]: https://img.shields.io/github/followers/JamieMason.svg?style=social&label=Follow
-
-[twitter badge]: https://img.shields.io/twitter/follow/fold_left.svg?style=social&label=Follow
-
-<!-- links -->
-
-[arsenal]: https://www.arsenal.com
-
-[betfair]: https://www.betfair.com
-
-[github]: https://github.com/JamieMason
-
-[jamie mason]: https://www.linkedin.com/in/jamiemasonleeds
-
-[leeds united]: https://www.leedsunited.com/
-
-[leeds]: https://www.instagram.com/visitleeds
-
-[premier league]: https://www.premierleague.com
-
-[shell]: https://www.shell.com
-
-[sky bet]: https://www.skybet.com
-
-[sky poker]: https://www.skypoker.com
-
-[sky sports]: https://www.skysports.com
-
-[spurs]: https://www.tottenhamhotspur.com
-
-[twitter]: https://twitter.com/fold_left
-
-[west ham]: https://www.whufc.com
-
-[william hill]: https://www.williamhill.com
+- [**eslint-formatter-git-log**](https://github.com/JamieMason/eslint-formatter-git-log)<br>ESLint Formatter featuring
+  Git Author, Date, and Hash
+- [**eslint-plugin-move-files**](https://github.com/JamieMason/eslint-plugin-move-files)<br>Move and rename files while
+  keeping imports up to date
+- [**eslint-plugin-prefer-arrow-functions**](https://github.com/JamieMason/eslint-plugin-prefer-arrow-functions)<br>Convert
+  functions to arrow functions
+- [**ImageOptim-CLI**](https://github.com/JamieMason/ImageOptim-CLI)<br>Automates ImageOptim, ImageAlpha, and JPEGmini
+  for Mac to make batch optimisation of images part of your automated build process.
+- [**Jasmine-Matchers**](https://github.com/JamieMason/Jasmine-Matchers)<br>Write Beautiful Specs with Custom Matchers
+- [**karma-benchmark**](https://github.com/JamieMason/karma-benchmark)<br>Run Benchmark.js over multiple Browsers, with
+  CI compatible output
+- [**self-help**](https://github.com/JamieMason/self-help#readme)<br>Interactive Q&A Guides for Web and the Command Line

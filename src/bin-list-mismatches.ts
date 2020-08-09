@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { listMismatchesFromDisk } from './commands/list-mismatches';
 import { option } from './constants';
+import { getConfig } from './lib/get-config';
 import program = require('commander');
 
 program.description(
@@ -50,10 +51,12 @@ program
   .option(...option.filter)
   .parse(process.argv);
 
-listMismatchesFromDisk({
-  dev: Boolean(program.dev),
-  filter: new RegExp(program.filter ? program.filter : '.'),
-  peer: Boolean(program.peer),
-  prod: Boolean(program.prod),
-  sources: Array.isArray(program.source) ? program.source : [],
-});
+listMismatchesFromDisk(
+  getConfig({
+    dev: program.dev,
+    filter: program.filter,
+    peer: program.peer,
+    prod: program.prod,
+    source: program.source,
+  }),
+);

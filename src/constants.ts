@@ -32,8 +32,26 @@ export const SEMVER_ORDER: ValidRange[] = [
   RANGE_ANY,
 ];
 
-const DEFAULT_INDENT = '  ';
-const DEFAULT_SEMVER_RANGE = RANGE_EXACT;
+export type SyncpackConfig = Readonly<{
+  dev: boolean;
+  filter: RegExp;
+  indent: string;
+  peer: boolean;
+  prod: boolean;
+  semverRange: string;
+  source: string[];
+}>;
+
+export const DEFAULT_CONFIG: SyncpackConfig = {
+  dev: true,
+  filter: /./,
+  indent: '  ',
+  peer: true,
+  prod: true,
+  semverRange: '',
+  source: [],
+};
+
 const MONOREPO_PATTERN = 'package.json';
 const PACKAGES_PATTERN = 'packages/*/package.json';
 
@@ -52,9 +70,12 @@ interface OptionsByName {
 export const option: OptionsByName = {
   dev: ['-d, --dev', 'include devDependencies'],
   filter: ['-f, --filter [pattern]', 'regex for dependency filter'],
-  indent: ['-i, --indent [value]', `override indentation. defaults to "${DEFAULT_INDENT}"`],
+  indent: ['-i, --indent [value]', `override indentation. defaults to "${DEFAULT_CONFIG.indent}"`],
   peer: ['-P, --peer', 'include peerDependencies'],
   prod: ['-p, --prod', 'include dependencies'],
-  semverRange: ['-r, --semver-range <range>', `see supported ranges below. defaults to "${DEFAULT_SEMVER_RANGE}"`],
+  semverRange: [
+    '-r, --semver-range <range>',
+    `see supported ranges below. defaults to "${DEFAULT_CONFIG.semverRange}"`,
+  ],
   source: ['-s, --source [pattern]', 'glob pattern for package.json files to read from', collect, []],
 };

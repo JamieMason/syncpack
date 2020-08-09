@@ -1,19 +1,11 @@
-import { DependencyType, RANGE_LOOSE } from '../constants';
+import { DependencyType, RANGE_LOOSE, SyncpackConfig } from '../constants';
 import { getDependencyTypes } from './lib/get-dependency-types';
 import { getDependencies } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { isLooseSemver, isSemver, isValidSemverRange } from './lib/is-semver';
 import { writeIfChanged } from './lib/write-if-changed';
 
-interface Options {
-  dev: boolean;
-  filter: RegExp;
-  indent: string;
-  peer: boolean;
-  prod: boolean;
-  semverRange: string;
-  sources: string[];
-}
+type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'semverRange' | 'source'>;
 
 export const setSemverRange = (range: string, version: string): string => {
   if (!isSemver(version) || !isValidSemverRange(range)) {
@@ -47,17 +39,9 @@ export const setSemverRanges = (
   }
 };
 
-export const setSemverRangesToDisk = ({
-  dev,
-  filter,
-  indent,
-  peer,
-  prod,
-  semverRange,
-  sources: sources,
-}: Options): void => {
+export const setSemverRangesToDisk = ({ dev, filter, indent, peer, prod, semverRange, source }: Options): void => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  getWrappers({ sources }).forEach((wrapper) => {
+  getWrappers({ source }).forEach((wrapper) => {
     writeIfChanged(indent, wrapper, () => {
       setSemverRanges(semverRange, dependencyTypes, filter, wrapper);
     });

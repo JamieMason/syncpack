@@ -1,17 +1,11 @@
 import chalk from 'chalk';
-import { DependencyType } from '../constants';
+import { DependencyType, SyncpackConfig } from '../constants';
 import { getDependencyTypes } from './lib/get-dependency-types';
 import { getMismatchedDependencies, InstalledPackage, sortByName } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { log } from './lib/log';
 
-interface Options {
-  dev: boolean;
-  filter: RegExp;
-  peer: boolean;
-  prod: boolean;
-  sources: string[];
-}
+type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source'>;
 
 export const listMismatches = (
   dependencyTypes: DependencyType[],
@@ -31,9 +25,9 @@ export const listMismatches = (
   return mismatches;
 };
 
-export const listMismatchesFromDisk = ({ dev, filter, peer, prod, sources: sources }: Options): void | never => {
+export const listMismatchesFromDisk = ({ dev, filter, peer, prod, source: source }: Options): void | never => {
   const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  const wrappers = getWrappers({ sources });
+  const wrappers = getWrappers({ source });
   const mismatches = listMismatches(dependencyTypes, filter, wrappers);
 
   if (mismatches.length > 0) {
