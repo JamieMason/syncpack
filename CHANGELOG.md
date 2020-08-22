@@ -1,3 +1,17 @@
+## [5.2.5](https://github.com/JamieMason/syncpack/compare/5.1.4...5.2.5) (2020-08-22)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([19ad510](https://github.com/JamieMason/syncpack/commit/19ad510d09040e1aa098e16d6831836da3c9c12f))
+
+
+### Features
+
+* **core:** add support for config files ([cfd5df3](https://github.com/JamieMason/syncpack/commit/cfd5df35134de068eaf26bdb2cfaa1890c6c3545))
+
+
+
 ## [5.1.4](https://github.com/JamieMason/syncpack/compare/5.0.3...5.1.4) (2020-08-02)
 
 
