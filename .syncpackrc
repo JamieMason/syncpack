@@ -6,6 +6,20 @@
     "peer": true,
     "prod": true,
     "filter": "",
+    "sortAz": [
+      "contributors",
+      "dependencies",
+      "devDependencies",
+      "keywords",
+      "peerDependencies",
+      "scripts"
+    ],
+    "sortFirst": [
+      "name",
+      "description",
+      "version",
+      "author"
+    ],
     "source": []
   }
 }

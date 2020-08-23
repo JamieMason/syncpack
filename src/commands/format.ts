@@ -1,13 +1,8 @@
-import { SORT_AZ, SORT_FIRST, SyncpackConfig } from '../constants';
+import { SyncpackConfig } from '../constants';
 import { getWrappers, Source, SourceWrapper } from './lib/get-wrappers';
 import { writeIfChanged } from './lib/write-if-changed';
 
-interface FormatConfig {
-  sortAz?: string[];
-  sortFirst?: string[];
-}
-
-type Options = Pick<SyncpackConfig, 'indent' | 'source'>;
+type Options = Pick<SyncpackConfig, 'indent' | 'sortAz' | 'sortFirst' | 'source'>;
 
 const sortObject = (sortedKeys: string[] | Set<string>, obj: Source | { [key: string]: string }): void => {
   sortedKeys.forEach((key: string) => {
@@ -25,10 +20,7 @@ const sortAlphabetically = (value: Source[keyof Source]): void => {
   }
 };
 
-export const format = (
-  wrapper: SourceWrapper,
-  { sortAz = SORT_AZ, sortFirst = SORT_FIRST }: FormatConfig = {},
-): Source => {
+export const format = (wrapper: SourceWrapper, { sortAz, sortFirst }: Options): Source => {
   const { contents } = wrapper;
   const sortedKeys = Object.keys(contents).sort();
   const keys = new Set<string>(sortFirst.concat(sortedKeys));
@@ -50,10 +42,10 @@ export const format = (
   return contents;
 };
 
-export const formatToDisk = ({ indent, source: source }: Options): void => {
-  getWrappers({ source }).forEach((wrapper) => {
-    writeIfChanged(indent, wrapper, () => {
-      format(wrapper);
+export const formatToDisk = (options: Options): void => {
+  getWrappers({ source: options.source }).forEach((wrapper) => {
+    writeIfChanged(options.indent, wrapper, () => {
+      format(wrapper, options);
     });
   });
 };

@@ -1,9 +1,9 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { isArray, isBoolean, isNonEmptyString, isObject, isRegExp } from 'expect-more';
+import { isArray, isBoolean, isNonEmptyString, isObject, isRegExp, isArrayOfStrings } from 'expect-more';
 import { isValidSemverRange } from '../commands/lib/is-semver';
 import { DEFAULT_CONFIG, SyncpackConfig } from '../constants';
 
-export interface Options {
+export interface CliOptions {
   dev: boolean;
   filter: string;
   indent: string;
@@ -13,16 +13,18 @@ export interface Options {
   source: string[];
 }
 
-export const getConfig = (program: Partial<Options>): SyncpackConfig => {
-  type OptionName = keyof Options;
+export const getConfig = (program: Partial<CliOptions>): SyncpackConfig => {
+  type OptionName = keyof CliOptions | 'sortAz' | 'sortFirst';
   type TypeChecker = (value: any) => boolean;
 
   const rcSearch = cosmiconfigSync('syncpack').search();
   const rcFile = isObject(rcSearch) && isObject(rcSearch.config) ? rcSearch.config : {};
   const rcOptions = isObject(rcFile.options) ? rcFile.options : {};
 
+  const isCliOption = (key: string): key is keyof CliOptions => key in program;
+
   const getOption = (name: OptionName, isValid: TypeChecker) => {
-    if (isValid(program[name])) {
+    if (isCliOption(name) && isValid(program[name])) {
       return program[name];
     }
     if (isValid(rcOptions[name])) {
@@ -40,6 +42,8 @@ export const getConfig = (program: Partial<Options>): SyncpackConfig => {
     peer: getOption('peer', isBoolean),
     prod: getOption('prod', isBoolean),
     semverRange: getOption('semverRange', isValidSemverRange),
+    sortAz: getOption('sortAz', isArrayOfStrings),
+    sortFirst: getOption('sortFirst', isArrayOfStrings),
     source: getOption('source', isArray),
   };
 

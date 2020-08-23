@@ -3,9 +3,6 @@ import { collect } from './lib/collect';
 export type DependencyType = 'dependencies' | 'devDependencies' | 'peerDependencies';
 export const DEPENDENCY_TYPES: DependencyType[] = ['dependencies', 'devDependencies', 'peerDependencies'];
 
-export const SORT_AZ = ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'scripts'];
-
-export const SORT_FIRST = ['name', 'description', 'version', 'author'];
 export const GREATER = 1;
 export const LESSER = -1;
 export const SAME = 0;
@@ -39,6 +36,8 @@ export type SyncpackConfig = Readonly<{
   peer: boolean;
   prod: boolean;
   semverRange: string;
+  sortAz: string[];
+  sortFirst: string[];
   source: string[];
 }>;
 
@@ -49,6 +48,8 @@ export const DEFAULT_CONFIG: SyncpackConfig = {
   peer: true,
   prod: true,
   semverRange: '',
+  sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'scripts'],
+  sortFirst: ['name', 'description', 'version', 'author'],
   source: [],
 };
 

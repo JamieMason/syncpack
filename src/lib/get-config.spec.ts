@@ -1,10 +1,10 @@
 import { DEFAULT_CONFIG } from '../constants';
-import { Options } from './get-config';
+import { CliOptions } from './get-config';
 
 describe('getConfig', () => {
   let getConfig = require('./get-config').getConfig;
 
-  const setConfigFileTo = (value: Partial<Options>) => {
+  const setConfigFileTo = (value: Partial<CliOptions>) => {
     jest.resetModules();
     jest.mock('cosmiconfig', () => ({ cosmiconfigSync: jest.fn() }));
     const { cosmiconfigSync } = require('cosmiconfig');
@@ -29,13 +29,15 @@ describe('getConfig', () => {
 
   it('merges defaults, config, and CLI options', () => {
     setConfigFileTo({ source: ['./from-config'] });
-    expect(getConfig({ filter: 'syncpack', semverRange: '~' })).toEqual({
+    expect(getConfig({ filter: 'syncpack', semverRange: '~', sortAz: ['overridden'] })).toEqual({
       dev: true,
       filter: /syncpack/,
       indent: '  ',
       peer: true,
       prod: true,
       semverRange: '~',
+      sortAz: ['overridden'],
+      sortFirst: ['name', 'description', 'version', 'author'],
       source: ['./from-config'],
     });
   });

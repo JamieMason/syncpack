@@ -232,6 +232,8 @@ Creating a configuration file is optional, syncpack will search up the directory
   "peer": true,
   "prod": true,
   "semverRange": "",
+  "sortAz": ["contributors", "dependencies", "devDependencies", "keywords", "peerDependencies", "scripts"],
+  "sortFirst": ["name", "description", "version", "author"],
   "source": ["package.json", "packages/*/package.json"]
 }
 ```
@@ -273,6 +275,17 @@ in your config file or via the `--semver-range` command line option.
 Defaults to `["package.json", "packages/*/package.json"]` to match most Projects using Lerna or Yarn Workspaces, but
 this can be overridden in your config file or via multiple `--source` command line options. Supports any patterns
 supported by [glob](https://github.com/isaacs/node-glob).
+
+### `sortAz`
+
+When using the `format` command, determines which fields within package.json files should be sorted alphabetically. When
+the value is an Object, its keys are sorted alphabetically. When the value is an Array, its values are sorted
+alphabetically. There is no equivalent CLI Option for this configuration.
+
+### `sortFirst`
+
+When using the `format` command, determines which fields within package.json files should appear at the top, and in what
+order. There is no equivalent CLI Option for this configuration.
 
 ## 🕵🏾‍♀️ Resolving Packages
 
