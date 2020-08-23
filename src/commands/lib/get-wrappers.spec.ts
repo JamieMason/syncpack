@@ -61,21 +61,42 @@ describe('getWrappers', () => {
       mock.restore();
     });
 
-    beforeEach(() => {
-      mock({
-        'package.json': JSON.stringify({ workspaces: ['packages/*'] }),
-        'packages/a/package.json': JSON.stringify({ name: 'packages-a' }),
-        'packages/b/package.json': JSON.stringify({ name: 'packages-b' }),
+    describe('when configuration is an array', () => {
+      beforeEach(() => {
+        mock({
+          'package.json': JSON.stringify({ workspaces: ['as-array/*'] }),
+          'as-array/a/package.json': JSON.stringify({ name: 'packages-a' }),
+          'as-array/b/package.json': JSON.stringify({ name: 'packages-b' }),
+        });
+      });
+
+      it('should resolve correctly', () => {
+        const program = { source: [] };
+        expect(getWrappers(program)).toEqual([
+          { contents: { workspaces: ['as-array/*'] }, filePath: `${process.cwd()}/package.json` },
+          getShape('packages-a', 'as-array/a/package.json'),
+          getShape('packages-b', 'as-array/b/package.json'),
+        ]);
       });
     });
 
-    it('should resolve correctly', () => {
-      const program = { source: [] };
-      expect(getWrappers(program)).toEqual([
-        { contents: { workspaces: ['packages/*'] }, filePath: `${process.cwd()}/package.json` },
-        getShape('packages-a', 'packages/a/package.json'),
-        getShape('packages-b', 'packages/b/package.json'),
-      ]);
+    describe('when configuration is an object', () => {
+      beforeEach(() => {
+        mock({
+          'package.json': JSON.stringify({ workspaces: { packages: ['as-object/*'] } }),
+          'as-object/a/package.json': JSON.stringify({ name: 'packages-a' }),
+          'as-object/b/package.json': JSON.stringify({ name: 'packages-b' }),
+        });
+      });
+
+      it('should resolve correctly', () => {
+        const program = { source: [] };
+        expect(getWrappers(program)).toEqual([
+          { contents: { workspaces: { packages: ['as-object/*'] } }, filePath: `${process.cwd()}/package.json` },
+          getShape('packages-a', 'as-object/a/package.json'),
+          getShape('packages-b', 'as-object/b/package.json'),
+        ]);
+      });
     });
   });
 

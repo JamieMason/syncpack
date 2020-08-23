@@ -21,13 +21,13 @@
     "Matt Sprague (https://github.com/uforic)"
   ],
   "dependencies": {
-    "@manypkg/get-packages": "1.1.1",
     "chalk": "4.1.0",
     "commander": "6.0.0",
     "cosmiconfig": "7.0.0",
     "expect-more": "0.8.0",
     "fs-extra": "9.0.1",
     "glob": "7.1.6",
+    "read-yaml-file": "2.0.0",
     "semver": "7.3.2"
   },
   "devDependencies": {
