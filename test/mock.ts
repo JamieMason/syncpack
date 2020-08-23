@@ -7,12 +7,12 @@ const toObject = (identifiers: string[]): { [key: string]: string } =>
     return memo;
   }, {});
 
-export const wrapper = (dirName: string, deps: string[], devDeps?: string[], peerDeps?: string[]): SourceWrapper => {
+export const wrapper = (dirName: string, deps?: string[], devDeps?: string[], peerDeps?: string[]): SourceWrapper => {
   return {
     contents: {
-      ...(deps ? { dependencies: toObject(deps) } : {}),
-      ...(devDeps ? { devDependencies: toObject(devDeps) } : {}),
-      ...(peerDeps ? { peerDependencies: toObject(peerDeps) } : {}),
+      ...(deps && deps.length > 0 ? { dependencies: toObject(deps) } : {}),
+      ...(devDeps && devDeps.length > 0 ? { devDependencies: toObject(devDeps) } : {}),
+      ...(peerDeps && peerDeps.length > 0 ? { peerDependencies: toObject(peerDeps) } : {}),
     },
     filePath: `/${dirName}/package.json`,
   };

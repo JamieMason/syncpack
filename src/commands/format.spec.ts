@@ -1,6 +1,6 @@
+import { DEFAULT_CONFIG } from '../constants';
 import { format } from './format';
 import { Source, SourceWrapper } from './lib/get-wrappers';
-import { DEFAULT_CONFIG } from '../constants';
 
 const createWrapper = (contents: Source): SourceWrapper => ({ contents, filePath: '' });
 

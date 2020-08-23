@@ -14,8 +14,17 @@ describe('fixMismatches', () => {
   });
 
   it('sets all dependencies installed with different versions to the highest version', () => {
-    const wrappers = [mock.wrapper('a', ['foo@0.1.0']), mock.wrapper('b', ['foo@0.2.0'])];
-    fixMismatches(['dependencies'], /./, wrappers);
+    const wrappers = [mock.wrapper('a', ['foo@0.1.0']), mock.wrapper('b', [], ['foo@0.2.0'])];
+    fixMismatches(['dependencies', 'devDependencies', 'peerDependencies'], /./, wrappers);
+    expect(wrappers).toMatchSnapshot();
+  });
+
+  it('ignores non-semver dependencies', () => {
+    const wrappers = [
+      mock.wrapper('a', ['foo@link:vendor/foo-0.1.0']),
+      mock.wrapper('b', ['foo@link:vendor/foo-0.2.0']),
+    ];
+    fixMismatches(['dependencies', 'devDependencies', 'peerDependencies'], /./, wrappers);
     expect(wrappers).toMatchSnapshot();
   });
 });

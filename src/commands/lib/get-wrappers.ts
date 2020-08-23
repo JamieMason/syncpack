@@ -1,8 +1,8 @@
-import { sync as readYamlFileSync } from 'read-yaml-file';
 import { isArrayOfStrings } from 'expect-more';
 import { readJsonSync } from 'fs-extra';
 import { sync } from 'glob';
 import { join, resolve } from 'path';
+import { sync as readYamlFileSync } from 'read-yaml-file';
 import { ALL_PATTERNS } from '../../constants';
 
 interface Options {

@@ -1,5 +1,5 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { isArray, isBoolean, isNonEmptyString, isObject, isRegExp, isArrayOfStrings } from 'expect-more';
+import { isArray, isArrayOfStrings, isBoolean, isNonEmptyString, isObject, isRegExp } from 'expect-more';
 import { isValidSemverRange } from '../commands/lib/is-semver';
 import { DEFAULT_CONFIG, SyncpackConfig } from '../constants';
 

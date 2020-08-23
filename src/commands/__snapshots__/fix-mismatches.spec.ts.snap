@@ -1,5 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`fixMismatches ignores non-semver dependencies 1`] = `
+Array [
+  Object {
+    "contents": Object {
+      "dependencies": Object {
+        "foo": "link:vendor/foo-0.1.0",
+      },
+    },
+    "filePath": "/a/package.json",
+  },
+  Object {
+    "contents": Object {
+      "dependencies": Object {
+        "foo": "link:vendor/foo-0.2.0",
+      },
+    },
+    "filePath": "/b/package.json",
+  },
+]
+`;
+
 exports[`fixMismatches sets all dependencies installed with different versions to the highest version 1`] = `
 Array [
   Object {
@@ -12,7 +33,7 @@ Array [
   },
   Object {
     "contents": Object {
-      "dependencies": Object {
+      "devDependencies": Object {
         "foo": "0.2.0",
       },
     },
