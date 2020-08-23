@@ -20,7 +20,8 @@ const sortAlphabetically = (value: Source[keyof Source]): void => {
   }
 };
 
-export const format = (wrapper: SourceWrapper, { sortAz, sortFirst }: Options): Source => {
+export const format = (wrapper: SourceWrapper, options: Options): Source => {
+  const { sortAz, sortFirst } = options;
   const { contents } = wrapper;
   const sortedKeys = Object.keys(contents).sort();
   const keys = new Set<string>(sortFirst.concat(sortedKeys));

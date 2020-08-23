@@ -1,19 +1,14 @@
 import chalk from 'chalk';
-import { DependencyType, SyncpackConfig } from '../constants';
-import { getDependencyTypes } from './lib/get-dependency-types';
+import { SyncpackConfig } from '../constants';
 import { getMismatchedDependencies, InstalledPackage, sortByName } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { log } from './lib/log';
 
 type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source'>;
 
-export const listMismatches = (
-  dependencyTypes: DependencyType[],
-  filter: RegExp,
-  wrappers: SourceWrapper[],
-): InstalledPackage[] => {
-  const iterator = getMismatchedDependencies(dependencyTypes, wrappers);
-  const mismatches = Array.from(iterator).filter(({ name }) => name.search(filter) !== -1);
+export const listMismatches = (wrappers: SourceWrapper[], options: Options): InstalledPackage[] => {
+  const iterator = getMismatchedDependencies(wrappers, options);
+  const mismatches = Array.from(iterator).filter(({ name }) => name.search(options.filter) !== -1);
 
   mismatches.sort(sortByName).forEach(({ name, installations }) => {
     log(chalk`{red ✕ ${name}}`);
@@ -25,10 +20,9 @@ export const listMismatches = (
   return mismatches;
 };
 
-export const listMismatchesFromDisk = ({ dev, filter, peer, prod, source: source }: Options): void | never => {
-  const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  const wrappers = getWrappers({ source });
-  const mismatches = listMismatches(dependencyTypes, filter, wrappers);
+export const listMismatchesFromDisk = (options: Options): void | never => {
+  const wrappers = getWrappers(options);
+  const mismatches = listMismatches(wrappers, options);
 
   if (mismatches.length > 0) {
     process.exit(1);

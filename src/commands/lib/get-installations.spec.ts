@@ -1,5 +1,5 @@
 import 'expect-more-jest';
-import { DependencyType } from '../../constants';
+import { DEFAULT_CONFIG } from '../../constants';
 import { getDependencies, getMismatchedDependencies, Installation, sortByName } from './get-installations';
 import { SourceWrapper } from './get-wrappers';
 
@@ -11,7 +11,6 @@ const mocked = {
     { filePath: '', contents: { dependencies: { chalk: '1.0.0' } } },
     { filePath: '', contents: { dependencies: { biggy: '0.1.0' } } },
   ],
-  types: (): DependencyType[] => ['dependencies', 'devDependencies', 'peerDependencies'],
 };
 
 type ExpectedShape = {
@@ -26,7 +25,7 @@ const getShape = (name: string, ...installations: Array<[string, string]>): Expe
 
 describe('getDependencies', () => {
   it('lists all dependencies and their versions', () => {
-    const iterator = getDependencies(mocked.types(), mocked.projects());
+    const iterator = getDependencies(mocked.projects(), DEFAULT_CONFIG);
     expect(Array.from(iterator)).toEqual([
       getShape('chalk', ['dependencies', '2.3.0'], ['dependencies', '1.0.0']),
       getShape('biggy', ['dependencies', '0.1.0']),
@@ -37,7 +36,7 @@ describe('getDependencies', () => {
 
 describe('getMismatchedDependencies', () => {
   it('lists dependencies installed with different versions', () => {
-    const iterator = getMismatchedDependencies(mocked.types(), mocked.projects());
+    const iterator = getMismatchedDependencies(mocked.projects(), DEFAULT_CONFIG);
     expect(Array.from(iterator)).toEqual([getShape('chalk', ['dependencies', '2.3.0'], ['dependencies', '1.0.0'])]);
   });
 });

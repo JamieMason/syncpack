@@ -1,5 +1,4 @@
-import { DependencyType, RANGE_LOOSE, SyncpackConfig } from '../constants';
-import { getDependencyTypes } from './lib/get-dependency-types';
+import { RANGE_LOOSE, SyncpackConfig } from '../constants';
 import { getDependencies } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { isLooseSemver, isSemver, isValidSemverRange } from './lib/is-semver';
@@ -19,31 +18,26 @@ export const setSemverRange = (range: string, version: string): string => {
     : `${range}${nextVersion.slice(from1stNumber)}`;
 };
 
-export const setSemverRanges = (
-  semverRange: string,
-  dependencyTypes: DependencyType[],
-  filter: RegExp,
-  wrapper: SourceWrapper,
-): void => {
-  const iterator = getDependencies(dependencyTypes, [wrapper]);
+export const setSemverRanges = (wrapper: SourceWrapper, options: Options): void => {
+  const iterator = getDependencies([wrapper], options);
   for (const installedPackage of iterator) {
-    if (installedPackage.name.search(filter) !== -1) {
+    if (installedPackage.name.search(options.filter) !== -1) {
       for (const installation of installedPackage.installations) {
         const { name, type, version } = installation;
         const dependencies = installation.source.contents[type];
         if (dependencies) {
-          dependencies[name] = setSemverRange(semverRange, version);
+          dependencies[name] = setSemverRange(options.semverRange, version);
         }
       }
     }
   }
 };
 
-export const setSemverRangesToDisk = ({ dev, filter, indent, peer, prod, semverRange, source }: Options): void => {
-  const dependencyTypes = getDependencyTypes({ dev, peer, prod });
+export const setSemverRangesToDisk = (options: Options): void => {
+  const { indent, source } = options;
   getWrappers({ source }).forEach((wrapper) => {
     writeIfChanged(indent, wrapper, () => {
-      setSemverRanges(semverRange, dependencyTypes, filter, wrapper);
+      setSemverRanges(wrapper, options);
     });
   });
 };

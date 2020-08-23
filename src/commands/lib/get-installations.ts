@@ -1,4 +1,5 @@
-import { DependencyType } from '../../constants';
+import { DependencyType, SyncpackConfig } from '../../constants';
+import { getDependencyTypes } from './get-dependency-types';
 import { SourceWrapper } from './get-wrappers';
 
 export interface Installation {
@@ -39,7 +40,11 @@ function* getInstallationsOf(
   }
 }
 
-export function* getDependencies(types: DependencyType[], wrappers: SourceWrapper[]): Generator<InstalledPackage> {
+export function* getDependencies(
+  wrappers: SourceWrapper[],
+  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod'>,
+): Generator<InstalledPackage> {
+  const types = getDependencyTypes(options);
   const visited: { [name: string]: boolean } = {};
   for (const type of types) {
     for (const wrapper of wrappers) {
@@ -59,10 +64,10 @@ export function* getDependencies(types: DependencyType[], wrappers: SourceWrappe
 }
 
 export function* getMismatchedDependencies(
-  types: DependencyType[],
   wrappers: SourceWrapper[],
+  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod'>,
 ): Generator<InstalledPackage> {
-  const iterator = getDependencies(types, wrappers);
+  const iterator = getDependencies(wrappers, options);
   for (const installedPackage of iterator) {
     const { installations } = installedPackage;
     const len = installations.length;

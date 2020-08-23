@@ -1,15 +1,14 @@
 import chalk from 'chalk';
-import { DependencyType, SyncpackConfig } from '../constants';
-import { getDependencyTypes } from './lib/get-dependency-types';
+import { SyncpackConfig } from '../constants';
 import { getDependencies, sortByName } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { log } from './lib/log';
 
 type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source'>;
 
-export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers: SourceWrapper[]): void => {
-  const iterator = getDependencies(dependencyTypes, wrappers);
-  const packages = Array.from(iterator).filter(({ name }) => name.search(filter) !== -1);
+export const list = (wrappers: SourceWrapper[], options: Options): void => {
+  const iterator = getDependencies(wrappers, options);
+  const packages = Array.from(iterator).filter(({ name }) => name.search(options.filter) !== -1);
 
   packages.sort(sortByName).forEach(({ name, installations }) => {
     const versions = installations.map(({ version }) => version);
@@ -23,9 +22,7 @@ export const list = (dependencyTypes: DependencyType[], filter: RegExp, wrappers
   });
 };
 
-export const listFromDisk = ({ dev, filter, peer, prod, source: source }: Options): void => {
-  const dependencyTypes = getDependencyTypes({ dev, peer, prod });
-  const wrappers = getWrappers({ source });
-
-  list(dependencyTypes, filter, wrappers);
+export const listFromDisk = (options: Options): void => {
+  const wrappers = getWrappers(options);
+  list(wrappers, options);
 };

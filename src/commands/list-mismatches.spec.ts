@@ -1,4 +1,5 @@
 import * as mock from '../../test/mock';
+import { DEFAULT_CONFIG } from '../constants';
 import * as api from './list-mismatches';
 
 describe('listMismatches', () => {
@@ -17,7 +18,7 @@ describe('listMismatches', () => {
 
   it('outputs all dependencies installed with different versions', () => {
     const wrappers = [mock.wrapper('a', ['foo@0.1.0']), mock.wrapper('b', ['foo@0.2.0'])];
-    listMismatches(['dependencies'], /./, wrappers);
+    listMismatches(wrappers, { ...DEFAULT_CONFIG, dev: false, peer: false, prod: true });
     expect(log.mock.calls).toMatchSnapshot();
   });
 });
