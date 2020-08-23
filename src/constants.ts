@@ -29,6 +29,11 @@ export const SEMVER_ORDER: ValidRange[] = [
   RANGE_ANY,
 ];
 
+export interface VersionGroup {
+  packages: string[];
+  dependencies: string[];
+}
+
 export type SyncpackConfig = Readonly<{
   dev: boolean;
   filter: RegExp;
@@ -39,6 +44,7 @@ export type SyncpackConfig = Readonly<{
   sortAz: string[];
   sortFirst: string[];
   source: string[];
+  versionGroups: VersionGroup[];
 }>;
 
 export const DEFAULT_CONFIG: SyncpackConfig = {
@@ -51,6 +57,7 @@ export const DEFAULT_CONFIG: SyncpackConfig = {
   sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'resolutions', 'scripts'],
   sortFirst: ['name', 'description', 'version', 'author'],
   source: [],
+  versionGroups: [],
 };
 
 const MONOREPO_PATTERN = 'package.json';

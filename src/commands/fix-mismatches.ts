@@ -8,7 +8,7 @@ import { getMismatchedDependencies } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { log } from './lib/log';
 
-type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'source'>;
+type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'source' | 'versionGroups'>;
 
 export const fixMismatches = (wrappers: SourceWrapper[], options: Options): void => {
   const iterator = getMismatchedDependencies(wrappers, options);

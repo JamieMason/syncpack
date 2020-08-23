@@ -4,7 +4,7 @@ import { getMismatchedDependencies, InstalledPackage, sortByName } from './lib/g
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { log } from './lib/log';
 
-type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source'>;
+type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source' | 'versionGroups'>;
 
 export const listMismatches = (wrappers: SourceWrapper[], options: Options): InstalledPackage[] => {
   const iterator = getMismatchedDependencies(wrappers, options);

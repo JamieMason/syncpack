@@ -1,7 +1,7 @@
 import { cosmiconfigSync } from 'cosmiconfig';
 import { isArray, isArrayOfStrings, isBoolean, isNonEmptyString, isObject, isRegExp } from 'expect-more';
 import { isValidSemverRange } from '../commands/lib/is-semver';
-import { DEFAULT_CONFIG, SyncpackConfig } from '../constants';
+import { DEFAULT_CONFIG, SyncpackConfig, VersionGroup } from '../constants';
 
 export interface CliOptions {
   dev: boolean;
@@ -14,7 +14,7 @@ export interface CliOptions {
 }
 
 export const getConfig = (program: Partial<CliOptions>): SyncpackConfig => {
-  type OptionName = keyof CliOptions | 'sortAz' | 'sortFirst';
+  type OptionName = keyof CliOptions | 'sortAz' | 'sortFirst' | 'versionGroups';
   type TypeChecker = (value: any) => boolean;
 
   const rcSearch = cosmiconfigSync('syncpack').search();
@@ -22,6 +22,11 @@ export const getConfig = (program: Partial<CliOptions>): SyncpackConfig => {
   const rcOptions = isObject(rcFile.options) ? rcFile.options : {};
 
   const isCliOption = (key: string): key is keyof CliOptions => key in program;
+
+  const isVersionGroup = (value: any): value is VersionGroup =>
+    isObject(value) && isArrayOfStrings(value.packages) && isArrayOfStrings(value.dependencies);
+
+  const isArrayOfVersionGroups = (value: any): value is VersionGroup[] => isArray(value) && value.every(isVersionGroup);
 
   const getOption = (name: OptionName, isValid: TypeChecker) => {
     if (isCliOption(name) && isValid(program[name])) {
@@ -45,6 +50,7 @@ export const getConfig = (program: Partial<CliOptions>): SyncpackConfig => {
     sortAz: getOption('sortAz', isArrayOfStrings),
     sortFirst: getOption('sortFirst', isArrayOfStrings),
     source: getOption('source', isArray),
+    versionGroups: getOption('versionGroups', isArrayOfVersionGroups),
   };
 
   if (program.prod || program.dev || program.peer) {
