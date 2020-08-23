@@ -12,6 +12,7 @@
       "devDependencies",
       "keywords",
       "peerDependencies",
+      "resolutions",
       "scripts"
     ],
     "sortFirst": [

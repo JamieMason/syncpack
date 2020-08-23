@@ -48,7 +48,7 @@ export const DEFAULT_CONFIG: SyncpackConfig = {
   peer: true,
   prod: true,
   semverRange: '',
-  sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'scripts'],
+  sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'resolutions', 'scripts'],
   sortFirst: ['name', 'description', 'version', 'author'],
   source: [],
 };
