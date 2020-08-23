@@ -1,3 +1,19 @@
+## [5.5.6](https://github.com/JamieMason/syncpack/compare/5.2.5...5.5.6) (2020-08-23)
+
+
+### Bug Fixes
+
+* **core:** ignore link: versions rather than throw ([7a48366](https://github.com/JamieMason/syncpack/commit/7a483666e64a046be9984bf4146ac8566b3f5920)), closes [#38](https://github.com/JamieMason/syncpack/issues/38)
+
+
+### Features
+
+* **core:** expose format configuration ([4f74d9a](https://github.com/JamieMason/syncpack/commit/4f74d9a0b9a92428278f66327630e5b0e9dc5add)), closes [#30](https://github.com/JamieMason/syncpack/issues/30)
+* **core:** sort resolutions field a-z ([f76a127](https://github.com/JamieMason/syncpack/commit/f76a1278b45ec3b00b2658b5da327d0a480ff12d)), closes [#34](https://github.com/JamieMason/syncpack/issues/34)
+* **core:** support yarn workspaces config as object ([34eceaf](https://github.com/JamieMason/syncpack/commit/34eceaffae143fdbc9729495ea693172c2944351)), closes [#33](https://github.com/JamieMason/syncpack/issues/33)
+
+
+
 ## [5.2.5](https://github.com/JamieMason/syncpack/compare/5.1.4...5.2.5) (2020-08-22)
 
 
