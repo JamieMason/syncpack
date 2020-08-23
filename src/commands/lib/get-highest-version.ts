@@ -9,6 +9,7 @@ import {
   RANGE_MINOR,
   RANGE_PATCH,
 } from '../../constants';
+import { isSemver } from './is-semver';
 
 const getRange = (version: string): string => version.slice(0, version.search(/[0-9]/));
 
@@ -27,23 +28,24 @@ const getRangeScore = (version: string | null): number => {
   return 0;
 };
 
-export const getHighestVersion = (versions: string[]): string => {
-  let rawHighest: string | null = null;
-  for (const raw of versions) {
-    if (raw === '*') return raw;
+export const getHighestVersion = (versions: string[]): string | null =>
+  versions.reduce<string | null>((rawHighest, raw) => {
     const version = valid(coerce(raw));
-    if (version === null) continue;
     const highest = valid(coerce(rawHighest));
-    if (
-      highest === null ||
-      gt(version, highest) ||
-      (eq(version, highest) && getRangeScore(raw) > getRangeScore(rawHighest))
-    ) {
-      rawHighest = raw;
+    if (raw === '*' || rawHighest === '*') {
+      return '*';
     }
-  }
-  if (rawHighest === null) {
-    throw new Error(`Failed to find highest version of ${versions.join(', ')}`);
-  }
-  return rawHighest;
-};
+    if (!isSemver(raw) || version === null) {
+      return rawHighest;
+    }
+    if (highest === null) {
+      return raw;
+    }
+    if (gt(version, highest)) {
+      return raw;
+    }
+    if (eq(version, highest) && getRangeScore(raw) > getRangeScore(rawHighest)) {
+      return raw;
+    }
+    return rawHighest;
+  }, null);

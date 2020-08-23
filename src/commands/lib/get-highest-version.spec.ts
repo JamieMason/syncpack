@@ -9,6 +9,34 @@ const shuffle = (array: string[]): string[] => {
 };
 
 describe('getHighestVersion', () => {
+  it('ignores non-semver versions', () => {
+    const a: string[] = [];
+    const b = shuffle([...a, 'http://asdf.com/asdf.tar.gz']);
+    const c = shuffle([...b, 'file:../foo/bar']);
+    const d = shuffle([...c, 'latest']);
+    const e = shuffle([...d, 'git+https://isaacs@github.com/npm/cli.git']);
+    const f = shuffle([...e, 'expressjs/express']);
+    const g = shuffle([...f, 'mochajs/mocha#4727d357ea']);
+    const h = shuffle([...g, 'user/repo#feature/branch']);
+    const i = shuffle([...h, 'link:../foo/bar']);
+    const j = shuffle([...i, 'git+ssh://git@github.com:npm/cli.git#v1.0.27']);
+    const k = shuffle([...j, 'git+ssh://git@github.com:npm/cli#semver:^5.0']);
+    const l = shuffle([...k, 'git://github.com/npm/cli.git#v1.0.27']);
+    expect(getHighestVersion(a)).toBeNull();
+    expect(getHighestVersion(b)).toBeNull();
+    expect(getHighestVersion(c)).toBeNull();
+    expect(getHighestVersion(d)).toBeNull();
+    expect(getHighestVersion(e)).toBeNull();
+    expect(getHighestVersion(f)).toBeNull();
+    expect(getHighestVersion(g)).toBeNull();
+    expect(getHighestVersion(h)).toBeNull();
+    expect(getHighestVersion(i)).toBeNull();
+    expect(getHighestVersion(i)).toBeNull();
+    expect(getHighestVersion(j)).toBeNull();
+    expect(getHighestVersion(k)).toBeNull();
+    expect(getHighestVersion(l)).toBeNull();
+  });
+
   it('returns the newest version from an array of versions', () => {
     const a = ['<1.0.0'];
     const b = shuffle([...a, '<=1.0.0']);
@@ -29,6 +57,7 @@ describe('getHighestVersion', () => {
     const q = shuffle([...p, 'expressjs/express']);
     const r = shuffle([...q, 'mochajs/mocha#4727d357ea']);
     const s = shuffle([...r, 'user/repo#feature/branch']);
+    const t = shuffle([...s, 'link:../foo/bar']);
     // valid semver
     expect(getHighestVersion(a)).toEqual('<1.0.0');
     expect(getHighestVersion(b)).toEqual('<=1.0.0');
@@ -50,5 +79,6 @@ describe('getHighestVersion', () => {
     expect(getHighestVersion(q)).toEqual('*');
     expect(getHighestVersion(r)).toEqual('*');
     expect(getHighestVersion(s)).toEqual('*');
+    expect(getHighestVersion(t)).toEqual('*');
   });
 });

@@ -18,12 +18,14 @@ export const fixMismatches = (dependencyTypes: DependencyType[], filter: RegExp,
   mismatches.forEach((installedPackage) => {
     const versions = installedPackage.installations.map((installation) => installation.version);
     const newest = getHighestVersion(versions);
-    installedPackage.installations.forEach(({ type, name, source }) => {
-      const dependencies = source.contents[type];
-      if (dependencies) {
-        dependencies[name] = newest;
-      }
-    });
+    if (newest !== null) {
+      installedPackage.installations.forEach(({ type, name, source }) => {
+        const dependencies = source.contents[type];
+        if (dependencies) {
+          dependencies[name] = newest;
+        }
+      });
+    }
   });
 };
 
