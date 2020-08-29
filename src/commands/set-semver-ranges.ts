@@ -1,6 +1,6 @@
 import { RANGE_LOOSE, SyncpackConfig } from '../constants';
-import { getDependencies } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
+import { getDependencies } from './lib/installations/get-dependencies';
 import { isLooseSemver, isSemver, isValidSemverRange } from './lib/is-semver';
 import { writeIfChanged } from './lib/write-if-changed';
 

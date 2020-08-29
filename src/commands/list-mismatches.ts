@@ -1,7 +1,9 @@
 import chalk from 'chalk';
 import { SyncpackConfig } from '../constants';
-import { getMismatchedDependencies, InstalledPackage, sortByName } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
+import { InstalledPackage } from './lib/installations/get-dependencies';
+import { getMismatchedDependencies } from './lib/installations/get-mismatched-dependencies';
+import { sortByName } from './lib/installations/sort-by-name';
 import { log } from './lib/log';
 
 type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source' | 'versionGroups'>;

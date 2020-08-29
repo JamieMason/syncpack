@@ -4,8 +4,8 @@ import { EOL } from 'os';
 import { relative } from 'path';
 import { SyncpackConfig } from '../constants';
 import { getHighestVersion } from './lib/get-highest-version';
-import { getMismatchedDependencies } from './lib/get-installations';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
+import { getMismatchedDependencies } from './lib/installations/get-mismatched-dependencies';
 import { log } from './lib/log';
 
 type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'source' | 'versionGroups'>;

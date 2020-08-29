@@ -43,7 +43,7 @@ describe('getConfig', () => {
     });
   });
 
-  it('overrides all dependency types when CLI options are used', () => {
+  it('overrides all dependency types when any CLI option is used', () => {
     setConfigFileTo({ dev: true, peer: true, prod: true });
     expect(getConfig({ prod: true })).toEqual(
       expect.objectContaining({
