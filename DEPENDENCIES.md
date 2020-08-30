@@ -47,6 +47,7 @@ npm test
 - [expect-more-jest](https://ghub.io/expect-more-jest): Write Beautiful Specs with Custom Matchers for Jest
 - [jest](https://ghub.io/jest): Delightful JavaScript Testing.
 - [mock-fs](https://ghub.io/mock-fs): A configurable mock file system.  You know, for testing.
+- [organize-imports-cli](https://ghub.io/organize-imports-cli): VS Code&#39;s &#39;Organize imports&#39; executable from command line
 - [prettier](https://ghub.io/prettier): Prettier is an opinionated code formatter
 - [rimraf](https://ghub.io/rimraf): A deep deletion module for node (like `rm -rf`)
 - [ts-jest](https://ghub.io/ts-jest): A preprocessor with source maps support to help use TypeScript with Jest

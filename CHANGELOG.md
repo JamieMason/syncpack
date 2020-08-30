@@ -1,3 +1,17 @@
+## [5.6.7](https://github.com/JamieMason/syncpack/compare/5.5.6...5.6.7) (2020-08-30)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([2e3ea3b](https://github.com/JamieMason/syncpack/commit/2e3ea3b0f6de8a97a390305a998053550183cc27))
+
+
+### Features
+
+* **core:** support granular versioning rules ([2197f90](https://github.com/JamieMason/syncpack/commit/2197f90608c119a04ddde6255e729fa1ec5c49ec)), closes [#41](https://github.com/JamieMason/syncpack/issues/41)
+
+
+
 ## [5.5.6](https://github.com/JamieMason/syncpack/compare/5.2.5...5.5.6) (2020-08-23)
 
 
