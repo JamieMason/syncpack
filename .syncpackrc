@@ -1,26 +1,25 @@
 {
-  "options": {
-    "dev": true,
-    "indent": "  ",
-    "semverRange": "",
-    "peer": true,
-    "prod": true,
-    "filter": "",
-    "sortAz": [
-      "contributors",
-      "dependencies",
-      "devDependencies",
-      "keywords",
-      "peerDependencies",
-      "resolutions",
-      "scripts"
-    ],
-    "sortFirst": [
-      "name",
-      "description",
-      "version",
-      "author"
-    ],
-    "source": []
-  }
+  "dev": true,
+  "indent": "  ",
+  "semverRange": "",
+  "peer": true,
+  "prod": true,
+  "filter": "",
+  "sortAz": [
+    "contributors",
+    "dependencies",
+    "devDependencies",
+    "keywords",
+    "peerDependencies",
+    "resolutions",
+    "scripts"
+  ],
+  "sortFirst": [
+    "name",
+    "description",
+    "version",
+    "author"
+  ],
+  "source": [],
+  "versionGroups": []
 }

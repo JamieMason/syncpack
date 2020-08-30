@@ -7,17 +7,18 @@ import {
   RANGE_LTE,
   RANGE_MINOR,
   RANGE_PATCH,
+  ValidRange,
 } from '../../constants';
 
-export const isValidSemverRange = (range: string): boolean =>
-  range === RANGE_EXACT ||
-  range === RANGE_GT ||
-  range === RANGE_GTE ||
-  range === RANGE_LOOSE ||
-  range === RANGE_LT ||
-  range === RANGE_LTE ||
-  range === RANGE_MINOR ||
-  range === RANGE_PATCH;
+export const isValidSemverRange = (value: string): value is ValidRange =>
+  value === RANGE_EXACT ||
+  value === RANGE_GT ||
+  value === RANGE_GTE ||
+  value === RANGE_LOOSE ||
+  value === RANGE_LT ||
+  value === RANGE_LTE ||
+  value === RANGE_MINOR ||
+  value === RANGE_PATCH;
 
 export const isSemver = (version: string): boolean => {
   return version.search(/^(~|\^|>=|>|<=|<|)?[0-9]+\.[0-9x]+\.[0-9x]+/) !== -1 && version.indexOf(' ') === -1;

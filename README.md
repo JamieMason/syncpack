@@ -32,6 +32,8 @@
 Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg.
 `react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
 
+See [`versionGroups`](#versiongroups) if you have advanced requirements.
+
 <details>
 <summary>Options</summary>
 
@@ -138,6 +140,8 @@ syncpack list --dev --peer
 
 List dependencies which are required by multiple packages, where the version is not the same across every package.
 
+See [`versionGroups`](#versiongroups) if you have advanced requirements.
+
 <details>
 <summary>Options</summary>
 
@@ -234,7 +238,8 @@ Creating a configuration file is optional, syncpack will search up the directory
   "semverRange": "",
   "sortAz": ["contributors", "dependencies", "devDependencies", "keywords", "peerDependencies", "scripts"],
   "sortFirst": ["name", "description", "version", "author"],
-  "source": ["package.json", "packages/*/package.json"]
+  "source": ["package.json", "packages/*/package.json"],
+  "versionGroups": []
 }
 ```
 
@@ -270,12 +275,6 @@ in your config file or via the `--semver-range` command line option.
 *  *
 ```
 
-### `source`
-
-Defaults to `["package.json", "packages/*/package.json"]` to match most Projects using Lerna or Yarn Workspaces, but
-this can be overridden in your config file or via multiple `--source` command line options. Supports any patterns
-supported by [glob](https://github.com/isaacs/node-glob).
-
 ### `sortAz`
 
 When using the `format` command, determines which fields within package.json files should be sorted alphabetically. When
@@ -286,6 +285,43 @@ alphabetically. There is no equivalent CLI Option for this configuration.
 
 When using the `format` command, determines which fields within package.json files should appear at the top, and in what
 order. There is no equivalent CLI Option for this configuration.
+
+### `source`
+
+Defaults to `["package.json", "packages/*/package.json"]` to match most Projects using Lerna or Yarn Workspaces, but
+this can be overridden in your config file or via multiple `--source` command line options. Supports any patterns
+supported by [glob](https://github.com/isaacs/node-glob).
+
+### `versionGroups`
+
+If some packages in your Monorepo relate to "alpha" (or legacy) versions of your software, you will need to manage
+dependencies differently within those packages. Your alpha packages might use latest or unstable versions of some 3rd
+party dependencies, while the rest of the repo might need to remain on older versions. You don't want mismatches within
+your alpha packages, or within the other packages in your monorepo – but you do want those groups to use different
+versions to each other and not have `syncpack fix-mismatches` make them all the same.
+
+In the following example, 2 packages in our monorepo are using different versions of `react` and `react-dom` to the rest
+of the project.
+
+```json
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react", "react-dom"],
+      "packages": ["@alpha/server", "@alpha/ui"]
+    }
+  ]
+}
+```
+
+`syncpack` will make ensure that:
+
+- The versions of `react` and `react-dom` are the same within `@alpha/server` and `@alpha/ui`.
+- The versions of `react` and `react-dom` are the same across every package except `@alpha/server` and `@alpha/ui`.
+- The versions of `react` and `react-dom` within `@alpha/server` and `@alpha/ui` can be different to the other packages
+  in the monorepo.
+- The versions of every other dependency in the monorepo (eg `lodash`) are the same across every package including
+  `@alpha/server` and `@alpha/ui`.
 
 ## 🕵🏾‍♀️ Resolving Packages
 

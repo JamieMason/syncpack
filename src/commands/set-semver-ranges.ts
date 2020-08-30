@@ -21,7 +21,7 @@ export const setSemverRange = (range: string, version: string): string => {
 export const setSemverRanges = (wrapper: SourceWrapper, options: Options): void => {
   const iterator = getDependencies([wrapper], options);
   for (const installedPackage of iterator) {
-    if (installedPackage.name.search(options.filter) !== -1) {
+    if (installedPackage.name.search(new RegExp(options.filter)) !== -1) {
       for (const installation of installedPackage.installations) {
         const { name, type, version } = installation;
         const dependencies = installation.source.contents[type];

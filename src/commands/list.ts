@@ -9,7 +9,7 @@ type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source
 
 export const list = (wrappers: SourceWrapper[], options: Options): void => {
   const iterator = getDependencies(wrappers, options);
-  const packages = Array.from(iterator).filter(({ name }) => name.search(options.filter) !== -1);
+  const packages = Array.from(iterator).filter(({ name }) => name.search(new RegExp(options.filter)) !== -1);
 
   packages.sort(sortByName).forEach(({ name, installations }) => {
     const versions = installations.map(({ version }) => version);

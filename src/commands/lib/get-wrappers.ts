@@ -25,7 +25,9 @@ export interface Source {
 }
 
 export interface SourceWrapper {
+  /** the absolute path on disk to this package.json file */
   filePath: string;
+  /** the parsed JSON contents of this package.json file */
   contents: Source;
 }
 

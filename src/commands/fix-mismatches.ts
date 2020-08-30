@@ -12,7 +12,7 @@ type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod
 
 export const fixMismatches = (wrappers: SourceWrapper[], options: Options): void => {
   const iterator = getMismatchedDependencies(wrappers, options);
-  const mismatches = Array.from(iterator).filter(({ name }) => name.search(options.filter) !== -1);
+  const mismatches = Array.from(iterator).filter(({ name }) => name.search(new RegExp(options.filter)) !== -1);
 
   mismatches.forEach((installedPackage) => {
     const versions = installedPackage.installations.map((installation) => installation.version);

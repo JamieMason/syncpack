@@ -10,7 +10,7 @@ type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source
 
 export const listMismatches = (wrappers: SourceWrapper[], options: Options): InstalledPackage[] => {
   const iterator = getMismatchedDependencies(wrappers, options);
-  const mismatches = Array.from(iterator).filter(({ name }) => name.search(options.filter) !== -1);
+  const mismatches = Array.from(iterator).filter(({ name }) => name.search(new RegExp(options.filter)) !== -1);
 
   mismatches.sort(sortByName).forEach(({ name, installations }) => {
     log(chalk`{red ✕ ${name}}`);

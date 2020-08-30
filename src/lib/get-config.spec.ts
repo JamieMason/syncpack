@@ -1,19 +1,26 @@
-import { DEFAULT_CONFIG } from '../constants';
-import { CliOptions } from './get-config';
+import { DEFAULT_CONFIG, SyncpackConfig } from '../constants';
 
 describe('getConfig', () => {
   let getConfig = require('./get-config').getConfig;
 
-  const setConfigFileTo = (value: Partial<CliOptions>) => {
+  const setConfigFileTo = (value: Partial<SyncpackConfig>) => {
     jest.resetModules();
     jest.mock('cosmiconfig', () => ({ cosmiconfigSync: jest.fn() }));
     const { cosmiconfigSync } = require('cosmiconfig');
-    cosmiconfigSync.mockReturnValue({ search: () => ({ config: { options: value } }) });
+    cosmiconfigSync.mockReturnValue({ search: () => ({ config: value }) });
+    getConfig = require('./get-config').getConfig;
+  };
+
+  const removeConfigFile = () => {
+    jest.resetModules();
+    jest.mock('cosmiconfig', () => ({ cosmiconfigSync: jest.fn() }));
+    const { cosmiconfigSync } = require('cosmiconfig');
+    cosmiconfigSync.mockReturnValue({ search: () => null });
     getConfig = require('./get-config').getConfig;
   };
 
   it('returns default when config and CLI option are not used', () => {
-    setConfigFileTo({});
+    removeConfigFile();
     expect(getConfig({})).toHaveProperty('source', DEFAULT_CONFIG.source);
   });
 
@@ -31,7 +38,7 @@ describe('getConfig', () => {
     setConfigFileTo({ source: ['./from-config'] });
     expect(getConfig({ filter: 'syncpack', semverRange: '~', sortAz: ['overridden'] })).toEqual({
       dev: true,
-      filter: /syncpack/,
+      filter: 'syncpack',
       indent: '  ',
       peer: true,
       prod: true,
@@ -41,6 +48,19 @@ describe('getConfig', () => {
       source: ['./from-config'],
       versionGroups: [],
     });
+  });
+
+  it('merges config-only options', () => {
+    setConfigFileTo({
+      sortAz: ['overridden'],
+      sortFirst: ['overridden'],
+      versionGroups: [{ dependencies: ['chalk'], packages: ['foo', 'bar'] }],
+    });
+    expect(getConfig({ filter: 'syncpack', semverRange: '~', sortAz: ['overridden'] })).toEqual(
+      expect.objectContaining({
+        versionGroups: [{ dependencies: ['chalk'], packages: ['foo', 'bar'] }],
+      }),
+    );
   });
 
   it('overrides all dependency types when any CLI option is used', () => {

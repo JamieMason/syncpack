@@ -30,26 +30,67 @@ export const SEMVER_ORDER: ValidRange[] = [
 ];
 
 export interface VersionGroup {
+  /**
+   * the names of packages in your monorepo which belong to this group, taken
+   * from the "name" field in package.json, not the package directory name
+   */
   packages: string[];
+  /**
+   * the names of the dependencies (eg. "lodash") which belong to this group
+   */
   dependencies: string[];
 }
 
 export type SyncpackConfig = Readonly<{
+  /**
+   * whether to search within devDependencies
+   */
   dev: boolean;
-  filter: RegExp;
+  /**
+   * A string which will be passed to `new RegExp()` to match against package
+   * names that should be included
+   */
+  filter: string;
+  /**
+   * The character(s) to be used to indent your package.json files when writing
+   * to disk
+   */
   indent: string;
+  /**
+   * whether to search within peerDependencies
+   */
   peer: boolean;
+  /**
+   * whether to search within dependencies
+   */
   prod: boolean;
+  /**
+   * defaults to `""` to ensure that exact dependency versions are used instead
+   * of loose ranges
+   */
   semverRange: string;
+  /**
+   * which fields within package.json files should be sorted alphabetically
+   */
   sortAz: string[];
+  /**
+   * which fields within package.json files should appear at the top, and in
+   * what order
+   */
   sortFirst: string[];
+  /**
+   * glob patterns for package.json file locations
+   */
   source: string[];
+  /**
+   *
+   */
   versionGroups: VersionGroup[];
 }>;
 
 export const DEFAULT_CONFIG: SyncpackConfig = {
   dev: true,
-  filter: /./,
+  filter: '.',
   indent: '  ',
   peer: true,
   prod: true,
