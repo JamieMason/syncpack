@@ -25,22 +25,27 @@ const mockWrapper = (contents: SourceWrapper['contents']): SourceWrapper => ({ f
 
 describe('getMismatchedDependencies', () => {
   describe('when versions match inside a group, but differ to those outside the group', () => {
-    it('returns no mismatches because the grouped and non-grouped packages each match internally', () => {
+    it('returns no mismatches because the grouped and non-grouped packages all match internally', () => {
       const config: SyncpackConfig = {
         ...DEFAULT_CONFIG,
-        versionGroups: [{ dependencies: ['core'], packages: ['@next/a', '@next/b'] }],
+        versionGroups: [
+          { dependencies: ['core'], packages: ['@next/a', '@next/b'] },
+          { dependencies: ['core'], packages: ['@legacy/a', '@legacy/b'] },
+        ],
       };
       const iterator = getMismatchedDependencies(
         [
-          mockWrapper({ name: '@next/a', dependencies: { core: '0.0.1' } }),
-          mockWrapper({ name: '@next/b', dependencies: { core: '0.0.1' } }),
-          mockWrapper({ name: '@legacy/a', dependencies: { core: '0.0.0' } }),
-          mockWrapper({ name: '@legacy/b', dependencies: { core: '0.0.0' } }),
-          mockWrapper({ name: 'ungrouped', dependencies: { outside: '1.0.0' } }),
+          mockWrapper({ name: '@next/a', dependencies: { core: '0.0.1', unaffected: '1.1.1' } }),
+          mockWrapper({ name: '@next/b', dependencies: { core: '0.0.1', unaffected: '1.1.1' } }),
+          mockWrapper({ name: '@legacy/a', dependencies: { core: '0.0.0', unaffected: '1.1.1' } }),
+          mockWrapper({ name: '@legacy/b', dependencies: { core: '0.0.0', unaffected: '1.1.1' } }),
+          mockWrapper({ name: 'ungrouped/a', dependencies: { core: '1.0.0', unaffected: '1.1.1' } }),
+          mockWrapper({ name: 'ungrouped/b', dependencies: { core: '1.0.0', unaffected: '1.1.1' } }),
         ],
         config,
       );
-      expect(Array.from(iterator)).toBeEmptyArray();
+      const result = Array.from(iterator);
+      expect(result).toBeEmptyArray();
     });
   });
 
@@ -206,6 +211,36 @@ describe('getMismatchedDependencies', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('issue 43', () => {
+    it('should return no mismatches', () => {
+      const config: SyncpackConfig = {
+        ...DEFAULT_CONFIG,
+        versionGroups: [
+          { dependencies: ['fs-extra', 'node-fetch'], packages: ['syncpack-repro-b'] },
+          { dependencies: ['uuid'], packages: ['syncpack-repro-c'] },
+        ],
+      };
+      const iterator = getMismatchedDependencies(
+        [
+          mockWrapper({
+            name: 'syncpack-repro-a',
+            dependencies: { 'node-fetch': '2.6.1', 'fs-extra': '9.0.1', uuid: '6.0.0' },
+          }),
+          mockWrapper({
+            name: 'syncpack-repro-b',
+            dependencies: { 'node-fetch': '2.4.1', 'fs-extra': '8.0.1' },
+          }),
+          mockWrapper({
+            name: 'syncpack-repro-c',
+            dependencies: { 'node-fetch': '2.6.1', 'fs-extra': '9.0.1', uuid: '8.3.0' },
+          }),
+        ],
+        config,
+      );
+      expect(Array.from(iterator)).toEqual([]);
     });
   });
 });

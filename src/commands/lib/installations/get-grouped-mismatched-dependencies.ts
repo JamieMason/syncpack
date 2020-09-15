@@ -1,56 +1,64 @@
-import { SyncpackConfig } from '../../../constants';
+import { SyncpackConfig, VersionGroup } from '../../../constants';
 import { SourceWrapper } from '../get-wrappers';
-import { getDependencies, InstalledPackage } from './get-dependencies';
+import { getDependencies, Installation, InstalledPackage } from './get-dependencies';
+
+const groupContainsDependency = (versionGroup: VersionGroup, installedPackage: InstalledPackage) =>
+  versionGroup.dependencies.includes(installedPackage.name);
+
+const groupContainsPackage = (versionGroup: VersionGroup, installation: Installation) =>
+  versionGroup.packages.includes(`${installation.source.contents.name}`);
+
+const hasDifferentVersionToPreviousSibling = (installation: Installation, i: number, all: Installation[]) =>
+  i > 0 && installation.version !== all[i - 1].version;
 
 export function* getGroupedMismatchedDependencies(
   wrappers: SourceWrapper[],
   options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod' | 'versionGroups'>,
 ): Generator<InstalledPackage> {
   const iterator = getDependencies(wrappers, options);
-  for (const installedPackage of iterator) {
-    if (installedPackage.installations.length > 1) {
-      const ungroupedInstallations = [];
-      for (const versionGroup of options.versionGroups) {
-        let hasMismatchesInThisGroup = false;
-        const groupInstallations = [];
-        const dependencyIsInThisGroup = versionGroup.dependencies.includes(installedPackage.name);
-        if (dependencyIsInThisGroup) {
-          for (const installation of installedPackage.installations) {
-            const packageIsInThisGroup = versionGroup.packages.includes(String(installation.source.contents.name));
-            if (packageIsInThisGroup) {
-              if (!hasMismatchesInThisGroup) {
-                const [lastItem] = groupInstallations.slice(-1);
-                if (lastItem && lastItem.version !== installation.version) {
-                  hasMismatchesInThisGroup = true;
-                }
-              }
-              groupInstallations.push(installation);
-            } else {
-              ungroupedInstallations.push(installation);
-            }
-          }
-        } else {
-          ungroupedInstallations.push(...installedPackage.installations);
-        }
-        if (hasMismatchesInThisGroup) {
-          yield {
-            installations: groupInstallations,
-            name: installedPackage.name,
-          };
-        }
-      }
-      const len = ungroupedInstallations.length;
-      if (len > 1) {
-        for (let i = 1; i < len; i++) {
-          if (ungroupedInstallations[i].version !== ungroupedInstallations[i - 1].version) {
-            yield {
-              installations: ungroupedInstallations,
-              name: installedPackage.name,
-            };
-            break;
-          }
-        }
-      }
-    }
+  const installedPackages = Array.from(iterator);
+
+  const groupedDependenciesByGroup = options.versionGroups.map((versionGroup) =>
+    installedPackages
+      .filter((installedPackage) => groupContainsDependency(versionGroup, installedPackage))
+      .map(({ installations, name }) => ({
+        installations: installations.filter((installation) => groupContainsPackage(versionGroup, installation)),
+        name,
+      }))
+      .filter(({ installations }) => installations.length > 0),
+  );
+
+  const ungroupedDependencies = installedPackages
+    .map((installedPackage) => {
+      const { installations, name } = installedPackage;
+      return {
+        installations: installations.filter((installation) =>
+          options.versionGroups.every(
+            (versionGroup) =>
+              !groupContainsDependency(versionGroup, installedPackage) ||
+              !groupContainsPackage(versionGroup, installation),
+          ),
+        ),
+        name,
+      };
+    })
+    .filter(({ installations }) => installations.length > 0);
+
+  const groupedMismatches = groupedDependenciesByGroup
+    .map((groupedDependencies) =>
+      groupedDependencies.filter((installedPackage) =>
+        installedPackage.installations.some(hasDifferentVersionToPreviousSibling),
+      ),
+    )
+    .reduce((flat, next) => flat.concat(next), []);
+
+  const ungroupedMismatches = ungroupedDependencies.filter((installedPackage) =>
+    installedPackage.installations.some(hasDifferentVersionToPreviousSibling),
+  );
+
+  const allMismatches = groupedMismatches.concat(ungroupedMismatches);
+
+  for (const installedPackage of allMismatches) {
+    yield installedPackage;
   }
 }
