@@ -42,6 +42,9 @@ const getPatternsFromJson = (
   return packages ? [process.cwd()].concat(packages).map((dirPath) => join(dirPath, 'package.json')) : null;
 };
 
+const getCliPatterns = (program: Options): Options['source'] | null =>
+  isArrayOfStrings(program.source) ? program.source : null;
+
 const getYarnPatterns = (): string[] | null =>
   getPatternsFromJson('package.json', (config) => [config.workspaces, config.workspaces?.packages]);
 
@@ -58,18 +61,13 @@ const getPnpmPatterns = (): string[] | null => {
   }
 };
 
-const hasCliPatterns = (program: Options): boolean => program.source && program.source.length > 0;
-const getCliPatterns = (program: Options): Options['source'] => program.source;
 const getDefaultPatterns = (): string[] => ALL_PATTERNS;
 const resolvePattern = (pattern: string): string[] => sync(pattern, { absolute: true });
 const reduceFlatArray = (all: string[], next: string[]): string[] => all.concat(next);
 const createWrapper = (filePath: string): SourceWrapper => ({ contents: readJsonSync(filePath), filePath });
 
 export const getWrappers = (program: Options): SourceWrapper[] =>
-  (hasCliPatterns(program)
-    ? getCliPatterns(program)
-    : getYarnPatterns() || getPnpmPatterns() || getLernaPatterns() || getDefaultPatterns()
-  )
+  (getCliPatterns(program) || getYarnPatterns() || getPnpmPatterns() || getLernaPatterns() || getDefaultPatterns())
     .map(resolvePattern)
     .reduce(reduceFlatArray, [])
     .map(createWrapper);

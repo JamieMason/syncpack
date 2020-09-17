@@ -38,7 +38,7 @@ export const getConfig = (program: Partial<SyncpackConfig>): SyncpackConfig => {
     semverRange: getOption<ValidRange>('semverRange', isValidSemverRange),
     sortAz: getOption<string[]>('sortAz', isArrayOfStrings),
     sortFirst: getOption<string[]>('sortFirst', isArrayOfStrings),
-    source: getOption<string[]>('source', isArray),
+    source: getOption<string[]>('source', isArrayOfStrings),
     versionGroups: getOption<VersionGroup[]>('versionGroups', isArrayOfVersionGroups),
   };
 };
