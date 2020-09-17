@@ -5,12 +5,13 @@ import { InstalledPackage } from './lib/installations/get-dependencies';
 import { getMismatchedDependencies } from './lib/installations/get-mismatched-dependencies';
 import { sortByName } from './lib/installations/sort-by-name';
 import { log } from './lib/log';
+import { matchesFilter } from './lib/matches-filter';
 
 type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source' | 'versionGroups'>;
 
 export const listMismatches = (wrappers: SourceWrapper[], options: Options): InstalledPackage[] => {
   const iterator = getMismatchedDependencies(wrappers, options);
-  const mismatches = Array.from(iterator).filter(({ name }) => name.search(new RegExp(options.filter)) !== -1);
+  const mismatches = Array.from(iterator).filter(matchesFilter(options));
 
   mismatches.sort(sortByName).forEach(({ name, installations }) => {
     log(chalk`{red ✕ ${name}}`);

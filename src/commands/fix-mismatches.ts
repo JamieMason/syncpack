@@ -7,12 +7,13 @@ import { getHighestVersion } from './lib/get-highest-version';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { getMismatchedDependencies } from './lib/installations/get-mismatched-dependencies';
 import { log } from './lib/log';
+import { matchesFilter } from './lib/matches-filter';
 
 type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'source' | 'versionGroups'>;
 
 export const fixMismatches = (wrappers: SourceWrapper[], options: Options): void => {
   const iterator = getMismatchedDependencies(wrappers, options);
-  const mismatches = Array.from(iterator).filter(({ name }) => name.search(new RegExp(options.filter)) !== -1);
+  const mismatches = Array.from(iterator).filter(matchesFilter(options));
 
   mismatches.forEach((installedPackage) => {
     const versions = installedPackage.installations.map((installation) => installation.version);
