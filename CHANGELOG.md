@@ -1,3 +1,14 @@
+## [5.6.10](https://github.com/JamieMason/syncpack/compare/5.6.7...5.6.10) (2020-09-17)
+
+
+### Bug Fixes
+
+* **cli:** use defaults when source is empty array ([c2f6199](https://github.com/JamieMason/syncpack/commit/c2f61998add60ed5d52af1c3518d1f737cf75c80))
+* **core:** support multiple version groups ([bfd12b4](https://github.com/JamieMason/syncpack/commit/bfd12b4f3a6693ac1b4580621b12995d2b04eee7)), closes [#43](https://github.com/JamieMason/syncpack/issues/43)
+* **list:** display mismatches from version groups ([43ba18d](https://github.com/JamieMason/syncpack/commit/43ba18dff1aa7c749724b992b6eef17a227f5445))
+
+
+
 ## [5.6.7](https://github.com/JamieMason/syncpack/compare/5.5.6...5.6.7) (2020-08-30)
 
 
