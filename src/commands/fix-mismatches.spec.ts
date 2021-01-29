@@ -34,14 +34,16 @@ describe('fixMismatches', () => {
         expect(wrappers).toMatchSnapshot();
       });
     });
-  });
 
-  it('ignores non-semver dependencies', () => {
-    const wrappers = [
-      mock.wrapper('a', ['foo@link:vendor/foo-0.1.0']),
-      mock.wrapper('b', ['foo@link:vendor/foo-0.2.0']),
-    ];
-    fixMismatches(wrappers, DEFAULT_CONFIG);
-    expect(wrappers).toMatchSnapshot();
+    it('replaces non-semver dependencies with valid semver dependencies', () => {
+      const wrappers = [
+        mock.wrapper('a', ['foo@link:vendor/foo-0.1.0']),
+        mock.wrapper('b', ['foo@link:vendor/foo-0.2.0']),
+        mock.wrapper('c', ['foo@0.3.0']),
+        mock.wrapper('d', ['foo@0.2.0']),
+      ];
+      fixMismatches(wrappers, DEFAULT_CONFIG);
+      expect(wrappers).toMatchSnapshot();
+    });
   });
 });
