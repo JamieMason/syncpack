@@ -1,3 +1,17 @@
+## [5.7.11](https://github.com/JamieMason/syncpack/compare/5.6.10...5.7.11) (2021-01-29)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([5531da6](https://github.com/JamieMason/syncpack/commit/5531da60bc1cfb0fe3c5ca8e904d0a9e55d3d4b5))
+
+
+### Features
+
+* **fix-mismatches:** use local package version when available ([640cb7f](https://github.com/JamieMason/syncpack/commit/640cb7faf18b33fd491e68f66d3cf599845c9265)), closes [#47](https://github.com/JamieMason/syncpack/issues/47)
+
+
+
 ## [5.6.10](https://github.com/JamieMason/syncpack/compare/5.6.7...5.6.10) (2020-09-17)
 
 
