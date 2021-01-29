@@ -21,7 +21,35 @@ Array [
 ]
 `;
 
-exports[`fixMismatches sets all dependencies installed with different versions to the highest version 1`] = `
+exports[`fixMismatches when dependencies are installed with different versions when the dependency is a package maintained in this workspace uses the workspace version 1`] = `
+Array [
+  Object {
+    "contents": Object {
+      "dependencies": Object {
+        "foo": "0.0.1",
+      },
+    },
+    "filePath": "/a/package.json",
+  },
+  Object {
+    "contents": Object {
+      "devDependencies": Object {
+        "foo": "0.0.1",
+      },
+    },
+    "filePath": "/b/package.json",
+  },
+  Object {
+    "contents": Object {
+      "name": "foo",
+      "version": "0.0.1",
+    },
+    "filePath": "/foo/package.json",
+  },
+]
+`;
+
+exports[`fixMismatches when dependencies are installed with different versions when the dependency is not a package maintained in this workspace uses the highest version 1`] = `
 Array [
   Object {
     "contents": Object {
