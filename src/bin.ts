@@ -9,5 +9,5 @@ program
   .command('list', 'list every dependency used in your packages', { isDefault: true })
   .command('list-mismatches', 'list every dependency used with different versions in your packages')
   .command('set-semver-ranges', 'set semver ranges to the given format')
-  .command('lint-semver-ranges', 'checks whether semver ranges comply with the given format')
+  .command('lint-semver-ranges', 'checks whether dependency versions comply with the given semver range format')
   .parse(process.argv);
