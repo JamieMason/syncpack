@@ -19,8 +19,8 @@ describe('lint-semver-ranges', () => {
 
   it('outputs all dependencies with incorrect versions', () => {
     const wrappers = [
-      mock.wrapper('a', ['foo@0.1.0'], [], [], {name: 'pkg1'}),
-      mock.wrapper('b', ['foo@0.2.0', 'bar@^0.2.0', 'baz@~0.3.0'], [], [], {name: 'pkg2'}),
+      mock.wrapper('a', ['foo@0.1.0'], [], [], { name: 'pkg1' }),
+      mock.wrapper('b', ['foo@0.2.0', 'bar@^0.2.0', 'baz@~0.3.0'], [], [], { name: 'pkg2' }),
     ];
     lintSemverRanges(wrappers, { ...DEFAULT_CONFIG, dev: false, peer: false, prod: true });
     expect(log.mock.calls).toMatchSnapshot();

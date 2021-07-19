@@ -1,11 +1,10 @@
 import { SyncpackConfig } from '../constants';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
+import { getInstallations } from './lib/installations/get-installations';
 import { setSemverRange as createSetSemverRange } from './lib/set-semver-range';
 import { writeIfChanged } from './lib/write-if-changed';
-import { getInstallations } from './lib/installations/get-installations';
 
 type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'semverRange' | 'source'>;
-
 
 export const setSemverRanges = (wrapper: SourceWrapper, options: Options): void => {
   const installationsIterator = getInstallations([wrapper], options);
