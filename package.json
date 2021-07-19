@@ -9,7 +9,8 @@
     "syncpack-format": "dist/bin-format.js",
     "syncpack-list-mismatches": "dist/bin-list-mismatches.js",
     "syncpack-list": "dist/bin-list.js",
-    "syncpack-set-semver-ranges": "dist/bin-set-semver-ranges.js"
+    "syncpack-set-semver-ranges": "dist/bin-set-semver-ranges.js",
+    "syncpack-lint-semver-ranges": "dist/bin-lint-semver-ranges.js"
   },
   "bugs": "https://github.com/JamieMason/syncpack/issues",
   "contributors": [
