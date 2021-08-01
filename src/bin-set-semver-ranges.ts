@@ -2,9 +2,9 @@
 
 import chalk from 'chalk';
 import { setSemverRangesToDisk } from './commands/set-semver-ranges';
-import { option } from './constants';
+import { option, SyncpackConfig } from './constants';
 import { getConfig } from './lib/get-config';
-import program = require('commander');
+import { program } from 'commander';
 
 program.description(
   `
@@ -67,14 +67,16 @@ program
   .option(...option.semverRange)
   .parse(process.argv);
 
+const args = program as Partial<SyncpackConfig>;
+
 setSemverRangesToDisk(
   getConfig({
-    dev: program.dev,
-    filter: program.filter,
-    indent: program.indent,
-    peer: program.peer,
-    prod: program.prod,
-    semverRange: program.semverRange,
-    source: program.source,
+    dev: args.dev,
+    filter: args.filter,
+    indent: args.indent,
+    peer: args.peer,
+    prod: args.prod,
+    semverRange: args.semverRange,
+    source: args.source,
   }),
 );

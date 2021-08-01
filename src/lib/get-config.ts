@@ -19,7 +19,7 @@ export const getConfig = (program: Partial<SyncpackConfig>): SyncpackConfig => {
     if (isValid(configOption)) {
       return configOption;
     }
-    return (DEFAULT_CONFIG[name] as unknown) as T;
+    return DEFAULT_CONFIG[name] as unknown as T;
   };
 
   const isVersionGroup = (value: any): value is VersionGroup =>

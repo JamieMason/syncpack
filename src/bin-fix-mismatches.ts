@@ -2,9 +2,9 @@
 
 import chalk from 'chalk';
 import { fixMismatchesToDisk } from './commands/fix-mismatches';
-import { option } from './constants';
+import { option, SyncpackConfig } from './constants';
 import { getConfig } from './lib/get-config';
-import program = require('commander');
+import { program } from 'commander';
 
 program.description(
   `
@@ -55,13 +55,15 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
+const args = program as Partial<SyncpackConfig>;
+
 fixMismatchesToDisk(
   getConfig({
-    dev: program.dev,
-    filter: program.filter,
-    indent: program.indent,
-    peer: program.peer,
-    prod: program.prod,
-    source: program.source,
+    dev: args.dev,
+    filter: args.filter,
+    indent: args.indent,
+    peer: args.peer,
+    prod: args.prod,
+    source: args.source,
   }),
 );

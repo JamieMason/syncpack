@@ -2,9 +2,9 @@
 
 import chalk from 'chalk';
 import { formatToDisk } from './commands/format';
-import { option } from './constants';
+import { option, SyncpackConfig } from './constants';
 import { getConfig } from './lib/get-config';
-import program = require('commander');
+import { program } from 'commander';
 
 program.description(
   `
@@ -46,9 +46,11 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
+const args = program as Partial<SyncpackConfig>;
+
 formatToDisk(
   getConfig({
-    indent: program.indent,
-    source: program.source,
+    indent: args.indent,
+    source: args.source,
   }),
 );

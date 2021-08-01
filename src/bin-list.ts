@@ -2,9 +2,9 @@
 
 import chalk from 'chalk';
 import { listFromDisk } from './commands/list';
-import { option } from './constants';
+import { option, SyncpackConfig } from './constants';
 import { getConfig } from './lib/get-config';
-import program = require('commander');
+import { program } from 'commander';
 
 program.description('  List all dependencies required by your packages.');
 
@@ -47,12 +47,14 @@ program
   .option(...option.filter)
   .parse(process.argv);
 
+const args = program as Partial<SyncpackConfig>;
+
 listFromDisk(
   getConfig({
-    dev: program.dev,
-    filter: program.filter,
-    peer: program.peer,
-    prod: program.prod,
-    source: program.source,
+    dev: args.dev,
+    filter: args.filter,
+    peer: args.peer,
+    prod: args.prod,
+    source: args.source,
   }),
 );

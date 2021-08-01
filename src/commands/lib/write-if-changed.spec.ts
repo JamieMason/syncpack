@@ -9,7 +9,7 @@ describe('writeIfChanged', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.resetModuleRegistry();
+    jest.resetModules();
   });
 
   beforeEach(() => {
