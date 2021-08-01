@@ -1,3 +1,13 @@
+## [5.8.14](https://github.com/JamieMason/syncpack/compare/5.8.12...5.8.14) (2021-08-01)
+
+
+### Bug Fixes
+
+* **cli:** apply breaking change from commander ([a61d384](https://github.com/JamieMason/syncpack/commit/a61d3845a55f0796defce7cafaaf29541a4ff07f))
+* **format:** write files if only whitespace changes ([f38ea40](https://github.com/JamieMason/syncpack/commit/f38ea4092af8181acbc0281c775c0c84acb5be3d)), closes [#54](https://github.com/JamieMason/syncpack/issues/54)
+
+
+
 ## [5.8.12](https://github.com/JamieMason/syncpack/compare/5.7.11...5.8.12) (2021-08-01)
 
 
