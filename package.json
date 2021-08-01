@@ -78,6 +78,9 @@
   "license": "MIT",
   "main": "syncpack",
   "repository": "JamieMason/syncpack",
+  "resolutions": {
+    "lodash": "4.17.21"
+  },
   "scripts": {
     "build": "tsc --project .",
     "format": "npm run format:imports && npm run format:source",
