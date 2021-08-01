@@ -50,7 +50,7 @@ npm test
 - [organize-imports-cli](https://ghub.io/organize-imports-cli): VS Code&#39;s &#39;Organize imports&#39; executable from command line
 - [prettier](https://ghub.io/prettier): Prettier is an opinionated code formatter
 - [rimraf](https://ghub.io/rimraf): A deep deletion module for node (like `rm -rf`)
-- [ts-jest](https://ghub.io/ts-jest): A preprocessor with source maps support to help use TypeScript with Jest
+- [ts-jest](https://ghub.io/ts-jest): A Jest transformer with source map support that lets you use Jest to test projects written in TypeScript
 - [typescript](https://ghub.io/typescript): TypeScript is a language for application scale JavaScript development
 
 ## License

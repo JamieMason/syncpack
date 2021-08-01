@@ -1,3 +1,17 @@
+## [5.8.12](https://github.com/JamieMason/syncpack/compare/5.7.11...5.8.12) (2021-08-01)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([91254f6](https://github.com/JamieMason/syncpack/commit/91254f6aa283afcc0b32163864468359dd4f888f))
+
+
+### Features
+
+* **core:** add lint-semver-ranges command ([b4209f0](https://github.com/JamieMason/syncpack/commit/b4209f076344a9d59830d3bbd75569de9e19b4b3)), closes [#56](https://github.com/JamieMason/syncpack/issues/56)
+
+
+
 ## [5.7.11](https://github.com/JamieMason/syncpack/compare/5.6.10...5.7.11) (2021-01-29)
 
 
