@@ -7,14 +7,16 @@
     "syncpack": "dist/bin.js",
     "syncpack-fix-mismatches": "dist/bin-fix-mismatches.js",
     "syncpack-format": "dist/bin-format.js",
-    "syncpack-list-mismatches": "dist/bin-list-mismatches.js",
+    "syncpack-lint-semver-ranges": "dist/bin-lint-semver-ranges.js",
     "syncpack-list": "dist/bin-list.js",
+    "syncpack-list-mismatches": "dist/bin-list-mismatches.js",
     "syncpack-set-semver-ranges": "dist/bin-set-semver-ranges.js"
   },
   "bugs": "https://github.com/JamieMason/syncpack/issues",
   "contributors": [
     "Alex Hayton (https://github.com/AlexHayton)",
     "Aparajita Fishman (https://github.com/aparajita)",
+    "Artur Wierzbicki (https://github.com/ArturWierzbicki)",
     "Jamie Mason (https://github.com/JamieMason)",
     "Luis Vieira (https://github.com/luisvieiragmr)",
     "Marais Rossouw (https://github.com/maraisr)",

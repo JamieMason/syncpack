@@ -7,20 +7,6 @@
 [![Build Status](http://img.shields.io/travis/JamieMason/syncpack/master.svg?style=flat-square)](https://travis-ci.org/JamieMason/syncpack)
 [![Maintainability](https://api.codeclimate.com/v1/badges/516439365fdd0e3c6526/maintainability)](https://codeclimate.com/github/JamieMason/syncpack/maintainability)
 
-## Table of Contents
-
-- [🌩 Installation](#-installation)
-- [📝 Commands](#-commands)
-  - [fix-mismatches](#fix-mismatches)
-  - [format](#format)
-  - [list](#list)
-  - [list-mismatches](#list-mismatches)
-  - [set-semver-ranges](#set-semver-ranges)
-- [🛠 Configuration File](#-configuration-file)
-- [🕵🏾‍♀️ Resolving Packages](#️-resolving-packages)
-- [🙋🏿‍♀️ Getting Help](#️-getting-help)
-- [👀 Other Projects](#-other-projects)
-
 ## 🌩 Installation
 
     npm install --global syncpack
@@ -37,13 +23,15 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 <details>
 <summary>Options</summary>
 
-    -s, --source [pattern]  glob pattern for package.json files to read from
-    -p, --prod              include dependencies
-    -d, --dev               include devDependencies
-    -P, --peer              include peerDependencies
-    -f, --filter [pattern]  regex for dependency filter
-    -i, --indent [value]    override indentation. defaults to "  "
-    -h, --help              output usage information
+```
+-s, --source [pattern]  glob pattern for package.json files to read from
+-p, --prod              include dependencies
+-d, --dev               include devDependencies
+-P, --peer              include peerDependencies
+-f, --filter [pattern]  regex for dependency filter
+-i, --indent [value]    override indentation. defaults to "  "
+-h, --help              output usage information
+```
 
 </details>
 
@@ -78,9 +66,11 @@ fields are ordered alphabetically. Shorthand properties are used where available
 <details>
 <summary>Options</summary>
 
-    -s, --source [pattern]  glob pattern for package.json files to read from
-    -i, --indent [value]    override indentation. defaults to "  "
-    -h, --help              output usage information
+```
+-s, --source [pattern]  glob pattern for package.json files to read from
+-i, --indent [value]    override indentation. defaults to "  "
+-h, --help              output usage information
+```
 
 </details>
 
@@ -100,19 +90,23 @@ syncpack format --indent "    "
 
 </details>
 
-### list
+### lint-semver-ranges
 
-List all dependencies required by your packages.
+Check whether dependency versions used within "dependencies", "devDependencies", and "peerDependencies" follow a
+consistent format.
 
 <details>
 <summary>Options</summary>
 
-    -s, --source [pattern]  glob pattern for package.json files to read from
-    -p, --prod              include dependencies
-    -d, --dev               include devDependencies
-    -P, --peer              include peerDependencies
-    -f, --filter [pattern]  regex for dependency filter
-    -h, --help              output usage information
+```
+-s, --source [pattern]      glob pattern for package.json files to read from (default: [])
+-p, --prod                  include dependencies
+-d, --dev                   include devDependencies
+-P, --peer                  include peerDependencies
+-f, --filter [pattern]      regex for dependency filter
+-r, --semver-range <range>  see supported ranges below. defaults to ""
+-h, --help                  display help for command
+```
 
 </details>
 
@@ -121,17 +115,19 @@ List all dependencies required by your packages.
 
 ```bash
 # uses defaults for resolving packages
-syncpack list
+syncpack lint-semver-ranges
 # uses packages defined by --source when provided
-syncpack list --source "apps/*/package.json"
+syncpack lint-semver-ranges --source "apps/*/package.json"
 # multiple globs can be provided like this
-syncpack list --source "apps/*/package.json" --source "core/*/package.json"
+syncpack lint-semver-ranges --source "apps/*/package.json" --source "core/*/package.json"
 # uses dependencies regular expression defined by --filter when provided
-syncpack list --filter "typescript|tslint"
-# only inspect "devDependencies"
-syncpack list --dev
-# only inspect "devDependencies" and "peerDependencies"
-syncpack list --dev --peer
+syncpack lint-semver-ranges --filter "typescript|tslint"
+# use ~ range instead of default ""
+syncpack lint-semver-ranges --semver-range ~
+# use ~ range in "devDependencies"
+syncpack lint-semver-ranges --dev --semver-range ~
+# use ~ range in "devDependencies" and "peerDependencies"
+syncpack lint-semver-ranges --dev --peer --semver-range ~
 ```
 
 </details>
@@ -145,12 +141,14 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 <details>
 <summary>Options</summary>
 
-    -s, --source [pattern]  glob pattern for package.json files to read from
-    -p, --prod              include dependencies
-    -d, --dev               include devDependencies
-    -P, --peer              include peerDependencies
-    -f, --filter [pattern]  regex for dependency filter
-    -h, --help              output usage information
+```
+-s, --source [pattern]  glob pattern for package.json files to read from
+-p, --prod              include dependencies
+-d, --dev               include devDependencies
+-P, --peer              include peerDependencies
+-f, --filter [pattern]  regex for dependency filter
+-h, --help              output usage information
+```
 
 </details>
 
@@ -174,6 +172,44 @@ syncpack list-mismatches --dev --peer
 
 </details>
 
+### list
+
+List all dependencies required by your packages.
+
+<details>
+<summary>Options</summary>
+
+```
+-s, --source [pattern]  glob pattern for package.json files to read from
+-p, --prod              include dependencies
+-d, --dev               include devDependencies
+-P, --peer              include peerDependencies
+-f, --filter [pattern]  regex for dependency filter
+-h, --help              output usage information
+```
+
+</details>
+
+<details>
+<summary>Examples</summary>
+
+```bash
+# uses defaults for resolving packages
+syncpack list
+# uses packages defined by --source when provided
+syncpack list --source "apps/*/package.json"
+# multiple globs can be provided like this
+syncpack list --source "apps/*/package.json" --source "core/*/package.json"
+# uses dependencies regular expression defined by --filter when provided
+syncpack list --filter "typescript|tslint"
+# only inspect "devDependencies"
+syncpack list --dev
+# only inspect "devDependencies" and "peerDependencies"
+syncpack list --dev --peer
+```
+
+</details>
+
 ### set-semver-ranges
 
 Ensure dependency versions used within `"dependencies"`, `"devDependencies"`, and `"peerDependencies"` follow a
@@ -182,14 +218,16 @@ consistent format.
 <details>
 <summary>Options</summary>
 
-    -s, --source [pattern]      glob pattern for package.json files to read from
-    -p, --prod                  include dependencies
-    -d, --dev                   include devDependencies
-    -P, --peer                  include peerDependencies
-    -f, --filter [pattern]      regex for dependency filter
-    -i, --indent [value]        override indentation. defaults to "  "
-    -r, --semver-range <range>  see supported ranges below. defaults to ""
-    -h, --help                  output usage information
+```
+-s, --source [pattern]      glob pattern for package.json files to read from
+-p, --prod                  include dependencies
+-d, --dev                   include devDependencies
+-P, --peer                  include peerDependencies
+-f, --filter [pattern]      regex for dependency filter
+-i, --indent [value]        override indentation. defaults to "  "
+-r, --semver-range <range>  see supported ranges below. defaults to ""
+-h, --help                  output usage information
+```
 
 </details>
 

@@ -6,6 +6,7 @@
   "prod": true,
   "filter": "",
   "sortAz": [
+    "bin",
     "contributors",
     "dependencies",
     "devDependencies",
