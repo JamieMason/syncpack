@@ -2,15 +2,17 @@ import 'expect-more-jest';
 import { DEFAULT_CONFIG } from '../../../constants';
 import { SourceWrapper } from '../get-wrappers';
 import { getDependencies, Installation } from './get-dependencies';
+import { withJson } from '../../../../test/mock';
 
 const mocked = {
-  projects: (): SourceWrapper[] => [
-    { filePath: '', contents: { dependencies: { chalk: '2.3.0' } } },
-    { filePath: '', contents: { devDependencies: { jest: '22.1.4' } } },
-    { filePath: '', contents: { peerDependencies: { jest: '22.1.4' } } },
-    { filePath: '', contents: { dependencies: { chalk: '1.0.0' } } },
-    { filePath: '', contents: { dependencies: { biggy: '0.1.0' } } },
-  ],
+  projects: (): SourceWrapper[] =>
+    [
+      { filePath: '', contents: { dependencies: { chalk: '2.3.0' } } },
+      { filePath: '', contents: { devDependencies: { jest: '22.1.4' } } },
+      { filePath: '', contents: { peerDependencies: { jest: '22.1.4' } } },
+      { filePath: '', contents: { dependencies: { chalk: '1.0.0' } } },
+      { filePath: '', contents: { dependencies: { biggy: '0.1.0' } } },
+    ].map((obj) => withJson(obj)),
 };
 
 type ExpectedShape = {

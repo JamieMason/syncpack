@@ -1,5 +1,5 @@
 import { isArrayOfStrings } from 'expect-more';
-import { readJsonSync } from 'fs-extra';
+import { readFileSync, readJsonSync } from 'fs-extra';
 import { sync } from 'glob';
 import { join, resolve } from 'path';
 import { sync as readYamlFileSync } from 'read-yaml-file';
@@ -21,7 +21,8 @@ export interface Source {
   resolutions?: { [key: string]: string };
   scripts?: { [key: string]: string };
   version?: string;
-  [otherProps: string]: string | string[] | { [key: string]: string } | undefined;
+  workspaces?: string[] | { [key: string]: string[] };
+  [otherProps: string]: string | string[] | { [key: string]: string | string[] } | undefined;
 }
 
 export interface SourceWrapper {
@@ -29,6 +30,8 @@ export interface SourceWrapper {
   filePath: string;
   /** the parsed JSON contents of this package.json file */
   contents: Source;
+  /** the raw file contents of this package.json file */
+  json: string;
 }
 
 const getPatternsFromJson = (
@@ -64,7 +67,14 @@ const getPnpmPatterns = (): string[] | null => {
 const getDefaultPatterns = (): string[] => ALL_PATTERNS;
 const resolvePattern = (pattern: string): string[] => sync(pattern, { absolute: true });
 const reduceFlatArray = (all: string[], next: string[]): string[] => all.concat(next);
-const createWrapper = (filePath: string): SourceWrapper => ({ contents: readJsonSync(filePath), filePath });
+const createWrapper = (filePath: string): SourceWrapper => {
+  const json = readFileSync(filePath, { encoding: 'utf8' });
+  return {
+    contents: JSON.parse(json),
+    filePath,
+    json,
+  };
+};
 
 export const getWrappers = (program: Options): SourceWrapper[] =>
   (getCliPatterns(program) || getYarnPatterns() || getPnpmPatterns() || getLernaPatterns() || getDefaultPatterns())

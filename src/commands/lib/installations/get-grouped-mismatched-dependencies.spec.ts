@@ -1,4 +1,5 @@
 import 'expect-more-jest';
+import { withJson } from '../../../../test/mock';
 import { DEFAULT_CONFIG, SyncpackConfig } from '../../../constants';
 import { SourceWrapper } from '../get-wrappers';
 import { getMismatchedDependencies } from './get-mismatched-dependencies';
@@ -15,13 +16,14 @@ const expectedMismatch = (nameAndVersion: string, packageName: string, dependenc
           [dependencyName]: dependencyVersion,
         }),
       }),
+      json: expect.toBeNonEmptyString(),
     },
     type: dependencyType,
     version: dependencyVersion,
   });
 };
 
-const mockWrapper = (contents: SourceWrapper['contents']): SourceWrapper => ({ filePath: '', contents });
+const mockWrapper = (contents: SourceWrapper['contents']): SourceWrapper => withJson({ filePath: '', contents });
 
 describe('getMismatchedDependencies', () => {
   describe('when versions match inside a group, but differ to those outside the group', () => {

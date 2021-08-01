@@ -1,6 +1,7 @@
 import { removeSync } from 'fs-extra';
 import { getWrappers, SourceWrapper } from './get-wrappers';
 import mock = require('mock-fs');
+import { toJson, withJson } from '../../../test/mock';
 
 describe('getWrappers', () => {
   afterEach(() => {
@@ -13,21 +14,22 @@ describe('getWrappers', () => {
 
   beforeEach(() => {
     mock({
-      'package.json': JSON.stringify({ name: 'root' }),
-      'cli/a/package.json': JSON.stringify({ name: 'cli-a' }),
-      'cli/b/package.json': JSON.stringify({ name: 'cli-b' }),
-      'lerna.json': JSON.stringify({ packages: ['lerna/*'] }),
-      'lerna/a/package.json': JSON.stringify({ name: 'lerna-a' }),
-      'lerna/b/package.json': JSON.stringify({ name: 'lerna-b' }),
-      'packages/a/package.json': JSON.stringify({ name: 'packages-a' }),
-      'packages/b/package.json': JSON.stringify({ name: 'packages-b' }),
+      'package.json': toJson({ name: 'root' }),
+      'cli/a/package.json': toJson({ name: 'cli-a' }),
+      'cli/b/package.json': toJson({ name: 'cli-b' }),
+      'lerna.json': toJson({ packages: ['lerna/*'] }),
+      'lerna/a/package.json': toJson({ name: 'lerna-a' }),
+      'lerna/b/package.json': toJson({ name: 'lerna-b' }),
+      'packages/a/package.json': toJson({ name: 'packages-a' }),
+      'packages/b/package.json': toJson({ name: 'packages-b' }),
     });
   });
 
-  const getShape = (name: string, filePath: string): SourceWrapper => ({
-    contents: { name },
-    filePath: `${process.cwd()}/${filePath}`,
-  });
+  const getShape = (name: string, filePath: string): SourceWrapper =>
+    withJson({
+      contents: { name },
+      filePath: `${process.cwd()}/${filePath}`,
+    });
 
   it('prefers CLI', () => {
     const program = { source: ['cli/*/package.json'] };
@@ -64,16 +66,16 @@ describe('getWrappers', () => {
     describe('when configuration is an array', () => {
       beforeEach(() => {
         mock({
-          'package.json': JSON.stringify({ workspaces: ['as-array/*'] }),
-          'as-array/a/package.json': JSON.stringify({ name: 'packages-a' }),
-          'as-array/b/package.json': JSON.stringify({ name: 'packages-b' }),
+          'package.json': toJson({ workspaces: ['as-array/*'] }),
+          'as-array/a/package.json': toJson({ name: 'packages-a' }),
+          'as-array/b/package.json': toJson({ name: 'packages-b' }),
         });
       });
 
       it('should resolve correctly', () => {
         const program = { source: [] };
         expect(getWrappers(program)).toEqual([
-          { contents: { workspaces: ['as-array/*'] }, filePath: `${process.cwd()}/package.json` },
+          withJson({ contents: { workspaces: ['as-array/*'] }, filePath: `${process.cwd()}/package.json` }),
           getShape('packages-a', 'as-array/a/package.json'),
           getShape('packages-b', 'as-array/b/package.json'),
         ]);
@@ -83,16 +85,19 @@ describe('getWrappers', () => {
     describe('when configuration is an object', () => {
       beforeEach(() => {
         mock({
-          'package.json': JSON.stringify({ workspaces: { packages: ['as-object/*'] } }),
-          'as-object/a/package.json': JSON.stringify({ name: 'packages-a' }),
-          'as-object/b/package.json': JSON.stringify({ name: 'packages-b' }),
+          'package.json': toJson({ workspaces: { packages: ['as-object/*'] } }),
+          'as-object/a/package.json': toJson({ name: 'packages-a' }),
+          'as-object/b/package.json': toJson({ name: 'packages-b' }),
         });
       });
 
       it('should resolve correctly', () => {
         const program = { source: [] };
         expect(getWrappers(program)).toEqual([
-          { contents: { workspaces: { packages: ['as-object/*'] } }, filePath: `${process.cwd()}/package.json` },
+          withJson({
+            contents: { workspaces: { packages: ['as-object/*'] } },
+            filePath: `${process.cwd()}/package.json`,
+          }),
           getShape('packages-a', 'as-object/a/package.json'),
           getShape('packages-b', 'as-object/b/package.json'),
         ]);
@@ -107,17 +112,17 @@ describe('getWrappers', () => {
 
     beforeEach(() => {
       mock({
-        'package.json': JSON.stringify({ name: 'root' }),
+        'package.json': toJson({ name: 'root' }),
         'pnpm-workspace.yaml': ['packages:', '  - "./*"'].join('\n'),
-        'a/package.json': JSON.stringify({ name: 'package-a' }),
-        'b/package.json': JSON.stringify({ name: 'package-b' }),
+        'a/package.json': toJson({ name: 'package-a' }),
+        'b/package.json': toJson({ name: 'package-b' }),
       });
     });
 
     it('should resolve correctly', () => {
       const program = { source: [] };
       expect(getWrappers(program)).toEqual([
-        { contents: { name: 'root' }, filePath: `${process.cwd()}/package.json` },
+        withJson({ contents: { name: 'root' }, filePath: `${process.cwd()}/package.json` }),
         getShape('package-a', 'a/package.json'),
         getShape('package-b', 'b/package.json'),
       ]);

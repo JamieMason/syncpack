@@ -5,13 +5,14 @@ import { relative } from 'path';
 import { SourceWrapper } from './get-wrappers';
 import { log } from './log';
 
+const toJson = (indent: string, wrapper: SourceWrapper): string =>
+  `${JSON.stringify(wrapper.contents, null, indent)}${EOL}`;
+
 export const writeIfChanged = (indent: string, wrapper: SourceWrapper, mutateContents: () => void): void => {
-  const toJson = (): string => `${JSON.stringify(wrapper.contents, null, indent)}${EOL}`;
   const shortPath = relative(process.cwd(), wrapper.filePath);
-  const before = toJson();
   mutateContents();
-  const after = toJson();
-  if (before !== after) {
+  const after = toJson(indent, wrapper);
+  if (wrapper.json !== after) {
     writeFileSync(wrapper.filePath, after);
     log(chalk.green('✓'), shortPath);
   } else {

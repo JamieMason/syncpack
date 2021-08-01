@@ -1,8 +1,9 @@
+import { withJson } from '../../test/mock';
 import { DEFAULT_CONFIG } from '../constants';
 import { format } from './format';
 import { Source, SourceWrapper } from './lib/get-wrappers';
 
-const createWrapper = (contents: Source): SourceWrapper => ({ contents, filePath: '' });
+const createWrapper = (contents: Source): SourceWrapper => withJson({ contents, filePath: '' });
 
 describe('format', () => {
   it('sorts Array properties alphabetically by value', () => {

@@ -20,9 +20,8 @@ export const setSemverRanges = (wrapper: SourceWrapper, options: Options): void 
 };
 
 export const setSemverRangesToDisk = (options: Options): void => {
-  const { indent, source } = options;
-  getWrappers({ source }).forEach((wrapper) => {
-    writeIfChanged(indent, wrapper, () => {
+  getWrappers({ source: options.source }).forEach((wrapper) => {
+    writeIfChanged(options.indent, wrapper, () => {
       setSemverRanges(wrapper, options);
     });
   });

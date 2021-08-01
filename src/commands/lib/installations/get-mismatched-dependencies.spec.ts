@@ -1,4 +1,5 @@
 import 'expect-more-jest';
+import { withJson } from '../../../../test/mock';
 import { DEFAULT_CONFIG } from '../../../constants';
 import { SourceWrapper } from '../get-wrappers';
 import { getMismatchedDependencies } from './get-mismatched-dependencies';
@@ -28,7 +29,7 @@ describe('getMismatchedDependencies', () => {
                       Array.from(
                         getMismatchedDependencies(
                           [{ [typeA]: { chalk: versionA } }, { [typeB]: { chalk: versionB } }].map(
-                            (contents): SourceWrapper => ({ filePath: '', contents }),
+                            (contents): SourceWrapper => withJson({ filePath: '', contents }),
                           ),
                           { ...DEFAULT_CONFIG, dev, peer, prod },
                         ),
@@ -59,7 +60,7 @@ describe('getMismatchedDependencies', () => {
                       const result = Array.from(
                         getMismatchedDependencies(
                           [{ [typeA]: { chalk: versionA } }, { [typeB]: { chalk: versionB } }].map(
-                            (contents): SourceWrapper => ({ filePath: '', contents }),
+                            (contents): SourceWrapper => withJson({ filePath: '', contents }),
                           ),
                           { ...DEFAULT_CONFIG, dev, peer, prod },
                         ),
