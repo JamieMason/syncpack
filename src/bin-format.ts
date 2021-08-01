@@ -2,7 +2,7 @@
 
 import chalk from 'chalk';
 import { formatToDisk } from './commands/format';
-import { option, SyncpackConfig } from './constants';
+import { option } from './constants';
 import { getConfig } from './lib/get-config';
 import { program } from 'commander';
 
@@ -46,11 +46,9 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-const args = program as Partial<SyncpackConfig>;
-
 formatToDisk(
   getConfig({
-    indent: args.indent,
-    source: args.source,
+    indent: program.opts().indent,
+    source: program.opts().source,
   }),
 );

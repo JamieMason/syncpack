@@ -2,7 +2,7 @@
 
 import chalk from 'chalk';
 import { fixMismatchesToDisk } from './commands/fix-mismatches';
-import { option, SyncpackConfig } from './constants';
+import { option } from './constants';
 import { getConfig } from './lib/get-config';
 import { program } from 'commander';
 
@@ -55,15 +55,13 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-const args = program as Partial<SyncpackConfig>;
-
 fixMismatchesToDisk(
   getConfig({
-    dev: args.dev,
-    filter: args.filter,
-    indent: args.indent,
-    peer: args.peer,
-    prod: args.prod,
-    source: args.source,
+    dev: program.opts().dev,
+    filter: program.opts().filter,
+    indent: program.opts().indent,
+    peer: program.opts().peer,
+    prod: program.opts().prod,
+    source: program.opts().source,
   }),
 );
