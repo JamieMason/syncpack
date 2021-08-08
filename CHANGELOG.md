@@ -1,3 +1,12 @@
+## [5.8.15](https://github.com/JamieMason/syncpack/compare/5.8.14...5.8.15) (2021-08-08)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([aea1f37](https://github.com/JamieMason/syncpack/commit/aea1f374e4e039a35aec7b2e629b9607fd922c75))
+
+
+
 ## [5.8.14](https://github.com/JamieMason/syncpack/compare/5.8.12...5.8.14) (2021-08-01)
 
 
