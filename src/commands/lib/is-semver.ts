@@ -1,3 +1,4 @@
+import { isString } from 'expect-more';
 import {
   RANGE_EXACT,
   RANGE_GT,
@@ -10,7 +11,7 @@ import {
   ValidRange,
 } from '../../constants';
 
-export const isValidSemverRange = (value: string): value is ValidRange =>
+export const isValidSemverRange = (value: unknown): value is ValidRange =>
   value === RANGE_EXACT ||
   value === RANGE_GT ||
   value === RANGE_GTE ||
@@ -20,10 +21,14 @@ export const isValidSemverRange = (value: string): value is ValidRange =>
   value === RANGE_MINOR ||
   value === RANGE_PATCH;
 
-export const isSemver = (version: string): boolean => {
-  return version.search(/^(~|\^|>=|>|<=|<|)?[0-9]+\.[0-9x]+\.[0-9x]+/) !== -1 && version.indexOf(' ') === -1;
+export const isSemver = (version: unknown): boolean => {
+  return (
+    isString(version) &&
+    version.search(/^(~|\^|>=|>|<=|<|)?[0-9]+\.[0-9x]+\.[0-9x]+/) !== -1 &&
+    version.indexOf(' ') === -1
+  );
 };
 
-export const isLooseSemver = (version: string): boolean => {
-  return isSemver(version) && version.search(/\.x(\.|$)/) !== -1;
+export const isLooseSemver = (version: unknown): boolean => {
+  return isString(version) && isSemver(version) && version.search(/\.x(\.|$)/) !== -1;
 };

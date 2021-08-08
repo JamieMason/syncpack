@@ -5,10 +5,11 @@ import { DEFAULT_CONFIG, SyncpackConfig, ValidRange, VersionGroup } from '../con
 
 export const getConfig = (program: Partial<SyncpackConfig>): SyncpackConfig => {
   type OptionName = keyof SyncpackConfig;
-  type TypeChecker<T> = (value: any) => value is T;
+  type TypeChecker<T> = (value: unknown) => value is T;
 
   const rcSearch = cosmiconfigSync('syncpack').search();
-  const rcFile: Partial<SyncpackConfig> = isObject(rcSearch) && isObject(rcSearch.config) ? rcSearch.config : {};
+  const rcConfig = rcSearch !== null ? rcSearch.config : {};
+  const rcFile = isObject<Partial<SyncpackConfig>>(rcConfig) ? rcConfig : {};
 
   const getOption = <T>(name: OptionName, isValid: TypeChecker<T>): T => {
     const cliOption = program[name];
@@ -22,17 +23,18 @@ export const getConfig = (program: Partial<SyncpackConfig>): SyncpackConfig => {
     return DEFAULT_CONFIG[name] as unknown as T;
   };
 
-  const isVersionGroup = (value: any): value is VersionGroup =>
+  const isVersionGroup = (value: unknown): value is VersionGroup =>
     isObject(value) && isArrayOfStrings(value.packages) && isArrayOfStrings(value.dependencies);
 
-  const isArrayOfVersionGroups = (value: any): value is VersionGroup[] => isArray(value) && value.every(isVersionGroup);
+  const isArrayOfVersionGroups = (value: unknown): value is VersionGroup[] =>
+    isArray(value) && value.every(isVersionGroup);
 
   const hasTypeOverride = program.prod || program.dev || program.peer;
 
   return {
     dev: hasTypeOverride ? Boolean(program.dev) : getOption<boolean>('dev', isBoolean),
-    filter: getOption<string>('filter', (value: any): value is string => isNonEmptyString(value)),
-    indent: getOption<string>('indent', (value: any): value is string => isNonEmptyString(value)),
+    filter: getOption<string>('filter', (value: unknown): value is string => isNonEmptyString(value)),
+    indent: getOption<string>('indent', (value: unknown): value is string => isNonEmptyString(value)),
     peer: hasTypeOverride ? Boolean(program.peer) : getOption<boolean>('peer', isBoolean),
     prod: hasTypeOverride ? Boolean(program.prod) : getOption<boolean>('prod', isBoolean),
     semverRange: getOption<ValidRange>('semverRange', isValidSemverRange),
