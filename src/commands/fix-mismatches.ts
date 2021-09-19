@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { writeFileSync } from 'fs-extra';
 import { EOL } from 'os';
 import { relative } from 'path';
-import { SyncpackConfig } from '../constants';
+import { CWD, SyncpackConfig } from '../constants';
 import { getHighestVersion } from './lib/get-highest-version';
 import { getWrappers, SourceWrapper } from './lib/get-wrappers';
 import { getMismatchedDependencies } from './lib/installations/get-mismatched-dependencies';
@@ -43,7 +43,7 @@ export const fixMismatchesToDisk = (options: Options): void => {
   fixMismatches(wrappers, options);
 
   wrappers.forEach((wrapper, i) => {
-    const shortPath = relative(process.cwd(), wrapper.filePath);
+    const shortPath = relative(CWD, wrapper.filePath);
     const before = allBefore[i];
     const after = toJson(wrapper);
     if (before !== after) {

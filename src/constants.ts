@@ -3,6 +3,8 @@ import { collect } from './lib/collect';
 export type DependencyType = 'dependencies' | 'devDependencies' | 'peerDependencies';
 export const DEPENDENCY_TYPES: DependencyType[] = ['dependencies', 'devDependencies', 'peerDependencies'];
 
+export const CWD = process.cwd();
+
 export const GREATER = 1;
 export const LESSER = -1;
 export const SAME = 0;
