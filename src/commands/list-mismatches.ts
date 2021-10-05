@@ -7,7 +7,7 @@ import { sortByName } from './lib/installations/sort-by-name';
 import { log } from './lib/log';
 import { matchesFilter } from './lib/matches-filter';
 
-type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'source' | 'versionGroups'>;
+type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'matchRanges' | 'source' | 'versionGroups'>;
 
 export const listMismatches = (wrappers: SourceWrapper[], options: Options): InstalledPackage[] => {
   const iterator = getMismatchedDependencies(wrappers, options);

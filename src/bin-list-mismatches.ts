@@ -49,6 +49,7 @@ program
   .option(...option.dev)
   .option(...option.peer)
   .option(...option.filter)
+  .option(...option.matchRanges)
   .parse(process.argv);
 
 listMismatchesFromDisk(
@@ -58,5 +59,6 @@ listMismatchesFromDisk(
     peer: program.opts().peer,
     prod: program.opts().prod,
     source: program.opts().source,
+    matchRanges: program.opts().matchRanges,
   }),
 );

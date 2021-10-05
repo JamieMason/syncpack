@@ -17,7 +17,8 @@ const getWorkspaceVersion = (name: string, wrappers: SourceWrapper[]): string | 
 };
 
 export const fixMismatches = (wrappers: SourceWrapper[], options: Options): void => {
-  const iterator = getMismatchedDependencies(wrappers, options);
+  // TODO: decide what to do here
+  const iterator = getMismatchedDependencies(wrappers, { ...options, matchRanges: false });
   const mismatches = Array.from(iterator).filter(matchesFilter(options));
 
   mismatches.forEach((installedPackage) => {
