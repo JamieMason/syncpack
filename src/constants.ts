@@ -65,6 +65,10 @@ export type SyncpackConfig = Readonly<{
    */
   prod: boolean;
   /**
+   * whether versions should be considered equal if their version ranges match
+   */
+  matchRanges: boolean;
+  /**
    * defaults to `""` to ensure that exact dependency versions are used instead
    * of loose ranges
    */
@@ -94,6 +98,7 @@ export const DEFAULT_CONFIG: SyncpackConfig = {
   indent: '  ',
   peer: true,
   prod: true,
+  matchRanges: false,
   semverRange: '',
   sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'resolutions', 'scripts'],
   sortFirst: ['name', 'description', 'version', 'author'],
@@ -112,6 +117,7 @@ interface OptionsByName {
   indent: [string, string];
   peer: [string, string];
   prod: [string, string];
+  matchRanges: [string, string];
   semverRange: [string, string];
   source: [string, string, typeof collect, string[]];
 }
@@ -122,6 +128,7 @@ export const option: OptionsByName = {
   indent: ['-i, --indent [value]', `override indentation. defaults to "${DEFAULT_CONFIG.indent}"`],
   peer: ['-P, --peer', 'include peerDependencies'],
   prod: ['-p, --prod', 'include dependencies'],
+  matchRanges: ['-m, --match-ranges', 'include dependencies'],
   semverRange: [
     '-r, --semver-range <range>',
     `see supported ranges below. defaults to "${DEFAULT_CONFIG.semverRange}"`,

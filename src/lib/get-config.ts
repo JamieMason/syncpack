@@ -37,6 +37,7 @@ export const getConfig = (program: Partial<SyncpackConfig>): SyncpackConfig => {
     indent: getOption<string>('indent', (value: unknown): value is string => isNonEmptyString(value)),
     peer: hasTypeOverride ? Boolean(program.peer) : getOption<boolean>('peer', isBoolean),
     prod: hasTypeOverride ? Boolean(program.prod) : getOption<boolean>('prod', isBoolean),
+    matchRanges: getOption<boolean>('matchRanges', isBoolean),
     semverRange: getOption<ValidRange>('semverRange', isValidSemverRange),
     sortAz: getOption<string[]>('sortAz', isArrayOfStrings),
     sortFirst: getOption<string[]>('sortFirst', isArrayOfStrings),
