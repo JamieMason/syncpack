@@ -46,6 +46,9 @@ describe('versionsMatch', () => {
       ['npm:1.2.3', 'npm:1.2.3', true],
       ['npm:1.2.3', 'npm:1.0.0', false],
       ['npm:1.2.3', 'github:1.2.3', false],
+
+      ['https://github.com/npm/npm.git', 'https://github.com/npm/npm.git', true],
+      ['https://github.com/npm/npm.git', 'https://github.com/npm/npm-two.git', false],
     ];
 
     it.each(cases)('%s =~ %s == %s', (aVersion, bVersion, expectedResult) => {

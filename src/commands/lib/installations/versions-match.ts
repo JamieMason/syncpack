@@ -19,6 +19,10 @@ export const versionsMatch = (a: Installation, b: Installation, matchRanges: boo
     protocolsMatch = aProtocol === bProtocol;
   }
 
+  if (!validRange(aVersion) || !validRange(bVersion)) {
+    return aVersion === bVersion;
+  }
+
   // If both versions are ranges we need to check if they intersect (satisfy each other)
   // as .satisfies() does not support two ranges.
   if (validRange(aVersion) && validRange(bVersion)) {
