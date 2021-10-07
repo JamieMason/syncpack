@@ -60,6 +60,8 @@ program
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
+  .option(...option.resolutions)
+  .option(...option.overrides)
   .option(...option.filter)
   .option(...option.semverRange)
   .parse(process.argv);
@@ -70,6 +72,8 @@ lintSemverRangesFromDisk(
     filter: program.opts().filter,
     peer: program.opts().peer,
     prod: program.opts().prod,
+    resolutions: program.opts().resolutions,
+    overrides: program.opts().overrides,
     semverRange: program.opts().semverRange,
     source: program.opts().source,
   }),

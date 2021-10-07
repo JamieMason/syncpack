@@ -62,6 +62,8 @@ program
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
+  .option(...option.resolutions)
+  .option(...option.overrides)
   .option(...option.filter)
   .option(...option.indent)
   .option(...option.semverRange)
@@ -74,6 +76,8 @@ setSemverRangesToDisk(
     indent: program.opts().indent,
     peer: program.opts().peer,
     prod: program.opts().prod,
+    resolutions: program.opts().resolutions,
+    overrides: program.opts().overrides,
     semverRange: program.opts().semverRange,
     source: program.opts().source,
   }),

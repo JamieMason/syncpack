@@ -6,7 +6,10 @@ import { getInstallations } from './lib/installations/get-installations';
 import { log } from './lib/log';
 import { setSemverRange as createSetSemverRange } from './lib/set-semver-range';
 
-type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'peer' | 'prod' | 'semverRange' | 'source'>;
+type Options = Pick<
+  SyncpackConfig,
+  'dev' | 'filter' | 'peer' | 'prod' | 'resolutions' | 'overrides' | 'semverRange' | 'source'
+>;
 
 export const lintSemverRanges = (
   wrappers: SourceWrapper[],

@@ -51,6 +51,8 @@ program
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
+  .option(...option.resolutions)
+  .option(...option.overrides)
   .option(...option.filter)
   .option(...option.indent)
   .parse(process.argv);
@@ -62,6 +64,8 @@ fixMismatchesToDisk(
     indent: program.opts().indent,
     peer: program.opts().peer,
     prod: program.opts().prod,
+    resolutions: program.opts().resolutions,
+    overrides: program.opts().overrides,
     source: program.opts().source,
   }),
 );

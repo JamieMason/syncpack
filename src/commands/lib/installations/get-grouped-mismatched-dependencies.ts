@@ -13,7 +13,7 @@ const hasDifferentVersionToPreviousSibling = (installation: Installation, i: num
 
 export function* getGroupedMismatchedDependencies(
   wrappers: SourceWrapper[],
-  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod' | 'versionGroups'>,
+  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod' | 'resolutions' | 'overrides' | 'versionGroups'>,
 ): Generator<InstalledPackage> {
   const iterator = getDependencies(wrappers, options);
   const installedPackages = Array.from(iterator);

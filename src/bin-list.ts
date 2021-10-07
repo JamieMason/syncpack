@@ -44,6 +44,8 @@ program
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
+  .option(...option.resolutions)
+  .option(...option.overrides)
   .option(...option.filter)
   .parse(process.argv);
 
@@ -53,6 +55,8 @@ listFromDisk(
     filter: program.opts().filter,
     peer: program.opts().peer,
     prod: program.opts().prod,
+    resolutions: program.opts().resolutions,
+    overrides: program.opts().overrides,
     source: program.opts().source,
   }),
 );

@@ -9,7 +9,10 @@ import { getMismatchedDependencies } from './lib/installations/get-mismatched-de
 import { log } from './lib/log';
 import { matchesFilter } from './lib/matches-filter';
 
-type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'source' | 'versionGroups'>;
+type Options = Pick<
+  SyncpackConfig,
+  'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'resolutions' | 'overrides' | 'source' | 'versionGroups'
+>;
 
 const getWorkspaceVersion = (name: string, wrappers: SourceWrapper[]): string | null => {
   const local = wrappers.find((wrapper) => wrapper.contents.name === name);

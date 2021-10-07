@@ -5,7 +5,7 @@ import { getGroupedMismatchedDependencies } from './get-grouped-mismatched-depen
 
 function* getUngroupedMismatchedDependencies(
   wrappers: SourceWrapper[],
-  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod' | 'versionGroups'>,
+  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod' | 'resolutions' | 'overrides' | 'versionGroups'>,
 ): Generator<InstalledPackage> {
   const iterator = getDependencies(wrappers, options);
   for (const installedPackage of iterator) {

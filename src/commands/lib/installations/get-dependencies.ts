@@ -23,7 +23,7 @@ export interface InstalledPackage {
 
 export function* getDependencies(
   wrappers: SourceWrapper[],
-  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod'>,
+  options: Pick<SyncpackConfig, 'dev' | 'peer' | 'prod' | 'resolutions' | 'overrides'>,
 ): Generator<InstalledPackage> {
   const types = getDependencyTypes(options);
   const visited: { [name: string]: boolean } = {};

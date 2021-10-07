@@ -19,6 +19,7 @@ export interface Source {
   peerDependencies?: { [key: string]: string };
   repository?: { type: string; url: string } | string;
   resolutions?: { [key: string]: string };
+  overrides?: { [key: string]: string };
   scripts?: { [key: string]: string };
   version?: string;
   workspaces?: string[] | { [key: string]: string[] };

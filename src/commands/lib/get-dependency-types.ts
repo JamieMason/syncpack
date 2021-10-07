@@ -4,6 +4,8 @@ interface Options {
   prod: boolean;
   dev: boolean;
   peer: boolean;
+  resolutions: boolean;
+  overrides: boolean;
 }
 
 export const getDependencyTypes = (program: Options): DependencyType[] =>
@@ -12,6 +14,8 @@ export const getDependencyTypes = (program: Options): DependencyType[] =>
         (type) =>
           (type === 'dependencies' && program.prod) ||
           (type === 'devDependencies' && program.dev) ||
+          (type === 'resolutions' && program.resolutions) ||
+          (type === 'overrides' && program.overrides) ||
           (type === 'peerDependencies' && program.peer),
       )
     : DEPENDENCY_TYPES;
