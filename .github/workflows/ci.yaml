@@ -1,12 +1,12 @@
-name: ci
+name: verify
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request_target:
 
 jobs:
-  build:
+  all:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,58 +14,29 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: 12.x
           cache: yarn
+          node-version: 14.x
 
-      - name: Install dependencies
+      - name: Install
         run: yarn install --frozen-lockfile
 
-      - run: yarn build
-        # Enable colors
+      - name: Build
+        run: yarn build
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
 
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 12.x
-          cache: yarn
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - run: yarn lint
-        # Enable colors
+      - name: Lint
+        run: yarn lint
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
 
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 12.x
-          cache: yarn
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - run: yarn test
-        # Enable colors
+      - name: Test
+        run: yarn test
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
-
       - uses: paambaati/codeclimate-action@v3.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

@@ -83,13 +83,12 @@
     "lodash": "4.17.21"
   },
   "scripts": {
-    "build": "tsc --project .",
-    "format": "npm run format:imports && npm run format:source",
+    "build": "rm -rf ./dist && tsc --project .",
+    "format": "npm run format:imports && npm run format:lint && npm run format:source",
     "format:imports": "organize-imports-cli ./src/**/*.ts",
+    "format:lint": "yarn lint --fix",
     "format:source": "prettier --write ./{src,test}/**/*.ts",
-    "lint": "eslint --fix --ext .ts,.tsx .",
-    "prebuild": "rimraf dist ./test/dist",
-    "prelint": "npm run format",
+    "lint": "eslint --ext .ts,.tsx .",
     "prepack": "npm run build",
     "test": "jest"
   }
