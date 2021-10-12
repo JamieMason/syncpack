@@ -1,18 +1,18 @@
 module.exports = {
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/bin*.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/bin*/index.ts'],
   coverageReporters: ['html', 'lcov'],
   coverageThreshold: {
     global: {
-      branches: 89,
-      functions: 89,
-      lines: 93,
-      statements: 92,
+      branches: 69,
+      functions: 84,
+      lines: 81,
+      statements: 80,
     },
   },
-  moduleFileExtensions: ['ts', 'tsx', 'js'],
-  testMatch: ['<rootDir>/src/**/*.spec.(ts|tsx|js)'],
+  moduleFileExtensions: ['ts', 'js'],
+  testMatch: ['<rootDir>/src/**/*.spec.(ts|js)'],
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest',
   },
 };

@@ -1,6 +1,6 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'import'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   parserOptions: {
     ecmaVersion: 6,
@@ -12,16 +12,17 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.ts'],
-      rules: {
-        '@typescript-eslint/no-var-requires': 0
-      },
-    },
-    {
       files: ['*.spec.ts'],
       env: {
         jest: true,
       },
     },
   ],
+  rules: {
+    '@typescript-eslint/no-var-requires': 0,
+    '@typescript-eslint/consistent-type-imports': [
+      2,
+      { prefer: 'type-imports' },
+    ],
+  },
 };
