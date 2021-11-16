@@ -361,6 +361,10 @@ of the project.
 - The versions of every other dependency in the monorepo (eg `lodash`) are the same across every package including
   `@alpha/server` and `@alpha/ui`.
 
+### `versionOverrides`
+
+Provides a way to globally pin a dependency's version in all packages across the monorepo, overriding any prior setting for that package's version in either `versionGroups` or any of the `package.json` file.
+
 ## 🕵🏾‍♀️ Resolving Packages
 
 package.json files are resolved in this order of precendence:
