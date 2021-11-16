@@ -1,3 +1,4 @@
+import {string} from 'fp-ts';
 import { collect } from './lib/collect';
 
 export type DependencyType = 'dependencies' | 'devDependencies' | 'peerDependencies';
@@ -88,6 +89,11 @@ export type SyncpackConfig = Readonly<{
    *
    */
   versionGroups: VersionGroup[];
+
+  /**
+   * global overrides - the single version of each dependency listed will be used in every package
+   */
+  versionOverrides: Record<string, string>;
 }>;
 
 export const DEFAULT_CONFIG: SyncpackConfig = {
@@ -101,6 +107,7 @@ export const DEFAULT_CONFIG: SyncpackConfig = {
   sortFirst: ['name', 'description', 'version', 'author'],
   source: [],
   versionGroups: [],
+  versionOverrides: {}
 };
 
 const MONOREPO_PATTERN = 'package.json';

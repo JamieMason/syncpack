@@ -9,12 +9,14 @@ import { getMismatchedDependencies } from './lib/installations/get-mismatched-de
 import { log } from './lib/log';
 import { matchesFilter } from './lib/matches-filter';
 
-type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'source' | 'versionGroups'>;
+type Options = Pick<SyncpackConfig, 'dev' | 'filter' | 'indent' | 'peer' | 'prod' | 'source' | 'versionGroups' | 'versionOverrides'>;
 
 const getWorkspaceVersion = (name: string, wrappers: SourceWrapper[]): string | null => {
   const local = wrappers.find((wrapper) => wrapper.contents.name === name);
   return local?.contents?.version || null;
 };
+
+const getOverridesVersion = (versionOverrides: SyncpackConfig['versionOverrides'], packageName: string) => versionOverrides?.[packageName] || null;
 
 export const fixMismatches = (wrappers: SourceWrapper[], options: Options): void => {
   const iterator = getMismatchedDependencies(wrappers, options);
@@ -22,7 +24,10 @@ export const fixMismatches = (wrappers: SourceWrapper[], options: Options): void
 
   mismatches.forEach((installedPackage) => {
     const versions = installedPackage.installations.map((installation) => installation.version);
-    const nextVersion = getWorkspaceVersion(installedPackage.name, wrappers) || getHighestVersion(versions);
+    const nextVersion =
+      getOverridesVersion(options.versionOverrides, installedPackage.name) ||
+      getWorkspaceVersion(installedPackage.name, wrappers) ||
+      getHighestVersion(versions);
     if (nextVersion !== null) {
       installedPackage.installations.forEach(({ type, name, source }) => {
         const dependencies = source.contents[type];

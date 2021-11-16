@@ -29,6 +29,9 @@ export const getConfig = (program: Partial<SyncpackConfig>): SyncpackConfig => {
   const isArrayOfVersionGroups = (value: unknown): value is VersionGroup[] =>
     isArray(value) && value.every(isVersionGroup);
 
+  const isMapWithNonemptyStrings = (value: unknown): value is SyncpackConfig['versionOverrides'] =>
+    isObject(value) && Object.keys(value).every(isNonEmptyString) && Object.values(value).every(isNonEmptyString);
+
   const hasTypeOverride = program.prod || program.dev || program.peer;
 
   return {
@@ -42,5 +45,6 @@ export const getConfig = (program: Partial<SyncpackConfig>): SyncpackConfig => {
     sortFirst: getOption<string[]>('sortFirst', isArrayOfStrings),
     source: getOption<string[]>('source', isArrayOfStrings),
     versionGroups: getOption<VersionGroup[]>('versionGroups', isArrayOfVersionGroups),
+    versionOverrides: getOption<SyncpackConfig['versionOverrides']>('versionOverrides', isMapWithNonemptyStrings),
   };
 };

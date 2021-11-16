@@ -138,3 +138,36 @@ Array [
   },
 ]
 `;
+
+exports[`fixMismatches when dependencies are installed with different versions when the dependency is not a package maintained in this workspace when strict overrides are provided uses the version from the versionOverrides map 1`] = `
+Array [
+  Object {
+    "contents": Object {
+      "dependencies": Object {
+        "foo": "0.3.0",
+      },
+    },
+    "filePath": "/a/package.json",
+    "json": "{
+  \\"dependencies\\": {
+    \\"foo\\": \\"0.1.0\\"
+  }
+}
+",
+  },
+  Object {
+    "contents": Object {
+      "devDependencies": Object {
+        "foo": "0.3.0",
+      },
+    },
+    "filePath": "/b/package.json",
+    "json": "{
+  \\"devDependencies\\": {
+    \\"foo\\": \\"0.2.0\\"
+  }
+}
+",
+  },
+]
+`;

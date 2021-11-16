@@ -16,6 +16,14 @@ describe('fixMismatches', () => {
 
   describe('when dependencies are installed with different versions', () => {
     describe('when the dependency is not a package maintained in this workspace', () => {
+      describe('when strict overrides are provided', () => {
+        it('uses the version from the versionOverrides map', () => {
+          const wrappers = [mock.wrapper('a', ['foo@0.1.0']), mock.wrapper('b', [], ['foo@0.2.0'])];
+          fixMismatches(wrappers, {...DEFAULT_CONFIG, versionOverrides: { 'foo': '0.3.0' }});
+          expect(wrappers).toMatchSnapshot();
+        })
+      });
+
       it('uses the highest version', () => {
         const wrappers = [mock.wrapper('a', ['foo@0.1.0']), mock.wrapper('b', [], ['foo@0.2.0'])];
         fixMismatches(wrappers, DEFAULT_CONFIG);

@@ -47,6 +47,7 @@ describe('getConfig', () => {
       sortFirst: ['name', 'description', 'version', 'author'],
       source: ['./from-config'],
       versionGroups: [],
+      versionOverrides: {}
     });
   });
 
