@@ -1,3 +1,4 @@
+import 'expect-more-jest';
 import { getHighestVersion } from './get-highest-version';
 
 const shuffle = (array: string[]): string[] => {
@@ -22,19 +23,19 @@ describe('getHighestVersion', () => {
     const j = shuffle([...i, 'git+ssh://git@github.com:npm/cli.git#v1.0.27']);
     const k = shuffle([...j, 'git+ssh://git@github.com:npm/cli#semver:^5.0']);
     const l = shuffle([...k, 'git://github.com/npm/cli.git#v1.0.27']);
-    expect(getHighestVersion(a)).toBeNull();
-    expect(getHighestVersion(b)).toBeNull();
-    expect(getHighestVersion(c)).toBeNull();
-    expect(getHighestVersion(d)).toBeNull();
-    expect(getHighestVersion(e)).toBeNull();
-    expect(getHighestVersion(f)).toBeNull();
-    expect(getHighestVersion(g)).toBeNull();
-    expect(getHighestVersion(h)).toBeNull();
-    expect(getHighestVersion(i)).toBeNull();
-    expect(getHighestVersion(i)).toBeNull();
-    expect(getHighestVersion(j)).toBeNull();
-    expect(getHighestVersion(k)).toBeNull();
-    expect(getHighestVersion(l)).toBeNull();
+    expect(getHighestVersion(a)).toBeEmptyString();
+    expect(getHighestVersion(b)).toBeEmptyString();
+    expect(getHighestVersion(c)).toBeEmptyString();
+    expect(getHighestVersion(d)).toBeEmptyString();
+    expect(getHighestVersion(e)).toBeEmptyString();
+    expect(getHighestVersion(f)).toBeEmptyString();
+    expect(getHighestVersion(g)).toBeEmptyString();
+    expect(getHighestVersion(h)).toBeEmptyString();
+    expect(getHighestVersion(i)).toBeEmptyString();
+    expect(getHighestVersion(i)).toBeEmptyString();
+    expect(getHighestVersion(j)).toBeEmptyString();
+    expect(getHighestVersion(k)).toBeEmptyString();
+    expect(getHighestVersion(l)).toBeEmptyString();
   });
 
   it('returns the newest version from an array of versions', () => {

@@ -1,11 +1,11 @@
 import chalk from 'chalk';
+import { string } from 'fp-ts';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
 import { matchesFilter } from '../lib/matches-filter';
 import { writeIfChanged } from '../lib/write-if-changed';
-import { getHighestVersion } from './get-highest-version';
-import { getWorkspaceVersion } from './get-workspace-version';
+import { getExpectedVersion } from './get-expected-version';
 
 export function fixMismatches(input: ProgramInput, disk: Disk): void {
   /**
@@ -24,9 +24,7 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
 
     groups.forEach(({ hasMismatches, instances, name }) => {
       if (hasMismatches) {
-        const nextVersion =
-          getWorkspaceVersion(name, input.wrappers) ||
-          getHighestVersion(instances.map(({ version }) => version));
+        const nextVersion = getExpectedVersion(input, name, instances);
         instances.forEach(({ dependencyType, version, wrapper }) => {
           const root: any = wrapper.contents;
           if (version !== nextVersion) {

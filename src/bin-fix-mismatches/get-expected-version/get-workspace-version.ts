@@ -1,4 +1,4 @@
-import type { SourceWrapper } from '../lib/get-input/get-wrappers';
+import type { SourceWrapper } from '../../lib/get-input/get-wrappers';
 
 /**
  * If the dependency `name` is a package developed locally in this monorepo, we
