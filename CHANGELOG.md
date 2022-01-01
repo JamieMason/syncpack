@@ -1,3 +1,39 @@
+# [6.0.0](https://github.com/JamieMason/syncpack/compare/5.8.15...6.0.0) (2022-01-01)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([fdef0a2](https://github.com/JamieMason/syncpack/commit/fdef0a202340e4287bf8f7e6ae27953002c5b4ee))
+
+
+### Features
+
+* **core:** add glob support and semver range rule groups ([787757c](https://github.com/JamieMason/syncpack/commit/787757c4b09163ec12a60b190954811c0cf4f15f))
+
+
+### BREAKING CHANGES
+
+* **core:** Dependencies defined within the `resolutions` and `overrides` fields are
+now processed by syncpack and are enabled by default. To exclude these
+new fields you will need to define only the fields you do want to
+process, either in your configuration file:
+
+```json
+{
+  "dev": true,
+  "peer": true,
+  "prod": true
+}
+```
+
+or via the command line:
+
+```
+syncpack list --dev --peer --prod
+```
+
+
+
 ## [5.8.15](https://github.com/JamieMason/syncpack/compare/5.8.14...5.8.15) (2021-08-08)
 
 
