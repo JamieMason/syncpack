@@ -1,3 +1,12 @@
+# [6.1.0](https://github.com/JamieMason/syncpack/compare/6.0.0...6.1.0) (2022-01-03)
+
+
+### Features
+
+* **groups:** pin a version group to a specific version ([3de6f90](https://github.com/JamieMason/syncpack/commit/3de6f90752b04f8324c4e30823a39e009ef0587b)), closes [#44](https://github.com/JamieMason/syncpack/issues/44) [#53](https://github.com/JamieMason/syncpack/issues/53) [#63](https://github.com/JamieMason/syncpack/issues/63) [#64](https://github.com/JamieMason/syncpack/issues/64)
+
+
+
 # [6.0.0](https://github.com/JamieMason/syncpack/compare/5.8.15...6.0.0) (2022-01-01)
 
 
