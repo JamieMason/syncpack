@@ -1,4 +1,6 @@
 import chalk from 'chalk';
+import { version } from 'os';
+import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { ProgramInput } from '../lib/get-input';
 
@@ -20,10 +22,11 @@ export function listMismatches(input: ProgramInput): void {
 
     groups.forEach(({ hasMismatches, instances, name }) => {
       if (hasMismatches) {
-        console.log(chalk`{red ✕ ${name}}`);
+        const expectedVersion = getExpectedVersion(name, versionGroup, input);
+        console.log(chalk`{dim -} ${name} {green.dim ${expectedVersion}}`);
         instances.forEach(({ dependencyType, version, wrapper }) => {
           console.log(
-            chalk`{dim -} ${version} {dim in ${dependencyType} of} ${wrapper.contents.name}`,
+            chalk`{red   ${version} {dim in ${dependencyType} of ${wrapper.contents.name}}}`,
           );
         });
       }

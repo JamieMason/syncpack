@@ -47,6 +47,10 @@ export interface VersionGroup {
    * the names of the dependencies (eg. "lodash") which belong to this group
    */
   dependencies: string[];
+  /**
+   * optionally force all dependencies in this group to have this version
+   */
+  pinVersion?: string;
 }
 
 export type SyncpackConfig = Readonly<{

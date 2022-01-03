@@ -21,7 +21,7 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
 
     groups.forEach(({ hasMismatches, instances, name }) => {
       if (hasMismatches) {
-        const nextVersion = getExpectedVersion(input, name, instances);
+        const nextVersion = getExpectedVersion(name, versionGroup, input);
         instances.forEach(({ dependencyType, version, wrapper }) => {
           const root: any = wrapper.contents;
           if (version !== nextVersion) {

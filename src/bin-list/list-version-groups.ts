@@ -1,3 +1,4 @@
+import { isNonEmptyString } from 'expect-more';
 import type {
   IndexedVersionGroup,
   Instance,
@@ -20,9 +21,15 @@ export function listVersionGroups(
     versionGroup.instances.sort(sortByName),
   );
   return Object.entries(instancesByName).map(([name, instances]) => {
+    const pinnedVersion = versionGroup.pinVersion;
+    const hasPinnedVersion = isNonEmptyString(pinnedVersion);
     const versions = instances.map(({ version }) => version);
     const uniques = Array.from(new Set(versions));
-    const hasMismatches = uniques.length > 1;
+    const hasMismatches = versions.some(
+      (version, i) =>
+        (hasPinnedVersion && version !== pinnedVersion) ||
+        (i > 0 && version !== versions[i - 1]),
+    );
     return {
       hasMismatches,
       instances,
