@@ -1,10 +1,24 @@
-import type { Instance } from '../lib/get-input/get-instances';
+import type {
+  IndexedVersionGroup,
+  Instance,
+} from '../lib/get-input/get-instances';
 import { groupBy } from '../lib/group-by';
 import { sortByName } from '../lib/sort-by-name';
-import type { ListItem } from './list';
 
-export function listVersionGroups(instances: Instance[]): ListItem[] {
-  const instancesByName = groupBy<Instance>('name', instances.sort(sortByName));
+interface ListItem {
+  hasMismatches: boolean;
+  instances: Instance[];
+  name: string;
+  uniques: string[];
+}
+
+export function listVersionGroups(
+  versionGroup: IndexedVersionGroup,
+): ListItem[] {
+  const instancesByName = groupBy<Instance>(
+    'name',
+    versionGroup.instances.sort(sortByName),
+  );
   return Object.entries(instancesByName).map(([name, instances]) => {
     const versions = instances.map(({ version }) => version);
     const uniques = Array.from(new Set(versions));

@@ -1,9 +1,7 @@
 import chalk from 'chalk';
-import { string } from 'fp-ts';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
-import { matchesFilter } from '../lib/matches-filter';
 import { writeIfChanged } from '../lib/write-if-changed';
 import { getExpectedVersion } from './get-expected-version';
 
@@ -15,8 +13,7 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
    */
   input.instances.versionGroups.reverse().forEach((versionGroup, i) => {
     const isVersionGroup = i > 0;
-    const filtered = versionGroup.instances.filter(matchesFilter(input));
-    const groups = listVersionGroups(filtered);
+    const groups = listVersionGroups(versionGroup);
 
     if (isVersionGroup) {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);

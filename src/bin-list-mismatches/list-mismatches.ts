@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { ProgramInput } from '../lib/get-input';
-import { matchesFilter } from '../lib/matches-filter';
 
 export function listMismatches(input: ProgramInput): void {
   const isInvalid = false;
@@ -13,14 +12,13 @@ export function listMismatches(input: ProgramInput): void {
    */
   input.instances.versionGroups.reverse().forEach((versionGroup, i) => {
     const isVersionGroup = i > 0;
-    const filtered = versionGroup.instances.filter(matchesFilter(input));
-    const ungrouped = listVersionGroups(filtered);
+    const groups = listVersionGroups(versionGroup);
 
     if (isVersionGroup) {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
     }
 
-    ungrouped.forEach(({ hasMismatches, instances, name }) => {
+    groups.forEach(({ hasMismatches, instances, name }) => {
       if (hasMismatches) {
         console.log(chalk`{red ✕ ${name}}`);
         instances.forEach(({ dependencyType, version, wrapper }) => {

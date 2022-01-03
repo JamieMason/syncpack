@@ -1,15 +1,6 @@
 import chalk from 'chalk';
 import type { ProgramInput } from '../lib/get-input';
-import type { Instance } from '../lib/get-input/get-instances';
-import { matchesFilter } from '../lib/matches-filter';
 import { listVersionGroups } from './list-version-groups';
-
-export interface ListItem {
-  hasMismatches: boolean;
-  instances: Instance[];
-  name: string;
-  uniques: string[];
-}
 
 export function list(input: ProgramInput): void {
   let isInvalid = false;
@@ -21,14 +12,13 @@ export function list(input: ProgramInput): void {
    */
   input.instances.versionGroups.reverse().forEach((versionGroup, i) => {
     const isVersionGroup = i > 0;
-    const filtered = versionGroup.instances.filter(matchesFilter(input));
-    const ungrouped = listVersionGroups(filtered);
+    const groups = listVersionGroups(versionGroup);
 
     if (isVersionGroup) {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
     }
 
-    ungrouped.forEach(({ hasMismatches, name, uniques }) => {
+    groups.forEach(({ hasMismatches, name, uniques }) => {
       const versionList = uniques.sort().join(', ');
       console.log(
         hasMismatches
@@ -37,7 +27,7 @@ export function list(input: ProgramInput): void {
       );
     });
 
-    if (ungrouped.some(({ hasMismatches }) => hasMismatches)) {
+    if (groups.some(({ hasMismatches }) => hasMismatches)) {
       isInvalid = true;
     }
   });

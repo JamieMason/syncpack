@@ -48,6 +48,7 @@ export function getInstances(
       const pkgs = Object.entries(versionsByName);
       for (const [name, version] of pkgs) {
         if (!isNonEmptyString(name)) continue;
+        if (name.search(new RegExp(options.filter)) === -1) continue;
         if (!isNonEmptyString(version)) continue;
         const instance = { dependencyType, name, version, wrapper };
         allInstances.all.push(instance);

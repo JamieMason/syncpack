@@ -3,10 +3,12 @@ import { listVersionGroups } from './list-version-groups';
 describe('listVersionGroups', () => {
   it('returns a sorted list of every dependency in the project', () => {
     expect(
-      listVersionGroups([
-        { name: 'foo', version: '1.0.0' },
-        { name: 'bar', version: '0.5.0' },
-      ] as any),
+      listVersionGroups({
+        instances: [
+          { name: 'foo', version: '1.0.0' },
+          { name: 'bar', version: '0.5.0' },
+        ],
+      } as any),
     ).toEqual([
       {
         hasMismatches: false,
@@ -24,10 +26,12 @@ describe('listVersionGroups', () => {
   });
   it('recognises mismatched dependency versions', () => {
     expect(
-      listVersionGroups([
-        { name: 'foo', version: '1.0.0' },
-        { name: 'foo', version: '1.1.0' },
-      ] as any),
+      listVersionGroups({
+        instances: [
+          { name: 'foo', version: '1.0.0' },
+          { name: 'foo', version: '1.1.0' },
+        ],
+      } as any),
     ).toEqual([
       {
         hasMismatches: true,
