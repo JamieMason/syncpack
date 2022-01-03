@@ -40,9 +40,9 @@ it('applies the highest installed version third', () => {
       'foo',
       {
         instances: [
-          { version: '2.0.0' },
-          { version: '3.0.0' },
-          { version: '1.0.0' },
+          { name: 'foo', version: '2.0.0' },
+          { name: 'foo', version: '3.0.0' },
+          { name: 'foo', version: '1.0.0' },
         ] as Instance[],
       },
       { wrappers: [] },

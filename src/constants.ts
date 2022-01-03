@@ -35,6 +35,10 @@ export interface SemverGroup {
    * the semver range which dependencies in this group should use
    */
   range: ValidRange;
+  /**
+   * optionally only apply this group to dependencies of the provided types
+   */
+  dependencyTypes?: DependencyType[];
 }
 
 export interface VersionGroup {
@@ -51,6 +55,10 @@ export interface VersionGroup {
    * optionally force all dependencies in this group to have this version
    */
   pinVersion?: string;
+  /**
+   * optionally only apply this group to dependencies of the provided types
+   */
+  dependencyTypes?: DependencyType[];
 }
 
 export type SyncpackConfig = Readonly<{

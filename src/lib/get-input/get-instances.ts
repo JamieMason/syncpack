@@ -1,4 +1,4 @@
-import { isNonEmptyString, isObject } from 'expect-more';
+import { isNonEmptyArray, isNonEmptyString, isObject } from 'expect-more';
 import minimatch from 'minimatch';
 import type {
   DependencyType,
@@ -52,8 +52,8 @@ export function getInstances(
         if (!isNonEmptyString(version)) continue;
         const instance = { dependencyType, name, version, wrapper };
         allInstances.all.push(instance);
-        groupInstancesBy('semverGroups', pkgName, instance);
-        groupInstancesBy('versionGroups', pkgName, instance);
+        groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
+        groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
       }
     }
   }
@@ -68,6 +68,7 @@ export function getInstances(
 
   function groupInstancesBy(
     groupName: 'semverGroups' | 'versionGroups',
+    dependencyType: DependencyType,
     pkgName: string,
     instance: Instance,
   ): void {
@@ -76,7 +77,7 @@ export function getInstances(
     if (!groups.length) return;
     for (const i in groups) {
       const group = groups[i];
-      if (matchesGroup(pkgName, name, group)) {
+      if (matchesGroup(dependencyType, pkgName, name, group)) {
         if (!group.instancesByName[name]) {
           group.instancesByName[name] = [];
         }
@@ -89,11 +90,14 @@ export function getInstances(
   }
 
   function matchesGroup(
+    dependencyType: DependencyType,
     pkgName: string,
     dependencyName: string,
     group: SemverGroup | VersionGroup,
   ): boolean {
     return (
+      (!isNonEmptyArray(group.dependencyTypes) ||
+        group.dependencyTypes.includes(dependencyType)) &&
       group.packages.some((pattern) => minimatch(pkgName, pattern)) &&
       group.dependencies.some((pattern) => minimatch(dependencyName, pattern))
     );

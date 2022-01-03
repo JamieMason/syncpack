@@ -5,7 +5,7 @@ import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { ProgramInput } from '../lib/get-input';
 
 export function listMismatches(input: ProgramInput): void {
-  const isInvalid = false;
+  let isInvalid = false;
 
   /**
    * Reverse the list so the default/ungrouped version group is rendered first
@@ -14,22 +14,26 @@ export function listMismatches(input: ProgramInput): void {
    */
   input.instances.versionGroups.reverse().forEach((versionGroup, i) => {
     const isVersionGroup = i > 0;
-    const groups = listVersionGroups(versionGroup);
+    const groups = listVersionGroups(versionGroup).filter(
+      ({ hasMismatches }) => hasMismatches,
+    );
 
-    if (isVersionGroup) {
-      console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
+    if (groups.length > 0) {
+      isInvalid = true;
+
+      if (isVersionGroup) {
+        console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
+      }
     }
 
-    groups.forEach(({ hasMismatches, instances, name }) => {
-      if (hasMismatches) {
-        const expectedVersion = getExpectedVersion(name, versionGroup, input);
-        console.log(chalk`{dim -} ${name} {green.dim ${expectedVersion}}`);
-        instances.forEach(({ dependencyType, version, wrapper }) => {
-          console.log(
-            chalk`{red   ${version} {dim in ${dependencyType} of ${wrapper.contents.name}}}`,
-          );
-        });
-      }
+    groups.forEach(({ instances, name }) => {
+      const expectedVersion = getExpectedVersion(name, versionGroup, input);
+      console.log(chalk`{dim -} ${name} {green.dim ${expectedVersion}}`);
+      instances.forEach(({ dependencyType, version, wrapper }) => {
+        console.log(
+          chalk`{red   ${version} {dim in ${dependencyType} of ${wrapper.contents.name}}}`,
+        );
+      });
     });
   });
 

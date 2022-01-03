@@ -12,6 +12,10 @@ export function getExpectedVersion(
   return (
     getPinnedVersion(versionGroup) ||
     getWorkspaceVersion(name, input.wrappers) ||
-    getHighestVersion(versionGroup.instances.map(({ version }) => version))
+    getHighestVersion(
+      versionGroup.instances
+        .filter((instance) => instance.name === name)
+        .map(({ version }) => version),
+    )
   );
 }
