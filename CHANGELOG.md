@@ -1,3 +1,12 @@
+# [6.2.0](https://github.com/JamieMason/syncpack/compare/6.1.0...6.2.0) (2022-01-03)
+
+
+### Features
+
+* **groups:** target specific dependency types ([565c1e7](https://github.com/JamieMason/syncpack/commit/565c1e76c71592dc0353266e1289dd9d0bf3fd9b))
+
+
+
 # [6.1.0](https://github.com/JamieMason/syncpack/compare/6.0.0...6.1.0) (2022-01-03)
 
 
