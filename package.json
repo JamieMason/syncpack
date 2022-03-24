@@ -20,7 +20,8 @@
     "Jamie Mason (https://github.com/JamieMason)",
     "Luis Vieira (https://github.com/luisvieiragmr)",
     "Marais Rossouw (https://github.com/maraisr)",
-    "Matt Sprague (https://github.com/uforic)"
+    "Matt Sprague (https://github.com/uforic)",
+    "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
   "dependencies": {
     "chalk": "4.1.2",
