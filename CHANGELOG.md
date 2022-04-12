@@ -1,3 +1,12 @@
+## [6.2.1](https://github.com/JamieMason/syncpack/compare/6.2.0...6.2.1) (2022-04-12)
+
+
+### Bug Fixes
+
+* **globs:** ignore node_modules ([8e11545](https://github.com/JamieMason/syncpack/commit/8e115451f2e9f08745a1ca53c03d502f8a21c2fb)), closes [#68](https://github.com/JamieMason/syncpack/issues/68) [#70](https://github.com/JamieMason/syncpack/issues/70)
+
+
+
 # [6.2.0](https://github.com/JamieMason/syncpack/compare/6.1.0...6.2.0) (2022-01-03)
 
 
