@@ -19,7 +19,7 @@ describe('setSemverRanges', () => {
       if (filePath.endsWith('packages/a/package.json')) return aBefore.json;
     });
     setSemverRanges(
-      getInput(disk, {
+      getInput(disk, undefined, {
         dev: false,
         peer: false,
         prod: true,

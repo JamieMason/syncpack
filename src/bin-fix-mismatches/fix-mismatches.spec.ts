@@ -28,7 +28,7 @@ describe('fixMismatches', () => {
             return bBefore.json;
           }
         });
-        fixMismatches(getInput(disk, {}), disk);
+        fixMismatches(getInput(disk, undefined, {}), disk);
         expect(disk.writeFileSync.mock.calls).toEqual([
           [expect.stringContaining('packages/a/package.json'), aAfter.json],
         ]);
@@ -75,7 +75,7 @@ describe('fixMismatches', () => {
           if (filePath.endsWith('packages/foo/package.json'))
             return fooBefore.json;
         });
-        fixMismatches(getInput(disk, {}), disk);
+        fixMismatches(getInput(disk, undefined, {}), disk);
         expect(disk.writeFileSync.mock.calls).toEqual([
           [expect.stringContaining('packages/a/package.json'), aAfter.json],
           [expect.stringContaining('packages/b/package.json'), bAfter.json],
@@ -126,7 +126,7 @@ describe('fixMismatches', () => {
         if (filePath.endsWith('packages/c/package.json')) return cBefore.json;
         if (filePath.endsWith('packages/d/package.json')) return dBefore.json;
       });
-      fixMismatches(getInput(disk, {}), disk);
+      fixMismatches(getInput(disk, undefined, {}), disk);
       expect(disk.writeFileSync.mock.calls).toEqual([
         [expect.stringContaining('packages/a/package.json'), aAfter.json],
         [expect.stringContaining('packages/b/package.json'), bAfter.json],

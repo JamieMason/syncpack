@@ -13,41 +13,43 @@ describe('getInput', () => {
     const resolutions = 'resolutions';
 
     it('enables them all if none are set', () => {
-      expect(getInput(disk, {})).toHaveProperty(
+      expect(getInput(disk, undefined, {})).toHaveProperty(
         'dependencyTypes',
         expect.arrayContaining([prod, dev, peer, overrides, resolutions]),
       );
     });
     it('enables one if it is the only one set', () => {
-      expect(getInput(disk, { prod: true })).toHaveProperty('dependencyTypes', [
-        prod,
-      ]);
-      expect(getInput(disk, { dev: true })).toHaveProperty('dependencyTypes', [
-        dev,
-      ]);
-      expect(getInput(disk, { peer: true })).toHaveProperty('dependencyTypes', [
-        peer,
-      ]);
-      expect(getInput(disk, { overrides: true })).toHaveProperty(
+      expect(getInput(disk, undefined, { prod: true })).toHaveProperty(
+        'dependencyTypes',
+        [prod],
+      );
+      expect(getInput(disk, undefined, { dev: true })).toHaveProperty(
+        'dependencyTypes',
+        [dev],
+      );
+      expect(getInput(disk, undefined, { peer: true })).toHaveProperty(
+        'dependencyTypes',
+        [peer],
+      );
+      expect(getInput(disk, undefined, { overrides: true })).toHaveProperty(
         'dependencyTypes',
         [overrides],
       );
-      expect(getInput(disk, { resolutions: true })).toHaveProperty(
+      expect(getInput(disk, undefined, { resolutions: true })).toHaveProperty(
         'dependencyTypes',
         [resolutions],
       );
     });
     it('enables some if only those are set', () => {
-      expect(getInput(disk, { dev: true, prod: true })).toHaveProperty(
-        'dependencyTypes',
-        expect.arrayContaining([prod, dev]),
-      );
+      expect(
+        getInput(disk, undefined, { dev: true, prod: true }),
+      ).toHaveProperty('dependencyTypes', expect.arrayContaining([prod, dev]));
     });
   });
   describe('source', () => {
     it('uses defaults when no CLI options or config are set', () => {
       const disk = mockDisk();
-      expect(getInput(disk, {})).toHaveProperty(
+      expect(getInput(disk, undefined, {})).toHaveProperty(
         'source',
         DEFAULT_CONFIG.source,
       );
@@ -55,19 +57,20 @@ describe('getInput', () => {
     it('uses value from config when no CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['./foo'] });
-      expect(getInput(disk, {})).toHaveProperty('source', ['./foo']);
+      expect(getInput(disk, undefined, {})).toHaveProperty('source', ['./foo']);
     });
     it('uses value from CLI when config and CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['./foo'] });
-      expect(getInput(disk, { source: ['./bar'] })).toHaveProperty('source', [
-        './bar',
-      ]);
+      expect(getInput(disk, undefined, { source: ['./bar'] })).toHaveProperty(
+        'source',
+        ['./bar'],
+      );
     });
     it('combines defaults, values from CLI options, and config', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['./foo'] });
-      expect(getInput(disk, { sortAz: ['overridden'] })).toEqual(
+      expect(getInput(disk, undefined, { sortAz: ['overridden'] })).toEqual(
         expect.objectContaining({
           semverRange: '',
           source: ['./foo'],
@@ -87,20 +90,20 @@ describe('getInput', () => {
             },
           ],
         });
-        expect(getInput(disk, { sortAz: ['overridden'] }).semverGroups).toEqual(
-          [
-            expect.objectContaining({
-              dependencies: ['@alpha/*'],
-              packages: ['@myrepo/library'],
-              range: '~',
-            }),
-            expect.objectContaining({
-              dependencies: ['**'],
-              packages: ['**'],
-              range: '',
-            }),
-          ],
-        );
+        expect(
+          getInput(disk, undefined, { sortAz: ['overridden'] }).semverGroups,
+        ).toEqual([
+          expect.objectContaining({
+            dependencies: ['@alpha/*'],
+            packages: ['@myrepo/library'],
+            range: '~',
+          }),
+          expect.objectContaining({
+            dependencies: ['**'],
+            packages: ['**'],
+            range: '',
+          }),
+        ]);
       });
       it('merges versionGroups', () => {
         const disk = mockDisk();
@@ -110,7 +113,7 @@ describe('getInput', () => {
           ],
         });
         expect(
-          getInput(disk, { sortAz: ['overridden'] }).versionGroups,
+          getInput(disk, undefined, { sortAz: ['overridden'] }).versionGroups,
         ).toEqual([
           expect.objectContaining({
             dependencies: ['chalk'],
@@ -135,7 +138,9 @@ describe('getInput', () => {
           const disk = mockDisk();
           disk.globSync.mockReturnValue([filePath]);
           disk.readFileSync.mockReturnValue(json);
-          expect(getInput(disk, { source: ['package.json'] })).toEqual(
+          expect(
+            getInput(disk, undefined, { source: ['package.json'] }),
+          ).toEqual(
             expect.objectContaining({
               wrappers: [{ filePath, contents, json }],
             }),
@@ -146,10 +151,9 @@ describe('getInput', () => {
         it('returns an empty array', () => {
           const disk = mockDisk();
           disk.globSync.mockReturnValue([]);
-          expect(getInput(disk, { source: ['typo.json'] })).toHaveProperty(
-            'wrappers',
-            [],
-          );
+          expect(
+            getInput(disk, undefined, { source: ['typo.json'] }),
+          ).toHaveProperty('wrappers', []);
           expect(disk.readFileSync).not.toHaveBeenCalled();
         });
       });
@@ -157,7 +161,7 @@ describe('getInput', () => {
     describe('when no --source cli options are given', () => {
       it('performs a default search', () => {
         const disk = mockDisk();
-        getInput(disk, {});
+        getInput(disk, undefined, {});
         expect(disk.globSync.mock.calls).toEqual([
           ['package.json'],
           ['packages/*/package.json'],
@@ -173,7 +177,7 @@ describe('getInput', () => {
             const disk = mockDisk();
             disk.globSync.mockReturnValue([filePath]);
             disk.readFileSync.mockReturnValue(json);
-            getInput(disk, {});
+            getInput(disk, undefined, {});
             expect(disk.globSync.mock.calls).toEqual([
               ['package.json'],
               ['as-array/*/package.json'],
@@ -189,7 +193,7 @@ describe('getInput', () => {
             const disk = mockDisk();
             disk.globSync.mockReturnValue([filePath]);
             disk.readFileSync.mockReturnValue(json);
-            getInput(disk, {});
+            getInput(disk, undefined, {});
             expect(disk.globSync.mock.calls).toEqual([
               ['package.json'],
               ['as-object/*/package.json'],
@@ -211,7 +215,7 @@ describe('getInput', () => {
               if (filePath.endsWith('lerna.json'))
                 return JSON.stringify({ packages: ['lerna/*'] });
             });
-            getInput(disk, {});
+            getInput(disk, undefined, {});
             expect(disk.globSync.mock.calls).toEqual([
               ['package.json'],
               ['lerna/*/package.json'],
@@ -228,7 +232,7 @@ describe('getInput', () => {
               disk.readYamlFileSync.mockReturnValue({
                 packages: ['./from-pnpm/*'],
               });
-              getInput(disk, {});
+              getInput(disk, undefined, {});
               expect(disk.globSync.mock.calls).toEqual([
                 ['package.json'],
                 ['from-pnpm/*/package.json'],
