@@ -52,10 +52,11 @@ program
   .option(...option.resolutions)
   .option(...option.overrides)
   .option(...option.filter)
+  .option(...option.config)
   .parse(process.argv);
 
 listMismatches(
-  getInput(disk, {
+  getInput(disk, program.opts().config, {
     dev: program.opts().dev,
     filter: program.opts().filter,
     overrides: program.opts().overrides,

@@ -18,13 +18,15 @@ export type ProgramInput = SyncpackConfig & {
  * that the majority of syncpack and its tests don't have to deal with the file
  * system and can focus solely on transformation logic.
  *
- * @param  program  Options received from CLI arguments
+ * @param  configPath  Path to config file, or undefined to search for one
+ * @param  program     Options received from CLI arguments
  */
 export function getInput(
   disk: Disk,
+  configPath: string | undefined,
   program: Partial<SyncpackConfig>,
 ): ProgramInput {
-  const rcFile = disk.readConfigFileSync();
+  const rcFile = disk.readConfigFileSync(configPath);
   const config = getConfig(rcFile, program);
   const wrappers = getWrappers(disk, config);
   const instances = getInstances(config, wrappers);

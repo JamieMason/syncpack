@@ -71,10 +71,11 @@ program
   .option(...option.filter)
   .option(...option.indent)
   .option(...option.semverRange)
+  .option(...option.config)
   .parse(process.argv);
 
 setSemverRanges(
-  getInput(disk, {
+  getInput(disk, program.opts().config, {
     dev: program.opts().dev,
     filter: program.opts().filter,
     indent: program.opts().indent,

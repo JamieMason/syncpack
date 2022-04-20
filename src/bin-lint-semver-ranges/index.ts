@@ -68,10 +68,11 @@ program
   .option(...option.overrides)
   .option(...option.filter)
   .option(...option.semverRange)
+  .option(...option.config)
   .parse(process.argv);
 
 lintSemverRanges(
-  getInput(disk, {
+  getInput(disk, program.opts().config, {
     dev: program.opts().dev,
     filter: program.opts().filter,
     overrides: program.opts().overrides,

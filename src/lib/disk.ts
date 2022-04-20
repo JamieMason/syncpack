@@ -10,10 +10,16 @@ export type Disk = typeof disk;
 
 export const disk = {
   globSync(pattern: string): string[] {
-    return globSync(pattern, { ignore: '**/node_modules/**', absolute: true, cwd: CWD });
+    return globSync(pattern, {
+      ignore: '**/node_modules/**',
+      absolute: true,
+      cwd: CWD,
+    });
   },
-  readConfigFileSync(): Partial<SyncpackConfig> {
-    const rcSearch = cosmiconfigSync('syncpack').search();
+  readConfigFileSync(configFile: string | undefined): Partial<SyncpackConfig> {
+    const rcSearch = configFile
+      ? cosmiconfigSync('syncpack').load(configFile)
+      : cosmiconfigSync('syncpack').search();
     const rcConfig: unknown = rcSearch !== null ? rcSearch.config : {};
     const rcFile = isObject<Partial<SyncpackConfig>>(rcConfig) ? rcConfig : {};
     return rcFile;

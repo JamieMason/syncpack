@@ -45,10 +45,11 @@ Reference:
 program
   .option(...option.source)
   .option(...option.indent)
+  .option(...option.config)
   .parse(process.argv);
 
 format(
-  getInput(disk, {
+  getInput(disk, program.opts().config, {
     indent: program.opts().indent,
     overrides: program.opts().overrides,
     resolutions: program.opts().resolutions,
