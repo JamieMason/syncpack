@@ -63,14 +63,15 @@ Reference:
 
 program
   .option(...option.source)
+  .option(...option.semverRange)
+  .option(...option.filter)
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
   .option(...option.resolutions)
   .option(...option.overrides)
-  .option(...option.filter)
+  .option(...option.workspace)
   .option(...option.indent)
-  .option(...option.semverRange)
   .parse(process.argv);
 
 setSemverRanges(
@@ -84,6 +85,7 @@ setSemverRanges(
     resolutions: program.opts().resolutions,
     semverRange: program.opts().semverRange,
     source: program.opts().source,
+    workspace: program.opts().workspace,
   }),
   disk,
 );

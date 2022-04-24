@@ -1,6 +1,8 @@
 import chalk from 'chalk';
+import { relative } from 'path';
 import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
 import { listVersionGroups } from '../bin-list/list-version-groups';
+import { CWD } from '../constants';
 import type { ProgramInput } from '../lib/get-input';
 
 export function listMismatches(input: ProgramInput): void {
@@ -29,9 +31,14 @@ export function listMismatches(input: ProgramInput): void {
       const expectedVersion = getExpectedVersion(name, versionGroup, input);
       console.log(chalk`{dim -} ${name} {green.dim ${expectedVersion}}`);
       instances.forEach(({ dependencyType, version, wrapper }) => {
-        console.log(
-          chalk`{red   ${version} {dim in ${dependencyType} of ${wrapper.contents.name}}}`,
-        );
+        if (dependencyType === 'workspace') {
+          const shortPath = relative(CWD, wrapper.filePath);
+          console.log(chalk`{red   ${version} {dim at ${shortPath}}}`);
+        } else {
+          console.log(
+            chalk`{red   ${version} {dim in ${dependencyType} of ${wrapper.contents.name}}}`,
+          );
+        }
       });
     });
   });

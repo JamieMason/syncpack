@@ -61,13 +61,14 @@ Reference:
 
 program
   .option(...option.source)
+  .option(...option.filter)
+  .option(...option.semverRange)
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
   .option(...option.resolutions)
   .option(...option.overrides)
-  .option(...option.filter)
-  .option(...option.semverRange)
+  .option(...option.workspace)
   .parse(process.argv);
 
 lintSemverRanges(
@@ -80,5 +81,6 @@ lintSemverRanges(
     resolutions: program.opts().resolutions,
     semverRange: program.opts().semverRange,
     source: program.opts().source,
+    workspace: program.opts().workspace,
   }),
 );

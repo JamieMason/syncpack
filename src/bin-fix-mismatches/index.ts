@@ -52,12 +52,13 @@ Reference:
 
 program
   .option(...option.source)
+  .option(...option.filter)
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
   .option(...option.resolutions)
   .option(...option.overrides)
-  .option(...option.filter)
+  .option(...option.workspace)
   .option(...option.indent)
   .parse(process.argv);
 
@@ -71,6 +72,7 @@ fixMismatches(
     prod: program.opts().prod,
     resolutions: program.opts().resolutions,
     source: program.opts().source,
+    workspace: program.opts().workspace,
   }),
   disk,
 );

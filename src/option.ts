@@ -29,4 +29,5 @@ export const option = {
     collect,
     [] as string[],
   ],
+  workspace: ['-w, --workspace', 'include locally developed package versions'],
 } as const;

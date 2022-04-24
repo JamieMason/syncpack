@@ -28,13 +28,14 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 <summary>Options</summary>
 
 ```
--s, --source [pattern]  glob pattern for package.json files to read from (default: [])
+-s, --source [pattern]  glob pattern for package.json files to read from
+-f, --filter [pattern]  only include dependencies whose name matches this regex
 -p, --prod              include dependencies
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
 -o, --overrides         include overrides (pnpm)
--f, --filter [pattern]  only include dependencies whose name matches this regex
+-w, --workspace         include locally developed package versions
 -i, --indent [value]    override indentation. defaults to "  "
 -h, --help              display help for command
 ```
@@ -108,14 +109,15 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 <summary>Options</summary>
 
 ```
--s, --source [pattern]      glob pattern for package.json files to read from (default: [])
+-s, --source [pattern]      glob pattern for package.json files to read from
+-f, --filter [pattern]      only include dependencies whose name matches this regex
+-r, --semver-range <range>  see supported ranges below. defaults to ""
 -p, --prod                  include dependencies
 -d, --dev                   include devDependencies
 -P, --peer                  include peerDependencies
 -R, --resolutions           include resolutions (yarn)
 -o, --overrides             include overrides (pnpm)
--f, --filter [pattern]      only include dependencies whose name matches this regex
--r, --semver-range <range>  see supported ranges below. defaults to ""
+-w, --workspace             include locally developed package versions
 -h, --help                  display help for command
 ```
 
@@ -151,13 +153,14 @@ List all dependencies required by your packages.
 <summary>Options</summary>
 
 ```
--s, --source [pattern]  glob pattern for package.json files to read from (default: [])
+-s, --source [pattern]  glob pattern for package.json files to read from
+-f, --filter [pattern]  only include dependencies whose name matches this regex
 -p, --prod              include dependencies
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
 -o, --overrides         include overrides (pnpm)
--f, --filter [pattern]  only include dependencies whose name matches this regex
+-w, --workspace         include locally developed package versions
 -h, --help              display help for command
 ```
 
@@ -194,13 +197,14 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 <summary>Options</summary>
 
 ```
--s, --source [pattern]  glob pattern for package.json files to read from (default: [])
+-s, --source [pattern]  glob pattern for package.json files to read from
+-f, --filter [pattern]  only include dependencies whose name matches this regex
 -p, --prod              include dependencies
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
 -o, --overrides         include overrides (pnpm)
--f, --filter [pattern]  only include dependencies whose name matches this regex
+-w, --workspace         include locally developed package versions
 -h, --help              display help for command
 ```
 
@@ -237,15 +241,16 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 <summary>Options</summary>
 
 ```
--s, --source [pattern]      glob pattern for package.json files to read from (default: [])
+-s, --source [pattern]      glob pattern for package.json files to read from
+-r, --semver-range <range>  see supported ranges below. defaults to ""
+-f, --filter [pattern]      only include dependencies whose name matches this regex
 -p, --prod                  include dependencies
 -d, --dev                   include devDependencies
 -P, --peer                  include peerDependencies
 -R, --resolutions           include resolutions (yarn)
 -o, --overrides             include overrides (pnpm)
--f, --filter [pattern]      only include dependencies whose name matches this regex
+-w, --workspace             include locally developed package versions
 -i, --indent [value]        override indentation. defaults to "  "
--r, --semver-range <range>  see supported ranges below. defaults to ""
 -h, --help                  display help for command
 ```
 
@@ -298,6 +303,7 @@ tree in the following places:
   "peer": true,
   "prod": true,
   "resolutions": true,
+  "workspace": true,
   "semverGroups": [],
   "semverRange": "",
   "sortAz": [
@@ -306,23 +312,31 @@ tree in the following places:
     "devDependencies",
     "keywords",
     "peerDependencies",
+    "resolutions",
     "scripts"
   ],
-  "sortFirst": ["name", "description", "version", "author"],
-  "source": ["package.json", "packages/*/package.json"],
+  "sortFirst": [
+    "name",
+    "description",
+    "version",
+    "author"
+  ],
+  "source": [],
   "versionGroups": []
 }
 ```
 
-### `dev`, `peer`, `prod`, `resolutions`, and `overrides`
+### `dev`, `peer`, `prod`, `resolutions`, `overrides`, and `workspace`
 
 Whether to search within `devDependencies`, `peerDependencies`, `dependencies`,
-`resolutions` (Yarn), and `overrides` (Pnpm) respectively.
+`resolutions` (Yarn), `overrides` (Pnpm), and the `version` property of the
+package.json files of your own packages developed within your `workspace`
+respectively.
 
 All of these locations are searched by default but they can be disabled
 individually in your config file. If any are set via the command line options
-`--dev`, `--peer`, `--prod`, `--resolutions`, or `overrides` then only the
-options you provide will be searched.
+`--dev`, `--peer`, `--prod`, `--resolutions`, `--overrides`, or `--workspace`
+then only the options you provide will be searched.
 
 ### `filter`
 
@@ -373,6 +387,61 @@ using Lerna or Yarn Workspaces, but this can be overridden in your config file
 or via multiple `--source` command line options. Supports any patterns supported
 by [glob](https://github.com/isaacs/node-glob).
 
+### `versionGroups`
+
+The most common use case for version groups is when some of the packages in your
+Monorepo are considered alpha (or legacy). Since those packages are much further
+ahead (or behind) the other packages, the dependencies within those packages
+need to be managed differently to the rest of the Monorepo.
+
+Your alpha packages might use unstable versions of some dependencies, while the
+rest of the repo might need to remain on stable versions.
+
+You don't want mismatches within your alpha packages, you don't want mismatches
+within the other packages, but you _do_ want those groups to use different
+versions *to each other* and not have `syncpack` make them all the same.
+
+In the following example, 2 of our packages are using different versions of
+`react` and `react-dom` to the rest of the project.
+
+```json
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react", "react-dom"],
+      "packages": ["@alpha/server", "@alpha/ui"]
+    }
+  ]
+}
+```
+
+> 👋 The `dependencies` and `packages` fields are processed using
+> [minimatch](https://github.com/isaacs/minimatch), so the above example can
+> also be written as `"packages": ["@alpha/**"]`.
+
+`syncpack` will make ensure that:
+
+- The versions of `react` and `react-dom` are the same within `@alpha/server`
+  and `@alpha/ui`.
+- The versions of `react` and `react-dom` are the same across every package
+  except `@alpha/server` and `@alpha/ui`.
+- The versions of `react` and `react-dom` within `@alpha/server` and `@alpha/ui`
+  can be different to the other packages in the monorepo.
+- The versions of every other dependency in the monorepo (eg `lodash`) are the
+  same across every package including `@alpha/server` and `@alpha/ui`.
+
+Each dependency can only belong to one version group, the first rule which
+matches a given dependency and package will apply.
+
+You can be quite granular with these rules, so the partitioning doesn't _have_
+to apply to an entire package:
+
+- A specific dependency in a specific package.
+- A specific dependency in some specific packages only.
+- Any dependency who name matches a pattern such as `@aws-sdk/**`.
+
+See [`semverGroups`](#semverGroups) for some examples, they work the same way.
+
 ### `semverGroups`
 
 Allow some packages to have different semver range rules to the rest of your
@@ -397,14 +466,14 @@ regardless of what the rest of the monorepo uses:
 ```
 
 2: Every dependency of `@myrepo/library` whose name matches `@alpha/**` should
-have a semver range of `~`, regardless of what the rest of that package or the
+have a semver range of `^`, regardless of what the rest of that package or the
 rest of the monorepo uses:
 
 ```json
 {
   "semverGroups": [
     {
-      "range": "~",
+      "range": "^",
       "dependencies": ["@alpha/**"],
       "packages": ["@myrepo/library"]
     }
@@ -426,49 +495,6 @@ semver range of `~`, regardless of what the rest of the monorepo uses:
   ]
 }
 ```
-
-### `versionGroups`
-
-If some packages in your Monorepo relate to "alpha" (or legacy) versions of your
-software, you will need to manage dependencies differently within those
-packages. Your alpha packages might use latest or unstable versions of some 3rd
-party dependencies, while the rest of the repo might need to remain on older
-versions. You don't want mismatches within your alpha packages, or within the
-other packages in your monorepo – but you do want those groups to use different
-versions to each other and not have `syncpack fix-mismatches` make them all the
-same.
-
-In the following example, 2 packages in our monorepo are using different
-versions of `react` and `react-dom` to the rest of the project.
-
-```json
-{
-  "versionGroups": [
-    {
-      "dependencies": ["react", "react-dom"],
-      "packages": ["@alpha/server", "@alpha/ui"]
-    }
-  ]
-}
-```
-
-> ℹ️ The `dependencies` and `packages` fields are processed using
-> [minimatch](https://github.com/isaacs/minimatch), so the above example can
-> also be written as `"packages": ["@alpha/**"]`.
-
-`syncpack` will make ensure that:
-
-- The versions of `react` and `react-dom` are the same within `@alpha/server`
-  and `@alpha/ui`.
-- The versions of `react` and `react-dom` are the same across every package
-  except `@alpha/server` and `@alpha/ui`.
-- The versions of `react` and `react-dom` within `@alpha/server` and `@alpha/ui`
-  can be different to the other packages in the monorepo.
-- The versions of every other dependency in the monorepo (eg `lodash`) are the
-  same across every package including `@alpha/server` and `@alpha/ui`.
-
-Each dependency can only belong to one version group, the first rule which
-matches a given dependency and package will apply.
 
 ## 🕵🏾‍♀️ Resolving Packages
 

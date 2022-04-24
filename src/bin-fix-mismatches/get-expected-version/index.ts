@@ -7,11 +7,11 @@ import { getWorkspaceVersion } from './get-workspace-version';
 export function getExpectedVersion(
   name: string,
   versionGroup: Pick<IndexedVersionGroup, 'instances' | 'pinVersion'>,
-  input: Pick<ProgramInput, 'wrappers'>,
+  input: Pick<ProgramInput, 'workspace' | 'wrappers'>,
 ): string {
   return (
     getPinnedVersion(versionGroup) ||
-    getWorkspaceVersion(name, input.wrappers) ||
+    (input.workspace === true && getWorkspaceVersion(name, input.wrappers)) ||
     getHighestVersion(
       versionGroup.instances
         .filter((instance) => instance.name === name)

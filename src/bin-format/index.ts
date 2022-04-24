@@ -50,8 +50,6 @@ program
 format(
   getInput(disk, {
     indent: program.opts().indent,
-    overrides: program.opts().overrides,
-    resolutions: program.opts().resolutions,
     source: program.opts().source,
   }),
   disk,

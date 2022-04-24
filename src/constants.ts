@@ -3,11 +3,12 @@ export type DependencyType =
   | 'devDependencies'
   | 'overrides'
   | 'peerDependencies'
-  | 'resolutions';
+  | 'resolutions'
+  | 'workspace';
 
 export type DependencyOption = Pick<
   SyncpackConfig,
-  'dev' | 'overrides' | 'peer' | 'prod' | 'resolutions'
+  'dev' | 'workspace' | 'overrides' | 'peer' | 'prod' | 'resolutions'
 >;
 
 export type ValidRange =
@@ -122,6 +123,11 @@ export type SyncpackConfig = Readonly<{
    *
    */
   versionGroups: VersionGroup[];
+  /**
+   * whether to include the versions of the `--source` packages developed in
+   * your workspace/monorepo as part of the search for versions to sync
+   */
+  workspace: boolean;
 }>;
 
 export const ALL_PATTERNS = ['package.json', 'packages/*/package.json'];
@@ -132,6 +138,7 @@ export const DEPENDENCY_TYPES: DependencyType[] = [
   'overrides',
   'peerDependencies',
   'resolutions',
+  'workspace',
 ];
 
 export const CWD = process.cwd();
@@ -170,6 +177,7 @@ export const DEFAULT_CONFIG: SyncpackConfig = {
   peer: true,
   prod: true,
   resolutions: true,
+  workspace: true,
   semverGroups: [],
   semverRange: '',
   sortAz: [

@@ -6,17 +6,18 @@ it('applies pinned versions first', () => {
     getExpectedVersion(
       'foo',
       { instances: [], pinVersion: '2.2.2' },
-      { wrappers: [] },
+      { workspace: true, wrappers: [] },
     ),
   ).toEqual('2.2.2');
 });
 
-it('applies matching local package versions second', () => {
+it('applies matching local package versions second, if --workspace is set', () => {
   expect(
     getExpectedVersion(
       'foo',
       { instances: [] },
       {
+        workspace: true,
         wrappers: [
           {
             contents: { name: 'bar', version: '0.1.0' },
@@ -34,7 +35,7 @@ it('applies matching local package versions second', () => {
   ).toEqual('1.2.3');
 });
 
-it('applies the highest installed version third', () => {
+it('applies the highest installed version third, if --workspace is not set', () => {
   expect(
     getExpectedVersion(
       'foo',
@@ -45,13 +46,17 @@ it('applies the highest installed version third', () => {
           { name: 'foo', version: '1.0.0' },
         ] as Instance[],
       },
-      { wrappers: [] },
+      { workspace: false, wrappers: [] },
     ),
   ).toEqual('3.0.0');
 });
 
 it('returns an empty string if nothing matches', () => {
   expect(
-    getExpectedVersion('foo', { instances: [] }, { wrappers: [] }),
+    getExpectedVersion(
+      'foo',
+      { instances: [] },
+      { workspace: false, wrappers: [] },
+    ),
   ).toEqual('');
 });

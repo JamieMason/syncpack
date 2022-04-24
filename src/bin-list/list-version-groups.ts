@@ -6,7 +6,7 @@ import type {
 import { groupBy } from '../lib/group-by';
 import { sortByName } from '../lib/sort-by-name';
 
-interface ListItem {
+export interface ListItem {
   hasMismatches: boolean;
   instances: Instance[];
   name: string;

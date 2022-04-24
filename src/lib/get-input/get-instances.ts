@@ -43,10 +43,9 @@ export function getInstances(
   for (const wrapper of wrappers) {
     const pkgName = wrapper.contents.name || 'packagewithoutaname';
     for (const dependencyType of options.dependencyTypes) {
-      const versionsByName = wrapper.contents?.[dependencyType];
-      if (!isObject<Record<string, string>>(versionsByName)) continue;
-      const pkgs = Object.entries(versionsByName);
-      for (const [name, version] of pkgs) {
+      if (dependencyType === 'workspace') {
+        const name = wrapper.contents?.name;
+        const version = wrapper.contents?.version;
         if (!isNonEmptyString(name)) continue;
         if (name.search(new RegExp(options.filter)) === -1) continue;
         if (!isNonEmptyString(version)) continue;
@@ -54,6 +53,19 @@ export function getInstances(
         allInstances.all.push(instance);
         groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
         groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
+      } else {
+        const versionsByName = wrapper.contents?.[dependencyType];
+        if (!isObject<Record<string, string>>(versionsByName)) continue;
+        const pkgs = Object.entries(versionsByName);
+        for (const [name, version] of pkgs) {
+          if (!isNonEmptyString(name)) continue;
+          if (name.search(new RegExp(options.filter)) === -1) continue;
+          if (!isNonEmptyString(version)) continue;
+          const instance = { dependencyType, name, version, wrapper };
+          allInstances.all.push(instance);
+          groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
+          groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
+        }
       }
     }
   }
