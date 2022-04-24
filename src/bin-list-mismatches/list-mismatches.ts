@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { version } from 'os';
 import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { ProgramInput } from '../lib/get-input';

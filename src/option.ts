@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import { collect } from './lib/collect';
 import { DEFAULT_CONFIG } from './constants';
+import { collect } from './lib/collect';
 
 export const option = {
   dev: ['-d, --dev', chalk`include {yellow devDependencies}`],

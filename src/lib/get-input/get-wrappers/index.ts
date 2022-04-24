@@ -1,11 +1,11 @@
 import * as E from 'fp-ts/lib/Either';
-import * as O from 'fp-ts/lib/Option';
 import { flow, pipe } from 'fp-ts/lib/function';
+import * as O from 'fp-ts/lib/Option';
 import type { SyncpackConfig } from '../../../constants';
+import type { Disk } from '../../../lib/disk';
 import { getFilePaths } from './get-file-paths';
 import { readJsonSafe } from './get-patterns/read-json-safe';
 import { removeReadonlyType } from './readonly';
-import type { Disk } from '../../../lib/disk';
 
 export interface Source {
   bugs?: { url: string } | string;

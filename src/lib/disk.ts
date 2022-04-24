@@ -10,7 +10,11 @@ export type Disk = typeof disk;
 
 export const disk = {
   globSync(pattern: string): string[] {
-    return globSync(pattern, { ignore: '**/node_modules/**', absolute: true, cwd: CWD });
+    return globSync(pattern, {
+      ignore: '**/node_modules/**',
+      absolute: true,
+      cwd: CWD,
+    });
   },
   readConfigFileSync(): Partial<SyncpackConfig> {
     const rcSearch = cosmiconfigSync('syncpack').search();

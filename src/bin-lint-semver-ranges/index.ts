@@ -2,9 +2,9 @@
 
 import chalk from 'chalk';
 import { program } from 'commander';
-import { option } from '../option';
 import { disk } from '../lib/disk';
 import { getInput } from '../lib/get-input';
+import { option } from '../option';
 import { lintSemverRanges } from './lint-semver-ranges';
 
 program.description(
