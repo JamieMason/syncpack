@@ -1,3 +1,31 @@
+# [7.0.0](https://github.com/JamieMason/syncpack/compare/6.2.1...7.0.0) (2022-04-27)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([4e5a1cf](https://github.com/JamieMason/syncpack/commit/4e5a1cf484bcfcdab2eef6ded1558ddb51a49286))
+* **npm:** update dependencies ([eebbcde](https://github.com/JamieMason/syncpack/commit/eebbcde479adefdbf0dee0f7560c8bc0952a1c03))
+
+
+### Features
+
+* **cli:** sync versions of locally developed packages ([0367c9f](https://github.com/JamieMason/syncpack/commit/0367c9fe669172fad27d9a8fdf2125e3a5054c51)), closes [#66](https://github.com/JamieMason/syncpack/issues/66)
+
+
+### BREAKING CHANGES
+
+* **cli:** If a package developed in your Monorepo depends on another package
+developed in your Monorepo, syncpack will now fix the installed version
+of the dependent to match the actual version from the package.json file
+of the local package.
+
+You can disable this functionality by setting `"workspace": false` in
+your `.syncpackrc` config file, or by omitting the new `--workspace`
+option when using `--dev`, `--prod` etc to define which dependency types
+you wish to include.
+
+
+
 ## [6.2.1](https://github.com/JamieMason/syncpack/compare/6.2.0...6.2.1) (2022-04-12)
 
 
