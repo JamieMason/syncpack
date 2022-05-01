@@ -14,6 +14,7 @@ import type {
 } from '../../constants';
 import { DEFAULT_CONFIG, DEPENDENCY_TYPES } from '../../constants';
 import { isValidSemverRange } from '../../lib/is-semver';
+import type { Disk } from '../disk';
 
 /**
  * Take all configuration from the command line and config file, combine it, and
@@ -23,11 +24,13 @@ import { isValidSemverRange } from '../../lib/is-semver';
  * @param  program  Optional command line options
  */
 export const getConfig = (
-  rcFile: Partial<SyncpackConfig>,
-  program: Partial<SyncpackConfig>,
+  disk: Disk,
+  program: Partial<SyncpackConfig & { configPath: string }>,
 ): SyncpackConfig => {
   type OptionName = keyof SyncpackConfig;
   type TypeChecker<T> = (value: unknown) => value is T;
+
+  const rcFile = disk.readConfigFileSync(program.configPath);
 
   const hasTypeOverride =
     isBoolean(program.dev) ||

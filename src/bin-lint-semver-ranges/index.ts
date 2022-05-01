@@ -63,6 +63,7 @@ program
   .option(...option.source)
   .option(...option.filter)
   .option(...option.semverRange)
+  .option(...option.config)
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
@@ -73,6 +74,7 @@ program
 
 lintSemverRanges(
   getInput(disk, {
+    configPath: program.opts().config,
     dev: program.opts().dev,
     filter: program.opts().filter,
     overrides: program.opts().overrides,

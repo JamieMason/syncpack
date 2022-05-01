@@ -44,11 +44,13 @@ Reference:
 
 program
   .option(...option.source)
+  .option(...option.config)
   .option(...option.indent)
   .parse(process.argv);
 
 format(
   getInput(disk, {
+    configPath: program.opts().config,
     indent: program.opts().indent,
     source: program.opts().source,
   }),

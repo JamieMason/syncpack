@@ -3,6 +3,7 @@ import { DEFAULT_CONFIG } from './constants';
 import { collect } from './lib/collect';
 
 export const option = {
+  config: ['-c, --config <path>', 'path to a syncpack config file'],
   dev: ['-d, --dev', chalk`include {yellow devDependencies}`],
   filter: [
     '-f, --filter [pattern]',

@@ -37,6 +37,7 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 -o, --overrides         include overrides (pnpm)
 -w, --workspace         include locally developed package versions
 -i, --indent [value]    override indentation. defaults to "  "
+-c, --config <path>     path to a syncpack config file
 -h, --help              display help for command
 ```
 
@@ -77,7 +78,8 @@ Shorthand properties are used where available, such as the `"repository"` and
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
 -i, --indent [value]    override indentation. defaults to "  "
--h, --help              output usage information
+-c, --config <path>     path to a syncpack config file
+-h, --help              display help for command
 ```
 
 </details>
@@ -110,13 +112,14 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 
 ```
 -s, --source [pattern]      glob pattern for package.json files to read from
--f, --filter [pattern]      only include dependencies whose name matches this regex
--r, --semver-range <range>  see supported ranges below. defaults to ""
 -p, --prod                  include dependencies
 -d, --dev                   include devDependencies
 -P, --peer                  include peerDependencies
 -R, --resolutions           include resolutions (yarn)
 -o, --overrides             include overrides (pnpm)
+-f, --filter [pattern]      only include dependencies whose name matches this regex
+-r, --semver-range <range>  see supported ranges below. defaults to ""
+-c, --config <path>         path to a syncpack config file
 -w, --workspace             include locally developed package versions
 -h, --help                  display help for command
 ```
@@ -154,12 +157,13 @@ List all dependencies required by your packages.
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
--f, --filter [pattern]  only include dependencies whose name matches this regex
 -p, --prod              include dependencies
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
 -o, --overrides         include overrides (pnpm)
+-f, --filter [pattern]  only include dependencies whose name matches this regex
+-c, --config <path>     path to a syncpack config file
 -w, --workspace         include locally developed package versions
 -h, --help              display help for command
 ```
@@ -198,12 +202,13 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
--f, --filter [pattern]  only include dependencies whose name matches this regex
 -p, --prod              include dependencies
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
 -o, --overrides         include overrides (pnpm)
+-f, --filter [pattern]  only include dependencies whose name matches this regex
+-c, --config <path>     path to a syncpack config file
 -w, --workspace         include locally developed package versions
 -h, --help              display help for command
 ```
@@ -251,6 +256,8 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 -o, --overrides             include overrides (pnpm)
 -w, --workspace             include locally developed package versions
 -i, --indent [value]        override indentation. defaults to "  "
+-r, --semver-range <range>  see supported ranges below. defaults to ""
+-c, --config <path>         path to a syncpack config file
 -h, --help                  display help for command
 ```
 
@@ -291,6 +298,9 @@ tree in the following places:
   or `.syncpackrc.cjs` file
 - a `syncpack.config.js` or `syncpack.config.cjs` CommonJS module exporting an
   object
+
+If you want to specify a path to a configuration file, overriding the discovered
+configuration file (if present), you can use the `--config` option.
 
 ### Default Configuration
 

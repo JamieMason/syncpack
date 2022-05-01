@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import type { ProgramInput } from '../lib/get-input';
-import type { ListItem } from './list-version-groups';
 import { listVersionGroups } from './list-version-groups';
 
 export function list(input: ProgramInput): void {

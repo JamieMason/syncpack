@@ -63,8 +63,9 @@ Reference:
 
 program
   .option(...option.source)
-  .option(...option.semverRange)
   .option(...option.filter)
+  .option(...option.config)
+  .option(...option.semverRange)
   .option(...option.prod)
   .option(...option.dev)
   .option(...option.peer)
@@ -76,6 +77,7 @@ program
 
 setSemverRanges(
   getInput(disk, {
+    configPath: program.opts().config,
     dev: program.opts().dev,
     filter: program.opts().filter,
     indent: program.opts().indent,
