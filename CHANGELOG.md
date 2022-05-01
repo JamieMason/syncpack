@@ -1,3 +1,12 @@
+# [7.1.0](https://github.com/JamieMason/syncpack/compare/7.0.0...7.1.0) (2022-05-01)
+
+
+### Features
+
+* **cli:** add --config to specify path to config file ([4b19a13](https://github.com/JamieMason/syncpack/commit/4b19a1375a7856bffb50c9fda84a3a8b6def877b)), closes [#71](https://github.com/JamieMason/syncpack/issues/71) [#72](https://github.com/JamieMason/syncpack/issues/72)
+
+
+
 # [7.0.0](https://github.com/JamieMason/syncpack/compare/6.2.1...7.0.0) (2022-04-27)
 
 
