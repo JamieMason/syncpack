@@ -64,7 +64,6 @@ export const getConfig = (
       ? DEPENDENCY_TYPES.filter(
           (type) =>
             (type === 'devDependencies' && dev) ||
-            (type === 'workspace' && workspace) ||
             (type === 'overrides' && overrides) ||
             (type === 'peerDependencies' && peer) ||
             (type === 'dependencies' && prod) ||

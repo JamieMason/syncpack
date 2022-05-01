@@ -1,7 +1,9 @@
 import chalk from 'chalk';
+import { isUndefined } from 'expect-more';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
+import type { SourceWrapper } from '../lib/get-input/get-wrappers';
 import { writeIfChanged } from '../lib/write-if-changed';
 import { getExpectedVersion } from './get-expected-version';
 
@@ -33,6 +35,7 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
   });
 
   input.wrappers.forEach((wrapper) => {
+    removeEmptyIndexes(wrapper);
     writeIfChanged(disk, {
       contents: wrapper.contents,
       filePath: wrapper.filePath,
@@ -40,4 +43,16 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
       json: wrapper.json,
     });
   });
+
+  /**
+   * Remove eg `{"dependencies": {}, "devDependencies": {}}`
+   */
+  function removeEmptyIndexes(wrapper: SourceWrapper): void {
+    input.dependencyTypes.forEach((dependencyType) => {
+      const deps = wrapper.contents[dependencyType];
+      if (deps && Object.values(deps).every(isUndefined)) {
+        delete wrapper.contents[dependencyType];
+      }
+    });
+  }
 }

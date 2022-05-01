@@ -1,7 +1,24 @@
 import { getExpectedVersion } from '.';
 import type { Instance } from '../../lib/get-input/get-instances';
 
-it('applies pinned versions first', () => {
+it('removes every dependency in the group if the group is marked as disallowed', () => {
+  expect(
+    getExpectedVersion(
+      'foo',
+      {
+        isBanned: true,
+        instances: [
+          { name: 'foo', version: '2.0.0' },
+          { name: 'foo', version: '3.0.0' },
+          { name: 'foo', version: '1.0.0' },
+        ] as Instance[],
+      },
+      { workspace: false, wrappers: [] },
+    ),
+  ).toEqual(undefined);
+});
+
+it('if not disallowed, applies pinned versions first', () => {
   expect(
     getExpectedVersion(
       'foo',

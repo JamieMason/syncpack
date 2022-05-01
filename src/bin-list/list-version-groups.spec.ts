@@ -13,12 +13,14 @@ describe('listVersionGroups', () => {
       {
         hasMismatches: false,
         instances: [{ name: 'bar', version: '0.5.0' }],
+        isBanned: false,
         name: 'bar',
         uniques: ['0.5.0'],
       },
       {
         hasMismatches: false,
         instances: [{ name: 'foo', version: '1.0.0' }],
+        isBanned: false,
         name: 'foo',
         uniques: ['1.0.0'],
       },
@@ -39,6 +41,7 @@ describe('listVersionGroups', () => {
           { name: 'foo', version: '1.0.0' },
           { name: 'foo', version: '1.1.0' },
         ],
+        isBanned: false,
         name: 'foo',
         uniques: ['1.0.0', '1.1.0'],
       },

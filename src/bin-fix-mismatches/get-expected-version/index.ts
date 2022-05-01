@@ -6,16 +6,21 @@ import { getWorkspaceVersion } from './get-workspace-version';
 
 export function getExpectedVersion(
   name: string,
-  versionGroup: Pick<IndexedVersionGroup, 'instances' | 'pinVersion'>,
+  versionGroup: Pick<
+    IndexedVersionGroup,
+    'isBanned' | 'instances' | 'pinVersion'
+  >,
   input: Pick<ProgramInput, 'workspace' | 'wrappers'>,
-): string {
-  return (
-    getPinnedVersion(versionGroup) ||
-    (input.workspace === true && getWorkspaceVersion(name, input.wrappers)) ||
-    getHighestVersion(
-      versionGroup.instances
-        .filter((instance) => instance.name === name)
-        .map(({ version }) => version),
-    )
-  );
+): string | undefined {
+  return versionGroup.isBanned === true
+    ? // remove this dependency
+      undefined
+    : getPinnedVersion(versionGroup) ||
+        (input.workspace === true &&
+          getWorkspaceVersion(name, input.wrappers)) ||
+        getHighestVersion(
+          versionGroup.instances
+            .filter((instance) => instance.name === name)
+            .map(({ version }) => version),
+        );
 }

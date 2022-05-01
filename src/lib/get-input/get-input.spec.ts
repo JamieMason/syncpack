@@ -13,17 +13,10 @@ describe('getInput', () => {
     const overrides = 'overrides';
     const resolutions = 'resolutions';
 
-    it('enables them all if none are set', () => {
+    it('includes all except workspace (which is a not a property of package.json) if none are set', () => {
       expect(getInput(disk, {})).toHaveProperty(
         'dependencyTypes',
-        expect.arrayContaining([
-          prod,
-          dev,
-          peer,
-          workspace,
-          overrides,
-          resolutions,
-        ]),
+        expect.arrayContaining([prod, dev, peer, overrides, resolutions]),
       );
     });
     it('enables one if it is the only one set', () => {
@@ -38,7 +31,7 @@ describe('getInput', () => {
       ]);
       expect(getInput(disk, { workspace: true })).toHaveProperty(
         'dependencyTypes',
-        [workspace],
+        [],
       );
       expect(getInput(disk, { overrides: true })).toHaveProperty(
         'dependencyTypes',
@@ -52,10 +45,7 @@ describe('getInput', () => {
     it('enables some if only those are set', () => {
       expect(
         getInput(disk, { dev: true, workspace: true, prod: true }),
-      ).toHaveProperty(
-        'dependencyTypes',
-        expect.arrayContaining([prod, dev, workspace]),
-      );
+      ).toHaveProperty('dependencyTypes', expect.arrayContaining([prod, dev]));
     });
   });
   describe('source', () => {

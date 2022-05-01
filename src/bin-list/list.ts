@@ -18,10 +18,12 @@ export function list(input: ProgramInput): void {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
     }
 
-    groups.forEach(({ hasMismatches, name, uniques }) => {
+    groups.forEach(({ hasMismatches, isBanned, name, uniques }) => {
       const versionList = uniques.sort().join(', ');
       console.log(
-        hasMismatches
+        isBanned
+          ? chalk`{red ✕ ${name}} {dim.red remove this dependency}`
+          : hasMismatches
           ? chalk`{red ✕ ${name}} {dim.red ${versionList}}`
           : chalk`{dim -} {white ${name}} {dim ${versionList}}`,
       );

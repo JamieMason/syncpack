@@ -9,6 +9,7 @@ import { sortByName } from '../lib/sort-by-name';
 export interface ListItem {
   hasMismatches: boolean;
   instances: Instance[];
+  isBanned: boolean;
   name: string;
   uniques: string[];
 }
@@ -16,23 +17,25 @@ export interface ListItem {
 export function listVersionGroups(
   versionGroup: IndexedVersionGroup,
 ): ListItem[] {
-  const instancesByName = groupBy<Instance>(
-    'name',
-    versionGroup.instances.sort(sortByName),
-  );
+  const instances = versionGroup.instances;
+  const instancesByName = groupBy<Instance>('name', instances.sort(sortByName));
   return Object.entries(instancesByName).map(([name, instances]) => {
     const pinnedVersion = versionGroup.pinVersion;
     const hasPinnedVersion = isNonEmptyString(pinnedVersion);
     const versions = instances.map(({ version }) => version);
     const uniques = Array.from(new Set(versions));
-    const hasMismatches = versions.some(
-      (version, i) =>
-        (hasPinnedVersion && version !== pinnedVersion) ||
-        (i > 0 && version !== versions[i - 1]),
-    );
+    const isBanned = versionGroup.isBanned === true;
+    const hasMismatches =
+      isBanned ||
+      versions.some(
+        (version, i) =>
+          (hasPinnedVersion && version !== pinnedVersion) ||
+          (i > 0 && version !== versions[i - 1]),
+      );
     return {
       hasMismatches,
       instances,
+      isBanned,
       name,
       uniques,
     };

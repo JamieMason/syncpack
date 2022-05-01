@@ -152,5 +152,56 @@ describe('fixMismatches', () => {
       ]);
       log.mockRestore();
     });
+
+    it('removes banned/disallowed dependencues', () => {
+      const disk = mockDisk();
+      const aBefore = wrapper('a', ['foo@0.1.0']);
+      const bBefore = wrapper('b', ['bar@0.2.0']);
+      const bAfter = wrapper('b');
+      const log = jest
+        .spyOn(console, 'log')
+        .mockImplementation(() => undefined);
+      disk.globSync.mockImplementation((glob) => {
+        if (glob.endsWith('packages/*/package.json')) {
+          return ['packages/a/package.json', 'packages/b/package.json'];
+        }
+      });
+      disk.readFileSync.mockImplementation((filePath) => {
+        if (filePath.endsWith('packages/a/package.json')) {
+          return aBefore.json;
+        }
+        if (filePath.endsWith('packages/b/package.json')) {
+          return bBefore.json;
+        }
+      });
+      fixMismatches(
+        getInput(disk, {
+          versionGroups: [
+            {
+              dependencies: ['bar'],
+              packages: ['**'],
+              isBanned: true,
+            },
+          ],
+        }),
+        disk,
+      );
+      expect(disk.writeFileSync.mock.calls).toEqual([
+        [expect.stringContaining('packages/b/package.json'), bAfter.json],
+      ]);
+      expect(log.mock.calls).toEqual([
+        [expect.stringMatching(/Version Group 1/)],
+        [
+          expect.stringMatching(/-/),
+          expect.stringMatching('packages/a/package.json'),
+        ],
+        [
+          expect.stringMatching(/✓/),
+          expect.stringMatching('packages/b/package.json'),
+        ],
+      ]);
+
+      log.mockRestore();
+    });
   });
 });

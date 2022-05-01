@@ -325,12 +325,7 @@ configuration file (if present), you can use the `--config` option.
     "resolutions",
     "scripts"
   ],
-  "sortFirst": [
-    "name",
-    "description",
-    "version",
-    "author"
-  ],
+  "sortFirst": ["name", "description", "version", "author"],
   "source": [],
   "versionGroups": []
 }
@@ -409,7 +404,7 @@ rest of the repo might need to remain on stable versions.
 
 You don't want mismatches within your alpha packages, you don't want mismatches
 within the other packages, but you _do_ want those groups to use different
-versions *to each other* and not have `syncpack` make them all the same.
+versions _to each other_ and not have `syncpack` make them all the same.
 
 In the following example, 2 of our packages are using different versions of
 `react` and `react-dom` to the rest of the project.
@@ -450,7 +445,40 @@ to apply to an entire package:
 - A specific dependency in some specific packages only.
 - Any dependency who name matches a pattern such as `@aws-sdk/**`.
 
-See [`semverGroups`](#semverGroups) for some examples, they work the same way.
+See [`semverGroups`](#semverGroups) for more examples, they work the same way.
+
+#### `versionGroup.isBanned`
+
+Remove dependencies which you've decided should never be allowed.
+
+```json
+{
+  "versionGroups": [
+    {
+      "isBanned": true,
+      "dependencies": ["never-gonna"],
+      "packages": ["**"]
+    }
+  ]
+}
+```
+
+#### `versionGroup.pinVersion`
+
+Pin the version of all dependencies in this group to match this specific version
+you've defined.
+
+```json
+{
+  "versionGroups": [
+    {
+      "pinVersion": "3.55.0",
+      "dependencies": ["@aws-sdk/**"],
+      "packages": ["**"]
+    }
+  ]
+}
+```
 
 ### `semverGroups`
 

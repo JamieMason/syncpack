@@ -27,9 +27,13 @@ export function listMismatches(input: ProgramInput): void {
       }
     }
 
-    groups.forEach(({ instances, name }) => {
+    groups.forEach(({ instances, isBanned, name }) => {
       const expectedVersion = getExpectedVersion(name, versionGroup, input);
-      console.log(chalk`{dim -} ${name} {green.dim ${expectedVersion}}`);
+      console.log(
+        isBanned
+          ? chalk`{red ✕ ${name}} {dim.red remove this dependency}`
+          : chalk`{dim -} ${name} {green.dim ${expectedVersion}}`,
+      );
       instances.forEach(({ dependencyType, version, wrapper }) => {
         if (dependencyType === 'workspace') {
           const shortPath = relative(CWD, wrapper.filePath);

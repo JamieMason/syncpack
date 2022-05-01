@@ -53,6 +53,10 @@ export interface VersionGroup {
    */
   dependencies: string[];
   /**
+   * optionally force all dependencies in this group to be removed
+   */
+  isBanned?: true;
+  /**
    * optionally force all dependencies in this group to have this version
    */
   pinVersion?: string;
