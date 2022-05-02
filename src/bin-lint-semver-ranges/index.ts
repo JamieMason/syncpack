@@ -85,4 +85,5 @@ lintSemverRanges(
     source: program.opts().source,
     workspace: program.opts().workspace,
   }),
+  disk,
 );

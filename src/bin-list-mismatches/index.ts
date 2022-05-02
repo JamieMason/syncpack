@@ -68,4 +68,5 @@ listMismatches(
     source: program.opts().source,
     workspace: program.opts().workspace,
   }),
+  disk,
 );

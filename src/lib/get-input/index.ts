@@ -22,7 +22,7 @@ export type ProgramInput = SyncpackConfig & {
  */
 export function getInput(
   disk: Disk,
-  program: Partial<SyncpackConfig & { configPath: string }>,
+  program: Partial<SyncpackConfig & { configPath: string | undefined }>,
 ): ProgramInput {
   const config = getConfig(disk, program);
   const wrappers = getWrappers(disk, config);

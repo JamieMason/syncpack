@@ -25,7 +25,7 @@ import type { Disk } from '../disk';
  */
 export const getConfig = (
   disk: Disk,
-  program: Partial<SyncpackConfig & { configPath: string }>,
+  program: Partial<SyncpackConfig & { configPath: string | undefined }>,
 ): SyncpackConfig => {
   type OptionName = keyof SyncpackConfig;
   type TypeChecker<T> = (value: unknown) => value is T;

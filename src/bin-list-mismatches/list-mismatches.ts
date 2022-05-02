@@ -3,9 +3,10 @@ import { relative } from 'path';
 import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import { CWD } from '../constants';
+import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
 
-export function listMismatches(input: ProgramInput): void {
+export function listMismatches(input: ProgramInput, disk: Disk): void {
   let isInvalid = false;
 
   /**
@@ -48,6 +49,6 @@ export function listMismatches(input: ProgramInput): void {
   });
 
   if (isInvalid) {
-    process.exit(1);
+    disk.process.exit(1);
   }
 }

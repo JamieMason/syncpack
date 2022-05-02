@@ -12,6 +12,11 @@ export type Disk = typeof disk;
 const client = cosmiconfigSync('syncpack');
 
 export const disk = {
+  process: {
+    exit(code: number): void {
+      process.exit(code);
+    },
+  },
   globSync(pattern: string): string[] {
     return globSync(pattern, {
       ignore: '**/node_modules/**',

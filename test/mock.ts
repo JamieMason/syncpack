@@ -18,6 +18,7 @@ export const wrapper = (
 ): SourceWrapper => {
   return withJson({
     contents: {
+      name: dirName,
       ...(deps && deps.length > 0
         ? {
             dependencies: toObject(deps),

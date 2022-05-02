@@ -1,8 +1,9 @@
 import chalk from 'chalk';
+import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
 import { listVersionGroups } from './list-version-groups';
 
-export function list(input: ProgramInput): void {
+export function list(input: ProgramInput, disk: Disk): void {
   let isInvalid = false;
 
   /**
@@ -35,6 +36,6 @@ export function list(input: ProgramInput): void {
   });
 
   if (isInvalid) {
-    process.exit(1);
+    disk.process.exit(1);
   }
 }

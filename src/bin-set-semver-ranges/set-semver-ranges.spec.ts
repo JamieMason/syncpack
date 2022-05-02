@@ -1,41 +1,21 @@
 import 'expect-more-jest';
-import { wrapper } from '../../test/mock';
-import { mockDisk } from '../../test/mock-disk';
+import { scenarios } from '../../test/scenarios';
 import { getInput } from '../lib/get-input';
 import { setSemverRanges } from './set-semver-ranges';
 
 describe('setSemverRanges', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('sets all versions to use the supplied range', () => {
-    const disk = mockDisk();
-    const aBefore = wrapper('a', ['foo@0.1.0', 'bar@2.0.0']);
-    const aAfter = wrapper('a', ['foo@~0.1.0', 'bar@~2.0.0']);
-    const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
-    disk.globSync.mockImplementation((glob) => {
-      if (glob.endsWith('packages/*/package.json')) {
-        return ['packages/a/package.json'];
-      }
-    });
-    disk.readFileSync.mockImplementation((filePath) => {
-      if (filePath.endsWith('packages/a/package.json')) return aBefore.json;
-    });
-    setSemverRanges(
-      getInput(disk, {
-        dev: false,
-        peer: false,
-        prod: true,
-        semverRange: '~',
-      }),
-      disk,
-    );
-    expect(disk.writeFileSync.mock.calls).toEqual([
-      [expect.stringContaining('packages/a/package.json'), aAfter.json],
+    const scenario = scenarios.semverRangesDoNotMatchConfig();
+    setSemverRanges(getInput(scenario.disk, scenario.config), scenario.disk);
+    expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].diskWriteWhenChanged,
     ]);
-    expect(log.mock.calls).toEqual([
-      [
-        expect.stringMatching(/✓/),
-        expect.stringMatching('packages/a/package.json'),
-      ],
+    expect(scenario.log.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].logEntryWhenChanged,
     ]);
-    log.mockRestore();
   });
 });

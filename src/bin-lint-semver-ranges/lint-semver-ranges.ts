@@ -1,9 +1,10 @@
 import chalk from 'chalk';
+import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
 import { setSemverRange } from '../lib/set-semver-range';
 import { listSemverGroupMismatches } from './list-semver-group-mismatches';
 
-export function lintSemverRanges(input: ProgramInput): void {
+export function lintSemverRanges(input: ProgramInput, disk: Disk): void {
   let isInvalid = false;
 
   /**
@@ -33,6 +34,6 @@ export function lintSemverRanges(input: ProgramInput): void {
   });
 
   if (isInvalid) {
-    process.exit(1);
+    disk.process.exit(1);
   }
 }

@@ -64,4 +64,5 @@ list(
     source: program.opts().source,
     workspace: program.opts().workspace,
   }),
+  disk,
 );
