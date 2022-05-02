@@ -1,3 +1,17 @@
+## [7.2.1](https://github.com/JamieMason/syncpack/compare/7.1.0...7.2.1) (2022-05-02)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([b9a9f5d](https://github.com/JamieMason/syncpack/commit/b9a9f5da2dee72e8aea7ccebca7607c80cd8391e))
+
+
+### Features
+
+* **versionGroups:** mark specific dependencies for removal ([e571775](https://github.com/JamieMason/syncpack/commit/e571775ebc120786b2742d0047dc8f79f7f8a539)), closes [#65](https://github.com/JamieMason/syncpack/issues/65)
+
+
+
 # [7.1.0](https://github.com/JamieMason/syncpack/compare/7.0.0...7.1.0) (2022-05-01)
 
 
