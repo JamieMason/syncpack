@@ -101,6 +101,38 @@ export const scenarios = {
     );
   },
   /**
+   * Variation of the previous scenario in a nested workspace.
+   * 
+   */
+  dependentDoesNotMatchNestedWorkspaceVersion() {
+    return createScenario(
+      [
+        {
+          path: 'workspaces/a/packages/a/package.json',
+          before: wrapper('a', ['c@0.1.0']),
+          after: wrapper('a', ['c@0.0.1']),
+        },
+        {
+          path: 'workspaces/b/packages/b/package.json',
+          before: wrapper('b', [], ['c@0.2.0']),
+          after: wrapper('b', [], ['c@0.0.1']),
+        },
+        {
+          path: 'workspaces/b/packages/c/package.json',
+          before: wrapper('c', [], [], [], {
+            name: 'c',
+            version: '0.0.1',
+          }),
+          after: wrapper('c', [], [], [], {
+            name: 'c',
+            version: '0.0.1',
+          }),
+        },
+      ],
+      {},
+    );
+  },
+  /**
    * Only `dependencies` are checked
    * The semver range `~` should be used
    * A uses exact versions for `foo` and `bar`
