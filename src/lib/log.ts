@@ -1,7 +1,16 @@
 import chalk from 'chalk';
+import { isString } from 'expect-more';
+import { inspect } from 'util';
 
-export function verbose(message: string): void {
+export function verbose(...values: any[]): void {
   if (process.env.SYNCPACK_VERBOSE) {
-    console.log(chalk.yellow(`? ${message}`));
+    console.info(
+      chalk.yellow('?'),
+      ...values.map((value) =>
+        isString(value)
+          ? chalk.yellow(value)
+          : inspect(value, false, null, true),
+      ),
+    );
   }
 }

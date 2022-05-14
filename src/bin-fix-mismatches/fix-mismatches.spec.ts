@@ -1,6 +1,5 @@
 import 'expect-more-jest';
 import { scenarios } from '../../test/scenarios';
-import type { TestScenario } from '../../test/scenarios/create-scenario';
 import { getInput } from '../lib/get-input';
 import { fixMismatches } from './fix-mismatches';
 

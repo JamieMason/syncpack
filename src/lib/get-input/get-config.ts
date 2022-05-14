@@ -15,6 +15,7 @@ import type {
 import { DEFAULT_CONFIG, DEPENDENCY_TYPES } from '../../constants';
 import { isValidSemverRange } from '../../lib/is-semver';
 import type { Disk } from '../disk';
+import { verbose } from '../log';
 
 /**
  * Take all configuration from the command line and config file, combine it, and
@@ -29,6 +30,8 @@ export const getConfig = (
 ): SyncpackConfig => {
   type OptionName = keyof SyncpackConfig;
   type TypeChecker<T> = (value: unknown) => value is T;
+
+  verbose('cli arguments:', program);
 
   const rcFile = disk.readConfigFileSync(program.configPath);
 
@@ -107,7 +110,7 @@ export const getConfig = (
     isArrayOfVersionGroups,
   ).concat(defaultVersionGroup);
 
-  return {
+  const finalConfig = {
     dependencyTypes,
     dev,
     filter,
@@ -124,6 +127,10 @@ export const getConfig = (
     source,
     versionGroups,
   };
+
+  verbose('final config:', finalConfig);
+
+  return finalConfig;
 
   function getOption<T>(name: OptionName, isValid: TypeChecker<T>): T {
     const cliOption = program[name];
