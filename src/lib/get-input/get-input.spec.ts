@@ -1,4 +1,5 @@
 import 'expect-more-jest';
+import { join } from 'path';
 import { getInput } from '.';
 import { mockDisk } from '../../../test/mock-disk';
 import { DEFAULT_CONFIG } from '../../constants';
@@ -133,13 +134,13 @@ describe('getInput', () => {
       describe('for a single package.json file', () => {
         it('reads that file only', () => {
           const CWD = process.cwd();
-          const filePath = `${CWD}/package.json`;
+          const filePath = join(CWD, 'package.json');
           const contents = { name: 'foo' };
           const json = '{"name":"foo"}';
           const disk = mockDisk();
           disk.globSync.mockReturnValue([filePath]);
           disk.readFileSync.mockReturnValue(json);
-          expect(getInput(disk, { source: ['package.json'] })).toEqual(
+          expect(getInput(disk, { source: ['./package.json'] })).toEqual(
             expect.objectContaining({
               wrappers: [{ filePath, contents, json }],
             }),
@@ -171,32 +172,32 @@ describe('getInput', () => {
         describe('as an array', () => {
           it('resolves yarn workspace packages', () => {
             const CWD = process.cwd();
-            const filePath = `${CWD}/package.json`;
-            const contents = { workspaces: ['as-array/*'] };
+            const filePath = join(CWD, 'package.json');
+            const contents = { workspaces: ['./as-array/*'] };
             const json = JSON.stringify(contents);
             const disk = mockDisk();
             disk.globSync.mockReturnValue([filePath]);
             disk.readFileSync.mockReturnValue(json);
             getInput(disk, {});
             expect(disk.globSync.mock.calls).toEqual([
-              ['package.json'],
-              ['as-array/*/package.json'],
+              ['./package.json'],
+              ['./as-array/*/package.json'],
             ]);
           });
         });
         describe('as an object', () => {
           it('resolves yarn workspace packages', () => {
             const CWD = process.cwd();
-            const filePath = `${CWD}/package.json`;
-            const contents = { workspaces: { packages: ['as-object/*'] } };
+            const filePath = join(CWD, 'package.json');
+            const contents = { workspaces: { packages: ['./as-object/*'] } };
             const json = JSON.stringify(contents);
             const disk = mockDisk();
             disk.globSync.mockReturnValue([filePath]);
             disk.readFileSync.mockReturnValue(json);
             getInput(disk, {});
             expect(disk.globSync.mock.calls).toEqual([
-              ['package.json'],
-              ['as-object/*/package.json'],
+              ['./package.json'],
+              ['./as-object/*/package.json'],
             ]);
           });
         });
@@ -205,7 +206,7 @@ describe('getInput', () => {
         describe('when lerna.json is defined', () => {
           it('resolves lerna packages', () => {
             const CWD = process.cwd();
-            const filePath = `${CWD}/package.json`;
+            const filePath = join(CWD, 'package.json');
             const contents = { name: 'foo' };
             const json = JSON.stringify(contents);
             const disk = mockDisk();
@@ -213,12 +214,12 @@ describe('getInput', () => {
             disk.readFileSync.mockImplementation((filePath) => {
               if (filePath.endsWith('package.json')) return json;
               if (filePath.endsWith('lerna.json'))
-                return JSON.stringify({ packages: ['lerna/*'] });
+                return JSON.stringify({ packages: ['./lerna/*'] });
             });
             getInput(disk, {});
             expect(disk.globSync.mock.calls).toEqual([
-              ['package.json'],
-              ['lerna/*/package.json'],
+              ['./package.json'],
+              ['./lerna/*/package.json'],
             ]);
           });
         });
@@ -226,7 +227,7 @@ describe('getInput', () => {
           describe('when pnpm workspaces are defined', () => {
             it('resolves pnpm packages', () => {
               const CWD = process.cwd();
-              const filePath = `${CWD}/package.json`;
+              const filePath = join(CWD, 'package.json');
               const disk = mockDisk();
               disk.globSync.mockReturnValue([filePath]);
               disk.readYamlFileSync.mockReturnValue({
@@ -234,8 +235,8 @@ describe('getInput', () => {
               });
               getInput(disk, {});
               expect(disk.globSync.mock.calls).toEqual([
-                ['package.json'],
-                ['from-pnpm/*/package.json'],
+                ['./package.json'],
+                ['./from-pnpm/*/package.json'],
               ]);
             });
           });
