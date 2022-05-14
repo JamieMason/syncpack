@@ -2,6 +2,7 @@ import minimatch from 'minimatch';
 import path from 'path';
 import type { SyncpackConfig } from '../../src/constants';
 import type { SourceWrapper } from '../../src/lib/get-input/get-wrappers';
+import type { MockDisk } from '../mock-disk';
 import { mockDisk } from '../mock-disk';
 
 interface MockedFile {
@@ -14,6 +15,13 @@ interface MockedFile {
   relativePath: string;
 }
 
+export interface TestScenario {
+  config: Partial<SyncpackConfig & { configPath: string | undefined }>;
+  disk: MockDisk;
+  log: jest.SpyInstance;
+  files: Record<string, MockedFile>;
+}
+
 export function createScenario(
   fileMocks: {
     path: string;
@@ -21,7 +29,7 @@ export function createScenario(
     after: SourceWrapper;
   }[],
   config: Partial<SyncpackConfig & { configPath: string | undefined }>,
-) {
+): TestScenario {
   const disk = mockDisk();
   const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
   // resolve all paths

@@ -101,8 +101,16 @@ export const scenarios = {
     );
   },
   /**
-   * Variation of the previous scenario in a nested workspace.
-   * 
+   * Variation of `dependentDoesNotMatchWorkspaceVersion` in a nested workspace.
+   *
+   * C is developed in this monorepo, its version is `0.0.1`
+   * C's version is the single source of truth and should never be changed
+   * A and B depend on C incorrectly and should be fixed
+   * A, B, and C are in nested workspaces
+   *
+   * @see https://github.com/goldstack/goldstack/pull/170/files#diff-7ae45ad102eab3b6d7e7896acd08c427a9b25b346470d7bc6507b6481575d519R19
+   * @see https://github.com/JamieMason/syncpack/pull/74
+   * @see https://github.com/JamieMason/syncpack/issues/66
    */
   dependentDoesNotMatchNestedWorkspaceVersion() {
     return createScenario(
@@ -129,7 +137,19 @@ export const scenarios = {
           }),
         },
       ],
-      {},
+      {
+        dev: true,
+        overrides: false,
+        peer: false,
+        prod: true,
+        resolutions: false,
+        workspace: true,
+        source: [
+          'package.json',
+          'workspaces/*/package.json',
+          'workspaces/*/packages/*/package.json',
+        ],
+      },
     );
   },
   /**
