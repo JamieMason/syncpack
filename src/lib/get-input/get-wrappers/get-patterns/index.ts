@@ -1,7 +1,6 @@
 import { isArrayOfStrings } from 'expect-more';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
-import { join } from 'path';
 import type { SyncpackConfig } from '../../../../constants';
 import { ALL_PATTERNS } from '../../../../constants';
 import type { Disk } from '../../../../lib/disk';
@@ -46,6 +45,8 @@ export function getPatterns(disk: Disk, program: SyncpackConfig): Patterns {
   }
 
   function limitToPackageJson(patterns: Patterns): Patterns {
-    return patterns.map((pattern) => join(pattern, 'package.json'));
+    return patterns.map((pattern) =>
+      pattern.includes('package.json') ? pattern : `${pattern}/package.json`,
+    );
   }
 }
