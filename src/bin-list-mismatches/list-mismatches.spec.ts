@@ -1,5 +1,6 @@
 import 'expect-more-jest';
 import { scenarios } from '../../test/scenarios';
+import type { TestScenario } from '../../test/scenarios/create-scenario';
 import { getInput } from '../lib/get-input';
 import { listMismatches } from './list-mismatches';
 
@@ -10,15 +11,32 @@ describe('listMismatches', () => {
 
   describe('when dependencies are installed with different versions', () => {
     describe('when the dependency is a package maintained in this workspace', () => {
-      it('warns ab the workspace version', () => {
-        const scenario = scenarios.dependentDoesNotMatchWorkspaceVersion();
-        listMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
-        expect(scenario.log.mock.calls).toEqual([
-          ['- c 0.0.1'],
-          ['  0.1.0 in dependencies of a'],
-          ['  0.2.0 in devDependencies of b'],
-        ]);
-        expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+      const variants: [string, () => TestScenario][] = [
+        [
+          'when using a typical workspace',
+          scenarios.dependentDoesNotMatchWorkspaceVersion,
+        ],
+        [
+          'when using nested workspaces',
+          scenarios.dependentDoesNotMatchNestedWorkspaceVersion,
+        ],
+      ];
+      variants.forEach(([context, getScenario]) => {
+        describe(context, () => {
+          it('warns about the workspace version', () => {
+            const scenario = getScenario();
+            listMismatches(
+              getInput(scenario.disk, scenario.config),
+              scenario.disk,
+            );
+            expect(scenario.log.mock.calls).toEqual([
+              ['- c 0.0.1'],
+              ['  0.1.0 in dependencies of a'],
+              ['  0.2.0 in devDependencies of b'],
+            ]);
+            expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+          });
+        });
       });
     });
 
