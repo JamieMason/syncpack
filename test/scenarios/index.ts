@@ -1,4 +1,4 @@
-import { wrapper } from '../mock';
+import { mockPackage } from '../mock';
 import { createScenario } from './create-scenario';
 
 export const scenarios = {
@@ -13,13 +13,13 @@ export const scenarios = {
       [
         {
           path: 'packages/a/package.json',
-          before: wrapper('a', ['foo@0.1.0']),
-          after: wrapper('a', ['foo@0.1.0']),
+          before: mockPackage('a', { deps: ['foo@0.1.0'] }),
+          after: mockPackage('a', { deps: ['foo@0.1.0'] }),
         },
         {
           path: 'packages/b/package.json',
-          before: wrapper('b', ['bar@0.2.0']),
-          after: wrapper('b'),
+          before: mockPackage('b', { deps: ['bar@0.2.0'] }),
+          after: mockPackage('b'),
         },
       ],
       {
@@ -45,23 +45,23 @@ export const scenarios = {
       [
         {
           path: 'packages/a/package.json',
-          before: wrapper('a', ['foo@link:vendor/foo-0.1.0']),
-          after: wrapper('a', ['foo@0.3.0']),
+          before: mockPackage('a', { deps: ['foo@link:vendor/foo-0.1.0'] }),
+          after: mockPackage('a', { deps: ['foo@0.3.0'] }),
         },
         {
           path: 'packages/b/package.json',
-          before: wrapper('b', ['foo@link:vendor/foo-0.2.0']),
-          after: wrapper('b', ['foo@0.3.0']),
+          before: mockPackage('b', { deps: ['foo@link:vendor/foo-0.2.0'] }),
+          after: mockPackage('b', { deps: ['foo@0.3.0'] }),
         },
         {
           path: 'packages/c/package.json',
-          before: wrapper('c', ['foo@0.3.0']),
-          after: wrapper('c', ['foo@0.3.0']),
+          before: mockPackage('c', { deps: ['foo@0.3.0'] }),
+          after: mockPackage('c', { deps: ['foo@0.3.0'] }),
         },
         {
           path: 'packages/d/package.json',
-          before: wrapper('d', ['foo@0.2.0']),
-          after: wrapper('d', ['foo@0.3.0']),
+          before: mockPackage('d', { deps: ['foo@0.2.0'] }),
+          after: mockPackage('d', { deps: ['foo@0.3.0'] }),
         },
       ],
       {},
@@ -77,23 +77,21 @@ export const scenarios = {
       [
         {
           path: 'packages/a/package.json',
-          before: wrapper('a', ['c@0.1.0']),
-          after: wrapper('a', ['c@0.0.1']),
+          before: mockPackage('a', { deps: ['c@0.1.0'] }),
+          after: mockPackage('a', { deps: ['c@0.0.1'] }),
         },
         {
           path: 'packages/b/package.json',
-          before: wrapper('b', [], ['c@0.2.0']),
-          after: wrapper('b', [], ['c@0.0.1']),
+          before: mockPackage('b', { devDeps: ['c@0.2.0'] }),
+          after: mockPackage('b', { devDeps: ['c@0.0.1'] }),
         },
         {
           path: 'packages/c/package.json',
-          before: wrapper('c', [], [], [], {
-            name: 'c',
-            version: '0.0.1',
+          before: mockPackage('c', {
+            otherProps: { name: 'c', version: '0.0.1' },
           }),
-          after: wrapper('c', [], [], [], {
-            name: 'c',
-            version: '0.0.1',
+          after: mockPackage('c', {
+            otherProps: { name: 'c', version: '0.0.1' },
           }),
         },
       ],
@@ -117,23 +115,21 @@ export const scenarios = {
       [
         {
           path: 'workspaces/a/packages/a/package.json',
-          before: wrapper('a', ['c@0.1.0']),
-          after: wrapper('a', ['c@0.0.1']),
+          before: mockPackage('a', { deps: ['c@0.1.0'] }),
+          after: mockPackage('a', { deps: ['c@0.0.1'] }),
         },
         {
           path: 'workspaces/b/packages/b/package.json',
-          before: wrapper('b', [], ['c@0.2.0']),
-          after: wrapper('b', [], ['c@0.0.1']),
+          before: mockPackage('b', { devDeps: ['c@0.2.0'] }),
+          after: mockPackage('b', { devDeps: ['c@0.0.1'] }),
         },
         {
           path: 'workspaces/b/packages/c/package.json',
-          before: wrapper('c', [], [], [], {
-            name: 'c',
-            version: '0.0.1',
+          before: mockPackage('c', {
+            otherProps: { name: 'c', version: '0.0.1' },
           }),
-          after: wrapper('c', [], [], [], {
-            name: 'c',
-            version: '0.0.1',
+          after: mockPackage('c', {
+            otherProps: { name: 'c', version: '0.0.1' },
           }),
         },
       ],
@@ -163,8 +159,8 @@ export const scenarios = {
       [
         {
           path: 'packages/a/package.json',
-          before: wrapper('a', ['foo@0.1.0', 'bar@2.0.0']),
-          after: wrapper('a', ['foo@~0.1.0', 'bar@~2.0.0']),
+          before: mockPackage('a', { deps: ['foo@0.1.0', 'bar@2.0.0'] }),
+          after: mockPackage('a', { deps: ['foo@~0.1.0', 'bar@~2.0.0'] }),
         },
       ],
       {

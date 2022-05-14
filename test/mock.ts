@@ -9,12 +9,19 @@ export function toJson(contents: SourceWrapper['contents']): string {
   return `${JSON.stringify(contents, null, 2)}${EOL}`;
 }
 
-export const wrapper = (
+export const mockPackage = (
   dirName: string,
-  deps?: string[],
-  devDeps?: string[],
-  peerDeps?: string[],
-  otherProps?: Record<string, string | Record<string, any>>,
+  {
+    deps,
+    devDeps,
+    peerDeps,
+    otherProps,
+  }: {
+    deps?: string[];
+    devDeps?: string[];
+    peerDeps?: string[];
+    otherProps?: Record<string, string | Record<string, any>>;
+  } = {},
 ): SourceWrapper => {
   return withJson({
     contents: {
