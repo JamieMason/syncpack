@@ -14,6 +14,10 @@
 npm install --global syncpack
 ```
 
+## 🤖 GitHub Action
+
+As of May 2022 there is now a [Syncpack GitHub Action](https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions). It is new and less stable than syncpack itself, but please give it a try and [give your feedback](https://github.com/JamieMason/syncpack-github-action/issues/new).
+
 ## 📝 Commands
 
 ### fix-mismatches
