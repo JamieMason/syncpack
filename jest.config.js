@@ -1,6 +1,13 @@
 module.exports = {
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/bin*/index.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/bin.ts',
+    '!src/bin*/index.ts',
+    '!src/lib/disk.ts',
+    '!src/lib/log.ts',
+    '!src/option.ts',
+  ],
   coverageReporters: ['html', 'lcov'],
   coverageThreshold: {
     global: {
