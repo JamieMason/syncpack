@@ -1,3 +1,12 @@
+## [7.2.2](https://github.com/JamieMason/syncpack/compare/7.2.1...7.2.2) (2022-05-29)
+
+
+### Bug Fixes
+
+* **windows:** normalise file paths ([33f067f](https://github.com/JamieMason/syncpack/commit/33f067f820edef5ff0d9780cbea23de9cbff97f7)), closes [#66](https://github.com/JamieMason/syncpack/issues/66)
+
+
+
 ## [7.2.1](https://github.com/JamieMason/syncpack/compare/7.1.0...7.2.1) (2022-05-02)
 
 
