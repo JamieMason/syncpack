@@ -2,7 +2,7 @@ import 'expect-more-jest';
 import { join } from 'path';
 import { getInput } from '.';
 import { mockDisk } from '../../../test/mock-disk';
-import { DEFAULT_CONFIG } from '../../constants';
+import { CWD, DEFAULT_CONFIG } from '../../constants';
 
 describe('getInput', () => {
   describe('dependencyTypes', () => {
@@ -133,7 +133,6 @@ describe('getInput', () => {
     describe('when --source cli options are given', () => {
       describe('for a single package.json file', () => {
         it('reads that file only', () => {
-          const CWD = process.cwd();
           const filePath = join(CWD, 'package.json');
           const contents = { name: 'foo' };
           const json = '{"name":"foo"}';
@@ -171,7 +170,6 @@ describe('getInput', () => {
       describe('when yarn workspaces are defined', () => {
         describe('as an array', () => {
           it('resolves yarn workspace packages', () => {
-            const CWD = process.cwd();
             const filePath = join(CWD, 'package.json');
             const contents = { workspaces: ['./as-array/*'] };
             const json = JSON.stringify(contents);
@@ -187,7 +185,6 @@ describe('getInput', () => {
         });
         describe('as an object', () => {
           it('resolves yarn workspace packages', () => {
-            const CWD = process.cwd();
             const filePath = join(CWD, 'package.json');
             const contents = { workspaces: { packages: ['./as-object/*'] } };
             const json = JSON.stringify(contents);
@@ -205,7 +202,6 @@ describe('getInput', () => {
       describe('when yarn workspaces are not defined', () => {
         describe('when lerna.json is defined', () => {
           it('resolves lerna packages', () => {
-            const CWD = process.cwd();
             const filePath = join(CWD, 'package.json');
             const contents = { name: 'foo' };
             const json = JSON.stringify(contents);
@@ -226,7 +222,6 @@ describe('getInput', () => {
         describe('when lerna.json is not defined', () => {
           describe('when pnpm workspaces are defined', () => {
             it('resolves pnpm packages', () => {
-              const CWD = process.cwd();
               const filePath = join(CWD, 'package.json');
               const disk = mockDisk();
               disk.globSync.mockReturnValue([filePath]);

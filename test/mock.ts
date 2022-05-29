@@ -1,8 +1,10 @@
 import { EOL } from 'os';
+import { join, normalize } from 'path';
+import { CWD } from '../src/constants';
 import type { Source, SourceWrapper } from '../src/lib/get-input/get-wrappers';
 
 export function createWrapper(contents: Source): SourceWrapper {
-  return withJson({ contents, filePath: '/some/package.json' });
+  return withJson({ contents, filePath: join(CWD, 'some/package.json') });
 }
 
 export function toJson(contents: SourceWrapper['contents']): string {
@@ -43,7 +45,7 @@ export const mockPackage = (
         : {}),
       ...(otherProps ? otherProps : {}),
     },
-    filePath: `/${dirName}/package.json`,
+    filePath: join(CWD, `${dirName}/package.json`),
   });
 };
 
