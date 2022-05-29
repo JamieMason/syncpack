@@ -1,6 +1,7 @@
 import minimatch from 'minimatch';
-import { join } from 'path';
+import { join, normalize } from 'path';
 import type { SyncpackConfig } from '../../src/constants';
+import { CWD } from '../../src/constants';
 import type { SourceWrapper } from '../../src/lib/get-input/get-wrappers';
 import type { MockDisk } from '../mock-disk';
 import { mockDisk } from '../mock-disk';
@@ -10,6 +11,7 @@ interface MockedFile {
   after: SourceWrapper;
   before: SourceWrapper;
   diskWriteWhenChanged: [string, string];
+  id: string;
   logEntryWhenChanged: [any, any];
   logEntryWhenUnchanged: [any, any];
   relativePath: string;
@@ -33,34 +35,51 @@ export function createScenario(
   const disk = mockDisk();
   const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
   // resolve all paths
-  const mockedFiles: MockedFile[] = fileMocks.map((file) => ({
-    absolutePath: join(process.cwd(), file.path),
-    after: file.after,
-    before: file.before,
-    diskWriteWhenChanged: [expect.stringContaining(file.path), file.after.json],
-    logEntryWhenChanged: [
-      expect.stringMatching(/✓/),
-      expect.stringContaining(file.path),
-    ],
-    logEntryWhenUnchanged: [
-      expect.stringMatching(/-/),
-      expect.stringContaining(file.path),
-    ],
-    relativePath: file.path,
-  }));
+  const mockedFiles: MockedFile[] = fileMocks.map((file) => {
+    const absolutePath = join(CWD, file.path);
+    const relativePath = normalize(file.path);
+    return {
+      absolutePath,
+      after: {
+        ...file.after,
+        filePath: absolutePath,
+      },
+      before: {
+        ...file.before,
+        filePath: absolutePath,
+      },
+      diskWriteWhenChanged: [
+        expect.stringContaining(relativePath),
+        file.after.json,
+      ],
+      id: file.path,
+      logEntryWhenChanged: [
+        expect.stringMatching(/✓/),
+        expect.stringContaining(relativePath),
+      ],
+      logEntryWhenUnchanged: [
+        expect.stringMatching(/-/),
+        expect.stringContaining(relativePath),
+      ],
+      relativePath,
+    };
+  });
   // mock file system
   disk.readFileSync.mockImplementation((filePath): string | undefined => {
     return mockedFiles.find((file) => {
-      return filePath === file.absolutePath;
+      return normalize(filePath) === normalize(file.absolutePath);
     })?.before?.json;
   });
   // mock globs
   disk.globSync.mockImplementation((pattern): string[] => {
     return mockedFiles
       .filter((file) => {
-        return minimatch(file.absolutePath, join(process.cwd(), pattern));
+        return minimatch(
+          normalize(file.absolutePath),
+          toPosix(join(CWD, pattern)),
+        );
       })
-      .map((file) => file.absolutePath);
+      .map((file) => normalize(file.absolutePath));
   });
   // return API
   return {
@@ -68,8 +87,12 @@ export function createScenario(
     disk,
     log,
     files: mockedFiles.reduce((memo, file) => {
-      memo[file.relativePath] = file;
+      memo[file.id] = file;
       return memo;
     }, {} as Record<string, MockedFile>),
   };
+}
+
+function toPosix(value: string): string {
+  return value.replace('C:', '').replace(/\\/g, '/');
 }

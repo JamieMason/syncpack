@@ -1,4 +1,5 @@
 import 'expect-more-jest';
+import { normalize } from 'path';
 import { createWrapper, toJson } from '../../test/mock';
 import { mockDisk } from '../../test/mock-disk';
 import { DEFAULT_CONFIG } from '../constants';
@@ -19,13 +20,13 @@ describe('format', () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     format(input, disk);
     expect(disk.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('/some/package.json')),
       json,
     );
     expect(before).toEqual(after);
     expect(log).toHaveBeenCalledWith(
       expect.stringMatching(/✓/),
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('some/package.json')),
     );
   });
   it('sorts object properties alphabetically by key', () => {
@@ -41,13 +42,13 @@ describe('format', () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     format(input, disk);
     expect(disk.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('/some/package.json')),
       json,
     );
     expect(before).toEqual(after);
     expect(log).toHaveBeenCalledWith(
       expect.stringMatching(/✓/),
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('some/package.json')),
     );
   });
   it('sorts named properties first, then the rest alphabetically', () => {
@@ -63,13 +64,13 @@ describe('format', () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     format(input, disk);
     expect(disk.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('/some/package.json')),
       json,
     );
     expect(before).toEqual(after);
     expect(log).toHaveBeenCalledWith(
       expect.stringMatching(/✓/),
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('some/package.json')),
     );
   });
   it('uses shorthand format for "bugs"', () => {
@@ -84,13 +85,13 @@ describe('format', () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     format(input, disk);
     expect(disk.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('/some/package.json')),
       json,
     );
     expect(before).toEqual(after);
     expect(log).toHaveBeenCalledWith(
       expect.stringMatching(/✓/),
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('some/package.json')),
     );
   });
   it('uses shorthand format for "repository"', () => {
@@ -107,13 +108,13 @@ describe('format', () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     format(input, disk);
     expect(disk.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('/some/package.json')),
       json,
     );
     expect(before).toEqual(after);
     expect(log).toHaveBeenCalledWith(
       expect.stringMatching(/✓/),
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('some/package.json')),
     );
   });
   it('uses github shorthand format for "repository"', () => {
@@ -130,13 +131,13 @@ describe('format', () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     format(input, disk);
     expect(disk.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('/some/package.json')),
       json,
     );
     expect(before).toEqual(after);
     expect(log).toHaveBeenCalledWith(
       expect.stringMatching(/✓/),
-      expect.stringContaining('/some/package.json'),
+      expect.stringContaining(normalize('some/package.json')),
     );
   });
 });
