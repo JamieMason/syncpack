@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import { join, normalize } from 'path';
+import { join } from 'path';
 import { CWD } from '../src/constants';
 import type { Source, SourceWrapper } from '../src/lib/get-input/get-wrappers';
 
@@ -16,12 +16,18 @@ export const mockPackage = (
   {
     deps,
     devDeps,
+    overrides,
     peerDeps,
+    pnpmOverrides,
+    resolutions,
     otherProps,
   }: {
     deps?: string[];
     devDeps?: string[];
+    overrides?: string[];
     peerDeps?: string[];
+    pnpmOverrides?: string[];
+    resolutions?: string[];
     otherProps?: Record<string, string | Record<string, any>>;
   } = {},
 ): SourceWrapper => {
@@ -38,9 +44,26 @@ export const mockPackage = (
             devDependencies: toObject(devDeps),
           }
         : {}),
+      ...(overrides && overrides.length > 0
+        ? {
+            overrides: toObject(overrides),
+          }
+        : {}),
       ...(peerDeps && peerDeps.length > 0
         ? {
             peerDependencies: toObject(peerDeps),
+          }
+        : {}),
+      ...(pnpmOverrides && pnpmOverrides.length > 0
+        ? {
+            pnpm: {
+              overrides: toObject(pnpmOverrides),
+            },
+          }
+        : {}),
+      ...(resolutions && resolutions.length > 0
+        ? {
+            resolutions: toObject(resolutions),
           }
         : {}),
       ...(otherProps ? otherProps : {}),

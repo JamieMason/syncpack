@@ -15,13 +15,16 @@ export interface Source {
   keywords?: string[];
   name?: string;
   peerDependencies?: Record<string, string>;
+  pnpm?: {
+    overrides?: Record<string, string>;
+  };
   repository?: { type: string; url: string } | string;
   resolutions?: Record<string, string>;
   scripts?: Record<string, string>;
   version?: string;
   workspaces?: Record<string, string[]> | string[];
   [otherProps: string]:
-    | Record<string, string | string[]>
+    | Record<string, string | string[] | Record<string, string | string[]>>
     | string
     | string[]
     | undefined;

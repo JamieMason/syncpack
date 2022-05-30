@@ -136,6 +136,7 @@ export const scenarios = {
       {
         dev: true,
         overrides: false,
+        pnpmOverrides: false,
         peer: false,
         prod: true,
         resolutions: false,
@@ -149,25 +150,103 @@ export const scenarios = {
     );
   },
   /**
-   * Only `dependencies` are checked
+   * Only `dependencies` is unchecked
    * The semver range `~` should be used
-   * A uses exact versions for `foo` and `bar`
-   * A should be fixed to use `~` in both cases
+   * A uses exact versions for `a`
+   * A should be fixed to use `~` in all other cases
    */
   semverRangesDoNotMatchConfig() {
     return createScenario(
       [
         {
           path: 'packages/a/package.json',
-          before: mockPackage('a', { deps: ['foo@0.1.0', 'bar@2.0.0'] }),
-          after: mockPackage('a', { deps: ['foo@~0.1.0', 'bar@~2.0.0'] }),
+          before: mockPackage('a', {
+            deps: ['a@0.1.0'],
+            devDeps: ['b@0.1.0'],
+            overrides: ['c@0.1.0'],
+            peerDeps: ['d@0.1.0'],
+            resolutions: ['e@0.1.0'],
+          }),
+          after: mockPackage('a', {
+            deps: ['a@0.1.0'],
+            devDeps: ['b@~0.1.0'],
+            overrides: ['c@~0.1.0'],
+            peerDeps: ['d@~0.1.0'],
+            resolutions: ['e@~0.1.0'],
+          }),
+        },
+      ],
+      {
+        dev: true,
+        overrides: true,
+        pnpmOverrides: false,
+        peer: true,
+        prod: false,
+        resolutions: true,
+        workspace: true,
+        semverRange: '~',
+      },
+    );
+  },
+  /**
+   * A has a pnpm override of C
+   * B has a pnpm override of C
+   * The versions do not match
+   * The highest semver version wins
+   */
+  dependentDoesNotMatchPnpmOverrideVersion() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', { overrides: ['c@0.1.0'] }),
+          after: mockPackage('a', { overrides: ['c@0.2.0'] }),
+        },
+        {
+          path: 'packages/b/package.json',
+          before: mockPackage('b', { overrides: ['c@0.2.0'] }),
+          after: mockPackage('b', { overrides: ['c@0.2.0'] }),
         },
       ],
       {
         dev: false,
+        overrides: true,
+        pnpmOverrides: false,
         peer: false,
-        prod: true,
-        semverRange: '~',
+        prod: false,
+        resolutions: false,
+        workspace: false,
+      },
+    );
+  },
+  /**
+   * A has an npm override of C
+   * B has an npm override of C
+   * The versions do not match
+   * The highest semver version wins
+   */
+  dependentDoesNotMatchNpmOverrideVersion() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', { pnpmOverrides: ['c@0.1.0'] }),
+          after: mockPackage('a', { pnpmOverrides: ['c@0.2.0'] }),
+        },
+        {
+          path: 'packages/b/package.json',
+          before: mockPackage('b', { pnpmOverrides: ['c@0.2.0'] }),
+          after: mockPackage('b', { pnpmOverrides: ['c@0.2.0'] }),
+        },
+      ],
+      {
+        dev: false,
+        overrides: false,
+        pnpmOverrides: true,
+        peer: false,
+        prod: false,
+        resolutions: false,
+        workspace: false,
       },
     );
   },

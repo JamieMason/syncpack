@@ -7,12 +7,13 @@ import { CWD, DEFAULT_CONFIG } from '../../constants';
 describe('getInput', () => {
   describe('dependencyTypes', () => {
     const disk = mockDisk();
-    const prod = 'dependencies';
     const dev = 'devDependencies';
-    const peer = 'peerDependencies';
-    const workspace = 'workspace';
     const overrides = 'overrides';
+    const peer = 'peerDependencies';
+    const pnpmOverrides = 'pnpmOverrides';
+    const prod = 'dependencies';
     const resolutions = 'resolutions';
+    const workspace = 'workspace';
 
     it('includes all except workspace (which is a not a property of package.json) if none are set', () => {
       expect(getInput(disk, {})).toHaveProperty(
@@ -37,6 +38,10 @@ describe('getInput', () => {
       expect(getInput(disk, { overrides: true })).toHaveProperty(
         'dependencyTypes',
         [overrides],
+      );
+      expect(getInput(disk, { pnpmOverrides: true })).toHaveProperty(
+        'dependencyTypes',
+        [pnpmOverrides],
       );
       expect(getInput(disk, { resolutions: true })).toHaveProperty(
         'dependencyTypes',

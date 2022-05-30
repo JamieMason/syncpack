@@ -33,12 +33,26 @@ describe('list', () => {
       });
     });
 
-    it('replaces non-semver dependencies with valid semver dependencies', () => {
+    it('lists non-semver dependencies with valid semver dependencies', () => {
       const scenario = scenarios.mismatchesIncludeNonSemverVersions();
       list(getInput(scenario.disk, scenario.config), scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         ['✕ foo 0.2.0, 0.3.0, link:vendor/foo-0.1.0, link:vendor/foo-0.2.0'],
       ]);
+      expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('lists mismatching npm overrides', () => {
+      const scenario = scenarios.dependentDoesNotMatchNpmOverrideVersion();
+      list(getInput(scenario.disk, scenario.config), scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([['✕ c 0.1.0, 0.2.0']]);
+      expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('lists mismatching pnpm overrides', () => {
+      const scenario = scenarios.dependentDoesNotMatchPnpmOverrideVersion();
+      list(getInput(scenario.disk, scenario.config), scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([['✕ c 0.1.0, 0.2.0']]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
 

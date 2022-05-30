@@ -82,5 +82,29 @@ describe('fixMismatches', () => {
         scenario.files['packages/b/package.json'].logEntryWhenChanged,
       ]);
     });
+
+    it('replaces mismatching npm overrides', () => {
+      const scenario = scenarios.dependentDoesNotMatchNpmOverrideVersion();
+      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+      ]);
+      expect(scenario.log.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].logEntryWhenChanged,
+        scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+      ]);
+    });
+
+    it('replaces mismatching pnpm overrides', () => {
+      const scenario = scenarios.dependentDoesNotMatchPnpmOverrideVersion();
+      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+      ]);
+      expect(scenario.log.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].logEntryWhenChanged,
+        scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+      ]);
+    });
   });
 });

@@ -38,7 +38,8 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
--o, --overrides         include overrides (pnpm)
+-o, --overrides         include overrides (npm)
+-O, --pnpmOverrides     include overrides (pnpm)
 -w, --workspace         include locally developed package versions
 -i, --indent [value]    override indentation. defaults to "  "
 -c, --config <path>     path to a syncpack config file
@@ -120,7 +121,8 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 -d, --dev                   include devDependencies
 -P, --peer                  include peerDependencies
 -R, --resolutions           include resolutions (yarn)
--o, --overrides             include overrides (pnpm)
+-o, --overrides             include overrides (npm)
+-O, --pnpmOverrides         include overrides (pnpm)
 -f, --filter [pattern]      only include dependencies whose name matches this regex
 -r, --semver-range <range>  see supported ranges below. defaults to ""
 -c, --config <path>         path to a syncpack config file
@@ -165,7 +167,8 @@ List all dependencies required by your packages.
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
--o, --overrides         include overrides (pnpm)
+-o, --overrides         include overrides (npm)
+-O, --pnpmOverrides     include overrides (pnpm)
 -f, --filter [pattern]  only include dependencies whose name matches this regex
 -c, --config <path>     path to a syncpack config file
 -w, --workspace         include locally developed package versions
@@ -210,7 +213,8 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 -d, --dev               include devDependencies
 -P, --peer              include peerDependencies
 -R, --resolutions       include resolutions (yarn)
--o, --overrides         include overrides (pnpm)
+-o, --overrides         include overrides (npm)
+-O, --pnpmOverrides     include overrides (pnpm)
 -f, --filter [pattern]  only include dependencies whose name matches this regex
 -c, --config <path>     path to a syncpack config file
 -w, --workspace         include locally developed package versions
@@ -257,7 +261,8 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 -d, --dev                   include devDependencies
 -P, --peer                  include peerDependencies
 -R, --resolutions           include resolutions (yarn)
--o, --overrides             include overrides (pnpm)
+-o, --overrides             include overrides (npm)
+-O, --pnpmOverrides         include overrides (pnpm)
 -w, --workspace             include locally developed package versions
 -i, --indent [value]        override indentation. defaults to "  "
 -r, --semver-range <range>  see supported ranges below. defaults to ""
@@ -315,6 +320,7 @@ configuration file (if present), you can use the `--config` option.
   "indent": "  ",
   "overrides": true,
   "peer": true,
+  "pnpmOverrides": true,
   "prod": true,
   "resolutions": true,
   "workspace": true,
@@ -335,17 +341,17 @@ configuration file (if present), you can use the `--config` option.
 }
 ```
 
-### `dev`, `peer`, `prod`, `resolutions`, `overrides`, and `workspace`
+### `dev`, `peer`, `prod`, `resolutions`, `overrides`, `pnpmOverrides`, and `workspace`
 
 Whether to search within `devDependencies`, `peerDependencies`, `dependencies`,
-`resolutions` (Yarn), `overrides` (Pnpm), and the `version` property of the
-package.json files of your own packages developed within your `workspace`
-respectively.
+`resolutions` (Yarn), `overrides` (npm), `pnpmOverrides` (pnpm), and the
+`version` property of the package.json files of your own packages developed
+within your `workspace` respectively.
 
 All of these locations are searched by default but they can be disabled
 individually in your config file. If any are set via the command line options
-`--dev`, `--peer`, `--prod`, `--resolutions`, `--overrides`, or `--workspace`
-then only the options you provide will be searched.
+`--dev`, `--peer`, `--prod`, `--resolutions`, `--overrides`, `--pnpmOverrides`,
+or `--workspace` then only the options you provide will be searched.
 
 ### `filter`
 

@@ -79,6 +79,7 @@ lintSemverRanges(
     filter: program.opts().filter,
     overrides: program.opts().overrides,
     peer: program.opts().peer,
+    pnpmOverrides: program.opts().pnpmOverrides,
     prod: program.opts().prod,
     resolutions: program.opts().resolutions,
     semverRange: program.opts().semverRange,

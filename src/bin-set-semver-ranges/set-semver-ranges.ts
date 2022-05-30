@@ -9,7 +9,12 @@ export const setSemverRanges = (input: ProgramInput, disk: Disk): void => {
     const mismatches = listSemverGroupMismatches(semverGroup);
     mismatches.forEach(({ dependencyType, name, version, wrapper }) => {
       const root: any = wrapper.contents;
-      root[dependencyType][name] = setSemverRange(semverGroup.range, version);
+      const nextVersion = setSemverRange(semverGroup.range, version);
+      if (dependencyType === 'pnpmOverrides') {
+        root.pnpm.overrides[name] = nextVersion;
+      } else {
+        root[dependencyType][name] = nextVersion;
+      }
     });
   });
 

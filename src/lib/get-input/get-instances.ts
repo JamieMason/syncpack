@@ -46,31 +46,42 @@ export function getInstances(
       if (dependencyType === 'workspace') {
         const name = wrapper.contents?.name;
         const version = wrapper.contents?.version;
-        if (!isNonEmptyString(name)) continue;
-        if (name.search(new RegExp(options.filter)) === -1) continue;
-        if (!isNonEmptyString(version)) continue;
-        const instance = { dependencyType, name, version, wrapper };
-        allInstances.all.push(instance);
-        groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
-        groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
+        addInstance(wrapper, dependencyType, pkgName, name, version);
+      } else if (dependencyType === 'pnpmOverrides') {
+        const versionsByName = wrapper.contents?.pnpm?.overrides;
+        if (!isObject<Record<string, string>>(versionsByName)) continue;
+        const pkgs = Object.entries(versionsByName);
+        for (const [name, version] of pkgs) {
+          addInstance(wrapper, dependencyType, pkgName, name, version);
+        }
       } else {
         const versionsByName = wrapper.contents?.[dependencyType];
         if (!isObject<Record<string, string>>(versionsByName)) continue;
         const pkgs = Object.entries(versionsByName);
         for (const [name, version] of pkgs) {
-          if (!isNonEmptyString(name)) continue;
-          if (name.search(new RegExp(options.filter)) === -1) continue;
-          if (!isNonEmptyString(version)) continue;
-          const instance = { dependencyType, name, version, wrapper };
-          allInstances.all.push(instance);
-          groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
-          groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
+          addInstance(wrapper, dependencyType, pkgName, name, version);
         }
       }
     }
   }
 
   return allInstances;
+
+  function addInstance(
+    wrapper: SourceWrapper,
+    dependencyType: DependencyType,
+    pkgName: string,
+    name?: string,
+    version?: string,
+  ): void {
+    if (!isNonEmptyString(name)) return;
+    if (name.search(new RegExp(options.filter)) === -1) return;
+    if (!isNonEmptyString(version)) return;
+    const instance = { dependencyType, name, version, wrapper };
+    allInstances.all.push(instance);
+    groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
+    groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
+  }
 
   function withInstances<T>(group: T): T & InstanceIndex {
     const instances: InstanceIndex['instances'] = [];

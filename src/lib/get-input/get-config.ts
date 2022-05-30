@@ -40,6 +40,7 @@ export const getConfig = (
     isBoolean(program.workspace) ||
     isBoolean(program.overrides) ||
     isBoolean(program.peer) ||
+    isBoolean(program.pnpmOverrides) ||
     isBoolean(program.prod) ||
     isBoolean(program.resolutions);
 
@@ -55,6 +56,9 @@ export const getConfig = (
   const peer = hasTypeOverride
     ? Boolean(program.peer)
     : getOption<boolean>('peer', isBoolean);
+  const pnpmOverrides = hasTypeOverride
+    ? Boolean(program.pnpmOverrides)
+    : getOption<boolean>('pnpmOverrides', isBoolean);
   const prod = hasTypeOverride
     ? Boolean(program.prod)
     : getOption<boolean>('prod', isBoolean);
@@ -63,13 +67,20 @@ export const getConfig = (
     : getOption<boolean>('resolutions', isBoolean);
 
   const dependencyTypes =
-    dev || workspace || overrides || peer || prod || resolutions
+    dev ||
+    overrides ||
+    peer ||
+    pnpmOverrides ||
+    prod ||
+    resolutions ||
+    workspace
       ? DEPENDENCY_TYPES.filter(
           (type) =>
+            (type === 'dependencies' && prod) ||
             (type === 'devDependencies' && dev) ||
             (type === 'overrides' && overrides) ||
             (type === 'peerDependencies' && peer) ||
-            (type === 'dependencies' && prod) ||
+            (type === 'pnpmOverrides' && pnpmOverrides) ||
             (type === 'resolutions' && resolutions),
         )
       : DEPENDENCY_TYPES;
@@ -110,7 +121,7 @@ export const getConfig = (
     isArrayOfVersionGroups,
   ).concat(defaultVersionGroup);
 
-  const finalConfig = {
+  const finalConfig: SyncpackConfig = {
     dependencyTypes,
     dev,
     filter,
@@ -118,6 +129,7 @@ export const getConfig = (
     workspace,
     overrides,
     peer,
+    pnpmOverrides,
     prod,
     resolutions,
     semverGroups,

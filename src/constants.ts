@@ -3,6 +3,7 @@ export type DependencyType =
   | 'devDependencies'
   | 'overrides'
   | 'peerDependencies'
+  | 'pnpmOverrides'
   | 'resolutions'
   | 'workspace';
 
@@ -86,13 +87,17 @@ export type SyncpackConfig = Readonly<{
    */
   indent: string;
   /**
-   * whether to search within pnpm overrides
+   * whether to search within npm overrides
    */
   overrides: boolean;
   /**
    * whether to search within peerDependencies
    */
   peer: boolean;
+  /**
+   * whether to search within pnpm overrides
+   */
+  pnpmOverrides: boolean;
   /**
    * whether to search within dependencies
    */
@@ -141,6 +146,7 @@ export const DEPENDENCY_TYPES: DependencyType[] = [
   'devDependencies',
   'overrides',
   'peerDependencies',
+  'pnpmOverrides',
   'resolutions',
   'workspace',
 ];
@@ -179,6 +185,7 @@ export const DEFAULT_CONFIG: SyncpackConfig = {
   indent: '  ',
   overrides: true,
   peer: true,
+  pnpmOverrides: true,
   prod: true,
   resolutions: true,
   workspace: true,

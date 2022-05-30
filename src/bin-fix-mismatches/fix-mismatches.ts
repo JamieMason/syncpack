@@ -27,7 +27,11 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
         instances.forEach(({ dependencyType, version, wrapper }) => {
           const root: any = wrapper.contents;
           if (version !== nextVersion) {
-            root[dependencyType][name] = nextVersion;
+            if (dependencyType === 'pnpmOverrides') {
+              root.pnpm.overrides[name] = nextVersion;
+            } else {
+              root[dependencyType][name] = nextVersion;
+            }
           }
         });
       }

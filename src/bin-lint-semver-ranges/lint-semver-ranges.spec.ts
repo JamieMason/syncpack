@@ -12,8 +12,10 @@ describe('lintSemverRanges', () => {
     const scenario = scenarios.semverRangesDoNotMatchConfig();
     lintSemverRanges(getInput(scenario.disk, scenario.config), scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
-      ['✕ bar 2.0.0 in dependencies of a should be ~2.0.0'],
-      ['✕ foo 0.1.0 in dependencies of a should be ~0.1.0'],
+      ['✕ b 0.1.0 in devDependencies of a should be ~0.1.0'],
+      ['✕ c 0.1.0 in overrides of a should be ~0.1.0'],
+      ['✕ d 0.1.0 in peerDependencies of a should be ~0.1.0'],
+      ['✕ e 0.1.0 in resolutions of a should be ~0.1.0'],
     ]);
   });
 });

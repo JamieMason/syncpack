@@ -13,8 +13,9 @@ export const option = {
     '-i, --indent [value]',
     `override indentation. defaults to "${DEFAULT_CONFIG.indent}"`,
   ],
-  overrides: ['-o, --overrides', chalk`include {yellow overrides} (pnpm)`],
+  overrides: ['-o, --overrides', chalk`include {yellow overrides} (npm)`],
   peer: ['-P, --peer', chalk`include {yellow peerDependencies}`],
+  pnpmOverrides: ['-O, --overrides', chalk`include {yellow overrides} (pnpm)`],
   prod: ['-p, --prod', chalk`include {yellow dependencies}`],
   resolutions: [
     '-R, --resolutions',
