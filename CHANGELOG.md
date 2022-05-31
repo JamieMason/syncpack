@@ -1,9 +1,32 @@
+# [8.0.0](https://github.com/JamieMason/syncpack/compare/7.2.2...8.0.0) (2022-05-31)
+
+
+### Features
+
+* **pnpm:** add support for pnpm overrides ([2d1bf05](https://github.com/JamieMason/syncpack/commit/2d1bf059a239dff3af203104491a315b894b8796)), closes [#78](https://github.com/JamieMason/syncpack/issues/78)
+
+
+### BREAKING CHANGES
+
+* **pnpm:** The `--overrides` option delivered in 6.0.0 was originally intended to
+support pnpm, but erroneously read from the `.overrides` property of
+package.json files and not `.pnpm.overrides`.
+
+However, npm now also has an `.overrides` property to support the same
+functionality for users of npm.
+
+From this release, the `--overrides` option of syncpack now refers to
+npm overrides. Pnpm users should change to using the new
+`--pnpmOverrides` option instead.
+
+
+
 ## [7.2.2](https://github.com/JamieMason/syncpack/compare/7.2.1...7.2.2) (2022-05-29)
 
 
 ### Bug Fixes
 
-* **windows:** normalise file paths ([33f067f](https://github.com/JamieMason/syncpack/commit/33f067f820edef5ff0d9780cbea23de9cbff97f7)), closes [#66](https://github.com/JamieMason/syncpack/issues/66)
+* **windows:** normalise file paths ([c5e87c2](https://github.com/JamieMason/syncpack/commit/c5e87c2efe47bb538701ec3d83b813c47eddab8b)), closes [#66](https://github.com/JamieMason/syncpack/issues/66)
 
 
 
