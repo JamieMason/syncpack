@@ -67,7 +67,7 @@ export interface VersionGroup {
   dependencyTypes?: DependencyType[];
 }
 
-export type SyncpackConfig = Readonly<{
+export interface SyncpackConfig {
   /**
    * which dependency properties to search within
    */
@@ -137,7 +137,7 @@ export type SyncpackConfig = Readonly<{
    * your workspace/monorepo as part of the search for versions to sync
    */
   workspace: boolean;
-}>;
+}
 
 export const ALL_PATTERNS = ['package.json', 'packages/*/package.json'];
 

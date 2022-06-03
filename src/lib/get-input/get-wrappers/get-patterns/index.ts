@@ -4,14 +4,10 @@ import * as O from 'fp-ts/lib/Option';
 import type { SyncpackConfig } from '../../../../constants';
 import { ALL_PATTERNS } from '../../../../constants';
 import type { Disk } from '../../../../lib/disk';
-import { tapNone } from '../tap';
+import { tapNone, tapOption } from '../tap';
 import { getLernaPatterns } from './get-lerna-patterns';
 import { getPnpmPatterns } from './get-pnpm-patterns';
 import { getYarnPatterns } from './get-yarn-patterns';
-
-type Patterns = string[];
-
-export type MaybePatterns = O.Option<Patterns>;
 
 /**
  * Find every glob pattern which should be used to find package.json files for
@@ -19,32 +15,28 @@ export type MaybePatterns = O.Option<Patterns>;
  *
  * @returns `['./package.json', './packages/* /package.json']`
  */
-export function getPatterns(disk: Disk, program: SyncpackConfig): Patterns {
-  return pipe(
-    O.of(program.source),
-    O.filter(isArrayOfStrings),
-    tapNone<Patterns>('no --source patterns found'),
-    O.fold(
-      flow(
-        getYarnPatterns(disk),
-        tapNone<Patterns>('no yarn workspaces found'),
-        O.fold(getPnpmPatterns(disk), O.of),
-        tapNone<Patterns>('no pnpm workspaces found'),
-        O.fold(getLernaPatterns(disk), O.of),
-        tapNone<Patterns>('no lerna packages found'),
-        O.map(flow(addRootDir, limitToPackageJson)),
-      ),
-      O.of,
-    ),
-    tapNone<Patterns>('no patterns found, using defaults'),
-    O.getOrElse(() => ALL_PATTERNS),
-  );
+export function getPatterns(disk: Disk) {
+  return (program: SyncpackConfig): O.Option<string[]> =>
+    pipe(
+      O.of(program.source),
+      O.filter(isArrayOfStrings),
+      tapOption('--source patterns found'),
+      O.fold(flow(getYarnPatterns(disk), O.map(addRootDir)), O.of),
+      tapOption('yarn workspaces found'),
+      O.fold(flow(getPnpmPatterns(disk), O.map(addRootDir)), O.of),
+      tapOption('pnpm workspaces found'),
+      O.fold(flow(getLernaPatterns(disk), O.map(addRootDir)), O.of),
+      tapOption('lerna packages found'),
+      O.map(limitToPackageJson),
+      tapNone('no patterns found, using defaults'),
+      O.fold(() => O.some(ALL_PATTERNS), O.of),
+    );
 
-  function addRootDir(patterns: Patterns): Patterns {
+  function addRootDir(patterns: string[]): string[] {
     return ['.', ...patterns];
   }
 
-  function limitToPackageJson(patterns: Patterns): Patterns {
+  function limitToPackageJson(patterns: string[]): string[] {
     return patterns.map((pattern) =>
       pattern.includes('package.json') ? pattern : `${pattern}/package.json`,
     );

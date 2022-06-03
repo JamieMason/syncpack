@@ -6,6 +6,7 @@ import type {
   SyncpackConfig,
   VersionGroup,
 } from '../../constants';
+import { verbose } from '../log';
 import type { SourceWrapper } from './get-wrappers';
 
 export interface Instance {
@@ -46,20 +47,20 @@ export function getInstances(
       if (dependencyType === 'workspace') {
         const name = wrapper.contents?.name;
         const version = wrapper.contents?.version;
-        addInstance(wrapper, dependencyType, pkgName, name, version);
+        addInstance({ dependencyType, name, pkgName, version, wrapper });
       } else if (dependencyType === 'pnpmOverrides') {
         const versionsByName = wrapper.contents?.pnpm?.overrides;
         if (!isObject<Record<string, string>>(versionsByName)) continue;
         const pkgs = Object.entries(versionsByName);
         for (const [name, version] of pkgs) {
-          addInstance(wrapper, dependencyType, pkgName, name, version);
+          addInstance({ dependencyType, name, pkgName, version, wrapper });
         }
       } else {
         const versionsByName = wrapper.contents?.[dependencyType];
         if (!isObject<Record<string, string>>(versionsByName)) continue;
         const pkgs = Object.entries(versionsByName);
         for (const [name, version] of pkgs) {
-          addInstance(wrapper, dependencyType, pkgName, name, version);
+          addInstance({ dependencyType, name, pkgName, version, wrapper });
         }
       }
     }
@@ -67,17 +68,25 @@ export function getInstances(
 
   return allInstances;
 
-  function addInstance(
-    wrapper: SourceWrapper,
-    dependencyType: DependencyType,
-    pkgName: string,
-    name?: string,
-    version?: string,
-  ): void {
-    if (!isNonEmptyString(name)) return;
-    if (name.search(new RegExp(options.filter)) === -1) return;
-    if (!isNonEmptyString(version)) return;
+  function addInstance(input: {
+    dependencyType: DependencyType;
+    name?: string;
+    pkgName: string;
+    version?: string;
+    wrapper: SourceWrapper;
+  }): void {
+    const { dependencyType, name, pkgName, version, wrapper } = input;
+    if (!isNonEmptyString(name)) {
+      return verbose('skip instance, no name', input);
+    }
+    if (name.search(new RegExp(options.filter)) === -1) {
+      return verbose('skip instance, name does not match filter', input);
+    }
+    if (!isNonEmptyString(version)) {
+      return verbose('skip instance, no version', input);
+    }
     const instance = { dependencyType, name, version, wrapper };
+    verbose(`add ${name}@${version} to ${dependencyType} ${wrapper.filePath}`);
     allInstances.all.push(instance);
     groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
     groupInstancesBy('versionGroups', dependencyType, pkgName, instance);

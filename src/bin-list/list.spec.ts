@@ -51,7 +51,7 @@ describe('list', () => {
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
 
-    it('lists mismatching pnpm overrides', () => {
+    it.only('lists mismatching pnpm overrides', () => {
       const scenario = scenarios.dependentDoesNotMatchPnpmOverrideVersion();
       list(getInput(scenario.disk, scenario.config), scenario.disk);
       expect(scenario.log.mock.calls).toEqual([['✕ c 0.1.0, 0.2.0']]);
