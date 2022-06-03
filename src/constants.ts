@@ -178,6 +178,13 @@ export const SEMVER_ORDER: ValidRange[] = [
   RANGE_ANY,
 ];
 
+export const ICON = {
+  cross: '✘',
+  debug: '?',
+  skip: '-',
+  tick: '✓',
+};
+
 export const DEFAULT_CONFIG: SyncpackConfig = {
   dependencyTypes: [],
   dev: true,

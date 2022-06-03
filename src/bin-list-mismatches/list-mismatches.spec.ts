@@ -1,6 +1,5 @@
 import 'expect-more-jest';
 import { scenarios } from '../../test/scenarios';
-import type { TestScenario } from '../../test/scenarios/create-scenario';
 import { getInput } from '../lib/get-input';
 import { listMismatches } from './list-mismatches';
 
@@ -11,34 +10,42 @@ describe('listMismatches', () => {
 
   describe('when dependencies are installed with different versions', () => {
     describe('when the dependency is a package maintained in this workspace', () => {
-      const variants: [string, () => TestScenario, string][] = [
-        [
-          'when using a typical workspace',
-          scenarios.dependentDoesNotMatchWorkspaceVersion,
-          'packages/c/package.json',
-        ],
-        [
-          'when using nested workspaces',
-          scenarios.dependentDoesNotMatchNestedWorkspaceVersion,
-          'workspaces/b/packages/c/package.json',
-        ],
-      ];
-      variants.forEach(([context, getScenario, originPath]) => {
-        describe(context, () => {
-          it('warns about the workspace version', () => {
-            const scenario = getScenario();
-            listMismatches(
-              getInput(scenario.disk, scenario.config),
-              scenario.disk,
-            );
-            expect(scenario.log.mock.calls).toEqual([
-              ['- c 0.0.1'],
-              ['  0.1.0 in dependencies of a'],
-              ['  0.2.0 in devDependencies of b'],
-              [`  0.0.1 at ${originPath}`],
-            ]);
-            expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
-          });
+      describe('when using a typical workspace', () => {
+        it('warns about the workspace version', () => {
+          const scenario = scenarios.dependentDoesNotMatchWorkspaceVersion();
+          listMismatches(
+            getInput(scenario.disk, scenario.config),
+            scenario.disk,
+          );
+          expect(scenario.log.mock.calls).toEqual([
+            ['- c 0.0.1 is developed in this repo at packages/c/package.json'],
+            ['  0.1.0 in dependencies of packages/a/package.json'],
+            ['  0.2.0 in devDependencies of packages/b/package.json'],
+            ['  0.0.1 in version of packages/c/package.json'],
+          ]);
+          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+        });
+      });
+
+      describe('when using nested workspaces', () => {
+        it('warns about the workspace version', () => {
+          const scenario =
+            scenarios.dependentDoesNotMatchNestedWorkspaceVersion();
+          listMismatches(
+            getInput(scenario.disk, scenario.config),
+            scenario.disk,
+          );
+          expect(scenario.log.mock.calls).toEqual([
+            [
+              '- c 0.0.1 is developed in this repo at workspaces/b/packages/c/package.json',
+            ],
+            ['  0.1.0 in dependencies of workspaces/a/packages/a/package.json'],
+            [
+              '  0.2.0 in devDependencies of workspaces/b/packages/b/package.json',
+            ],
+            ['  0.0.1 in version of workspaces/b/packages/c/package.json'],
+          ]);
+          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
         });
       });
     });
@@ -47,11 +54,11 @@ describe('listMismatches', () => {
       const scenario = scenarios.mismatchesIncludeNonSemverVersions();
       listMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        ['- foo 0.3.0'],
-        ['  link:vendor/foo-0.1.0 in dependencies of a'],
-        ['  link:vendor/foo-0.2.0 in dependencies of b'],
-        ['  0.3.0 in dependencies of c'],
-        ['  0.2.0 in dependencies of d'],
+        ['- foo 0.3.0 is the highest valid semver version in use'],
+        ['  link:vendor/foo-0.1.0 in dependencies of packages/a/package.json'],
+        ['  link:vendor/foo-0.2.0 in dependencies of packages/b/package.json'],
+        ['  0.3.0 in dependencies of packages/c/package.json'],
+        ['  0.2.0 in dependencies of packages/d/package.json'],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
@@ -61,8 +68,8 @@ describe('listMismatches', () => {
       listMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         [expect.stringMatching(/Version Group 1/)],
-        ['✕ bar remove this dependency'],
-        ['  0.2.0 in dependencies of b'],
+        ['✘ bar is defined in this version group as banned from use'],
+        ['  0.2.0 in dependencies of packages/b/package.json'],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });

@@ -1,4 +1,6 @@
 import chalk from 'chalk';
+import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
+import { ICON } from '../constants';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
 import { listVersionGroups } from './list-version-groups';
@@ -20,12 +22,19 @@ export function list(input: ProgramInput, disk: Disk): void {
     }
 
     groups.forEach(({ hasMismatches, isBanned, name, uniques }) => {
-      const versionList = uniques.sort().join(', ');
+      const versionList = uniques.sort();
+      const expected = getExpectedVersion(name, versionGroup, input);
       console.log(
         isBanned
-          ? chalk`{red ✕ ${name}} {dim.red remove this dependency}`
+          ? chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`
           : hasMismatches
-          ? chalk`{red ✕ ${name}} {dim.red ${versionList}}`
+          ? chalk`{red ${ICON.cross} ${name}} ${versionList
+              .map((version) =>
+                version === expected
+                  ? chalk.green(version)
+                  : chalk.dim.red(version),
+              )
+              .join(chalk.dim(', '))}`
           : chalk`{dim -} {white ${name}} {dim ${versionList}}`,
       );
     });

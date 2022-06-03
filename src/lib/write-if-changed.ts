@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { EOL } from 'os';
 import { relative } from 'path';
-import { CWD } from '../constants';
+import { CWD, ICON } from '../constants';
 import type { Source } from '../lib/get-input/get-wrappers';
 import type { Disk } from './disk';
 
@@ -18,8 +18,8 @@ export function writeIfChanged(disk: Disk, fileData: FileData): void {
   const after = `${JSON.stringify(contents, null, indent)}${EOL}`;
   if (json !== after) {
     disk.writeFileSync(filePath, after);
-    console.log(chalk.green('✓'), shortPath);
+    console.log(chalk.green(ICON.tick), shortPath);
   } else {
-    console.log(chalk.dim('-'), chalk.dim(shortPath));
+    console.log(chalk.dim(ICON.skip), chalk.dim(shortPath));
   }
 }

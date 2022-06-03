@@ -1,3 +1,4 @@
+import type { IndexedVersionGroup } from '../lib/get-input/get-instances';
 import { listVersionGroups } from './list-version-groups';
 
 describe('listVersionGroups', () => {
@@ -8,7 +9,7 @@ describe('listVersionGroups', () => {
           { name: 'foo', version: '1.0.0' },
           { name: 'bar', version: '0.5.0' },
         ],
-      } as any),
+      } as IndexedVersionGroup),
     ).toEqual([
       {
         hasMismatches: false,
@@ -33,7 +34,7 @@ describe('listVersionGroups', () => {
           { name: 'foo', version: '1.0.0' },
           { name: 'foo', version: '1.1.0' },
         ],
-      } as any),
+      } as IndexedVersionGroup),
     ).toEqual([
       {
         hasMismatches: true,

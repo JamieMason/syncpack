@@ -228,19 +228,36 @@ describe('getInput', () => {
           });
         });
         describe('when lerna.json is not defined', () => {
-          describe('when pnpm workspaces are defined', () => {
-            it('resolves pnpm packages', () => {
-              const filePath = join(CWD, 'package.json');
-              const disk = mockDisk();
-              disk.globSync.mockReturnValue([filePath]);
-              disk.readYamlFileSync.mockReturnValue({
-                packages: ['./from-pnpm/*'],
+          describe('when pnpm config is present', () => {
+            describe('when pnpm workspaces are defined', () => {
+              it('resolves pnpm packages', () => {
+                const filePath = join(CWD, 'package.json');
+                const disk = mockDisk();
+                disk.globSync.mockReturnValue([filePath]);
+                disk.readYamlFileSync.mockReturnValue({
+                  packages: ['./from-pnpm/*'],
+                });
+                getInput(disk, {});
+                expect(disk.globSync.mock.calls).toEqual([
+                  ['./package.json'],
+                  ['./from-pnpm/*/package.json'],
+                ]);
               });
-              getInput(disk, {});
-              expect(disk.globSync.mock.calls).toEqual([
-                ['./package.json'],
-                ['./from-pnpm/*/package.json'],
-              ]);
+            });
+            describe('when pnpm config is invalid', () => {
+              it('performs a default search', () => {
+                const filePath = join(CWD, 'package.json');
+                const disk = mockDisk();
+                disk.globSync.mockReturnValue([filePath]);
+                disk.readYamlFileSync.mockImplementation(() => {
+                  throw new Error('Some YAML Error');
+                });
+                getInput(disk, {});
+                expect(disk.globSync.mock.calls).toEqual([
+                  ['package.json'],
+                  ['packages/*/package.json'],
+                ]);
+              });
             });
           });
         });

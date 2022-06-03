@@ -2,9 +2,10 @@ import chalk from 'chalk';
 import { relative } from 'path';
 import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
 import { listVersionGroups } from '../bin-list/list-version-groups';
-import { CWD } from '../constants';
+import { CWD, ICON } from '../constants';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
+import type { Instance } from '../lib/get-input/get-instances';
 
 export function listMismatches(input: ProgramInput, disk: Disk): void {
   let isInvalid = false;
@@ -29,19 +30,44 @@ export function listMismatches(input: ProgramInput, disk: Disk): void {
     }
 
     groups.forEach(({ instances, isBanned, name }) => {
-      const expectedVersion = getExpectedVersion(name, versionGroup, input);
-      console.log(
-        isBanned
-          ? chalk`{red ✕ ${name}} {dim.red remove this dependency}`
-          : chalk`{dim -} ${name} {green.dim ${expectedVersion}}`,
-      );
+      let workspaceMatch: Instance | null = null;
+      const expected = getExpectedVersion(name, versionGroup, input);
+
+      for (const instance of instances) {
+        const isMatch = instance.version === expected;
+        const isWorkspace = instance.dependencyType === 'workspace';
+        if (isMatch && isWorkspace) {
+          workspaceMatch = instance;
+        }
+      }
+
+      if (isBanned) {
+        console.log(
+          chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`,
+        );
+      } else if (workspaceMatch) {
+        const shortPath = relative(CWD, workspaceMatch.wrapper.filePath);
+        console.log(
+          chalk`{dim -} ${name} {green.dim ${expected} is developed in this repo at ${shortPath}}`,
+        );
+      } else {
+        console.log(
+          chalk`{dim -} ${name} {green.dim ${expected} is the highest valid semver version in use}`,
+        );
+      }
+
       instances.forEach(({ dependencyType, version, wrapper }) => {
-        if (dependencyType === 'workspace') {
-          const shortPath = relative(CWD, wrapper.filePath);
-          console.log(chalk`{red   ${version} {dim at ${shortPath}}}`);
+        const isMatch = version === expected;
+        const isLocal = dependencyType === 'workspace';
+        const shortPath = relative(CWD, wrapper.filePath);
+        const loc = isLocal ? 'version' : dependencyType;
+        if (isMatch) {
+          console.log(
+            chalk`{green   ${version} {dim in ${loc} of ${shortPath}}}`,
+          );
         } else {
           console.log(
-            chalk`{red   ${version} {dim in ${dependencyType} of ${wrapper.contents.name}}}`,
+            chalk`{red   ${version} {dim in ${loc} of ${shortPath}}}`,
           );
         }
       });
