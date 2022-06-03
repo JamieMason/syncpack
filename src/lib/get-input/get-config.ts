@@ -37,19 +37,16 @@ export const getConfig = (
 
   const hasTypeOverride =
     isBoolean(program.dev) ||
-    isBoolean(program.workspace) ||
     isBoolean(program.overrides) ||
     isBoolean(program.peer) ||
     isBoolean(program.pnpmOverrides) ||
     isBoolean(program.prod) ||
-    isBoolean(program.resolutions);
+    isBoolean(program.resolutions) ||
+    isBoolean(program.workspace);
 
   const dev = hasTypeOverride
     ? Boolean(program.dev)
     : getOption<boolean>('dev', isBoolean);
-  const workspace = hasTypeOverride
-    ? Boolean(program.workspace)
-    : getOption<boolean>('workspace', isBoolean);
   const overrides = hasTypeOverride
     ? Boolean(program.overrides)
     : getOption<boolean>('overrides', isBoolean);
@@ -65,6 +62,9 @@ export const getConfig = (
   const resolutions = hasTypeOverride
     ? Boolean(program.resolutions)
     : getOption<boolean>('resolutions', isBoolean);
+  const workspace = hasTypeOverride
+    ? Boolean(program.workspace)
+    : getOption<boolean>('workspace', isBoolean);
 
   const dependencyTypes =
     dev ||
@@ -76,12 +76,13 @@ export const getConfig = (
     workspace
       ? DEPENDENCY_TYPES.filter(
           (type) =>
-            (type === 'dependencies' && prod) ||
             (type === 'devDependencies' && dev) ||
             (type === 'overrides' && overrides) ||
             (type === 'peerDependencies' && peer) ||
             (type === 'pnpmOverrides' && pnpmOverrides) ||
-            (type === 'resolutions' && resolutions),
+            (type === 'dependencies' && prod) ||
+            (type === 'resolutions' && resolutions) ||
+            (type === 'workspace' && workspace),
         )
       : DEPENDENCY_TYPES;
 

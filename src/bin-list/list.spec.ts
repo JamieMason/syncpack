@@ -26,7 +26,9 @@ describe('list', () => {
           it('warns about the workspace version', () => {
             const scenario = getScenario();
             list(getInput(scenario.disk, scenario.config), scenario.disk);
-            expect(scenario.log.mock.calls).toEqual([['✕ c 0.1.0, 0.2.0']]);
+            expect(scenario.log.mock.calls).toEqual([
+              ['✕ c 0.0.1, 0.1.0, 0.2.0'],
+            ]);
             expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
           });
         });

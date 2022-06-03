@@ -11,17 +11,19 @@ describe('listMismatches', () => {
 
   describe('when dependencies are installed with different versions', () => {
     describe('when the dependency is a package maintained in this workspace', () => {
-      const variants: [string, () => TestScenario][] = [
+      const variants: [string, () => TestScenario, string][] = [
         [
           'when using a typical workspace',
           scenarios.dependentDoesNotMatchWorkspaceVersion,
+          'packages/c/package.json',
         ],
         [
           'when using nested workspaces',
           scenarios.dependentDoesNotMatchNestedWorkspaceVersion,
+          'workspaces/b/packages/c/package.json',
         ],
       ];
-      variants.forEach(([context, getScenario]) => {
+      variants.forEach(([context, getScenario, originPath]) => {
         describe(context, () => {
           it('warns about the workspace version', () => {
             const scenario = getScenario();
@@ -33,6 +35,7 @@ describe('listMismatches', () => {
               ['- c 0.0.1'],
               ['  0.1.0 in dependencies of a'],
               ['  0.2.0 in devDependencies of b'],
+              [`  0.0.1 at ${originPath}`],
             ]);
             expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
           });

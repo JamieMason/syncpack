@@ -70,7 +70,8 @@ export const scenarios = {
   /**
    * C is developed in this monorepo, its version is `0.0.1`
    * C's version is the single source of truth and should never be changed
-   * A and B depend on C incorrectly and should be fixed
+   * A depends on C incorrectly and should be fixed
+   * B depends on C incorrectly and should be fixed
    */
   dependentDoesNotMatchWorkspaceVersion() {
     return createScenario(

@@ -14,44 +14,47 @@ describe('getInput', () => {
     const prod = 'dependencies';
     const resolutions = 'resolutions';
     const workspace = 'workspace';
+    const allTypes = [
+      dev,
+      overrides,
+      peer,
+      pnpmOverrides,
+      prod,
+      resolutions,
+      workspace,
+    ];
+    const ix = {
+      dev: 'devDependencies',
+      overrides: 'overrides',
+      peer: 'peerDependencies',
+      pnpmOverrides: 'pnpmOverrides',
+      prod: 'dependencies',
+      resolutions: 'resolutions',
+      workspace: 'workspace',
+    };
 
-    it('includes all except workspace (which is a not a property of package.json) if none are set', () => {
+    it('includes all if none are set', () => {
       expect(getInput(disk, {})).toHaveProperty(
         'dependencyTypes',
-        expect.arrayContaining([prod, dev, peer, overrides, resolutions]),
+        expect.toBeArrayIncludingOnly(allTypes),
       );
     });
     it('enables one if it is the only one set', () => {
-      expect(getInput(disk, { prod: true })).toHaveProperty('dependencyTypes', [
-        prod,
-      ]);
-      expect(getInput(disk, { dev: true })).toHaveProperty('dependencyTypes', [
-        dev,
-      ]);
-      expect(getInput(disk, { peer: true })).toHaveProperty('dependencyTypes', [
-        peer,
-      ]);
-      expect(getInput(disk, { workspace: true })).toHaveProperty(
-        'dependencyTypes',
-        [],
-      );
-      expect(getInput(disk, { overrides: true })).toHaveProperty(
-        'dependencyTypes',
-        [overrides],
-      );
-      expect(getInput(disk, { pnpmOverrides: true })).toHaveProperty(
-        'dependencyTypes',
-        [pnpmOverrides],
-      );
-      expect(getInput(disk, { resolutions: true })).toHaveProperty(
-        'dependencyTypes',
-        [resolutions],
-      );
+      expect.assertions(allTypes.length);
+      Object.entries(ix).forEach(([optionName, typeName]) => {
+        expect(getInput(disk, { [optionName]: true })).toHaveProperty(
+          'dependencyTypes',
+          expect.toBeArrayIncludingOnly([typeName]),
+        );
+      });
     });
     it('enables some if only those are set', () => {
       expect(
-        getInput(disk, { dev: true, workspace: true, prod: true }),
-      ).toHaveProperty('dependencyTypes', expect.arrayContaining([prod, dev]));
+        getInput(disk, { dev: true, prod: true, workspace: true }),
+      ).toHaveProperty(
+        'dependencyTypes',
+        expect.toBeArrayIncludingOnly([dev, prod, workspace]),
+      );
     });
   });
   describe('source', () => {
