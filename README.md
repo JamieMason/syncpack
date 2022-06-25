@@ -16,7 +16,10 @@ npm install --global syncpack
 
 ## 🤖 GitHub Action
 
-As of May 2022 there is now a [Syncpack GitHub Action](https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions). It is new and less stable than syncpack itself, but please give it a try and [give your feedback](https://github.com/JamieMason/syncpack-github-action/issues/new).
+As of May 2022 there is now a
+[Syncpack GitHub Action](https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions).
+It is new and less stable than syncpack itself, but please give it a try and
+[give your feedback](https://github.com/JamieMason/syncpack-github-action/issues/new).
 
 ## 📝 Commands
 
@@ -457,6 +460,49 @@ to apply to an entire package:
 
 See [`semverGroups`](#semverGroups) for more examples, they work the same way.
 
+#### `versionGroup.dependencies`
+
+Required. An array of minimatch glob patterns which should match the key of
+dependencies defined in your package.json files.
+
+| Pattern                  | Matches                                  |
+| ------------------------ | ---------------------------------------- |
+| `["**"]`                 | Any dependency                           |
+| `["@aws-sdk/**"]`        | Any dependency with the scope `@aws-sdk` |
+| `["react", "react-dom"]` | Specific dependencies by name            |
+
+#### `versionGroup.packages`
+
+Required. An array of minimatch glob patterns which should match the `name`
+property of packages developed within your monorepo.
+
+| Pattern                      | Matches                               |
+| ---------------------------- | ------------------------------------- |
+| `["**"]`                     | Any package                           |
+| `["@my-repo/**"]`            | Any package with the scope `@my-repo` |
+| `["my-server", "my-client"]` | Specific packages by name             |
+
+#### `versionGroup.dependencyTypes`
+
+Optional. If set, will result in only the dependency types included in that
+array being considered a match for this version group.
+
+In this example we define that all dependencies within `peerDependencies` in the
+repo must match, regardless of what versions of the same dependencies might be
+used in `dependencies` or `devDependencies`.
+
+```json
+{
+  "versionGroups": [
+    {
+      "dependencies": ["**"],
+      "dependencyTypes": ["peer"],
+      "packages": ["**"]
+    }
+  ]
+}
+```
+
 #### `versionGroup.isBanned`
 
 Remove dependencies which you've decided should never be allowed.
@@ -465,8 +511,8 @@ Remove dependencies which you've decided should never be allowed.
 {
   "versionGroups": [
     {
-      "isBanned": true,
       "dependencies": ["never-gonna"],
+      "isBanned": true,
       "packages": ["**"]
     }
   ]
@@ -482,9 +528,9 @@ you've defined.
 {
   "versionGroups": [
     {
-      "pinVersion": "3.55.0",
       "dependencies": ["@aws-sdk/**"],
-      "packages": ["**"]
+      "packages": ["**"],
+      "pinVersion": "3.55.0"
     }
   ]
 }
@@ -543,6 +589,56 @@ semver range of `~`, regardless of what the rest of the monorepo uses:
   ]
 }
 ```
+
+3: Production dependencies should have fixed version numbers, but development
+and peer dependencies can be broader.
+
+```json
+{
+  "semverGroups": [
+    {
+      "range": "",
+      "dependencyTypes": [
+        "prod",
+        "resolutions",
+        "overrides",
+        "pnpmOverrides",
+        "workspace"
+      ],
+      "dependencies": ["**"],
+      "packages": ["**"]
+    },
+    {
+      "range": "~",
+      "dependencyTypes": ["dev"],
+      "dependencies": ["**"],
+      "packages": ["**"]
+    },
+    {
+      "range": "^",
+      "dependencyTypes": ["peer"],
+      "dependencies": ["**"],
+      "packages": ["**"]
+    }
+  ]
+}
+```
+
+#### `semverGroup.range`
+
+Which of the [Supported Ranges](#supported-ranges) this group should use.
+
+#### `semverGroup.dependencies`
+
+Works the same as [`semverGroup.dependencies`](#semvergroupdependencies).
+
+#### `semverGroup.packages`
+
+Works the same as [`semverGroup.packages`](#semvergrouppackages).
+
+#### `semverGroup.dependencyTypes`
+
+Works the same as [`semverGroup.dependencyTypes`](#semvergroupdependencytypes).
 
 ## 🕵🏾‍♀️ Resolving Packages
 
