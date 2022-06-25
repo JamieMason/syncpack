@@ -2,13 +2,14 @@ import { EOL } from 'os';
 import { join } from 'path';
 import { CWD } from '../src/constants';
 import type { Source, SourceWrapper } from '../src/lib/get-input/get-wrappers';
+import { setNewlines } from '../src/lib/write-if-changed/set-newlines';
 
 export function createWrapper(contents: Source): SourceWrapper {
   return withJson({ contents, filePath: join(CWD, 'some/package.json') });
 }
 
 export function toJson(contents: SourceWrapper['contents']): string {
-  return `${JSON.stringify(contents, null, 2)}${EOL}`;
+  return setNewlines(`${JSON.stringify(contents, null, 2)}${EOL}`, EOL);
 }
 
 export const mockPackage = (
