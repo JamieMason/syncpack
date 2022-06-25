@@ -1,3 +1,21 @@
+## [8.2.4](https://github.com/JamieMason/syncpack/compare/8.0.0...8.2.4) (2022-06-25)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([1bdf0c7](https://github.com/JamieMason/syncpack/commit/1bdf0c756a369fc65987d04d5867a525e2e2248d))
+* **npm:** update dependencies ([34c5d68](https://github.com/JamieMason/syncpack/commit/34c5d68194e7134305422f84a05d4774f812ef08))
+* **output:** edit log output and colours ([3623c41](https://github.com/JamieMason/syncpack/commit/3623c41cb8bd16c4cd9186199140905847722b50))
+* **workspace:** find missed mismatches against workspace versions ([25c1836](https://github.com/JamieMason/syncpack/commit/25c18363ebacbd5870e14d234e68cfb570ce913e)), closes [#66](https://github.com/JamieMason/syncpack/issues/66)
+
+
+### Features
+
+* **eol:** detect line endings when writing ([7e61f5c](https://github.com/JamieMason/syncpack/commit/7e61f5cd6edbaab48cfe89b356bee1ac6bb4d442)), closes [#76](https://github.com/JamieMason/syncpack/issues/76)
+* **output:** better explain mismatch reasons ([45e0cf1](https://github.com/JamieMason/syncpack/commit/45e0cf141337f692909b72de3edaf52b86f1ec42)), closes [#65](https://github.com/JamieMason/syncpack/issues/65) [#77](https://github.com/JamieMason/syncpack/issues/77) [#79](https://github.com/JamieMason/syncpack/issues/79)
+
+
+
 # [8.0.0](https://github.com/JamieMason/syncpack/compare/7.2.2...8.0.0) (2022-05-31)
 
 
