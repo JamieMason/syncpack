@@ -47,13 +47,11 @@ export function listMismatches(input: ProgramInput, disk: Disk): void {
         );
       } else if (workspaceMatch) {
         const shortPath = relative(CWD, workspaceMatch.wrapper.filePath);
-        console.log(
-          chalk`{dim -} ${name} {green.dim ${expected} is developed in this repo at ${shortPath}}`,
-        );
+        const reason = chalk`{dim : ${expected} is developed in this repo at ${shortPath}}`;
+        console.log(chalk`{dim -} ${name}${reason}`);
       } else {
-        console.log(
-          chalk`{dim -} ${name} {green.dim ${expected} is the highest valid semver version in use}`,
-        );
+        const reason = chalk`{dim : ${expected} is the highest valid semver version in use}`;
+        console.log(chalk`{dim -} ${name}${reason}`);
       }
 
       instances.forEach(({ dependencyType, version, wrapper }) => {
@@ -62,13 +60,9 @@ export function listMismatches(input: ProgramInput, disk: Disk): void {
         const shortPath = relative(CWD, wrapper.filePath);
         const loc = isLocal ? 'version' : dependencyType;
         if (isMatch) {
-          console.log(
-            chalk`{green   ${version} {dim in ${loc} of ${shortPath}}}`,
-          );
+          console.log(chalk`{green   ${version} in ${loc} of ${shortPath}}`);
         } else {
-          console.log(
-            chalk`{red   ${version} {dim in ${loc} of ${shortPath}}}`,
-          );
+          console.log(chalk`{red   ${version} in ${loc} of ${shortPath}}`);
         }
       });
     });

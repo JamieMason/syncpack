@@ -32,7 +32,7 @@ export function list(input: ProgramInput, disk: Disk): void {
               .map((version) =>
                 version === expected
                   ? chalk.green(version)
-                  : chalk.dim.red(version),
+                  : chalk.red(version),
               )
               .join(chalk.dim(', '))}`
           : chalk`{dim -} {white ${name}} {dim ${versionList}}`,
