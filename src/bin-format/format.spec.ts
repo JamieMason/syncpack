@@ -117,6 +117,27 @@ describe('format', () => {
       expect.stringContaining(normalize('some/package.json')),
     );
   });
+  it('retains long form format for "repository" when directory property used', () => {
+    const disk = mockDisk();
+    const before = {
+      repository: {
+        url: 'git://gitlab.com/User/repo',
+        type: 'git',
+        directory: 'packages/foo',
+      },
+    };
+    const input = {
+      ...DEFAULT_CONFIG,
+      wrappers: [createWrapper(before)],
+    } as ProgramInput;
+    const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    format(input, disk);
+    expect(disk.writeFileSync).not.toHaveBeenCalledWith();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringMatching(/-/),
+      expect.stringContaining(normalize('some/package.json')),
+    );
+  });
   it('uses github shorthand format for "repository"', () => {
     const disk = mockDisk();
     const before = {

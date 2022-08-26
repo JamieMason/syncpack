@@ -1,4 +1,4 @@
-import { isArray } from 'expect-more';
+import { isArray, isNonEmptyString } from 'expect-more';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
 import type { Source } from '../lib/get-input/get-wrappers';
@@ -10,18 +10,20 @@ export function format(input: ProgramInput, disk: Disk): void {
   wrappers.forEach(({ contents, filePath, json }) => {
     const sortedKeys = Object.keys(contents).sort();
     const keys = new Set<string>(sortFirst.concat(sortedKeys));
+
     const optionalChaining: any = contents;
     const bugsUrl = optionalChaining?.bugs?.url;
-    const repositoryUrl = optionalChaining?.repository?.url;
+    const repoUrl = optionalChaining?.repository?.url;
+    const repoDir = optionalChaining?.repository?.directory;
 
     if (bugsUrl) {
       contents.bugs = bugsUrl;
     }
 
-    if (repositoryUrl) {
-      contents.repository = repositoryUrl.includes('github.com')
-        ? repositoryUrl.replace(/^.+github\.com\//, '')
-        : repositoryUrl;
+    if (isNonEmptyString(repoUrl) && !isNonEmptyString(repoDir)) {
+      contents.repository = repoUrl.includes('github.com')
+        ? repoUrl.replace(/^.+github\.com\//, '')
+        : repoUrl;
     }
 
     sortAz.forEach((key) => sortAlphabetically(contents[key]));

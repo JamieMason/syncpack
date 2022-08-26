@@ -18,7 +18,7 @@ export interface Source {
   pnpm?: {
     overrides?: Record<string, string>;
   };
-  repository?: { type: string; url: string } | string;
+  repository?: { directory?: string; type: string; url: string } | string;
   resolutions?: Record<string, string>;
   scripts?: Record<string, string>;
   version?: string;
