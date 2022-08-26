@@ -18,7 +18,7 @@ export function format(input: ProgramInput, disk: Disk): void {
       contents.bugs = bugsUrl;
     }
 
-    if (repositoryUrl) {
+    if (repositoryUrl && optionalChaining?.repository?.directory == null) {
       contents.repository = repositoryUrl.includes('github.com')
         ? repositoryUrl.replace(/^.+github\.com\//, '')
         : repositoryUrl;
