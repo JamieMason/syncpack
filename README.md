@@ -496,7 +496,7 @@ used in `dependencies` or `devDependencies`.
   "versionGroups": [
     {
       "dependencies": ["**"],
-      "dependencyTypes": ["peer"],
+      "dependencyTypes": ["peerDependencies"],
       "packages": ["**"]
     }
   ]
