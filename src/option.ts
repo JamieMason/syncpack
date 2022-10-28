@@ -15,7 +15,10 @@ export const option = {
   ],
   overrides: ['-o, --overrides', chalk`include {yellow overrides} (npm)`],
   peer: ['-P, --peer', chalk`include {yellow peerDependencies}`],
-  pnpmOverrides: ['-O, --overrides', chalk`include {yellow overrides} (pnpm)`],
+  pnpmOverrides: [
+    '-O, --pnpmOverrides',
+    chalk`include {yellow overrides} (pnpm)`,
+  ],
   prod: ['-p, --prod', chalk`include {yellow dependencies}`],
   resolutions: [
     '-R, --resolutions',
