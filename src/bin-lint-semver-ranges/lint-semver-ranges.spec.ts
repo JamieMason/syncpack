@@ -31,4 +31,12 @@ describe('lintSemverRanges', () => {
       ['✕ f 0.1.0 in resolutions of a should be *'],
     ]);
   });
+
+  it('does not include ignored dependencies in its output', () => {
+    const scenario = scenarios.semverIsIgnored();
+    lintSemverRanges(getInput(scenario.disk, scenario.config), scenario.disk);
+    expect(scenario.log.mock.calls).toEqual([
+      ['✕ foo 0.1.0 in dependencies of a should be ~0.1.0'],
+    ]);
+  });
 });

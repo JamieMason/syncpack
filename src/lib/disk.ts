@@ -1,16 +1,16 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { isNonEmptyObject, isObject } from 'expect-more';
+import { isNonEmptyObject } from 'expect-more';
 import {
   readFileSync,
+  readJsonSync,
   removeSync,
   writeFileSync,
-  readJsonSync,
 } from 'fs-extra';
 import { sync as globSync } from 'glob';
 import { join } from 'path';
 import { sync as readYamlSync } from 'read-yaml-file';
-import type { SyncpackConfig } from '../constants';
 import { CWD } from '../constants';
+import type { SyncpackConfig } from '../types';
 import { verbose } from './log';
 
 export type Disk = typeof disk;

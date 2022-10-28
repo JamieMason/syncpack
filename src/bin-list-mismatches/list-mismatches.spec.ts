@@ -85,5 +85,12 @@ describe('listMismatches', () => {
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
+
+    it('does not mention ignored dependencies', () => {
+      const scenario = scenarios.versionIsIgnored();
+      listMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      expect(scenario.log.mock.calls).toBeEmptyArray();
+      expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+    });
   });
 });

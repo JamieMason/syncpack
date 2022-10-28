@@ -1,11 +1,18 @@
 import { isNonEmptyArray, isNonEmptyString, isObject } from 'expect-more';
 import minimatch from 'minimatch';
+import type { DependencyType, SyncpackConfig } from '../../types';
 import type {
-  DependencyType,
+  AnySemverGroup,
+  IgnoredSemverGroup,
   SemverGroup,
-  SyncpackConfig,
+} from '../../types/semver-group';
+import type {
+  AnyVersionGroup,
+  BannedVersionGroup,
+  IgnoredVersionGroup,
+  PinnedVersionGroup,
   VersionGroup,
-} from '../../constants';
+} from '../../types/version-group';
 import { verbose } from '../log';
 import type { SourceWrapper } from './get-wrappers';
 
@@ -22,13 +29,21 @@ export interface InstanceIndex {
 }
 
 export type InstancesByName = Record<string, Instance[]>;
+
+export type IndexedIgnoredSemverGroup = IgnoredSemverGroup & InstanceIndex;
 export type IndexedSemverGroup = SemverGroup & InstanceIndex;
+export type AnyIndexedSemverGroup = AnySemverGroup & InstanceIndex;
+
 export type IndexedVersionGroup = VersionGroup & InstanceIndex;
+export type IndexedBannedVersionGroup = BannedVersionGroup & InstanceIndex;
+export type IndexedIgnoredVersionGroup = IgnoredVersionGroup & InstanceIndex;
+export type IndexedPinnedVersionGroup = PinnedVersionGroup & InstanceIndex;
+export type AnyIndexedVersionGroup = AnyVersionGroup & InstanceIndex;
 
 export interface Instances {
   all: Instance[];
-  semverGroups: IndexedSemverGroup[];
-  versionGroups: IndexedVersionGroup[];
+  semverGroups: AnyIndexedSemverGroup[];
+  versionGroups: AnyIndexedVersionGroup[];
 }
 
 export function getInstances(
@@ -125,7 +140,7 @@ export function getInstances(
     dependencyType: DependencyType,
     pkgName: string,
     dependencyName: string,
-    group: SemverGroup | VersionGroup,
+    group: AnySemverGroup | AnyVersionGroup,
   ): boolean {
     return (
       (!isNonEmptyArray(group.dependencyTypes) ||

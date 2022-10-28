@@ -18,7 +18,7 @@ export function listMismatches(input: ProgramInput, disk: Disk): void {
   input.instances.versionGroups.reverse().forEach((versionGroup, i) => {
     const isVersionGroup = i > 0;
     const groups = listVersionGroups(versionGroup).filter(
-      ({ hasMismatches }) => hasMismatches,
+      (group) => !group.isIgnored && group.hasMismatches,
     );
 
     if (groups.length > 0) {

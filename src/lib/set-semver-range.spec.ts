@@ -1,5 +1,5 @@
 import 'expect-more-jest';
-import type { ValidRange } from '../constants';
+import type { ValidRange } from '../types';
 import { setSemverRange } from './set-semver-range';
 
 describe('setSemverRange', () => {

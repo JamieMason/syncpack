@@ -1,7 +1,7 @@
 import * as E from 'fp-ts/lib/Either';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
-import type { SyncpackConfig } from '../../../constants';
+import type { SyncpackConfig } from '../../../types';
 import type { Disk } from '../../../lib/disk';
 import { getFilePaths } from './get-file-paths';
 import { readJsonSafe } from './get-patterns/read-json-safe';

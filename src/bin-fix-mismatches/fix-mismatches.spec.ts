@@ -28,6 +28,7 @@ describe('fixMismatches', () => {
           ]);
         });
       });
+
       describe('when using nested workspaces', () => {
         it('warns about the workspace version', () => {
           const scenario =
@@ -80,6 +81,17 @@ describe('fixMismatches', () => {
         [expect.stringMatching(/Version Group 1/)],
         scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
         scenario.files['packages/b/package.json'].logEntryWhenChanged,
+      ]);
+    });
+
+    it('does not consider versions of ignored dependencies', () => {
+      const scenario = scenarios.versionIsIgnored();
+      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
+      expect(scenario.log.mock.calls).toEqual([
+        [expect.stringMatching(/Version Group 1/)],
+        scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
+        scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
       ]);
     });
 

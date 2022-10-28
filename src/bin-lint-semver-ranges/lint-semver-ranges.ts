@@ -13,6 +13,8 @@ export function lintSemverRanges(input: ProgramInput, disk: Disk): void {
    * will then start from index 1.
    */
   input.instances.semverGroups.reverse().forEach((semverGroup, i) => {
+    if (!('range' in semverGroup && semverGroup.range)) return;
+
     const isSemverGroup = i > 0;
     const mismatches = listSemverGroupMismatches(semverGroup);
 

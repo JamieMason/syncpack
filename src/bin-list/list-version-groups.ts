@@ -1,6 +1,6 @@
 import { isNonEmptyString } from 'expect-more';
 import type {
-  IndexedVersionGroup,
+  AnyIndexedVersionGroup,
   Instance,
 } from '../lib/get-input/get-instances';
 import { groupBy } from '../lib/group-by';
@@ -10,21 +10,26 @@ export interface ListItem {
   hasMismatches: boolean;
   instances: Instance[];
   isBanned: boolean;
+  isIgnored: boolean;
   name: string;
   uniques: string[];
 }
 
 export function listVersionGroups(
-  versionGroup: IndexedVersionGroup,
+  versionGroup: AnyIndexedVersionGroup,
 ): ListItem[] {
   const instances = versionGroup.instances;
   const instancesByName = groupBy<Instance>('name', instances.sort(sortByName));
   return Object.entries(instancesByName).map(([name, instances]) => {
-    const pinnedVersion = versionGroup.pinVersion;
+    const pinnedVersion =
+      'pinVersion' in versionGroup ? versionGroup.pinVersion : '';
     const hasPinnedVersion = isNonEmptyString(pinnedVersion);
     const versions = instances.map(({ version }) => version);
     const uniques = Array.from(new Set(versions));
-    const isBanned = versionGroup.isBanned === true;
+    const isBanned =
+      'isBanned' in versionGroup && versionGroup.isBanned === true;
+    const isIgnored =
+      'isIgnored' in versionGroup && versionGroup.isIgnored === true;
     const hasMismatches =
       isBanned ||
       versions.some(
@@ -36,6 +41,7 @@ export function listVersionGroups(
       hasMismatches,
       instances,
       isBanned,
+      isIgnored,
       name,
       uniques,
     };

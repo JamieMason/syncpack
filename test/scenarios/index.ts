@@ -33,6 +33,74 @@ export const scenarios = {
       },
     );
   },
+
+  /**
+   * A does not depend on `bar`
+   * B does depend on `bar`
+   * `bar` is ignored by syncpack in every package
+   * `foo` is not ignored
+   * `bar` is unprotected so can have mismatching range etc
+   * only `foo` should have its semver range fixed
+   */
+  semverIsIgnored() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', { deps: ['foo@0.1.0', 'bar@1.1.1'] }),
+          after: mockPackage('a', { deps: ['foo@~0.1.0', 'bar@1.1.1'] }),
+        },
+        {
+          path: 'packages/b/package.json',
+          before: mockPackage('b', { deps: ['bar@0.2.0'] }),
+          after: mockPackage('b', { deps: ['bar@0.2.0'] }),
+        },
+      ],
+      {
+        semverRange: '~',
+        semverGroups: [
+          {
+            dependencies: ['bar'],
+            packages: ['**'],
+            isIgnored: true,
+          },
+        ],
+      },
+    );
+  },
+
+  /**
+   * A does not depend on `bar`
+   * B does depend on `bar`
+   * `bar` is ignored by syncpack in every package
+   * `bar` is unprotected so can mismatch etc
+   */
+  versionIsIgnored() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', { deps: ['foo@0.1.0', 'bar@1.1.1'] }),
+          after: mockPackage('a', { deps: ['foo@0.1.0', 'bar@1.1.1'] }),
+        },
+        {
+          path: 'packages/b/package.json',
+          before: mockPackage('b', { deps: ['bar@0.2.0'] }),
+          after: mockPackage('b', { deps: ['bar@0.2.0'] }),
+        },
+      ],
+      {
+        versionGroups: [
+          {
+            dependencies: ['bar'],
+            packages: ['**'],
+            isIgnored: true,
+          },
+        ],
+      },
+    );
+  },
+
   /**
    * A, B, C & D depend on foo
    * The versions mismatch
@@ -67,6 +135,7 @@ export const scenarios = {
       {},
     );
   },
+
   /**
    * C is developed in this monorepo, its version is `0.0.1`
    * C's version is the single source of truth and should never be changed
@@ -99,6 +168,7 @@ export const scenarios = {
       {},
     );
   },
+
   /**
    * Variation of `dependentDoesNotMatchWorkspaceVersion` in a nested workspace.
    *
@@ -150,6 +220,7 @@ export const scenarios = {
       },
     );
   },
+
   /**
    * Only `dependencies` is unchecked
    * The semver range `~` should be used
@@ -191,6 +262,57 @@ export const scenarios = {
       },
     );
   },
+
+  /**
+   * All dependencies are checked
+   * The semver range `~` should be used
+   * `one` uses exact versions
+   * `b` and `c` are ignored
+   * All but `b` and `c` should use `~`
+   */
+  ignoredSemverRangesDoNotMatchConfig() {
+    return createScenario(
+      [
+        {
+          path: 'packages/one/package.json',
+          before: mockPackage('one', {
+            deps: ['a@0.1.0'],
+            devDeps: ['b@0.1.0'],
+            overrides: ['c@0.1.0'],
+            pnpmOverrides: ['d@0.1.0'],
+            peerDeps: ['e@0.1.0'],
+            resolutions: ['f@0.1.0'],
+          }),
+          after: mockPackage('two', {
+            deps: ['a@~0.1.0'],
+            devDeps: ['b@0.1.0'],
+            overrides: ['c@0.1.0'],
+            pnpmOverrides: ['d@~0.1.0'],
+            peerDeps: ['e@~0.1.0'],
+            resolutions: ['f@~0.1.0'],
+          }),
+        },
+      ],
+      {
+        dev: true,
+        overrides: true,
+        pnpmOverrides: true,
+        peer: true,
+        prod: true,
+        resolutions: true,
+        workspace: true,
+        semverRange: '~',
+        semverGroups: [
+          {
+            dependencies: ['b', 'c'],
+            packages: ['**'],
+            isIgnored: true,
+          },
+        ],
+      },
+    );
+  },
+
   /**
    * Only `dependencies` is unchecked
    * The semver range `*` should be used
@@ -232,6 +354,7 @@ export const scenarios = {
       },
     );
   },
+
   /**
    * A has a pnpm override of C
    * B has a pnpm override of C
@@ -263,6 +386,7 @@ export const scenarios = {
       },
     );
   },
+
   /**
    * A has an npm override of C
    * B has an npm override of C
@@ -294,6 +418,7 @@ export const scenarios = {
       },
     );
   },
+
   /**
    * @see https://github.com/JamieMason/syncpack/issues/84#issue-1284878219
    */
