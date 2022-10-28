@@ -7,6 +7,7 @@ describe('setSemverRange', () => {
     it('sets its semver range to the given range', () => {
       (
         [
+          ['*', '*'],
           ['', '1.2.3'],
           ['>', '>1.2.3'],
           ['>=', '>=1.2.3'],

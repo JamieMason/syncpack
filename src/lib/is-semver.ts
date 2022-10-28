@@ -1,6 +1,7 @@
 import { isString } from 'expect-more';
 import type { ValidRange } from '../constants';
 import {
+  RANGE_ANY,
   RANGE_EXACT,
   RANGE_GT,
   RANGE_GTE,
@@ -13,6 +14,7 @@ import {
 
 export function isValidSemverRange(value: unknown): value is ValidRange {
   return (
+    value === RANGE_ANY ||
     value === RANGE_EXACT ||
     value === RANGE_GT ||
     value === RANGE_GTE ||

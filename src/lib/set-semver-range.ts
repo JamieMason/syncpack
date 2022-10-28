@@ -6,9 +6,8 @@ export function setSemverRange(
   semverRange: ValidRange,
   version: string,
 ): string {
-  if (!isSemver(version) || !isValidSemverRange(semverRange)) {
-    return version;
-  }
+  if (!isSemver(version) || !isValidSemverRange(semverRange)) return version;
+  if (semverRange === '*') return semverRange;
   const nextVersion = isLooseSemver(version)
     ? version.replace(/\.x/g, '.0')
     : version;
