@@ -18,4 +18,16 @@ describe('setSemverRanges', () => {
       scenario.files['packages/a/package.json'].logEntryWhenChanged,
     ]);
   });
+
+  it('fixes issue 84', () => {
+    const scenario = scenarios.issue84Reproduction();
+    setSemverRanges(getInput(scenario.disk, scenario.config), scenario.disk);
+    expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+    ]);
+    expect(scenario.log.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].logEntryWhenChanged,
+      scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+    ]);
+  });
 });

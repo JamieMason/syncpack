@@ -89,7 +89,9 @@ function withJson({
 
 function toObject(identifiers: string[]): { [key: string]: string } {
   return identifiers.reduce<{ [key: string]: string }>((memo, dep) => {
-    const [name, version] = dep.split('@');
+    const ix = dep.lastIndexOf('@');
+    const name = dep.slice(0, ix);
+    const version = dep.slice(ix + 1);
     memo[name] = version;
     return memo;
   }, {});

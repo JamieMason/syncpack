@@ -253,4 +253,40 @@ export const scenarios = {
       },
     );
   },
+  /**
+   * @see https://github.com/JamieMason/syncpack/issues/84#issue-1284878219
+   */
+  issue84Reproduction() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('@myscope/a', { deps: ['@myscope/a@1.0.0'] }),
+          after: mockPackage('@myscope/a', { deps: ['@myscope/a@^1.0.0'] }),
+        },
+        {
+          path: 'packages/b/package.json',
+          before: mockPackage('@myscope/b', {}),
+          after: mockPackage('@myscope/b', {}),
+        },
+      ],
+      {
+        dev: true,
+        overrides: true,
+        pnpmOverrides: true,
+        peer: true,
+        prod: true,
+        resolutions: true,
+        semverGroups: [
+          {
+            range: '^',
+            dependencies: ['@myscope/**'],
+            packages: ['**'],
+          },
+        ],
+        semverRange: '~',
+        workspace: true,
+      },
+    );
+  },
 };
