@@ -15,7 +15,7 @@ export function props(keys: string) {
       S.traverseArray((key: string) =>
         S.modify(O.chain(C.lookup(key) as never)),
       ),
-      S.execute(O.fromNullable<unknown>(obj)),
+      S.execute<O.Option<unknown>>(O.fromNullable<unknown>(obj)),
     );
   };
 }
