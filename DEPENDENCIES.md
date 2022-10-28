@@ -38,7 +38,7 @@ npm test
 ## Dev Dependencies
 
 - [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
-- [@types/glob](https://ghub.io/@types/glob): TypeScript definitions for Glob
+- [@types/glob](https://ghub.io/@types/glob): TypeScript definitions for glob
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
 - [@types/node](https://ghub.io/@types/node): TypeScript definitions for Node.js
 - [@types/semver](https://ghub.io/@types/semver): TypeScript definitions for semver

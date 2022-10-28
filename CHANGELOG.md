@@ -1,3 +1,19 @@
+## [8.3.8](https://github.com/JamieMason/syncpack/compare/8.2.5...8.3.8) (2022-10-28)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([6311999](https://github.com/JamieMason/syncpack/commit/63119995d5ab7e98b867edad28bf1655eb96bbdf))
+* **pnpm:** fix regression affecting --pnpmOverrides ([6a782f9](https://github.com/JamieMason/syncpack/commit/6a782f95b558b2ae2800f429b4135f306e7abbfb)), closes [#94](https://github.com/JamieMason/syncpack/issues/94)
+* **set-semver-ranges:** handle 'workspace' type ([2134658](https://github.com/JamieMason/syncpack/commit/213465882ee6182bbc0f3ef00108cc562b63deae)), closes [#84](https://github.com/JamieMason/syncpack/issues/84)
+
+
+### Features
+
+* **config:** include config.syncpack of package.json ([40dcdce](https://github.com/JamieMason/syncpack/commit/40dcdcef00d66db0866882e2ef0138972199eea3)), closes [#86](https://github.com/JamieMason/syncpack/issues/86)
+
+
+
 ## [8.2.5](https://github.com/JamieMason/syncpack/compare/8.2.4...8.2.5) (2022-10-28)
 
 
