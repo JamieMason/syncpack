@@ -1,3 +1,12 @@
+## [8.2.5](https://github.com/JamieMason/syncpack/compare/8.2.4...8.2.5) (2022-10-28)
+
+
+### Bug Fixes
+
+* **format:** skip .repository when its .directory is present ([688bc0c](https://github.com/JamieMason/syncpack/commit/688bc0c29c09b4ea3e289f4584a6cc62adec936e)), closes [#91](https://github.com/JamieMason/syncpack/issues/91) [#93](https://github.com/JamieMason/syncpack/issues/93) [#100](https://github.com/JamieMason/syncpack/issues/100)
+
+
+
 ## [8.2.4](https://github.com/JamieMason/syncpack/compare/8.0.0...8.2.4) (2022-06-25)
 
 
