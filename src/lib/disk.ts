@@ -1,6 +1,13 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { readFileSync, removeSync, writeFileSync } from 'fs-extra';
+import { isNonEmptyObject, isObject } from 'expect-more';
+import {
+  readFileSync,
+  removeSync,
+  writeFileSync,
+  readJsonSync,
+} from 'fs-extra';
 import { sync as globSync } from 'glob';
+import { join } from 'path';
 import { sync as readYamlSync } from 'read-yaml-file';
 import type { SyncpackConfig } from '../constants';
 import { CWD } from '../constants';
@@ -30,6 +37,11 @@ export const disk = {
     try {
       const result = configPath ? client.load(configPath) : client.search();
       if (result === null) {
+        const rcPath = join(CWD, 'package.json');
+        const pjson = readJsonSync(rcPath, { throws: false });
+        const rcConfig = pjson?.config?.syncpack;
+        console.log(rcConfig);
+        if (isNonEmptyObject(rcConfig)) return rcConfig;
         verbose('no config file found');
         return {};
       }

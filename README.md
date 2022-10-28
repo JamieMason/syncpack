@@ -310,6 +310,7 @@ tree in the following places:
   or `.syncpackrc.cjs` file
 - a `syncpack.config.js` or `syncpack.config.cjs` CommonJS module exporting an
   object
+- a `config.syncpack` property in `package.json`
 
 If you want to specify a path to a configuration file, overriding the discovered
 configuration file (if present), you can use the `--config` option.
