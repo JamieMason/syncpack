@@ -1,4 +1,4 @@
-import type { SyncpackConfig } from '../../constants';
+import type { SyncpackConfig } from '../../types';
 import type { Disk } from '../../lib/disk';
 import { getConfig } from './get-config';
 import type { Instances } from './get-instances';

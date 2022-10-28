@@ -520,6 +520,22 @@ Remove dependencies which you've decided should never be allowed.
 }
 ```
 
+#### `versionGroup.isIgnored`
+
+Have syncpack ignore these dependencies completely.
+
+```json
+{
+  "versionGroups": [
+    {
+      "dependencies": ["**"],
+      "isIgnored": true,
+      "packages": ["oops-moment", "workaround"]
+    }
+  ]
+}
+```
+
 #### `versionGroup.pinVersion`
 
 Pin the version of all dependencies in this group to match this specific version
@@ -631,15 +647,20 @@ Which of the [Supported Ranges](#supported-ranges) this group should use.
 
 #### `semverGroup.dependencies`
 
-Works the same as [`semverGroup.dependencies`](#semvergroupdependencies).
+Works the same as [`versionGroup.dependencies`](#versiongroupdependencies).
+
+#### `semverGroup.isIgnored`
+
+Works the same as [`versionGroup.isIgnored`](#versiongroupisignored).
 
 #### `semverGroup.packages`
 
-Works the same as [`semverGroup.packages`](#semvergrouppackages).
+Works the same as [`versionGroup.packages`](#versiongrouppackages).
 
 #### `semverGroup.dependencyTypes`
 
-Works the same as [`semverGroup.dependencyTypes`](#semvergroupdependencytypes).
+Works the same as
+[`versionGroup.dependencyTypes`](#versiongroupdependencytypes).
 
 ## 🕵🏾‍♀️ Resolving Packages
 
@@ -656,7 +677,8 @@ package.json files are resolved in this order of precendence:
     `./pnpm-workspace.yaml`.
 5.  Default to `'package.json'` and `'packages/*/package.json'`.
 
-> 👋 Always add quotes around your `--source` patterns [[more info](https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769)].
+> 👋 Always add quotes around your `--source` patterns
+> [[more info](https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769)].
 
 ## 🙋🏿‍♀️ Getting Help
 
@@ -674,8 +696,6 @@ If you find my Open Source projects useful, please share them ❤️
 
 - [**eslint-formatter-git-log**](https://github.com/JamieMason/eslint-formatter-git-log)<br>ESLint
   Formatter featuring Git Author, Date, and Hash
-- [**eslint-plugin-move-files**](https://github.com/JamieMason/eslint-plugin-move-files)<br>Move
-  and rename files while keeping imports up to date
 - [**eslint-plugin-prefer-arrow-functions**](https://github.com/JamieMason/eslint-plugin-prefer-arrow-functions)<br>Convert
   functions to arrow functions
 - [**ImageOptim-CLI**](https://github.com/JamieMason/ImageOptim-CLI)<br>Automates

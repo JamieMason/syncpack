@@ -1,7 +1,7 @@
 import { isArrayOfStrings } from 'expect-more';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
-import type { SyncpackConfig } from '../../../../constants';
+import type { SyncpackConfig } from '../../../../types';
 import { ALL_PATTERNS } from '../../../../constants';
 import type { Disk } from '../../../../lib/disk';
 import { tapNone, tapOption } from '../tap';

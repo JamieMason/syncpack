@@ -1,6 +1,6 @@
 import minimatch from 'minimatch';
 import { join, normalize } from 'path';
-import type { SyncpackConfig } from '../../src/constants';
+import type { SyncpackConfig } from '../../src/types';
 import { CWD } from '../../src/constants';
 import type { SourceWrapper } from '../../src/lib/get-input/get-wrappers';
 import type { MockDisk } from '../mock-disk';

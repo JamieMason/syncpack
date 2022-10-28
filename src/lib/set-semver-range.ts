@@ -1,4 +1,4 @@
-import type { ValidRange } from '../constants';
+import type { ValidRange } from '../types';
 import { RANGE_LOOSE } from '../constants';
 import { isLooseSemver, isSemver, isValidSemverRange } from './is-semver';
 

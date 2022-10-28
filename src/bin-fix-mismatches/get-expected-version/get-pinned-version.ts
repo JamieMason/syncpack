@@ -1,7 +1,7 @@
-import type { IndexedVersionGroup } from '../../lib/get-input/get-instances';
+import type { PinnedVersionGroup } from '../../types/version-group';
 
 export function getPinnedVersion(
-  versionGroup: Pick<IndexedVersionGroup, 'pinVersion'>,
+  versionGroup: Pick<PinnedVersionGroup, 'pinVersion'>,
 ): string {
   return versionGroup.pinVersion || '';
 }

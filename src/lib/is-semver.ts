@@ -1,5 +1,5 @@
 import { isString } from 'expect-more';
-import type { ValidRange } from '../constants';
+import type { ValidRange } from '../types';
 import {
   RANGE_ANY,
   RANGE_EXACT,

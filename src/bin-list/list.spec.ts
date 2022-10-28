@@ -68,5 +68,16 @@ describe('list', () => {
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
+
+    it('mentions ignored dependencies', () => {
+      const scenario = scenarios.versionIsIgnored();
+      list(getInput(scenario.disk, scenario.config), scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([
+        ['- foo 0.1.0'],
+        [expect.stringMatching(/Version Group 1/)],
+        ['- bar is ignored in this version group'],
+      ]);
+      expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+    });
   });
 });

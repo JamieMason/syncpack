@@ -6,12 +6,9 @@ import {
   isObject,
   isString,
 } from 'expect-more';
-import type {
-  SemverGroup,
-  SyncpackConfig,
-  ValidRange,
-  VersionGroup,
-} from '../../constants';
+import type { SyncpackConfig, ValidRange } from '../../types';
+import type { AnyVersionGroup } from '../../types/version-group';
+import type { AnySemverGroup } from '../../types/semver-group';
 import { DEFAULT_CONFIG, DEPENDENCY_TYPES } from '../../constants';
 import { isValidSemverRange } from '../../lib/is-semver';
 import type { Disk } from '../disk';
@@ -103,7 +100,7 @@ export const getConfig = (
     packages: ['**'],
   };
 
-  const semverGroups = getOption<SemverGroup[]>(
+  const semverGroups = getOption<AnySemverGroup[]>(
     'semverGroups',
     isArrayOfSemverGroups,
   ).concat(defaultSemverGroup);
@@ -117,7 +114,7 @@ export const getConfig = (
     dependencies: ['**'],
   };
 
-  const versionGroups = getOption<VersionGroup[]>(
+  const versionGroups = getOption<AnyVersionGroup[]>(
     'versionGroups',
     isArrayOfVersionGroups,
   ).concat(defaultVersionGroup);
@@ -153,7 +150,7 @@ export const getConfig = (
     return DEFAULT_CONFIG[name] as unknown as T;
   }
 
-  function isArrayOfSemverGroups(value: unknown): value is SemverGroup[] {
+  function isArrayOfSemverGroups(value: unknown): value is AnySemverGroup[] {
     return (
       isArray(value) &&
       value.every(
@@ -161,12 +158,12 @@ export const getConfig = (
           isObject(value) &&
           isArrayOfStrings(value.packages) &&
           isArrayOfStrings(value.dependencies) &&
-          isString(value.range),
+          (value.isIgnored === true || isString(value.range)),
       )
     );
   }
 
-  function isArrayOfVersionGroups(value: unknown): value is VersionGroup[] {
+  function isArrayOfVersionGroups(value: unknown): value is AnyVersionGroup[] {
     return (
       isArray(value) &&
       value.every(

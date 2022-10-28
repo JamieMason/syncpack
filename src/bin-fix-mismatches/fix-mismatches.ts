@@ -21,8 +21,8 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
     }
 
-    groups.forEach(({ hasMismatches, instances, name }) => {
-      if (hasMismatches) {
+    groups.forEach(({ hasMismatches, instances, isIgnored, name }) => {
+      if (hasMismatches && !isIgnored) {
         const nextVersion = getExpectedVersion(name, versionGroup, input);
         instances.forEach(({ dependencyType, version, wrapper }) => {
           const root: any = wrapper.contents;

@@ -4,7 +4,7 @@ import * as E from 'fp-ts/lib/Either';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import * as S from 'fp-ts/lib/string';
-import type { SyncpackConfig } from '../../../constants';
+import type { SyncpackConfig } from '../../../types';
 import type { Disk } from '../../../lib/disk';
 import { getPatterns } from './get-patterns';
 import { removeReadonlyType } from './readonly';

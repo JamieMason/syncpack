@@ -21,12 +21,14 @@ export function list(input: ProgramInput, disk: Disk): void {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
     }
 
-    groups.forEach(({ hasMismatches, isBanned, name, uniques }) => {
+    groups.forEach(({ hasMismatches, isBanned, isIgnored, name, uniques }) => {
       const versionList = uniques.sort();
       const expected = getExpectedVersion(name, versionGroup, input);
       console.log(
         isBanned
           ? chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`
+          : isIgnored
+          ? chalk`{dim ${ICON.skip} ${name}} is ignored in this version group`
           : hasMismatches
           ? chalk`{red ${ICON.cross} ${name}} ${versionList
               .map((version) =>
@@ -39,7 +41,7 @@ export function list(input: ProgramInput, disk: Disk): void {
       );
     });
 
-    if (groups.some(({ hasMismatches }) => hasMismatches)) {
+    if (groups.some((group) => !group.isIgnored && group.hasMismatches)) {
       isInvalid = true;
     }
   });
