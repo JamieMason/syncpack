@@ -655,6 +655,8 @@ package.json files are resolved in this order of precendence:
     `./pnpm-workspace.yaml`.
 5.  Default to `'package.json'` and `'packages/*/package.json'`.
 
+> 👋 Always add quotes around your `--source` patterns [[more info](https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769)].
+
 ## 🙋🏿‍♀️ Getting Help
 
 Get help with issues by creating a [Bug Report] or discuss ideas by opening a
