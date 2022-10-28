@@ -1,3 +1,12 @@
+## [8.3.9](https://github.com/JamieMason/syncpack/compare/8.3.8...8.3.9) (2022-10-28)
+
+
+### Bug Fixes
+
+* **semver:** add support for setting '*' ([779772b](https://github.com/JamieMason/syncpack/commit/779772b039ad18aed84df560b13fa92b2a4ad741))
+
+
+
 ## [8.3.8](https://github.com/JamieMason/syncpack/compare/8.2.5...8.3.8) (2022-10-28)
 
 
