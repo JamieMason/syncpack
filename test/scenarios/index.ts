@@ -202,19 +202,19 @@ export const scenarios = {
       [
         {
           path: 'packages/a/package.json',
-          before: mockPackage('a', { overrides: ['c@0.1.0'] }),
-          after: mockPackage('a', { overrides: ['c@0.2.0'] }),
+          before: mockPackage('a', { pnpmOverrides: ['c@0.1.0'] }),
+          after: mockPackage('a', { pnpmOverrides: ['c@0.2.0'] }),
         },
         {
           path: 'packages/b/package.json',
-          before: mockPackage('b', { overrides: ['c@0.2.0'] }),
-          after: mockPackage('b', { overrides: ['c@0.2.0'] }),
+          before: mockPackage('b', { pnpmOverrides: ['c@0.2.0'] }),
+          after: mockPackage('b', { pnpmOverrides: ['c@0.2.0'] }),
         },
       ],
       {
         dev: false,
-        overrides: true,
-        pnpmOverrides: false,
+        overrides: false,
+        pnpmOverrides: true,
         peer: false,
         prod: false,
         resolutions: false,
