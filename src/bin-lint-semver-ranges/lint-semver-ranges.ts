@@ -18,7 +18,7 @@ export function lintSemverRanges(input: ProgramInput, disk: Disk): void {
     const isSemverGroup = i > 0;
     const mismatches = listSemverGroupMismatches(semverGroup);
 
-    if (isSemverGroup) {
+    if (isSemverGroup && mismatches.length > 0) {
       console.log(chalk`{dim = Semver Group ${i} ${'='.repeat(63)}}`);
     }
 
