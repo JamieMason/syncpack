@@ -1,3 +1,17 @@
+## [8.4.10](https://github.com/JamieMason/syncpack/compare/8.3.9...8.4.10) (2022-11-23)
+
+
+### Bug Fixes
+
+* **lint-ranges:** remove empty groups from output ([fa6db49](https://github.com/JamieMason/syncpack/commit/fa6db490f63cc0e59889628c3f08cc1f92aa9fd5))
+
+
+### Features
+
+* **groups:** add support to ignore dependencies ([f96df8f](https://github.com/JamieMason/syncpack/commit/f96df8fe6faf80c28e02178f2dd23863290a1da6))
+
+
+
 ## [8.3.9](https://github.com/JamieMason/syncpack/compare/8.3.8...8.3.9) (2022-10-28)
 
 
