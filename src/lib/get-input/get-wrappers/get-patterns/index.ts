@@ -2,7 +2,7 @@ import { isArrayOfStrings } from 'expect-more';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import type { SyncpackConfig } from '../../../../types';
-import { ALL_PATTERNS } from '../../../../constants';
+import { DEFAULT_SOURCES } from '../../../../constants';
 import type { Disk } from '../../../../lib/disk';
 import { tapNone, tapOption } from '../tap';
 import { getLernaPatterns } from './get-lerna-patterns';
@@ -29,7 +29,7 @@ export function getPatterns(disk: Disk) {
       tapOption('lerna packages found'),
       O.map(limitToPackageJson),
       tapNone('no patterns found, using defaults'),
-      O.fold(() => O.some(ALL_PATTERNS), O.of),
+      O.fold(() => O.some(DEFAULT_SOURCES), O.of),
     );
 
   function addRootDir(patterns: string[]): string[] {

@@ -1,9 +1,6 @@
 import type { ProgramInput } from '../../lib/get-input';
-import type {
-  IndexedBannedVersionGroup,
-  IndexedPinnedVersionGroup,
-  IndexedVersionGroup,
-} from '../../lib/get-input/get-instances';
+import type { InstanceIndex } from '../../lib/get-input/get-instances';
+import type { VersionGroup } from '../../types/version-group';
 import { getHighestVersion } from './get-highest-version';
 import { getPinnedVersion } from './get-pinned-version';
 import { getWorkspaceVersion } from './get-workspace-version';
@@ -11,9 +8,9 @@ import { getWorkspaceVersion } from './get-workspace-version';
 export function getExpectedVersion(
   name: string,
   versionGroup:
-    | Pick<IndexedBannedVersionGroup, 'isBanned' | 'instances'>
-    | Pick<IndexedPinnedVersionGroup, 'instances' | 'pinVersion'>
-    | Pick<IndexedVersionGroup, 'instances'>,
+    | Pick<InstanceIndex<VersionGroup.Banned>, 'isBanned' | 'instances'>
+    | Pick<InstanceIndex<VersionGroup.Pinned>, 'instances' | 'pinVersion'>
+    | Pick<InstanceIndex<VersionGroup.Default>, 'instances'>,
   input: Pick<ProgramInput, 'workspace' | 'wrappers'>,
 ): string | undefined {
   if ('isBanned' in versionGroup && versionGroup.isBanned === true) {

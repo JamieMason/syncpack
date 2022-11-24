@@ -6,11 +6,11 @@ import {
   isObject,
   isString,
 } from 'expect-more';
-import type { SyncpackConfig, ValidRange } from '../../types';
-import type { AnyVersionGroup } from '../../types/version-group';
-import type { AnySemverGroup } from '../../types/semver-group';
-import { DEFAULT_CONFIG, DEPENDENCY_TYPES } from '../../constants';
+import { ALL_DEPENDENCY_TYPES, DEFAULT_CONFIG } from '../../constants';
 import { isValidSemverRange } from '../../lib/is-semver';
+import type { InternalConfig, SyncpackConfig, ValidRange } from '../../types';
+import type { SemverGroup } from '../../types/semver-group';
+import type { VersionGroup } from '../../types/version-group';
 import type { Disk } from '../disk';
 import { verbose } from '../log';
 
@@ -24,7 +24,7 @@ import { verbose } from '../log';
 export const getConfig = (
   disk: Disk,
   program: Partial<SyncpackConfig & { configPath: string | undefined }>,
-): SyncpackConfig => {
+): InternalConfig => {
   type OptionName = keyof SyncpackConfig;
   type TypeChecker<T> = (value: unknown) => value is T;
 
@@ -71,7 +71,7 @@ export const getConfig = (
     prod ||
     resolutions ||
     workspace
-      ? DEPENDENCY_TYPES.filter(
+      ? ALL_DEPENDENCY_TYPES.filter(
           (type) =>
             (type === 'devDependencies' && dev) ||
             (type === 'overrides' && overrides) ||
@@ -81,7 +81,7 @@ export const getConfig = (
             (type === 'resolutions' && resolutions) ||
             (type === 'workspace' && workspace),
         )
-      : DEPENDENCY_TYPES;
+      : [...ALL_DEPENDENCY_TYPES];
 
   const filter = getOption<string>('filter', isNonEmptyString);
   const indent = getOption<string>('indent', isNonEmptyString);
@@ -100,7 +100,7 @@ export const getConfig = (
     packages: ['**'],
   };
 
-  const semverGroups = getOption<AnySemverGroup[]>(
+  const semverGroups = getOption<SemverGroup.Any[]>(
     'semverGroups',
     isArrayOfSemverGroups,
   ).concat(defaultSemverGroup);
@@ -114,12 +114,12 @@ export const getConfig = (
     dependencies: ['**'],
   };
 
-  const versionGroups = getOption<AnyVersionGroup[]>(
+  const versionGroups = getOption<VersionGroup.Any[]>(
     'versionGroups',
     isArrayOfVersionGroups,
   ).concat(defaultVersionGroup);
 
-  const finalConfig: SyncpackConfig = {
+  const finalConfig: InternalConfig = {
     dependencyTypes,
     dev,
     filter,
@@ -150,7 +150,7 @@ export const getConfig = (
     return DEFAULT_CONFIG[name] as unknown as T;
   }
 
-  function isArrayOfSemverGroups(value: unknown): value is AnySemverGroup[] {
+  function isArrayOfSemverGroups(value: unknown): value is SemverGroup.Any[] {
     return (
       isArray(value) &&
       value.every(
@@ -163,7 +163,7 @@ export const getConfig = (
     );
   }
 
-  function isArrayOfVersionGroups(value: unknown): value is AnyVersionGroup[] {
+  function isArrayOfVersionGroups(value: unknown): value is VersionGroup.Any[] {
     return (
       isArray(value) &&
       value.every(

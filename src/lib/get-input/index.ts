@@ -1,12 +1,12 @@
-import type { SyncpackConfig } from '../../types';
 import type { Disk } from '../../lib/disk';
+import type { InternalConfig, SyncpackConfig } from '../../types';
 import { getConfig } from './get-config';
 import type { Instances } from './get-instances';
 import { getInstances } from './get-instances';
 import type { SourceWrapper } from './get-wrappers';
 import { getWrappers } from './get-wrappers';
 
-export type ProgramInput = SyncpackConfig & {
+export type ProgramInput = InternalConfig & {
   disk: Disk;
   instances: Instances;
   wrappers: SourceWrapper[];

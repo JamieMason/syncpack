@@ -1,18 +1,8 @@
 import { isNonEmptyArray, isNonEmptyString, isObject } from 'expect-more';
 import minimatch from 'minimatch';
-import type { DependencyType, SyncpackConfig } from '../../types';
-import type {
-  AnySemverGroup,
-  IgnoredSemverGroup,
-  SemverGroup,
-} from '../../types/semver-group';
-import type {
-  AnyVersionGroup,
-  BannedVersionGroup,
-  IgnoredVersionGroup,
-  PinnedVersionGroup,
-  VersionGroup,
-} from '../../types/version-group';
+import type { DependencyType, InternalConfig } from '../../types';
+import type { SemverGroup } from '../../types/semver-group';
+import type { VersionGroup } from '../../types/version-group';
 import { verbose } from '../log';
 import type { SourceWrapper } from './get-wrappers';
 
@@ -23,31 +13,19 @@ export interface Instance {
   wrapper: SourceWrapper;
 }
 
-export interface InstanceIndex {
+export type InstanceIndex<T> = T & {
   instances: Instance[];
-  instancesByName: InstancesByName;
-}
-
-export type InstancesByName = Record<string, Instance[]>;
-
-export type IndexedIgnoredSemverGroup = IgnoredSemverGroup & InstanceIndex;
-export type IndexedSemverGroup = SemverGroup & InstanceIndex;
-export type AnyIndexedSemverGroup = AnySemverGroup & InstanceIndex;
-
-export type IndexedVersionGroup = VersionGroup & InstanceIndex;
-export type IndexedBannedVersionGroup = BannedVersionGroup & InstanceIndex;
-export type IndexedIgnoredVersionGroup = IgnoredVersionGroup & InstanceIndex;
-export type IndexedPinnedVersionGroup = PinnedVersionGroup & InstanceIndex;
-export type AnyIndexedVersionGroup = AnyVersionGroup & InstanceIndex;
+  instancesByName: Record<string, Instance[]>;
+};
 
 export interface Instances {
   all: Instance[];
-  semverGroups: AnyIndexedSemverGroup[];
-  versionGroups: AnyIndexedVersionGroup[];
+  semverGroups: InstanceIndex<SemverGroup.Any>[];
+  versionGroups: InstanceIndex<VersionGroup.Any>[];
 }
 
 export function getInstances(
-  options: SyncpackConfig,
+  options: InternalConfig,
   wrappers: SourceWrapper[],
 ): Instances {
   const allInstances: Instances = {
@@ -107,10 +85,8 @@ export function getInstances(
     groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
   }
 
-  function withInstances<T>(group: T): T & InstanceIndex {
-    const instances: InstanceIndex['instances'] = [];
-    const instancesByName: InstanceIndex['instancesByName'] = {};
-    return { ...group, instances, instancesByName };
+  function withInstances<T>(group: T): InstanceIndex<T> {
+    return { ...group, instances: [], instancesByName: {} };
   }
 
   function groupInstancesBy(
@@ -140,7 +116,7 @@ export function getInstances(
     dependencyType: DependencyType,
     pkgName: string,
     dependencyName: string,
-    group: AnySemverGroup | AnyVersionGroup,
+    group: SemverGroup.Any | VersionGroup.Any,
   ): boolean {
     return (
       (!isNonEmptyArray(group.dependencyTypes) ||

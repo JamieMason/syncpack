@@ -1,14 +1,5 @@
 import { coerce, eq, gt, valid } from 'semver';
-import {
-  RANGE_ANY,
-  RANGE_EXACT,
-  RANGE_GT,
-  RANGE_GTE,
-  RANGE_LT,
-  RANGE_LTE,
-  RANGE_MINOR,
-  RANGE_PATCH,
-} from '../../constants';
+import { RANGE } from '../../constants';
 import { isSemver } from '../../lib/is-semver';
 
 export function getHighestVersion(versions: string[]): string {
@@ -27,16 +18,16 @@ export function getHighestVersion(versions: string[]): string {
 
 function getRangeScore(version: string): number {
   if (version === '') return 0;
-  if (version === RANGE_ANY) return 8;
+  if (version === RANGE.ANY) return 8;
   const range = getRange(version);
-  if (range === RANGE_GT) return 7;
-  if (range === RANGE_GTE) return 6;
-  if (range === RANGE_MINOR) return 5;
+  if (range === RANGE.GT) return 7;
+  if (range === RANGE.GTE) return 6;
+  if (range === RANGE.MINOR) return 5;
   if (version.indexOf('.x') !== -1) return 4;
-  if (range === RANGE_PATCH) return 3;
-  if (range === RANGE_EXACT) return 2;
-  if (range === RANGE_LTE) return 1;
-  if (range === RANGE_LT) return 0;
+  if (range === RANGE.PATCH) return 3;
+  if (range === RANGE.EXACT) return 2;
+  if (range === RANGE.LTE) return 1;
+  if (range === RANGE.LT) return 0;
   return 0;
 }
 

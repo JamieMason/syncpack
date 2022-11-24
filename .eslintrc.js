@@ -19,6 +19,7 @@ module.exports = {
     },
   ],
   rules: {
+    '@typescript-eslint/no-namespace': 0,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/consistent-type-imports': [
       2,

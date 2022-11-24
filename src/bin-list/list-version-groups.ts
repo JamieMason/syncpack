@@ -1,12 +1,10 @@
 import { isNonEmptyString } from 'expect-more';
-import type {
-  AnyIndexedVersionGroup,
-  Instance,
-} from '../lib/get-input/get-instances';
+import type { Instance, InstanceIndex } from '../lib/get-input/get-instances';
 import { groupBy } from '../lib/group-by';
 import { sortByName } from '../lib/sort-by-name';
+import type { VersionGroup } from '../types/version-group';
 
-export interface ListItem {
+interface ListItem {
   hasMismatches: boolean;
   instances: Instance[];
   isBanned: boolean;
@@ -16,7 +14,7 @@ export interface ListItem {
 }
 
 export function listVersionGroups(
-  versionGroup: AnyIndexedVersionGroup,
+  versionGroup: InstanceIndex<VersionGroup.Any>,
 ): ListItem[] {
   const instances = versionGroup.instances;
   const instancesByName = groupBy<Instance>('name', instances.sort(sortByName));

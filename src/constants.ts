@@ -1,8 +1,24 @@
-import type { DependencyType, SyncpackConfig, ValidRange } from './types';
+import type { SyncpackConfig } from './types';
 
-export const ALL_PATTERNS = ['package.json', 'packages/*/package.json'];
+/** Single source of truth, intended to aid testing or to override */
+export const CWD = process.cwd();
 
-export const DEPENDENCY_TYPES: DependencyType[] = [
+/** Where to search for packages if none are provided by the user */
+export const DEFAULT_SOURCES = ['package.json', 'packages/*/package.json'];
+
+/** Single source of truth for icons used in output */
+export const ICON = {
+  cross: '✘',
+  debug: '?',
+  skip: '-',
+  tick: '✓',
+} as const;
+
+/**
+ * Aliases for locations of versions within package.json files, it is looped
+ * over by each command to operate on each are as defined by the user.
+ */
+export const ALL_DEPENDENCY_TYPES = [
   'dependencies',
   'devDependencies',
   'overrides',
@@ -10,44 +26,21 @@ export const DEPENDENCY_TYPES: DependencyType[] = [
   'pnpmOverrides',
   'resolutions',
   'workspace',
-];
+] as const;
 
-export const CWD = process.cwd();
-
-export const GREATER = 1;
-export const LESSER = -1;
-export const SAME = 0;
-
-export const RANGE_ANY = '*';
-export const RANGE_EXACT = '';
-export const RANGE_GT = '>';
-export const RANGE_GTE = '>=';
-export const RANGE_LOOSE = '.x';
-export const RANGE_LT = '<';
-export const RANGE_LTE = '<=';
-export const RANGE_MINOR = '^';
-export const RANGE_PATCH = '~';
-
-export const SEMVER_ORDER: ValidRange[] = [
-  RANGE_LT,
-  RANGE_LTE,
-  RANGE_EXACT,
-  RANGE_PATCH,
-  RANGE_MINOR,
-  RANGE_GTE,
-  RANGE_GT,
-  RANGE_ANY,
-];
-
-export const ICON = {
-  cross: '✘',
-  debug: '?',
-  skip: '-',
-  tick: '✓',
-};
+export const RANGE = {
+  ANY: '*',
+  EXACT: '',
+  GT: '>',
+  GTE: '>=',
+  LOOSE: '.x',
+  LT: '<',
+  LTE: '<=',
+  MINOR: '^',
+  PATCH: '~',
+} as const;
 
 export const DEFAULT_CONFIG: SyncpackConfig = {
-  dependencyTypes: [],
   dev: true,
   filter: '.',
   indent: '  ',

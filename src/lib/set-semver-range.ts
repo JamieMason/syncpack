@@ -1,5 +1,5 @@
 import type { ValidRange } from '../types';
-import { RANGE_LOOSE } from '../constants';
+import { RANGE } from '../constants';
 import { isLooseSemver, isSemver, isValidSemverRange } from './is-semver';
 
 export function setSemverRange(
@@ -13,7 +13,7 @@ export function setSemverRange(
     : version;
   const from1stNumber = nextVersion.search(/[0-9]/);
   const from1stDot = nextVersion.indexOf('.');
-  return semverRange === RANGE_LOOSE
+  return semverRange === RANGE.LOOSE
     ? `${nextVersion.slice(from1stNumber, from1stDot)}.x.x`
     : `${semverRange}${nextVersion.slice(from1stNumber)}`;
 }

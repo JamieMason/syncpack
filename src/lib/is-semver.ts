@@ -1,28 +1,18 @@
 import { isString } from 'expect-more';
 import type { ValidRange } from '../types';
-import {
-  RANGE_ANY,
-  RANGE_EXACT,
-  RANGE_GT,
-  RANGE_GTE,
-  RANGE_LOOSE,
-  RANGE_LT,
-  RANGE_LTE,
-  RANGE_MINOR,
-  RANGE_PATCH,
-} from '../constants';
+import { RANGE } from '../constants';
 
 export function isValidSemverRange(value: unknown): value is ValidRange {
   return (
-    value === RANGE_ANY ||
-    value === RANGE_EXACT ||
-    value === RANGE_GT ||
-    value === RANGE_GTE ||
-    value === RANGE_LOOSE ||
-    value === RANGE_LT ||
-    value === RANGE_LTE ||
-    value === RANGE_MINOR ||
-    value === RANGE_PATCH
+    value === RANGE.ANY ||
+    value === RANGE.EXACT ||
+    value === RANGE.GT ||
+    value === RANGE.GTE ||
+    value === RANGE.LOOSE ||
+    value === RANGE.LT ||
+    value === RANGE.LTE ||
+    value === RANGE.MINOR ||
+    value === RANGE.PATCH
   );
 }
 

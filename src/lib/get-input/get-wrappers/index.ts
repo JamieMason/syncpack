@@ -1,7 +1,7 @@
 import * as E from 'fp-ts/lib/Either';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
-import type { SyncpackConfig } from '../../../types';
+import type { InternalConfig, SyncpackConfig } from '../../../types';
 import type { Disk } from '../../../lib/disk';
 import { getFilePaths } from './get-file-paths';
 import { readJsonSafe } from './get-patterns/read-json-safe';
@@ -14,6 +14,7 @@ export interface Source {
   devDependencies?: Record<string, string>;
   keywords?: string[];
   name?: string;
+  overrides?: Record<string, string>;
   peerDependencies?: Record<string, string>;
   pnpm?: {
     overrides?: Record<string, string>;
@@ -44,7 +45,7 @@ export interface SourceWrapper {
  */
 export function getWrappers(
   disk: Disk,
-  program: SyncpackConfig,
+  program: InternalConfig,
 ): SourceWrapper[] {
   const useEmpty = () => [];
   return pipe(

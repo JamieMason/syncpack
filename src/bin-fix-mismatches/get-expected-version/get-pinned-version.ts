@@ -1,7 +1,7 @@
-import type { PinnedVersionGroup } from '../../types/version-group';
+import type { VersionGroup } from '../../types/version-group';
 
 export function getPinnedVersion(
-  versionGroup: Pick<PinnedVersionGroup, 'pinVersion'>,
+  versionGroup: Pick<VersionGroup.Pinned, 'pinVersion'>,
 ): string {
   return versionGroup.pinVersion || '';
 }

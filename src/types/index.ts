@@ -1,110 +1,98 @@
-import type {
-  RANGE_ANY,
-  RANGE_EXACT,
-  RANGE_GT,
-  RANGE_GTE,
-  RANGE_LOOSE,
-  RANGE_LT,
-  RANGE_LTE,
-  RANGE_MINOR,
-  RANGE_PATCH,
-} from '../constants';
-import type { AnySemverGroup } from './semver-group';
-import type { AnyVersionGroup } from './version-group';
+import type { ALL_DEPENDENCY_TYPES, RANGE } from '../constants';
+import type { SemverGroup } from './semver-group';
+import type { VersionGroup } from './version-group';
 
-export type DependencyType =
-  | 'dependencies'
-  | 'devDependencies'
-  | 'overrides'
-  | 'peerDependencies'
-  | 'pnpmOverrides'
-  | 'resolutions'
-  | 'workspace';
+/** Aliases for locations within package.json files where versions can be found */
+export type DependencyType = typeof ALL_DEPENDENCY_TYPES[number];
 
-export type DependencyOption = Pick<
-  SyncpackConfig,
-  'dev' | 'workspace' | 'overrides' | 'peer' | 'prod' | 'resolutions'
->;
+/** Aliases for semver range formats supported by syncpack */
+export type ValidRange = typeof RANGE[keyof typeof RANGE];
 
-export type ValidRange =
-  | typeof RANGE_ANY
-  | typeof RANGE_EXACT
-  | typeof RANGE_GT
-  | typeof RANGE_GTE
-  | typeof RANGE_LOOSE
-  | typeof RANGE_LT
-  | typeof RANGE_LTE
-  | typeof RANGE_MINOR
-  | typeof RANGE_PATCH;
-
+/** All valid config which can be provided via a .syncpackrc  */
 export interface SyncpackConfig {
-  /**
-   * which dependency properties to search within
-   */
-  dependencyTypes: DependencyType[];
-  /**
-   * whether to search within devDependencies
-   */
+  /** Whether to search within `devDependencies` */
   dev: boolean;
+  /** Whether to search within npm `overrides` */
+  overrides: boolean;
+  /** Whether to search within `peerDependencies` */
+  peer: boolean;
+  /** Whether to search within `pnpm.overrides` */
+  pnpmOverrides: boolean;
+  /** Whether to search within `dependencies` */
+  prod: boolean;
+  /** Whether to search within yarn `resolutions` */
+  resolutions: boolean;
   /**
-   * a string which will be passed to `new RegExp()` to match against package
-   * names that should be included
+   * Whether to include the versions of the `--source` packages developed in
+   * your workspace/monorepo as part of the search for versions to sync
+   */
+  workspace: boolean;
+  /**
+   * A string which will be passed to `new RegExp()` to match against package
+   * names that should be included.
+   *
+   * > ⚠️ `filter` was originally intended as a convenience to be used from the
+   * > command line to filter the output of `syncpack list`, it is not recommended
+   * > to add this to your config file to manage your project more generally.
+   * >
+   * > Instead use `versionGroups` and/or `semverGroups`.
+   *
    */
   filter: string;
   /**
-   * the character(s) to be used to indent your package.json files when writing
+   * The character(s) to be used to indent your package.json files when writing
    * to disk
    */
   indent: string;
   /**
-   * whether to search within npm overrides
-   */
-  overrides: boolean;
-  /**
-   * whether to search within peerDependencies
-   */
-  peer: boolean;
-  /**
-   * whether to search within pnpm overrides
-   */
-  pnpmOverrides: boolean;
-  /**
-   * whether to search within dependencies
-   */
-  prod: boolean;
-  /**
-   * whether to search within yarn resolutions
-   */
-  resolutions: boolean;
-  /**
+   * Defaulted to `""` to ensure that exact dependency versions are used instead
+   * of loose ranges, but this can be overridden in your config file or via the
+   * `--semver-range` command line option.
    *
-   */
-  semverGroups: AnySemverGroup[];
-  /**
-   * defaults to `""` to ensure that exact dependency versions are used instead
-   * of loose ranges
+   * | Supported Range |   Example |
+   * | --------------- | --------: |
+   * | `"<"`           |  `<1.4.2` |
+   * | `"<="`          | `<=1.4.2` |
+   * | `""`            |   `1.4.2` |
+   * | `"~"`           |  `~1.4.2` |
+   * | `"^"`           |  `^1.4.2` |
+   * | `">="`          | `>=1.4.2` |
+   * | `">"`           |  `>1.4.2` |
+   * | `"*"`           |       `*` |
    */
   semverRange: ValidRange;
   /**
-   * which fields within package.json files should be sorted alphabetically
+   * When using the `format` command, determines which fields within
+   * package.json files should be sorted alphabetically. When the value is an
+   * Object, its keys are sorted alphabetically. When the value is an Array, its
+   * values are sorted alphabetically. There is no equivalent CLI Option for
+   * this configuration.
    */
   sortAz: string[];
   /**
-   * which fields within package.json files should appear at the top, and in
-   * what order
+   * When using the `format` command, determines which fields within package.json
+   * files should appear at the top, and in what order. There is no equivalent
+   * CLI Option for this configuration.
    */
   sortFirst: string[];
   /**
-   * glob patterns for package.json file locations
+   * Defaults to `["package.json", "packages/\*\/package.json"]` to match most
+   * Projects using Lerna or Yarn Workspaces, but this can be overridden in your
+   * config file or via multiple `--source` command line options.
+   *
+   * Supports any patterns supported by https://github.com/isaacs/node-glob
    */
   source: string[];
+  /** */
+  versionGroups: VersionGroup.Any[];
+  /** */
+  semverGroups: SemverGroup.Any[];
+}
+
+export interface InternalConfig extends SyncpackConfig {
   /**
-   *
+   * Aliases for locations of versions within package.json files, it is looped
+   * over by each command to operate on each are as defined by the user.
    */
-  versionGroups: AnyVersionGroup[];
-  /**
-   * whether to include the versions of the `--source` packages developed in
-   * your workspace/monorepo as part of the search for versions to sync
-   */
-  workspace: boolean;
+  dependencyTypes: DependencyType[];
 }
