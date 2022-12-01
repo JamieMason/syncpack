@@ -1,3 +1,12 @@
+## [8.4.11](https://github.com/JamieMason/syncpack/compare/8.4.10...8.4.11) (2022-12-01)
+
+
+### Bug Fixes
+
+* **semver-ranges:** fix regression in 8.4.10 {lint,set}-semver-ranges ([5bce1d8](https://github.com/JamieMason/syncpack/commit/5bce1d84e3018c08ec72459955de2631b3a3aabe))
+
+
+
 ## [8.4.10](https://github.com/JamieMason/syncpack/compare/8.3.9...8.4.10) (2022-11-23)
 
 
