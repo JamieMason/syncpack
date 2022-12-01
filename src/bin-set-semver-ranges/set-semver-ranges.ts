@@ -1,12 +1,14 @@
+import { isString } from 'expect-more';
 import { listSemverGroupMismatches } from '../bin-lint-semver-ranges/list-semver-group-mismatches';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';
+import { isValidSemverRange } from '../lib/is-semver';
 import { setSemverRange } from '../lib/set-semver-range';
 import { writeIfChanged } from '../lib/write-if-changed';
 
 export const setSemverRanges = (input: ProgramInput, disk: Disk): void => {
   input.instances.semverGroups.reverse().forEach((semverGroup) => {
-    if ('range' in semverGroup && semverGroup.range) {
+    if ('range' in semverGroup && isValidSemverRange(semverGroup.range)) {
       const mismatches = listSemverGroupMismatches(semverGroup);
       mismatches.forEach(({ dependencyType, name, version, wrapper }) => {
         if (dependencyType === 'workspace') return;
