@@ -1,5 +1,5 @@
-import type { ValidRange } from '../types';
 import { RANGE } from '../constants';
+import type { ValidRange } from '../types';
 import { isLooseSemver, isSemver, isValidSemverRange } from './is-semver';
 
 export function setSemverRange(

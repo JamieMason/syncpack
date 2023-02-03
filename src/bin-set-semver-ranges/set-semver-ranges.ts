@@ -1,4 +1,3 @@
-import { isString } from 'expect-more';
 import { listSemverGroupMismatches } from '../bin-lint-semver-ranges/list-semver-group-mismatches';
 import type { Disk } from '../lib/disk';
 import type { ProgramInput } from '../lib/get-input';

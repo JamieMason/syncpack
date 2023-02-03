@@ -1,9 +1,9 @@
 import { isArrayOfStrings } from 'expect-more';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
-import type { SyncpackConfig } from '../../../../types';
 import { DEFAULT_SOURCES } from '../../../../constants';
 import type { Disk } from '../../../../lib/disk';
+import type { SyncpackConfig } from '../../../../types';
 import { tapNone, tapOption } from '../tap';
 import { getLernaPatterns } from './get-lerna-patterns';
 import { getPnpmPatterns } from './get-pnpm-patterns';

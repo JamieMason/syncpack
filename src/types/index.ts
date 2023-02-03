@@ -3,10 +3,10 @@ import type { SemverGroup } from './semver-group';
 import type { VersionGroup } from './version-group';
 
 /** Aliases for locations within package.json files where versions can be found */
-export type DependencyType = typeof ALL_DEPENDENCY_TYPES[number];
+export type DependencyType = (typeof ALL_DEPENDENCY_TYPES)[number];
 
 /** Aliases for semver range formats supported by syncpack */
-export type ValidRange = typeof RANGE[keyof typeof RANGE];
+export type ValidRange = (typeof RANGE)[keyof typeof RANGE];
 
 /** All valid config which can be provided via a .syncpackrc  */
 export interface SyncpackConfig {

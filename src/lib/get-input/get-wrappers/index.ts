@@ -1,8 +1,8 @@
 import * as E from 'fp-ts/lib/Either';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
-import type { InternalConfig, SyncpackConfig } from '../../../types';
 import type { Disk } from '../../../lib/disk';
+import type { InternalConfig } from '../../../types';
 import { getFilePaths } from './get-file-paths';
 import { readJsonSafe } from './get-patterns/read-json-safe';
 import { removeReadonlyType } from './readonly';
