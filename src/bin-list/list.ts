@@ -1,7 +1,7 @@
 import chalk from 'chalk';
-import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
 import { ICON } from '../constants';
 import type { Disk } from '../lib/disk';
+import { getExpectedVersion } from '../lib/get-expected-version';
 import type { ProgramInput } from '../lib/get-input';
 import { listVersionGroups } from './list-version-groups';
 

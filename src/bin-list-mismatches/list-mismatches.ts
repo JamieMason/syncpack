@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import { relative } from 'path';
-import { getExpectedVersion } from '../bin-fix-mismatches/get-expected-version';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import { CWD, ICON } from '../constants';
 import type { Disk } from '../lib/disk';
+import { getExpectedVersion } from '../lib/get-expected-version';
 import type { ProgramInput } from '../lib/get-input';
 import type { Instance } from '../lib/get-input/get-instances';
 

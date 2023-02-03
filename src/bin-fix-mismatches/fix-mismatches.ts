@@ -2,10 +2,10 @@ import chalk from 'chalk';
 import { isUndefined } from 'expect-more';
 import { listVersionGroups } from '../bin-list/list-version-groups';
 import type { Disk } from '../lib/disk';
+import { getExpectedVersion } from '../lib/get-expected-version';
 import type { ProgramInput } from '../lib/get-input';
 import type { SourceWrapper } from '../lib/get-input/get-wrappers';
 import { writeIfChanged } from '../lib/write-if-changed';
-import { getExpectedVersion } from './get-expected-version';
 
 export function fixMismatches(input: ProgramInput, disk: Disk): void {
   /**

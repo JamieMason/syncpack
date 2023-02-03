@@ -1,6 +1,6 @@
-import type { ProgramInput } from '../../lib/get-input';
-import type { InstanceIndex } from '../../lib/get-input/get-instances';
 import type { VersionGroup } from '../../types/version-group';
+import type { ProgramInput } from '../get-input';
+import type { InstanceIndex } from '../get-input/get-instances';
 import { getHighestVersion } from './get-highest-version';
 import { getPinnedVersion } from './get-pinned-version';
 import { getWorkspaceVersion } from './get-workspace-version';
