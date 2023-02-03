@@ -15,25 +15,18 @@ interface ListItem {
 export function listVersionGroups(
   versionGroup: InstanceIndex<VersionGroup.Any>,
 ): ListItem[] {
-  const instances = versionGroup.instances;
-  const instancesByName = groupBy<Instance>('name', instances.sort(sortByName));
+  const instances = versionGroup.instances.sort(sortByName);
+  const instancesByName = groupByName(instances);
   return Object.entries(instancesByName).map(([name, instances]) => {
-    const pinnedVersion =
-      'pinVersion' in versionGroup ? versionGroup.pinVersion : '';
+    const pinnedVersion = (versionGroup as VersionGroup.Pinned).pinVersion;
+    const isBanned = (versionGroup as VersionGroup.Banned).isBanned === true;
+    const isIgnored = (versionGroup as VersionGroup.Ignored).isIgnored === true;
     const hasPinnedVersion = isNonEmptyString(pinnedVersion);
     const versions = instances.map(({ version }) => version);
     const uniques = Array.from(new Set(versions));
-    const isBanned =
-      'isBanned' in versionGroup && versionGroup.isBanned === true;
-    const isIgnored =
-      'isIgnored' in versionGroup && versionGroup.isIgnored === true;
-    const hasMismatches =
-      isBanned ||
-      versions.some(
-        (version, i) =>
-          (hasPinnedVersion && version !== pinnedVersion) ||
-          (i > 0 && version !== versions[i - 1]),
-      );
+    const [version] = uniques;
+    const isUnpinned = hasPinnedVersion && version !== pinnedVersion;
+    const hasMismatches = isBanned || isUnpinned || uniques.length > 1;
     return {
       hasMismatches,
       instances,
@@ -45,10 +38,10 @@ export function listVersionGroups(
   });
 }
 
-function groupBy<T>(key: string, array: T[]): Record<string, T[]> {
-  return array.reduce((memo: any, obj: any) => {
-    const value = obj[key];
-    memo[value] = (memo[value] || []).concat(obj);
+function groupByName(instances: Instance[]) {
+  return instances.reduce<Record<string, Instance[]>>((memo, instance) => {
+    const name = instance.name;
+    memo[name] = (memo[name] || []).concat(instance);
     return memo;
   }, {});
 }
