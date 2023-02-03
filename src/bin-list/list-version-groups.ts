@@ -1,6 +1,5 @@
 import { isNonEmptyString } from 'expect-more';
 import type { Instance, InstanceIndex } from '../lib/get-input/get-instances';
-import { groupBy } from '../lib/group-by';
 import { sortByName } from '../lib/sort-by-name';
 import type { VersionGroup } from '../types/version-group';
 
@@ -44,4 +43,12 @@ export function listVersionGroups(
       uniques,
     };
   });
+}
+
+function groupBy<T>(key: string, array: T[]): Record<string, T[]> {
+  return array.reduce((memo: any, obj: any) => {
+    const value = obj[key];
+    memo[value] = (memo[value] || []).concat(obj);
+    return memo;
+  }, {});
 }

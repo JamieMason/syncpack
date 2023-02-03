@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import { DEFAULT_CONFIG } from './constants';
-import { collect } from './lib/collect';
 
 export const option = {
   config: ['-c, --config <path>', 'path to a syncpack config file'],
@@ -36,3 +35,7 @@ export const option = {
   ],
   workspace: ['-w, --workspace', 'include locally developed package versions'],
 } as const;
+
+function collect(value: string, previous: string[]): string[] {
+  return previous.concat([value]);
+}
