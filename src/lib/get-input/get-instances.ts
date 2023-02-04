@@ -16,6 +16,7 @@ export interface Instance {
 export type InstanceIndex<T> = T & {
   instances: Instance[];
   instancesByName: Record<string, Instance[]>;
+  isDefault: boolean;
 };
 
 export interface Instances {
@@ -86,7 +87,14 @@ export function getInstances(
   }
 
   function withInstances<T>(group: T): InstanceIndex<T> {
-    return { ...group, instances: [], instancesByName: {} };
+    return {
+      ...group,
+      instances: [],
+      instancesByName: {},
+      isDefault:
+        group === options.defaultSemverGroup ||
+        group === options.defaultVersionGroup,
+    };
   }
 
   function groupInstancesBy(

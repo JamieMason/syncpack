@@ -120,7 +120,6 @@ export const getConfig = (
   ).concat(defaultVersionGroup);
 
   const finalConfig: InternalConfig = {
-    dependencyTypes,
     dev,
     filter,
     indent,
@@ -136,6 +135,10 @@ export const getConfig = (
     sortFirst,
     source,
     versionGroups,
+    // The following are internal additions not exposed in public config
+    defaultSemverGroup,
+    defaultVersionGroup,
+    dependencyTypes,
   };
 
   verbose('final config:', finalConfig);

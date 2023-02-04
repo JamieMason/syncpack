@@ -10,7 +10,7 @@ describe('listVersionGroups', () => {
           { name: 'foo', version: '1.0.0' },
           { name: 'bar', version: '0.5.0' },
         ],
-      } as InstanceIndex<VersionGroup.Default>),
+      } as InstanceIndex<VersionGroup.Standard>),
     ).toEqual([
       {
         hasMismatches: false,
@@ -37,7 +37,7 @@ describe('listVersionGroups', () => {
           { name: 'foo', version: '1.0.0' },
           { name: 'foo', version: '1.1.0' },
         ],
-      } as InstanceIndex<VersionGroup.Default>),
+      } as InstanceIndex<VersionGroup.Standard>),
     ).toEqual([
       {
         hasMismatches: true,

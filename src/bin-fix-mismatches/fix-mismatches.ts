@@ -14,10 +14,9 @@ export function fixMismatches(input: ProgramInput, disk: Disk): void {
    * will then start from index 1.
    */
   input.instances.versionGroups.reverse().forEach((versionGroup, i) => {
-    const isVersionGroup = i > 0;
     const groups = listVersionGroups(versionGroup);
 
-    if (isVersionGroup) {
+    if (!versionGroup.isDefault) {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
     }
 

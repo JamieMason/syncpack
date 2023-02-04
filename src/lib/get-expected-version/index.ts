@@ -10,7 +10,7 @@ export function getExpectedVersion(
   versionGroup:
     | Pick<InstanceIndex<VersionGroup.Banned>, 'isBanned' | 'instances'>
     | Pick<InstanceIndex<VersionGroup.Pinned>, 'instances' | 'pinVersion'>
-    | Pick<InstanceIndex<VersionGroup.Default>, 'instances'>,
+    | Pick<InstanceIndex<VersionGroup.Standard>, 'instances'>,
   input: Pick<ProgramInput, 'workspace' | 'wrappers'>,
 ): string | undefined {
   if ('isBanned' in versionGroup && versionGroup.isBanned === true) {

@@ -15,10 +15,9 @@ export function lintSemverRanges(input: ProgramInput, disk: Disk): void {
    */
   input.instances.semverGroups.reverse().forEach((semverGroup, i) => {
     if ('range' in semverGroup && isValidSemverRange(semverGroup.range)) {
-      const isSemverGroup = i > 0;
       const mismatches = listSemverGroupMismatches(semverGroup);
 
-      if (isSemverGroup && mismatches.length > 0) {
+      if (!semverGroup.isDefault && mismatches.length > 0) {
         console.log(chalk`{dim = Semver Group ${i} ${'='.repeat(63)}}`);
       }
 

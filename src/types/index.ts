@@ -91,6 +91,22 @@ export interface SyncpackConfig {
 
 export interface InternalConfig extends SyncpackConfig {
   /**
+   * The standard/catch-all semver group.
+   *
+   * + When no semver groups are defined, this will be the only group.
+   * + Otherwise this group will appear last, to be used when none of the user's
+   *   groups found a match.
+   */
+  defaultSemverGroup: SemverGroup.WithRange;
+  /**
+   * The standard/catch-all version group.
+   *
+   * + When no version groups are defined, this will be the only group.
+   * + Otherwise this group will appear last, to be used when none of the user's
+   *   groups found a match.
+   */
+  defaultVersionGroup: VersionGroup.Standard;
+  /**
    * Aliases for locations of versions within package.json files, it is looped
    * over by each command to operate on each are as defined by the user.
    */
