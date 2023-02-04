@@ -1,13 +1,12 @@
 import { isArray, isNonEmptyString } from 'expect-more';
-import type { Disk } from '../lib/disk';
-import type { ProgramInput } from '../lib/get-input';
-import type { Source } from '../lib/get-input/get-wrappers';
-import { writeIfChanged } from '../lib/write-if-changed';
+import type { Context } from '../lib/get-context';
+import type { Source } from '../lib/get-context/get-wrappers';
 
-export function format(input: ProgramInput, disk: Disk): void {
-  const { indent, sortAz, sortFirst, wrappers } = input;
+export function format(ctx: Context): Context {
+  const { sortAz, sortFirst, wrappers } = ctx;
 
-  wrappers.forEach(({ contents, filePath, json }) => {
+  wrappers.forEach((wrapper) => {
+    const { contents } = wrapper;
     const sortedKeys = Object.keys(contents).sort();
     const keys = new Set<string>(sortFirst.concat(sortedKeys));
 
@@ -28,8 +27,9 @@ export function format(input: ProgramInput, disk: Disk): void {
 
     sortAz.forEach((key) => sortAlphabetically(contents[key]));
     sortObject(keys, contents);
-    writeIfChanged(disk, { contents, filePath, indent, json });
   });
+
+  return ctx;
 
   function sortObject(
     sortedKeys: string[] | Set<string>,

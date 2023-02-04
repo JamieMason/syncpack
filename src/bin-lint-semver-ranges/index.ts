@@ -3,9 +3,8 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
-import { getInput } from '../lib/get-input';
 import { option } from '../option';
-import { lintSemverRanges } from './lint-semver-ranges';
+import { lintSemverRangesCli } from './lint-semver-ranges-cli';
 
 program.description(
   chalk`
@@ -72,8 +71,8 @@ program
   .option(...option.workspace)
   .parse(process.argv);
 
-lintSemverRanges(
-  getInput(disk, {
+lintSemverRangesCli(
+  {
     configPath: program.opts().config,
     dev: program.opts().dev,
     filter: program.opts().filter,
@@ -85,6 +84,6 @@ lintSemverRanges(
     semverRange: program.opts().semverRange,
     source: program.opts().source,
     workspace: program.opts().workspace,
-  }),
+  },
   disk,
 );

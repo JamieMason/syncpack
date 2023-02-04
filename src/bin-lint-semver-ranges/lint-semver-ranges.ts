@@ -1,19 +1,16 @@
 import chalk from 'chalk';
-import type { Disk } from '../lib/disk';
-import type { ProgramInput } from '../lib/get-input';
+import type { Context } from '../lib/get-context';
 import { isValidSemverRange } from '../lib/is-semver';
+import { listSemverGroupMismatches } from '../lib/list-semver-group-mismatches';
 import { setSemverRange } from '../lib/set-semver-range';
-import { listSemverGroupMismatches } from './list-semver-group-mismatches';
 
-export function lintSemverRanges(input: ProgramInput, disk: Disk): void {
-  let isInvalid = false;
-
+export function lintSemverRanges(ctx: Context): Context {
   /**
    * Reverse the list so the default/ungrouped semver group is rendered first
    * (appears at the top). The actual semver groups which the user configured
    * will then start from index 1.
    */
-  input.instances.semverGroups.reverse().forEach((semverGroup, i) => {
+  ctx.semverGroups.reverse().forEach((semverGroup, i) => {
     if ('range' in semverGroup && isValidSemverRange(semverGroup.range)) {
       const mismatches = listSemverGroupMismatches(semverGroup);
 
@@ -30,12 +27,10 @@ export function lintSemverRanges(input: ProgramInput, disk: Disk): void {
       });
 
       if (mismatches.length > 0) {
-        isInvalid = true;
+        ctx.isInvalid = true;
       }
     }
   });
 
-  if (isInvalid) {
-    disk.process.exit(1);
-  }
+  return ctx;
 }

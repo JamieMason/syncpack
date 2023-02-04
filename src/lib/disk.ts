@@ -10,7 +10,7 @@ import { sync as globSync } from 'glob';
 import { join } from 'path';
 import { sync as readYamlSync } from 'read-yaml-file';
 import { CWD } from '../constants';
-import type { SyncpackConfig } from '../types';
+import type { Config } from './get-context/get-config/config';
 import { verbose } from './log';
 
 export type Disk = typeof disk;
@@ -32,7 +32,7 @@ export const disk = {
       cwd: CWD,
     });
   },
-  readConfigFileSync(configPath?: string): Partial<SyncpackConfig> {
+  readConfigFileSync(configPath?: string): Partial<Config.RcFile> {
     verbose('readConfigFileSync(', configPath, ')');
     try {
       const result = configPath ? client.load(configPath) : client.search();

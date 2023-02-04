@@ -3,9 +3,8 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
-import { getInput } from '../lib/get-input';
 import { option } from '../option';
-import { format } from './format';
+import { formatCli } from './format-cli';
 
 program.description(
   chalk`
@@ -48,11 +47,11 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-format(
-  getInput(disk, {
+formatCli(
+  {
     configPath: program.opts().config,
     indent: program.opts().indent,
     source: program.opts().source,
-  }),
+  },
   disk,
 );

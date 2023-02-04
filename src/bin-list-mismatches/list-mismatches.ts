@@ -1,36 +1,32 @@
 import chalk from 'chalk';
 import { relative } from 'path';
-import { listVersionGroups } from '../bin-list/list-version-groups';
 import { CWD, ICON } from '../constants';
-import type { Disk } from '../lib/disk';
+import type { Context } from '../lib/get-context';
+import type { Instance } from '../lib/get-context/get-groups';
 import { getExpectedVersion } from '../lib/get-expected-version';
-import type { ProgramInput } from '../lib/get-input';
-import type { Instance } from '../lib/get-input/get-instances';
+import { getVersionGroupInstances } from '../lib/get-version-group-instances';
 
-export function listMismatches(input: ProgramInput, disk: Disk): void {
-  let isInvalid = false;
-
+export function listMismatches(ctx: Context): Context {
   /**
    * Reverse the list so the default/ungrouped version group is rendered first
    * (appears at the top). The actual version groups which the user configured
    * will then start from index 1.
    */
-  input.instances.versionGroups.reverse().forEach((versionGroup, i) => {
-    const groups = listVersionGroups(versionGroup).filter(
-      (group) => !group.isIgnored && group.hasMismatches,
-    );
+  ctx.versionGroups.reverse().forEach((versionGroup, i) => {
+    const groups = getVersionGroupInstances(versionGroup);
+    const invalidGroups = groups.filter((group) => group.isInvalid);
 
-    if (groups.length > 0) {
-      isInvalid = true;
+    if (invalidGroups.length > 0) {
+      ctx.isInvalid = true;
 
       if (!versionGroup.isDefault) {
         console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
       }
     }
 
-    groups.forEach(({ instances, isBanned, name }) => {
+    invalidGroups.forEach(({ instances, isBanned, name }) => {
       let workspaceMatch: Instance | null = null;
-      const expected = getExpectedVersion(name, versionGroup, input);
+      const expected = getExpectedVersion(name, versionGroup, ctx);
 
       for (const instance of instances) {
         const isMatch = instance.version === expected;
@@ -67,7 +63,5 @@ export function listMismatches(input: ProgramInput, disk: Disk): void {
     });
   });
 
-  if (isInvalid) {
-    disk.process.exit(1);
-  }
+  return ctx;
 }

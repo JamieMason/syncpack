@@ -1,4 +1,4 @@
-import type { SyncpackConfig } from './types';
+import type { Config } from './lib/get-context/get-config/config';
 
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.cwd();
@@ -40,7 +40,7 @@ export const RANGE = {
   PATCH: '~',
 } as const;
 
-export const DEFAULT_CONFIG: SyncpackConfig = {
+export const DEFAULT_CONFIG: Config.RcFile = {
   dev: true,
   filter: '.',
   indent: '  ',

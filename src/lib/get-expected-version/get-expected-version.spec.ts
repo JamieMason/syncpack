@@ -1,5 +1,5 @@
 import { getExpectedVersion } from '.';
-import type { Instance } from '../../lib/get-input/get-instances';
+import type { Instance } from '../get-context/get-groups';
 
 it('removes every dependency in the group if the group is marked as disallowed', () => {
   expect(
@@ -36,16 +36,8 @@ it('applies matching local package versions second, if --workspace is set', () =
       {
         workspace: true,
         wrappers: [
-          {
-            contents: { name: 'bar', version: '0.1.0' },
-            filePath: '',
-            json: '',
-          },
-          {
-            contents: { name: 'foo', version: '1.2.3' },
-            filePath: '',
-            json: '',
-          },
+          { contents: { name: 'bar', version: '0.1.0' } },
+          { contents: { name: 'foo', version: '1.2.3' } },
         ],
       },
     ),

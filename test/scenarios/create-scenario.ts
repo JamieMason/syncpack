@@ -1,15 +1,16 @@
 import minimatch from 'minimatch';
 import { join, normalize } from 'path';
-import type { SyncpackConfig } from '../../src/types';
 import { CWD } from '../../src/constants';
-import type { SourceWrapper } from '../../src/lib/get-input/get-wrappers';
+import type { Config } from '../../src/lib/get-context/get-config/config';
+import type { Source } from '../../src/lib/get-context/get-wrappers';
+import type { JsonFile } from '../../src/lib/get-context/get-wrappers/get-patterns/read-json-safe';
 import type { MockDisk } from '../mock-disk';
 import { mockDisk } from '../mock-disk';
 
 interface MockedFile {
   absolutePath: string;
-  after: SourceWrapper;
-  before: SourceWrapper;
+  after: JsonFile<Source>;
+  before: JsonFile<Source>;
   diskWriteWhenChanged: [string, string];
   id: string;
   logEntryWhenChanged: [any, any];
@@ -18,7 +19,7 @@ interface MockedFile {
 }
 
 export interface TestScenario {
-  config: Partial<SyncpackConfig & { configPath: string | undefined }>;
+  config: Partial<Config.All>;
   disk: MockDisk;
   log: jest.SpyInstance;
   files: Record<string, MockedFile>;
@@ -27,11 +28,12 @@ export interface TestScenario {
 export function createScenario(
   fileMocks: {
     path: string;
-    before: SourceWrapper;
-    after: SourceWrapper;
+    before: JsonFile<Source>;
+    after: JsonFile<Source>;
   }[],
-  config: Partial<SyncpackConfig & { configPath: string | undefined }>,
+  config: Partial<Config.All>,
 ): TestScenario {
+  jest.clearAllMocks();
   const disk = mockDisk();
   const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
   // resolve all paths

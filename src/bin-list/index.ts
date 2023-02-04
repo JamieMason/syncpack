@@ -3,9 +3,8 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
-import { getInput } from '../lib/get-input';
 import { option } from '../option';
-import { list } from './list';
+import { listCli } from './list-cli';
 
 program.description('  List all dependencies required by your packages.');
 
@@ -52,8 +51,8 @@ program
   .option(...option.workspace)
   .parse(process.argv);
 
-list(
-  getInput(disk, {
+listCli(
+  {
     configPath: program.opts().config,
     dev: program.opts().dev,
     filter: program.opts().filter,
@@ -64,6 +63,6 @@ list(
     resolutions: program.opts().resolutions,
     source: program.opts().source,
     workspace: program.opts().workspace,
-  }),
+  },
   disk,
 );

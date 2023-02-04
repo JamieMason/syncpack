@@ -3,6 +3,159 @@ import { createScenario } from './create-scenario';
 
 export const scenarios = {
   /**
+   * "keywords" array should be A-Z but is not
+   */
+  sortArrayProps() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', {
+            otherProps: { keywords: ['B', 'A'] },
+          }),
+          after: mockPackage('a', {
+            otherProps: { keywords: ['A', 'B'] },
+          }),
+        },
+      ],
+      {
+        sortAz: ['keywords'],
+      },
+    );
+  },
+  /**
+   * "scripts" object keys should be A-Z but is not
+   */
+  sortObjectProps() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', {
+            otherProps: { scripts: { B: '', A: '' } },
+          }),
+          after: mockPackage('a', {
+            otherProps: { scripts: { A: '', B: '' } },
+          }),
+        },
+      ],
+      {
+        sortAz: ['scripts'],
+      },
+    );
+  },
+  /**
+   * F E D should appear first, then the rest in A-Z order
+   */
+  sortFirst() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', {
+            omitName: true,
+            otherProps: { A: '', F: '', B: '', D: '', E: '' },
+          }),
+          after: mockPackage('a', {
+            omitName: true,
+            otherProps: { F: '', E: '', D: '', A: '', B: '' },
+          }),
+        },
+      ],
+      {
+        sortFirst: ['F', 'E', 'D'],
+      },
+    );
+  },
+  /**
+   * "bugs" and "repository" can safely use equivalent shorthands
+   */
+  shorthand() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', {
+            omitName: true,
+            otherProps: {
+              bugs: { url: 'https://github.com/User/repo/issues' },
+              repository: { url: 'git://gitlab.com/User/repo', type: 'git' },
+            },
+          }),
+          after: mockPackage('a', {
+            omitName: true,
+            otherProps: {
+              bugs: 'https://github.com/User/repo/issues',
+              repository: 'git://gitlab.com/User/repo',
+            },
+          }),
+        },
+      ],
+      {},
+    );
+  },
+  /**
+   * "repository" contains properties which cannot be shortened
+   */
+  protectedShorthand() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', {
+            omitName: true,
+            otherProps: {
+              repository: {
+                url: 'git://gitlab.com/User/repo',
+                type: 'git',
+                directory: 'packages/foo',
+              },
+            },
+          }),
+          after: mockPackage('a', {
+            omitName: true,
+            otherProps: {
+              repository: {
+                url: 'git://gitlab.com/User/repo',
+                type: 'git',
+                directory: 'packages/foo',
+              },
+            },
+          }),
+        },
+      ],
+      {},
+    );
+  },
+  /**
+   * "repository" contains a github URL which can be shortened further
+   */
+  githubShorthand() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', {
+            omitName: true,
+            otherProps: {
+              repository: {
+                url: 'git://github.com/User/repo',
+                type: 'git',
+              },
+            },
+          }),
+          after: mockPackage('a', {
+            omitName: true,
+            otherProps: {
+              repository: 'User/repo',
+            },
+          }),
+        },
+      ],
+      {},
+    );
+  },
+  /**
    * A does not depend on `bar`
    * B does depend on `bar`
    * `bar` is banned in every package from being installed

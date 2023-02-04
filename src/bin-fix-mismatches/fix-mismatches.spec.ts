@@ -1,7 +1,6 @@
 import 'expect-more-jest';
 import { scenarios } from '../../test/scenarios';
-import { getInput } from '../lib/get-input';
-import { fixMismatches } from './fix-mismatches';
+import { fixMismatchesCli } from './fix-mismatches-cli';
 
 describe('fixMismatches', () => {
   beforeEach(() => {
@@ -13,10 +12,7 @@ describe('fixMismatches', () => {
       describe('when using a typical workspace', () => {
         it('warns about the workspace version', () => {
           const scenario = scenarios.dependentDoesNotMatchWorkspaceVersion();
-          fixMismatches(
-            getInput(scenario.disk, scenario.config),
-            scenario.disk,
-          );
+          fixMismatchesCli(scenario.config, scenario.disk);
           expect(scenario.disk.writeFileSync.mock.calls).toEqual([
             scenario.files['packages/a/package.json'].diskWriteWhenChanged,
             scenario.files['packages/b/package.json'].diskWriteWhenChanged,
@@ -33,10 +29,7 @@ describe('fixMismatches', () => {
         it('warns about the workspace version', () => {
           const scenario =
             scenarios.dependentDoesNotMatchNestedWorkspaceVersion();
-          fixMismatches(
-            getInput(scenario.disk, scenario.config),
-            scenario.disk,
-          );
+          fixMismatchesCli(scenario.config, scenario.disk);
           expect(scenario.disk.writeFileSync.mock.calls).toEqual([
             scenario.files['workspaces/a/packages/a/package.json']
               .diskWriteWhenChanged,
@@ -57,7 +50,7 @@ describe('fixMismatches', () => {
 
     it('replaces non-semver dependencies with valid semver dependencies', () => {
       const scenario = scenarios.mismatchesIncludeNonSemverVersions();
-      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
         scenario.files['packages/b/package.json'].diskWriteWhenChanged,
@@ -73,7 +66,7 @@ describe('fixMismatches', () => {
 
     it('removes banned/disallowed dependencies', () => {
       const scenario = scenarios.dependencyIsBanned();
-      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/b/package.json'].diskWriteWhenChanged,
       ]);
@@ -86,7 +79,7 @@ describe('fixMismatches', () => {
 
     it('does not consider versions of ignored dependencies', () => {
       const scenario = scenarios.versionIsIgnored();
-      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
       expect(scenario.log.mock.calls).toEqual([
         [expect.stringMatching(/Version Group 1/)],
@@ -97,7 +90,7 @@ describe('fixMismatches', () => {
 
     it('replaces mismatching npm overrides', () => {
       const scenario = scenarios.dependentDoesNotMatchNpmOverrideVersion();
-      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
       ]);
@@ -109,7 +102,7 @@ describe('fixMismatches', () => {
 
     it('replaces mismatching pnpm overrides', () => {
       const scenario = scenarios.dependentDoesNotMatchPnpmOverrideVersion();
-      fixMismatches(getInput(scenario.disk, scenario.config), scenario.disk);
+      fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
       ]);

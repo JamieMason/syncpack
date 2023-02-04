@@ -3,9 +3,8 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
-import { getInput } from '../lib/get-input';
 import { option } from '../option';
-import { fixMismatches } from './fix-mismatches';
+import { fixMismatchesCli } from './fix-mismatches-cli';
 
 program.description(
   chalk`
@@ -63,8 +62,8 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-fixMismatches(
-  getInput(disk, {
+fixMismatchesCli(
+  {
     configPath: program.opts().config,
     dev: program.opts().dev,
     filter: program.opts().filter,
@@ -76,6 +75,6 @@ fixMismatches(
     resolutions: program.opts().resolutions,
     source: program.opts().source,
     workspace: program.opts().workspace,
-  }),
+  },
   disk,
 );

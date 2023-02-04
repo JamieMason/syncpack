@@ -1,15 +1,16 @@
 import { EOL } from 'os';
 import { join } from 'path';
 import { CWD } from '../src/constants';
-import type { Source, SourceWrapper } from '../src/lib/get-input/get-wrappers';
-import { setNewlines } from '../src/lib/write-if-changed/set-newlines';
+import type { Source } from '../src/lib/get-context/get-wrappers';
+import type { JsonFile } from '../src/lib/get-context/get-wrappers/get-patterns/read-json-safe';
+import { newlines } from '../src/lib/get-context/get-wrappers/newlines';
 
-export function createWrapper(contents: Source): SourceWrapper {
+export function createWrapper(contents: Source): JsonFile<Source> {
   return withJson({ contents, filePath: join(CWD, 'some/package.json') });
 }
 
-export function toJson(contents: SourceWrapper['contents']): string {
-  return setNewlines(`${JSON.stringify(contents, null, 2)}${EOL}`, EOL);
+export function toJson(contents: Source): string {
+  return newlines.fix(`${JSON.stringify(contents, null, 2)}${EOL}`, EOL);
 }
 
 export const mockPackage = (
@@ -17,6 +18,7 @@ export const mockPackage = (
   {
     deps,
     devDeps,
+    omitName = false,
     overrides,
     peerDeps,
     pnpmOverrides,
@@ -25,16 +27,17 @@ export const mockPackage = (
   }: {
     deps?: string[];
     devDeps?: string[];
+    omitName?: boolean;
     overrides?: string[];
     peerDeps?: string[];
     pnpmOverrides?: string[];
     resolutions?: string[];
     otherProps?: Record<string, string | Record<string, any>>;
   } = {},
-): SourceWrapper => {
+): JsonFile<Source> => {
   return withJson({
     contents: {
-      name: dirName,
+      ...(!omitName ? { name: dirName } : {}),
       ...(deps && deps.length > 0
         ? {
             dependencies: toObject(deps),
@@ -79,7 +82,7 @@ function withJson({
 }: {
   contents: { [key: string]: any };
   filePath: string;
-}): SourceWrapper {
+}): JsonFile<Source> {
   return {
     contents,
     filePath,

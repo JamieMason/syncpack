@@ -1,12 +1,10 @@
-import type { SourceWrapper } from '../get-input/get-wrappers';
-
 /**
  * If the dependency `name` is a package developed locally in this monorepo, we
  * should use its version as the source of truth.
  */
 export function getWorkspaceVersion(
   name: string,
-  wrappers: SourceWrapper[],
+  wrappers: { contents: { name?: string; version?: string } }[],
 ): string {
   const wrapper = wrappers.find(({ contents }) => contents.name === name);
   if (!wrapper) return '';

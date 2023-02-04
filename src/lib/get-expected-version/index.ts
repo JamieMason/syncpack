@@ -1,6 +1,4 @@
-import type { VersionGroup } from '../../types/version-group';
-import type { ProgramInput } from '../get-input';
-import type { InstanceIndex } from '../get-input/get-instances';
+import type { VersionGroup } from '../get-context/get-groups';
 import { getHighestVersion } from './get-highest-version';
 import { getPinnedVersion } from './get-pinned-version';
 import { getWorkspaceVersion } from './get-workspace-version';
@@ -8,10 +6,13 @@ import { getWorkspaceVersion } from './get-workspace-version';
 export function getExpectedVersion(
   name: string,
   versionGroup:
-    | Pick<InstanceIndex<VersionGroup.Banned>, 'isBanned' | 'instances'>
-    | Pick<InstanceIndex<VersionGroup.Pinned>, 'instances' | 'pinVersion'>
-    | Pick<InstanceIndex<VersionGroup.Standard>, 'instances'>,
-  input: Pick<ProgramInput, 'workspace' | 'wrappers'>,
+    | Pick<VersionGroup.Banned, 'isBanned' | 'instances'>
+    | Pick<VersionGroup.Pinned, 'instances' | 'pinVersion'>
+    | Pick<VersionGroup.Standard, 'instances'>,
+  ctx: {
+    workspace: boolean;
+    wrappers: { contents: { name?: string; version?: string } }[];
+  },
 ): string | undefined {
   if ('isBanned' in versionGroup && versionGroup.isBanned === true) {
     // remove this dependency
@@ -20,8 +21,8 @@ export function getExpectedVersion(
   if ('pinVersion' in versionGroup && versionGroup.pinVersion) {
     return getPinnedVersion(versionGroup);
   }
-  if (input.workspace === true) {
-    const workspaceVersion = getWorkspaceVersion(name, input.wrappers);
+  if (ctx.workspace === true) {
+    const workspaceVersion = getWorkspaceVersion(name, ctx.wrappers);
     if (workspaceVersion) return workspaceVersion;
   }
   return getHighestVersion(

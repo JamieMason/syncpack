@@ -1,12 +1,10 @@
-import { listSemverGroupMismatches } from '../bin-lint-semver-ranges/list-semver-group-mismatches';
-import type { Disk } from '../lib/disk';
-import type { ProgramInput } from '../lib/get-input';
+import type { Context } from '../lib/get-context';
 import { isValidSemverRange } from '../lib/is-semver';
+import { listSemverGroupMismatches } from '../lib/list-semver-group-mismatches';
 import { setSemverRange } from '../lib/set-semver-range';
-import { writeIfChanged } from '../lib/write-if-changed';
 
-export const setSemverRanges = (input: ProgramInput, disk: Disk): void => {
-  input.instances.semverGroups.reverse().forEach((semverGroup) => {
+export const setSemverRanges = (ctx: Context): Context => {
+  ctx.semverGroups.reverse().forEach((semverGroup) => {
     if ('range' in semverGroup && isValidSemverRange(semverGroup.range)) {
       const mismatches = listSemverGroupMismatches(semverGroup);
       mismatches.forEach(({ dependencyType, name, version, wrapper }) => {
@@ -22,12 +20,5 @@ export const setSemverRanges = (input: ProgramInput, disk: Disk): void => {
     }
   });
 
-  input.wrappers.forEach((wrapper) => {
-    writeIfChanged(disk, {
-      contents: wrapper.contents,
-      filePath: wrapper.filePath,
-      indent: input.indent,
-      json: wrapper.json,
-    });
-  });
+  return ctx;
 };

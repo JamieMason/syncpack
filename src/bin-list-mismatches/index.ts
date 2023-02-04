@@ -3,9 +3,8 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
-import { getInput } from '../lib/get-input';
 import { option } from '../option';
-import { listMismatches } from './list-mismatches';
+import { listMismatchesCli } from './list-mismatches-cli';
 
 program.description(
   `
@@ -56,8 +55,8 @@ program
   .option(...option.workspace)
   .parse(process.argv);
 
-listMismatches(
-  getInput(disk, {
+listMismatchesCli(
+  {
     configPath: program.opts().config,
     dev: program.opts().dev,
     filter: program.opts().filter,
@@ -68,6 +67,6 @@ listMismatches(
     resolutions: program.opts().resolutions,
     source: program.opts().source,
     workspace: program.opts().workspace,
-  }),
+  },
   disk,
 );

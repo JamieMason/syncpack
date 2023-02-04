@@ -1,6 +1,6 @@
 import { isString } from 'expect-more';
 import { RANGE } from '../constants';
-import type { ValidRange } from '../types';
+import type { ValidRange } from './get-context/get-config/config';
 
 export function isValidSemverRange(value: unknown): value is ValidRange {
   return (

@@ -3,9 +3,8 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
-import { getInput } from '../lib/get-input';
 import { option } from '../option';
-import { setSemverRanges } from './set-semver-ranges';
+import { setSemverRangesCli } from './set-semver-ranges-cli';
 
 program.description(
   chalk`
@@ -75,8 +74,8 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-setSemverRanges(
-  getInput(disk, {
+setSemverRangesCli(
+  {
     configPath: program.opts().config,
     dev: program.opts().dev,
     filter: program.opts().filter,
@@ -89,6 +88,6 @@ setSemverRanges(
     semverRange: program.opts().semverRange,
     source: program.opts().source,
     workspace: program.opts().workspace,
-  }),
+  },
   disk,
 );

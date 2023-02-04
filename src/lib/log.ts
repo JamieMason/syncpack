@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import { isString } from 'expect-more';
+import { relative } from 'path';
 import { inspect } from 'util';
-import { ICON } from '../constants';
+import { CWD, ICON } from '../constants';
 
 export function verbose(...values: unknown[]): void {
   if (process.env.SYNCPACK_VERBOSE) {
@@ -14,4 +15,12 @@ export function verbose(...values: unknown[]): void {
       ),
     );
   }
+}
+
+export function fileChanged(filePath: string): void {
+  console.log(chalk.green(ICON.tick), relative(CWD, filePath));
+}
+
+export function fileUnchanged(filePath: string): void {
+  console.log(chalk.dim(ICON.skip), chalk.dim(relative(CWD, filePath)));
 }
