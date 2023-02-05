@@ -111,5 +111,31 @@ describe('fixMismatches', () => {
         scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
       ]);
     });
+
+    it('synchronises pinned versions', () => {
+      const scenario = scenarios.dependencyIsPinned();
+      fixMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+      ]);
+      expect(scenario.log.mock.calls).toEqual([
+        [expect.stringMatching(/Version Group 1/)],
+        scenario.files['packages/a/package.json'].logEntryWhenChanged,
+      ]);
+    });
+
+    it('uses the highest installed version', () => {
+      const scenario = scenarios.useHighestVersion();
+      fixMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+        scenario.files['packages/c/package.json'].diskWriteWhenChanged,
+      ]);
+      expect(scenario.log.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].logEntryWhenChanged,
+        scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+        scenario.files['packages/c/package.json'].logEntryWhenChanged,
+      ]);
+    });
   });
 });

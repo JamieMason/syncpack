@@ -85,5 +85,30 @@ describe('listMismatches', () => {
       expect(scenario.log.mock.calls).toBeEmptyArray();
       expect(scenario.disk.process.exit).not.toHaveBeenCalled();
     });
+
+    it('synchronises pinned versions', () => {
+      const scenario = scenarios.dependencyIsPinned();
+      const a = 'packages/a/package.json';
+      listMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([
+        [expect.stringMatching(/Version Group 1/)],
+        ['✘ bar is defined in this version group to be pinned at 2.2.2'],
+        [`  0.2.0 in dependencies of ${normalize(a)}`],
+      ]);
+    });
+
+    it('uses the highest installed version', () => {
+      const scenario = scenarios.useHighestVersion();
+      const a = 'packages/a/package.json';
+      const b = 'packages/b/package.json';
+      const c = 'packages/c/package.json';
+      listMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([
+        ['- bar: 0.3.0 is the highest valid semver version in use'],
+        [`  0.2.0 in dependencies of ${normalize(a)}`],
+        [`  0.3.0 in dependencies of ${normalize(b)}`],
+        [`  0.1.0 in dependencies of ${normalize(c)}`],
+      ]);
+    });
   });
 });

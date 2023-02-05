@@ -2,9 +2,7 @@ import { mockPackage } from '../mock';
 import { createScenario } from './create-scenario';
 
 export const scenarios = {
-  /**
-   * "keywords" array should be A-Z but is not
-   */
+  /** "keywords" array should be A-Z but is not */
   sortArrayProps() {
     return createScenario(
       [
@@ -23,9 +21,8 @@ export const scenarios = {
       },
     );
   },
-  /**
-   * "scripts" object keys should be A-Z but is not
-   */
+
+  /** "scripts" object keys should be A-Z but is not */
   sortObjectProps() {
     return createScenario(
       [
@@ -44,9 +41,8 @@ export const scenarios = {
       },
     );
   },
-  /**
-   * F E D should appear first, then the rest in A-Z order
-   */
+
+  /** F E D should appear first, then the rest in A-Z order */
   sortFirst() {
     return createScenario(
       [
@@ -67,9 +63,8 @@ export const scenarios = {
       },
     );
   },
-  /**
-   * "bugs" and "repository" can safely use equivalent shorthands
-   */
+
+  /** "bugs" and "repository" can safely use equivalent shorthands */
   shorthand() {
     return createScenario(
       [
@@ -94,9 +89,8 @@ export const scenarios = {
       {},
     );
   },
-  /**
-   * "repository" contains properties which cannot be shortened
-   */
+
+  /** "repository" contains properties which cannot be shortened */
   protectedShorthand() {
     return createScenario(
       [
@@ -127,9 +121,8 @@ export const scenarios = {
       {},
     );
   },
-  /**
-   * "repository" contains a github URL which can be shortened further
-   */
+
+  /** "repository" contains a github URL which can be shortened further */
   githubShorthand() {
     return createScenario(
       [
@@ -155,11 +148,12 @@ export const scenarios = {
       {},
     );
   },
+
   /**
-   * A does not depend on `bar`
-   * B does depend on `bar`
-   * `bar` is banned in every package from being installed
-   * `bar` should be removed from B
+   * - A does not depend on `bar`
+   * - B does depend on `bar`
+   * - `bar` is banned in every package from being installed
+   * - `bar` should be removed from B
    */
   dependencyIsBanned() {
     return createScenario(
@@ -187,13 +181,59 @@ export const scenarios = {
     );
   },
 
+  /** "bar" should always be 2.2.2 but is not */
+  dependencyIsPinned() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', { deps: ['bar@0.2.0'] }),
+          after: mockPackage('a', { deps: ['bar@2.2.2'] }),
+        },
+      ],
+      {
+        versionGroups: [
+          {
+            dependencies: ['bar'],
+            packages: ['**'],
+            pinVersion: '2.2.2',
+          },
+        ],
+      },
+    );
+  },
+
+  /** "bar" should be 0.3.0, which is the highest installed version */
+  useHighestVersion() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', { deps: ['bar@0.2.0'] }),
+          after: mockPackage('a', { deps: ['bar@0.3.0'] }),
+        },
+        {
+          path: 'packages/b/package.json',
+          before: mockPackage('b', { deps: ['bar@0.3.0'] }),
+          after: mockPackage('b', { deps: ['bar@0.3.0'] }),
+        },
+        {
+          path: 'packages/c/package.json',
+          before: mockPackage('c', { deps: ['bar@0.1.0'] }),
+          after: mockPackage('c', { deps: ['bar@0.3.0'] }),
+        },
+      ],
+      {},
+    );
+  },
+
   /**
-   * A does not depend on `bar`
-   * B does depend on `bar`
-   * `bar` is ignored by syncpack in every package
-   * `foo` is not ignored
-   * `bar` is unprotected so can have mismatching range etc
-   * only `foo` should have its semver range fixed
+   * - A does not depend on `bar`
+   * - B does depend on `bar`
+   * - `bar` is ignored by syncpack in every package
+   * - `foo` is not ignored
+   * - `bar` is unprotected so can have mismatching range etc
+   * - only `foo` should have its semver range fixed
    */
   semverIsIgnored() {
     return createScenario(
@@ -223,10 +263,10 @@ export const scenarios = {
   },
 
   /**
-   * A does not depend on `bar`
-   * B does depend on `bar`
-   * `bar` is ignored by syncpack in every package
-   * `bar` is unprotected so can mismatch etc
+   * - A does not depend on `bar`
+   * - B does depend on `bar`
+   * - `bar` is ignored by syncpack in every package
+   * - `bar` is unprotected so can mismatch etc
    */
   versionIsIgnored() {
     return createScenario(
@@ -255,11 +295,11 @@ export const scenarios = {
   },
 
   /**
-   * A, B, C & D depend on foo
-   * The versions mismatch
-   * Some versions are not semver
-   * `0.3.0` is the highest valid semver version
-   * All packages should be fixed to use `0.3.0`
+   * - A, B, C & D depend on foo
+   * - The versions mismatch
+   * - Some versions are not semver
+   * - `0.3.0` is the highest valid semver version
+   * - All packages should be fixed to use `0.3.0`
    */
   mismatchesIncludeNonSemverVersions() {
     return createScenario(
@@ -290,10 +330,10 @@ export const scenarios = {
   },
 
   /**
-   * C is developed in this monorepo, its version is `0.0.1`
-   * C's version is the single source of truth and should never be changed
-   * A depends on C incorrectly and should be fixed
-   * B depends on C incorrectly and should be fixed
+   * - C is developed in this monorepo, its version is `0.0.1`
+   * - C's version is the single source of truth and should never be changed
+   * - A depends on C incorrectly and should be fixed
+   * - B depends on C incorrectly and should be fixed
    */
   dependentDoesNotMatchWorkspaceVersion() {
     return createScenario(
@@ -325,10 +365,10 @@ export const scenarios = {
   /**
    * Variation of `dependentDoesNotMatchWorkspaceVersion` in a nested workspace.
    *
-   * C is developed in this monorepo, its version is `0.0.1`
-   * C's version is the single source of truth and should never be changed
-   * A and B depend on C incorrectly and should be fixed
-   * A, B, and C are in nested workspaces
+   * - C is developed in this monorepo, its version is `0.0.1`
+   * - C's version is the single source of truth and should never be changed
+   * - A and B depend on C incorrectly and should be fixed
+   * - A, B, and C are in nested workspaces
    *
    * @see https://github.com/goldstack/goldstack/pull/170/files#diff-7ae45ad102eab3b6d7e7896acd08c427a9b25b346470d7bc6507b6481575d519R19
    * @see https://github.com/JamieMason/syncpack/pull/74
@@ -375,10 +415,10 @@ export const scenarios = {
   },
 
   /**
-   * Only `dependencies` is unchecked
-   * The semver range `~` should be used
-   * A uses exact versions for `a`
-   * A should be fixed to use `~` in all other cases
+   * - Only `dependencies` is unchecked
+   * - The semver range `~` should be used
+   * - A uses exact versions for `a`
+   * - A should be fixed to use `~` in all other cases
    */
   semverRangesDoNotMatchConfig() {
     return createScenario(
@@ -417,11 +457,11 @@ export const scenarios = {
   },
 
   /**
-   * All dependencies are checked
-   * The semver range `~` should be used
-   * `one` uses exact versions
-   * `b` and `c` are ignored
-   * All but `b` and `c` should use `~`
+   * - All dependencies are checked
+   * - The semver range `~` should be used
+   * - `one` uses exact versions
+   * - `b` and `c` are ignored
+   * - All but `b` and `c` should use `~`
    */
   ignoredSemverRangesDoNotMatchConfig() {
     return createScenario(
@@ -467,10 +507,10 @@ export const scenarios = {
   },
 
   /**
-   * Only `dependencies` is unchecked
-   * The semver range `*` should be used
-   * A uses exact versions for `a`
-   * A should be fixed to use `*` in all other cases
+   * - Only `dependencies` is unchecked
+   * - The semver range `*` should be used
+   * - A uses exact versions for `a`
+   * - A should be fixed to use `*` in all other cases
    */
   semverRangesDoNotMatchConfigWildcard() {
     return createScenario(
@@ -509,10 +549,10 @@ export const scenarios = {
   },
 
   /**
-   * A has a pnpm override of C
-   * B has a pnpm override of C
-   * The versions do not match
-   * The highest semver version wins
+   * - A has a pnpm override of C
+   * - B has a pnpm override of C
+   * - The versions do not match
+   * - The highest semver version wins
    */
   dependentDoesNotMatchPnpmOverrideVersion() {
     return createScenario(
@@ -541,10 +581,10 @@ export const scenarios = {
   },
 
   /**
-   * A has an npm override of C
-   * B has an npm override of C
-   * The versions do not match
-   * The highest semver version wins
+   * - A has an npm override of C
+   * - B has an npm override of C
+   * - The versions do not match
+   * - The highest semver version wins
    */
   dependentDoesNotMatchNpmOverrideVersion() {
     return createScenario(

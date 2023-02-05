@@ -4,8 +4,10 @@ import { getAllInstances } from './get-all-instances';
 import { getConfig } from './get-config';
 import type { Config } from './get-config/config';
 import type { InternalConfig } from './get-config/internal-config';
-import type { SemverGroup, VersionGroup } from './get-groups';
-import { getSemverGroups, getVersionGroups } from './get-groups';
+import type { SemverGroup } from './get-groups/get-semver-groups';
+import { getSemverGroups } from './get-groups/get-semver-groups';
+import { getVersionGroups } from './get-groups/get-version-groups';
+import type { VersionGroup } from './get-groups/version-group';
 import { getPackageJsonFiles } from './get-package-json-files';
 import type { PackageJsonFile } from './get-package-json-files/package-json-file';
 
@@ -14,7 +16,7 @@ export type Context = Omit<InternalConfig, 'semverGroups' | 'versionGroups'> & {
   isInvalid: boolean;
   packageJsonFiles: PackageJsonFile[];
   semverGroups: SemverGroup.Any[];
-  versionGroups: VersionGroup.Any[];
+  versionGroups: VersionGroup[];
 };
 
 /**

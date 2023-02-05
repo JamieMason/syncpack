@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import { ICON } from '../constants';
 import type { Context } from '../lib/get-context';
-import { getExpectedVersion } from '../lib/get-expected-version';
 
 export function list(ctx: Context): Context {
   /**
@@ -18,27 +17,25 @@ export function list(ctx: Context): Context {
       console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
     }
 
-    versionGroup.instanceGroups.forEach(
-      ({ hasMismatches, isBanned, isIgnored, name, uniques }) => {
-        const versionList = uniques.sort();
-        const expected = getExpectedVersion(name, versionGroup, ctx);
-        console.log(
-          isBanned
-            ? chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`
-            : isIgnored
-            ? chalk`{dim ${ICON.skip} ${name}} is ignored in this version group`
-            : hasMismatches
-            ? chalk`{red ${ICON.cross} ${name}} ${versionList
-                .map((version) =>
-                  version === expected
-                    ? chalk.green(version)
-                    : chalk.red(version),
-                )
-                .join(chalk.dim(', '))}`
-            : chalk`{dim -} {white ${name}} {dim ${versionList}}`,
-        );
-      },
-    );
+    versionGroup.instanceGroups.forEach((instanceGroup) => {
+      const versionList = instanceGroup.uniques.sort();
+      const expected = instanceGroup.getExpectedVersion();
+      console.log(
+        instanceGroup.isBanned
+          ? chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is defined in this version group as banned from use}`
+          : instanceGroup.isIgnored
+          ? chalk`{dim ${ICON.skip} ${instanceGroup.name}} is ignored in this version group`
+          : instanceGroup.hasMismatches
+          ? chalk`{red ${ICON.cross} ${instanceGroup.name}} ${versionList
+              .map((version) =>
+                version === expected
+                  ? chalk.green(version)
+                  : chalk.red(version),
+              )
+              .join(chalk.dim(', '))}`
+          : chalk`{dim -} {white ${instanceGroup.name}} {dim ${versionList}}`,
+      );
+    });
   });
 
   return ctx;

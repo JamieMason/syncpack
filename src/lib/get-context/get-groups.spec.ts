@@ -1,4 +1,4 @@
-import type { VersionGroup } from './get-groups';
+import type { VersionGroup } from '../get-context/get-groups/version-group';
 // import { getVersionGroupInstances } from './get-version-group-instances';
 
 let getVersionGroupInstances: any;
@@ -11,7 +11,7 @@ describe.skip('getVersionGroupInstances', () => {
           { name: 'foo', version: '1.0.0' },
           { name: 'bar', version: '0.5.0' },
         ],
-      } as VersionGroup.Standard),
+      } as VersionGroup),
     ).toEqual([
       {
         hasMismatches: false,
@@ -40,7 +40,7 @@ describe.skip('getVersionGroupInstances', () => {
           { name: 'foo', version: '1.0.0' },
           { name: 'foo', version: '1.1.0' },
         ],
-      } as VersionGroup.Standard),
+      } as VersionGroup),
     ).toEqual([
       {
         hasMismatches: true,

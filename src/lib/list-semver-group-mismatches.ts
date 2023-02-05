@@ -1,4 +1,4 @@
-import type { SemverGroup } from './get-context/get-groups';
+import type { SemverGroup } from './get-context/get-groups/get-semver-groups';
 import type { Instance } from './get-context/get-package-json-files/package-json-file/instance';
 import { setSemverRange } from './set-semver-range';
 import { sortByName } from './sort-by-name';

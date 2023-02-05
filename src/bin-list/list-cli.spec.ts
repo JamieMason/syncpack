@@ -78,5 +78,20 @@ describe('list', () => {
       ]);
       expect(scenario.disk.process.exit).not.toHaveBeenCalled();
     });
+
+    it('lists mismatching pinned versions', () => {
+      const scenario = scenarios.dependencyIsPinned();
+      listCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([
+        [expect.stringMatching(/Version Group 1/)],
+        ['✘ bar 0.2.0'],
+      ]);
+    });
+
+    it('uses the highest installed version', () => {
+      const scenario = scenarios.useHighestVersion();
+      listCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([['✘ bar 0.1.0, 0.2.0, 0.3.0']]);
+    });
   });
 });

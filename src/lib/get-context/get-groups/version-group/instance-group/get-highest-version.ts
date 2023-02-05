@@ -1,6 +1,6 @@
 import { coerce, eq, gt, valid } from 'semver';
-import { RANGE } from '../../constants';
-import { isSemver } from '../is-semver';
+import { RANGE } from '../../../../../constants';
+import { isSemver } from '../../../../is-semver';
 
 export function getHighestVersion(versions: string[]): string {
   return versions.reduce<string>((rawHighest, raw) => {

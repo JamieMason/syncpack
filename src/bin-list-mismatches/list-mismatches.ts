@@ -3,7 +3,6 @@ import { relative } from 'path';
 import { CWD, ICON } from '../constants';
 import type { Context } from '../lib/get-context';
 import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
-import { getExpectedVersion } from '../lib/get-expected-version';
 
 export function listMismatches(ctx: Context): Context {
   /**
@@ -24,11 +23,12 @@ export function listMismatches(ctx: Context): Context {
       }
     }
 
-    invalidGroups.forEach(({ instances, isBanned, name }) => {
+    invalidGroups.forEach((instanceGroup) => {
       let workspaceMatch: Instance | null = null;
-      const expected = getExpectedVersion(name, versionGroup, ctx);
+      const expected = instanceGroup.getExpectedVersion();
+      const name = instanceGroup.name;
 
-      for (const instance of instances) {
+      for (const instance of instanceGroup.instances) {
         const isMatch = instance.version === expected;
         const isWorkspace = instance.dependencyType === 'workspace';
         if (isMatch && isWorkspace) {
@@ -36,9 +36,13 @@ export function listMismatches(ctx: Context): Context {
         }
       }
 
-      if (isBanned) {
+      if (instanceGroup.isBanned) {
         console.log(
           chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`,
+        );
+      } else if (instanceGroup.isUnpinned) {
+        console.log(
+          chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group to be pinned at ${instanceGroup.versionGroup.pinVersion}}`,
         );
       } else if (workspaceMatch) {
         const shortPath = relative(
@@ -52,17 +56,19 @@ export function listMismatches(ctx: Context): Context {
         console.log(chalk`{dim -} ${name}${reason}`);
       }
 
-      instances.forEach(({ dependencyType, version, packageJsonFile }) => {
-        const isMatch = version === expected;
-        const isLocal = dependencyType === 'workspace';
-        const shortPath = relative(CWD, packageJsonFile.filePath);
-        const loc = isLocal ? 'version' : dependencyType;
-        if (isMatch) {
-          console.log(chalk`{green   ${version} in ${loc} of ${shortPath}}`);
-        } else {
-          console.log(chalk`{red   ${version} in ${loc} of ${shortPath}}`);
-        }
-      });
+      instanceGroup.instances.forEach(
+        ({ dependencyType, version, packageJsonFile }) => {
+          const isMatch = version === expected;
+          const isLocal = dependencyType === 'workspace';
+          const shortPath = relative(CWD, packageJsonFile.filePath);
+          const loc = isLocal ? 'version' : dependencyType;
+          if (isMatch) {
+            console.log(chalk`{green   ${version} in ${loc} of ${shortPath}}`);
+          } else {
+            console.log(chalk`{red   ${version} in ${loc} of ${shortPath}}`);
+          }
+        },
+      );
     });
   });
 
