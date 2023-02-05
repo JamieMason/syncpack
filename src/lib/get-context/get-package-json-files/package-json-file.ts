@@ -1,7 +1,7 @@
 import type { Disk } from '../../disk';
+import { newlines } from '../../newlines';
 import type { InternalConfig } from '../get-config/internal-config';
 import type { JsonFile } from './get-patterns/read-json-safe';
-import { newlines } from './newlines';
 
 export interface PackageJson {
   bugs?: { url: string } | string;

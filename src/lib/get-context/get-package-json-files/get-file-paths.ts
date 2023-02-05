@@ -7,7 +7,6 @@ import * as S from 'fp-ts/lib/string';
 import type { Disk } from '../../disk';
 import type { Config } from '../get-config/config';
 import { getPatterns } from './get-patterns';
-import { removeReadonlyType } from './readonly';
 import { tapOption } from './tap';
 import { getErrorOrElse } from './try-catch';
 
@@ -48,4 +47,11 @@ export function getFilePaths(
       ),
     );
   }
+}
+
+/**
+ * Remove unwanted readonly type added by TaskEither.traverseArray
+ */
+function removeReadonlyType<T>(value: readonly T[]): T[] {
+  return value as T[];
 }
