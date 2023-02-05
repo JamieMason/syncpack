@@ -2,12 +2,12 @@ import type { Context } from './get-context';
 import * as log from './log';
 
 export function writeIfChanged(ctx: Context): Context {
-  ctx.wrappers.forEach((wrapper) => {
-    if (wrapper.hasChanged()) {
-      wrapper.write();
-      log.fileChanged(wrapper.filePath);
+  ctx.packageJsonFiles.forEach((packageJsonFile) => {
+    if (packageJsonFile.hasChanged()) {
+      packageJsonFile.write();
+      log.fileChanged(packageJsonFile.filePath);
     } else {
-      log.fileUnchanged(wrapper.filePath);
+      log.fileUnchanged(packageJsonFile.filePath);
     }
   });
   return ctx;

@@ -13,7 +13,7 @@ it('removes every dependency in the group if the group is marked as disallowed',
           { name: 'foo', version: '1.0.0' },
         ] as Instance[],
       },
-      { workspace: false, wrappers: [] },
+      { workspace: false, packageJsonFiles: [] },
     ),
   ).toEqual(undefined);
 });
@@ -23,7 +23,7 @@ it('if not disallowed, applies pinned versions first', () => {
     getExpectedVersion(
       'foo',
       { instances: [], pinVersion: '2.2.2' },
-      { workspace: true, wrappers: [] },
+      { workspace: true, packageJsonFiles: [] },
     ),
   ).toEqual('2.2.2');
 });
@@ -35,7 +35,7 @@ it('applies matching local package versions second, if --workspace is set', () =
       { instances: [] },
       {
         workspace: true,
-        wrappers: [
+        packageJsonFiles: [
           { contents: { name: 'bar', version: '0.1.0' } },
           { contents: { name: 'foo', version: '1.2.3' } },
         ],
@@ -55,7 +55,7 @@ it('applies the highest installed version third, if --workspace is not set', () 
           { name: 'foo', version: '1.0.0' },
         ] as Instance[],
       },
-      { workspace: false, wrappers: [] },
+      { workspace: false, packageJsonFiles: [] },
     ),
   ).toEqual('3.0.0');
 });
@@ -65,7 +65,7 @@ it('returns an empty string if nothing matches', () => {
     getExpectedVersion(
       'foo',
       { instances: [] },
-      { workspace: false, wrappers: [] },
+      { workspace: false, packageJsonFiles: [] },
     ),
   ).toEqual('');
 });

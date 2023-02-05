@@ -1,15 +1,17 @@
 import { EOL } from 'os';
 import { join } from 'path';
 import { CWD } from '../src/constants';
-import type { Source } from '../src/lib/get-context/get-wrappers';
-import type { JsonFile } from '../src/lib/get-context/get-wrappers/get-patterns/read-json-safe';
-import { newlines } from '../src/lib/get-context/get-wrappers/newlines';
+import type { JsonFile } from '../src/lib/get-context/get-package-json-files/get-patterns/read-json-safe';
+import { newlines } from '../src/lib/get-context/get-package-json-files/newlines';
+import type { PackageJson } from '../src/lib/get-context/get-package-json-files/package-json-file';
 
-export function createWrapper(contents: Source): JsonFile<Source> {
+export function createPackageJsonFile(
+  contents: PackageJson,
+): JsonFile<PackageJson> {
   return withJson({ contents, filePath: join(CWD, 'some/package.json') });
 }
 
-export function toJson(contents: Source): string {
+export function toJson(contents: PackageJson): string {
   return newlines.fix(`${JSON.stringify(contents, null, 2)}${EOL}`, EOL);
 }
 
@@ -34,7 +36,7 @@ export const mockPackage = (
     resolutions?: string[];
     otherProps?: Record<string, string | Record<string, any>>;
   } = {},
-): JsonFile<Source> => {
+): JsonFile<PackageJson> => {
   return withJson({
     contents: {
       ...(!omitName ? { name: dirName } : {}),
@@ -82,7 +84,7 @@ function withJson({
 }: {
   contents: { [key: string]: any };
   filePath: string;
-}): JsonFile<Source> {
+}): JsonFile<PackageJson> {
   return {
     contents,
     filePath,

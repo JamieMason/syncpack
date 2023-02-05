@@ -2,15 +2,15 @@ import minimatch from 'minimatch';
 import { join, normalize } from 'path';
 import { CWD } from '../../src/constants';
 import type { Config } from '../../src/lib/get-context/get-config/config';
-import type { Source } from '../../src/lib/get-context/get-wrappers';
-import type { JsonFile } from '../../src/lib/get-context/get-wrappers/get-patterns/read-json-safe';
+import type { JsonFile } from '../../src/lib/get-context/get-package-json-files/get-patterns/read-json-safe';
+import type { PackageJson } from '../../src/lib/get-context/get-package-json-files/package-json-file';
 import type { MockDisk } from '../mock-disk';
 import { mockDisk } from '../mock-disk';
 
 interface MockedFile {
   absolutePath: string;
-  after: JsonFile<Source>;
-  before: JsonFile<Source>;
+  after: JsonFile<PackageJson>;
+  before: JsonFile<PackageJson>;
   diskWriteWhenChanged: [string, string];
   id: string;
   logEntryWhenChanged: [any, any];
@@ -28,8 +28,8 @@ export interface TestScenario {
 export function createScenario(
   fileMocks: {
     path: string;
-    before: JsonFile<Source>;
-    after: JsonFile<Source>;
+    before: JsonFile<PackageJson>;
+    after: JsonFile<PackageJson>;
   }[],
   config: Partial<Config.All>,
 ): TestScenario {

@@ -5,15 +5,15 @@ import type { Config } from './get-config/config';
 import type { InternalConfig } from './get-config/internal-config';
 import type { SemverGroup, VersionGroup } from './get-groups';
 import { getGroups } from './get-groups';
-import { getWrappers } from './get-wrappers';
-import type { Wrapper } from './get-wrappers/wrapper';
+import { getPackageJsonFiles } from './get-package-json-files';
+import type { PackageJsonFile } from './get-package-json-files/package-json-file';
 
 export type Context = Omit<InternalConfig, 'semverGroups' | 'versionGroups'> & {
   disk: Disk;
   isInvalid: boolean;
+  packageJsonFiles: PackageJsonFile[];
   semverGroups: SemverGroup.Any[];
   versionGroups: VersionGroup.Any[];
-  wrappers: Wrapper[];
 };
 
 /**
@@ -27,14 +27,14 @@ export function getContext(
   disk: Disk = defaultDisk,
 ): Context {
   const config = getConfig(disk, program);
-  const wrappers = getWrappers(disk, config);
-  const { semverGroups, versionGroups } = getGroups(config, wrappers);
+  const packageJsonFiles = getPackageJsonFiles(disk, config);
+  const { semverGroups, versionGroups } = getGroups(config, packageJsonFiles);
   return {
     ...config,
     disk,
     isInvalid: false,
     semverGroups,
     versionGroups,
-    wrappers,
+    packageJsonFiles,
   };
 }

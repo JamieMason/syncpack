@@ -41,7 +41,10 @@ export function listMismatches(ctx: Context): Context {
           chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`,
         );
       } else if (workspaceMatch) {
-        const shortPath = relative(CWD, workspaceMatch.wrapper.filePath);
+        const shortPath = relative(
+          CWD,
+          workspaceMatch.packageJsonFile.filePath,
+        );
         const reason = chalk`{dim : ${expected} is developed in this repo at ${shortPath}}`;
         console.log(chalk`{dim -} ${name}${reason}`);
       } else {
@@ -49,10 +52,10 @@ export function listMismatches(ctx: Context): Context {
         console.log(chalk`{dim -} ${name}${reason}`);
       }
 
-      instances.forEach(({ dependencyType, version, wrapper }) => {
+      instances.forEach(({ dependencyType, version, packageJsonFile }) => {
         const isMatch = version === expected;
         const isLocal = dependencyType === 'workspace';
-        const shortPath = relative(CWD, wrapper.filePath);
+        const shortPath = relative(CWD, packageJsonFile.filePath);
         const loc = isLocal ? 'version' : dependencyType;
         if (isMatch) {
           console.log(chalk`{green   ${version} in ${loc} of ${shortPath}}`);

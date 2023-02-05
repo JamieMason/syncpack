@@ -18,13 +18,15 @@ export function lintSemverRanges(ctx: Context): Context {
         console.log(chalk`{dim = Semver Group ${i} ${'='.repeat(63)}}`);
       }
 
-      mismatches.forEach(({ dependencyType, name, version, wrapper }) => {
-        console.log(
-          chalk`{red ✕ ${name}} {red.dim ${version} in ${dependencyType} of ${
-            wrapper.contents.name
-          } should be ${setSemverRange(semverGroup.range, version)}}`,
-        );
-      });
+      mismatches.forEach(
+        ({ dependencyType, name, version, packageJsonFile }) => {
+          console.log(
+            chalk`{red ✕ ${name}} {red.dim ${version} in ${dependencyType} of ${
+              packageJsonFile.contents.name
+            } should be ${setSemverRange(semverGroup.range, version)}}`,
+          );
+        },
+      );
 
       if (mismatches.length > 0) {
         ctx.isInvalid = true;

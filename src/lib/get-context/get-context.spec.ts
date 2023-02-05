@@ -137,7 +137,7 @@ describe('getContext', () => {
       });
     });
   });
-  describe('wrappers', () => {
+  describe('packageJsonFiles', () => {
     describe('when --source cli options are given', () => {
       describe('for a single package.json file', () => {
         it('reads that file only', () => {
@@ -150,7 +150,7 @@ describe('getContext', () => {
           const program = getContext({ source: ['./package.json'] }, disk);
           expect(program).toEqual(
             expect.objectContaining({
-              wrappers: [
+              packageJsonFiles: [
                 {
                   contents,
                   disk: expect.toBeNonEmptyObject(),
@@ -168,7 +168,7 @@ describe('getContext', () => {
           const disk = mockDisk();
           disk.globSync.mockReturnValue([]);
           expect(getContext({ source: ['typo.json'] }, disk)).toHaveProperty(
-            'wrappers',
+            'packageJsonFiles',
             [],
           );
           expect(disk.readFileSync).not.toHaveBeenCalled();

@@ -1,12 +1,12 @@
 import { isArray, isNonEmptyString } from 'expect-more';
 import type { Context } from '../lib/get-context';
-import type { Source } from '../lib/get-context/get-wrappers';
+import type { PackageJson } from '../lib/get-context/get-package-json-files/package-json-file';
 
 export function format(ctx: Context): Context {
-  const { sortAz, sortFirst, wrappers } = ctx;
+  const { sortAz, sortFirst, packageJsonFiles } = ctx;
 
-  wrappers.forEach((wrapper) => {
-    const { contents } = wrapper;
+  packageJsonFiles.forEach((packageJsonFile) => {
+    const { contents } = packageJsonFile;
     const sortedKeys = Object.keys(contents).sort();
     const keys = new Set<string>(sortFirst.concat(sortedKeys));
 
@@ -33,7 +33,7 @@ export function format(ctx: Context): Context {
 
   function sortObject(
     sortedKeys: string[] | Set<string>,
-    obj: Source | { [key: string]: string },
+    obj: PackageJson | { [key: string]: string },
   ): void {
     sortedKeys.forEach((key: string) => {
       const value = obj[key];
@@ -42,7 +42,7 @@ export function format(ctx: Context): Context {
     });
   }
 
-  function sortAlphabetically(value: Source[keyof Source]): void {
+  function sortAlphabetically(value: PackageJson[keyof PackageJson]): void {
     if (isArray(value)) {
       value.sort();
     } else if (value && typeof value === 'object') {

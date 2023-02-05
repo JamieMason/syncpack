@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 import { verbose } from '../log';
 import type { Config, DependencyType } from './get-config/config';
 import type { InternalConfig } from './get-config/internal-config';
-import type { Wrapper } from './get-wrappers/wrapper';
+import type { PackageJsonFile } from './get-package-json-files/package-json-file';
 
 type Group<T> = T & {
   instances: Instance[];
@@ -19,8 +19,8 @@ interface Groups {
 export interface Instance {
   dependencyType: DependencyType;
   name: string;
+  packageJsonFile: PackageJsonFile;
   version: string;
-  wrapper: Wrapper;
 }
 
 export namespace SemverGroup {
@@ -39,33 +39,51 @@ export namespace VersionGroup {
 
 export function getGroups(
   options: InternalConfig,
-  wrappers: Wrapper[],
+  packageJsonFiles: PackageJsonFile[],
 ): Groups {
   const allInstances: Groups = {
     semverGroups: options.semverGroups.map(withInstances),
     versionGroups: options.versionGroups.map(withInstances),
   };
 
-  for (const wrapper of wrappers) {
-    const pkgName = wrapper.contents.name || 'packagewithoutaname';
+  for (const packageJsonFile of packageJsonFiles) {
+    const pkgName = packageJsonFile.contents.name || 'packagewithoutaname';
     for (const dependencyType of options.dependencyTypes) {
       if (dependencyType === 'workspace') {
-        const name = wrapper.contents?.name;
-        const version = wrapper.contents?.version;
-        addInstance({ dependencyType, name, pkgName, version, wrapper });
+        const name = packageJsonFile.contents?.name;
+        const version = packageJsonFile.contents?.version;
+        addInstance({
+          dependencyType,
+          name,
+          pkgName,
+          version,
+          packageJsonFile: packageJsonFile,
+        });
       } else if (dependencyType === 'pnpmOverrides') {
-        const versionsByName = wrapper.contents?.pnpm?.overrides;
+        const versionsByName = packageJsonFile.contents?.pnpm?.overrides;
         if (!isObject<Record<string, string>>(versionsByName)) continue;
         const pkgs = Object.entries(versionsByName);
         for (const [name, version] of pkgs) {
-          addInstance({ dependencyType, name, pkgName, version, wrapper });
+          addInstance({
+            dependencyType,
+            name,
+            pkgName,
+            version,
+            packageJsonFile: packageJsonFile,
+          });
         }
       } else {
-        const versionsByName = wrapper.contents?.[dependencyType];
+        const versionsByName = packageJsonFile.contents?.[dependencyType];
         if (!isObject<Record<string, string>>(versionsByName)) continue;
         const pkgs = Object.entries(versionsByName);
         for (const [name, version] of pkgs) {
-          addInstance({ dependencyType, name, pkgName, version, wrapper });
+          addInstance({
+            dependencyType,
+            name,
+            packageJsonFile,
+            pkgName,
+            version,
+          });
         }
       }
     }
@@ -76,11 +94,11 @@ export function getGroups(
   function addInstance(input: {
     dependencyType: DependencyType;
     name?: string;
+    packageJsonFile: PackageJsonFile;
     pkgName: string;
     version?: string;
-    wrapper: Wrapper;
   }): void {
-    const { dependencyType, name, pkgName, version, wrapper } = input;
+    const { dependencyType, name, packageJsonFile, pkgName, version } = input;
     if (!isNonEmptyString(name)) {
       return verbose('skip instance, no name', input);
     }
@@ -90,8 +108,10 @@ export function getGroups(
     if (!isNonEmptyString(version)) {
       return verbose('skip instance, no version', input);
     }
-    const instance = { dependencyType, name, version, wrapper };
-    verbose(`add ${name}@${version} to ${dependencyType} ${wrapper.filePath}`);
+    const instance = { dependencyType, name, packageJsonFile, version };
+    verbose(
+      `add ${name}@${version} to ${dependencyType} ${packageJsonFile.filePath}`,
+    );
     groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
     groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
   }

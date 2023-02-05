@@ -11,7 +11,7 @@ export function getExpectedVersion(
     | Pick<VersionGroup.Standard, 'instances'>,
   ctx: {
     workspace: boolean;
-    wrappers: { contents: { name?: string; version?: string } }[];
+    packageJsonFiles: { contents: { name?: string; version?: string } }[];
   },
 ): string | undefined {
   if ('isBanned' in versionGroup && versionGroup.isBanned === true) {
@@ -22,7 +22,7 @@ export function getExpectedVersion(
     return getPinnedVersion(versionGroup);
   }
   if (ctx.workspace === true) {
-    const workspaceVersion = getWorkspaceVersion(name, ctx.wrappers);
+    const workspaceVersion = getWorkspaceVersion(name, ctx.packageJsonFiles);
     if (workspaceVersion) return workspaceVersion;
   }
   return getHighestVersion(

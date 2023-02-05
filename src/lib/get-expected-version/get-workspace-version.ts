@@ -4,9 +4,11 @@
  */
 export function getWorkspaceVersion(
   name: string,
-  wrappers: { contents: { name?: string; version?: string } }[],
+  packageJsonFiles: { contents: { name?: string; version?: string } }[],
 ): string {
-  const wrapper = wrappers.find(({ contents }) => contents.name === name);
-  if (!wrapper) return '';
-  return wrapper.contents.version || '';
+  const packageJsonFile = packageJsonFiles.find(
+    ({ contents }) => contents.name === name,
+  );
+  if (!packageJsonFile) return '';
+  return packageJsonFile.contents.version || '';
 }

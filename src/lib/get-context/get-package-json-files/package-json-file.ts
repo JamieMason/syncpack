@@ -1,12 +1,35 @@
-import type { Source } from '.';
 import type { Disk } from '../../disk';
 import type { InternalConfig } from '../get-config/internal-config';
 import type { JsonFile } from './get-patterns/read-json-safe';
 import { newlines } from './newlines';
 
-export class Wrapper {
+export interface PackageJson {
+  bugs?: { url: string } | string;
+  dependencies?: Record<string, string>;
+  description?: string;
+  devDependencies?: Record<string, string>;
+  keywords?: string[];
+  name?: string;
+  overrides?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  pnpm?: {
+    overrides?: Record<string, string>;
+  };
+  repository?: { directory?: string; type: string; url: string } | string;
+  resolutions?: Record<string, string>;
+  scripts?: Record<string, string>;
+  version?: string;
+  workspaces?: Record<string, string[]> | string[];
+  [otherProps: string]:
+    | Record<string, string | string[] | Record<string, string | string[]>>
+    | string
+    | string[]
+    | undefined;
+}
+
+export class PackageJsonFile {
   /** parsed JSON contents of the file */
-  contents: Source;
+  contents: PackageJson;
 
   /** api for writing to disk */
   readonly disk: Disk;
@@ -21,7 +44,7 @@ export class Wrapper {
   readonly program: Pick<InternalConfig, 'indent'>;
 
   constructor(
-    jsonFile: JsonFile<Source>,
+    jsonFile: JsonFile<PackageJson>,
     program: Pick<InternalConfig, 'indent'>,
     disk: Disk,
   ) {

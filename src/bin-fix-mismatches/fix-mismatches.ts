@@ -20,8 +20,8 @@ export function fixMismatches(ctx: Context): Context {
     groups.forEach(({ hasMismatches, instances, isIgnored, name }) => {
       if (hasMismatches && !isIgnored) {
         const nextVersion = getExpectedVersion(name, versionGroup, ctx);
-        instances.forEach(({ dependencyType, version, wrapper }) => {
-          const root: any = wrapper.contents;
+        instances.forEach(({ dependencyType, version, packageJsonFile }) => {
+          const root: any = packageJsonFile.contents;
           if (version !== nextVersion) {
             if (dependencyType === 'pnpmOverrides') {
               root.pnpm.overrides[name] = nextVersion;
@@ -35,11 +35,11 @@ export function fixMismatches(ctx: Context): Context {
   });
 
   /** Remove eg `{"dependencies": {}, "devDependencies": {}}` */
-  ctx.wrappers.forEach((wrapper) => {
+  ctx.packageJsonFiles.forEach((packageJsonFile) => {
     ctx.dependencyTypes.forEach((dependencyType) => {
-      const deps = wrapper.contents[dependencyType];
+      const deps = packageJsonFile.contents[dependencyType];
       if (deps && Object.values(deps).every(isUndefined)) {
-        delete wrapper.contents[dependencyType];
+        delete packageJsonFile.contents[dependencyType];
       }
     });
   });
