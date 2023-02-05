@@ -40,7 +40,6 @@ export const disk = {
         const rcPath = join(CWD, 'package.json');
         const pjson = readJsonSync(rcPath, { throws: false });
         const rcConfig = pjson?.config?.syncpack;
-        console.log(rcConfig);
         if (isNonEmptyObject(rcConfig)) return rcConfig;
         verbose('no config file found');
         return {};
