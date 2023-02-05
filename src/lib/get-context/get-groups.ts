@@ -1,9 +1,7 @@
-import { isNonEmptyArray, isNonEmptyString, isObject } from 'expect-more';
-import minimatch from 'minimatch';
-import { verbose } from '../log';
-import type { Config, DependencyType } from './get-config/config';
+import { isNonEmptyString } from 'expect-more';
+import type { Config } from './get-config/config';
 import type { InternalConfig } from './get-config/internal-config';
-import type { PackageJsonFile } from './get-package-json-files/package-json-file';
+import type { Instance } from './get-package-json-files/package-json-file/instance';
 
 type Group<T> = T & {
   instances: Instance[];
@@ -11,156 +9,124 @@ type Group<T> = T & {
   isDefault: boolean;
 };
 
-interface Groups {
-  semverGroups: SemverGroup.Any[];
-  versionGroups: VersionGroup.Any[];
-}
-
-export interface Instance {
-  dependencyType: DependencyType;
-  name: string;
-  packageJsonFile: PackageJsonFile;
-  version: string;
-}
-
 export namespace SemverGroup {
   export type Any = Group<Config.SemverGroup.Any>;
   export type Ignored = Group<Config.SemverGroup.Ignored>;
   export type WithRange = Group<Config.SemverGroup.WithRange>;
 }
 
-export namespace VersionGroup {
-  export type Any = Group<Config.VersionGroup.Any>;
-  export type Standard = Group<Config.VersionGroup.Standard>;
-  export type Banned = Group<Config.VersionGroup.Banned>;
-  export type Ignored = Group<Config.VersionGroup.Ignored>;
-  export type Pinned = Group<Config.VersionGroup.Pinned>;
-}
-
-export function getGroups(
-  options: InternalConfig,
-  packageJsonFiles: PackageJsonFile[],
-): Groups {
-  const allInstances: Groups = {
-    semverGroups: options.semverGroups.map(withInstances),
-    versionGroups: options.versionGroups.map(withInstances),
-  };
-
-  for (const packageJsonFile of packageJsonFiles) {
-    const pkgName = packageJsonFile.contents.name || 'packagewithoutaname';
-    for (const dependencyType of options.dependencyTypes) {
-      if (dependencyType === 'workspace') {
-        const name = packageJsonFile.contents?.name;
-        const version = packageJsonFile.contents?.version;
-        addInstance({
-          dependencyType,
-          name,
-          pkgName,
-          version,
-          packageJsonFile: packageJsonFile,
-        });
-      } else if (dependencyType === 'pnpmOverrides') {
-        const versionsByName = packageJsonFile.contents?.pnpm?.overrides;
-        if (!isObject<Record<string, string>>(versionsByName)) continue;
-        const pkgs = Object.entries(versionsByName);
-        for (const [name, version] of pkgs) {
-          addInstance({
-            dependencyType,
-            name,
-            pkgName,
-            version,
-            packageJsonFile: packageJsonFile,
-          });
-        }
-      } else {
-        const versionsByName = packageJsonFile.contents?.[dependencyType];
-        if (!isObject<Record<string, string>>(versionsByName)) continue;
-        const pkgs = Object.entries(versionsByName);
-        for (const [name, version] of pkgs) {
-          addInstance({
-            dependencyType,
-            name,
-            packageJsonFile,
-            pkgName,
-            version,
-          });
-        }
-      }
-    }
-  }
-
-  return allInstances;
-
-  function addInstance(input: {
-    dependencyType: DependencyType;
-    name?: string;
-    packageJsonFile: PackageJsonFile;
-    pkgName: string;
-    version?: string;
-  }): void {
-    const { dependencyType, name, packageJsonFile, pkgName, version } = input;
-    if (!isNonEmptyString(name)) {
-      return verbose('skip instance, no name', input);
-    }
-    if (name.search(new RegExp(options.filter)) === -1) {
-      return verbose('skip instance, name does not match filter', input);
-    }
-    if (!isNonEmptyString(version)) {
-      return verbose('skip instance, no version', input);
-    }
-    const instance = { dependencyType, name, packageJsonFile, version };
-    verbose(
-      `add ${name}@${version} to ${dependencyType} ${packageJsonFile.filePath}`,
-    );
-    groupInstancesBy('semverGroups', dependencyType, pkgName, instance);
-    groupInstancesBy('versionGroups', dependencyType, pkgName, instance);
-  }
-
-  function withInstances<T>(group: T): Group<T> {
-    return {
-      ...group,
+export function getSemverGroups(
+  input: InternalConfig,
+  instances: Instance[],
+): SemverGroup.Any[] {
+  const semverGroups = input.semverGroups.map(
+    (semverGroup): SemverGroup.Any => ({
+      ...semverGroup,
       instances: [],
       instancesByName: {},
-      isDefault:
-        group === options.defaultSemverGroup ||
-        group === options.defaultVersionGroup,
-    };
-  }
+      isDefault: semverGroup === input.defaultSemverGroup,
+    }),
+  );
 
-  function groupInstancesBy(
-    groupName: 'semverGroups' | 'versionGroups',
-    dependencyType: DependencyType,
-    pkgName: string,
-    instance: Instance,
-  ): void {
-    const name = instance.name;
-    const groups = allInstances[groupName];
-    if (!groups.length) return;
-    for (const i in groups) {
-      const group = groups[i];
-      if (matchesGroup(dependencyType, pkgName, name, group)) {
-        if (!group.instancesByName[name]) {
-          group.instancesByName[name] = [];
+  instances.forEach((instance) => {
+    const { name, pkgName } = instance;
+    for (const semverGroup of semverGroups) {
+      if (instance.matchesGroup(semverGroup)) {
+        if (!semverGroup.instancesByName[name]) {
+          semverGroup.instancesByName[name] = [];
         }
-        group.instancesByName[name].push(instance);
-        group.instances.push(instance);
+        semverGroup.instancesByName[name].push(instance);
+        semverGroup.instances.push(instance);
         return;
       }
     }
-    throw new Error(`${name} in ${pkgName} did not match any ${groupName}`);
+    throw new Error(`${name} in ${pkgName} did not match any semverGroups`);
+  });
+
+  return semverGroups;
+}
+
+export namespace VersionGroup {
+  export interface InstanceGroup {
+    hasMismatches: boolean;
+    instances: Instance[];
+    isBanned: boolean;
+    isIgnored: boolean;
+    isInvalid: boolean;
+    name: string;
+    uniques: string[];
   }
 
-  function matchesGroup(
-    dependencyType: DependencyType,
-    pkgName: string,
-    dependencyName: string,
-    group: Config.SemverGroup.Any | Config.VersionGroup.Any,
-  ): boolean {
-    return (
-      (!isNonEmptyArray(group.dependencyTypes) ||
-        group.dependencyTypes.includes(dependencyType)) &&
-      group.packages.some((pattern) => minimatch(pkgName, pattern)) &&
-      group.dependencies.some((pattern) => minimatch(dependencyName, pattern))
-    );
-  }
+  type Base<T> = Group<T> & { instanceGroups: InstanceGroup[] };
+
+  export type Any = Base<Config.VersionGroup.Any>;
+  export type Standard = Base<Config.VersionGroup.Standard>;
+  export type Banned = Base<Config.VersionGroup.Banned>;
+  export type Ignored = Base<Config.VersionGroup.Ignored>;
+  export type Pinned = Base<Config.VersionGroup.Pinned>;
+}
+
+export function getVersionGroups(
+  input: InternalConfig,
+  instances: Instance[],
+): VersionGroup.Any[] {
+  const versionGroups = input.versionGroups.map(
+    (versionGroup): VersionGroup.Any => ({
+      ...versionGroup,
+      instanceGroups: [],
+      instances: [],
+      instancesByName: {},
+      isDefault: versionGroup === input.defaultVersionGroup,
+    }),
+  );
+
+  instances.forEach((instance) => {
+    const { name, pkgName } = instance;
+    for (const versionGroup of versionGroups) {
+      if (instance.matchesGroup(versionGroup)) {
+        if (!versionGroup.instancesByName[name]) {
+          versionGroup.instancesByName[name] = [];
+        }
+        versionGroup.instancesByName[name].push(instance);
+        versionGroup.instances.push(instance);
+        return;
+      }
+    }
+    throw new Error(`${name} in ${pkgName} did not match any versionGroups`);
+  });
+
+  versionGroups.forEach((versionGroup) => {
+    versionGroup.instanceGroups = getInstanceGroups(versionGroup);
+  });
+
+  return versionGroups;
+}
+
+function getInstanceGroups(
+  versionGroup: VersionGroup.Any,
+): VersionGroup.InstanceGroup[] {
+  return Object.entries(versionGroup.instancesByName).map(
+    ([name, instances]): VersionGroup.InstanceGroup => {
+      const pinnedVersion = (versionGroup as VersionGroup.Pinned).pinVersion;
+      const isBanned = (versionGroup as VersionGroup.Banned).isBanned === true;
+      const isIgnored =
+        (versionGroup as VersionGroup.Ignored).isIgnored === true;
+      const hasPinnedVersion = isNonEmptyString(pinnedVersion);
+      const versions = instances.map(({ version }) => version);
+      const uniques = Array.from(new Set(versions));
+      const [version] = uniques;
+      const isUnpinned = hasPinnedVersion && version !== pinnedVersion;
+      const hasMismatches = isBanned || isUnpinned || uniques.length > 1;
+      const isInvalid = !isIgnored && hasMismatches;
+      return {
+        hasMismatches,
+        instances,
+        isBanned,
+        isIgnored,
+        isInvalid,
+        name,
+        uniques,
+      };
+    },
+  );
 }

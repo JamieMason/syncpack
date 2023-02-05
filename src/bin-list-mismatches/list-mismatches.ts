@@ -2,9 +2,8 @@ import chalk from 'chalk';
 import { relative } from 'path';
 import { CWD, ICON } from '../constants';
 import type { Context } from '../lib/get-context';
-import type { Instance } from '../lib/get-context/get-groups';
+import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
 import { getExpectedVersion } from '../lib/get-expected-version';
-import { getVersionGroupInstances } from '../lib/get-version-group-instances';
 
 export function listMismatches(ctx: Context): Context {
   /**
@@ -13,8 +12,9 @@ export function listMismatches(ctx: Context): Context {
    * will then start from index 1.
    */
   ctx.versionGroups.reverse().forEach((versionGroup, i) => {
-    const groups = getVersionGroupInstances(versionGroup);
-    const invalidGroups = groups.filter((group) => group.isInvalid);
+    const invalidGroups = versionGroup.instanceGroups.filter(
+      (group) => group.isInvalid,
+    );
 
     if (invalidGroups.length > 0) {
       ctx.isInvalid = true;

@@ -1,5 +1,7 @@
-import { getExpectedVersion } from '.';
-import type { Instance } from '../get-context/get-groups';
+import { getExpectedVersion as fn } from '.';
+
+type RelaxTypes = (name: string, b: any, c: any) => string | undefined;
+const getExpectedVersion: RelaxTypes = fn;
 
 it('removes every dependency in the group if the group is marked as disallowed', () => {
   expect(
@@ -11,7 +13,7 @@ it('removes every dependency in the group if the group is marked as disallowed',
           { name: 'foo', version: '2.0.0' },
           { name: 'foo', version: '3.0.0' },
           { name: 'foo', version: '1.0.0' },
-        ] as Instance[],
+        ],
       },
       { workspace: false, packageJsonFiles: [] },
     ),
@@ -53,7 +55,7 @@ it('applies the highest installed version third, if --workspace is not set', () 
           { name: 'foo', version: '2.0.0' },
           { name: 'foo', version: '3.0.0' },
           { name: 'foo', version: '1.0.0' },
-        ] as Instance[],
+        ],
       },
       { workspace: false, packageJsonFiles: [] },
     ),

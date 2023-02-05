@@ -1,3 +1,4 @@
+import type { Context } from '../get-context';
 import type { VersionGroup } from '../get-context/get-groups';
 import { getHighestVersion } from './get-highest-version';
 import { getPinnedVersion } from './get-pinned-version';
@@ -5,14 +6,8 @@ import { getWorkspaceVersion } from './get-workspace-version';
 
 export function getExpectedVersion(
   name: string,
-  versionGroup:
-    | Pick<VersionGroup.Banned, 'isBanned' | 'instances'>
-    | Pick<VersionGroup.Pinned, 'instances' | 'pinVersion'>
-    | Pick<VersionGroup.Standard, 'instances'>,
-  ctx: {
-    workspace: boolean;
-    packageJsonFiles: { contents: { name?: string; version?: string } }[];
-  },
+  versionGroup: VersionGroup.Any,
+  ctx: Context,
 ): string | undefined {
   if ('isBanned' in versionGroup && versionGroup.isBanned === true) {
     // remove this dependency
