@@ -17,11 +17,22 @@ export function fixMismatches(ctx: Context): Context {
       if (instanceGroup.hasMismatches && !instanceGroup.isIgnored) {
         const nextVersion = instanceGroup.getExpectedVersion();
         instanceGroup.instances.forEach(
-          ({ dependencyType, version, packageJsonFile }) => {
+          ({
+            dependencyType,
+            dependencyCustomPath,
+            version,
+            packageJsonFile,
+          }) => {
             const root: any = packageJsonFile.contents;
             if (version !== nextVersion) {
               if (dependencyType === 'pnpmOverrides') {
                 root.pnpm.overrides[instanceGroup.name] = nextVersion;
+              } else if (dependencyType === 'customDependencies') {
+                updateObjectNestedKeyFromPath(
+                  root,
+                  dependencyCustomPath as string,
+                  nextVersion,
+                );
               } else {
                 root[dependencyType][instanceGroup.name] = nextVersion;
               }
@@ -43,4 +54,19 @@ export function fixMismatches(ctx: Context): Context {
   });
 
   return ctx;
+}
+
+function updateObjectNestedKeyFromPath(
+  obj: any,
+  nestedPropertyPath: string,
+  value: string | undefined,
+) {
+  const properties = nestedPropertyPath.split('.');
+  const lastKeyIndex = properties.length - 1;
+  for (let i = 0; i < lastKeyIndex; ++i) {
+    const key = properties[i];
+    if (!(key in obj)) obj[key] = {};
+    obj = obj[key];
+  }
+  obj[properties[lastKeyIndex]] = value;
 }

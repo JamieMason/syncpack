@@ -6,6 +6,8 @@ import type { Config, DependencyType } from '../../get-config/config';
 export class Instance {
   /** where this dependency is installed */
   dependencyType: DependencyType;
+  /** if dependencyType is "customDependencies" his associated dependencyCustomPath */
+  dependencyCustomPath?: string;
   /** the name of this dependency */
   name: string;
   /** The package this dependency is installed in this specific time */
@@ -20,8 +22,10 @@ export class Instance {
     name: string,
     packageJsonFile: PackageJsonFile,
     version: string,
+    dependencyCustomPath?: string,
   ) {
     this.dependencyType = dependencyType;
+    this.dependencyCustomPath = dependencyCustomPath;
     this.name = name;
     this.packageJsonFile = packageJsonFile;
     this.pkgName = packageJsonFile.contents.name || 'PACKAGE_JSON_HAS_NO_NAME';

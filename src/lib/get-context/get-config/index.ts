@@ -59,6 +59,12 @@ export const getConfig = (
     ? Boolean(program.workspace)
     : getOption<boolean>('workspace', isBoolean);
 
+  const dependenciesCustomPaths = getOption<Config.DependencyCustomPath[]>(
+    'dependenciesCustomPaths',
+    isArrayOfDependencyCustomPath,
+  );
+  const customDependencies = dependenciesCustomPaths?.length > 0;
+
   const dependencyTypes =
     dev ||
     overrides ||
@@ -75,7 +81,8 @@ export const getConfig = (
             (type === 'pnpmOverrides' && pnpmOverrides) ||
             (type === 'dependencies' && prod) ||
             (type === 'resolutions' && resolutions) ||
-            (type === 'workspace' && workspace),
+            (type === 'workspace' && workspace) ||
+            (type === 'customDependencies' && customDependencies),
         )
       : [...ALL_DEPENDENCY_TYPES];
 
@@ -117,6 +124,7 @@ export const getConfig = (
 
   const finalConfig: InternalConfig = {
     dev,
+    dependenciesCustomPaths,
     filter,
     indent,
     workspace,
@@ -174,6 +182,18 @@ export const getConfig = (
           isObject(value) &&
           isArrayOfStrings(value.packages) &&
           isArrayOfStrings(value.dependencies),
+      )
+    );
+  }
+
+  function isArrayOfDependencyCustomPath(
+    value: unknown,
+  ): value is Config.DependencyCustomPath[] {
+    return (
+      isArray(value) &&
+      value.every(
+        (value: unknown) =>
+          isObject(value) && isString(value.name) && isString(value.path),
       )
     );
   }

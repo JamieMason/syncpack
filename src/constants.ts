@@ -26,6 +26,7 @@ export const ALL_DEPENDENCY_TYPES = [
   'pnpmOverrides',
   'resolutions',
   'workspace',
+  'customDependencies',
 ] as const;
 
 export const RANGE = {
@@ -64,4 +65,5 @@ export const DEFAULT_CONFIG: Config.RcFile = {
   sortFirst: ['name', 'description', 'version', 'author'],
   source: [],
   versionGroups: [],
+  dependenciesCustomPaths: [],
 };

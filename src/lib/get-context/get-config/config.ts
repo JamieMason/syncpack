@@ -66,6 +66,11 @@ export namespace Config {
     }
   }
 
+  /**
+   * Custom property path within package.json files where versions can be found
+   */
+  export type DependencyCustomPath = { name: string; path: string };
+
   /** All valid config which can only be provided via .syncpackrc */
   interface RcFileOnly {
     /**
@@ -86,6 +91,10 @@ export namespace Config {
     versionGroups: VersionGroup.Any[];
     /** */
     semverGroups: SemverGroup.Any[];
+    /** Custom path in the package.json that point to a dependencies
+     * @example {name: 'foo', path: 'x:y.z'}
+     */
+    dependenciesCustomPaths: DependencyCustomPath[];
   }
 
   /** All valid config which can only be provided via the CLI */

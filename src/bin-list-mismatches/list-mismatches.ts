@@ -57,11 +57,20 @@ export function listMismatches(ctx: Context): Context {
       }
 
       instanceGroup.instances.forEach(
-        ({ dependencyType, version, packageJsonFile }) => {
+        ({
+          dependencyType,
+          dependencyCustomPath,
+          version,
+          packageJsonFile,
+        }) => {
           const isMatch = version === expected;
           const isLocal = dependencyType === 'workspace';
           const shortPath = relative(CWD, packageJsonFile.filePath);
-          const loc = isLocal ? 'version' : dependencyType;
+          const loc = isLocal
+            ? 'version'
+            : dependencyType === 'customDependencies'
+            ? `"${dependencyCustomPath}"`
+            : dependencyType;
           if (isMatch) {
             console.log(chalk`{green   ${version} in ${loc} of ${shortPath}}`);
           } else {

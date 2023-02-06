@@ -648,4 +648,48 @@ export const scenarios = {
       },
     );
   },
+
+  /**
+   * A, B & C depend on foo
+   * C has foo at a dependenciesCustomPath 'x:y.z'
+   * The versions mismatch
+   * `0.2.0` is the highest valid semver version
+   * All packages should be fixed to use `0.2.0`
+   */
+  customDepPath() {
+    return createScenario(
+      [
+        {
+          path: 'packages/a/package.json',
+          before: mockPackage('a', { deps: ['foo@0.2.0'] }),
+          after: mockPackage('a', { deps: ['foo@0.2.0'] }),
+        },
+        {
+          path: 'packages/b/package.json',
+          before: mockPackage('b', { devDeps: ['foo@0.1.0'] }),
+          after: mockPackage('b', { devDeps: ['foo@0.2.0'] }),
+        },
+        {
+          path: 'packages/c/package.json',
+          before: mockPackage('c', {
+            otherProps: {
+              'x:y': {
+                z: '0.0.1',
+              },
+            },
+          }),
+          after: mockPackage('c', {
+            otherProps: {
+              'x:y': {
+                z: '0.2.0',
+              },
+            },
+          }),
+        },
+      ],
+      {
+        dependenciesCustomPaths: [{ name: 'foo', path: 'x:y.z' }],
+      },
+    );
+  },
 };

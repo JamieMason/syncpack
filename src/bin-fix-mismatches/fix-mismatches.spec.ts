@@ -137,5 +137,19 @@ describe('fixMismatches', () => {
         scenario.files['packages/c/package.json'].logEntryWhenChanged,
       ]);
     });
+
+    it('fix version in dependenciesCustomPath using the highest installed version', () => {
+      const scenario = scenarios.customDepPath();
+      fixMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+        scenario.files['packages/b/package.json'].diskWriteWhenChanged,
+        scenario.files['packages/c/package.json'].diskWriteWhenChanged,
+      ]);
+      expect(scenario.log.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
+        scenario.files['packages/b/package.json'].logEntryWhenChanged,
+        scenario.files['packages/c/package.json'].logEntryWhenChanged,
+      ]);
+    });
   });
 });

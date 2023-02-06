@@ -19,9 +19,19 @@ export function lintSemverRanges(ctx: Context): Context {
       }
 
       mismatches.forEach(
-        ({ dependencyType, name, version, packageJsonFile }) => {
+        ({
+          dependencyType,
+          dependencyCustomPath,
+          name,
+          version,
+          packageJsonFile,
+        }) => {
+          const loc =
+            dependencyType === 'customDependencies'
+              ? `"${dependencyCustomPath}"`
+              : dependencyType;
           console.log(
-            chalk`{red ✕ ${name}} {red.dim ${version} in ${dependencyType} of ${
+            chalk`{red ✕ ${name}} {red.dim ${version} in ${loc} of ${
               packageJsonFile.contents.name
             } should be ${setSemverRange(semverGroup.range, version)}}`,
           );

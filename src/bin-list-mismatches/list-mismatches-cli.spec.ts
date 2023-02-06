@@ -110,5 +110,25 @@ describe('listMismatches', () => {
         [`  0.1.0 in dependencies of ${normalize(c)}`],
       ]);
     });
+
+    it('warns about the mismatch in customDependencies version', () => {
+      const scenario = scenarios.customDepPath();
+      const a = 'packages/a/package.json';
+      const b = 'packages/b/package.json';
+      const c = 'packages/c/package.json';
+      const customPath = scenario.config.dependenciesCustomPaths?.find(
+        (dep) => (dep.name = 'foo'),
+      )?.path;
+      listMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual(
+        [
+          [`- foo: 0.2.0 is the highest valid semver version in use`],
+          [`  0.2.0 in dependencies of ${normalize(a)}`],
+          [`  0.1.0 in devDependencies of ${normalize(b)}`],
+          [`  0.0.1 in "${customPath}" of ${normalize(c)}`],
+        ].map(([msg]) => [normalize(msg)]),
+      );
+      expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+    });
   });
 });

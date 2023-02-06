@@ -1,8 +1,9 @@
 import { isNonEmptyString } from 'expect-more';
 import type { Disk } from '../../../disk';
+import { isSemver } from '../../../is-semver';
 import { verbose } from '../../../log';
 import { newlines } from '../../../newlines';
-import type { DependencyType } from '../../get-config/config';
+import type { Config, DependencyType } from '../../get-config/config';
 import type { InternalConfig } from '../../get-config/internal-config';
 import type { JsonFile } from '../get-patterns/read-json-safe';
 import { Instance } from './instance';
@@ -76,11 +77,29 @@ export class PackageJsonFile {
   }
 
   getInstances(): Instance[] {
+    const dependencyCustomPathByName =
+      this.program.dependenciesCustomPaths.reduce<Record<string, string>>(
+        (depPathByName, customDep) => {
+          depPathByName[customDep.name] = customDep.path;
+          return depPathByName;
+        },
+        {},
+      );
     return this.program.dependencyTypes
       .flatMap((dependencyType): Instance[] =>
-        this.getDependencyEntries(dependencyType, this.contents).map(
+        this.getDependencyEntries(
+          dependencyType,
+          this.contents,
+          this.program.dependenciesCustomPaths,
+        ).map(
           ([name, version]) =>
-            new Instance(dependencyType, name, this, version),
+            new Instance(
+              dependencyType,
+              name,
+              this,
+              version,
+              dependencyCustomPathByName[name],
+            ),
         ),
       )
       .filter((instance) => {
@@ -105,6 +124,7 @@ export class PackageJsonFile {
   getDependencyEntries(
     dependencyType: DependencyType,
     contents: PackageJson,
+    dependenciesCustomPaths: Config.DependencyCustomPath[],
   ): [string, string][] {
     switch (dependencyType) {
       case 'dependencies':
@@ -120,6 +140,34 @@ export class PackageJsonFile {
       case 'pnpmOverrides': {
         return Object.entries(contents?.pnpm?.overrides || {});
       }
+      case 'customDependencies': {
+        return this.getCustomDependenciesEntries(
+          contents,
+          dependenciesCustomPaths,
+        );
+      }
     }
+  }
+
+  getCustomDependenciesEntries(
+    contents: PackageJson,
+    dependenciesCustomPaths: Config.DependencyCustomPath[],
+  ): [string, string][] {
+    return dependenciesCustomPaths.map((dependencyCustomPath) =>
+      this.getCustomDependencyEntries(contents, dependencyCustomPath),
+    );
+  }
+
+  getCustomDependencyEntries(
+    contents: PackageJson,
+    dependencyCustomPath: Config.DependencyCustomPath,
+  ): [string, string] {
+    const properties = dependencyCustomPath.path.split('.');
+    // That's bit bad looking but reduce is works really well for the job here
+    const version = properties.reduce<Record<string, unknown>>(
+      (prev, curr) => prev && (prev[curr] as Record<string, unknown>),
+      contents,
+    ) as unknown as string;
+    return [dependencyCustomPath.name, isSemver(version) ? version : ''];
   }
 }
