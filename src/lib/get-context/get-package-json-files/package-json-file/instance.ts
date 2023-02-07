@@ -1,7 +1,10 @@
 import { isNonEmptyArray } from 'expect-more';
 import minimatch from 'minimatch';
 import type { PackageJsonFile } from '.';
-import type { Config, DependencyType } from '../../get-config/config';
+import { setSemverRange } from '../../../set-semver-range';
+import type { DependencyType, ValidRange } from '../../get-config/config';
+import type { SemverGroup } from '../../get-groups/semver-group';
+import type { VersionGroup } from '../../get-groups/version-group';
 
 export class Instance {
   /** where this dependency is installed */
@@ -28,7 +31,25 @@ export class Instance {
     this.version = version;
   }
 
-  matchesGroup(group: Config.SemverGroup.Any | Config.VersionGroup.Any) {
+  hasRange(range: ValidRange): boolean {
+    return this.version === setSemverRange(range, this.version);
+  }
+
+  setRange(range: ValidRange): void {
+    this.setVersion(setSemverRange(range, this.version));
+  }
+
+  setVersion(version: string): void {
+    const root: any = this.packageJsonFile.contents;
+    if (this.dependencyType === 'pnpmOverrides') {
+      root.pnpm.overrides[this.name] = version;
+    } else {
+      root[this.dependencyType][this.name] = version;
+    }
+    this.version = version;
+  }
+
+  matchesGroup(group: SemverGroup | VersionGroup): boolean {
     return (
       group.packages.some((pattern) => minimatch(this.pkgName, pattern)) &&
       group.dependencies.some((pattern) => minimatch(this.name, pattern)) &&

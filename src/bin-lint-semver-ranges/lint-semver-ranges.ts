@@ -1,38 +1,38 @@
 import chalk from 'chalk';
 import type { Context } from '../lib/get-context';
-import { isValidSemverRange } from '../lib/is-semver';
-import { listSemverGroupMismatches } from '../lib/list-semver-group-mismatches';
+import type { ValidRange } from '../lib/get-context/get-config/config';
+import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
+import { logSemverGroupHeader } from '../lib/log';
 import { setSemverRange } from '../lib/set-semver-range';
 
 export function lintSemverRanges(ctx: Context): Context {
-  /**
-   * Reverse the list so the default/ungrouped semver group is rendered first
-   * (appears at the top). The actual semver groups which the user configured
-   * will then start from index 1.
-   */
   ctx.semverGroups.reverse().forEach((semverGroup, i) => {
-    if ('range' in semverGroup && isValidSemverRange(semverGroup.range)) {
-      const mismatches = listSemverGroupMismatches(semverGroup);
+    const invalidInstances = semverGroup.getInvalidInstances();
 
-      if (!semverGroup.isDefault && mismatches.length > 0) {
-        console.log(chalk`{dim = Semver Group ${i} ${'='.repeat(63)}}`);
-      }
+    // Nothing to do if there are no mismatches
+    if (invalidInstances.length === 0) return;
 
-      mismatches.forEach(
-        ({ dependencyType, name, version, packageJsonFile }) => {
-          console.log(
-            chalk`{red ✕ ${name}} {red.dim ${version} in ${dependencyType} of ${
-              packageJsonFile.contents.name
-            } should be ${setSemverRange(semverGroup.range, version)}}`,
-          );
-        },
-      );
+    // Record that this project has mismatches, so that eg. the CLI can exit
+    // with the correct status code.
+    ctx.isInvalid = true;
 
-      if (mismatches.length > 0) {
-        ctx.isInvalid = true;
-      }
-    }
+    // Annotate user-defined version groups
+    if (!semverGroup.isDefault) logSemverGroupHeader(i);
+
+    // Log the mismatches
+    invalidInstances.forEach((instance) => {
+      logSemverRangeMismatch(semverGroup.range, instance);
+    });
   });
 
   return ctx;
+}
+
+function logSemverRangeMismatch(range: ValidRange, instance: Instance): void {
+  const { dependencyType, name, packageJsonFile, version } = instance;
+  console.log(
+    chalk`{red ✕ ${name}} {red.dim ${version} in ${dependencyType} of ${
+      packageJsonFile.contents.name
+    } should be ${setSemverRange(range, version)}}`,
+  );
 }

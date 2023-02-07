@@ -4,11 +4,6 @@ import type { Context } from '../lib/get-context';
 import { logVersionGroupHeader } from '../lib/log';
 
 export function list(ctx: Context): Context {
-  /**
-   * Reverse the list so the default/ungrouped version group is rendered first
-   * (appears at the top). The actual version groups which the user configured
-   * will then start from index 1.
-   */
   ctx.versionGroups.reverse().forEach((versionGroup, i) => {
     if (versionGroup.instanceGroups.some((group) => group.isInvalid)) {
       ctx.isInvalid = true;

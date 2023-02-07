@@ -1,25 +1,13 @@
-import type { Config } from '../get-config/config';
 import type { InternalConfig } from '../get-config/internal-config';
 import type { Instance } from '../get-package-json-files/package-json-file/instance';
-import type { Group } from './types';
-
-export namespace SemverGroup {
-  export type Any = Group<Config.SemverGroup.Any>;
-  export type Ignored = Group<Config.SemverGroup.Ignored>;
-  export type WithRange = Group<Config.SemverGroup.WithRange>;
-}
+import { SemverGroup } from './semver-group';
 
 export function getSemverGroups(
   input: InternalConfig,
   instances: Instance[],
-): SemverGroup.Any[] {
+): SemverGroup[] {
   const semverGroups = input.semverGroups.map(
-    (semverGroup): SemverGroup.Any => ({
-      ...semverGroup,
-      instances: [],
-      instancesByName: {},
-      isDefault: semverGroup === input.defaultSemverGroup,
-    }),
+    (semverGroup) => new SemverGroup(input, semverGroup),
   );
 
   instances.forEach((instance) => {

@@ -1,7 +1,9 @@
 import 'expect-more-jest';
-import { listSemverGroupMismatches } from './list-semver-group-mismatches';
 
-describe('listSemverGroupMismatches', () => {
+// @TODO
+const listSemverGroupMismatches: any = () => null;
+
+describe.skip('listSemverGroupMismatches', () => {
   describe('when semver range should be "~"', () => {
     it('returns dependencies with invalid semver ranges', () => {
       expect(

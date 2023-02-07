@@ -25,6 +25,10 @@ export function fileUnchanged(filePath: string): void {
   console.log(chalk.dim(ICON.skip), chalk.dim(relative(CWD, filePath)));
 }
 
+export function logSemverGroupHeader(order: number): void {
+  console.log(chalk`{dim = Semver Group ${order} ${'='.repeat(63)}}`);
+}
+
 export function logVersionGroupHeader(order: number): void {
   console.log(chalk`{dim = Version Group ${order} ${'='.repeat(63)}}`);
 }
