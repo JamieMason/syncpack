@@ -26,7 +26,7 @@ export class InstanceGroup {
     const isIgnored = versionGroup.isIgnored === true;
     const hasPinnedVersion = isNonEmptyString(pinnedVersion);
     const versions = instances.map(({ version }) => version);
-    const uniques = Array.from(new Set(versions));
+    const uniques = Array.from(new Set(versions)).sort();
     const [version] = uniques;
     const isUnpinned = hasPinnedVersion && version !== pinnedVersion;
     const hasMismatches = isBanned || isUnpinned || uniques.length > 1;
