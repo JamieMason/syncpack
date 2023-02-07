@@ -58,7 +58,7 @@ export function getPatterns(disk: Disk) {
     }
 
     function addRootDir(patterns: string[]): string[] {
-      return ['.', ...patterns];
+      return ['package.json', ...patterns];
     }
 
     function limitToPackageJson(patterns: string[]): string[] {

@@ -1,4 +1,5 @@
 import { R } from '@mobily/ts-belt';
+import { normalize } from 'path';
 import { mockDisk } from '../../../../../test/mock-disk';
 import { BaseError } from '../../../error';
 import { getPnpmPatterns } from './get-pnpm-patterns';
@@ -12,7 +13,7 @@ it('returns an R.Ok of strings when found', () => {
 it('returns an R.Error when disk throws', () => {
   const disk = mockDisk();
   const thrownError = new BaseError(
-    'Failed to read YAML file at /fake/dir/pnpm-workspace.yaml',
+    `Failed to read YAML file at ${normalize('/fake/dir/pnpm-workspace.yaml')}`,
   );
   disk.readYamlFileSync.mockImplementation(() => {
     throw thrownError;

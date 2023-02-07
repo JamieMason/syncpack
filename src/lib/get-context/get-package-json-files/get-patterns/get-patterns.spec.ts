@@ -12,9 +12,9 @@ it('returns R.Ok of default patterns when nothing is available', () => {
 
 it('CLI --source options take precedence', () => {
   const disk = mockDisk();
-  const program = getConfig(disk, { source: ['./foo/package.json'] });
+  const program = getConfig(disk, { source: ['foo/package.json'] });
   expect(getPatterns(disk)(program)).toEqual(
-    R.Ok(['./package.json', './foo/package.json']),
+    R.Ok(['package.json', 'foo/package.json']),
   );
 });
 
@@ -23,12 +23,12 @@ describe('Yarn takes precedence after CLI --source options', () => {
     const disk = mockDisk();
     const program = getConfig(disk, {});
     disk.readFileSync.mockImplementation((filePath) => {
-      if (filePath === '/fake/dir/package.json') {
-        return JSON.stringify({ workspaces: ['./yarn/*'] });
+      if (filePath.endsWith('package.json')) {
+        return JSON.stringify({ workspaces: ['yarn/*'] });
       }
     });
     expect(getPatterns(disk)(program)).toEqual(
-      R.Ok(['./package.json', './yarn/*/package.json']),
+      R.Ok(['package.json', 'yarn/*/package.json']),
     );
   });
 
@@ -36,7 +36,7 @@ describe('Yarn takes precedence after CLI --source options', () => {
     const disk = mockDisk();
     const program = getConfig(disk, {});
     disk.readFileSync.mockImplementation((filePath) => {
-      if (filePath === '/fake/dir/package.json') {
+      if (filePath.endsWith('package.json')) {
         return 'wut?';
       }
     });
@@ -49,10 +49,10 @@ describe('Pnpm takes precedence after Yarn', () => {
     const disk = mockDisk();
     const program = getConfig(disk, {});
     disk.readYamlFileSync.mockImplementation(() => ({
-      packages: ['./pnpm/*'],
+      packages: ['pnpm/*'],
     }));
     expect(getPatterns(disk)(program)).toEqual(
-      R.Ok(['./package.json', './pnpm/*/package.json']),
+      R.Ok(['package.json', 'pnpm/*/package.json']),
     );
   });
 
@@ -71,12 +71,12 @@ describe('Lerna takes precedence after Pnpm', () => {
     const disk = mockDisk();
     const program = getConfig(disk, {});
     disk.readFileSync.mockImplementation((filePath) => {
-      if (filePath === '/fake/dir/lerna.json') {
-        return JSON.stringify({ packages: ['./lerna/*'] });
+      if (filePath.endsWith('lerna.json')) {
+        return JSON.stringify({ packages: ['lerna/*'] });
       }
     });
     expect(getPatterns(disk)(program)).toEqual(
-      R.Ok(['./package.json', './lerna/*/package.json']),
+      R.Ok(['package.json', 'lerna/*/package.json']),
     );
   });
 
@@ -84,7 +84,7 @@ describe('Lerna takes precedence after Pnpm', () => {
     const disk = mockDisk();
     const program = getConfig(disk, {});
     disk.readFileSync.mockImplementation((filePath) => {
-      if (filePath === '/fake/dir/package.json') {
+      if (filePath.endsWith('package.json')) {
         return 'wut?';
       }
     });

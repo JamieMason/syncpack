@@ -1,4 +1,5 @@
 import { R } from '@mobily/ts-belt';
+import { normalize } from 'path';
 import { mockDisk } from '../../../../../test/mock-disk';
 import { BaseError } from '../../../error';
 import { getLernaPatterns } from './get-lerna-patterns';
@@ -12,7 +13,7 @@ it('returns an R.Ok of strings when found', () => {
 it('returns an R.Error when disk throws', () => {
   const disk = mockDisk();
   const thrownError = new BaseError(
-    'Failed to read JSON file at /fake/dir/lerna.json',
+    `Failed to read JSON file at ${normalize('/fake/dir/lerna.json')}`,
   );
   disk.readFileSync.mockImplementation(() => {
     throw thrownError;
@@ -23,7 +24,7 @@ it('returns an R.Error when disk throws', () => {
 it('returns an R.Error when data is not valid JSON', () => {
   const disk = mockDisk();
   const thrownError = new BaseError(
-    'Failed to parse JSON file at /fake/dir/lerna.json',
+    `Failed to parse JSON file at ${normalize('/fake/dir/lerna.json')}`,
   );
   disk.readFileSync.mockReturnValue('wut?');
   expect(getLernaPatterns(disk)()).toEqual(R.Error(thrownError));

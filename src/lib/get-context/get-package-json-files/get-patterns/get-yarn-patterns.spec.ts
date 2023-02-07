@@ -1,4 +1,5 @@
 import { R } from '@mobily/ts-belt';
+import { normalize } from 'path';
 import { mockDisk } from '../../../../../test/mock-disk';
 import { BaseError } from '../../../error';
 import { getYarnPatterns } from './get-yarn-patterns';
@@ -44,7 +45,7 @@ describe('when Yarn config is at .workspaces.packages[]', () => {
 it('returns an R.Error when disk throws', () => {
   const disk = mockDisk();
   const thrownError = new BaseError(
-    'Failed to read JSON file at /fake/dir/package.json',
+    `Failed to read JSON file at ${normalize('/fake/dir/package.json')}`,
   );
   disk.readFileSync.mockImplementation(() => {
     throw thrownError;
@@ -55,7 +56,7 @@ it('returns an R.Error when disk throws', () => {
 it('returns an R.Error when data is not valid JSON', () => {
   const disk = mockDisk();
   const thrownError = new BaseError(
-    'Failed to parse JSON file at /fake/dir/package.json',
+    `Failed to parse JSON file at ${normalize('/fake/dir/package.json')}`,
   );
   disk.readFileSync.mockReturnValue('wut?');
   expect(getYarnPatterns(disk)()).toEqual(R.Error(thrownError));
