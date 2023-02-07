@@ -157,6 +157,7 @@ describe('getContext', () => {
                   filePath,
                   json,
                   program: expect.toBeNonEmptyObject(),
+                  shortPath: 'package.json',
                 },
               ],
             }),

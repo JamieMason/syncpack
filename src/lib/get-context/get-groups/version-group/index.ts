@@ -44,4 +44,8 @@ export class VersionGroup {
     this.packages = versionGroup.packages;
     this.pinVersion = (versionGroup as Pinned).pinVersion;
   }
+
+  getInvalidInstanceGroups(): InstanceGroup[] {
+    return this.instanceGroups.filter((group) => group.isInvalid);
+  }
 }

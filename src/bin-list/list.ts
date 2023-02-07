@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { ICON } from '../constants';
 import type { Context } from '../lib/get-context';
+import { logVersionGroupHeader } from '../lib/log';
 
 export function list(ctx: Context): Context {
   /**
@@ -14,7 +15,7 @@ export function list(ctx: Context): Context {
     }
 
     if (!versionGroup.isDefault) {
-      console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
+      logVersionGroupHeader(i);
     }
 
     versionGroup.instanceGroups.forEach((instanceGroup) => {

@@ -60,13 +60,20 @@ export class InstanceGroup {
   }
 
   /**
-   * If this dependency is a package developed locally in this monorepo, we
-   * should use its version as the source of truth.
+   * If this dependency is a package developed locally, we should use its
+   * version as the source of truth.
    */
   getWorkspaceVersion() {
-    return (
-      this.instances.find((instance) => instance.dependencyType === 'workspace')
-        ?.packageJsonFile.contents.version || ''
+    return this.getWorkspaceInstance()?.packageJsonFile.contents.version || '';
+  }
+
+  /**
+   * Find instance of this dependency which is a package developed locally in
+   * this monorepo.
+   */
+  getWorkspaceInstance(): Instance | undefined {
+    return this.instances.find(
+      (instance) => instance.dependencyType === 'workspace',
     );
   }
 }

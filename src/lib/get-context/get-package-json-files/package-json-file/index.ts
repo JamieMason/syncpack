@@ -1,4 +1,6 @@
 import { isNonEmptyString } from 'expect-more';
+import { relative } from 'path';
+import { CWD } from '../../../../constants';
 import type { Disk } from '../../../disk';
 import { verbose } from '../../../log';
 import { newlines } from '../../../newlines';
@@ -47,6 +49,9 @@ export class PackageJsonFile {
   /** resolved configuration */
   readonly program: InternalConfig;
 
+  /** relative path on disk to this file */
+  readonly shortPath: string;
+
   constructor(
     jsonFile: JsonFile<PackageJson>,
     program: InternalConfig,
@@ -57,6 +62,7 @@ export class PackageJsonFile {
     this.filePath = jsonFile.filePath;
     this.json = jsonFile.json;
     this.program = program;
+    this.shortPath = relative(CWD, jsonFile.filePath);
   }
 
   hasChanged(): boolean {

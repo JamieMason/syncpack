@@ -1,6 +1,6 @@
-import chalk from 'chalk';
 import { isUndefined } from 'expect-more';
 import type { Context } from '../lib/get-context';
+import { logVersionGroupHeader } from '../lib/log';
 
 export function fixMismatches(ctx: Context): Context {
   /**
@@ -10,7 +10,7 @@ export function fixMismatches(ctx: Context): Context {
    */
   ctx.versionGroups.reverse().forEach((versionGroup, i) => {
     if (!versionGroup.isDefault) {
-      console.log(chalk`{dim = Version Group ${i} ${'='.repeat(63)}}`);
+      logVersionGroupHeader(i);
     }
 
     versionGroup.instanceGroups.forEach((instanceGroup) => {
