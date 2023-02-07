@@ -1,8 +1,7 @@
 import chalk from 'chalk';
 import { isString } from 'expect-more';
-import { relative } from 'path';
 import { inspect } from 'util';
-import { CWD, ICON } from '../constants';
+import { ICON } from '../constants';
 
 export function verbose(...values: unknown[]): void {
   if (process.env.SYNCPACK_VERBOSE) {
@@ -17,18 +16,34 @@ export function verbose(...values: unknown[]): void {
   }
 }
 
-export function fileChanged(filePath: string): void {
-  console.log(chalk.green(ICON.tick), relative(CWD, filePath));
+export function fixed(message: string): void {
+  console.log(chalk`{green ${ICON.tick}}`, message);
 }
 
-export function fileUnchanged(filePath: string): void {
-  console.log(chalk.dim(ICON.skip), chalk.dim(relative(CWD, filePath)));
+export function skip(message: string): void {
+  console.log(chalk.dim(ICON.skip), chalk.dim(message));
 }
 
-export function logSemverGroupHeader(order: number): void {
+export function semverGroupHeader(order: number): void {
   console.log(chalk`{dim = Semver Group ${order} ${'='.repeat(63)}}`);
 }
 
-export function logVersionGroupHeader(order: number): void {
+export function versionGroupHeader(order: number): void {
   console.log(chalk`{dim = Version Group ${order} ${'='.repeat(63)}}`);
+}
+
+export function valid(message: string, comment?: string): void {
+  if (comment) {
+    console.log(chalk`{dim ${ICON.skip}} ${message} {dim ${comment}}`);
+  } else {
+    console.log(chalk`{dim ${ICON.skip}} ${message}`);
+  }
+}
+
+export function invalid(message: string, comment?: string): void {
+  if (comment) {
+    console.log(chalk`{red ${ICON.cross}} ${message} {dim ${comment}}`);
+  } else {
+    console.log(chalk`{red ${ICON.cross}} ${message}`);
+  }
 }

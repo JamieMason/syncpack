@@ -5,9 +5,9 @@ export function writeIfChanged(ctx: Context): Context {
   ctx.packageJsonFiles.forEach((packageJsonFile) => {
     if (packageJsonFile.hasChanged()) {
       packageJsonFile.write();
-      log.fileChanged(packageJsonFile.filePath);
+      log.fixed(packageJsonFile.shortPath);
     } else {
-      log.fileUnchanged(packageJsonFile.filePath);
+      log.skip(packageJsonFile.shortPath);
     }
   });
   return ctx;

@@ -8,6 +8,7 @@ export const DEFAULT_SOURCES = ['package.json', 'packages/*/package.json'];
 
 /** Single source of truth for icons used in output */
 export const ICON = {
+  rightArrow: '→',
   cross: '✘',
   debug: '?',
   skip: '-',

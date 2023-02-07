@@ -1,9 +1,8 @@
 import chalk from 'chalk';
-import { ICON } from '../constants';
 import type { Context } from '../lib/get-context';
 import type { InstanceGroup } from '../lib/get-context/get-groups/version-group/instance-group';
 import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
-import { logVersionGroupHeader } from '../lib/log';
+import * as log from '../lib/log';
 
 export function listMismatches(ctx: Context): Context {
   ctx.versionGroups.reverse().forEach((versionGroup, i) => {
@@ -17,16 +16,17 @@ export function listMismatches(ctx: Context): Context {
     ctx.isInvalid = true;
 
     // Annotate user-defined version groups
-    if (!versionGroup.isDefault) logVersionGroupHeader(i);
+    if (!versionGroup.isDefault) log.versionGroupHeader(i);
 
     // Log the mismatches
     invalidGroups.forEach((instanceGroup) => {
       const name = instanceGroup.name;
       const workspaceInstance = instanceGroup.getWorkspaceInstance();
-      const expected = instanceGroup.getExpectedVersion();
+      const expected = instanceGroup.getExpectedVersion() || 'nice b';
       const isBanned = instanceGroup.versionGroup.isBanned;
       const isUnpinned = instanceGroup.isUnpinned;
 
+      // Log the dependency name
       if (isBanned) {
         logBanned(name);
       } else if (isUnpinned) {
@@ -37,10 +37,9 @@ export function listMismatches(ctx: Context): Context {
         logHighestVersionMismatch(expected, name);
       }
 
+      // Log each of the dependencies mismatches
       instanceGroup.instances.forEach((instance) => {
-        if (instance.version === expected) {
-          logVersionMatch(instance);
-        } else {
+        if (instance.version !== expected) {
           logVersionMismatch(instance);
         }
       });
@@ -49,28 +48,16 @@ export function listMismatches(ctx: Context): Context {
 
   return ctx;
 
-  function logVersionMatch(instance: Instance): void {
-    const { dependencyType, version, packageJsonFile } = instance;
-    const isWorkspace = dependencyType === 'workspace';
-    const shortPath = packageJsonFile.shortPath;
-    const loc = isWorkspace ? 'version' : dependencyType;
-    console.log(chalk`{green   ${version} in ${loc} of ${shortPath}}`);
+  function logBanned(name: string) {
+    log.invalid(name, 'is banned in this version group');
   }
 
-  function logVersionMismatch(instance: Instance): void {
-    const { dependencyType, version, packageJsonFile } = instance;
-    const isWorkspace = dependencyType === 'workspace';
-    const shortPath = packageJsonFile.shortPath;
-    const loc = isWorkspace ? 'version' : dependencyType;
-    console.log(chalk`{red   ${version} in ${loc} of ${shortPath}}`);
-  }
-
-  function logHighestVersionMismatch(
-    expected: string | undefined,
-    name: string,
-  ) {
-    const reason = chalk`{dim : ${expected} is the highest valid semver version in use}`;
-    console.log(chalk`{dim -} ${name}${reason}`);
+  function logPinVersionMismatch(name: string, instanceGroup: InstanceGroup) {
+    const pinVersion = instanceGroup.versionGroup.pinVersion;
+    log.invalid(
+      name,
+      chalk`is pinned in this version group at {reset.green ${pinVersion}}`,
+    );
   }
 
   function logWorkspaceMismatch(
@@ -79,19 +66,26 @@ export function listMismatches(ctx: Context): Context {
     name: string,
   ) {
     const shortPath = workspaceInstance.packageJsonFile.shortPath;
-    const reason = chalk`{dim : ${expected} is developed in this repo at ${shortPath}}`;
-    console.log(chalk`{dim -} ${name}${reason}`);
-  }
-
-  function logPinVersionMismatch(name: string, instanceGroup: InstanceGroup) {
-    console.log(
-      chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group to be pinned at ${instanceGroup.versionGroup.pinVersion}}`,
+    log.invalid(
+      name,
+      chalk`{reset.green ${expected}} {dim is developed in this repo at ${shortPath}}`,
     );
   }
 
-  function logBanned(name: string) {
-    console.log(
-      chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`,
+  function logHighestVersionMismatch(
+    expected: string | undefined,
+    name: string,
+  ) {
+    log.invalid(
+      name,
+      chalk`{reset.green ${expected}} {dim is the highest valid semver version in use}`,
     );
+  }
+
+  function logVersionMismatch(instance: Instance): void {
+    const type = instance.dependencyType;
+    const shortPath = instance.packageJsonFile.shortPath;
+    const actual = instance.version;
+    console.log(chalk`  {red ${actual}} {dim in ${type} of ${shortPath}}`);
   }
 }

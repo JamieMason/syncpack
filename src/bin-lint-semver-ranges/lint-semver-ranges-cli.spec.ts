@@ -11,11 +11,16 @@ describe('lintSemverRanges', () => {
     const scenario = scenarios.semverRangesDoNotMatchConfig();
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
-      ['✕ b 0.1.0 in devDependencies of a should be ~0.1.0'],
-      ['✕ c 0.1.0 in overrides of a should be ~0.1.0'],
-      ['✕ d 0.1.0 in pnpmOverrides of a should be ~0.1.0'],
-      ['✕ e 0.1.0 in peerDependencies of a should be ~0.1.0'],
-      ['✕ f 0.1.0 in resolutions of a should be ~0.1.0'],
+      ['✘ b'],
+      ['  0.1.0 → ~0.1.0 in devDependencies of packages/a/package.json'],
+      ['✘ c'],
+      ['  0.1.0 → ~0.1.0 in overrides of packages/a/package.json'],
+      ['✘ d'],
+      ['  0.1.0 → ~0.1.0 in pnpmOverrides of packages/a/package.json'],
+      ['✘ e'],
+      ['  0.1.0 → ~0.1.0 in peerDependencies of packages/a/package.json'],
+      ['✘ f'],
+      ['  0.1.0 → ~0.1.0 in resolutions of packages/a/package.json'],
     ]);
   });
 
@@ -23,11 +28,16 @@ describe('lintSemverRanges', () => {
     const scenario = scenarios.semverRangesDoNotMatchConfigWildcard();
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
-      ['✕ b 0.1.0 in devDependencies of a should be *'],
-      ['✕ c 0.1.0 in overrides of a should be *'],
-      ['✕ d 0.1.0 in pnpmOverrides of a should be *'],
-      ['✕ e 0.1.0 in peerDependencies of a should be *'],
-      ['✕ f 0.1.0 in resolutions of a should be *'],
+      ['✘ b'],
+      ['  0.1.0 → * in devDependencies of packages/a/package.json'],
+      ['✘ c'],
+      ['  0.1.0 → * in overrides of packages/a/package.json'],
+      ['✘ d'],
+      ['  0.1.0 → * in pnpmOverrides of packages/a/package.json'],
+      ['✘ e'],
+      ['  0.1.0 → * in peerDependencies of packages/a/package.json'],
+      ['✘ f'],
+      ['  0.1.0 → * in resolutions of packages/a/package.json'],
     ]);
   });
 
@@ -35,7 +45,8 @@ describe('lintSemverRanges', () => {
     const scenario = scenarios.semverIsIgnored();
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
-      ['✕ foo 0.1.0 in dependencies of a should be ~0.1.0'],
+      ['✘ foo'],
+      ['  0.1.0 → ~0.1.0 in dependencies of packages/a/package.json'],
     ]);
   });
 });

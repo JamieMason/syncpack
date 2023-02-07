@@ -1,6 +1,7 @@
 import 'expect-more-jest';
 import { normalize } from 'path';
 import { scenarios } from '../../test/scenarios';
+import { ICON } from '../constants';
 import { listMismatchesCli } from './list-mismatches-cli';
 
 describe('listMismatches', () => {
@@ -19,10 +20,13 @@ describe('listMismatches', () => {
           listMismatchesCli(scenario.config, scenario.disk);
           expect(scenario.log.mock.calls).toEqual(
             [
-              [`- c: 0.0.1 is developed in this repo at ${normalize(c)}`],
+              [
+                `${ICON.cross} c 0.0.1 is developed in this repo at ${normalize(
+                  c,
+                )}`,
+              ],
               [`  0.1.0 in dependencies of ${normalize(a)}`],
               [`  0.2.0 in devDependencies of ${normalize(b)}`],
-              [`  0.0.1 in version of ${normalize(c)}`],
             ].map(([msg]) => [normalize(msg)]),
           );
           expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
@@ -39,10 +43,13 @@ describe('listMismatches', () => {
           listMismatchesCli(scenario.config, scenario.disk);
           expect(scenario.log.mock.calls).toEqual(
             [
-              [`- c: 0.0.1 is developed in this repo at ${normalize(bc)}`],
+              [
+                `${ICON.cross} c 0.0.1 is developed in this repo at ${normalize(
+                  bc,
+                )}`,
+              ],
               [`  0.1.0 in dependencies of ${normalize(aa)}`],
               [`  0.2.0 in devDependencies of ${normalize(bb)}`],
-              [`  0.0.1 in version of ${normalize(bc)}`],
             ].map(([msg]) => [normalize(msg)]),
           );
           expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
@@ -58,10 +65,9 @@ describe('listMismatches', () => {
       const d = 'packages/d/package.json';
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        ['- foo: 0.3.0 is the highest valid semver version in use'],
+        [`${ICON.cross} foo 0.3.0 is the highest valid semver version in use`],
         [`  link:vendor/foo-0.1.0 in dependencies of ${normalize(a)}`],
         [`  link:vendor/foo-0.2.0 in dependencies of ${normalize(b)}`],
-        [`  0.3.0 in dependencies of ${normalize(c)}`],
         [`  0.2.0 in dependencies of ${normalize(d)}`],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
@@ -73,7 +79,7 @@ describe('listMismatches', () => {
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         [expect.stringMatching(/Version Group 1/)],
-        ['✘ bar is defined in this version group as banned from use'],
+        [`${ICON.cross} bar is banned in this version group`],
         [`  0.2.0 in dependencies of ${normalize(b)}`],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
@@ -92,7 +98,7 @@ describe('listMismatches', () => {
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         [expect.stringMatching(/Version Group 1/)],
-        ['✘ bar is defined in this version group to be pinned at 2.2.2'],
+        [`${ICON.cross} bar is pinned in this version group at 2.2.2`],
         [`  0.2.0 in dependencies of ${normalize(a)}`],
       ]);
     });
@@ -100,13 +106,11 @@ describe('listMismatches', () => {
     it('uses the highest installed version', () => {
       const scenario = scenarios.useHighestVersion();
       const a = 'packages/a/package.json';
-      const b = 'packages/b/package.json';
       const c = 'packages/c/package.json';
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        ['- bar: 0.3.0 is the highest valid semver version in use'],
+        [`${ICON.cross} bar 0.3.0 is the highest valid semver version in use`],
         [`  0.2.0 in dependencies of ${normalize(a)}`],
-        [`  0.3.0 in dependencies of ${normalize(b)}`],
         [`  0.1.0 in dependencies of ${normalize(c)}`],
       ]);
     });

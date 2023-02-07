@@ -63,7 +63,7 @@ describe('list', () => {
       expect(scenario.log.mock.calls).toEqual([
         ['- foo 0.1.0'],
         [expect.stringMatching(/Version Group 1/)],
-        ['✘ bar is defined in this version group as banned from use'],
+        ['✘ bar is banned in this version group'],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });

@@ -2,12 +2,12 @@ import chalk from 'chalk';
 import { ICON } from '../constants';
 import type { Context } from '../lib/get-context';
 import type { InstanceGroup } from '../lib/get-context/get-groups/version-group/instance-group';
-import { logVersionGroupHeader } from '../lib/log';
+import * as log from '../lib/log';
 
 export function list(ctx: Context): Context {
   ctx.versionGroups.reverse().forEach((versionGroup, i) => {
     // Annotate user-defined version groups
-    if (!versionGroup.isDefault) logVersionGroupHeader(i);
+    if (!versionGroup.isDefault) log.versionGroupHeader(i);
 
     versionGroup.instanceGroups.forEach((instanceGroup) => {
       const expected = instanceGroup.getExpectedVersion();
@@ -58,7 +58,7 @@ export function list(ctx: Context): Context {
 
   function logBanned(instanceGroup: InstanceGroup): void {
     console.log(
-      chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is defined in this version group as banned from use}`,
+      chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is banned in this version group}`,
     );
   }
 }
