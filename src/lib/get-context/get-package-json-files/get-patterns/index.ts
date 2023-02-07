@@ -1,10 +1,9 @@
+import { A, F, pipe, R } from '@mobily/ts-belt';
 import { isArrayOfStrings } from 'expect-more';
-import { flow, pipe } from 'fp-ts/lib/function';
-import * as O from 'fp-ts/lib/Option';
 import { DEFAULT_SOURCES } from '../../../../constants';
 import type { Disk } from '../../../disk';
+import { BaseError } from '../../../error';
 import type { Config } from '../../get-config/config';
-import { tapNone, tapOption } from '../tap';
 import { getLernaPatterns } from './get-lerna-patterns';
 import { getPnpmPatterns } from './get-pnpm-patterns';
 import { getYarnPatterns } from './get-yarn-patterns';
@@ -16,29 +15,56 @@ import { getYarnPatterns } from './get-yarn-patterns';
  * @returns `['./package.json', './packages/* /package.json']`
  */
 export function getPatterns(disk: Disk) {
-  return (program: Config.RcFile): O.Option<string[]> =>
-    pipe(
-      O.of(program.source),
-      O.filter(isArrayOfStrings),
-      tapOption('--source patterns found'),
-      O.fold(flow(getYarnPatterns(disk), O.map(addRootDir)), O.of),
-      tapOption('yarn workspaces found'),
-      O.fold(flow(getPnpmPatterns(disk), O.map(addRootDir)), O.of),
-      tapOption('pnpm workspaces found'),
-      O.fold(flow(getLernaPatterns(disk), O.map(addRootDir)), O.of),
-      tapOption('lerna packages found'),
-      O.map(limitToPackageJson),
-      tapNone('no patterns found, using defaults'),
-      O.fold(() => O.some(DEFAULT_SOURCES), O.of),
+  return function getPatterns(
+    program: Config.RcFile,
+  ): R.Result<string[], BaseError> {
+    type PatternResult = R.Result<string[], BaseError>;
+    type SafeGetPatterns = () => PatternResult;
+
+    const getters: SafeGetPatterns[] = [
+      getCliPatterns,
+      getYarnPatterns(disk),
+      getPnpmPatterns(disk),
+      getLernaPatterns(disk),
+    ];
+
+    const initialResult = R.Error(
+      new BaseError('getPatterns did not try any sources'),
+    ) as PatternResult;
+
+    const res = A.reduce(
+      getters,
+      initialResult,
+      (previousResult, getNextResult) => {
+        if (R.isOk(previousResult)) return previousResult;
+        return getNextResult();
+      },
     );
 
-  function addRootDir(patterns: string[]): string[] {
-    return ['.', ...patterns];
-  }
-
-  function limitToPackageJson(patterns: string[]): string[] {
-    return patterns.map((pattern) =>
-      pattern.includes('package.json') ? pattern : `${pattern}/package.json`,
+    return pipe(
+      res,
+      R.map(addRootDir),
+      R.map(limitToPackageJson),
+      R.handleError(() => DEFAULT_SOURCES),
+      R.mapError(F.identity as () => BaseError),
     );
-  }
+
+    function getCliPatterns() {
+      return R.fromPredicate(
+        program.source,
+        isArrayOfStrings,
+        new BaseError('No --source options provided'),
+      );
+    }
+
+    function addRootDir(patterns: string[]): string[] {
+      return ['.', ...patterns];
+    }
+
+    function limitToPackageJson(patterns: string[]): string[] {
+      return patterns.map((pattern) =>
+        pattern.includes('package.json') ? pattern : `${pattern}/package.json`,
+      );
+    }
+  };
 }

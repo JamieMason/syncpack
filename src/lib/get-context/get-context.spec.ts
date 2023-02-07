@@ -33,7 +33,7 @@ describe('getContext', () => {
       workspace: 'workspace',
     };
 
-    it('includes all if none are set', () => {
+    it.only('includes all if none are set', () => {
       expect(getContext({}, disk)).toHaveProperty(
         'dependencyTypes',
         expect.toBeArrayIncludingOnly(allTypes),

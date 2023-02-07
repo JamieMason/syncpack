@@ -1,14 +1,14 @@
-import * as E from 'fp-ts/lib/Either';
+import { pipe, R } from '@mobily/ts-belt';
 import type { Disk } from '../../../disk';
-import { getErrorOrElse } from '../try-catch';
+import { BaseError } from '../../../error';
 
 export function readYamlSafe<T = unknown>(
   disk: Disk,
-): (filePath: string) => E.Either<Error, T> {
+): (filePath: string) => R.Result<T, BaseError> {
   return function readYamlSafe(filePath) {
-    return E.tryCatch(
-      () => disk.readYamlFileSync<T>(filePath),
-      getErrorOrElse(`Failed to read YAML file at ${filePath}`),
+    return pipe(
+      R.fromExecution(() => disk.readYamlFileSync<T>(filePath)),
+      R.mapError(BaseError.map(`Failed to read YAML file at ${filePath}`)),
     );
   };
 }

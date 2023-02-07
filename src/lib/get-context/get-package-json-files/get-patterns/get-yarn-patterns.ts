@@ -1,34 +1,29 @@
-import { isArrayOfStrings } from 'expect-more';
-import * as E from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/function';
-import * as O from 'fp-ts/lib/Option';
+import { F, O, pipe, R } from '@mobily/ts-belt';
 import { join } from 'path';
 import { CWD } from '../../../../constants';
 import type { Disk } from '../../../disk';
+import { BaseError } from '../../../error';
 import type { PackageJson } from '../package-json-file';
-import { props } from './props';
+import { getArrayOfStrings } from './lib/get-array-of-strings';
 import { readJsonSafe } from './read-json-safe';
 
-export function getYarnPatterns(disk: Disk): () => O.Option<string[]> {
-  return () =>
-    pipe(
-      readJsonSafe<PackageJson>(disk)(join(CWD, 'package.json')),
-      E.map((file) => pipe(findPackages(file.contents))),
-      O.fromEither,
-      O.flatten,
-    );
+export function getYarnPatterns(
+  disk: Disk,
+): () => R.Result<string[], BaseError> {
+  const getPackages = getArrayOfStrings('workspaces');
+  const getPackagesNested = getArrayOfStrings('workspaces.packages');
 
-  function findPackages(yarn: PackageJson): O.Option<string[]> {
+  return function getYarnPatterns() {
     return pipe(
-      getArrayOfStrings('workspaces', yarn),
-      O.fold(() => getArrayOfStrings('workspaces.packages', yarn), O.some),
+      join(CWD, 'package.json'),
+      readJsonSafe<PackageJson>(disk),
+      R.flatMap(({ contents }) =>
+        pipe(
+          getPackages(contents),
+          O.match(F.identity, () => getPackagesNested(contents)),
+          O.toResult(new BaseError('no yarn patterns found')),
+        ),
+      ),
     );
-  }
-
-  function getArrayOfStrings(
-    paths: string,
-    yarn: PackageJson,
-  ): O.Option<string[]> {
-    return pipe(yarn, props(paths), O.filter(isArrayOfStrings));
-  }
+  };
 }

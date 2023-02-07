@@ -18,7 +18,7 @@ export function getVersionGroups(
         if (!versionGroup.instancesByName[name]) {
           versionGroup.instancesByName[name] = [];
         }
-        versionGroup.instancesByName[name].push(instance);
+        versionGroup.instancesByName[name]?.push(instance);
         versionGroup.instances.push(instance);
         return;
       }

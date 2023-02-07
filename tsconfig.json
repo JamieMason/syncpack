@@ -5,6 +5,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["es2017", "es6"],
+    "noUncheckedIndexedAccess": true,
     "outDir": "./dist",
     "skipLibCheck": true,
     "strict": true,

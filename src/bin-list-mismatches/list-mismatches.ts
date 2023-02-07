@@ -22,7 +22,7 @@ export function listMismatches(ctx: Context): Context {
     invalidGroups.forEach((instanceGroup) => {
       const name = instanceGroup.name;
       const workspaceInstance = instanceGroup.getWorkspaceInstance();
-      const expected = instanceGroup.getExpectedVersion() || 'nice b';
+      const expected = instanceGroup.getExpectedVersion() || '';
       const isBanned = instanceGroup.versionGroup.isBanned;
       const isUnpinned = instanceGroup.isUnpinned;
 

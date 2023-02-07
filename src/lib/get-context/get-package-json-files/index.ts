@@ -1,7 +1,7 @@
-import * as E from 'fp-ts/lib/Either';
-import { flow, identity, pipe } from 'fp-ts/lib/function';
-import * as O from 'fp-ts/lib/Option';
+import { flow, pipe, R } from '@mobily/ts-belt';
+import { $R } from '../$R';
 import type { Disk } from '../../disk';
+import type { BaseError } from '../../error';
 import type { InternalConfig } from '../get-config/internal-config';
 import { getFilePaths } from './get-file-paths';
 import { readJsonSafe } from './get-patterns/read-json-safe';
@@ -13,20 +13,18 @@ export function getPackageJsonFiles(
   disk: Disk,
   program: InternalConfig,
 ): PackageJsonFile[] {
-  const useEmpty = () => [];
   return pipe(
     getFilePaths(disk, program),
-    E.chain(
-      flow(
-        O.getOrElse(useEmpty as () => string[]),
-        E.traverseArray(readJsonSafe<PackageJson>(disk)),
-        E.map((jsonFiles) =>
-          jsonFiles.map(
-            (jsonFile) => new PackageJsonFile(jsonFile, program, disk),
-          ),
-        ),
-      ),
-    ),
-    E.fold(useEmpty as () => PackageJsonFile[], identity),
+    R.flatMap($R.onlyOk<string, PackageJsonFile>(resolvePackageJson(disk))),
+    R.getWithDefault([] as PackageJsonFile[]),
   );
+
+  function resolvePackageJson(
+    disk: Disk,
+  ): (filePath: string) => R.Result<PackageJsonFile, BaseError> {
+    return flow(
+      readJsonSafe<PackageJson>(disk),
+      R.map((jsonFile) => new PackageJsonFile(jsonFile, program, disk)),
+    );
+  }
 }

@@ -1,14 +1,12 @@
-import { isArrayOfStrings } from 'expect-more';
-import * as A from 'fp-ts/lib/Array';
-import * as E from 'fp-ts/lib/Either';
-import { flow, pipe } from 'fp-ts/lib/function';
-import * as O from 'fp-ts/lib/Option';
-import * as S from 'fp-ts/lib/string';
+import { A, flow, pipe, R } from '@mobily/ts-belt';
+import { isArrayOfStrings, isEmptyArray } from 'expect-more';
+import { $R } from '../$R';
 import type { Disk } from '../../disk';
+import { BaseError } from '../../error';
 import type { Config } from '../get-config/config';
 import { getPatterns } from './get-patterns';
-import { tapOption } from './tap';
-import { getErrorOrElse } from './try-catch';
+
+type SafeFilePaths = R.Result<string[], BaseError>;
 
 /**
  * Using --source options and/or config files on disk from npm/pnpm/yarn/lerna,
@@ -20,38 +18,39 @@ import { getErrorOrElse } from './try-catch';
 export function getFilePaths(
   disk: Disk,
   program: Config.RcFile,
-): E.Either<Error, O.Option<string[]>> {
-  return pipe(
-    program,
-    getPatterns(disk),
-    O.getOrElse<string[]>(() => []),
-    E.traverseArray(resolvePattern),
-    E.map(removeReadonlyType),
-    E.map(flow(A.flatten, A.uniq(S.Eq))),
-    E.map(O.fromPredicate(isArrayOfStrings)),
-    E.map(tapOption<string[]>('package.json files found')),
-  );
+): SafeFilePaths {
+  return pipe(program, getPatterns(disk), R.flatMap(resolvePatterns));
 
-  function resolvePattern(pattern: string): E.Either<Error, string[]> {
+  function resolvePatterns(patterns: string[]): SafeFilePaths {
+    const quoted = patterns.map((p) => `"${p}"`).join(', ');
+    const ERR_NO_MATCH = `No package.json files matched the patterns: ${quoted}`;
     return pipe(
-      E.tryCatch(
-        () => disk.globSync(pattern),
-        getErrorOrElse(`npm package "glob" threw on pattern "${pattern}"`),
-      ),
-      E.map(
-        flow(
-          O.fromPredicate(isArrayOfStrings),
-          tapOption(`files found matching pattern "${pattern}"`),
-          O.getOrElse<string[]>(() => []),
-        ),
+      patterns,
+      $R.onlyOk<string, string[]>(resolvePattern),
+      R.mapError(BaseError.map(ERR_NO_MATCH)),
+      R.map(flow(A.flat, A.uniq, removeReadonlyType)),
+    );
+  }
+
+  function resolvePattern(pattern: string): SafeFilePaths {
+    const ERR_GLOB_MISS = `No package.json files match pattern "${pattern}"`;
+    const ERR_INVALID = `"glob" returned unexpected data on pattern "${pattern}"`;
+    const ERR_GLOB_THROW = `"glob" threw on pattern "${pattern}"`;
+    return pipe(
+      R.fromExecution(() => disk.globSync(pattern)),
+      R.mapError(BaseError.map(ERR_GLOB_THROW)),
+      R.flatMap((filePaths) =>
+        isEmptyArray(filePaths)
+          ? R.Error(new BaseError(ERR_GLOB_MISS))
+          : isArrayOfStrings(filePaths)
+          ? R.Ok(pipe(filePaths, A.flat, A.uniq, removeReadonlyType))
+          : R.Error(new BaseError(ERR_INVALID)),
       ),
     );
   }
-}
 
-/**
- * Remove unwanted readonly type added by TaskEither.traverseArray
- */
-function removeReadonlyType<T>(value: readonly T[]): T[] {
-  return value as T[];
+  /** Remove unwanted readonly type */
+  function removeReadonlyType<T>(value: readonly T[]): T[] {
+    return value as T[];
+  }
 }

@@ -13,11 +13,21 @@ import { CWD } from '../constants';
 import type { Config } from './get-context/get-config/config';
 import { verbose } from './log';
 
-export type Disk = typeof disk;
+export type Disk = {
+  process: {
+    exit: (code: number) => void;
+  };
+  globSync: (pattern: string) => string[];
+  readConfigFileSync: (configPath?: string) => Partial<Config.RcFile>;
+  readFileSync: (filePath: string) => string;
+  readYamlFileSync: <T = unknown>(filePath: string) => T;
+  removeSync: (filePath: string) => void;
+  writeFileSync: (filePath: string, contents: string) => void;
+};
 
 const client = cosmiconfigSync('syncpack');
 
-export const disk = {
+export const disk: Disk = {
   process: {
     exit(code: number): void {
       verbose('exit(', code, ')');
@@ -70,4 +80,4 @@ export const disk = {
     verbose('writeFileSync(', filePath, contents, ')');
     writeFileSync(filePath, contents);
   },
-} as const;
+};

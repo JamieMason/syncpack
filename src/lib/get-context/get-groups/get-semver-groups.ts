@@ -17,7 +17,7 @@ export function getSemverGroups(
         if (!semverGroup.instancesByName[name]) {
           semverGroup.instancesByName[name] = [];
         }
-        semverGroup.instancesByName[name].push(instance);
+        semverGroup.instancesByName[name]?.push(instance);
         semverGroup.instances.push(instance);
         return;
       }
