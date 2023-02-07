@@ -1,3 +1,19 @@
+## [8.5.14](https://github.com/JamieMason/syncpack/compare/8.4.11...8.5.14) (2023-02-07)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([f2c0322](https://github.com/JamieMason/syncpack/commit/f2c0322ccb1724b566bf818c0a3b03ac3ed9a27e))
+* **npm:** update dependencies ([3ec1361](https://github.com/JamieMason/syncpack/commit/3ec13613d1f7446d7798adabf33eb82101c51ee8))
+* **output:** remove console.log in readConfigFileSync ([1c51366](https://github.com/JamieMason/syncpack/commit/1c51366a557f2a69e441c33f29d4927c9cdf88f5)), closes [#106](https://github.com/JamieMason/syncpack/issues/106)
+
+
+### Features
+
+* **cli:** tidy log output and make it more consistent ([cb58070](https://github.com/JamieMason/syncpack/commit/cb58070e646d80acec893e72154a96a25ae8d8ca))
+
+
+
 ## [8.4.11](https://github.com/JamieMason/syncpack/compare/8.4.10...8.4.11) (2022-12-01)
 
 
