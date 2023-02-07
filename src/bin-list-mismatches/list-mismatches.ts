@@ -36,7 +36,7 @@ export function listMismatches(ctx: Context): Context {
         }
       }
 
-      if (instanceGroup.isBanned) {
+      if (instanceGroup.versionGroup.isBanned) {
         console.log(
           chalk`{red ${ICON.cross} ${name}} {dim.red is defined in this version group as banned from use}`,
         );

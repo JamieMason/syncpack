@@ -14,7 +14,10 @@ export function fixMismatches(ctx: Context): Context {
     }
 
     versionGroup.instanceGroups.forEach((instanceGroup) => {
-      if (instanceGroup.hasMismatches && !instanceGroup.isIgnored) {
+      if (
+        instanceGroup.hasMismatches &&
+        !instanceGroup.versionGroup.isIgnored
+      ) {
         const nextVersion = instanceGroup.getExpectedVersion();
         instanceGroup.instances.forEach(
           ({ dependencyType, version, packageJsonFile }) => {

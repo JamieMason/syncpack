@@ -21,9 +21,9 @@ export function list(ctx: Context): Context {
       const versionList = instanceGroup.uniques.sort();
       const expected = instanceGroup.getExpectedVersion();
       console.log(
-        instanceGroup.isBanned
+        instanceGroup.versionGroup.isBanned
           ? chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is defined in this version group as banned from use}`
-          : instanceGroup.isIgnored
+          : instanceGroup.versionGroup.isIgnored
           ? chalk`{dim ${ICON.skip} ${instanceGroup.name}} is ignored in this version group`
           : instanceGroup.hasMismatches
           ? chalk`{red ${ICON.cross} ${instanceGroup.name}} ${versionList

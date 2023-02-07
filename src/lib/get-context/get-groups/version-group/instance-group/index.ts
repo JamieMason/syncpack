@@ -3,16 +3,21 @@ import type { VersionGroup } from '..';
 import type { Instance } from '../../../get-package-json-files/package-json-file/instance';
 import { getHighestVersion } from './get-highest-version';
 
+/** Every `Instance` of eg `"lodash"` for a given `VersionGroup` */
 export class InstanceGroup {
+  /** 1+ `Instance` has a version which does not follow the rules */
   hasMismatches: boolean;
+  /** Every package/dependencyType location where this dependency was found */
   instances: Instance[];
-  isBanned: boolean;
-  isIgnored: boolean;
+  /** Syncpack must report or fix this groups mismatches */
   isInvalid: boolean;
+  /** 1+ `Instance` has a version not matching `VersionGroup.pinVersion` */
   isUnpinned: boolean;
-  isWorkspace: boolean;
+  /** @example `"lodash"` */
   name: string;
+  /** All `Instance` versions, with duplicates removed */
   uniques: string[];
+  /** The `VersionGroup` which this `InstanceGroup` belongs to */
   versionGroup: VersionGroup;
 
   constructor(versionGroup: VersionGroup, name: string, instances: Instance[]) {
@@ -29,25 +34,22 @@ export class InstanceGroup {
 
     this.hasMismatches = hasMismatches;
     this.instances = instances;
-    this.isBanned = isBanned;
-    this.isIgnored = isIgnored;
     this.isInvalid = isInvalid;
     this.isUnpinned = isUnpinned;
     this.name = name;
     this.uniques = uniques;
     this.versionGroup = versionGroup;
-    this.isWorkspace = versionGroup.input.workspace === true;
   }
 
   getExpectedVersion(): string | undefined {
     // remove this dependency
-    if (this.isBanned) {
+    if (this.versionGroup.isBanned) {
       return undefined;
     }
     if (this.isUnpinned) {
       return this.getPinnedVersion();
     }
-    if (this.isWorkspace) {
+    if (this.versionGroup.input.workspace) {
       return this.getWorkspaceVersion() || getHighestVersion(this.uniques);
     }
     return getHighestVersion(this.uniques);
@@ -58,8 +60,8 @@ export class InstanceGroup {
   }
 
   /**
-   * If the dependency `name` is a package developed locally in this monorepo,
-   * we should use its version as the source of truth.
+   * If this dependency is a package developed locally in this monorepo, we
+   * should use its version as the source of truth.
    */
   getWorkspaceVersion() {
     return (
