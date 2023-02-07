@@ -39,14 +39,17 @@ export class Instance {
     this.setVersion(setSemverRange(range, this.version));
   }
 
-  setVersion(version: string): void {
+  /**
+   * In the case of banned dependencies, their version is set to `undefined`,
+   * which causes them to be removed by `JSON.stringify`.
+   */
+  setVersion(version: string | undefined): void {
     const root: any = this.packageJsonFile.contents;
     if (this.dependencyType === 'pnpmOverrides') {
       root.pnpm.overrides[this.name] = version;
-    } else {
+    } else if (this.dependencyType !== 'workspace') {
       root[this.dependencyType][this.name] = version;
     }
-    this.version = version;
   }
 
   matchesGroup(group: SemverGroup | VersionGroup): boolean {

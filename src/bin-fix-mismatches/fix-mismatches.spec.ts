@@ -71,7 +71,6 @@ describe('fixMismatches', () => {
         scenario.files['packages/b/package.json'].diskWriteWhenChanged,
       ]);
       expect(scenario.log.mock.calls).toEqual([
-        [expect.stringMatching(/Version Group 1/)],
         scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
         scenario.files['packages/b/package.json'].logEntryWhenChanged,
       ]);
@@ -82,7 +81,6 @@ describe('fixMismatches', () => {
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
       expect(scenario.log.mock.calls).toEqual([
-        [expect.stringMatching(/Version Group 1/)],
         scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
         scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
       ]);
@@ -119,7 +117,6 @@ describe('fixMismatches', () => {
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
       ]);
       expect(scenario.log.mock.calls).toEqual([
-        [expect.stringMatching(/Version Group 1/)],
         scenario.files['packages/a/package.json'].logEntryWhenChanged,
       ]);
     });
