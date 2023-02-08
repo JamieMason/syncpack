@@ -20,6 +20,6 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js'],
   setupFiles: ['<rootDir>/test/jest.setup.ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', { isolatedModules: true }],
   },
 };
