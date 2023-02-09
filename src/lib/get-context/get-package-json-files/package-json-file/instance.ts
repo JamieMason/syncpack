@@ -32,7 +32,10 @@ export class Instance {
   }
 
   hasRange(range: ValidRange): boolean {
-    return this.version === setSemverRange(range, this.version);
+    return (
+      this.dependencyType !== 'workspace' &&
+      this.version === setSemverRange(range, this.version)
+    );
   }
 
   setRange(range: ValidRange): void {

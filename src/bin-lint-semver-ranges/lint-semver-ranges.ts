@@ -8,26 +8,24 @@ import { setSemverRange } from '../lib/set-semver-range';
 
 export function lintSemverRanges(ctx: Context): Context {
   ctx.semverGroups.reverse().forEach((semverGroup, i) => {
-    Object.entries(semverGroup.instancesByName).forEach(([name, instances]) => {
-      const range = semverGroup.range;
-      const hasMismatches = instances.some((obj) => !obj.hasRange(range));
+    // Nothing to do if there are no mismatches
+    if (!semverGroup.hasMismatches()) return;
 
-      // Nothing to do if there are no mismatches
-      if (!hasMismatches) return;
+    // Record that this project has mismatches, so that eg. the CLI can exit
+    // with the correct status code.
+    ctx.isInvalid = true;
 
+    // Log each group which has mismatches
+    semverGroup.getMismatches().forEach(([name, mismatches]) => {
       // Annotate user-defined version groups
       if (!semverGroup.isDefault) log.semverGroupHeader(i);
-
-      // Record that this project has mismatches, so that eg. the CLI can exit
-      // with the correct status code.
-      ctx.isInvalid = true;
 
       // Log the dependency name
       log.invalid(name);
 
       // Log each of the dependencies mismatches
-      instances.forEach((instance) => {
-        if (!instance.hasRange(range)) {
+      mismatches.forEach((instance) => {
+        if (!instance.hasRange(semverGroup.range)) {
           logSemverRangeMismatch(instance, semverGroup);
         }
       });

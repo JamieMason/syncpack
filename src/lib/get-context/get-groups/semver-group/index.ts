@@ -38,24 +38,24 @@ export class SemverGroup {
     this.isIgnored = (semverGroup as Ignored).isIgnored === true;
     this.packages = semverGroup.packages;
     this.range = (semverGroup as WithRange).range;
+
+    this.isMismatch = this.isMismatch.bind(this);
   }
 
-  /** Syncpack must report or fix this group's mismatches */
-  isInvalid() {
-    return !this.isIgnored && this.hasInvalidInstances();
+  /** Does this `Instance` not follow the rules of this group? */
+  isMismatch(instance: Instance) {
+    return !instance.hasRange(this.range);
   }
 
   /** 1+ `Instance` has a version which does not follow the rules */
-  hasInvalidInstances(): boolean {
-    return this.getInvalidInstances().length > 0;
+  hasMismatches() {
+    return !this.isIgnored && this.instances.some(this.isMismatch);
   }
 
   /** Get every `Instance` with a version which does not follow the rules */
-  getInvalidInstances(): Instance[] {
-    return this.instances.filter(
-      (instance) =>
-        instance.dependencyType !== 'workspace' &&
-        !instance.hasRange(this.range),
-    );
+  getMismatches(): [string, Instance[]][] {
+    return Object.entries(this.instancesByName)
+      .filter(([, instances]) => instances.some(this.isMismatch))
+      .map(([name, instances]) => [name, instances.filter(this.isMismatch)]);
   }
 }
