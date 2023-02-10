@@ -1,7 +1,7 @@
 import { isNonEmptyString } from 'expect-more';
 import { relative } from 'path';
 import { CWD } from '../../../../constants';
-import type { TConfig } from '../../../../types';
+import type { Syncpack } from '../../../../types';
 import type { Disk } from '../../../disk';
 import { verbose } from '../../../log';
 import { newlines } from '../../../newlines';
@@ -46,14 +46,14 @@ export class PackageJsonFile {
   readonly json: string;
 
   /** resolved configuration */
-  readonly program: TConfig.Private;
+  readonly program: Syncpack.Config.Private;
 
   /** relative path on disk to this file */
   readonly shortPath: string;
 
   constructor(
     jsonFile: JsonFile<PackageJson>,
-    program: TConfig.Private,
+    program: Syncpack.Config.Private,
     disk: Disk,
   ) {
     this.contents = jsonFile.contents;
@@ -108,7 +108,7 @@ export class PackageJsonFile {
   }
 
   getDependencyEntries(
-    dependencyType: TConfig.DependencyType.Name,
+    dependencyType: Syncpack.Config.DependencyType.Name,
     contents: PackageJson,
   ): [string, string][] {
     switch (dependencyType) {

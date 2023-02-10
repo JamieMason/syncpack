@@ -1,7 +1,7 @@
 import { A, F, pipe, R } from '@mobily/ts-belt';
 import { isArrayOfStrings } from 'expect-more';
 import { DEFAULT_SOURCES } from '../../../../constants';
-import type { TConfig } from '../../../../types';
+import type { Syncpack } from '../../../../types';
 import type { Disk } from '../../../disk';
 import { BaseError } from '../../../error';
 import { getLernaPatterns } from './get-lerna-patterns';
@@ -16,7 +16,7 @@ import { getYarnPatterns } from './get-yarn-patterns';
  */
 export function getPatterns(disk: Disk) {
   return function getPatterns(
-    program: TConfig.SyncpackRc,
+    program: Syncpack.Config.SyncpackRc,
   ): R.Result<string[], BaseError> {
     type PatternResult = R.Result<string[], BaseError>;
     type SafeGetPatterns = () => PatternResult;

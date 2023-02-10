@@ -1,7 +1,7 @@
 import { isUndefined } from 'expect-more';
-import type { Context } from '../lib/get-context';
+import type { Syncpack } from '../types';
 
-export function fixMismatches(ctx: Context): Context {
+export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
   ctx.versionGroups.reverse().forEach((versionGroup) => {
     const invalidGroups = versionGroup.getInvalidInstanceGroups();
 

@@ -1,6 +1,6 @@
 import { flow, pipe, R } from '@mobily/ts-belt';
 import { $R } from '../$R';
-import type { TConfig } from '../../../types';
+import type { Syncpack } from '../../../types';
 import type { Disk } from '../../disk';
 import type { BaseError } from '../../error';
 import { getFilePaths } from './get-file-paths';
@@ -11,7 +11,7 @@ import { PackageJsonFile } from './package-json-file';
 /** Create an API for every package.json file needed. */
 export function getPackageJsonFiles(
   disk: Disk,
-  program: TConfig.Private,
+  program: Syncpack.Config.Private,
 ): PackageJsonFile[] {
   return pipe(
     getFilePaths(disk, program),

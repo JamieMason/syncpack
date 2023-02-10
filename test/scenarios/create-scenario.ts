@@ -3,6 +3,7 @@ import { join, normalize } from 'path';
 import { CWD } from '../../src/constants';
 import type { JsonFile } from '../../src/lib/get-context/get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJson } from '../../src/lib/get-context/get-package-json-files/package-json-file';
+import type { Syncpack } from '../../src/types';
 import type { MockDisk } from '../mock-disk';
 import { mockDisk } from '../mock-disk';
 
@@ -18,7 +19,7 @@ interface MockedFile {
 }
 
 export interface TestScenario {
-  config: Partial<Config.All>;
+  config: Partial<Syncpack.Config.Public>;
   disk: MockDisk;
   log: jest.SpyInstance;
   files: Record<string, MockedFile>;
@@ -30,7 +31,7 @@ export function createScenario(
     before: JsonFile<PackageJson>;
     after: JsonFile<PackageJson>;
   }[],
-  config: Partial<Config.All>,
+  config: Partial<Syncpack.Config.Public>,
 ): TestScenario {
   jest.clearAllMocks();
   const disk = mockDisk();

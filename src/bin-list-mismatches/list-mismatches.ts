@@ -1,10 +1,10 @@
 import chalk from 'chalk';
-import type { Context } from '../lib/get-context';
 import type { InstanceGroup } from '../lib/get-context/get-groups/version-group/instance-group';
 import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
 import * as log from '../lib/log';
+import type { Syncpack } from '../types';
 
-export function listMismatches(ctx: Context): Context {
+export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
   ctx.versionGroups.reverse().forEach((versionGroup, i) => {
     const invalidGroups = versionGroup.getInvalidInstanceGroups();
 

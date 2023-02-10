@@ -1,4 +1,4 @@
-import type { TConfig } from '../../../../types';
+import type { Syncpack } from '../../../../types';
 import type { Instance } from '../../get-package-json-files/package-json-file/instance';
 import type { InstanceGroup } from './instance-group';
 
@@ -6,9 +6,9 @@ export class VersionGroup {
   /** */
   dependencies: string[];
   /** Optionally limit this group to dependencies of the provided types */
-  dependencyTypes?: TConfig.DependencyType.NameList;
+  dependencyTypes?: Syncpack.Config.DependencyType.NameList;
   /** */
-  input: TConfig.Private;
+  input: Syncpack.Config.Private;
   /** */
   instanceGroups: InstanceGroup[];
   /** */
@@ -26,10 +26,13 @@ export class VersionGroup {
   /** Optionally force all dependencies in this group to have this version */
   pinVersion?: string;
 
-  constructor(input: TConfig.Private, versionGroup: TConfig.VersionGroup.Any) {
-    type Banned = TConfig.VersionGroup.Banned;
-    type Ignored = TConfig.VersionGroup.Ignored;
-    type Pinned = TConfig.VersionGroup.Pinned;
+  constructor(
+    input: Syncpack.Config.Private,
+    versionGroup: Syncpack.Config.VersionGroup.Any,
+  ) {
+    type Banned = Syncpack.Config.VersionGroup.Banned;
+    type Ignored = Syncpack.Config.VersionGroup.Ignored;
+    type Pinned = Syncpack.Config.VersionGroup.Pinned;
 
     this.dependencies = versionGroup.dependencies;
     this.dependencyTypes = versionGroup.dependencyTypes;

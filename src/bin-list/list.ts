@@ -1,10 +1,10 @@
 import chalk from 'chalk';
 import { ICON } from '../constants';
-import type { Context } from '../lib/get-context';
 import type { InstanceGroup } from '../lib/get-context/get-groups/version-group/instance-group';
 import * as log from '../lib/log';
+import type { Syncpack } from '../types';
 
-export function list(ctx: Context): Context {
+export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
   ctx.versionGroups.reverse().forEach((versionGroup, i) => {
     // Annotate user-defined version groups
     if (!versionGroup.isDefault) log.versionGroupHeader(i);

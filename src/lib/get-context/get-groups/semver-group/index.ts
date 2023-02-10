@@ -1,13 +1,13 @@
-import type { TConfig } from '../../../../types';
+import type { Syncpack } from '../../../../types';
 import type { Instance } from '../../get-package-json-files/package-json-file/instance';
 
 export class SemverGroup {
   /** */
   dependencies: string[];
   /** Optionally limit this group to dependencies of the provided types */
-  dependencyTypes?: TConfig.DependencyType.NameList;
+  dependencyTypes?: Syncpack.Config.DependencyType.NameList;
   /** */
-  input: TConfig.Private;
+  input: Syncpack.Config.Private;
   /** */
   instances: Instance[];
   /** */
@@ -19,11 +19,14 @@ export class SemverGroup {
   /** */
   packages: string[];
   /** The semver range which dependencies in this group should use */
-  range: TConfig.SemverRange.Value;
+  range: Syncpack.Config.SemverRange.Value;
 
-  constructor(input: TConfig.Private, semverGroup: TConfig.SemverGroup.Any) {
-    type Ignored = TConfig.SemverGroup.Ignored;
-    type WithRange = TConfig.SemverGroup.WithRange;
+  constructor(
+    input: Syncpack.Config.Private,
+    semverGroup: Syncpack.Config.SemverGroup.Any,
+  ) {
+    type Ignored = Syncpack.Config.SemverGroup.Ignored;
+    type WithRange = Syncpack.Config.SemverGroup.WithRange;
 
     this.dependencies = semverGroup.dependencies;
     this.input = input;

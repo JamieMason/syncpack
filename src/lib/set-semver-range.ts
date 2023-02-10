@@ -1,9 +1,9 @@
 import { RANGE } from '../constants';
-import type { TConfig } from '../types';
+import type { Syncpack } from '../types';
 import { isLooseSemver, isSemver, isValidSemverRange } from './is-semver';
 
 export function setSemverRange(
-  semverRange: TConfig.SemverRange.Value,
+  semverRange: Syncpack.Config.SemverRange.Value,
   version: string,
 ): string {
   if (!isSemver(version) || !isValidSemverRange(semverRange)) return version;

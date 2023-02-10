@@ -1,4 +1,4 @@
-import type { TConfig } from '../../../types';
+import type { Syncpack } from '../../../types';
 import type { Disk } from '../../disk';
 import { verbose } from '../../log';
 import { getDependencyTypes } from './get-dependency-types';
@@ -10,8 +10,8 @@ import * as ConfigSchema from './schema';
  */
 export const getConfig = (
   disk: Disk,
-  fromCli: Partial<TConfig.Cli>,
-): TConfig.Private => {
+  fromCli: Partial<Syncpack.Config.Cli>,
+): Syncpack.Config.Private => {
   verbose('cli arguments:', fromCli);
 
   const fromRcFile = disk.readConfigFileSync(fromCli.configPath);
@@ -59,8 +59,8 @@ export const getConfig = (
 
   return allConfig;
 
-  function getConfigByName(name: keyof TConfig.Public): unknown {
-    if (name in fromCli) return (fromCli as TConfig.Public)[name];
-    if (name in fromRcFile) return (fromRcFile as TConfig.Public)[name];
+  function getConfigByName(name: keyof Syncpack.Config.Public): unknown {
+    if (name in fromCli) return (fromCli as Syncpack.Config.Public)[name];
+    if (name in fromRcFile) return (fromRcFile as Syncpack.Config.Public)[name];
   }
 };

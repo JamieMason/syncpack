@@ -1,7 +1,7 @@
 import { isArray, isNonEmptyString, isObject } from 'expect-more';
-import type { Context } from '../lib/get-context';
+import type { Syncpack } from '../types';
 
-export function format(ctx: Context): Context {
+export function format(ctx: Syncpack.Ctx): Syncpack.Ctx {
   const { sortAz, sortFirst, packageJsonFiles } = ctx;
 
   packageJsonFiles.forEach((packageJsonFile) => {

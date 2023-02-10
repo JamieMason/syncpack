@@ -1,10 +1,10 @@
 import { isString } from 'expect-more';
 import { RANGE } from '../constants';
-import type { TConfig } from '../types';
+import type { Syncpack } from '../types';
 
 export function isValidSemverRange(
   value: unknown,
-): value is TConfig.SemverRange.Value {
+): value is Syncpack.Config.SemverRange.Value {
   return (
     value === RANGE.ANY ||
     value === RANGE.EXACT ||

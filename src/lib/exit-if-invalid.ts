@@ -1,6 +1,6 @@
-import type { Context } from './get-context';
+import type { Syncpack } from '../types';
 
-export function exitIfInvalid(ctx: Context): Context {
+export function exitIfInvalid(ctx: Syncpack.Ctx): Syncpack.Ctx {
   if (ctx.isInvalid) {
     ctx.disk.process.exit(1);
   }

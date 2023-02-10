@@ -1,14 +1,14 @@
 import { isNonEmptyArray } from 'expect-more';
 import minimatch from 'minimatch';
 import type { PackageJsonFile } from '.';
-import type { TConfig } from '../../../../types';
+import type { Syncpack } from '../../../../types';
 import { setSemverRange } from '../../../set-semver-range';
 import type { SemverGroup } from '../../get-groups/semver-group';
 import type { VersionGroup } from '../../get-groups/version-group';
 
 export class Instance {
   /** where this dependency is installed */
-  dependencyType: TConfig.DependencyType.Name;
+  dependencyType: Syncpack.Config.DependencyType.Name;
   /** the name of this dependency */
   name: string;
   /** The package this dependency is installed in this specific time */
@@ -19,7 +19,7 @@ export class Instance {
   version: string;
 
   constructor(
-    dependencyType: TConfig.DependencyType.Name,
+    dependencyType: Syncpack.Config.DependencyType.Name,
     name: string,
     packageJsonFile: PackageJsonFile,
     version: string,
@@ -31,14 +31,14 @@ export class Instance {
     this.version = version;
   }
 
-  hasRange(range: TConfig.SemverRange.Value): boolean {
+  hasRange(range: Syncpack.Config.SemverRange.Value): boolean {
     return (
       this.dependencyType !== 'workspace' &&
       this.version === setSemverRange(range, this.version)
     );
   }
 
-  setRange(range: TConfig.SemverRange.Value): void {
+  setRange(range: Syncpack.Config.SemverRange.Value): void {
     this.setVersion(setSemverRange(range, this.version));
   }
 

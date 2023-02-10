@@ -1,6 +1,6 @@
-import type { Context } from '../lib/get-context';
+import type { Syncpack } from '../types';
 
-export const setSemverRanges = (ctx: Context): Context => {
+export const setSemverRanges = (ctx: Syncpack.Ctx): Syncpack.Ctx => {
   ctx.semverGroups.reverse().forEach((semverGroup) => {
     semverGroup.instances.forEach((instance) => {
       instance.setRange(semverGroup.range);

@@ -1,7 +1,7 @@
-import type { Context } from './get-context';
+import type { Syncpack } from '../types';
 import * as log from './log';
 
-export function writeIfChanged(ctx: Context): Context {
+export function writeIfChanged(ctx: Syncpack.Ctx): Syncpack.Ctx {
   ctx.packageJsonFiles.forEach((packageJsonFile) => {
     if (packageJsonFile.hasChanged()) {
       packageJsonFile.write();

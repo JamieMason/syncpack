@@ -1,12 +1,12 @@
 import chalk from 'chalk';
 import { ICON } from '../constants';
-import type { Context } from '../lib/get-context';
 import type { SemverGroup } from '../lib/get-context/get-groups/semver-group';
 import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
 import * as log from '../lib/log';
 import { setSemverRange } from '../lib/set-semver-range';
+import type { Syncpack } from '../types';
 
-export function lintSemverRanges(ctx: Context): Context {
+export function lintSemverRanges(ctx: Syncpack.Ctx): Syncpack.Ctx {
   ctx.semverGroups.reverse().forEach((semverGroup, i) => {
     // Nothing to do if there are no mismatches
     if (!semverGroup.hasMismatches()) return;

@@ -1,4 +1,4 @@
-import type { TConfig } from '../../types';
+import type { Syncpack } from '../../types';
 import type { Disk } from '../disk';
 import { disk as defaultDisk } from '../disk';
 import { getAllInstances } from './get-all-instances';
@@ -11,7 +11,7 @@ import { getPackageJsonFiles } from './get-package-json-files';
 import type { PackageJsonFile } from './get-package-json-files/package-json-file';
 
 export type Context = Omit<
-  TConfig.Private,
+  Syncpack.Config.Private,
   'semverGroups' | 'versionGroups'
 > & {
   disk: Disk;
@@ -30,7 +30,7 @@ export type Context = Omit<
  * system and can focus solely on transformation logic.
  */
 export function getContext(
-  program: Partial<TConfig.Cli>,
+  program: Partial<Syncpack.Config.Cli>,
   disk: Disk = defaultDisk,
 ): Context {
   const config = getConfig(disk, program);

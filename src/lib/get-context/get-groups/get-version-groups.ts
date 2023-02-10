@@ -1,10 +1,10 @@
-import type { TConfig } from '../../../types';
+import type { Syncpack } from '../../../types';
 import type { Instance } from '../get-package-json-files/package-json-file/instance';
 import { VersionGroup } from './version-group';
 import { InstanceGroup } from './version-group/instance-group';
 
 export function getVersionGroups(
-  input: TConfig.Private,
+  input: Syncpack.Config.Private,
   instances: Instance[],
 ): VersionGroup[] {
   const versionGroups = input.versionGroups.map(

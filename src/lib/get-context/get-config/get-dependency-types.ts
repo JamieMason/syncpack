@@ -1,12 +1,12 @@
 import { isBoolean } from 'expect-more';
 import { ALL_DEPENDENCY_TYPES } from '../../../constants';
-import type { TConfig } from '../../../types';
+import type { Syncpack } from '../../../types';
 
 export function getDependencyTypes(
-  fromCli: Partial<TConfig.Cli>,
-  resolved: TConfig.Public,
-): TConfig.Private['dependencyTypes'] {
-  const dependencyTypes: TConfig.Private['dependencyTypes'] = [];
+  fromCli: Partial<Syncpack.Config.Cli>,
+  resolved: Syncpack.Config.Public,
+): Syncpack.Config.Private['dependencyTypes'] {
+  const dependencyTypes: Syncpack.Config.Private['dependencyTypes'] = [];
   const hasTypeOverride =
     isBoolean(fromCli.dev) ||
     isBoolean(fromCli.overrides) ||
