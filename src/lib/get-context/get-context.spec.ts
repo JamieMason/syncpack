@@ -33,7 +33,7 @@ describe('getContext', () => {
       workspace: 'workspace',
     };
 
-    it.only('includes all if none are set', () => {
+    it('includes all if none are set', () => {
       expect(getContext({}, disk)).toHaveProperty(
         'dependencyTypes',
         expect.toBeArrayIncludingOnly(allTypes),
@@ -67,23 +67,23 @@ describe('getContext', () => {
     });
     it('uses value from config when no CLI options are set', () => {
       const disk = mockDisk();
-      disk.readConfigFileSync.mockReturnValue({ source: ['./foo'] });
-      expect(getContext({}, disk)).toHaveProperty('source', ['./foo']);
+      disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
+      expect(getContext({}, disk)).toHaveProperty('source', ['foo']);
     });
     it('uses value from CLI when config and CLI options are set', () => {
       const disk = mockDisk();
-      disk.readConfigFileSync.mockReturnValue({ source: ['./foo'] });
-      expect(getContext({ source: ['./bar'] }, disk)).toHaveProperty('source', [
-        './bar',
+      disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
+      expect(getContext({ source: ['bar'] }, disk)).toHaveProperty('source', [
+        'bar',
       ]);
     });
     it('combines defaults, values from CLI options, and config', () => {
       const disk = mockDisk();
-      disk.readConfigFileSync.mockReturnValue({ source: ['./foo'] });
+      disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
       expect(getContext({ sortAz: ['overridden'] }, disk)).toEqual(
         expect.objectContaining({
           semverRange: '',
-          source: ['./foo'],
+          source: ['foo'],
           sortAz: ['overridden'],
         }),
       );
@@ -147,7 +147,7 @@ describe('getContext', () => {
           const disk = mockDisk();
           disk.globSync.mockReturnValue([filePath]);
           disk.readFileSync.mockReturnValue(json);
-          const program = getContext({ source: ['./package.json'] }, disk);
+          const program = getContext({ source: ['package.json'] }, disk);
           expect(program).toEqual(
             expect.objectContaining({
               packageJsonFiles: [
@@ -189,30 +189,30 @@ describe('getContext', () => {
         describe('as an array', () => {
           it('resolves yarn workspace packages', () => {
             const filePath = join(CWD, 'package.json');
-            const contents = { workspaces: ['./as-array/*'] };
+            const contents = { workspaces: ['as-array/*'] };
             const json = JSON.stringify(contents);
             const disk = mockDisk();
             disk.globSync.mockReturnValue([filePath]);
             disk.readFileSync.mockReturnValue(json);
             getContext({}, disk);
             expect(disk.globSync.mock.calls).toEqual([
-              ['./package.json'],
-              ['./as-array/*/package.json'],
+              ['package.json'],
+              ['as-array/*/package.json'],
             ]);
           });
         });
         describe('as an object', () => {
           it('resolves yarn workspace packages', () => {
             const filePath = join(CWD, 'package.json');
-            const contents = { workspaces: { packages: ['./as-object/*'] } };
+            const contents = { workspaces: { packages: ['as-object/*'] } };
             const json = JSON.stringify(contents);
             const disk = mockDisk();
             disk.globSync.mockReturnValue([filePath]);
             disk.readFileSync.mockReturnValue(json);
             getContext({}, disk);
             expect(disk.globSync.mock.calls).toEqual([
-              ['./package.json'],
-              ['./as-object/*/package.json'],
+              ['package.json'],
+              ['as-object/*/package.json'],
             ]);
           });
         });
@@ -228,12 +228,12 @@ describe('getContext', () => {
             disk.readFileSync.mockImplementation((filePath) => {
               if (filePath.endsWith('package.json')) return json;
               if (filePath.endsWith('lerna.json'))
-                return JSON.stringify({ packages: ['./lerna/*'] });
+                return JSON.stringify({ packages: ['lerna/*'] });
             });
             getContext({}, disk);
             expect(disk.globSync.mock.calls).toEqual([
-              ['./package.json'],
-              ['./lerna/*/package.json'],
+              ['package.json'],
+              ['lerna/*/package.json'],
             ]);
           });
         });
@@ -245,12 +245,12 @@ describe('getContext', () => {
                 const disk = mockDisk();
                 disk.globSync.mockReturnValue([filePath]);
                 disk.readYamlFileSync.mockReturnValue({
-                  packages: ['./from-pnpm/*'],
+                  packages: ['from-pnpm/*'],
                 });
                 getContext({}, disk);
                 expect(disk.globSync.mock.calls).toEqual([
-                  ['./package.json'],
-                  ['./from-pnpm/*/package.json'],
+                  ['package.json'],
+                  ['from-pnpm/*/package.json'],
                 ]);
               });
             });

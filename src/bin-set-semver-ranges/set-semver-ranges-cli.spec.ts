@@ -7,7 +7,7 @@ describe('setSemverRanges', () => {
     jest.restoreAllMocks();
   });
 
-  it.only('sets all versions to use the supplied range', () => {
+  it('sets all versions to use the supplied range', () => {
     const scenario = scenarios.semverRangesDoNotMatchConfig();
     setSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.disk.writeFileSync.mock.calls).toEqual([
