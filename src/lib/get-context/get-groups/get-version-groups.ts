@@ -1,10 +1,10 @@
-import type { InternalConfig } from '../get-config/internal-config';
+import type { TConfig } from '../../../types';
 import type { Instance } from '../get-package-json-files/package-json-file/instance';
 import { VersionGroup } from './version-group';
 import { InstanceGroup } from './version-group/instance-group';
 
 export function getVersionGroups(
-  input: InternalConfig,
+  input: TConfig.Private,
   instances: Instance[],
 ): VersionGroup[] {
   const versionGroups = input.versionGroups.map(

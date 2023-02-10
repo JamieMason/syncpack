@@ -1,17 +1,8 @@
-import {
-  isArray,
-  isArrayOfStrings,
-  isBoolean,
-  isNonEmptyString,
-  isObject,
-  isString,
-} from 'expect-more';
-import { ALL_DEPENDENCY_TYPES, DEFAULT_CONFIG } from '../../../constants';
+import type { TConfig } from '../../../types';
 import type { Disk } from '../../disk';
-import { isValidSemverRange } from '../../is-semver';
 import { verbose } from '../../log';
-import type { Config, ValidRange } from './config';
-import type { InternalConfig } from './internal-config';
+import { getDependencyTypes } from './get-dependency-types';
+import * as ConfigSchema from './schema';
 
 /**
  * Take all configuration from the command line and config file, combine it, and
@@ -19,162 +10,57 @@ import type { InternalConfig } from './internal-config';
  */
 export const getConfig = (
   disk: Disk,
-  program: Partial<Config.All>,
-): InternalConfig => {
-  type OptionName = keyof Config.RcFile;
-  type TypeChecker<T> = (value: unknown) => value is T;
+  fromCli: Partial<TConfig.Cli>,
+): TConfig.Private => {
+  verbose('cli arguments:', fromCli);
 
-  verbose('cli arguments:', program);
+  const fromRcFile = disk.readConfigFileSync(fromCli.configPath);
 
-  const rcFile = disk.readConfigFileSync(program.configPath);
+  verbose('rcfile contents:', fromCli);
 
-  const hasTypeOverride =
-    isBoolean(program.dev) ||
-    isBoolean(program.overrides) ||
-    isBoolean(program.peer) ||
-    isBoolean(program.pnpmOverrides) ||
-    isBoolean(program.prod) ||
-    isBoolean(program.resolutions) ||
-    isBoolean(program.workspace);
+  const fromPublic = ConfigSchema.Public.parse({
+    dev: getConfigByName('dev'),
+    filter: getConfigByName('filter'),
+    indent: getConfigByName('indent'),
+    overrides: getConfigByName('overrides'),
+    peer: getConfigByName('peer'),
+    pnpmOverrides: getConfigByName('pnpmOverrides'),
+    prod: getConfigByName('prod'),
+    resolutions: getConfigByName('resolutions'),
+    semverGroups: getConfigByName('semverGroups'),
+    semverRange: getConfigByName('semverRange'),
+    sortAz: getConfigByName('sortAz'),
+    sortFirst: getConfigByName('sortFirst'),
+    source: getConfigByName('source'),
+    versionGroups: getConfigByName('versionGroups'),
+    workspace: getConfigByName('workspace'),
+  });
 
-  const dev = hasTypeOverride
-    ? Boolean(program.dev)
-    : getOption<boolean>('dev', isBoolean);
-  const overrides = hasTypeOverride
-    ? Boolean(program.overrides)
-    : getOption<boolean>('overrides', isBoolean);
-  const peer = hasTypeOverride
-    ? Boolean(program.peer)
-    : getOption<boolean>('peer', isBoolean);
-  const pnpmOverrides = hasTypeOverride
-    ? Boolean(program.pnpmOverrides)
-    : getOption<boolean>('pnpmOverrides', isBoolean);
-  const prod = hasTypeOverride
-    ? Boolean(program.prod)
-    : getOption<boolean>('prod', isBoolean);
-  const resolutions = hasTypeOverride
-    ? Boolean(program.resolutions)
-    : getOption<boolean>('resolutions', isBoolean);
-  const workspace = hasTypeOverride
-    ? Boolean(program.workspace)
-    : getOption<boolean>('workspace', isBoolean);
+  const allConfig = ConfigSchema.Private.parse({
+    ...fromPublic,
+    defaultSemverGroup: {
+      dependencies: ['**'],
+      isDefault: true,
+      packages: ['**'],
+      range: fromPublic.semverRange,
+    },
+    defaultVersionGroup: {
+      dependencies: ['**'],
+      isDefault: true,
+      packages: ['**'],
+    },
+    dependencyTypes: getDependencyTypes(fromCli, fromPublic),
+  });
 
-  const dependencyTypes =
-    dev ||
-    overrides ||
-    peer ||
-    pnpmOverrides ||
-    prod ||
-    resolutions ||
-    workspace
-      ? ALL_DEPENDENCY_TYPES.filter(
-          (type) =>
-            (type === 'devDependencies' && dev) ||
-            (type === 'overrides' && overrides) ||
-            (type === 'peerDependencies' && peer) ||
-            (type === 'pnpmOverrides' && pnpmOverrides) ||
-            (type === 'dependencies' && prod) ||
-            (type === 'resolutions' && resolutions) ||
-            (type === 'workspace' && workspace),
-        )
-      : [...ALL_DEPENDENCY_TYPES];
+  allConfig.semverGroups.push(allConfig.defaultSemverGroup);
+  allConfig.versionGroups.push(allConfig.defaultVersionGroup);
 
-  const filter = getOption<string>('filter', isNonEmptyString);
-  const indent = getOption<string>('indent', isNonEmptyString);
-  const semverRange = getOption<ValidRange>('semverRange', isValidSemverRange);
-  const sortAz = getOption<string[]>('sortAz', isArrayOfStrings);
-  const sortFirst = getOption<string[]>('sortFirst', isArrayOfStrings);
-  const source = getOption<string[]>('source', isArrayOfStrings);
+  verbose('final config:', allConfig);
 
-  /**
-   * Every instance must belong to a semver group, even if that semver group is
-   * this one which represents a default, no special treatment group.
-   */
-  const defaultSemverGroup = {
-    range: semverRange,
-    dependencies: ['**'],
-    packages: ['**'],
-  };
+  return allConfig;
 
-  const semverGroups = getOption<Config.SemverGroup.Any[]>(
-    'semverGroups',
-    isArrayOfSemverGroups,
-  ).concat(defaultSemverGroup);
-
-  /**
-   * Every instance must belong to a semver group, even if that semver group is
-   * this one which represents a default, no special treatment group.
-   */
-  const defaultVersionGroup = {
-    packages: ['**'],
-    dependencies: ['**'],
-  };
-
-  const versionGroups = getOption<Config.VersionGroup.Any[]>(
-    'versionGroups',
-    isArrayOfVersionGroups,
-  ).concat(defaultVersionGroup);
-
-  const finalConfig: InternalConfig = {
-    dev,
-    filter,
-    indent,
-    workspace,
-    overrides,
-    peer,
-    pnpmOverrides,
-    prod,
-    resolutions,
-    semverGroups,
-    semverRange,
-    sortAz,
-    sortFirst,
-    source,
-    versionGroups,
-    // The following are internal additions not exposed in public config
-    defaultSemverGroup,
-    defaultVersionGroup,
-    dependencyTypes,
-  };
-
-  verbose('final config:', finalConfig);
-
-  return finalConfig;
-
-  function getOption<T>(name: OptionName, isValid: TypeChecker<T>): T {
-    const cliOption = program[name];
-    if (isValid(cliOption)) return cliOption;
-    const configOption = rcFile[name];
-    if (isValid(configOption)) return configOption;
-    return DEFAULT_CONFIG[name] as unknown as T;
-  }
-
-  function isArrayOfSemverGroups(
-    value: unknown,
-  ): value is Config.SemverGroup.Any[] {
-    return (
-      isArray(value) &&
-      value.every(
-        (value: unknown) =>
-          isObject(value) &&
-          isArrayOfStrings(value.packages) &&
-          isArrayOfStrings(value.dependencies) &&
-          (value.isIgnored === true || isString(value.range)),
-      )
-    );
-  }
-
-  function isArrayOfVersionGroups(
-    value: unknown,
-  ): value is Config.VersionGroup.Any[] {
-    return (
-      isArray(value) &&
-      value.every(
-        (value: unknown) =>
-          isObject(value) &&
-          isArrayOfStrings(value.packages) &&
-          isArrayOfStrings(value.dependencies),
-      )
-    );
+  function getConfigByName(name: keyof TConfig.Public): unknown {
+    if (name in fromCli) return (fromCli as TConfig.Public)[name];
+    if (name in fromRcFile) return (fromRcFile as TConfig.Public)[name];
   }
 };

@@ -1,8 +1,10 @@
 import { isString } from 'expect-more';
 import { RANGE } from '../constants';
-import type { ValidRange } from './get-context/get-config/config';
+import type { TConfig } from '../types';
 
-export function isValidSemverRange(value: unknown): value is ValidRange {
+export function isValidSemverRange(
+  value: unknown,
+): value is TConfig.SemverRange.Value {
   return (
     value === RANGE.ANY ||
     value === RANGE.EXACT ||

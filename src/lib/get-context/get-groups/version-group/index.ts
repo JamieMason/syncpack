@@ -1,5 +1,4 @@
-import type { Config, DependencyType } from '../../get-config/config';
-import type { InternalConfig } from '../../get-config/internal-config';
+import type { TConfig } from '../../../../types';
 import type { Instance } from '../../get-package-json-files/package-json-file/instance';
 import type { InstanceGroup } from './instance-group';
 
@@ -7,9 +6,9 @@ export class VersionGroup {
   /** */
   dependencies: string[];
   /** Optionally limit this group to dependencies of the provided types */
-  dependencyTypes?: DependencyType[];
+  dependencyTypes?: TConfig.DependencyType.NameList;
   /** */
-  input: InternalConfig;
+  input: TConfig.Private;
   /** */
   instanceGroups: InstanceGroup[];
   /** */
@@ -27,10 +26,10 @@ export class VersionGroup {
   /** Optionally force all dependencies in this group to have this version */
   pinVersion?: string;
 
-  constructor(input: InternalConfig, versionGroup: Config.VersionGroup.Any) {
-    type Banned = Config.VersionGroup.Banned;
-    type Ignored = Config.VersionGroup.Ignored;
-    type Pinned = Config.VersionGroup.Pinned;
+  constructor(input: TConfig.Private, versionGroup: TConfig.VersionGroup.Any) {
+    type Banned = TConfig.VersionGroup.Banned;
+    type Ignored = TConfig.VersionGroup.Ignored;
+    type Pinned = TConfig.VersionGroup.Pinned;
 
     this.dependencies = versionGroup.dependencies;
     this.dependencyTypes = versionGroup.dependencyTypes;

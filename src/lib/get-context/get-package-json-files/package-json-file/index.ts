@@ -1,11 +1,10 @@
 import { isNonEmptyString } from 'expect-more';
 import { relative } from 'path';
 import { CWD } from '../../../../constants';
+import type { TConfig } from '../../../../types';
 import type { Disk } from '../../../disk';
 import { verbose } from '../../../log';
 import { newlines } from '../../../newlines';
-import type { DependencyType } from '../../get-config/config';
-import type { InternalConfig } from '../../get-config/internal-config';
 import type { JsonFile } from '../get-patterns/read-json-safe';
 import { Instance } from './instance';
 
@@ -47,14 +46,14 @@ export class PackageJsonFile {
   readonly json: string;
 
   /** resolved configuration */
-  readonly program: InternalConfig;
+  readonly program: TConfig.Private;
 
   /** relative path on disk to this file */
   readonly shortPath: string;
 
   constructor(
     jsonFile: JsonFile<PackageJson>,
-    program: InternalConfig,
+    program: TConfig.Private,
     disk: Disk,
   ) {
     this.contents = jsonFile.contents;
@@ -109,7 +108,7 @@ export class PackageJsonFile {
   }
 
   getDependencyEntries(
-    dependencyType: DependencyType,
+    dependencyType: TConfig.DependencyType.Name,
     contents: PackageJson,
   ): [string, string][] {
     switch (dependencyType) {

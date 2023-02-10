@@ -1,9 +1,9 @@
 import { A, flow, pipe, R } from '@mobily/ts-belt';
 import { isArrayOfStrings, isEmptyArray } from 'expect-more';
 import { $R } from '../$R';
+import type { TConfig } from '../../../types';
 import type { Disk } from '../../disk';
 import { BaseError } from '../../error';
-import type { Config } from '../get-config/config';
 import { getPatterns } from './get-patterns';
 
 type SafeFilePaths = R.Result<string[], BaseError>;
@@ -17,7 +17,7 @@ type SafeFilePaths = R.Result<string[], BaseError>;
  */
 export function getFilePaths(
   disk: Disk,
-  program: Config.RcFile,
+  program: TConfig.SyncpackRc,
 ): SafeFilePaths {
   return pipe(program, getPatterns(disk), R.flatMap(resolvePatterns));
 

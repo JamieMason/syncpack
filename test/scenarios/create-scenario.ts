@@ -1,7 +1,6 @@
 import minimatch from 'minimatch';
 import { join, normalize } from 'path';
 import { CWD } from '../../src/constants';
-import type { Config } from '../../src/lib/get-context/get-config/config';
 import type { JsonFile } from '../../src/lib/get-context/get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJson } from '../../src/lib/get-context/get-package-json-files/package-json-file';
 import type { MockDisk } from '../mock-disk';

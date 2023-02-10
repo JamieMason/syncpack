@@ -1,5 +1,3 @@
-import type { Config } from './lib/get-context/get-config/config';
-
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.env.MOCK_CWD || process.cwd();
 
@@ -41,7 +39,7 @@ export const RANGE = {
   PATCH: '~',
 } as const;
 
-export const DEFAULT_CONFIG: Config.RcFile = {
+export const DEFAULT_CONFIG = {
   dev: true,
   filter: '.',
   indent: '  ',
@@ -65,4 +63,4 @@ export const DEFAULT_CONFIG: Config.RcFile = {
   sortFirst: ['name', 'description', 'version', 'author'],
   source: [],
   versionGroups: [],
-};
+} as const;

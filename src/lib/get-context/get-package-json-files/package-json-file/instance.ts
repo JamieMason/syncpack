@@ -1,14 +1,14 @@
 import { isNonEmptyArray } from 'expect-more';
 import minimatch from 'minimatch';
 import type { PackageJsonFile } from '.';
+import type { TConfig } from '../../../../types';
 import { setSemverRange } from '../../../set-semver-range';
-import type { DependencyType, ValidRange } from '../../get-config/config';
 import type { SemverGroup } from '../../get-groups/semver-group';
 import type { VersionGroup } from '../../get-groups/version-group';
 
 export class Instance {
   /** where this dependency is installed */
-  dependencyType: DependencyType;
+  dependencyType: TConfig.DependencyType.Name;
   /** the name of this dependency */
   name: string;
   /** The package this dependency is installed in this specific time */
@@ -19,7 +19,7 @@ export class Instance {
   version: string;
 
   constructor(
-    dependencyType: DependencyType,
+    dependencyType: TConfig.DependencyType.Name,
     name: string,
     packageJsonFile: PackageJsonFile,
     version: string,
@@ -31,14 +31,14 @@ export class Instance {
     this.version = version;
   }
 
-  hasRange(range: ValidRange): boolean {
+  hasRange(range: TConfig.SemverRange.Value): boolean {
     return (
       this.dependencyType !== 'workspace' &&
       this.version === setSemverRange(range, this.version)
     );
   }
 
-  setRange(range: ValidRange): void {
+  setRange(range: TConfig.SemverRange.Value): void {
     this.setVersion(setSemverRange(range, this.version));
   }
 

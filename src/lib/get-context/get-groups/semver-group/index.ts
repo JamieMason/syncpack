@@ -1,18 +1,13 @@
-import type {
-  Config,
-  DependencyType,
-  ValidRange,
-} from '../../get-config/config';
-import type { InternalConfig } from '../../get-config/internal-config';
+import type { TConfig } from '../../../../types';
 import type { Instance } from '../../get-package-json-files/package-json-file/instance';
 
 export class SemverGroup {
   /** */
   dependencies: string[];
   /** Optionally limit this group to dependencies of the provided types */
-  dependencyTypes?: DependencyType[];
+  dependencyTypes?: TConfig.DependencyType.NameList;
   /** */
-  input: InternalConfig;
+  input: TConfig.Private;
   /** */
   instances: Instance[];
   /** */
@@ -24,11 +19,11 @@ export class SemverGroup {
   /** */
   packages: string[];
   /** The semver range which dependencies in this group should use */
-  range: ValidRange;
+  range: TConfig.SemverRange.Value;
 
-  constructor(input: InternalConfig, semverGroup: Config.SemverGroup.Any) {
-    type Ignored = Config.SemverGroup.Ignored;
-    type WithRange = Config.SemverGroup.WithRange;
+  constructor(input: TConfig.Private, semverGroup: TConfig.SemverGroup.Any) {
+    type Ignored = TConfig.SemverGroup.Ignored;
+    type WithRange = TConfig.SemverGroup.WithRange;
 
     this.dependencies = semverGroup.dependencies;
     this.input = input;

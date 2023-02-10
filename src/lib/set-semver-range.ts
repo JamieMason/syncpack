@@ -1,9 +1,9 @@
 import { RANGE } from '../constants';
-import type { ValidRange } from './get-context/get-config/config';
+import type { TConfig } from '../types';
 import { isLooseSemver, isSemver, isValidSemverRange } from './is-semver';
 
 export function setSemverRange(
-  semverRange: ValidRange,
+  semverRange: TConfig.SemverRange.Value,
   version: string,
 ): string {
   if (!isSemver(version) || !isValidSemverRange(semverRange)) return version;

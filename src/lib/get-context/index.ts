@@ -1,9 +1,8 @@
+import type { TConfig } from '../../types';
 import type { Disk } from '../disk';
 import { disk as defaultDisk } from '../disk';
 import { getAllInstances } from './get-all-instances';
 import { getConfig } from './get-config';
-import type { Config } from './get-config/config';
-import type { InternalConfig } from './get-config/internal-config';
 import { getSemverGroups } from './get-groups/get-semver-groups';
 import { getVersionGroups } from './get-groups/get-version-groups';
 import type { SemverGroup } from './get-groups/semver-group';
@@ -11,7 +10,10 @@ import type { VersionGroup } from './get-groups/version-group';
 import { getPackageJsonFiles } from './get-package-json-files';
 import type { PackageJsonFile } from './get-package-json-files/package-json-file';
 
-export type Context = Omit<InternalConfig, 'semverGroups' | 'versionGroups'> & {
+export type Context = Omit<
+  TConfig.Private,
+  'semverGroups' | 'versionGroups'
+> & {
   disk: Disk;
   isInvalid: boolean;
   packageJsonFiles: PackageJsonFile[];
@@ -28,7 +30,7 @@ export type Context = Omit<InternalConfig, 'semverGroups' | 'versionGroups'> & {
  * system and can focus solely on transformation logic.
  */
 export function getContext(
-  program: Partial<Config.All>,
+  program: Partial<TConfig.Cli>,
   disk: Disk = defaultDisk,
 ): Context {
   const config = getConfig(disk, program);
