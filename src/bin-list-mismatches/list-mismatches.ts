@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type { InstanceGroup } from '../lib/get-context/get-groups/version-group/instance-group';
+import type { VersionGroup } from '../lib/get-context/get-groups/version-group';
 import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
 import * as log from '../lib/log';
 import type { Syncpack } from '../types';
@@ -23,14 +23,14 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
       const name = instanceGroup.name;
       const workspaceInstance = instanceGroup.getWorkspaceInstance();
       const expected = instanceGroup.getExpectedVersion() || '';
-      const isBanned = instanceGroup.versionGroup.isBanned;
+      const isBanned = versionGroup.isBanned;
       const isUnpinned = instanceGroup.isUnpinned;
 
       // Log the dependency name
       if (isBanned) {
         logBanned(name);
       } else if (isUnpinned) {
-        logPinVersionMismatch(name, instanceGroup);
+        logPinVersionMismatch(name, versionGroup);
       } else if (workspaceInstance) {
         logWorkspaceMismatch(workspaceInstance, expected, name);
       } else {
@@ -52,8 +52,8 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     log.invalid(name, 'is banned in this version group');
   }
 
-  function logPinVersionMismatch(name: string, instanceGroup: InstanceGroup) {
-    const pinVersion = instanceGroup.versionGroup.pinVersion;
+  function logPinVersionMismatch(name: string, versionGroup: VersionGroup) {
+    const pinVersion = versionGroup.pinVersion;
     log.invalid(
       name,
       chalk`is pinned in this version group at {reset.green ${pinVersion}}`,

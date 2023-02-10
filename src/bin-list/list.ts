@@ -17,9 +17,9 @@ export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
       // with the correct status code.
       if (instanceGroup.isInvalid) ctx.isInvalid = true;
 
-      instanceGroup.versionGroup.isBanned
+      versionGroup.isBanned
         ? logBanned(instanceGroup)
-        : instanceGroup.versionGroup.isIgnored
+        : versionGroup.isIgnored
         ? logIgnored(instanceGroup)
         : instanceGroup.hasMismatches
         ? logVersionMismatch(instanceGroup, uniques, expected)
