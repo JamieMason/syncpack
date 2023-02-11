@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { ICON } from '../constants';
-import type { SemverGroup } from '../lib/get-context/get-groups/semver-group';
-import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
+import type { SemverGroup } from '../get-context/get-groups/semver-group';
+import type { Instance } from '../get-context/get-package-json-files/package-json-file/instance';
 import * as log from '../lib/log';
 import { setSemverRange } from '../lib/set-semver-range';
 import type { Syncpack } from '../types';

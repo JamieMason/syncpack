@@ -1,19 +1,19 @@
 import type { z } from 'zod';
-import type { Context as TContext } from './lib/get-context';
+import type { Context as TContext } from './get-context';
 import type {
   Cli as CliSchema,
   Private as PrivateSchema,
   Public as PublicSchema,
   SyncpackRc as SyncpackRcSchema,
-} from './lib/get-context/get-config/schema';
-import type * as DependencyTypeSchema from './lib/get-context/get-config/schema/dependency-type';
-import type * as SemverGroupSchema from './lib/get-context/get-config/schema/semver-group';
-import type * as SemverRangeSchema from './lib/get-context/get-config/schema/semver-range';
-import type * as VersionGroupSchema from './lib/get-context/get-config/schema/version-group';
-import type { SemverGroup as TSemverGroup } from './lib/get-context/get-groups/semver-group';
-import type { VersionGroup as TVersionGroup } from './lib/get-context/get-groups/version-group';
-import type { PackageJsonFile as TPackageJsonFile } from './lib/get-context/get-package-json-files/package-json-file';
-import type { Instance as TInstance } from './lib/get-context/get-package-json-files/package-json-file/instance';
+} from './get-context/get-config/schema';
+import type * as DependencyTypeSchema from './get-context/get-config/schema/dependency-type';
+import type * as SemverGroupSchema from './get-context/get-config/schema/semver-group';
+import type * as SemverRangeSchema from './get-context/get-config/schema/semver-range';
+import type * as VersionGroupSchema from './get-context/get-config/schema/version-group';
+import type { SemverGroup as TSemverGroup } from './get-context/get-groups/semver-group';
+import type { VersionGroup as TVersionGroup } from './get-context/get-groups/version-group';
+import type { PackageJsonFile as TPackageJsonFile } from './get-context/get-package-json-files/package-json-file';
+import type { Instance as TInstance } from './get-context/get-package-json-files/package-json-file/instance';
 
 export namespace Syncpack {
   export type Ctx = TContext;

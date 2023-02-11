@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import type { VersionGroup } from '../lib/get-context/get-groups/version-group';
-import type { Instance } from '../lib/get-context/get-package-json-files/package-json-file/instance';
+import type { VersionGroup } from '../get-context/get-groups/version-group';
+import type { Instance } from '../get-context/get-package-json-files/package-json-file/instance';
 import * as log from '../lib/log';
 import type { Syncpack } from '../types';
 

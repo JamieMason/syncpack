@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { ICON } from '../constants';
-import type { InstanceGroup } from '../lib/get-context/get-groups/version-group/instance-group';
+import type { InstanceGroup } from '../get-context/get-groups/version-group/instance-group';
 import * as log from '../lib/log';
 import type { Syncpack } from '../types';
 
