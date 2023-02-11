@@ -4,8 +4,9 @@ import { BaseError } from '../lib/error';
 /** Additional helpers for https://mobily.github.io/ts-belt/api/result */
 export const $R = {
   /**
-   * Return an R.Ok<output[]> for every R.Result which succeeded, or an
-   * R.Error<BaseError> if none succeeded.
+   * Return a single `R.Ok<output[]>` containing an array of the output of every
+   * `R.Result` returned by `getResult(input)` which succeeded, or a single
+   * `R.Error<BaseError>` if none succeeded.
    */
   onlyOk<Input, Output = Input>(
     getResult: (value: Input) => R.Result<Output, BaseError>,
