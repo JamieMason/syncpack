@@ -4,8 +4,8 @@ import type { Instance } from '../../get-package-json-files/package-json-file/in
 export class SemverGroup {
   /** */
   dependencies: string[];
-  /** Optionally limit this group to dependencies of the provided types */
-  dependencyTypes?: Syncpack.Config.DependencyType.NameList;
+  /** Optionally limit this group to dependencies at these named paths */
+  pathNames?: Syncpack.PathName[];
   /** */
   input: Syncpack.Config.Private;
   /** */

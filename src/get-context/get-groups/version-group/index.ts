@@ -5,8 +5,8 @@ import type { InstanceGroup } from './instance-group';
 export class VersionGroup {
   /** */
   dependencies: string[];
-  /** Optionally limit this group to dependencies of the provided types */
-  dependencyTypes?: Syncpack.Config.DependencyType.NameList;
+  /** Optionally limit this group to dependencies at these named paths */
+  pathNames?: Syncpack.PathName[];
   /** */
   input: Syncpack.Config.Private;
   /** */
@@ -35,7 +35,7 @@ export class VersionGroup {
     type Pinned = Syncpack.Config.VersionGroup.Pinned;
 
     this.dependencies = versionGroup.dependencies;
-    this.dependencyTypes = versionGroup.dependencyTypes;
+    this.pathNames = versionGroup.dependencyTypes;
     this.input = input;
     this.instanceGroups = [];
     this.instances = [];

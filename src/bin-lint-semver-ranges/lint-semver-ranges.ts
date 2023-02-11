@@ -36,11 +36,11 @@ export function lintSemverRanges(ctx: Syncpack.Ctx): Syncpack.Ctx {
 }
 
 function logSemverRangeMismatch(instance: Instance, semverGroup: SemverGroup) {
-  const type = instance.dependencyType;
+  const path = instance.pathDef.path;
   const shortPath = instance.packageJsonFile.shortPath;
   const actual = instance.version;
   const expected = setSemverRange(semverGroup.range, actual);
   console.log(
-    chalk`  {red ${actual}} ${ICON.rightArrow} {green ${expected}} {dim in ${type} of ${shortPath}}`,
+    chalk`  {red ${actual}} ${ICON.rightArrow} {green ${expected}} {dim in ${path} of ${shortPath}}`,
   );
 }

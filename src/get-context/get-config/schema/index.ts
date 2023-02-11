@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { DEFAULT_CONFIG } from '../../../constants';
-import * as DependencyTypeSchema from './dependency-type';
-import * as SemverGroupSchema from './semver-group';
-import * as SemverRangeSchema from './semver-range';
-import * as VersionGroupSchema from './version-group';
+import * as paths from './paths';
+import * as semverGroup from './semver-group';
+import * as semverRange from './semver-range';
+import * as versionGroup from './version-group';
 
 const NonEmptyString = z.string().trim().min(1);
 
@@ -12,13 +12,14 @@ const cliOnly = {
 } as const;
 
 const syncpackRcOnly = {
+  customPaths: paths.pathConfigByName.optional(),
   semverGroups: z
-    .array(SemverGroupSchema.Any)
+    .array(semverGroup.any)
     .default([...DEFAULT_CONFIG.semverGroups]),
   sortAz: z.array(NonEmptyString).default([...DEFAULT_CONFIG.sortAz]),
   sortFirst: z.array(NonEmptyString).default([...DEFAULT_CONFIG.sortFirst]),
   versionGroups: z
-    .array(VersionGroupSchema.Any)
+    .array(versionGroup.any)
     .default([...DEFAULT_CONFIG.versionGroups]),
 } as const;
 
@@ -32,16 +33,14 @@ const cliAndRcFile = {
   workspace: z.boolean().default(DEFAULT_CONFIG.workspace),
   filter: NonEmptyString.default(DEFAULT_CONFIG.filter),
   indent: z.string().default(DEFAULT_CONFIG.indent),
-  semverRange: SemverRangeSchema.Value.default(
-    DEFAULT_CONFIG.semverRange as '',
-  ),
+  semverRange: semverRange.value.default(DEFAULT_CONFIG.semverRange as ''),
   source: z.array(NonEmptyString).default([...DEFAULT_CONFIG.source]),
 } as const;
 
 const privateOnly = {
-  defaultSemverGroup: SemverGroupSchema.Default,
-  defaultVersionGroup: VersionGroupSchema.Default,
-  dependencyTypes: DependencyTypeSchema.NameList,
+  corePaths: z.array(paths.pathDefinition),
+  defaultSemverGroup: semverGroup.base,
+  defaultVersionGroup: versionGroup.base,
 } as const;
 
 export const Private = z.object({
@@ -62,7 +61,7 @@ export const Cli = z.object({
 });
 
 export const Public = Private.omit({
+  corePaths: true,
   defaultSemverGroup: true,
   defaultVersionGroup: true,
-  dependencyTypes: true,
 });

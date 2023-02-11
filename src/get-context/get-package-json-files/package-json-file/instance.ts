@@ -1,30 +1,38 @@
+import { pipe } from '@mobily/ts-belt';
 import { isNonEmptyArray } from 'expect-more';
 import minimatch from 'minimatch';
 import type { PackageJsonFile } from '.';
+import { $R } from '../../$R';
 import { setSemverRange } from '../../../lib/set-semver-range';
 import type { Syncpack } from '../../../types';
+import {
+  exhaustiveCheck,
+  strategyByName,
+} from '../../get-config/path-strategy';
 import type { SemverGroup } from '../../get-groups/semver-group';
 import type { VersionGroup } from '../../get-groups/version-group';
 
+type Entry = [string, string | undefined];
+
 export class Instance {
-  /** where this dependency is installed */
-  dependencyType: Syncpack.Config.DependencyType.Name;
   /** the name of this dependency */
   name: string;
   /** The package this dependency is installed in this specific time */
   packageJsonFile: PackageJsonFile;
+  /** where this dependency is installed */
+  pathDef: Syncpack.PathDefinition;
   /** The .name property of the package.json file of this instance */
   pkgName: string;
   /** the version of this dependency */
   version: string;
 
   constructor(
-    dependencyType: Syncpack.Config.DependencyType.Name,
+    pathDef: Syncpack.PathDefinition,
     name: string,
     packageJsonFile: PackageJsonFile,
     version: string,
   ) {
-    this.dependencyType = dependencyType;
+    this.pathDef = pathDef;
     this.name = name;
     this.packageJsonFile = packageJsonFile;
     this.pkgName = packageJsonFile.contents.name || 'PACKAGE_JSON_HAS_NO_NAME';
@@ -33,7 +41,7 @@ export class Instance {
 
   hasRange(range: Syncpack.Config.SemverRange.Value): boolean {
     return (
-      this.dependencyType !== 'workspace' &&
+      this.pathDef.name !== 'workspace' &&
       this.version === setSemverRange(range, this.version)
     );
   }
@@ -47,11 +55,36 @@ export class Instance {
    * which causes them to be removed by `JSON.stringify`.
    */
   setVersion(version: string | undefined): void {
-    const root: any = this.packageJsonFile.contents;
-    if (this.dependencyType === 'pnpmOverrides') {
-      root.pnpm.overrides[this.name] = version;
-    } else if (this.dependencyType !== 'workspace') {
-      root[this.dependencyType][this.name] = version;
+    const strategyName = this.pathDef.strategy;
+    const entry: Entry = [this.name, version];
+    const file = this.packageJsonFile;
+    switch (strategyName) {
+      case 'name@version':
+        pipe(
+          strategyByName[strategyName].write(file, this.pathDef, entry),
+          $R.tapErrVerbose,
+        );
+        break;
+      case 'name~version':
+        pipe(
+          strategyByName[strategyName].write(file, this.pathDef, entry),
+          $R.tapErrVerbose,
+        );
+        break;
+      case 'version':
+        pipe(
+          strategyByName[strategyName].write(file, this.pathDef, entry),
+          $R.tapErrVerbose,
+        );
+        break;
+      case 'versionsByName':
+        pipe(
+          strategyByName[strategyName].write(file, this.pathDef, entry),
+          $R.tapErrVerbose,
+        );
+        break;
+      default:
+        return exhaustiveCheck(strategyName);
     }
   }
 
@@ -59,8 +92,8 @@ export class Instance {
     return (
       group.packages.some((pattern) => minimatch(this.pkgName, pattern)) &&
       group.dependencies.some((pattern) => minimatch(this.name, pattern)) &&
-      (!isNonEmptyArray(group.dependencyTypes) ||
-        group.dependencyTypes.includes(this.dependencyType))
+      (!isNonEmptyArray(group.pathNames) ||
+        group.pathNames.includes(this.pathDef.name))
     );
   }
 }

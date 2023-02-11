@@ -1,8 +1,8 @@
 import minimatch from 'minimatch';
 import { join, normalize } from 'path';
 import { CWD } from '../../src/constants';
-import type { JsonFile } from '../../src/lib/get-context/get-package-json-files/get-patterns/read-json-safe';
-import type { PackageJson } from '../../src/lib/get-context/get-package-json-files/package-json-file';
+import type { JsonFile } from '../../src/get-context/get-package-json-files/get-patterns/read-json-safe';
+import type { PackageJson } from '../../src/get-context/get-package-json-files/package-json-file';
 import type { Syncpack } from '../../src/types';
 import type { MockDisk } from '../mock-disk';
 import { mockDisk } from '../mock-disk';

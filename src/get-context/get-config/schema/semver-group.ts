@@ -2,20 +2,20 @@ import { z } from 'zod';
 import { baseGroupFields } from './base-group';
 import * as SemverRangeSchema from './semver-range';
 
-export const Ignored = z
+export const ignored = z
   .object({ ...baseGroupFields, isIgnored: z.literal(true) })
   .strict();
 
-export const WithRange = z
-  .object({ ...baseGroupFields, range: SemverRangeSchema.Value })
+export const withRange = z
+  .object({ ...baseGroupFields, range: SemverRangeSchema.value })
   .strict();
 
-export const Default = z
+export const base = z
   .object({
     ...baseGroupFields,
-    range: SemverRangeSchema.Value,
+    range: SemverRangeSchema.value,
     isDefault: z.literal(true),
   })
   .strict();
 
-export const Any = z.union([Ignored, WithRange, Default]);
+export const any = z.union([ignored, withRange, base]);

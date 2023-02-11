@@ -13,20 +13,6 @@ export const ICON = {
   tick: '✓',
 } as const;
 
-/**
- * Aliases for locations of versions within package.json files, it is looped
- * over by each command to operate on each are as defined by the user.
- */
-export const ALL_DEPENDENCY_TYPES = [
-  'dependencies',
-  'devDependencies',
-  'overrides',
-  'peerDependencies',
-  'pnpmOverrides',
-  'resolutions',
-  'workspace',
-] as const;
-
 export const RANGE = {
   ANY: '*',
   EXACT: '',

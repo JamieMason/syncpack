@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { RANGE } from '../../../constants';
 
-export const Value = z.enum([
+export const value = z.enum([
   RANGE.ANY,
   RANGE.EXACT,
   RANGE.GT,

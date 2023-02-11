@@ -1,7 +1,7 @@
 import type { Disk } from '../../lib/disk';
 import { verbose } from '../../lib/log';
 import type { Syncpack } from '../../types';
-import { getDependencyTypes } from './get-dependency-types';
+import { getCorePaths } from './get-core-paths';
 import * as ConfigSchema from './schema';
 
 /**
@@ -16,9 +16,10 @@ export const getConfig = (
 
   const fromRcFile = disk.readConfigFileSync(fromCli.configPath);
 
-  verbose('rcfile contents:', fromCli);
+  verbose('rcfile contents:', fromRcFile);
 
   const fromPublic = ConfigSchema.Public.parse({
+    customPaths: getConfigByName('customPaths'),
     dev: getConfigByName('dev'),
     filter: getConfigByName('filter'),
     indent: getConfigByName('indent'),
@@ -36,8 +37,11 @@ export const getConfig = (
     workspace: getConfigByName('workspace'),
   });
 
+  verbose('user config:', fromPublic);
+
   const allConfig = ConfigSchema.Private.parse({
     ...fromPublic,
+    corePaths: getCorePaths(fromCli),
     defaultSemverGroup: {
       dependencies: ['**'],
       isDefault: true,
@@ -49,7 +53,6 @@ export const getConfig = (
       isDefault: true,
       packages: ['**'],
     },
-    dependencyTypes: getDependencyTypes(fromCli, fromPublic),
   });
 
   allConfig.semverGroups.push(allConfig.defaultSemverGroup);

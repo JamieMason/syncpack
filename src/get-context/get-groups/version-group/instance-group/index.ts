@@ -7,7 +7,7 @@ import { getHighestVersion } from './get-highest-version';
 export class InstanceGroup {
   /** 1+ `Instance` has a version which does not follow the rules */
   hasMismatches: boolean;
-  /** Every package/dependencyType location where this dependency was found */
+  /** Every package/pathName location where this dependency was found */
   instances: Instance[];
   /** Syncpack must report or fix this groups mismatches */
   isInvalid: boolean;
@@ -73,7 +73,7 @@ export class InstanceGroup {
    */
   getWorkspaceInstance(): Instance | undefined {
     return this.instances.find(
-      (instance) => instance.dependencyType === 'workspace',
+      (instance) => instance.pathDef.name === 'workspace',
     );
   }
 }

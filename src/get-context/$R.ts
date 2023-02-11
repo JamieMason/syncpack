@@ -1,5 +1,6 @@
 import { R } from '@mobily/ts-belt';
 import { BaseError } from '../lib/error';
+import { verbose } from '../lib/log';
 
 /** Additional helpers for https://mobily.github.io/ts-belt/api/result */
 export const $R = {
@@ -22,5 +23,10 @@ export const $R = {
         ? (R.Ok<Output[]>(outputs) as R.Result<Output[], BaseError>)
         : R.Error(new BaseError('No R.Ok() returned by $R.onlyOk'));
     };
+  },
+  /** Log verbose only when R.Result is an R.Err */
+  tapErrVerbose<T extends R.Result<unknown, BaseError>>(result: T) {
+    if (R.isError(result)) verbose(result._0.message);
+    return result;
   },
 };

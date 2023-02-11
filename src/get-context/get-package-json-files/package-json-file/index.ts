@@ -1,10 +1,14 @@
-import { isNonEmptyString } from 'expect-more';
+import { pipe, R } from '@mobily/ts-belt';
 import { relative } from 'path';
 import { CWD } from '../../../constants';
 import type { Disk } from '../../../lib/disk';
 import { verbose } from '../../../lib/log';
 import { newlines } from '../../../lib/newlines';
 import type { Syncpack } from '../../../types';
+import {
+  exhaustiveCheck,
+  strategyByName,
+} from '../../get-config/path-strategy';
 import type { JsonFile } from '../get-patterns/read-json-safe';
 import { Instance } from './instance';
 
@@ -31,6 +35,8 @@ export interface PackageJson {
     | string[]
     | undefined;
 }
+
+type Entry = [string, string];
 
 export class PackageJsonFile {
   /** parsed JSON contents of the file */
@@ -81,50 +87,51 @@ export class PackageJsonFile {
   }
 
   getInstances(): Instance[] {
-    return this.program.dependencyTypes
-      .flatMap((dependencyType): Instance[] =>
-        this.getDependencyEntries(dependencyType, this.contents).map(
-          ([name, version]) =>
-            new Instance(dependencyType, name, this, version),
+    return this.program.corePaths
+      .flatMap((pathDef): Instance[] =>
+        this.getPathEntries(pathDef, this).map(
+          ([name, version]) => new Instance(pathDef, name, this, version),
         ),
       )
       .filter((instance) => {
-        const { dependencyType, name, version } = instance;
-        if (!isNonEmptyString(name)) {
-          verbose('skip instance, no name', instance);
-          return false;
-        }
+        const { pathDef, name, version } = instance;
         if (name.search(new RegExp(this.program.filter)) === -1) {
           verbose('skip instance, name does not match filter', instance);
           return false;
         }
-        if (!isNonEmptyString(version)) {
-          verbose('skip instance, no version', instance);
-          return false;
-        }
-        verbose(`add ${name}@${version} to ${dependencyType} ${this.filePath}`);
+        verbose(`add ${name}@${version} to ${pathDef} ${this.filePath}`);
         return true;
       });
   }
 
-  getDependencyEntries(
-    dependencyType: Syncpack.Config.DependencyType.Name,
-    contents: PackageJson,
-  ): [string, string][] {
-    switch (dependencyType) {
-      case 'dependencies':
-      case 'devDependencies':
-      case 'overrides':
-      case 'peerDependencies':
-      case 'resolutions': {
-        return Object.entries(contents?.[dependencyType] || {});
-      }
-      case 'workspace': {
-        return [[contents.name || '', contents.version || '']];
-      }
-      case 'pnpmOverrides': {
-        return Object.entries(contents?.pnpm?.overrides || {});
-      }
+  getPathEntries(
+    pathDef: Syncpack.PathDefinition,
+    file: PackageJsonFile,
+  ): Entry[] {
+    const strategyName = pathDef.strategy;
+    switch (strategyName) {
+      case 'name@version':
+        return pipe(
+          strategyByName[strategyName].read(file, pathDef),
+          R.getWithDefault([] as Entry[]),
+        );
+      case 'name~version':
+        return pipe(
+          strategyByName[strategyName].read(file, pathDef),
+          R.getWithDefault([] as Entry[]),
+        );
+      case 'version':
+        return pipe(
+          strategyByName[strategyName].read(file, pathDef),
+          R.getWithDefault([] as Entry[]),
+        );
+      case 'versionsByName':
+        return pipe(
+          strategyByName[strategyName].read(file, pathDef),
+          R.getWithDefault([] as Entry[]),
+        );
+      default:
+        return exhaustiveCheck(strategyName);
     }
   }
 }

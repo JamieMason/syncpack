@@ -5,58 +5,6 @@ import { mockDisk } from '../../test/mock-disk';
 import { CWD, DEFAULT_CONFIG } from '../constants';
 
 describe('getContext', () => {
-  describe('dependencyTypes', () => {
-    const disk = mockDisk();
-    const dev = 'devDependencies';
-    const overrides = 'overrides';
-    const peer = 'peerDependencies';
-    const pnpmOverrides = 'pnpmOverrides';
-    const prod = 'dependencies';
-    const resolutions = 'resolutions';
-    const workspace = 'workspace';
-    const allTypes = [
-      dev,
-      overrides,
-      peer,
-      pnpmOverrides,
-      prod,
-      resolutions,
-      workspace,
-    ];
-    const ix = {
-      dev: 'devDependencies',
-      overrides: 'overrides',
-      peer: 'peerDependencies',
-      pnpmOverrides: 'pnpmOverrides',
-      prod: 'dependencies',
-      resolutions: 'resolutions',
-      workspace: 'workspace',
-    };
-
-    it('includes all if none are set', () => {
-      expect(getContext({}, disk)).toHaveProperty(
-        'dependencyTypes',
-        expect.toBeArrayIncludingOnly(allTypes),
-      );
-    });
-    it('enables one if it is the only one set', () => {
-      expect.assertions(allTypes.length);
-      Object.entries(ix).forEach(([optionName, typeName]) => {
-        expect(getContext({ [optionName]: true }, disk)).toHaveProperty(
-          'dependencyTypes',
-          expect.toBeArrayIncludingOnly([typeName]),
-        );
-      });
-    });
-    it('enables some if only those are set', () => {
-      expect(
-        getContext({ dev: true, prod: true, workspace: true }, disk),
-      ).toHaveProperty(
-        'dependencyTypes',
-        expect.toBeArrayIncludingOnly([dev, prod, workspace]),
-      );
-    });
-  });
   describe('source', () => {
     it('uses defaults when no CLI options or config are set', () => {
       const disk = mockDisk();
@@ -80,11 +28,11 @@ describe('getContext', () => {
     it('combines defaults, values from CLI options, and config', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      expect(getContext({ sortAz: ['overridden'] }, disk)).toEqual(
+      expect(getContext({ indent: '    ' }, disk)).toEqual(
         expect.objectContaining({
           semverRange: '',
           source: ['foo'],
-          sortAz: ['overridden'],
+          indent: '    ',
         }),
       );
     });
@@ -100,9 +48,7 @@ describe('getContext', () => {
             },
           ],
         });
-        expect(
-          getContext({ sortAz: ['overridden'] }, disk).semverGroups,
-        ).toEqual([
+        expect(getContext({}, disk).semverGroups).toEqual([
           expect.objectContaining({
             dependencies: ['@alpha/*'],
             packages: ['@myrepo/library'],
@@ -122,9 +68,7 @@ describe('getContext', () => {
             { dependencies: ['chalk'], packages: ['foo', 'bar'] },
           ],
         });
-        expect(
-          getContext({ sortAz: ['overridden'] }, disk).versionGroups,
-        ).toEqual([
+        expect(getContext({}, disk).versionGroups).toEqual([
           expect.objectContaining({
             dependencies: ['chalk'],
             packages: ['foo', 'bar'],

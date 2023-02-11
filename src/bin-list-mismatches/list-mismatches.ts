@@ -83,7 +83,7 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
   }
 
   function logVersionMismatch(instance: Instance): void {
-    const type = instance.dependencyType;
+    const type = instance.pathDef.path;
     const shortPath = instance.packageJsonFile.shortPath;
     const actual = instance.version;
     console.log(chalk`  {red ${actual}} {dim in ${type} of ${shortPath}}`);
