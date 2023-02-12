@@ -1,4 +1,4 @@
-import { isUndefined } from 'expect-more';
+import { isEmptyObject, isObject, isUndefined } from 'expect-more';
 import type { Syncpack } from '../types';
 
 export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
@@ -17,15 +17,25 @@ export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     });
   });
 
-  /** Remove eg `{"dependencies": {}, "devDependencies": {}}` */
-  ctx.packageJsonFiles.forEach((packageJsonFile) => {
-    ctx.dependencyTypes.forEach((dependencyType) => {
-      const deps = packageJsonFile.contents[dependencyType];
-      if (deps && Object.values(deps).every(isUndefined)) {
-        delete packageJsonFile.contents[dependencyType];
-      }
-    });
+  ctx.packageJsonFiles.forEach((file) => {
+    removeEmptyObjects(file.contents);
   });
 
   return ctx;
+
+  /** Remove eg { "dependencies": {}, "devDependencies": {} }` */
+  function removeEmptyObjects(parent: unknown) {
+    if (isObject(parent)) {
+      Object.entries(parent).forEach(([key, child]) => {
+        if (
+          isObject(child) &&
+          (isEmptyObject(child) || Object.values(child).every(isUndefined))
+        ) {
+          delete parent[key];
+        } else {
+          removeEmptyObjects(child);
+        }
+      });
+    }
+  }
 }
