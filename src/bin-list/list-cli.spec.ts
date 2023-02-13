@@ -86,12 +86,21 @@ describe('list', () => {
         [expect.stringMatching(/Version Group 1/)],
         ['✘ bar 0.2.0'],
       ]);
+      expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
 
     it('uses the highest installed version', () => {
       const scenario = scenarios.useHighestVersion();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([['✘ bar 0.1.0, 0.2.0, 0.3.0']]);
+      expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('ignores mismatches which do not match applied filter', () => {
+      const scenario = scenarios.mismatchIsFilteredOut();
+      listCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([['- d 1.1.1']]);
+      expect(scenario.disk.process.exit).not.toHaveBeenCalled();
     });
   });
 });
