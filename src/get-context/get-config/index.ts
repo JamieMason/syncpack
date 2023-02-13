@@ -1,7 +1,9 @@
 import type { Disk } from '../../lib/disk';
 import { verbose } from '../../lib/log';
 import type { Syncpack } from '../../types';
-import { getCorePaths } from './get-core-paths';
+import { getCoreTypes } from './get-core-types';
+import { getCustomTypes } from './get-custom-types';
+import { getEnabledTypes } from './get-enabled-types';
 import * as ConfigSchema from './schema';
 
 /**
@@ -19,29 +21,30 @@ export const getConfig = (
   verbose('rcfile contents:', fromRcFile);
 
   const fromPublic = ConfigSchema.Public.parse({
-    customPaths: getConfigByName('customPaths'),
-    dev: getConfigByName('dev'),
+    customTypes: getConfigByName('customTypes'),
+    dependencyTypes: fromRcFile?.dependencyTypes,
     filter: getConfigByName('filter'),
     indent: getConfigByName('indent'),
-    overrides: getConfigByName('overrides'),
-    peer: getConfigByName('peer'),
-    pnpmOverrides: getConfigByName('pnpmOverrides'),
-    prod: getConfigByName('prod'),
-    resolutions: getConfigByName('resolutions'),
     semverGroups: getConfigByName('semverGroups'),
     semverRange: getConfigByName('semverRange'),
     sortAz: getConfigByName('sortAz'),
     sortFirst: getConfigByName('sortFirst'),
     source: getConfigByName('source'),
+    types: fromCli?.types,
     versionGroups: getConfigByName('versionGroups'),
-    workspace: getConfigByName('workspace'),
   });
 
   verbose('user config:', fromPublic);
 
+  const coreTypes = getCoreTypes();
+  const customTypes = getCustomTypes(fromPublic);
+  const allTypes = [...coreTypes, ...customTypes];
+  const enabledTypes = getEnabledTypes(allTypes, fromPublic);
+
   const allConfig = ConfigSchema.Private.parse({
     ...fromPublic,
-    corePaths: getCorePaths(fromCli),
+    allTypes,
+    enabledTypes,
     defaultSemverGroup: {
       dependencies: ['**'],
       isDefault: true,

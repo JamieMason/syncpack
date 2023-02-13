@@ -173,6 +173,7 @@ export const scenarios = {
         versionGroups: [
           {
             dependencies: ['bar'],
+            dependencyTypes: [],
             packages: ['**'],
             isBanned: true,
           },
@@ -195,6 +196,7 @@ export const scenarios = {
         versionGroups: [
           {
             dependencies: ['bar'],
+            dependencyTypes: [],
             packages: ['**'],
             pinVersion: '2.2.2',
           },
@@ -254,6 +256,7 @@ export const scenarios = {
         semverGroups: [
           {
             dependencies: ['bar'],
+            dependencyTypes: [],
             packages: ['**'],
             isIgnored: true,
           },
@@ -286,6 +289,7 @@ export const scenarios = {
         versionGroups: [
           {
             dependencies: ['bar'],
+            dependencyTypes: [],
             packages: ['**'],
             isIgnored: true,
           },
@@ -398,13 +402,7 @@ export const scenarios = {
         },
       ],
       {
-        dev: true,
-        overrides: false,
-        pnpmOverrides: false,
-        peer: false,
-        prod: true,
-        resolutions: false,
-        workspace: true,
+        types: 'dev,prod,workspace',
         source: [
           'package.json',
           'workspaces/*/package.json',
@@ -444,14 +442,8 @@ export const scenarios = {
         },
       ],
       {
-        dev: true,
-        overrides: true,
-        pnpmOverrides: true,
-        peer: true,
-        prod: false,
-        resolutions: true,
-        workspace: true,
         semverRange: '~',
+        types: 'dev,overrides,pnpmOverrides,peer,resolutions,workspace',
       },
     );
   },
@@ -487,21 +479,16 @@ export const scenarios = {
         },
       ],
       {
-        dev: true,
-        overrides: true,
-        pnpmOverrides: true,
-        peer: true,
-        prod: true,
-        resolutions: true,
-        workspace: true,
         semverRange: '~',
         semverGroups: [
           {
             dependencies: ['b', 'c'],
+            dependencyTypes: [],
             packages: ['**'],
             isIgnored: true,
           },
         ],
+        types: 'dev,overrides,pnpmOverrides,peer,prod,resolutions,workspace',
       },
     );
   },
@@ -536,14 +523,8 @@ export const scenarios = {
         },
       ],
       {
-        dev: true,
-        overrides: true,
-        pnpmOverrides: true,
-        peer: true,
-        prod: false,
-        resolutions: true,
-        workspace: true,
         semverRange: '*',
+        types: 'dev,overrides,pnpmOverrides,peer,resolutions,workspace',
       },
     );
   },
@@ -569,13 +550,7 @@ export const scenarios = {
         },
       ],
       {
-        dev: false,
-        overrides: false,
-        pnpmOverrides: true,
-        peer: false,
-        prod: false,
-        resolutions: false,
-        workspace: false,
+        types: 'pnpmOverrides',
       },
     );
   },
@@ -628,13 +603,7 @@ export const scenarios = {
         },
       ],
       {
-        dev: false,
-        overrides: false,
-        pnpmOverrides: true,
-        peer: false,
-        prod: false,
-        resolutions: false,
-        workspace: false,
+        types: 'pnpmOverrides',
       },
     );
   },
@@ -657,21 +626,16 @@ export const scenarios = {
         },
       ],
       {
-        dev: true,
-        overrides: true,
-        pnpmOverrides: true,
-        peer: true,
-        prod: true,
-        resolutions: true,
         semverGroups: [
           {
             range: '^',
             dependencies: ['@myscope/**'],
+            dependencyTypes: [],
             packages: ['**'],
           },
         ],
         semverRange: '~',
-        workspace: true,
+        types: 'dev,overrides,pnpmOverrides,peer,prod,resolutions,workspace',
       },
     );
   },

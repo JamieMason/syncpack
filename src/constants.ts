@@ -26,15 +26,17 @@ export const RANGE = {
 } as const;
 
 export const DEFAULT_CONFIG = {
-  dev: true,
+  dependencyTypes: [
+    'dev',
+    'overrides',
+    'peer',
+    'pnpmOverrides',
+    'prod',
+    'resolutions',
+    'workspace',
+  ],
   filter: '.',
   indent: '  ',
-  overrides: true,
-  peer: true,
-  pnpmOverrides: true,
-  prod: true,
-  resolutions: true,
-  workspace: true,
   semverGroups: [],
   semverRange: '',
   sortAz: [

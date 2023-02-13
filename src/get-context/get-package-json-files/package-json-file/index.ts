@@ -52,21 +52,21 @@ export class PackageJsonFile {
   readonly json: string;
 
   /** resolved configuration */
-  readonly program: Syncpack.Config.Private;
+  readonly config: Syncpack.Config.Private;
 
   /** relative path on disk to this file */
   readonly shortPath: string;
 
   constructor(
     jsonFile: JsonFile<PackageJson>,
-    program: Syncpack.Config.Private,
+    config: Syncpack.Config.Private,
     disk: Disk,
   ) {
     this.contents = jsonFile.contents;
     this.disk = disk;
     this.filePath = jsonFile.filePath;
     this.json = jsonFile.json;
-    this.program = program;
+    this.config = config;
     this.shortPath = relative(CWD, jsonFile.filePath);
   }
 
@@ -80,14 +80,14 @@ export class PackageJsonFile {
 
   getSource(): string {
     const contents = this.contents;
-    const indent = this.program.indent;
+    const indent = this.config.indent;
     const EOL = newlines.detect(this.json);
     const source = `${JSON.stringify(contents, null, indent)}${EOL}`;
     return newlines.fix(source, EOL);
   }
 
   getInstances(): Instance[] {
-    return this.program.corePaths
+    return this.config.enabledTypes
       .flatMap((pathDef): Instance[] =>
         this.getPathEntries(pathDef, this).map(
           ([name, version]) => new Instance(pathDef, name, this, version),
@@ -95,11 +95,13 @@ export class PackageJsonFile {
       )
       .filter((instance) => {
         const { pathDef, name, version } = instance;
-        if (name.search(new RegExp(this.program.filter)) === -1) {
+        if (name.search(new RegExp(this.config.filter)) === -1) {
           verbose('skip instance, name does not match filter', instance);
           return false;
         }
-        verbose(`add ${name}@${version} to ${pathDef} ${this.filePath}`);
+        verbose(
+          `add ${name}@${version} to ${pathDef.name}:${pathDef.strategy} ${this.shortPath}`,
+        );
         return true;
       });
   }

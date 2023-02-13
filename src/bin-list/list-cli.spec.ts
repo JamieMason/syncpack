@@ -1,7 +1,17 @@
 import 'expect-more-jest';
-import { scenarios } from '../../test/scenarios';
-import type { TestScenario } from '../../test/scenarios/create-scenario';
+import { dependencyIsBanned } from '../../test/scenarios/dependency-is-banned';
+import { dependencyIsPinned } from '../../test/scenarios/dependency-is-pinned';
+import { dependentDoesNotMatchNestedWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-nested-workspace-version';
+import { dependentDoesNotMatchNpmOverrideVersion } from '../../test/scenarios/dependent-does-not-match-npm-override-version';
+import { dependentDoesNotMatchPnpmOverrideVersion } from '../../test/scenarios/dependent-does-not-match-pnpm-override-version';
+import { dependentDoesNotMatchWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-workspace-version';
+import type { TestScenario } from '../../test/scenarios/lib/create-scenario';
+import { mismatchesIncludeNonSemverVersions } from '../../test/scenarios/mismatches-include-non-semver-versions';
+import { useHighestVersion } from '../../test/scenarios/use-highest-version';
+import { versionIsIgnored } from '../../test/scenarios/version-is-ignored';
 import { listCli } from './list-cli';
+
+import { mismatchIsFilteredOut } from '../../test/scenarios/mismatch-is-filtered-out';
 
 describe('list', () => {
   beforeEach(() => {
@@ -13,11 +23,11 @@ describe('list', () => {
       const variants: [string, () => TestScenario][] = [
         [
           'when using a typical workspace',
-          scenarios.dependentDoesNotMatchWorkspaceVersion,
+          dependentDoesNotMatchWorkspaceVersion,
         ],
         [
           'when using nested workspaces',
-          scenarios.dependentDoesNotMatchNestedWorkspaceVersion,
+          dependentDoesNotMatchNestedWorkspaceVersion,
         ],
       ];
       variants.forEach(([context, getScenario]) => {
@@ -35,7 +45,7 @@ describe('list', () => {
     });
 
     it('lists non-semver dependencies with valid semver dependencies', () => {
-      const scenario = scenarios.mismatchesIncludeNonSemverVersions();
+      const scenario = mismatchesIncludeNonSemverVersions();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         ['✘ foo 0.2.0, 0.3.0, link:vendor/foo-0.1.0, link:vendor/foo-0.2.0'],
@@ -44,21 +54,21 @@ describe('list', () => {
     });
 
     it('lists mismatching npm overrides', () => {
-      const scenario = scenarios.dependentDoesNotMatchNpmOverrideVersion();
+      const scenario = dependentDoesNotMatchNpmOverrideVersion();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([['✘ c 0.1.0, 0.2.0']]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
 
     it('lists mismatching pnpm overrides', () => {
-      const scenario = scenarios.dependentDoesNotMatchPnpmOverrideVersion();
+      const scenario = dependentDoesNotMatchPnpmOverrideVersion();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([['✘ c 0.1.0, 0.2.0']]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
 
     it('removes banned/disallowed dependencies', () => {
-      const scenario = scenarios.dependencyIsBanned();
+      const scenario = dependencyIsBanned();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         ['- foo 0.1.0'],
@@ -69,7 +79,7 @@ describe('list', () => {
     });
 
     it('mentions ignored dependencies', () => {
-      const scenario = scenarios.versionIsIgnored();
+      const scenario = versionIsIgnored();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         ['- foo 0.1.0'],
@@ -80,7 +90,7 @@ describe('list', () => {
     });
 
     it('lists mismatching pinned versions', () => {
-      const scenario = scenarios.dependencyIsPinned();
+      const scenario = dependencyIsPinned();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         [expect.stringMatching(/Version Group 1/)],
@@ -90,14 +100,14 @@ describe('list', () => {
     });
 
     it('uses the highest installed version', () => {
-      const scenario = scenarios.useHighestVersion();
+      const scenario = useHighestVersion();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([['✘ bar 0.1.0, 0.2.0, 0.3.0']]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
 
     it('ignores mismatches which do not match applied filter', () => {
-      const scenario = scenarios.mismatchIsFilteredOut();
+      const scenario = mismatchIsFilteredOut();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([['- d 1.1.1']]);
       expect(scenario.disk.process.exit).not.toHaveBeenCalled();

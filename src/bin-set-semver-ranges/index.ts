@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
+import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { setSemverRangesCli } from './set-semver-ranges-cli';
 
@@ -29,9 +30,9 @@ Examples:
   {dim # use ~ range instead of default ""}
   syncpack set-semver-ranges --semver-range ~
   {dim # set ~ range in "devDependencies"}
-  syncpack set-semver-ranges --dev --semver-range ~
+  syncpack set-semver-ranges --types dev --semver-range ~
   {dim # set ~ range in "devDependencies" and "peerDependencies"}
-  syncpack set-semver-ranges --dev --peer --semver-range ~
+  syncpack set-semver-ranges --types dev,peer --semver-range ~
   {dim # indent package.json with 4 spaces instead of 2}
   syncpack set-semver-ranges --indent {yellow "    "}
 
@@ -60,34 +61,25 @@ Reference:
 `);
 });
 
+showHelpOnError(program);
+
 program
   .option(...option.source)
   .option(...option.filter)
   .option(...option.config)
   .option(...option.semverRange)
-  .option(...option.prod)
-  .option(...option.dev)
-  .option(...option.peer)
-  .option(...option.resolutions)
-  .option(...option.overrides)
-  .option(...option.workspace)
+  .option(...option.types)
   .option(...option.indent)
   .parse(process.argv);
 
 setSemverRangesCli(
   {
     configPath: program.opts().config,
-    dev: program.opts().dev,
     filter: program.opts().filter,
     indent: program.opts().indent,
-    overrides: program.opts().overrides,
-    peer: program.opts().peer,
-    pnpmOverrides: program.opts().pnpmOverrides,
-    prod: program.opts().prod,
-    resolutions: program.opts().resolutions,
     semverRange: program.opts().semverRange,
     source: program.opts().source,
-    workspace: program.opts().workspace,
+    types: program.opts().types,
   },
   disk,
 );

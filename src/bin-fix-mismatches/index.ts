@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
+import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { fixMismatchesCli } from './fix-mismatches-cli';
 
@@ -35,9 +36,9 @@ Examples:
   {dim # uses dependencies regular expression defined by --filter when provided}
   syncpack fix-mismatches --filter {yellow "typescript|tslint"}
   {dim # only inspect "devDependencies"}
-  syncpack fix-mismatches --dev
+  syncpack fix-mismatches --types dev
   {dim # only inspect "devDependencies" and "peerDependencies"}
-  syncpack fix-mismatches --dev --peer
+  syncpack fix-mismatches --types dev,peer
   {dim # indent package.json with 4 spaces instead of 2}
   syncpack fix-mismatches --indent {yellow "    "}
 
@@ -49,32 +50,23 @@ Reference:
 `);
 });
 
+showHelpOnError(program);
+
 program
   .option(...option.source)
   .option(...option.filter)
+  .option(...option.types)
   .option(...option.config)
-  .option(...option.prod)
-  .option(...option.dev)
-  .option(...option.peer)
-  .option(...option.resolutions)
-  .option(...option.overrides)
-  .option(...option.workspace)
   .option(...option.indent)
   .parse(process.argv);
 
 fixMismatchesCli(
   {
     configPath: program.opts().config,
-    dev: program.opts().dev,
     filter: program.opts().filter,
     indent: program.opts().indent,
-    overrides: program.opts().overrides,
-    peer: program.opts().peer,
-    pnpmOverrides: program.opts().pnpmOverrides,
-    prod: program.opts().prod,
-    resolutions: program.opts().resolutions,
     source: program.opts().source,
-    workspace: program.opts().workspace,
+    types: program.opts().types,
   },
   disk,
 );

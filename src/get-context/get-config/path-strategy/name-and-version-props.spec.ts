@@ -1,4 +1,5 @@
 import { R } from '@mobily/ts-belt';
+import { normalize } from 'path';
 import { mockPackage } from '../../../../test/mock';
 import { mockDisk } from '../../../../test/mock-disk';
 import { BaseError } from '../../../lib/error';
@@ -55,7 +56,9 @@ it('returns R.Error when namePath is not found', () => {
   expect(fn.read(file, pathDef)).toEqual(
     R.Error(
       new BaseError(
-        'Strategy<name~version> failed to get never.gonna in foo/package.json',
+        `Strategy<name~version> failed to get never.gonna in ${normalize(
+          'foo/package.json',
+        )}`,
       ),
     ),
   );
@@ -73,7 +76,9 @@ it('returns R.Error when version (path) is not found', () => {
   expect(fn.read(file, pathDef)).toEqual(
     R.Error(
       new BaseError(
-        'Strategy<name~version> failed to get never.gonna in foo/package.json',
+        `Strategy<name~version> failed to get never.gonna in ${normalize(
+          'foo/package.json',
+        )}`,
       ),
     ),
   );

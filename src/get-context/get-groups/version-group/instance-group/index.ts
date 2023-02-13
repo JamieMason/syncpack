@@ -9,6 +9,8 @@ export class InstanceGroup {
   hasMismatches: boolean;
   /** Every package/pathName location where this dependency was found */
   instances: Instance[];
+  /**  */
+  hasWorkspaceInstance: boolean;
   /** Syncpack must report or fix this groups mismatches */
   isInvalid: boolean;
   /** 1+ `Instance` has a version not matching `VersionGroup.pinVersion` */
@@ -32,8 +34,9 @@ export class InstanceGroup {
     const hasMismatches = isBanned || isUnpinned || uniques.length > 1;
     const isInvalid = !isIgnored && hasMismatches;
 
-    this.hasMismatches = hasMismatches;
     this.instances = instances;
+    this.hasMismatches = hasMismatches;
+    this.hasWorkspaceInstance = Boolean(this.getWorkspaceVersion());
     this.isInvalid = isInvalid;
     this.isUnpinned = isUnpinned;
     this.name = name;
@@ -43,15 +46,9 @@ export class InstanceGroup {
 
   getExpectedVersion(): string | undefined {
     // remove this dependency
-    if (this.versionGroup.isBanned) {
-      return undefined;
-    }
-    if (this.isUnpinned) {
-      return this.getPinnedVersion();
-    }
-    if (this.versionGroup.input.workspace) {
-      return this.getWorkspaceVersion() || getHighestVersion(this.uniques);
-    }
+    if (this.versionGroup.isBanned) return undefined;
+    if (this.isUnpinned) return this.getPinnedVersion();
+    if (this.hasWorkspaceInstance) return this.getWorkspaceVersion();
     return getHighestVersion(this.uniques);
   }
 
@@ -72,8 +69,6 @@ export class InstanceGroup {
    * this monorepo.
    */
   getWorkspaceInstance(): Instance | undefined {
-    return this.instances.find(
-      (instance) => instance.pathDef.name === 'workspace',
-    );
+    return this.instances.find(({ pathDef }) => pathDef.name === 'workspace');
   }
 }

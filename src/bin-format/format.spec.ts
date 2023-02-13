@@ -1,10 +1,15 @@
 import 'expect-more-jest';
-import { scenarios } from '../../test/scenarios';
+import { githubShorthand } from '../../test/scenarios/github-shorthand';
+import { protectedShorthand } from '../../test/scenarios/protected-shorthand';
+import { shorthand } from '../../test/scenarios/shorthand';
+import { sortArrayProps } from '../../test/scenarios/sort-array-props';
+import { sortFirst } from '../../test/scenarios/sort-first';
+import { sortObjectProps } from '../../test/scenarios/sort-object-props';
 import { formatCli } from './format-cli';
 
 describe('format', () => {
   it('sorts array properties alphabetically by value', () => {
-    const scenario = scenarios.sortArrayProps();
+    const scenario = sortArrayProps();
     formatCli(scenario.config, scenario.disk);
     expect(scenario.disk.writeFileSync.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -14,7 +19,7 @@ describe('format', () => {
     ]);
   });
   it('sorts object properties alphabetically by key', () => {
-    const scenario = scenarios.sortObjectProps();
+    const scenario = sortObjectProps();
     formatCli(scenario.config, scenario.disk);
     expect(scenario.disk.writeFileSync.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -24,7 +29,7 @@ describe('format', () => {
     ]);
   });
   it('sorts named properties first, then the rest alphabetically', () => {
-    const scenario = scenarios.sortFirst();
+    const scenario = sortFirst();
     formatCli(scenario.config, scenario.disk);
     expect(scenario.disk.writeFileSync.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -34,7 +39,7 @@ describe('format', () => {
     ]);
   });
   it('uses shorthand format for "bugs" and "repository"', () => {
-    const scenario = scenarios.shorthand();
+    const scenario = shorthand();
     formatCli(scenario.config, scenario.disk);
     expect(scenario.disk.writeFileSync.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -44,7 +49,7 @@ describe('format', () => {
     ]);
   });
   it('retains long form format for "repository" when directory property used', () => {
-    const scenario = scenarios.protectedShorthand();
+    const scenario = protectedShorthand();
     formatCli(scenario.config, scenario.disk);
     expect(scenario.disk.writeFileSync.mock.calls).toEqual([]);
     expect(scenario.log.mock.calls).toEqual([
@@ -52,7 +57,7 @@ describe('format', () => {
     ]);
   });
   it('uses github shorthand format for "repository"', () => {
-    const scenario = scenarios.githubShorthand();
+    const scenario = githubShorthand();
     formatCli(scenario.config, scenario.disk);
     expect(scenario.disk.writeFileSync.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].diskWriteWhenChanged,

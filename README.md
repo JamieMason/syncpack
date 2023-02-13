@@ -8,20 +8,26 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/JamieMason/syncpack/ci.yaml?branch=master)](https://github.com/JamieMason/syncpack/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/516439365fdd0e3c6526/maintainability)](https://codeclimate.com/github/JamieMason/syncpack/maintainability)
 
-## 🌩 Installation
+## Installation
 
 ```bash
-npm install --global syncpack
+npm install --save-dev syncpack
 ```
 
-## 🤖 GitHub Action
+> ### Breaking Changes
+>
+> Version [9.0.0](https://github.com/JamieMason/syncpack/releases/tag/9.0.0)
+> required some breaking API changes to add support for a new
+> [`customTypes`](#customtypes) feature, but they are very simple to make.
+>
+> ### GitHub Action
+>
+> As of May 2022 there is now a
+> [Syncpack GitHub Action](https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions).
+> It is new and less stable than syncpack itself, but please give it a try and
+> [give your feedback](https://github.com/JamieMason/syncpack-github-action/issues/new).
 
-As of May 2022 there is now a
-[Syncpack GitHub Action](https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions).
-It is new and less stable than syncpack itself, but please give it a try and
-[give your feedback](https://github.com/JamieMason/syncpack-github-action/issues/new).
-
-## 📝 Commands
+## Commands
 
 ### fix-mismatches
 
@@ -37,15 +43,9 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
 -f, --filter [pattern]  only include dependencies whose name matches this regex
--p, --prod              include dependencies
--d, --dev               include devDependencies
--P, --peer              include peerDependencies
--R, --resolutions       include resolutions (yarn)
--o, --overrides         include overrides (npm)
--O, --pnpmOverrides     include overrides (pnpm)
--w, --workspace         include locally developed package versions
--i, --indent [value]    override indentation. defaults to "  "
+-t, --types <names>     only include dependencies matching these types (eg. types=dev,prod,myCustomType)
 -c, --config <path>     path to a syncpack config file
+-i, --indent [value]    override indentation. defaults to "  "
 -h, --help              display help for command
 ```
 
@@ -64,9 +64,9 @@ syncpack fix-mismatches --source "apps/*/package.json" --source "core/*/package.
 # uses dependencies regular expression defined by --filter when provided
 syncpack fix-mismatches --filter "typescript|tslint"
 # only inspect "devDependencies"
-syncpack fix-mismatches --dev
+syncpack fix-mismatches --types dev
 # only inspect "devDependencies" and "peerDependencies"
-syncpack fix-mismatches --dev --peer
+syncpack fix-mismatches --types dev,peer
 # indent package.json with 4 spaces instead of 2
 syncpack fix-mismatches --indent "    "
 ```
@@ -85,8 +85,8 @@ Shorthand properties are used where available, such as the `"repository"` and
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
--i, --indent [value]    override indentation. defaults to "  "
 -c, --config <path>     path to a syncpack config file
+-i, --indent [value]    override indentation. defaults to "  "
 -h, --help              display help for command
 ```
 
@@ -120,16 +120,10 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 
 ```
 -s, --source [pattern]      glob pattern for package.json files to read from
--p, --prod                  include dependencies
--d, --dev                   include devDependencies
--P, --peer                  include peerDependencies
--R, --resolutions           include resolutions (yarn)
--o, --overrides             include overrides (npm)
--O, --pnpmOverrides         include overrides (pnpm)
 -f, --filter [pattern]      only include dependencies whose name matches this regex
 -r, --semver-range <range>  see supported ranges below. defaults to ""
 -c, --config <path>         path to a syncpack config file
--w, --workspace             include locally developed package versions
+-t, --types <names>         only include dependencies matching these types (eg. types=dev,prod,myCustomType)
 -h, --help                  display help for command
 ```
 
@@ -150,9 +144,9 @@ syncpack lint-semver-ranges --filter "typescript|tslint"
 # use ~ range instead of default ""
 syncpack lint-semver-ranges --semver-range ~
 # use ~ range in "devDependencies"
-syncpack lint-semver-ranges --dev --semver-range ~
+syncpack lint-semver-ranges --types dev --semver-range ~
 # use ~ range in "devDependencies" and "peerDependencies"
-syncpack lint-semver-ranges --dev --peer --semver-range ~
+syncpack lint-semver-ranges --types dev,peer semver-range ~
 ```
 
 </details>
@@ -166,15 +160,9 @@ List all dependencies required by your packages.
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
--p, --prod              include dependencies
--d, --dev               include devDependencies
--P, --peer              include peerDependencies
--R, --resolutions       include resolutions (yarn)
--o, --overrides         include overrides (npm)
--O, --pnpmOverrides     include overrides (pnpm)
 -f, --filter [pattern]  only include dependencies whose name matches this regex
 -c, --config <path>     path to a syncpack config file
--w, --workspace         include locally developed package versions
+-t, --types <names>     only include dependencies matching these types (eg. types=dev,prod,myCustomType)
 -h, --help              display help for command
 ```
 
@@ -193,9 +181,9 @@ syncpack list --source "apps/*/package.json" --source "core/*/package.json"
 # uses dependencies regular expression defined by --filter when provided
 syncpack list --filter "typescript|tslint"
 # only inspect "devDependencies"
-syncpack list --dev
+syncpack list --types dev
 # only inspect "devDependencies" and "peerDependencies"
-syncpack list --dev --peer
+syncpack list --types dev,peer
 ```
 
 </details>
@@ -212,15 +200,9 @@ See [`versionGroups`](#versiongroups) if you have advanced requirements.
 
 ```
 -s, --source [pattern]  glob pattern for package.json files to read from
--p, --prod              include dependencies
--d, --dev               include devDependencies
--P, --peer              include peerDependencies
--R, --resolutions       include resolutions (yarn)
--o, --overrides         include overrides (npm)
--O, --pnpmOverrides     include overrides (pnpm)
 -f, --filter [pattern]  only include dependencies whose name matches this regex
 -c, --config <path>     path to a syncpack config file
--w, --workspace         include locally developed package versions
+-t, --types <names>     only include dependencies matching these types (eg. types=dev,prod,myCustomType)
 -h, --help              display help for command
 ```
 
@@ -239,9 +221,9 @@ syncpack list-mismatches --source "apps/*/package.json" --source "core/*/package
 # uses dependencies regular expression defined by --filter when provided
 syncpack list-mismatches --filter "typescript|tslint"
 # only inspect "devDependencies"
-syncpack list-mismatches --dev
+syncpack list-mismatches --types dev
 # only inspect "devDependencies" and "peerDependencies"
-syncpack list-mismatches --dev --peer
+syncpack list-mismatches --types dev,peer
 ```
 
 </details>
@@ -258,18 +240,11 @@ See [`semverGroups`](#semvergroups) if you have advanced requirements.
 
 ```
 -s, --source [pattern]      glob pattern for package.json files to read from
--r, --semver-range <range>  see supported ranges below. defaults to ""
 -f, --filter [pattern]      only include dependencies whose name matches this regex
--p, --prod                  include dependencies
--d, --dev                   include devDependencies
--P, --peer                  include peerDependencies
--R, --resolutions           include resolutions (yarn)
--o, --overrides             include overrides (npm)
--O, --pnpmOverrides         include overrides (pnpm)
--w, --workspace             include locally developed package versions
--i, --indent [value]        override indentation. defaults to "  "
--r, --semver-range <range>  see supported ranges below. defaults to ""
 -c, --config <path>         path to a syncpack config file
+-r, --semver-range <range>  see supported ranges below. defaults to ""
+-t, --types <names>         only include dependencies matching these types (eg. types=dev,prod,myCustomType)
+-i, --indent [value]        override indentation. defaults to "  "
 -h, --help                  display help for command
 ```
 
@@ -290,16 +265,16 @@ syncpack set-semver-ranges --filter "typescript|tslint"
 # use ~ range instead of default ""
 syncpack set-semver-ranges --semver-range ~
 # set ~ range in "devDependencies"
-syncpack set-semver-ranges --dev --semver-range ~
+syncpack set-semver-ranges --types dev --semver-range ~
 # set ~ range in "devDependencies" and "peerDependencies"
-syncpack set-semver-ranges --dev --peer --semver-range ~
+syncpack set-semver-ranges --types dev,peer --semver-range ~
 # indent package.json with 4 spaces instead of 2
 syncpack set-semver-ranges --indent "    "
 ```
 
 </details>
 
-## 🛠 Configuration File
+## Configuration File
 
 Creating a configuration file is optional, syncpack will search up the directory
 tree in the following places:
@@ -319,15 +294,17 @@ configuration file (if present), you can use the `--config` option.
 
 ```json
 {
-  "dev": true,
+  "dependencyTypes": [
+    "dev",
+    "overrides",
+    "peer",
+    "pnpmOverrides",
+    "prod",
+    "resolutions",
+    "workspace"
+  ],
   "filter": ".",
   "indent": "  ",
-  "overrides": true,
-  "peer": true,
-  "pnpmOverrides": true,
-  "prod": true,
-  "resolutions": true,
-  "workspace": true,
   "semverGroups": [],
   "semverRange": "",
   "sortAz": [
@@ -345,42 +322,84 @@ configuration file (if present), you can use the `--config` option.
 }
 ```
 
-### `dev`, `peer`, `prod`, `resolutions`, `overrides`, `pnpmOverrides`, and `workspace`
+### Configuration Options
 
-Whether to search within `devDependencies`, `peerDependencies`, `dependencies`,
-`resolutions` (Yarn), `overrides` (npm), `pnpmOverrides` (pnpm), and the
-`version` property of the package.json files of your own packages developed
-within your `workspace` respectively.
+#### `--type` / `dependencyTypes`
 
-All of these locations are searched by default but they can be disabled
-individually in your config file. If any are set via the command line options
-`--dev`, `--peer`, `--prod`, `--resolutions`, `--overrides`, `--pnpmOverrides`,
-or `--workspace` then only the options you provide will be searched.
+All of the properties in the table below are searched by default, but can be
+disabled via the `dependencyTypes` property of your config file or the `--types`
+option on the command line.
 
-### `filter`
+- If `dependencyTypes` is unset or is an empty array, nothing is disabled.
+- If `dependencyTypes` is set, only those listed will be enabled.
+- If `--types` is set, it takes precedence and only its values will be used.
 
-A string which will be passed to `new RegExp()` to match against package names
-that should be included.
+In this example, only dependencies found in `dependencies` and `devDependencies`
+will be inspected by syncpack.
 
-> ⚠️ `filter` was originally intended as a convenience to be used from the
-> command line to filter the output of `syncpack list`, **it is not recommended
-> to add this to your config file to manage your project more generally**.
->
-> Instead use [`versionGroups`](#versiongroups) and/or
-> [`semverGroups`](#semvergroups).
+```json
+{
+  "dependencyTypes": ["dev", "prod"]
+}
+```
 
-### `indent`
+| Value           | Property in package.json |
+| --------------- | ------------------------ |
+| `dev`           | `.devDependencies`       |
+| `overrides`     | `.overrides`             |
+| `peer`          | `.peerDependencies`      |
+| `pnpmOverrides` | `.pnpm.overrides`        |
+| `prod`          | `.dependencies`          |
+| `resolutions`   | `.resolutions`           |
+| `workspace`     | `.version`               |
+
+This list can be extended with your own `customTypes`, so you can find and fix
+versions found in other parts of your package.json files.
+
+##### The `workspace` type
+
+This option synchronises the versions of your dependencies with the `version`
+properties of the package.json files developed in your own local
+workspace/project, when they relate to eachother.
+
+Take this example, `@your-repo/fetch` is developed in your repo:
+
+```jsonc
+{
+  "name": "@your-repo/fetch",
+  "version": "1.0.2"
+  // ...rest of the file
+}
+```
+
+and another package developed in your repo depends on it:
+
+```jsonc
+{
+  "name": "@your-repo/ui",
+  // ...other stuff
+  "dependencies": {
+    "@your-repo/fetch": "0.9.4"
+  }
+  // ...rest of the file
+}
+```
+
+When `workspace` is enabled, syncpack will fix `@your-repo/ui` so it depends on
+version `1.0.2` of `@your-repo/fetch`.
+
+#### `indent`
 
 The character(s) to be used to indent your package.json files when writing to
 disk.
 
-### `semverRange`
+#### `semverRange`
 
 Defaulted to `""` to ensure that exact dependency versions are used instead of
 loose ranges, but this can be overridden in your config file or via the
 `--semver-range` command line option.
 
-#### Supported Ranges
+##### Supported Ranges
 
 ```
 <  <1.4.2
@@ -393,27 +412,82 @@ loose ranges, but this can be overridden in your config file or via the
 *  *
 ```
 
-### `sortAz`
+#### `sortAz`
 
 When using the `format` command, determines which fields within package.json
 files should be sorted alphabetically. When the value is an Object, its keys are
 sorted alphabetically. When the value is an Array, its values are sorted
 alphabetically. There is no equivalent CLI Option for this configuration.
 
-### `sortFirst`
+#### `sortFirst`
 
 When using the `format` command, determines which fields within package.json
 files should appear at the top, and in what order. There is no equivalent CLI
 Option for this configuration.
 
-### `source`
+#### `source`
 
 Defaults to `["package.json", "packages/*/package.json"]` to match most Projects
 using Lerna or Yarn Workspaces, but this can be overridden in your config file
 or via multiple `--source` command line options. Supports any patterns supported
 by [glob](https://github.com/isaacs/node-glob).
 
-### `versionGroups`
+#### `customTypes`
+
+Extend syncpack to find and fix versions in your packages which are not
+available by default. Custom types behave like any other dependency, so can be
+included in [versionGroups](#versiongroups) or [semverGroups](#semvergroups)
+etc.
+
+The example below adds support for synchronising versions found in:
+
+1. The
+   [`engines`](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#engines)
+   object.
+1. The [`packageManager`](https://nodejs.org/api/packages.html#packagemanager)
+   string.
+
+```json
+{
+  "customTypes": {
+    "engines": {
+      "path": "engines",
+      "strategy": "versionsByName"
+    },
+    "packageManager": {
+      "path": "packageManager",
+      "strategy": "name@version"
+    }
+  }
+}
+```
+
+##### `customTypes[name]`
+
+The key of each custom type is its name, this can be used in the following
+places to toggle when it is enabled:
+
+1. [`--type` / `dependencyTypes`](#--type--dependencytypes).
+1. [`versionGroup.dependencyTypes`](#versiongroupdependencytypes)
+1. [`semverGroup.dependencyTypes`](#semvergroupdependencytypes)
+
+##### `customTypes[name].path`
+
+Where the version can be found in each package.json file, such as `engines`,
+`packageManager` or `some.nested.property`.
+
+##### `customTypes[name].strategy`
+
+A strategy defines how syncpack needs to read and write dependency names and
+versions, there are 3 to choose from:
+
+| Name             | Example                                |
+| ---------------- | -------------------------------------- |
+| `name@version`   | `pnpm@7.27.0`                          |
+| `version`        | `12.4.2`                               |
+| `versionsByName` | `{"pnpm":"7.27.0", "semver": "7.3.8"}` |
+
+#### `versionGroups`
 
 The most common use case for version groups is when some of the packages in your
 Monorepo are considered alpha (or legacy). Since those packages are much further
@@ -468,7 +542,7 @@ to apply to an entire package:
 
 See [`semverGroups`](#semverGroups) for more examples, they work the same way.
 
-#### `versionGroup.dependencies`
+##### `versionGroup.dependencies`
 
 Required. An array of minimatch glob patterns which should match the key of
 dependencies defined in your package.json files.
@@ -479,7 +553,7 @@ dependencies defined in your package.json files.
 | `["@aws-sdk/**"]`        | Any dependency with the scope `@aws-sdk` |
 | `["react", "react-dom"]` | Specific dependencies by name            |
 
-#### `versionGroup.packages`
+##### `versionGroup.packages`
 
 Required. An array of minimatch glob patterns which should match the `name`
 property of packages developed within your monorepo.
@@ -490,7 +564,7 @@ property of packages developed within your monorepo.
 | `["@my-repo/**"]`            | Any package with the scope `@my-repo` |
 | `["my-server", "my-client"]` | Specific packages by name             |
 
-#### `versionGroup.dependencyTypes`
+##### `versionGroup.dependencyTypes`
 
 Optional. If set, will result in only the dependency types included in that
 array being considered a match for this version group.
@@ -511,7 +585,7 @@ used in `dependencies` or `devDependencies`.
 }
 ```
 
-#### `versionGroup.isBanned`
+##### `versionGroup.isBanned`
 
 Remove dependencies which you've decided should never be allowed.
 
@@ -527,7 +601,7 @@ Remove dependencies which you've decided should never be allowed.
 }
 ```
 
-#### `versionGroup.isIgnored`
+##### `versionGroup.isIgnored`
 
 Have syncpack ignore these dependencies completely.
 
@@ -543,7 +617,7 @@ Have syncpack ignore these dependencies completely.
 }
 ```
 
-#### `versionGroup.pinVersion`
+##### `versionGroup.pinVersion`
 
 Pin the version of all dependencies in this group to match this specific version
 you've defined.
@@ -560,13 +634,13 @@ you've defined.
 }
 ```
 
-### `semverGroups`
+#### `semverGroups`
 
 Allow some packages to have different semver range rules to the rest of your
 monorepo. Each dependency can only belong to one semver group, the first rule
 which matches a given dependency and package will apply.
 
-#### Example use cases
+##### Example use cases
 
 1: Every dependency of `@myrepo/library` should have a semver range of `~`,
 regardless of what the rest of the monorepo uses:
@@ -648,28 +722,40 @@ and peer dependencies can be broader.
 }
 ```
 
-#### `semverGroup.range`
+##### `semverGroup.range`
 
 Which of the [Supported Ranges](#supported-ranges) this group should use.
 
-#### `semverGroup.dependencies`
+##### `semverGroup.dependencies`
 
 Works the same as [`versionGroup.dependencies`](#versiongroupdependencies).
 
-#### `semverGroup.isIgnored`
+##### `semverGroup.isIgnored`
 
 Works the same as [`versionGroup.isIgnored`](#versiongroupisignored).
 
-#### `semverGroup.packages`
+##### `semverGroup.packages`
 
 Works the same as [`versionGroup.packages`](#versiongrouppackages).
 
-#### `semverGroup.dependencyTypes`
+##### `semverGroup.dependencyTypes`
 
 Works the same as
 [`versionGroup.dependencyTypes`](#versiongroupdependencytypes).
 
-## 🕵🏾‍♀️ Resolving Packages
+#### `filter`
+
+A string which will be passed to `new RegExp()` to match against package names
+that should be included.
+
+> ⚠️ `filter` was originally intended as a convenience to be used from the
+> command line to filter the output of `syncpack list`, **it is not recommended
+> to add this to your config file to manage your project more generally**.
+>
+> Instead use [`versionGroups`](#versiongroups) and/or
+> [`semverGroups`](#semvergroups).
+
+## Resolving Packages
 
 package.json files are resolved in this order of precendence:
 
@@ -687,7 +773,7 @@ package.json files are resolved in this order of precendence:
 > 👋 Always add quotes around your `--source` patterns
 > [[more info](https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769)].
 
-## 🙋🏿‍♀️ Getting Help
+## Getting Help
 
 Get help with issues by creating a [Bug Report] or discuss ideas by opening a
 [Feature Request].
@@ -697,7 +783,7 @@ Get help with issues by creating a [Bug Report] or discuss ideas by opening a
 [feature request]:
   https://github.com/JamieMason/syncpack/issues/new?template=feature_request.md
 
-## 👀 Other Projects
+## Other Projects
 
 If you find my Open Source projects useful, please share them ❤️
 

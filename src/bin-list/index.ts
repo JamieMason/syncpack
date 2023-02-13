@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
+import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { listCli } from './list-cli';
 
@@ -20,9 +21,9 @@ Examples:
   {dim # uses dependencies regular expression defined by --filter when provided}
   syncpack list --filter {yellow "typescript|tslint"}
   {dim # only inspect "devDependencies"}
-  syncpack list --dev
+  syncpack list --types dev
   {dim # only inspect "devDependencies" and "peerDependencies"}
-  syncpack list --dev --peer
+  syncpack list --types dev,peer
 
 Resolving Packages:
   1. If {yellow --source} globs are provided, use those.
@@ -39,30 +40,21 @@ Reference:
 `);
 });
 
+showHelpOnError(program);
+
 program
   .option(...option.source)
   .option(...option.filter)
   .option(...option.config)
-  .option(...option.prod)
-  .option(...option.dev)
-  .option(...option.peer)
-  .option(...option.resolutions)
-  .option(...option.overrides)
-  .option(...option.workspace)
+  .option(...option.types)
   .parse(process.argv);
 
 listCli(
   {
     configPath: program.opts().config,
-    dev: program.opts().dev,
     filter: program.opts().filter,
-    overrides: program.opts().overrides,
-    peer: program.opts().peer,
-    pnpmOverrides: program.opts().pnpmOverrides,
-    prod: program.opts().prod,
-    resolutions: program.opts().resolutions,
     source: program.opts().source,
-    workspace: program.opts().workspace,
+    types: program.opts().types,
   },
   disk,
 );

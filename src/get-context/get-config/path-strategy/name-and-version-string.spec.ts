@@ -1,4 +1,5 @@
 import { R } from '@mobily/ts-belt';
+import { normalize } from 'path';
 import { mockPackage } from '../../../../test/mock';
 import { mockDisk } from '../../../../test/mock-disk';
 import { BaseError } from '../../../lib/error';
@@ -51,6 +52,10 @@ it('returns R.Error when path is not found', () => {
   const jsonFile = mockPackage('foo', {});
   const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
   expect(fn.read(file, pathDef)).toEqual(
-    R.Error(new BaseError('Failed to get never.gonna in foo/package.json')),
+    R.Error(
+      new BaseError(
+        `Failed to get never.gonna in ${normalize('foo/package.json')}`,
+      ),
+    ),
   );
 });

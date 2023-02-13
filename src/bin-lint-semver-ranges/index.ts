@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
+import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { lintSemverRangesCli } from './lint-semver-ranges-cli';
 
@@ -29,9 +30,9 @@ Examples:
   {dim # use ~ range instead of default ""}
   syncpack lint-semver-ranges --semver-range ~
   {dim # use ~ range in "devDependencies"}
-  syncpack lint-semver-ranges --dev --semver-range ~
+  syncpack lint-semver-ranges --types dev --semver-range ~
   {dim # use ~ range in "devDependencies" and "peerDependencies"}
-  syncpack lint-semver-ranges --dev --peer --semver-range ~
+  syncpack lint-semver-ranges --types dev,peer semver-range ~
 
 Supported Ranges:
   <  {dim <1.4.2}
@@ -58,32 +59,23 @@ Reference:
 `);
 });
 
+showHelpOnError(program);
+
 program
   .option(...option.source)
   .option(...option.filter)
   .option(...option.semverRange)
   .option(...option.config)
-  .option(...option.prod)
-  .option(...option.dev)
-  .option(...option.peer)
-  .option(...option.resolutions)
-  .option(...option.overrides)
-  .option(...option.workspace)
+  .option(...option.types)
   .parse(process.argv);
 
 lintSemverRangesCli(
   {
     configPath: program.opts().config,
-    dev: program.opts().dev,
     filter: program.opts().filter,
-    overrides: program.opts().overrides,
-    peer: program.opts().peer,
-    pnpmOverrides: program.opts().pnpmOverrides,
-    prod: program.opts().prod,
-    resolutions: program.opts().resolutions,
     semverRange: program.opts().semverRange,
     source: program.opts().source,
-    workspace: program.opts().workspace,
+    types: program.opts().types,
   },
   disk,
 );

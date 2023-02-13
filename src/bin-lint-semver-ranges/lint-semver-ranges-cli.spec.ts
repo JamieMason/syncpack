@@ -1,6 +1,8 @@
 import 'expect-more-jest';
 import { normalize } from 'path';
-import { scenarios } from '../../test/scenarios';
+import { semverIsIgnored } from '../../test/scenarios/semver-is-ignored';
+import { semverRangesDoNotMatchConfig } from '../../test/scenarios/semver-ranges-do-not-match-config';
+import { semverRangesDoNotMatchConfigWildcard } from '../../test/scenarios/semver-ranges-do-not-match-config-wildcard';
 import { lintSemverRangesCli } from './lint-semver-ranges-cli';
 
 describe('lintSemverRanges', () => {
@@ -9,7 +11,7 @@ describe('lintSemverRanges', () => {
   });
 
   it('lists versions with ranges which do not match the project config', () => {
-    const scenario = scenarios.semverRangesDoNotMatchConfig();
+    const scenario = semverRangesDoNotMatchConfig();
     const a = normalize('packages/a/package.json');
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
@@ -27,7 +29,7 @@ describe('lintSemverRanges', () => {
   });
 
   it('ensures wildcard versions are supported', () => {
-    const scenario = scenarios.semverRangesDoNotMatchConfigWildcard();
+    const scenario = semverRangesDoNotMatchConfigWildcard();
     const a = normalize('packages/a/package.json');
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
@@ -45,7 +47,7 @@ describe('lintSemverRanges', () => {
   });
 
   it('does not include ignored dependencies in its output', () => {
-    const scenario = scenarios.semverIsIgnored();
+    const scenario = semverIsIgnored();
     const a = normalize('packages/a/package.json');
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([

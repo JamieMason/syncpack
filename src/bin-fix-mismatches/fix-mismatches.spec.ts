@@ -1,17 +1,29 @@
 import 'expect-more-jest';
-import { scenarios } from '../../test/scenarios';
+import { customNameAndVersionMismatch } from '../../test/scenarios/custom-name-and-version-mismatch';
+import { customVersionMismatch } from '../../test/scenarios/custom-version-mismatch';
+import { customVersionsByNameMismatch } from '../../test/scenarios/custom-versions-by-name-mismatch';
+import { dependencyIsBanned } from '../../test/scenarios/dependency-is-banned';
+import { dependencyIsPinned } from '../../test/scenarios/dependency-is-pinned';
+import { dependentDoesNotMatchNestedWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-nested-workspace-version';
+import { dependentDoesNotMatchNpmOverrideVersion } from '../../test/scenarios/dependent-does-not-match-npm-override-version';
+import { dependentDoesNotMatchPnpmOverrideVersion } from '../../test/scenarios/dependent-does-not-match-pnpm-override-version';
+import { dependentDoesNotMatchWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-workspace-version';
+import { mismatchesIncludeNonSemverVersions } from '../../test/scenarios/mismatches-include-non-semver-versions';
+import { unusedCustomType } from '../../test/scenarios/unused-custom-type';
+import { useHighestVersion } from '../../test/scenarios/use-highest-version';
+import { versionIsIgnored } from '../../test/scenarios/version-is-ignored';
 import { fixMismatchesCli } from './fix-mismatches-cli';
 
 describe('fixMismatches', () => {
-  beforeEach(() => {
-    jest.restoreAllMocks();
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('when dependencies are installed with different versions', () => {
     describe('when the dependency is a package maintained in this workspace', () => {
       describe('when using a typical workspace', () => {
         it('warns about the workspace version', () => {
-          const scenario = scenarios.dependentDoesNotMatchWorkspaceVersion();
+          const scenario = dependentDoesNotMatchWorkspaceVersion();
           fixMismatchesCli(scenario.config, scenario.disk);
           expect(scenario.disk.writeFileSync.mock.calls).toEqual([
             scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -27,8 +39,7 @@ describe('fixMismatches', () => {
 
       describe('when using nested workspaces', () => {
         it('warns about the workspace version', () => {
-          const scenario =
-            scenarios.dependentDoesNotMatchNestedWorkspaceVersion();
+          const scenario = dependentDoesNotMatchNestedWorkspaceVersion();
           fixMismatchesCli(scenario.config, scenario.disk);
           expect(scenario.disk.writeFileSync.mock.calls).toEqual([
             scenario.files['workspaces/a/packages/a/package.json']
@@ -46,10 +57,58 @@ describe('fixMismatches', () => {
           ]);
         });
       });
+
+      describe('when using custom types', () => {
+        it('ignores the mismatch in the custom location if it has been filtered out', () => {
+          const scenario = unusedCustomType();
+          fixMismatchesCli(scenario.config, scenario.disk);
+          expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
+          expect(scenario.log.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
+            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+          ]);
+        });
+
+        it('fixes "versionsByName" mismatches in custom locations', () => {
+          const scenario = customVersionsByNameMismatch();
+          fixMismatchesCli(scenario.config, scenario.disk);
+          expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+          ]);
+          expect(scenario.log.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].logEntryWhenChanged,
+            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+          ]);
+        });
+
+        it('fixes "name@version" mismatches in custom locations', () => {
+          const scenario = customNameAndVersionMismatch();
+          fixMismatchesCli(scenario.config, scenario.disk);
+          expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+          ]);
+          expect(scenario.log.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].logEntryWhenChanged,
+            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+          ]);
+        });
+
+        it('fixes "version" mismatches in custom locations', () => {
+          const scenario = customVersionMismatch();
+          fixMismatchesCli(scenario.config, scenario.disk);
+          expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+          ]);
+          expect(scenario.log.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].logEntryWhenChanged,
+            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+          ]);
+        });
+      });
     });
 
     it('replaces non-semver dependencies with valid semver dependencies', () => {
-      const scenario = scenarios.mismatchesIncludeNonSemverVersions();
+      const scenario = mismatchesIncludeNonSemverVersions();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -65,7 +124,7 @@ describe('fixMismatches', () => {
     });
 
     it('removes banned/disallowed dependencies', () => {
-      const scenario = scenarios.dependencyIsBanned();
+      const scenario = dependencyIsBanned();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/b/package.json'].diskWriteWhenChanged,
@@ -77,7 +136,7 @@ describe('fixMismatches', () => {
     });
 
     it('does not consider versions of ignored dependencies', () => {
-      const scenario = scenarios.versionIsIgnored();
+      const scenario = versionIsIgnored();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
       expect(scenario.log.mock.calls).toEqual([
@@ -87,7 +146,7 @@ describe('fixMismatches', () => {
     });
 
     it('replaces mismatching npm overrides', () => {
-      const scenario = scenarios.dependentDoesNotMatchNpmOverrideVersion();
+      const scenario = dependentDoesNotMatchNpmOverrideVersion();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -99,7 +158,7 @@ describe('fixMismatches', () => {
     });
 
     it('replaces mismatching pnpm overrides', () => {
-      const scenario = scenarios.dependentDoesNotMatchPnpmOverrideVersion();
+      const scenario = dependentDoesNotMatchPnpmOverrideVersion();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -111,7 +170,7 @@ describe('fixMismatches', () => {
     });
 
     it('synchronises pinned versions', () => {
-      const scenario = scenarios.dependencyIsPinned();
+      const scenario = dependencyIsPinned();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,
@@ -122,7 +181,7 @@ describe('fixMismatches', () => {
     });
 
     it('uses the highest installed version', () => {
-      const scenario = scenarios.useHighestVersion();
+      const scenario = useHighestVersion();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].diskWriteWhenChanged,

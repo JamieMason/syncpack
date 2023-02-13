@@ -8,7 +8,7 @@ export function getVersionGroups(
   instances: Instance[],
 ): VersionGroup[] {
   const versionGroups = input.versionGroups.map(
-    (versionGroup): VersionGroup => new VersionGroup(input, versionGroup),
+    (versionGroup) => new VersionGroup(input, versionGroup),
   );
 
   instances.forEach((instance) => {
@@ -35,7 +35,6 @@ export function getVersionGroups(
 
 function getInstanceGroups(versionGroup: VersionGroup): InstanceGroup[] {
   return Object.entries(versionGroup.instancesByName).map(
-    ([name, instances]): InstanceGroup =>
-      new InstanceGroup(versionGroup, name, instances),
+    ([name, instances]) => new InstanceGroup(versionGroup, name, instances),
   );
 }

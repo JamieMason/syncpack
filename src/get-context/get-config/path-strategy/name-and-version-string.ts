@@ -26,7 +26,6 @@ export const nameAndVersionString: Strategy<'name@version'> = {
   write(file, pathDef, [name, version]) {
     const { contents, shortPath } = file;
     const isNestedPath = pathDef.path.includes('.');
-
     if (isNestedPath) {
       const fullPath = pathDef.path.split('.');
       const pathToParent = fullPath.slice(0, fullPath.length - 1).join('.');

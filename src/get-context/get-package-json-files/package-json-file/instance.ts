@@ -92,8 +92,8 @@ export class Instance {
     return (
       group.packages.some((pattern) => minimatch(this.pkgName, pattern)) &&
       group.dependencies.some((pattern) => minimatch(this.name, pattern)) &&
-      (!isNonEmptyArray(group.pathNames) ||
-        group.pathNames.includes(this.pathDef.name))
+      (!isNonEmptyArray(group.dependencyTypes) ||
+        group.dependencyTypes.includes(this.pathDef.name))
     );
   }
 }

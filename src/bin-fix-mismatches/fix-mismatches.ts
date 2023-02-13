@@ -11,6 +11,7 @@ export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     // Set the correct version on each instance.
     invalidGroups.forEach((instanceGroup) => {
       const nextVersion = instanceGroup.getExpectedVersion();
+      if (nextVersion === '') console.trace(instanceGroup);
       instanceGroup.instances.forEach((instance) =>
         instance.setVersion(nextVersion),
       );

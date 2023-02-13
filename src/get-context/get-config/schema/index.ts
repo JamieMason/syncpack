@@ -5,40 +5,36 @@ import * as semverGroup from './semver-group';
 import * as semverRange from './semver-range';
 import * as versionGroup from './version-group';
 
-const NonEmptyString = z.string().trim().min(1);
+const nonEmptyString = z.string().trim().min(1);
 
 const cliOnly = {
   configPath: z.string().optional(),
+  types: z.string().default(''),
 } as const;
 
 const syncpackRcOnly = {
-  customPaths: paths.pathConfigByName.optional(),
+  customTypes: paths.pathConfigByName.optional(),
+  dependencyTypes: z.array(nonEmptyString).default([]),
   semverGroups: z
     .array(semverGroup.any)
     .default([...DEFAULT_CONFIG.semverGroups]),
-  sortAz: z.array(NonEmptyString).default([...DEFAULT_CONFIG.sortAz]),
-  sortFirst: z.array(NonEmptyString).default([...DEFAULT_CONFIG.sortFirst]),
+  sortAz: z.array(nonEmptyString).default([...DEFAULT_CONFIG.sortAz]),
+  sortFirst: z.array(nonEmptyString).default([...DEFAULT_CONFIG.sortFirst]),
   versionGroups: z
     .array(versionGroup.any)
     .default([...DEFAULT_CONFIG.versionGroups]),
 } as const;
 
 const cliAndRcFile = {
-  dev: z.boolean().default(DEFAULT_CONFIG.dev),
-  overrides: z.boolean().default(DEFAULT_CONFIG.overrides),
-  peer: z.boolean().default(DEFAULT_CONFIG.peer),
-  pnpmOverrides: z.boolean().default(DEFAULT_CONFIG.pnpmOverrides),
-  prod: z.boolean().default(DEFAULT_CONFIG.prod),
-  resolutions: z.boolean().default(DEFAULT_CONFIG.resolutions),
-  workspace: z.boolean().default(DEFAULT_CONFIG.workspace),
-  filter: NonEmptyString.default(DEFAULT_CONFIG.filter),
+  filter: nonEmptyString.default(DEFAULT_CONFIG.filter),
   indent: z.string().default(DEFAULT_CONFIG.indent),
   semverRange: semverRange.value.default(DEFAULT_CONFIG.semverRange as ''),
-  source: z.array(NonEmptyString).default([...DEFAULT_CONFIG.source]),
+  source: z.array(nonEmptyString).default([...DEFAULT_CONFIG.source]),
 } as const;
 
 const privateOnly = {
-  corePaths: z.array(paths.pathDefinition),
+  allTypes: z.array(paths.pathDefinition),
+  enabledTypes: z.array(paths.pathDefinition),
   defaultSemverGroup: semverGroup.base,
   defaultVersionGroup: versionGroup.base,
 } as const;
@@ -61,7 +57,8 @@ export const Cli = z.object({
 });
 
 export const Public = Private.omit({
-  corePaths: true,
+  allTypes: true,
+  enabledTypes: true,
   defaultSemverGroup: true,
   defaultVersionGroup: true,
 });

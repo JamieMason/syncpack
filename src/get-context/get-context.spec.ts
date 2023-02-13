@@ -91,8 +91,8 @@ describe('getContext', () => {
           const disk = mockDisk();
           disk.globSync.mockReturnValue([filePath]);
           disk.readFileSync.mockReturnValue(json);
-          const program = getContext({ source: ['package.json'] }, disk);
-          expect(program).toEqual(
+          const config = getContext({ source: ['package.json'] }, disk);
+          expect(config).toEqual(
             expect.objectContaining({
               packageJsonFiles: [
                 {
@@ -100,7 +100,7 @@ describe('getContext', () => {
                   disk: expect.toBeNonEmptyObject(),
                   filePath,
                   json,
-                  program: expect.toBeNonEmptyObject(),
+                  config: expect.toBeNonEmptyObject(),
                   shortPath: 'package.json',
                 },
               ],

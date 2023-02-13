@@ -5,7 +5,7 @@ export class SemverGroup {
   /** */
   dependencies: string[];
   /** Optionally limit this group to dependencies at these named paths */
-  pathNames?: Syncpack.PathName[];
+  dependencyTypes: Syncpack.TypeName[];
   /** */
   input: Syncpack.Config.Private;
   /** */
@@ -29,6 +29,7 @@ export class SemverGroup {
     type WithRange = Syncpack.Config.SemverGroup.WithRange;
 
     this.dependencies = semverGroup.dependencies;
+    this.dependencyTypes = semverGroup.dependencyTypes;
     this.input = input;
     this.instances = [];
     this.instancesByName = {};

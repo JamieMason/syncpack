@@ -6,7 +6,7 @@ export class VersionGroup {
   /** */
   dependencies: string[];
   /** Optionally limit this group to dependencies at these named paths */
-  pathNames?: Syncpack.PathName[];
+  dependencyTypes: Syncpack.TypeName[];
   /** */
   input: Syncpack.Config.Private;
   /** */
@@ -35,7 +35,7 @@ export class VersionGroup {
     type Pinned = Syncpack.Config.VersionGroup.Pinned;
 
     this.dependencies = versionGroup.dependencies;
-    this.pathNames = versionGroup.dependencyTypes;
+    this.dependencyTypes = versionGroup.dependencyTypes;
     this.input = input;
     this.instanceGroups = [];
     this.instances = [];

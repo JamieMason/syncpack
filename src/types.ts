@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import type { Context as TContext } from './get-context';
-import type { CorePathName } from './get-context/get-config/get-core-paths';
+import type { CoreTypeName } from './get-context/get-config/get-core-types';
 import type {
   Cli as cli,
   Private as privateSchema,
@@ -21,7 +21,7 @@ export namespace Syncpack {
   export type Instance = TInstance;
   export type PackageJsonFile = TPackageJsonFile;
   export type PathDefinition = z.infer<typeof paths.pathDefinition>;
-  export type PathName = CorePathName | string;
+  export type TypeName = CoreTypeName | string;
   export type SemverGroup = TSemverGroup;
   export type VersionGroup = TVersionGroup;
 

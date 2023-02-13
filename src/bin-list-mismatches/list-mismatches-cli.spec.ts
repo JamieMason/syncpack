@@ -1,6 +1,12 @@
 import 'expect-more-jest';
 import { normalize } from 'path';
-import { scenarios } from '../../test/scenarios';
+import { dependencyIsBanned } from '../../test/scenarios/dependency-is-banned';
+import { dependencyIsPinned } from '../../test/scenarios/dependency-is-pinned';
+import { dependentDoesNotMatchNestedWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-nested-workspace-version';
+import { dependentDoesNotMatchWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-workspace-version';
+import { mismatchesIncludeNonSemverVersions } from '../../test/scenarios/mismatches-include-non-semver-versions';
+import { useHighestVersion } from '../../test/scenarios/use-highest-version';
+import { versionIsIgnored } from '../../test/scenarios/version-is-ignored';
 import { ICON } from '../constants';
 import { listMismatchesCli } from './list-mismatches-cli';
 
@@ -13,7 +19,7 @@ describe('listMismatches', () => {
     describe('when the dependency is a package maintained in this workspace', () => {
       describe('when using a typical workspace', () => {
         it('warns about the workspace version', () => {
-          const scenario = scenarios.dependentDoesNotMatchWorkspaceVersion();
+          const scenario = dependentDoesNotMatchWorkspaceVersion();
           const a = 'packages/a/package.json';
           const b = 'packages/b/package.json';
           const c = 'packages/c/package.json';
@@ -35,8 +41,7 @@ describe('listMismatches', () => {
 
       describe('when using nested workspaces', () => {
         it('warns about the workspace version', () => {
-          const scenario =
-            scenarios.dependentDoesNotMatchNestedWorkspaceVersion();
+          const scenario = dependentDoesNotMatchNestedWorkspaceVersion();
           const bc = 'workspaces/b/packages/c/package.json';
           const aa = 'workspaces/a/packages/a/package.json';
           const bb = 'workspaces/b/packages/b/package.json';
@@ -58,7 +63,7 @@ describe('listMismatches', () => {
     });
 
     it('replaces non-semver dependencies with valid semver dependencies', () => {
-      const scenario = scenarios.mismatchesIncludeNonSemverVersions();
+      const scenario = mismatchesIncludeNonSemverVersions();
       const a = 'packages/a/package.json';
       const b = 'packages/b/package.json';
       const c = 'packages/c/package.json';
@@ -74,7 +79,7 @@ describe('listMismatches', () => {
     });
 
     it('removes banned/disallowed dependencies', () => {
-      const scenario = scenarios.dependencyIsBanned();
+      const scenario = dependencyIsBanned();
       const b = 'packages/b/package.json';
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
@@ -86,14 +91,14 @@ describe('listMismatches', () => {
     });
 
     it('does not mention ignored dependencies', () => {
-      const scenario = scenarios.versionIsIgnored();
+      const scenario = versionIsIgnored();
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toBeEmptyArray();
       expect(scenario.disk.process.exit).not.toHaveBeenCalled();
     });
 
     it('synchronises pinned versions', () => {
-      const scenario = scenarios.dependencyIsPinned();
+      const scenario = dependencyIsPinned();
       const a = 'packages/a/package.json';
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
@@ -104,7 +109,7 @@ describe('listMismatches', () => {
     });
 
     it('uses the highest installed version', () => {
-      const scenario = scenarios.useHighestVersion();
+      const scenario = useHighestVersion();
       const a = 'packages/a/package.json';
       const c = 'packages/c/package.json';
       listMismatchesCli(scenario.config, scenario.disk);

@@ -11,10 +11,10 @@ import { PackageJsonFile } from './package-json-file';
 /** Create an API for every package.json file needed. */
 export function getPackageJsonFiles(
   disk: Disk,
-  program: Syncpack.Config.Private,
+  config: Syncpack.Config.Private,
 ): PackageJsonFile[] {
   return pipe(
-    getFilePaths(disk, program),
+    getFilePaths(disk, config),
     R.flatMap($R.onlyOk<string, PackageJsonFile>(resolvePackageJson(disk))),
     R.getWithDefault([] as PackageJsonFile[]),
   );
@@ -24,7 +24,7 @@ export function getPackageJsonFiles(
   ): (filePath: string) => R.Result<PackageJsonFile, BaseError> {
     return flow(
       readJsonSafe<PackageJson>(disk),
-      R.map((jsonFile) => new PackageJsonFile(jsonFile, program, disk)),
+      R.map((jsonFile) => new PackageJsonFile(jsonFile, config, disk)),
     );
   }
 }

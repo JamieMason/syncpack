@@ -3,6 +3,7 @@
 import chalk from 'chalk';
 import { program } from 'commander';
 import { disk } from '../lib/disk';
+import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { formatCli } from './format-cli';
 
@@ -40,6 +41,8 @@ Reference:
   Pnpm Workspaces  {blue.underline https://pnpm.js.org/en/workspaces}
 `);
 });
+
+showHelpOnError(program);
 
 program
   .option(...option.source)
