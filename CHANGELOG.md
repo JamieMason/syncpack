@@ -1,3 +1,44 @@
+# [9.0.0](https://github.com/JamieMason/syncpack/compare/8.5.14...9.0.0) (2023-02-14)
+
+
+### Features
+
+* **custom:** support custom version locations ([2cd34fd](https://github.com/JamieMason/syncpack/commit/2cd34fd1f41e949cedd28b901a123906d8bc5d08)), closes [#112](https://github.com/JamieMason/syncpack/issues/112) [#113](https://github.com/JamieMason/syncpack/issues/113)
+* **fix-mismatches:** remove any empty objects ([a279e56](https://github.com/JamieMason/syncpack/commit/a279e56dfaf8ba11bd507a89315b2a5b038b027b))
+
+
+### BREAKING CHANGES
+
+* **custom:** 1. The following options were replaced in syncpack@9.0.0:
+
+  -p, --prod              include dependencies
+  -d, --dev               include devDependencies
+  -P, --peer              include peerDependencies
+  -R, --resolutions       include resolutions (yarn)
+  -o, --overrides         include overrides (npm)
+  -O, --pnpmOverrides     include overrides (pnpm)
+  -w, --workspace         include locally developed package versions
+
+  Instead use the new --types option like so:
+
+    --types dev,prod,peer
+
+2. In .syncpackrc, the following options were replaced:
+
+  "dev": true,
+  "overrides": true,
+  "peer": true,
+  "pnpmOverrides": true,
+  "prod": true,
+  "resolutions": true,
+  "workspace": true,
+
+  Instead use the new dependencyTypes array like so:
+
+    "dependencyTypes": ["dev", "prod", "peer"]
+
+
+
 ## [8.5.14](https://github.com/JamieMason/syncpack/compare/8.4.11...8.5.14) (2023-02-07)
 
 
