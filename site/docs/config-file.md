@@ -1,0 +1,52 @@
+---
+id: config-file
+title: Configuration File
+---
+
+Creating a configuration file is optional, syncpack will search up the directory
+tree in the following places:
+
+- a `syncpack` property in `package.json`
+- a `.syncpackrc` file in JSON or YAML format
+- a `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`,
+  or `.syncpackrc.cjs` file
+- a `syncpack.config.js` or `syncpack.config.cjs` CommonJS module exporting an
+  object
+- a `config.syncpack` property in `package.json`
+
+If you want to specify a path to a configuration file, overriding the discovered
+configuration file (if present), you can use the [`--config`](./config-file.md)
+option.
+
+## Default Configuration
+
+```json
+{
+  "customTypes": [],
+  "dependencyTypes": [
+    "dev",
+    "overrides",
+    "peer",
+    "pnpmOverrides",
+    "prod",
+    "resolutions",
+    "workspace"
+  ],
+  "filter": ".",
+  "indent": "  ",
+  "semverGroups": [],
+  "semverRange": "",
+  "sortAz": [
+    "contributors",
+    "dependencies",
+    "devDependencies",
+    "keywords",
+    "peerDependencies",
+    "resolutions",
+    "scripts"
+  ],
+  "sortFirst": ["name", "description", "version", "author"],
+  "source": ["package.json", "packages/*/package.json"],
+  "versionGroups": []
+}
+```

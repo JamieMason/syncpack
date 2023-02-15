@@ -1,0 +1,43 @@
+---
+id: source
+title: source
+---
+
+Patterns supported by [glob](https://github.com/isaacs/node-glob) to find
+package.json files you want to manage with syncpack.
+
+## Default Value
+
+Defaulted to match most Projects using Lerna or Yarn Workspaces
+
+```json
+{
+  "source": ["package.json", "packages/*/package.json"]
+}
+```
+
+## Resolving Packages
+
+package.json files are resolved in this order of precendence:
+
+1.  If `--source`
+    [glob patterns](https://github.com/isaacs/node-glob#glob-primer) are
+    provided, use those.
+2.  If using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/),
+    read `workspaces` from `./package.json`.
+3.  If using [Lerna](https://lerna.js.org/), read `packages` from
+    `./lerna.json`.
+4.  If using [Pnpm](https://pnpm.js.org/), read `packages` from
+    `./pnpm-workspace.yaml`.
+5.  Default to `'package.json'` and `'packages/*/package.json'`.
+
+> 👋 Always add quotes around your `--source` patterns
+> [[more info](https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769)].
+
+:::info
+
+Your `source` configuration in your [config file](../config-file.md) can be
+overridden on an ad hoc basis using multiple [`--source`](../option/source.md)
+options – one for each glob pattern.
+
+:::

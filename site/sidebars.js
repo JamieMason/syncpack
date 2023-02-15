@@ -14,7 +14,7 @@
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
   docs: {
-    'Introduction': ['installation'],
+    'Introduction': ['installation', 'config-file', 'github-action'],
     'CLI Commands': [
       'fix-mismatches',
       'format',
@@ -24,24 +24,24 @@ const sidebars = {
       'set-semver-ranges',
     ],
     'CLI Options': [
-      'config-option',
-      'filter-option',
-      'indent-option',
-      'semver-range-option',
-      'source-option',
-      'types-option',
+      'option/config',
+      'option/filter',
+      'option/indent',
+      'option/semver-range',
+      'option/source',
+      'option/types',
     ],
-    'Configuration File': [
-      'custom-types-config',
-      'dependency-types-config',
-      'filter-config',
-      'indent-config',
-      'semver-groups-config',
-      'semver-range-config',
-      'sort-az-config',
-      'sort-first-config',
-      'source-config',
-      'version-groups-config',
+    'Configuration File Options': [
+      'config/custom-types',
+      'config/dependency-types',
+      'config/filter',
+      'config/indent',
+      'config/semver-groups',
+      'config/semver-range',
+      'config/sort-az',
+      'config/sort-first',
+      'config/source',
+      'config/version-groups',
     ],
   },
 };

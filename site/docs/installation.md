@@ -3,4 +3,6 @@ id: installation
 title: Installation
 ---
 
-sdasdasd
+```bash
+npm install --save-dev syncpack
+```

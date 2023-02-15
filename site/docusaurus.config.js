@@ -93,6 +93,19 @@ const config = {
         style: 'dark',
         links: [
           {
+            title: 'Feedback',
+            items: [
+              {
+                label: 'Report a Bug',
+                href: 'https://github.com/JamieMason/syncpack/issues/new?template=bug_report.md',
+              },
+              {
+                label: 'Request a Feature',
+                href: 'https://github.com/JamieMason/syncpack/issues/new?template=feature_request.md',
+              },
+            ],
+          },
+          {
             title: 'Community',
             items: [
               {
@@ -108,10 +121,6 @@ const config = {
           {
             title: 'More',
             items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
               {
                 label: 'GitHub',
                 href: 'https://github.com/JamieMason/syncpack',
