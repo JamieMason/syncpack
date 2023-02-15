@@ -33,6 +33,10 @@ jobs:
           FORCE_COLOR: 3
           TERM: xterm-256color
 
+      - name: E2E Smoke Test
+        if: matrix.os == 'ubuntu-latest'
+        run: ./test/smoke.sh
+
       - name: Lint
         run: yarn lint
         env:
