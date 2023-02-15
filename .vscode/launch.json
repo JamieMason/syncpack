@@ -1,0 +1,62 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "name": "Debug fix-mismatches",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "args": ["--transpileOnly", "${workspaceRoot}/src/bin-fix-mismatches"]
+    },
+    {
+      "type": "node",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "name": "Debug format",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "args": ["--transpileOnly", "${workspaceRoot}/src/bin-format"]
+    },
+    {
+      "type": "node",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "name": "Debug lint-semver-ranges",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "args": ["--transpileOnly", "${workspaceRoot}/src/bin-lint-semver-ranges"]
+    },
+    {
+      "type": "node",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "name": "Debug list-mismatches",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "args": ["--transpileOnly", "${workspaceRoot}/src/bin-list-mismatches"]
+    },
+    {
+      "type": "node",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "name": "Debug list",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "args": ["--transpileOnly", "${workspaceRoot}/src/bin-list"]
+    },
+    {
+      "type": "node",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "name": "Debug set-semver-ranges",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "args": ["--transpileOnly", "${workspaceRoot}/src/bin-set-semver-ranges"]
+    }
+  ]
+}
