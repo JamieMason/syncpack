@@ -40,10 +40,11 @@ export class Instance {
   }
 
   hasRange(range: Syncpack.Config.SemverRange.Value): boolean {
-    return (
-      this.pathDef.name !== 'workspace' &&
-      this.version === setSemverRange(range, this.version)
-    );
+    if (this.pathDef.name === 'workspace') {
+      // version property of package.json must always be exact
+      return this.version === setSemverRange('', this.version);
+    }
+    return this.version === setSemverRange(range, this.version);
   }
 
   setRange(range: Syncpack.Config.SemverRange.Value): void {
