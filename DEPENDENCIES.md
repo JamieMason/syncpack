@@ -52,6 +52,7 @@ npm test
 - [prettier](https://ghub.io/prettier): Prettier is an opinionated code formatter
 - [rimraf](https://ghub.io/rimraf): A deep deletion module for node (like `rm -rf`)
 - [ts-jest](https://ghub.io/ts-jest): A Jest transformer with source map support that lets you use Jest to test projects written in TypeScript
+- [ts-node](https://ghub.io/ts-node): TypeScript execution environment and REPL for node.js, with source map support
 - [typescript](https://ghub.io/typescript): TypeScript is a language for application scale JavaScript development
 
 ## License

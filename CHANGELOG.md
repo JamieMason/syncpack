@@ -1,3 +1,13 @@
+## [9.0.2](https://github.com/JamieMason/syncpack/compare/9.0.0...9.0.2) (2023-02-15)
+
+
+### Bug Fixes
+
+* **options:** fix --source regression in 9.0.0 ([379409f](https://github.com/JamieMason/syncpack/commit/379409f892e98532ed52ec974da3c4ec73618d63)), closes [#116](https://github.com/JamieMason/syncpack/issues/116)
+* **semver:** fix false positive for workspace mismatches ([4f696c5](https://github.com/JamieMason/syncpack/commit/4f696c5de4b7a4106b05b4c2de1e76f607ba5ca2))
+
+
+
 # [9.0.0](https://github.com/JamieMason/syncpack/compare/8.5.14...9.0.0) (2023-02-14)
 
 
