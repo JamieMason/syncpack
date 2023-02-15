@@ -4,7 +4,7 @@
   "semverRange": "",
   "peer": true,
   "prod": true,
-  "filter": "",
+  "filter": ".",
   "sortAz": [
     "bin",
     "contributors",
