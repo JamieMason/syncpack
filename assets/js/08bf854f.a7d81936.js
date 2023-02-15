@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunksite=self.webpackChunksite||[]).push([[5231],{8724:a=>{a.exports=JSON.parse('{"label":"facebook","permalink":"/syncpack/blog/tags/facebook","allTagsPath":"/syncpack/blog/tags","count":1}')}}]);
