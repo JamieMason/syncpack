@@ -1,5 +1,6 @@
 import type { Disk } from '../lib/disk';
 import { disk as defaultDisk } from '../lib/disk';
+import { verbose } from '../lib/log';
 import type { Syncpack } from '../types';
 import { getAllInstances } from './get-all-instances';
 import { getConfig } from './get-config';
@@ -39,7 +40,7 @@ export function getContext(
   const semverGroups = getSemverGroups(config, instances);
   const versionGroups = getVersionGroups(config, instances);
 
-  return {
+  const ctx = {
     ...config,
     disk,
     isInvalid: false,
@@ -47,4 +48,8 @@ export function getContext(
     semverGroups,
     versionGroups,
   };
+
+  verbose('final context:', ctx);
+
+  return ctx;
 }
