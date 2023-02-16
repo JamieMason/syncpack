@@ -66,7 +66,6 @@ describe('listMismatches', () => {
       const scenario = mismatchesIncludeNonSemverVersions();
       const a = 'packages/a/package.json';
       const b = 'packages/b/package.json';
-      const c = 'packages/c/package.json';
       const d = 'packages/d/package.json';
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([

@@ -31,7 +31,7 @@ describe('list', () => {
         ],
       ];
       variants.forEach(([context, getScenario]) => {
-        describe(context, () => {
+        describe(`${context}`, () => {
           it('warns about the workspace version', () => {
             const scenario = getScenario();
             listCli(scenario.config, scenario.disk);
