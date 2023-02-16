@@ -4,7 +4,8 @@ import { dependencyIsBanned } from '../../test/scenarios/dependency-is-banned';
 import { dependencyIsPinned } from '../../test/scenarios/dependency-is-pinned';
 import { dependentDoesNotMatchNestedWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-nested-workspace-version';
 import { dependentDoesNotMatchWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-workspace-version';
-import { mismatchesIncludeNonSemverVersions } from '../../test/scenarios/mismatches-include-non-semver-versions';
+import { matchingUnsupportedVersions } from '../../test/scenarios/matching-unsupported-versions';
+import { mismatchingUnsupportedVersions } from '../../test/scenarios/mismatching-unsupported-versions';
 import { useHighestVersion } from '../../test/scenarios/use-highest-version';
 import { versionIsIgnored } from '../../test/scenarios/version-is-ignored';
 import { ICON } from '../constants';
@@ -62,19 +63,28 @@ describe('listMismatches', () => {
       });
     });
 
-    it('replaces non-semver dependencies with valid semver dependencies', () => {
-      const scenario = mismatchesIncludeNonSemverVersions();
+    it('lists mismatched versions which syncpack cannot fix', () => {
+      const scenario = mismatchingUnsupportedVersions();
       const a = 'packages/a/package.json';
       const b = 'packages/b/package.json';
+      const c = 'packages/c/package.json';
       const d = 'packages/d/package.json';
       listMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        [`${ICON.cross} foo 0.3.0 is the highest valid semver version in use`],
+        [`${ICON.cross} foo has mismatched versions which syncpack cannot fix`],
         [`  link:vendor/foo-0.1.0 in dependencies of ${normalize(a)}`],
         [`  workspace:* in dependencies of ${normalize(b)}`],
+        [`  0.3.0 in dependencies of ${normalize(c)}`],
         [`  0.2.0 in dependencies of ${normalize(d)}`],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('does not list matching versions which syncpack cannot fix anyway', () => {
+      const scenario = matchingUnsupportedVersions();
+      listMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.log).not.toHaveBeenCalled();
+      expect(scenario.disk.process.exit).not.toHaveBeenCalled();
     });
 
     it('removes banned/disallowed dependencies', () => {

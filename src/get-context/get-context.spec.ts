@@ -50,14 +50,18 @@ describe('getContext', () => {
         });
         expect(getContext({}, disk).semverGroups).toEqual([
           expect.objectContaining({
-            dependencies: ['@alpha/*'],
-            packages: ['@myrepo/library'],
-            range: '~',
+            groupConfig: expect.objectContaining({
+              dependencies: ['@alpha/*'],
+              packages: ['@myrepo/library'],
+              range: '~',
+            }),
           }),
           expect.objectContaining({
-            dependencies: ['**'],
-            packages: ['**'],
-            range: '',
+            groupConfig: expect.objectContaining({
+              dependencies: ['**'],
+              packages: ['**'],
+              range: '',
+            }),
           }),
         ]);
       });
@@ -70,12 +74,16 @@ describe('getContext', () => {
         });
         expect(getContext({}, disk).versionGroups).toEqual([
           expect.objectContaining({
-            dependencies: ['chalk'],
-            packages: ['foo', 'bar'],
+            groupConfig: expect.objectContaining({
+              dependencies: ['chalk'],
+              packages: ['foo', 'bar'],
+            }),
           }),
           expect.objectContaining({
-            dependencies: ['**'],
-            packages: ['**'],
+            groupConfig: expect.objectContaining({
+              dependencies: ['**'],
+              packages: ['**'],
+            }),
           }),
         ]);
       });

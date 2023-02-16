@@ -3,7 +3,6 @@ import { ICON } from '../constants';
 import type { SemverGroup } from '../get-context/get-groups/semver-group';
 import type { Instance } from '../get-context/get-package-json-files/package-json-file/instance';
 import * as log from '../lib/log';
-import { setSemverRange } from '../lib/set-semver-range';
 import type { Syncpack } from '../types';
 
 export function lintSemverRanges(ctx: Syncpack.Ctx): Syncpack.Ctx {
@@ -25,9 +24,7 @@ export function lintSemverRanges(ctx: Syncpack.Ctx): Syncpack.Ctx {
 
       // Log each of the dependencies mismatches
       mismatches.forEach((instance) => {
-        if (!instance.hasRange(semverGroup.range)) {
-          logSemverRangeMismatch(instance, semverGroup);
-        }
+        logSemverRangeMismatch(instance, semverGroup);
       });
     });
   });
@@ -39,7 +36,7 @@ function logSemverRangeMismatch(instance: Instance, semverGroup: SemverGroup) {
   const path = instance.pathDef.path;
   const shortPath = instance.packageJsonFile.shortPath;
   const actual = instance.version;
-  const expected = setSemverRange(semverGroup.range, actual);
+  const expected = semverGroup.getExpectedVersion(instance);
   console.log(
     chalk`  {red ${actual}} ${ICON.rightArrow} {green ${expected}} {dim in ${path} of ${shortPath}}`,
   );

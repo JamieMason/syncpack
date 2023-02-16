@@ -1,11 +1,9 @@
 import type { Disk } from '../lib/disk';
 import { disk as defaultDisk } from '../lib/disk';
-import { verbose } from '../lib/log';
 import type { Syncpack } from '../types';
 import { getAllInstances } from './get-all-instances';
 import { getConfig } from './get-config';
-import { getSemverGroups } from './get-groups/get-semver-groups';
-import { getVersionGroups } from './get-groups/get-version-groups';
+import { getGroups } from './get-groups';
 import type { SemverGroup } from './get-groups/semver-group';
 import type { VersionGroup } from './get-groups/version-group';
 import { getPackageJsonFiles } from './get-package-json-files';
@@ -37,8 +35,7 @@ export function getContext(
   const config = getConfig(disk, program);
   const packageJsonFiles = getPackageJsonFiles(disk, config);
   const instances = getAllInstances(packageJsonFiles);
-  const semverGroups = getSemverGroups(config, instances);
-  const versionGroups = getVersionGroups(config, instances);
+  const { semverGroups, versionGroups } = getGroups(config, instances);
 
   return {
     ...config,

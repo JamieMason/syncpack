@@ -1,53 +1,44 @@
+import { isNonEmptyString } from 'expect-more';
 import type { Syncpack } from '../../../types';
-import type { Instance } from '../../get-package-json-files/package-json-file/instance';
-import type { InstanceGroup } from './instance-group';
+import { BaseGroup } from '../base-group';
+import { InstanceGroup } from './instance-group';
 
-export class VersionGroup {
-  /** */
-  dependencies: string[];
-  /** Optionally limit this group to dependencies at these named paths */
-  dependencyTypes: Syncpack.TypeName[];
-  /** */
-  input: Syncpack.Config.Private;
-  /** */
-  instanceGroups: InstanceGroup[];
-  /** */
-  instances: Instance[];
-  /** */
-  instancesByName: Record<string, Instance[]>;
-  /** */
-  isBanned: boolean;
-  /** */
-  isDefault: boolean;
-  /** */
-  isIgnored: boolean;
-  /** */
-  packages: string[];
-  /** Optionally force all dependencies in this group to have this version */
-  pinVersion?: string;
+type Banned = Syncpack.Config.VersionGroup.Banned;
+type Ignored = Syncpack.Config.VersionGroup.Ignored;
+type Pinned = Syncpack.Config.VersionGroup.Pinned;
 
-  constructor(
-    input: Syncpack.Config.Private,
-    versionGroup: Syncpack.Config.VersionGroup.Any,
-  ) {
-    type Banned = Syncpack.Config.VersionGroup.Banned;
-    type Ignored = Syncpack.Config.VersionGroup.Ignored;
-    type Pinned = Syncpack.Config.VersionGroup.Pinned;
-
-    this.dependencies = versionGroup.dependencies;
-    this.dependencyTypes = versionGroup.dependencyTypes;
-    this.input = input;
-    this.instanceGroups = [];
-    this.instances = [];
-    this.instancesByName = {};
-    this.isBanned = (versionGroup as Banned).isBanned === true;
-    this.isDefault = versionGroup === input.defaultVersionGroup;
-    this.isIgnored = (versionGroup as Ignored).isIgnored === true;
-    this.packages = versionGroup.packages;
-    this.pinVersion = (versionGroup as Pinned).pinVersion;
+export class VersionGroup extends BaseGroup<Syncpack.Config.VersionGroup.Any> {
+  getAllInstanceGroups(): InstanceGroup[] {
+    return Object.entries(this.instancesByName).map(
+      ([name, instances]) => new InstanceGroup(this, name, instances),
+    );
   }
 
   getInvalidInstanceGroups(): InstanceGroup[] {
-    return this.instanceGroups.filter((group) => group.isInvalid);
+    return this.getAllInstanceGroups().filter((group) => group.isInvalid());
+  }
+
+  isBanned(): boolean {
+    return (this.groupConfig as Banned).isBanned === true;
+  }
+
+  isIgnored(): boolean {
+    return (this.groupConfig as Ignored).isIgnored === true;
+  }
+
+  hasPinnedVersion(): boolean {
+    return isNonEmptyString(this.getPinnedVersion());
+  }
+
+  getPinnedVersion(): string {
+    return (this.groupConfig as Pinned).pinVersion;
+  }
+
+  isUnpinned(): boolean {
+    const { pinVersion } = this.groupConfig as Pinned;
+    return (
+      isNonEmptyString(pinVersion) &&
+      this.instances.some(({ version }) => version !== pinVersion)
+    );
   }
 }

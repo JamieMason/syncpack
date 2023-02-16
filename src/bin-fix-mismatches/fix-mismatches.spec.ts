@@ -8,7 +8,8 @@ import { dependentDoesNotMatchNestedWorkspaceVersion } from '../../test/scenario
 import { dependentDoesNotMatchNpmOverrideVersion } from '../../test/scenarios/dependent-does-not-match-npm-override-version';
 import { dependentDoesNotMatchPnpmOverrideVersion } from '../../test/scenarios/dependent-does-not-match-pnpm-override-version';
 import { dependentDoesNotMatchWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-workspace-version';
-import { mismatchesIncludeNonSemverVersions } from '../../test/scenarios/mismatches-include-non-semver-versions';
+import { matchingUnsupportedVersions } from '../../test/scenarios/matching-unsupported-versions';
+import { mismatchingUnsupportedVersions } from '../../test/scenarios/mismatching-unsupported-versions';
 import { unusedCustomType } from '../../test/scenarios/unused-custom-type';
 import { useHighestVersion } from '../../test/scenarios/use-highest-version';
 import { versionIsIgnored } from '../../test/scenarios/version-is-ignored';
@@ -107,19 +108,25 @@ describe('fixMismatches', () => {
       });
     });
 
-    it('replaces non-semver dependencies with valid semver dependencies', () => {
-      const scenario = mismatchesIncludeNonSemverVersions();
+    it('skips mismatched versions which syncpack cannot fix', () => {
+      const scenario = mismatchingUnsupportedVersions();
       fixMismatchesCli(scenario.config, scenario.disk);
-      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
-        scenario.files['packages/a/package.json'].diskWriteWhenChanged,
-        scenario.files['packages/b/package.json'].diskWriteWhenChanged,
-        scenario.files['packages/d/package.json'].diskWriteWhenChanged,
-      ]);
+      expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
       expect(scenario.log.mock.calls).toEqual([
-        scenario.files['packages/a/package.json'].logEntryWhenChanged,
-        scenario.files['packages/b/package.json'].logEntryWhenChanged,
+        scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
+        scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
         scenario.files['packages/c/package.json'].logEntryWhenUnchanged,
-        scenario.files['packages/d/package.json'].logEntryWhenChanged,
+        scenario.files['packages/d/package.json'].logEntryWhenUnchanged,
+      ]);
+    });
+
+    it('skips matching versions which syncpack cannot fix anyway', () => {
+      const scenario = matchingUnsupportedVersions();
+      fixMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
+      expect(scenario.log.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
+        scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
       ]);
     });
 

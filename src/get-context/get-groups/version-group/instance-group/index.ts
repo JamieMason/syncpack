@@ -1,74 +1,88 @@
-import { isNonEmptyString } from 'expect-more';
 import type { VersionGroup } from '..';
+import { BaseError } from '../../../../lib/error';
+import { isSemver } from '../../../../lib/is-semver';
+import { printStrings } from '../../../../lib/print-strings';
 import type { Instance } from '../../../get-package-json-files/package-json-file/instance';
 import { getHighestVersion } from './get-highest-version';
 
 /** Every `Instance` of eg `"lodash"` for a given `VersionGroup` */
 export class InstanceGroup {
-  /** 1+ `Instance` has a version which does not follow the rules */
-  hasMismatches: boolean;
   /** Every package/pathName location where this dependency was found */
   instances: Instance[];
-  /**  */
-  hasWorkspaceInstance: boolean;
-  /** Syncpack must report or fix this groups mismatches */
-  isInvalid: boolean;
-  /** 1+ `Instance` has a version not matching `VersionGroup.pinVersion` */
-  isUnpinned: boolean;
   /** @example `"lodash"` */
   name: string;
-  /** All `Instance` versions, with duplicates removed */
-  uniques: string[];
   /** The `VersionGroup` which this `InstanceGroup` belongs to */
   versionGroup: VersionGroup;
 
   constructor(versionGroup: VersionGroup, name: string, instances: Instance[]) {
-    const pinnedVersion = versionGroup.pinVersion;
-    const isBanned = versionGroup.isBanned === true;
-    const isIgnored = versionGroup.isIgnored === true;
-    const hasPinnedVersion = isNonEmptyString(pinnedVersion);
-    const versions = instances.map(({ version }) => version);
-    const uniques = Array.from(new Set(versions)).sort();
-    const [version] = uniques;
-    const isUnpinned = hasPinnedVersion && version !== pinnedVersion;
-    const hasMismatches = isBanned || isUnpinned || uniques.length > 1;
-    const isInvalid = !isIgnored && hasMismatches;
-
     this.instances = instances;
-    this.hasMismatches = hasMismatches;
-    this.hasWorkspaceInstance = Boolean(this.getWorkspaceVersion());
-    this.isInvalid = isInvalid;
-    this.isUnpinned = isUnpinned;
     this.name = name;
-    this.uniques = uniques;
     this.versionGroup = versionGroup;
   }
 
+  hasUnsupportedVersion() {
+    return this.instances.some((obj) => !isSemver(obj.version));
+  }
+
+  getUniqueVersions() {
+    return Array.from(new Set(this.instances.map((obj) => obj.version))).sort();
+  }
+
+  hasMismatchingVersions() {
+    return this.getUniqueVersions().length > 1;
+  }
+
+  isInvalid() {
+    return this.versionGroup.isIgnored()
+      ? false
+      : this.versionGroup.isBanned() ||
+          this.versionGroup.isUnpinned() ||
+          this.hasMismatchingVersions();
+  }
+
   getExpectedVersion(): string | undefined {
-    // remove this dependency
-    if (this.versionGroup.isBanned) return undefined;
-    if (this.isUnpinned) return this.getPinnedVersion();
-    if (this.hasWorkspaceInstance) return this.getWorkspaceVersion();
-    return getHighestVersion(this.uniques);
+    const versionGroup = this.versionGroup;
+    const REMOVE_DEPENDENCY = undefined;
+    if (versionGroup.isBanned()) return REMOVE_DEPENDENCY;
+    if (versionGroup.isUnpinned()) return versionGroup.getPinnedVersion();
+    if (this.hasWorkspaceInstance()) return this.getWorkspaceVersion();
+    if (this.hasUnsupportedVersion()) {
+      throw new BaseError(
+        `${this.name} contains unsupported versions: ${printStrings(
+          this.getUniqueVersions(),
+        )}`,
+      );
+    }
+    return this.getHighestVersion();
   }
 
-  getPinnedVersion() {
-    return this.versionGroup.pinVersion || '';
+  getHighestVersion() {
+    return getHighestVersion(this.getUniqueVersions());
   }
 
-  /**
-   * If this dependency is a package developed locally, we should use its
-   * version as the source of truth.
-   */
+  isUnpinned() {
+    return (
+      this.versionGroup.hasPinnedVersion() &&
+      this.instances.some(
+        ({ version }) => version !== this.versionGroup.getPinnedVersion(),
+      )
+    );
+  }
+
+  /** Get version of dependency which is developed in this monorepo */
   getWorkspaceVersion() {
-    return this.getWorkspaceInstance()?.packageJsonFile.contents.version || '';
+    if (this.hasWorkspaceInstance()) {
+      return this.getWorkspaceInstance()?.packageJsonFile.contents.version;
+    }
+    throw new BaseError('getWorkspaceVersion invoked when there is none');
   }
 
-  /**
-   * Find instance of this dependency which is a package developed locally in
-   * this monorepo.
-   */
+  /** Find instance of this dependency which is developed in this monorepo */
   getWorkspaceInstance(): Instance | undefined {
     return this.instances.find(({ pathDef }) => pathDef.name === 'workspace');
+  }
+
+  hasWorkspaceInstance(): boolean {
+    return this.getWorkspaceInstance() !== undefined;
   }
 }

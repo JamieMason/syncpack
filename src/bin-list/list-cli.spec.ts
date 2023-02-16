@@ -6,7 +6,8 @@ import { dependentDoesNotMatchNpmOverrideVersion } from '../../test/scenarios/de
 import { dependentDoesNotMatchPnpmOverrideVersion } from '../../test/scenarios/dependent-does-not-match-pnpm-override-version';
 import { dependentDoesNotMatchWorkspaceVersion } from '../../test/scenarios/dependent-does-not-match-workspace-version';
 import type { TestScenario } from '../../test/scenarios/lib/create-scenario';
-import { mismatchesIncludeNonSemverVersions } from '../../test/scenarios/mismatches-include-non-semver-versions';
+import { matchingUnsupportedVersions } from '../../test/scenarios/matching-unsupported-versions';
+import { mismatchingUnsupportedVersions } from '../../test/scenarios/mismatching-unsupported-versions';
 import { useHighestVersion } from '../../test/scenarios/use-highest-version';
 import { versionIsIgnored } from '../../test/scenarios/version-is-ignored';
 import { listCli } from './list-cli';
@@ -44,13 +45,22 @@ describe('list', () => {
       });
     });
 
-    it('lists non-semver dependencies with valid semver dependencies', () => {
-      const scenario = mismatchesIncludeNonSemverVersions();
+    it('lists mismatched versions which syncpack cannot fix', () => {
+      const scenario = mismatchingUnsupportedVersions();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        ['✘ foo 0.2.0, 0.3.0, link:vendor/foo-0.1.0, workspace:*'],
+        [
+          '✘ foo has mismatched versions which syncpack cannot fix: 0.2.0, 0.3.0, link:vendor/foo-0.1.0, workspace:*',
+        ],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('lists matching versions which syncpack cannot fix anyway', () => {
+      const scenario = matchingUnsupportedVersions();
+      listCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([['- foo workspace:*']]);
+      expect(scenario.disk.process.exit).not.toHaveBeenCalled();
     });
 
     it('lists mismatching npm overrides', () => {
@@ -94,7 +104,7 @@ describe('list', () => {
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
         [expect.stringMatching(/Version Group 1/)],
-        ['✘ bar 0.2.0'],
+        ['✘ bar is pinned to 2.2.2 in this version group'],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });

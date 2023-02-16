@@ -3,6 +3,7 @@ import { isArrayOfStrings, isEmptyArray } from 'expect-more';
 import { $R } from '../$R';
 import type { Disk } from '../../lib/disk';
 import { BaseError } from '../../lib/error';
+import { printStrings } from '../../lib/print-strings';
 import type { Syncpack } from '../../types';
 import { getPatterns } from './get-patterns';
 
@@ -22,7 +23,7 @@ export function getFilePaths(
   return pipe(program, getPatterns(disk), R.flatMap(resolvePatterns));
 
   function resolvePatterns(patterns: string[]): SafeFilePaths {
-    const quoted = patterns.map((p) => `"${p}"`).join(', ');
+    const quoted = printStrings(patterns);
     const ERR_NO_MATCH = `No package.json files matched the patterns: ${quoted}`;
     return pipe(
       patterns,

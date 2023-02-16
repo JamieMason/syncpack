@@ -9,42 +9,41 @@ export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
     // Annotate user-defined version groups
     if (!versionGroup.isDefault) log.versionGroupHeader(i);
 
-    versionGroup.instanceGroups.forEach((instanceGroup) => {
-      const expected = instanceGroup.getExpectedVersion();
-      const uniques = instanceGroup.uniques;
-
+    versionGroup.getAllInstanceGroups().forEach((instanceGroup) => {
       // Record that this project has mismatches, so that eg. the CLI can exit
       // with the correct status code.
-      if (instanceGroup.isInvalid) ctx.isInvalid = true;
+      if (instanceGroup.isInvalid()) ctx.isInvalid = true;
 
-      versionGroup.isBanned
-        ? logBanned(instanceGroup)
-        : versionGroup.isIgnored
-        ? logIgnored(instanceGroup)
-        : instanceGroup.hasMismatches
-        ? logVersionMismatch(instanceGroup, uniques, expected)
-        : logVersionMatch(instanceGroup, uniques);
+      if (versionGroup.isBanned()) return logBanned(instanceGroup);
+      if (versionGroup.isIgnored()) return logIgnored(instanceGroup);
+      if (versionGroup.isUnpinned()) return logUnpinned(instanceGroup);
+      if (instanceGroup.hasMismatchingVersions()) {
+        return instanceGroup.hasUnsupportedVersion()
+          ? logUnsupportedMismatches(instanceGroup)
+          : logVersionMismatch(instanceGroup);
+      }
+      logVersionMatch(instanceGroup);
     });
   });
 
   return ctx;
 
-  function logVersionMatch(
-    instanceGroup: InstanceGroup,
-    uniques: string[],
-  ): void {
-    console.log(chalk`{dim -} {white ${instanceGroup.name}} {dim ${uniques}}`);
+  function logVersionMatch(instanceGroup: InstanceGroup): void {
+    console.log(
+      chalk`{dim -} {white ${
+        instanceGroup.name
+      }} {dim ${instanceGroup.getUniqueVersions()}}`,
+    );
   }
 
-  function logVersionMismatch(
-    instanceGroup: InstanceGroup,
-    uniques: string[],
-    expected: string | undefined,
-  ): void {
+  function logVersionMismatch(instanceGroup: InstanceGroup): void {
     console.log(
-      chalk`{red ${ICON.cross} ${instanceGroup.name}} ${uniques
+      chalk`{red ${ICON.cross} ${instanceGroup.name}} ${instanceGroup
+        .getUniqueVersions()
         .map((version) =>
-          version === expected ? chalk.green(version) : chalk.red(version),
+          version === instanceGroup.getExpectedVersion()
+            ? chalk.green(version)
+            : chalk.red(version),
         )
         .join(chalk.dim(', '))}`,
     );
@@ -59,6 +58,24 @@ export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
   function logBanned(instanceGroup: InstanceGroup): void {
     console.log(
       chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is banned in this version group}`,
+    );
+  }
+
+  function logUnpinned(instanceGroup: InstanceGroup): void {
+    const pinVersion = instanceGroup.versionGroup.getPinnedVersion();
+    console.log(
+      chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is pinned to ${pinVersion} in this version group}`,
+    );
+  }
+
+  function logUnsupportedMismatches(instanceGroup: InstanceGroup): void {
+    console.log(
+      chalk`{red ${ICON.cross} ${
+        instanceGroup.name
+      }} {dim.red has mismatched versions which syncpack cannot fix: ${instanceGroup
+        .getUniqueVersions()
+        .map((version) => chalk.yellow(version))
+        .join(chalk.dim(', '))}}`,
     );
   }
 }
