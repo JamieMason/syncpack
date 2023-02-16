@@ -95,8 +95,9 @@ export class PackageJsonFile {
       )
       .filter((instance) => {
         const { pathDef, name, version } = instance;
-        if (name.search(new RegExp(this.config.filter)) === -1) {
-          verbose('skip instance, name does not match filter', instance);
+        const filter = this.config.filter;
+        if (name.search(new RegExp(filter)) === -1) {
+          verbose(`skip, name "${name}" does not match filter "${filter}"`);
           return false;
         }
         verbose(

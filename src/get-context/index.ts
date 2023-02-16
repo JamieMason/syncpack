@@ -40,7 +40,7 @@ export function getContext(
   const semverGroups = getSemverGroups(config, instances);
   const versionGroups = getVersionGroups(config, instances);
 
-  const ctx = {
+  return {
     ...config,
     disk,
     isInvalid: false,
@@ -48,8 +48,4 @@ export function getContext(
     semverGroups,
     versionGroups,
   };
-
-  verbose('final context:', ctx);
-
-  return ctx;
 }
