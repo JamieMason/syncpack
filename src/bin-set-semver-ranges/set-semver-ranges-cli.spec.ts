@@ -1,4 +1,5 @@
 import 'expect-more-jest';
+import { customTypesAndSemverGroups } from '../../test/scenarios/custom-types-and-semver-groups';
 import { issue84Reproduction } from '../../test/scenarios/issue84-reproduction';
 import { semverIsIgnored } from '../../test/scenarios/semver-is-ignored';
 import { semverRangesDoNotMatchConfig } from '../../test/scenarios/semver-ranges-do-not-match-config';
@@ -41,6 +42,17 @@ describe('setSemverRanges', () => {
     expect(scenario.log.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].logEntryWhenChanged,
       scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+    ]);
+  });
+
+  it('fixes multiple custom types and semver groups together', () => {
+    const scenario = customTypesAndSemverGroups();
+    setSemverRangesCli(scenario.config, scenario.disk);
+    expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+    ]);
+    expect(scenario.log.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].logEntryWhenChanged,
     ]);
   });
 });
