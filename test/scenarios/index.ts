@@ -315,7 +315,7 @@ export const scenarios = {
         },
         {
           path: 'packages/b/package.json',
-          before: mockPackage('b', { deps: ['foo@link:vendor/foo-0.2.0'] }),
+          before: mockPackage('b', { deps: ['foo@workspace:*'] }),
           after: mockPackage('b', { deps: ['foo@0.3.0'] }),
         },
         {

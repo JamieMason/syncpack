@@ -71,7 +71,7 @@ describe('listMismatches', () => {
       expect(scenario.log.mock.calls).toEqual([
         [`${ICON.cross} foo 0.3.0 is the highest valid semver version in use`],
         [`  link:vendor/foo-0.1.0 in dependencies of ${normalize(a)}`],
-        [`  link:vendor/foo-0.2.0 in dependencies of ${normalize(b)}`],
+        [`  workspace:* in dependencies of ${normalize(b)}`],
         [`  0.2.0 in dependencies of ${normalize(d)}`],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);

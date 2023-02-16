@@ -48,7 +48,7 @@ describe('list', () => {
       const scenario = mismatchesIncludeNonSemverVersions();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        ['✘ foo 0.2.0, 0.3.0, link:vendor/foo-0.1.0, link:vendor/foo-0.2.0'],
+        ['✘ foo 0.2.0, 0.3.0, link:vendor/foo-0.1.0, workspace:*'],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
