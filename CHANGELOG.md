@@ -1,3 +1,17 @@
+## [9.1.2](https://github.com/JamieMason/syncpack/compare/9.0.2...9.1.2) (2023-02-16)
+
+
+### Features
+
+* **semver:** mention unsupported versions in output ([69edcaf](https://github.com/JamieMason/syncpack/commit/69edcaf9ad2a64c58b5e6dfddfef3bd1e937327e)), closes [#121](https://github.com/JamieMason/syncpack/issues/121) [#119](https://github.com/JamieMason/syncpack/issues/119)
+
+
+### Reverts
+
+* **fix-mismatches:** don't remove nested empty objects ([393d004](https://github.com/JamieMason/syncpack/commit/393d004a70e02d44d73c921b80ad5db1454c4ddd)), closes [#117](https://github.com/JamieMason/syncpack/issues/117)
+
+
+
 ## [9.0.2](https://github.com/JamieMason/syncpack/compare/9.0.0...9.0.2) (2023-02-15)
 
 

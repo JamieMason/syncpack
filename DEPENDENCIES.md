@@ -47,6 +47,7 @@ npm test
 - [@typescript-eslint/parser](https://ghub.io/@typescript-eslint/parser): An ESLint custom parser which leverages TypeScript ESTree
 - [eslint](https://ghub.io/eslint): An AST-based pattern checker for JavaScript.
 - [eslint-plugin-import](https://ghub.io/eslint-plugin-import): Import with sanity.
+- [eslint-plugin-jest](https://ghub.io/eslint-plugin-jest): ESLint rules for Jest
 - [expect-more-jest](https://ghub.io/expect-more-jest): Write Beautiful Specs with Custom Matchers for Jest
 - [jest](https://ghub.io/jest): Delightful JavaScript Testing.
 - [prettier](https://ghub.io/prettier): Prettier is an opinionated code formatter
