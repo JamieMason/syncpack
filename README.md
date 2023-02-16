@@ -1,12 +1,6 @@
 # syncpack
 
-> Manage multiple package.json files, such as in Lerna Monorepos and Yarn/Pnpm
-> Workspaces
-
-[![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
-[![NPM downloads](http://img.shields.io/npm/dm/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/JamieMason/syncpack/ci.yaml?branch=master)](https://github.com/JamieMason/syncpack/actions)
-[![Maintainability](https://api.codeclimate.com/v1/badges/516439365fdd0e3c6526/maintainability)](https://codeclimate.com/github/JamieMason/syncpack/maintainability)
+> Consistent dependency versions in large JavaScript Monorepos.
 
 ## Installation
 
@@ -59,3 +53,10 @@ Version [9.0.0](https://github.com/JamieMason/syncpack/releases/tag/9.0.0)
 required some breaking API changes to add support for a new
 [`customTypes`](https://jamiemason.github.io/syncpack/config/custom-types)
 feature, but they are very simple to make.
+
+## Badges
+
+- [![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
+- [![NPM downloads](http://img.shields.io/npm/dm/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
+- [![Build Status](https://img.shields.io/github/actions/workflow/status/JamieMason/syncpack/ci.yaml?branch=master)](https://github.com/JamieMason/syncpack/actions)
+- [![Maintainability](https://api.codeclimate.com/v1/badges/516439365fdd0e3c6526/maintainability)](https://codeclimate.com/github/JamieMason/syncpack/maintainability)
