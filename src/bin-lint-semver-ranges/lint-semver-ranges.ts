@@ -16,11 +16,11 @@ export function lintSemverRanges(ctx: Syncpack.Ctx): Syncpack.Ctx {
     // with the correct status code.
     ctx.isInvalid = true;
 
+    // Annotate each group
+    hasUserGroups && log.semverGroupHeader(semverGroup, i);
+
     // Log each group which has mismatches
     semverGroup.getMismatches().forEach(([name, mismatches]) => {
-      // Annotate each group
-      hasUserGroups && log.semverGroupHeader(semverGroup, i);
-
       // Log the dependency name
       log.invalid(name);
 

@@ -42,22 +42,24 @@ export function invalid(message: string, comment?: string): void {
   }
 }
 
-export function semverGroupHeader(semverGroup: SemverGroup, i: number): void {
-  logHeader(
-    semverGroup.isDefault ? 'Default Semver Group' : `Semver Group ${i + 1}`,
-  );
+export function semverGroupHeader(group: SemverGroup, i: number): void {
+  logHeader(group, 'Semver', i);
 }
 
-export function versionGroupHeader(
-  versionGroup: VersionGroup,
+export function versionGroupHeader(group: VersionGroup, i: number): void {
+  logHeader(group, 'Version', i);
+}
+
+function logHeader(
+  group: VersionGroup | SemverGroup,
+  type: 'Semver' | 'Version',
   i: number,
-): void {
-  logHeader(
-    versionGroup.isDefault ? 'Default Version Group' : `Version Group ${i + 1}`,
-  );
-}
-
-function logHeader(label: string) {
-  const lead = `= ${label} `;
-  console.log(chalk`{blue ${lead}${'='.repeat(80 - lead.length)}}`);
+) {
+  const customLabel = group.groupConfig.label;
+  const labelWhenDefault = group.isDefault ? `Default ${type} Group` : '';
+  const anonymousLabel = `${type} Group ${i + 1}`;
+  const label = customLabel || labelWhenDefault || anonymousLabel;
+  const leftSide = `= ${label} `;
+  const rightSide = '='.repeat(80 - leftSide.length);
+  console.log(chalk.blue(`${leftSide}${rightSide}`));
 }
