@@ -2,7 +2,7 @@ import { isObject, isUndefined } from 'expect-more';
 import type { Syncpack } from '../types';
 
 export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
-  ctx.versionGroups.reverse().forEach((versionGroup) => {
+  ctx.versionGroups.forEach((versionGroup) => {
     const invalidGroups = versionGroup.getInvalidInstanceGroups();
 
     // Nothing to do if there are no mismatches

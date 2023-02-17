@@ -2,6 +2,8 @@ import chalk from 'chalk';
 import { isString } from 'expect-more';
 import { inspect } from 'util';
 import { ICON } from '../constants';
+import type { SemverGroup } from '../get-context/get-groups/semver-group';
+import type { VersionGroup } from '../get-context/get-groups/version-group';
 
 export function verbose(...values: unknown[]): void {
   if (process.env.SYNCPACK_VERBOSE) {
@@ -24,14 +26,6 @@ export function skip(message: string): void {
   console.log(chalk.dim(ICON.skip), chalk.dim(message));
 }
 
-export function semverGroupHeader(order: number): void {
-  console.log(chalk`{dim = Semver Group ${order} ${'='.repeat(63)}}`);
-}
-
-export function versionGroupHeader(order: number): void {
-  console.log(chalk`{dim = Version Group ${order} ${'='.repeat(63)}}`);
-}
-
 export function valid(message: string, comment?: string): void {
   if (comment) {
     console.log(chalk`{dim ${ICON.skip}} ${message} {dim ${comment}}`);
@@ -46,4 +40,24 @@ export function invalid(message: string, comment?: string): void {
   } else {
     console.log(chalk`{red ${ICON.cross}} ${message}`);
   }
+}
+
+export function semverGroupHeader(semverGroup: SemverGroup, i: number): void {
+  logHeader(
+    semverGroup.isDefault ? 'Default Semver Group' : `Semver Group ${i + 1}`,
+  );
+}
+
+export function versionGroupHeader(
+  versionGroup: VersionGroup,
+  i: number,
+): void {
+  logHeader(
+    versionGroup.isDefault ? 'Default Version Group' : `Version Group ${i + 1}`,
+  );
+}
+
+function logHeader(label: string) {
+  const lead = `= ${label} `;
+  console.log(chalk`{blue ${lead}${'='.repeat(80 - lead.length)}}`);
 }

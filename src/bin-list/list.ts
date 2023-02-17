@@ -5,11 +5,18 @@ import * as log from '../lib/log';
 import type { Syncpack } from '../types';
 
 export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
-  ctx.versionGroups.reverse().forEach((versionGroup, i) => {
-    // Annotate user-defined version groups
-    if (!versionGroup.isDefault) log.versionGroupHeader(i);
+  const hasUserGroups = ctx.versionGroups.length > 1;
 
-    versionGroup.getAllInstanceGroups().forEach((instanceGroup) => {
+  ctx.versionGroups.forEach((versionGroup, i) => {
+    const instanceGroups = versionGroup.getAllInstanceGroups();
+
+    // Nothing to do if empty
+    if (instanceGroups.length === 0) return;
+
+    // Annotate each group
+    hasUserGroups && log.versionGroupHeader(versionGroup, i);
+
+    instanceGroups.forEach((instanceGroup) => {
       // Record that this project has mismatches, so that eg. the CLI can exit
       // with the correct status code.
       if (instanceGroup.isInvalid()) ctx.isInvalid = true;

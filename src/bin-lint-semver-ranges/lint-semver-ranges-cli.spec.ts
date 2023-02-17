@@ -52,6 +52,7 @@ describe('lintSemverRanges', () => {
     const a = normalize('packages/a/package.json');
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
+      [expect.stringMatching(/Default Semver Group/)],
       ['✘ foo'],
       [`  0.1.0 → ~0.1.0 in dependencies of ${a}`],
     ]);
@@ -62,21 +63,15 @@ describe('lintSemverRanges', () => {
     const a = normalize('packages/a/package.json');
     lintSemverRangesCli(scenario.config, scenario.disk);
     expect(scenario.log.mock.calls).toEqual([
-      [
-        '= Semver Group 1 ===============================================================',
-      ],
-      ['✘ yarn'],
-      [`  ~2.0.0 → 2.0.0 in packageManager of ${a}`],
-      [
-        '= Semver Group 2 ===============================================================',
-      ],
-      ['✘ npm'],
-      [`  7.24.2 → ^7.24.2 in engines.npm of ${a}`],
-      [
-        '= Semver Group 3 ===============================================================',
-      ],
+      [expect.stringMatching(/Semver Group 1/)],
       ['✘ node'],
       [`  16.16.0 → >=16.16.0 in engines.node of ${a}`],
+      [expect.stringMatching(/Semver Group 2/)],
+      ['✘ npm'],
+      [`  7.24.2 → ^7.24.2 in engines.npm of ${a}`],
+      [expect.stringMatching(/Semver Group 3/)],
+      ['✘ yarn'],
+      [`  ~2.0.0 → 2.0.0 in packageManager of ${a}`],
     ]);
   });
 });

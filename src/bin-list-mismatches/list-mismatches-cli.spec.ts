@@ -122,6 +122,7 @@ describe('listMismatches', () => {
       const a = 'packages/a/package.json';
       const c = 'packages/c/package.json';
       listMismatchesCli(scenario.config, scenario.disk);
+
       expect(scenario.log.mock.calls).toEqual([
         [`${ICON.cross} bar 0.3.0 is the highest valid semver version in use`],
         [`  0.2.0 in dependencies of ${normalize(a)}`],

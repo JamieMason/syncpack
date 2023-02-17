@@ -5,7 +5,9 @@ import * as log from '../lib/log';
 import type { Syncpack } from '../types';
 
 export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
-  ctx.versionGroups.reverse().forEach((versionGroup, i) => {
+  const hasUserGroups = ctx.versionGroups.length > 1;
+
+  ctx.versionGroups.forEach((versionGroup, i) => {
     const invalidGroups = versionGroup.getInvalidInstanceGroups();
 
     // Nothing to do if there are no mismatches
@@ -15,8 +17,8 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     // with the correct status code.
     ctx.isInvalid = true;
 
-    // Annotate user-defined version groups
-    if (!versionGroup.isDefault) log.versionGroupHeader(i);
+    // Annotate each group
+    hasUserGroups && log.versionGroupHeader(versionGroup, i);
 
     // Log the mismatches
     invalidGroups.forEach((instanceGroup) => {

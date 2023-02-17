@@ -81,9 +81,10 @@ describe('list', () => {
       const scenario = dependencyIsBanned();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        ['- foo 0.1.0'],
         [expect.stringMatching(/Version Group 1/)],
         ['✘ bar is banned in this version group'],
+        [expect.stringMatching(/Default Version Group/)],
+        ['- foo 0.1.0'],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
@@ -92,9 +93,10 @@ describe('list', () => {
       const scenario = versionIsIgnored();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        ['- foo 0.1.0'],
         [expect.stringMatching(/Version Group 1/)],
         ['- bar is ignored in this version group'],
+        [expect.stringMatching(/Default Version Group/)],
+        ['- foo 0.1.0'],
       ]);
       expect(scenario.disk.process.exit).not.toHaveBeenCalled();
     });

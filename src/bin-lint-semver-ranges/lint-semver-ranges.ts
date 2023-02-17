@@ -6,7 +6,9 @@ import * as log from '../lib/log';
 import type { Syncpack } from '../types';
 
 export function lintSemverRanges(ctx: Syncpack.Ctx): Syncpack.Ctx {
-  ctx.semverGroups.reverse().forEach((semverGroup, i) => {
+  const hasUserGroups = ctx.semverGroups.length > 1;
+
+  ctx.semverGroups.forEach((semverGroup, i) => {
     // Nothing to do if there are no mismatches
     if (!semverGroup.hasMismatches()) return;
 
@@ -16,8 +18,8 @@ export function lintSemverRanges(ctx: Syncpack.Ctx): Syncpack.Ctx {
 
     // Log each group which has mismatches
     semverGroup.getMismatches().forEach(([name, mismatches]) => {
-      // Annotate user-defined version groups
-      if (!semverGroup.isDefault) log.semverGroupHeader(i);
+      // Annotate each group
+      hasUserGroups && log.semverGroupHeader(semverGroup, i);
 
       // Log the dependency name
       log.invalid(name);
