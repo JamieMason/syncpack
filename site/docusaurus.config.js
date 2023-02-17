@@ -83,6 +83,11 @@ const config = {
             label: 'Docs',
           },
           {
+            href: 'https://github.com/sponsors/JamieMason',
+            label: '❤️ Sponsor',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/JamieMason/syncpack',
             label: 'GitHub',
             position: 'right',

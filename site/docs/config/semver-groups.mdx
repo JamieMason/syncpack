@@ -3,6 +3,8 @@ id: semver-groups
 title: semverGroups
 ---
 
+# `semverGroups` object[]
+
 Allow some packages to have different semver range rules to the rest of your
 monorepo. Each dependency can only belong to one semver group, the first rule
 which matches a given dependency and package will apply.
@@ -91,23 +93,23 @@ and peer dependencies can be broader.
 
 ## `semverGroup.range`
 
-Which of the [Supported Ranges](./semver-range.md#supported-ranges) this group
+Which of the [Supported Ranges](./semver-range.mdx#supported-ranges) this group
 should use.
 
 ## `semverGroup.dependencies`
 
 Works the same as
-[`versionGroup.dependencies`](./version-groups.md#dependencies).
+[`versionGroup.dependencies`](./version-groups.mdx#dependencies).
 
 ## `semverGroup.isIgnored`
 
-Works the same as [`versionGroup.isIgnored`](./version-groups.md#isignored).
+Works the same as [`versionGroup.isIgnored`](./version-groups.mdx#isignored).
 
 ## `semverGroup.packages`
 
-Works the same as [`versionGroup.packages`](./version-groups.md#packages).
+Works the same as [`versionGroup.packages`](./version-groups.mdx#packages).
 
 ## `semverGroup.dependencyTypes`
 
 Works the same as
-[`versionGroup.dependencyTypes`](./version-groups.md#dependencytypes).
+[`versionGroup.dependencyTypes`](./version-groups.mdx#dependencytypes).

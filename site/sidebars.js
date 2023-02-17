@@ -15,6 +15,7 @@
 const sidebars = {
   docs: {
     'Introduction': ['installation', 'config-file', 'github-action'],
+    'Guides': ['guide/version-groups'],
     'CLI Commands': [
       'fix-mismatches',
       'format',

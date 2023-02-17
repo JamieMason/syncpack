@@ -1,0 +1,86 @@
+---
+id: version-groups
+title: Version Groups
+---
+
+import Pills from '@site/src/components/pill';
+import DefaultDependencyTypes from '@site/src/partials/default-dependency-types.mdx';
+
+:::info
+
+See also the [versionGroups Configuration API](../config/version-groups.mdx).
+
+:::
+
+## Overview
+
+Syncpack helps you find and fix inconsistencies between every dependency defined
+throughout your monorepo's package.json files. Version Groups create partitions
+where dependencies inside each group can be internally consistent, without
+affecting the other groups.
+
+Version Groups let you handle special cases or provide more specific rules for
+what to do in certain situations.
+
+They're best understood by looking at some example use cases.
+
+## Example use cases
+
+### Incompatible packages using the same framework
+
+A 3rd party framework has had a major update which requires breaking changes but
+some of your packages can't easily be upgraded and will need to remain on an
+older version, while the rest are able to upgrade today.
+
+1. You **don't** want mismatches between your packages using the latest version
+   of the framework - they should all use eg. `next@13.1.6` and `react@18.2.0`.
+1. You **don't** want mismatches between the packages using the old version -
+   they should all use eg. `next@11.1.4` and `react@17.0.2`.
+1. You **do** want those groups to use **different versions to each other** and
+   not have Syncpack make them all the same.
+1. You only have this problem with `next` and `react`, other dependencies can
+   continue to be kept consistent with each other throughout the full monorepo.
+
+```json title="Allow different versions of just these dependencies, in these packages only"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["next", "react", "react-dom"],
+      "packages": ["@stricken/server", "@stricken/ui"],
+      "label": "These packages are stuck on next@11 for now"
+    }
+  ]
+}
+```
+
+:::note
+
+Syncpack will make ensure that:
+
+1. The versions of `next` and `react` are the same between `@stricken/server`
+   and `@stricken/ui`.
+1. The versions of `next` and `react` are the same across every package
+   **except** `@stricken/server` and `@stricken/ui`.
+1. The versions of `next` and `react` between `@stricken/server` and
+   `@stricken/ui` can be different to the other packages in the monorepo.
+1. The versions of every **other** dependency in the monorepo (eg `lodash`) are
+   the same across every package **including** `@stricken/server` and
+   `@stricken/ui`.
+
+:::
+
+## How groups are assigned
+
+Each dependency can only belong to one version group, the first group which
+matches a given dependency will apply.
+
+You can be quite granular with these rules, so the partitioning doesn't _have_
+to apply to an entire package:
+
+- A specific dependency in a specific part of a specific package.
+- A specific dependency in a specific package.
+- A specific dependency in some specific packages only.
+- Any dependency who name matches a pattern such as `@aws-sdk/**`.
+
+See [`semverGroups`](../config/semver-groups.mdx) for more examples, they work
+the same way.

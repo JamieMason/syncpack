@@ -3,10 +3,12 @@ id: custom-types
 title: customTypes
 ---
 
+# `customTypes` object
+
 Extend syncpack to find and fix versions in your packages which are not
 available by default. Custom types behave like any other dependency, so can be
-included in [versionGroups](./version-groups.md) or
-[semverGroups](./semver-groups.md) etc.
+included in [versionGroups](./version-groups.mdx) or
+[semverGroups](./semver-groups.mdx) etc.
 
 The example below adds support for synchronising versions found in:
 
@@ -36,10 +38,10 @@ The example below adds support for synchronising versions found in:
 The key of each custom type is its name, this can be used in the following
 places to toggle when it is enabled:
 
-1. [`--types`](../option/types.md) and
-   [`dependencyTypes`](./dependency-types.md).
-1. [`versionGroup.dependencyTypes`](./version-groups.md#dependencytypes)
-1. [`semverGroup.dependencyTypes`](./semver-groups.md#dependencytypes)
+1. [`--types`](../option/types.mdx) and
+   [`dependencyTypes`](./dependency-types.mdx).
+1. [`versionGroup.dependencyTypes`](./version-groups.mdx#dependencytypes)
+1. [`semverGroup.dependencyTypes`](./semver-groups.mdx#dependencytypes)
 
 ## customTypes\[name\].path
 

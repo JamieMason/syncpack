@@ -3,6 +3,8 @@ id: source
 title: source
 ---
 
+# `source` string[]
+
 Patterns supported by [glob](https://github.com/isaacs/node-glob) to find
 package.json files you want to manage with syncpack.
 
@@ -31,13 +33,17 @@ package.json files are resolved in this order of precendence:
     `./pnpm-workspace.yaml`.
 5.  Default to `'package.json'` and `'packages/*/package.json'`.
 
-> 👋 Always add quotes around your `--source` patterns
-> [[more info](https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769)].
+:::tip
+
+Always add quotes around your `--source` patterns
+[[more info](https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769)].
+
+:::
 
 :::info
 
-Your `source` configuration in your [config file](../config-file.md) can be
-overridden on an ad hoc basis using multiple [`--source`](../option/source.md)
+Your `source` configuration in your [config file](../config-file.mdx) can be
+overridden on an ad hoc basis using multiple [`--source`](../option/source.mdx)
 options – one for each glob pattern.
 
 :::

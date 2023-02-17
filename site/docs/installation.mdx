@@ -1,0 +1,56 @@
+---
+id: installation
+title: Installation
+---
+
+Syncpack is a
+[Command Line Application](https://en.wikipedia.org/wiki/Console_application)
+run from your Terminal.
+
+## Global Install
+
+Installing syncpack globally on your system let's you easily use it on any of
+the projects on your machine:
+
+```bash
+npm install --global syncpack
+```
+
+### Usage
+
+```bash
+syncpack --help
+```
+
+## Project Install
+
+Adding syncpack to your project as a dev dependency ensures that everyone on
+your team will use the same version.
+
+```bash
+npm install --save-dev syncpack
+```
+
+### Usage
+
+When installed into your project, it can be run via your project's Package
+Manager.
+
+| Package Manager | Command                       |
+| --------------- | ----------------------------- |
+| npm             | `npm exec syncpack -- --help` |
+| pnpm            | `pnpm syncpack --help`        |
+| yarn            | `yarn syncpack --help`        |
+
+## Run Remotely
+
+[npx](https://docs.npmjs.com/cli/v9/commands/npx?v=true) comes installed with
+[npm](https://docs.npmjs.com/cli/v9/commands) and allows you to install and run
+any CLI application in the npm registry on the fly.
+
+Just run the following command from the root directory of your project to use
+syncpack any time.
+
+```bash
+npx syncpack --help
+```
