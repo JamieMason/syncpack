@@ -1,3 +1,13 @@
+## [9.3.2](https://github.com/JamieMason/syncpack/compare/9.1.2...9.3.2) (2023-02-17)
+
+
+### Features
+
+* **groups:** add optional label to semver/version groups ([ff466af](https://github.com/JamieMason/syncpack/commit/ff466af88850bd8ddd1d80d0a272bae85b39cbe1)), closes [#118](https://github.com/JamieMason/syncpack/issues/118)
+* **groups:** output groups in order they're defined ([88950f1](https://github.com/JamieMason/syncpack/commit/88950f1208405d3c25a743e03fa59053a1c7662a)), closes [#120](https://github.com/JamieMason/syncpack/issues/120)
+
+
+
 ## [9.1.2](https://github.com/JamieMason/syncpack/compare/9.0.2...9.1.2) (2023-02-16)
 
 
