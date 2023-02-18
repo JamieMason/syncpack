@@ -18,16 +18,22 @@ export function isValidSemverRange(
   );
 }
 
-export function isSemver(version: unknown): boolean {
+export function isSemver(version: unknown): version is string {
+  const range = '(~|\\^|>=|>|<=|<)?';
+  const ints = '[0-9]+';
+  const intsOrX = '([0-9]+|x)';
+  const dot = '\\.';
+  const major = new RegExp(`^${range}${ints}$`);
+  const minor = new RegExp(`^${range}${ints}${dot}${intsOrX}$`);
+  const patch = new RegExp(`^${range}${ints}${dot}${intsOrX}${dot}${intsOrX}$`);
   return (
     isString(version) &&
-    version.search(/^(~|\^|>=|>|<=|<|)?[0-9]+\.[0-9x]+\.[0-9x]+/) !== -1 &&
-    version.indexOf(' ') === -1
+    (version.search(major) !== -1 ||
+      version.search(minor) !== -1 ||
+      version.search(patch) !== -1)
   );
 }
 
 export function isLooseSemver(version: unknown): boolean {
-  return (
-    isString(version) && isSemver(version) && version.search(/\.x(\.|$)/) !== -1
-  );
+  return isSemver(version) && version.search(/\.x(\.|$)/) !== -1;
 }

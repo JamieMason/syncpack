@@ -12,6 +12,9 @@ describe('isSemver', () => {
     expect(isSemver('^1.2.3')).toBeTrue();
     expect(isSemver('>=1.2.3')).toBeTrue();
     expect(isSemver('>1.2.3')).toBeTrue();
+    expect(isSemver('>1')).toBeTrue();
+    expect(isSemver('>=1')).toBeTrue();
+    expect(isSemver('^1')).toBeTrue();
     expect(isSemver('*')).toBeFalse();
     expect(isSemver('>=16.8.0 <17.0.0')).toBeFalse();
     expect(isSemver('https://github.com/npm/npm.git')).toBeFalse();
