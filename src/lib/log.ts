@@ -58,8 +58,20 @@ function logHeader(
   const customLabel = group.groupConfig.label;
   const labelWhenDefault = group.isDefault ? `Default ${type} Group` : '';
   const anonymousLabel = `${type} Group ${i + 1}`;
-  const label = customLabel || labelWhenDefault || anonymousLabel;
+  const label = (customLabel || labelWhenDefault || anonymousLabel).trim();
+  const hasNewLines = label.search(/[\r\n]/) !== -1;
+  const header = hasNewLines ? formatMultiLine(label) : formatSingleLine(label);
+  console.log(chalk.blue(header));
+}
+
+function formatSingleLine(label: string): string {
   const leftSide = `= ${label} `;
-  const rightSide = '='.repeat(80 - leftSide.length);
-  console.log(chalk.blue(`${leftSide}${rightSide}`));
+  const dividerWidth = 80 - leftSide.length;
+  const rightSide = dividerWidth > 0 ? '='.repeat(dividerWidth) : '';
+  return `${leftSide}${rightSide}`;
+}
+
+function formatMultiLine(label: string): string {
+  const reindented = label.replace(/^\s+/gm, '  ');
+  return `= ${reindented}`;
 }
