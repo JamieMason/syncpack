@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from 'expect-more';
+import { isNonEmptyArray } from 'expect-more/dist/is-non-empty-array';
 import minimatch from 'minimatch';
 import type { Syncpack } from '../../types';
 import type { Instance } from '../get-package-json-files/package-json-file/instance';

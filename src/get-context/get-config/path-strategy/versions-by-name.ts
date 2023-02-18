@@ -1,5 +1,6 @@
 import { O, pipe, R } from '@mobily/ts-belt';
-import { isNonEmptyObject, isObject } from 'expect-more';
+import { isNonEmptyObject } from 'expect-more/dist/is-non-empty-object';
+import { isObject } from 'expect-more/dist/is-object';
 import { BaseError } from '../../../lib/error';
 import { props } from '../../get-package-json-files/get-patterns/props';
 import type { Strategy } from './types';

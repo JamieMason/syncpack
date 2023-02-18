@@ -1,6 +1,6 @@
 import type { R } from '@mobily/ts-belt';
 import { O, pipe } from '@mobily/ts-belt';
-import { isNonEmptyString } from 'expect-more';
+import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
 import { BaseError } from '../../../../lib/error';
 import { props } from '../../../get-package-json-files/get-patterns/props';
 import type { PackageJsonFile } from '../../../get-package-json-files/package-json-file';

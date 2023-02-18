@@ -1,5 +1,5 @@
 import { A, F, pipe, R } from '@mobily/ts-belt';
-import { isArrayOfStrings } from 'expect-more';
+import { isArrayOfStrings } from 'expect-more/dist/is-array-of-strings';
 import { DEFAULT_SOURCES } from '../../../constants';
 import type { Disk } from '../../../lib/disk';
 import { BaseError } from '../../../lib/error';

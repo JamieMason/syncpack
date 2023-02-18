@@ -1,5 +1,6 @@
 import { A, flow, pipe, R } from '@mobily/ts-belt';
-import { isArrayOfStrings, isEmptyArray } from 'expect-more';
+import { isArrayOfStrings } from 'expect-more/dist/is-array-of-strings';
+import { isEmptyArray } from 'expect-more/dist/is-empty-array';
 import { $R } from '../$R';
 import type { Disk } from '../../lib/disk';
 import { BaseError } from '../../lib/error';

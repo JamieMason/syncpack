@@ -1,5 +1,5 @@
 import { O, pipe, R } from '@mobily/ts-belt';
-import { isObject } from 'expect-more';
+import { isObject } from 'expect-more/dist/is-object';
 import { BaseError } from '../../../lib/error';
 import { props } from '../../get-package-json-files/get-patterns/props';
 import { getNonEmptyStringProp } from './lib/get-non-empty-string-prop';

@@ -1,5 +1,5 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { isNonEmptyObject } from 'expect-more';
+import { isNonEmptyObject } from 'expect-more/dist/is-non-empty-object';
 import {
   readFileSync,
   readJsonSync,

@@ -1,4 +1,5 @@
-import { isObject, isUndefined } from 'expect-more';
+import { isObject } from 'expect-more/dist/is-object';
+import { isUndefined } from 'expect-more/dist/is-undefined';
 import type { Syncpack } from '../types';
 
 export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {

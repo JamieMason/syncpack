@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { isString } from 'expect-more';
+import { isString } from 'expect-more/dist/is-string';
 import { inspect } from 'util';
 import { ICON } from '../constants';
 import type { SemverGroup } from '../get-context/get-groups/semver-group';

@@ -1,4 +1,6 @@
-import { isArray, isNonEmptyString, isObject } from 'expect-more';
+import { isArray } from 'expect-more/dist/is-array';
+import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
+import { isObject } from 'expect-more/dist/is-object';
 import type { Syncpack } from '../types';
 
 export function format(ctx: Syncpack.Ctx): Syncpack.Ctx {

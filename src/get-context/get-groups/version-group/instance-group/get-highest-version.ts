@@ -1,4 +1,7 @@
-import { coerce, eq, gt, valid } from 'semver';
+import coerce from 'semver/functions/coerce';
+import eq from 'semver/functions/eq';
+import gt from 'semver/functions/gt';
+import valid from 'semver/functions/valid';
 import { RANGE } from '../../../../constants';
 import { isSemver } from '../../../../lib/is-semver';
 

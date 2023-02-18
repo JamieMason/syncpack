@@ -1,5 +1,7 @@
 import { O } from '@mobily/ts-belt';
-import { isNumber, isString, isUndefined } from 'expect-more';
+import { isNumber } from 'expect-more/dist/is-number';
+import { isString } from 'expect-more/dist/is-string';
+import { isUndefined } from 'expect-more/dist/is-undefined';
 import { props } from './props';
 
 it('Some when value is found and passes predicate', () => {

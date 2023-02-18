@@ -1,8 +1,6 @@
-import {
-  isArrayOfStrings,
-  isNonEmptyArray,
-  isNonEmptyString,
-} from 'expect-more';
+import { isArrayOfStrings } from 'expect-more/dist/is-array-of-strings';
+import { isNonEmptyArray } from 'expect-more/dist/is-non-empty-array';
+import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
 import type { Syncpack } from '../../types';
 
 type Options = Pick<

@@ -1,4 +1,4 @@
-import { isNonEmptyString } from 'expect-more';
+import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
 import type { Syncpack } from '../../../types';
 import { BaseGroup } from '../base-group';
 import { InstanceGroup } from './instance-group';

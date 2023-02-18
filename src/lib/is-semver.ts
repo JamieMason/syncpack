@@ -1,4 +1,4 @@
-import { isString } from 'expect-more';
+import { isString } from 'expect-more/dist/is-string';
 import { RANGE } from '../constants';
 import type { Syncpack } from '../types';
 
