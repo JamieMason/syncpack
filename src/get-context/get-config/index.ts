@@ -66,7 +66,9 @@ export const getConfig = (
   return allConfig;
 
   function getConfigByName(name: keyof Syncpack.Config.Public): unknown {
-    if (name in fromCli) return (fromCli as Syncpack.Config.Public)[name];
-    if (name in fromRcFile) return (fromRcFile as Syncpack.Config.Public)[name];
+    if (typeof (fromCli as any)[name] !== 'undefined')
+      return (fromCli as Syncpack.Config.Public)[name];
+    if (typeof (fromRcFile as any)[name] !== 'undefined')
+      return (fromRcFile as Syncpack.Config.Public)[name];
   }
 };
