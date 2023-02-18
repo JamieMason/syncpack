@@ -1,15 +1,10 @@
 {
+  "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "downlevelIteration": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["es2017", "es6"],
     "noUncheckedIndexedAccess": true,
     "outDir": "./dist",
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "es3"
+    "strict": true
   },
   "include": ["./package.json", "./src/**/*.ts"],
   "exclude": ["./src/**/*.spec.ts"]
