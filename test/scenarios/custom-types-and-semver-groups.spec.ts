@@ -1,6 +1,5 @@
 import { normalize } from 'path';
 import { lintSemverRangesCli } from '../../src/bin-lint-semver-ranges/lint-semver-ranges-cli';
-
 import { setSemverRangesCli } from '../../src/bin-set-semver-ranges/set-semver-ranges-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
@@ -10,7 +9,7 @@ import { createScenario } from './lib/create-scenario';
  * - Each semver group applies to one custom type
  * - All of the semver groups should run and fix
  */
-describe('Custom types and semver groups', () => {
+describe('customTypes and semverGroups', () => {
   function getScenario() {
     return createScenario(
       [

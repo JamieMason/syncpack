@@ -2,23 +2,23 @@ import { formatCli } from '../../src/bin-format/format-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
-/** "scripts" object keys should be A-Z but is not */
-describe('Sort object props', () => {
+/** "keywords" array should be A-Z but is not */
+describe('format: Sort array props', () => {
   function getScenario() {
     return createScenario(
       [
         {
           path: 'packages/a/package.json',
           before: mockPackage('a', {
-            otherProps: { scripts: { B: '', A: '' } },
+            otherProps: { keywords: ['B', 'A'] },
           }),
           after: mockPackage('a', {
-            otherProps: { scripts: { A: '', B: '' } },
+            otherProps: { keywords: ['A', 'B'] },
           }),
         },
       ],
       {
-        sortAz: ['scripts'],
+        sortAz: ['keywords'],
       },
     );
   }
@@ -28,7 +28,7 @@ describe('Sort object props', () => {
   });
 
   describe('format', () => {
-    it('sorts object properties alphabetically by key', () => {
+    it('sorts array properties alphabetically by value', () => {
       const scenario = getScenario();
       formatCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([

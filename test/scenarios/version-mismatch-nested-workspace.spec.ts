@@ -18,7 +18,7 @@ import { createScenario } from './lib/create-scenario';
  * @see https://github.com/JamieMason/syncpack/pull/74
  * @see https://github.com/JamieMason/syncpack/issues/66
  */
-describe('Dependent does not match nested workspace version', () => {
+describe('version mismatch: nested workspace', () => {
   function getScenario() {
     return createScenario(
       [

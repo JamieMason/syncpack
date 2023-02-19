@@ -1,4 +1,6 @@
+import { normalize } from 'path';
 import { fixMismatchesCli } from '../../src/bin-fix-mismatches/fix-mismatches-cli';
+import { listMismatchesCli } from '../../src/bin-list-mismatches/list-mismatches-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
@@ -8,7 +10,7 @@ import { createScenario } from './lib/create-scenario';
  * - B has yarn@3
  * - A should be fixed to use yarn@3
  */
-describe('Custom name and version mismatch', () => {
+describe('customTypes: name@version mismatch', () => {
   function getScenario() {
     return createScenario(
       [
@@ -52,6 +54,18 @@ describe('Custom name and version mismatch', () => {
       expect(scenario.log.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].logEntryWhenChanged,
         scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+      ]);
+    });
+  });
+
+  describe('list-mismatches', () => {
+    it('fixes "name@version" mismatches in custom locations', () => {
+      const scenario = getScenario();
+      const a = normalize('packages/a/package.json');
+      listMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.log.mock.calls).toEqual([
+        ['✘ yarn 3.0.0 is the highest valid semver version in use'],
+        [`  2.0.0 in packageManager of ${a}`],
       ]);
     });
   });

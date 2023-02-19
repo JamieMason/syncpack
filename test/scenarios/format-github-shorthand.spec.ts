@@ -2,8 +2,8 @@ import { formatCli } from '../../src/bin-format/format-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
-/** "bugs" and "repository" can safely use equivalent shorthands */
-describe('shorthand properties', () => {
+/** "repository" contains a github URL which can be shortened further */
+describe('format: GitHub shorthand', () => {
   function getScenario() {
     return createScenario(
       [
@@ -12,15 +12,16 @@ describe('shorthand properties', () => {
           before: mockPackage('a', {
             omitName: true,
             otherProps: {
-              bugs: { url: 'https://github.com/User/repo/issues' },
-              repository: { url: 'git://gitlab.com/User/repo', type: 'git' },
+              repository: {
+                url: 'git://github.com/User/repo',
+                type: 'git',
+              },
             },
           }),
           after: mockPackage('a', {
             omitName: true,
             otherProps: {
-              bugs: 'https://github.com/User/repo/issues',
-              repository: 'git://gitlab.com/User/repo',
+              repository: 'User/repo',
             },
           }),
         },
@@ -34,7 +35,7 @@ describe('shorthand properties', () => {
   });
 
   describe('format', () => {
-    it('uses shorthand format for "bugs" and "repository"', () => {
+    it('uses github shorthand format for "repository"', () => {
       const scenario = getScenario();
       formatCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([

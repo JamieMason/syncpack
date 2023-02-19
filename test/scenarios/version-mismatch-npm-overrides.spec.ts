@@ -9,23 +9,23 @@ import { createScenario } from './lib/create-scenario';
  * - The versions do not match
  * - The highest semver version wins
  */
-describe('Dependent does not match npm override version', () => {
+describe('version mismatch: npm overrides', () => {
   function getScenario() {
     return createScenario(
       [
         {
           path: 'packages/a/package.json',
-          before: mockPackage('a', { pnpmOverrides: ['c@0.1.0'] }),
-          after: mockPackage('a', { pnpmOverrides: ['c@0.2.0'] }),
+          before: mockPackage('a', { overrides: ['c@0.1.0'] }),
+          after: mockPackage('a', { overrides: ['c@0.2.0'] }),
         },
         {
           path: 'packages/b/package.json',
-          before: mockPackage('b', { pnpmOverrides: ['c@0.2.0'] }),
-          after: mockPackage('b', { pnpmOverrides: ['c@0.2.0'] }),
+          before: mockPackage('b', { overrides: ['c@0.2.0'] }),
+          after: mockPackage('b', { overrides: ['c@0.2.0'] }),
         },
       ],
       {
-        types: 'pnpmOverrides',
+        types: 'overrides',
       },
     );
   }
@@ -44,18 +44,6 @@ describe('Dependent does not match npm override version', () => {
     });
   });
 
-  describe('format', () => {
-    //
-  });
-
-  describe('lint-semver-ranges', () => {
-    //
-  });
-
-  describe('list-mismatches', () => {
-    //
-  });
-
   describe('list', () => {
     it('lists mismatching npm overrides', () => {
       const scenario = getScenario();
@@ -63,9 +51,5 @@ describe('Dependent does not match npm override version', () => {
       expect(scenario.log.mock.calls).toEqual([['✘ c 0.1.0, 0.2.0']]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
-  });
-
-  describe('set-semver-ranges', () => {
-    //
   });
 });

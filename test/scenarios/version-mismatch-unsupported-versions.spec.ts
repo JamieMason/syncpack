@@ -14,7 +14,7 @@ import { createScenario } from './lib/create-scenario';
  * - Syncpack can't know what the Developers intend with them
  * - All packages should be left unchanged
  */
-describe('Mismatching unsupported versions', () => {
+describe('version mismatch: unsupported versions', () => {
   function getScenario() {
     return createScenario(
       [

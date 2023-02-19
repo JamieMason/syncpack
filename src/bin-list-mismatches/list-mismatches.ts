@@ -8,7 +8,8 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
   const hasUserGroups = ctx.versionGroups.length > 1;
 
   ctx.versionGroups.forEach((versionGroup, i) => {
-    const invalidGroups = versionGroup.getInvalidInstanceGroups();
+    const invalidGroups: InstanceGroup[] =
+      versionGroup.getInvalidInstanceGroups();
 
     // Nothing to do if there are no mismatches
     if (invalidGroups.length === 0) return;
@@ -24,6 +25,8 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     invalidGroups.forEach((instanceGroup) => {
       if (versionGroup.isBanned()) return logBanned(instanceGroup);
       if (versionGroup.isUnpinned()) return logUnpinned(instanceGroup);
+      if (versionGroup.hasSnappedToPackages())
+        return logSnappedTo(instanceGroup);
       if (instanceGroup.hasUnsupportedVersion())
         return logUnsupportedMismatches(instanceGroup);
       if (instanceGroup.hasWorkspaceInstance()) {
@@ -63,6 +66,24 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     // Log each of the dependencies mismatches
     instanceGroup.instances.forEach((instance) => {
       if (instance.version !== pinVersion) {
+        logVersionMismatch(instance);
+      }
+    });
+  }
+
+  function logSnappedTo(instanceGroup: InstanceGroup) {
+    const name = instanceGroup.name;
+    const versionGroup = instanceGroup.versionGroup;
+    const snappedVersion = instanceGroup.getSnappedVersion();
+    const packages = versionGroup.getSnappedToPackages().join(' || ');
+    const version = instanceGroup.getExpectedVersion();
+    log.invalid(
+      name,
+      chalk`should snap to {reset.green ${version}}, used by ${packages}`,
+    );
+    // Log each of the dependencies mismatches
+    instanceGroup.instances.forEach((instance) => {
+      if (instance.version !== snappedVersion) {
         logVersionMismatch(instance);
       }
     });

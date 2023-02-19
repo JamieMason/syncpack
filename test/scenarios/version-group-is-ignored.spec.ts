@@ -11,7 +11,7 @@ import { createScenario } from './lib/create-scenario';
  * - `bar` is ignored by syncpack in every package
  * - `bar` is unprotected so can mismatch etc
  */
-describe('Version is ignored', () => {
+describe('versionGroup.isIgnored', () => {
   function getScenario() {
     return createScenario(
       [

@@ -9,13 +9,6 @@ type Ignored = Syncpack.Config.SemverGroup.Ignored;
 type MismatchesByName = [string, Instance[]];
 
 export class SemverGroup extends BaseGroup<Syncpack.Config.SemverGroup.Any> {
-  constructor(
-    config: Syncpack.Config.Private,
-    semverGroup: Syncpack.Config.SemverGroup.Any,
-  ) {
-    super(config, semverGroup);
-  }
-
   getExpectedVersion(instance: Instance): string {
     const version = instance.version;
     // leave ignored versions alone

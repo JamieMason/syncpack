@@ -2,24 +2,30 @@ import { formatCli } from '../../src/bin-format/format-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
-/** "keywords" array should be A-Z but is not */
-describe('Sort array props', () => {
+/** "bugs" and "repository" can safely use equivalent shorthands */
+describe('format: Shorthand properties', () => {
   function getScenario() {
     return createScenario(
       [
         {
           path: 'packages/a/package.json',
           before: mockPackage('a', {
-            otherProps: { keywords: ['B', 'A'] },
+            omitName: true,
+            otherProps: {
+              bugs: { url: 'https://github.com/User/repo/issues' },
+              repository: { url: 'git://gitlab.com/User/repo', type: 'git' },
+            },
           }),
           after: mockPackage('a', {
-            otherProps: { keywords: ['A', 'B'] },
+            omitName: true,
+            otherProps: {
+              bugs: 'https://github.com/User/repo/issues',
+              repository: 'git://gitlab.com/User/repo',
+            },
           }),
         },
       ],
-      {
-        sortAz: ['keywords'],
-      },
+      {},
     );
   }
 
@@ -28,7 +34,7 @@ describe('Sort array props', () => {
   });
 
   describe('format', () => {
-    it('sorts array properties alphabetically by value', () => {
+    it('uses shorthand format for "bugs" and "repository"', () => {
       const scenario = getScenario();
       formatCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([

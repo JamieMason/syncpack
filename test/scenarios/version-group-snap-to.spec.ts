@@ -7,33 +7,39 @@ import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
 /**
- * - A does not depend on `bar`
- * - B does depend on `bar`
- * - `bar` is banned in every package from being installed
- * - `bar` should be removed from B
+ * - A has an older version of react than B
+ * - A is marked as a source of truth via the `snapTo` property
+ * - C does not use react so should be unchanged
+ * - B should be downgraded, even though it is on a newer version
+ *
+ * @see https://github.com/JamieMason/syncpack/issues/87#issuecomment-1182456452
  */
-describe('Dependency is banned', () => {
+describe('versionGroup.snapTo', () => {
   function getScenario() {
     return createScenario(
       [
         {
           path: 'packages/a/package.json',
-          before: mockPackage('a', { deps: ['foo@0.1.0'] }),
-          after: mockPackage('a', { deps: ['foo@0.1.0'] }),
+          before: mockPackage('a', { deps: ['react@15.6.1'] }),
+          after: mockPackage('a', { deps: ['react@15.6.1'] }),
         },
         {
           path: 'packages/b/package.json',
-          before: mockPackage('b', { deps: ['bar@0.2.0'] }),
-          after: mockPackage('b'),
+          before: mockPackage('b', { deps: ['react@18.0.0'] }),
+          after: mockPackage('b', { deps: ['react@15.6.1'] }),
+        },
+        {
+          path: 'packages/c/package.json',
+          before: mockPackage('c', { deps: ['foo@0.1.0'] }),
+          after: mockPackage('c', { deps: ['foo@0.1.0'] }),
         },
       ],
       {
         versionGroups: [
           {
-            dependencies: ['bar'],
-            dependencyTypes: [],
+            dependencies: ['react'],
             packages: ['**'],
-            isBanned: true,
+            snapTo: ['a'],
           },
         ],
       },
@@ -41,7 +47,7 @@ describe('Dependency is banned', () => {
   }
 
   describe('fix-mismatches', () => {
-    it('removes banned/disallowed dependencies', () => {
+    it('fixes using the version from the snapTo target package', () => {
       const scenario = getScenario();
       fixMismatchesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([
@@ -50,47 +56,36 @@ describe('Dependency is banned', () => {
       expect(scenario.log.mock.calls).toEqual([
         scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
         scenario.files['packages/b/package.json'].logEntryWhenChanged,
+        scenario.files['packages/c/package.json'].logEntryWhenUnchanged,
       ]);
     });
   });
 
-  describe('format', () => {
-    //
-  });
-
-  describe('lint-semver-ranges', () => {
-    //
-  });
-
   describe('list-mismatches', () => {
-    it('removes banned/disallowed dependencies', () => {
+    it('suggests using the version from the snapTo target package', () => {
       const scenario = getScenario();
-      const b = 'packages/b/package.json';
+      const b = normalize('packages/b/package.json');
       listMismatchesCli(scenario.config, scenario.disk);
+
       expect(scenario.log.mock.calls).toEqual([
-        [expect.stringMatching(/Version Group 1/)],
-        [`${ICON.cross} bar is banned in this version group`],
-        [`  0.2.0 in dependencies of ${normalize(b)}`],
+        [expect.stringContaining('Version Group 1')],
+        [`${ICON.cross} react should snap to 15.6.1, used by a`],
+        [`  18.0.0 in dependencies of ${b}`],
       ]);
-      expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
   });
 
   describe('list', () => {
-    it('removes banned/disallowed dependencies', () => {
+    it('suggests using the version from the snapTo target package', () => {
       const scenario = getScenario();
       listCli(scenario.config, scenario.disk);
       expect(scenario.log.mock.calls).toEqual([
-        [expect.stringMatching(/Version Group 1/)],
-        ['✘ bar is banned in this version group'],
-        [expect.stringMatching(/Default Version Group/)],
+        [expect.stringContaining('Version Group 1')],
+        [`${ICON.cross} react 15.6.1, 18.0.0`],
+        [expect.stringContaining('Default Version Group')],
         ['- foo 0.1.0'],
       ]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
-  });
-
-  describe('set-semver-ranges', () => {
-    //
   });
 });

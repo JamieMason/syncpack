@@ -11,13 +11,13 @@ import { createScenario } from './lib/create-scenario';
  * - `b` and `c` are ignored
  * - All but `b` and `c` should use `~`
  */
-describe('Ignored semver ranges do not match config', () => {
+describe('semverGroup.isIgnored', () => {
   function getScenario() {
     return createScenario(
       [
         {
           path: 'packages/a/package.json',
-          before: mockPackage('a', {
+          before: mockPackage('one', {
             deps: ['a@0.1.0'],
             devDeps: ['b@0.1.0'],
             overrides: ['c@0.1.0'],
@@ -25,7 +25,7 @@ describe('Ignored semver ranges do not match config', () => {
             peerDeps: ['e@0.1.0'],
             resolutions: ['f@0.1.0'],
           }),
-          after: mockPackage('a', {
+          after: mockPackage('one', {
             deps: ['a@~0.1.0'],
             devDeps: ['b@0.1.0'],
             overrides: ['c@0.1.0'],
@@ -45,21 +45,12 @@ describe('Ignored semver ranges do not match config', () => {
             isIgnored: true,
           },
         ],
-        types: 'dev,overrides,pnpmOverrides,peer,prod,resolutions,workspace',
       },
     );
   }
 
-  describe('fix-mismatches', () => {
-    //
-  });
-
-  describe('format', () => {
-    //
-  });
-
   describe('lint-semver-ranges', () => {
-    it('list issues from multiple custom types and semver groups together', () => {
+    it('does not include ignored dependencies in its output', () => {
       const scenario = getScenario();
       const a = normalize('packages/a/package.json');
       lintSemverRangesCli(scenario.config, scenario.disk);
@@ -77,16 +68,8 @@ describe('Ignored semver ranges do not match config', () => {
     });
   });
 
-  describe('list-mismatches', () => {
-    //
-  });
-
-  describe('list', () => {
-    //
-  });
-
   describe('set-semver-ranges', () => {
-    it('fixes multiple custom types and semver groups together', () => {
+    it('fixes only the non-ignored dependencies', () => {
       const scenario = getScenario();
       setSemverRangesCli(scenario.config, scenario.disk);
       expect(scenario.disk.writeFileSync.mock.calls).toEqual([

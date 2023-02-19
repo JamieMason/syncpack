@@ -1,4 +1,4 @@
-import { R } from '@mobily/ts-belt';
+import { pipe, R } from '@mobily/ts-belt';
 import type { VersionGroup } from '..';
 import { BaseError } from '../../../../lib/error';
 import { isSemver } from '../../../../lib/is-semver';
@@ -46,6 +46,7 @@ export class InstanceGroup {
     const REMOVE_DEPENDENCY = undefined;
     if (versionGroup.isBanned()) return REMOVE_DEPENDENCY;
     if (versionGroup.isUnpinned()) return versionGroup.getPinnedVersion();
+    if (this.isUnsnapped()) return this.getSnappedVersion();
     if (this.hasWorkspaceInstance()) return this.getWorkspaceVersion();
     if (this.hasUnsupportedVersion()) {
       throw new BaseError(
@@ -54,20 +55,32 @@ export class InstanceGroup {
         )}`,
       );
     }
-    return R.getExn(this.getHighestVersion());
+    return this.getHighestVersion();
   }
 
-  getHighestVersion() {
-    return getHighestVersion(this.getUniqueVersions());
+  getHighestVersion(): string {
+    return pipe(getHighestVersion(this.getUniqueVersions()), R.getExn);
   }
 
-  isUnpinned() {
-    return (
-      this.versionGroup.hasPinnedVersion() &&
-      this.instances.some(
-        ({ version }) => version !== this.versionGroup.getPinnedVersion(),
-      )
-    );
+  getSnappedVersion(): string {
+    const snapTo = this.versionGroup.getSnappedToPackages();
+    const version = this.instances
+      .filter(({ pkgName }) => snapTo.includes(pkgName))
+      .map((instance) => instance.version)
+      .find(Boolean);
+    if (!version) {
+      const pkgNames = printStrings(snapTo);
+      throw new BaseError(
+        `${this.name} is in a versionGroup with snapTo:[${pkgNames}], but ${this.name} was not found in those packages`,
+      );
+    }
+    return version;
+  }
+
+  isUnsnapped(): boolean {
+    if (!this.versionGroup.hasSnappedToPackages()) return false;
+    const targetVersion = this.getSnappedVersion();
+    return this.instances.some(({ version }) => version !== targetVersion);
   }
 
   /** Get version of dependency which is developed in this monorepo */

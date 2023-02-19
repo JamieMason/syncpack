@@ -3,7 +3,7 @@ import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
 /** F E D should appear first, then the rest in A-Z order */
-describe('Sort first', () => {
+describe('format: Sort first', () => {
   function getScenario() {
     return createScenario(
       [

@@ -7,7 +7,7 @@ import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
 /** "bar" should be 0.3.0, which is the highest installed version */
-describe('Use highest version', () => {
+describe('version mismatch: Use highest version', () => {
   function getScenario() {
     return createScenario(
       [

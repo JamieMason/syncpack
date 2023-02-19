@@ -1,6 +1,7 @@
 import { isNonEmptyArray } from 'expect-more/dist/is-non-empty-array';
 import minimatch from 'minimatch';
 import type { Syncpack } from '../../types';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import type { Instance } from '../get-package-json-files/package-json-file/instance';
 
 export class BaseGroup<
@@ -16,14 +17,21 @@ export class BaseGroup<
   instancesByName: Record<string, Instance[]>;
   /** Is this the catch-all group, not defined by the user? */
   isDefault: boolean;
+  /** All package.json files */
+  packageJsonFiles: PackageJsonFile[];
 
-  constructor(config: Syncpack.Config.Private, group: T) {
+  constructor(
+    config: Syncpack.Config.Private,
+    group: T,
+    packageJsonFiles: PackageJsonFile[],
+  ) {
     this.groupConfig = group;
     this.instances = [];
     this.instancesByName = {};
     this.isDefault =
       group === config.defaultSemverGroup ||
       group === config.defaultVersionGroup;
+    this.packageJsonFiles = packageJsonFiles;
     this.syncpackConfig = config;
   }
 

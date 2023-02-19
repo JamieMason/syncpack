@@ -9,7 +9,7 @@ import { createScenario } from './lib/create-scenario';
  * - The versions do not match
  * - The highest semver version wins
  */
-describe('Dependent does not match pnpm override version', () => {
+describe('version mismatch: pnpm overrides', () => {
   function getScenario() {
     return createScenario(
       [
@@ -44,18 +44,6 @@ describe('Dependent does not match pnpm override version', () => {
     });
   });
 
-  describe('format', () => {
-    //
-  });
-
-  describe('lint-semver-ranges', () => {
-    //
-  });
-
-  describe('list-mismatches', () => {
-    //
-  });
-
   describe('list', () => {
     it('lists mismatching pnpm overrides', () => {
       const scenario = getScenario();
@@ -63,9 +51,5 @@ describe('Dependent does not match pnpm override version', () => {
       expect(scenario.log.mock.calls).toEqual([['✘ c 0.1.0, 0.2.0']]);
       expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
     });
-  });
-
-  describe('set-semver-ranges', () => {
-    //
   });
 });

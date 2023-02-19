@@ -35,14 +35,14 @@ export function getContext(
   const config = getConfig(disk, program);
   const packageJsonFiles = getPackageJsonFiles(disk, config);
   const instances = getAllInstances(packageJsonFiles);
-  const { semverGroups, versionGroups } = getGroups(config, instances);
+  const groups = getGroups(config, instances, packageJsonFiles);
 
   return {
     ...config,
     disk,
     isInvalid: false,
     packageJsonFiles,
-    semverGroups,
-    versionGroups,
+    semverGroups: groups.semverGroups,
+    versionGroups: groups.versionGroups,
   };
 }

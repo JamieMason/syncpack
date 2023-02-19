@@ -1,4 +1,5 @@
 import { fixMismatchesCli } from '../../src/bin-fix-mismatches/fix-mismatches-cli';
+import { listMismatchesCli } from '../../src/bin-list-mismatches/list-mismatches-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
@@ -10,7 +11,7 @@ import { createScenario } from './lib/create-scenario';
  *   "dependencyTypes" to only check the "dependencies" property
  * - Mismatch should be ignored
  */
-describe('Unused custom type', () => {
+describe('customTypes: Unused', () => {
   function getScenario() {
     return createScenario(
       [
@@ -66,7 +67,11 @@ describe('Unused custom type', () => {
   });
 
   describe('list-mismatches', () => {
-    //
+    it('ignores the mismatch in the custom location if it has been filtered out', () => {
+      const scenario = getScenario();
+      listMismatchesCli(scenario.config, scenario.disk);
+      expect(scenario.log).not.toHaveBeenCalled();
+    });
   });
 
   describe('list', () => {

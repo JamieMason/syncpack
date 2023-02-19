@@ -10,7 +10,7 @@ import { createScenario } from './lib/create-scenario';
  * - The versions match
  * - All packages should be left unchanged
  */
-describe('Matching unsupported versions', () => {
+describe('version match: unsupported versions', () => {
   function getScenario() {
     return createScenario(
       [

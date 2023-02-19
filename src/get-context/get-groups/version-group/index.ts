@@ -1,3 +1,4 @@
+import { isArrayOfStrings } from 'expect-more';
 import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
 import type { Syncpack } from '../../../types';
 import { BaseGroup } from '../base-group';
@@ -6,6 +7,7 @@ import { InstanceGroup } from './instance-group';
 type Banned = Syncpack.Config.VersionGroup.Banned;
 type Ignored = Syncpack.Config.VersionGroup.Ignored;
 type Pinned = Syncpack.Config.VersionGroup.Pinned;
+type SnappedTo = Syncpack.Config.VersionGroup.SnappedTo;
 
 export class VersionGroup extends BaseGroup<Syncpack.Config.VersionGroup.Any> {
   getAllInstanceGroups(): InstanceGroup[] {
@@ -26,8 +28,12 @@ export class VersionGroup extends BaseGroup<Syncpack.Config.VersionGroup.Any> {
     return (this.groupConfig as Ignored).isIgnored === true;
   }
 
-  hasPinnedVersion(): boolean {
-    return isNonEmptyString(this.getPinnedVersion());
+  hasSnappedToPackages(): boolean {
+    return isArrayOfStrings((this.groupConfig as SnappedTo).snapTo);
+  }
+
+  getSnappedToPackages(): string[] {
+    return (this.groupConfig as SnappedTo).snapTo;
   }
 
   getPinnedVersion(): string {

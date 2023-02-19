@@ -2,8 +2,8 @@ import { formatCli } from '../../src/bin-format/format-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
-/** "repository" contains a github URL which can be shortened further */
-describe('Github shorthand', () => {
+/** "repository" contains properties which cannot be shortened */
+describe('format: Protected shorthand', () => {
   function getScenario() {
     return createScenario(
       [
@@ -13,15 +13,20 @@ describe('Github shorthand', () => {
             omitName: true,
             otherProps: {
               repository: {
-                url: 'git://github.com/User/repo',
+                url: 'git://gitlab.com/User/repo',
                 type: 'git',
+                directory: 'packages/foo',
               },
             },
           }),
           after: mockPackage('a', {
             omitName: true,
             otherProps: {
-              repository: 'User/repo',
+              repository: {
+                url: 'git://gitlab.com/User/repo',
+                type: 'git',
+                directory: 'packages/foo',
+              },
             },
           }),
         },
@@ -35,14 +40,12 @@ describe('Github shorthand', () => {
   });
 
   describe('format', () => {
-    it('uses github shorthand format for "repository"', () => {
+    it('retains long form format for "repository" when directory property used', () => {
       const scenario = getScenario();
       formatCli(scenario.config, scenario.disk);
-      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
-        scenario.files['packages/a/package.json'].diskWriteWhenChanged,
-      ]);
+      expect(scenario.disk.writeFileSync.mock.calls).toEqual([]);
       expect(scenario.log.mock.calls).toEqual([
-        scenario.files['packages/a/package.json'].logEntryWhenChanged,
+        scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
       ]);
     });
   });

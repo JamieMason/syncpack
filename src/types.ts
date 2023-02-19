@@ -87,6 +87,8 @@ export namespace Syncpack {
       export type Ignored = z.infer<T['ignored']>;
       /** Override the version of dependencies in this group to always be this */
       export type Pinned = z.infer<T['pinned']>;
+      /** Use these named packages as the source of truth for versions */
+      export type SnappedTo = z.infer<T['snappedTo']>;
       /** @private */
       export type Default = z.infer<T['base']>;
       /** Every valid type of VersionGroup */

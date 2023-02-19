@@ -2,36 +2,24 @@ import { formatCli } from '../../src/bin-format/format-cli';
 import { mockPackage } from '../mock';
 import { createScenario } from './lib/create-scenario';
 
-/** "repository" contains properties which cannot be shortened */
-describe('Protected shorthand', () => {
+/** "scripts" object keys should be A-Z but is not */
+describe('format: Sort object props', () => {
   function getScenario() {
     return createScenario(
       [
         {
           path: 'packages/a/package.json',
           before: mockPackage('a', {
-            omitName: true,
-            otherProps: {
-              repository: {
-                url: 'git://gitlab.com/User/repo',
-                type: 'git',
-                directory: 'packages/foo',
-              },
-            },
+            otherProps: { scripts: { B: '', A: '' } },
           }),
           after: mockPackage('a', {
-            omitName: true,
-            otherProps: {
-              repository: {
-                url: 'git://gitlab.com/User/repo',
-                type: 'git',
-                directory: 'packages/foo',
-              },
-            },
+            otherProps: { scripts: { A: '', B: '' } },
           }),
         },
       ],
-      {},
+      {
+        sortAz: ['scripts'],
+      },
     );
   }
 
@@ -40,12 +28,14 @@ describe('Protected shorthand', () => {
   });
 
   describe('format', () => {
-    it('retains long form format for "repository" when directory property used', () => {
+    it('sorts object properties alphabetically by key', () => {
       const scenario = getScenario();
       formatCli(scenario.config, scenario.disk);
-      expect(scenario.disk.writeFileSync.mock.calls).toEqual([]);
+      expect(scenario.disk.writeFileSync.mock.calls).toEqual([
+        scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+      ]);
       expect(scenario.log.mock.calls).toEqual([
-        scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
+        scenario.files['packages/a/package.json'].logEntryWhenChanged,
       ]);
     });
   });

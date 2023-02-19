@@ -1,5 +1,6 @@
 import { verbose } from '../../lib/log';
 import type { Syncpack } from '../../types';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import type { Instance } from '../get-package-json-files/package-json-file/instance';
 import { SemverGroup } from './semver-group';
 import { VersionGroup } from './version-group';
@@ -7,16 +8,17 @@ import { VersionGroup } from './version-group';
 export function getGroups(
   config: Syncpack.Config.Private,
   instances: Instance[],
+  packageJsonFiles: PackageJsonFile[],
 ): {
   semverGroups: SemverGroup[];
   versionGroups: VersionGroup[];
 } {
   const groupsByName = {
     semverGroups: config.semverGroups.map(
-      (group) => new SemverGroup(config, group),
+      (group) => new SemverGroup(config, group, packageJsonFiles),
     ),
     versionGroups: config.versionGroups.map(
-      (group) => new VersionGroup(config, group),
+      (group) => new VersionGroup(config, group, packageJsonFiles),
     ),
   };
   type Key = keyof typeof groupsByName;

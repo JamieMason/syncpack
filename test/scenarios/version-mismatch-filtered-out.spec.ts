@@ -9,7 +9,7 @@ import { createScenario } from './lib/create-scenario';
  * - A filter is set to only look at dependency D
  * - The mismatches should be ignored
  */
-describe('Mismatch is filtered out', () => {
+describe('version mismatch: filtered out', () => {
   function getScenario() {
     return createScenario(
       [

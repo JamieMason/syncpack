@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { baseGroupFields } from './base-group';
 
-const NonEmptyString = z.string().trim().min(1);
+const nonEmptyString = z.string().trim().min(1);
 
 export const standard = z.object(baseGroupFields).strict();
 
@@ -14,11 +14,22 @@ export const ignored = z
   .strict();
 
 export const pinned = z
-  .object({ ...baseGroupFields, pinVersion: NonEmptyString })
+  .object({ ...baseGroupFields, pinVersion: nonEmptyString })
+  .strict();
+
+export const snappedTo = z
+  .object({ ...baseGroupFields, snapTo: z.array(nonEmptyString) })
   .strict();
 
 export const base = z
   .object({ ...baseGroupFields, isDefault: z.literal(true) })
   .strict();
 
-export const any = z.union([standard, banned, ignored, pinned, base]);
+export const any = z.union([
+  standard,
+  banned,
+  ignored,
+  pinned,
+  snappedTo,
+  base,
+]);
