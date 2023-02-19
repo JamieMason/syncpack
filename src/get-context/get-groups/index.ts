@@ -35,6 +35,7 @@ export function getGroups(
     });
   });
 
+  /* istanbul ignore if */
   if (process.env.SYNCPACK_VERBOSE) {
     groupNames.forEach((key) => {
       groupsByName[key].forEach((group, i) => {

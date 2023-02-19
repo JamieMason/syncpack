@@ -94,6 +94,6 @@
     "format:source": "prettier --write .",
     "lint": "eslint --ext .ts .",
     "prepack": "yarn build",
-    "test": "jest src"
+    "test": "jest src test"
   }
 }

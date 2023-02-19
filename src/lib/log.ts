@@ -6,6 +6,7 @@ import type { SemverGroup } from '../get-context/get-groups/semver-group';
 import type { VersionGroup } from '../get-context/get-groups/version-group';
 
 export function verbose(...values: unknown[]): void {
+  /* istanbul ignore if */
   if (process.env.SYNCPACK_VERBOSE) {
     console.info(
       chalk.yellow(ICON.debug),

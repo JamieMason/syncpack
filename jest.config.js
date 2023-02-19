@@ -19,6 +19,10 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js'],
   setupFiles: ['<rootDir>/test/jest.setup.ts'],
+  testMatch: [
+    '<rootDir>/src/**/*.spec.ts',
+    '<rootDir>/test/scenarios/**/*.spec.ts',
+  ],
   transform: {
     '^.+\\.ts$': ['ts-jest', { isolatedModules: true }],
   },

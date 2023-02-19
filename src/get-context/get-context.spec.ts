@@ -13,11 +13,13 @@ describe('getContext', () => {
         DEFAULT_CONFIG.source,
       );
     });
+
     it('uses value from config when no CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
       expect(getContext({}, disk)).toHaveProperty('source', ['foo']);
     });
+
     it('uses value from CLI when config and CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
@@ -25,6 +27,7 @@ describe('getContext', () => {
         'bar',
       ]);
     });
+
     it('combines defaults, values from CLI options, and config', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
@@ -36,6 +39,7 @@ describe('getContext', () => {
         }),
       );
     });
+
     describe('only available in config files', () => {
       it('merges semverGroups', () => {
         const disk = mockDisk();
@@ -65,6 +69,7 @@ describe('getContext', () => {
           }),
         ]);
       });
+
       it('merges versionGroups', () => {
         const disk = mockDisk();
         disk.readConfigFileSync.mockReturnValue({
@@ -89,6 +94,7 @@ describe('getContext', () => {
       });
     });
   });
+
   describe('packageJsonFiles', () => {
     describe('when --source cli options are given', () => {
       describe('for a single package.json file', () => {
@@ -116,6 +122,7 @@ describe('getContext', () => {
           );
         });
       });
+
       describe('for a pattern that matches nothing', () => {
         it('returns an empty array', () => {
           const disk = mockDisk();
@@ -128,6 +135,7 @@ describe('getContext', () => {
         });
       });
     });
+
     describe('when no --source cli options are given', () => {
       it('performs a default search', () => {
         const disk = mockDisk();
@@ -137,6 +145,7 @@ describe('getContext', () => {
           ['packages/*/package.json'],
         ]);
       });
+
       describe('when yarn workspaces are defined', () => {
         describe('as an array', () => {
           it('resolves yarn workspace packages', () => {
@@ -153,6 +162,7 @@ describe('getContext', () => {
             ]);
           });
         });
+
         describe('as an object', () => {
           it('resolves yarn workspace packages', () => {
             const filePath = join(CWD, 'package.json');
@@ -169,6 +179,7 @@ describe('getContext', () => {
           });
         });
       });
+
       describe('when yarn workspaces are not defined', () => {
         describe('when lerna.json is defined', () => {
           it('resolves lerna packages', () => {
@@ -189,6 +200,7 @@ describe('getContext', () => {
             ]);
           });
         });
+
         describe('when lerna.json is not defined', () => {
           describe('when pnpm config is present', () => {
             describe('when pnpm workspaces are defined', () => {
@@ -206,6 +218,7 @@ describe('getContext', () => {
                 ]);
               });
             });
+
             describe('when pnpm config is invalid', () => {
               it('performs a default search', () => {
                 const filePath = join(CWD, 'package.json');

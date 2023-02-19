@@ -17,6 +17,7 @@ beforeEach(() => {
 });
 
 const configPath = '/path/to/.syncpackrc';
+
 describe('readConfigFileSync', () => {
   it('searches parent directories when no file path is provided', () => {
     const client = require('cosmiconfig').cosmiconfigSync();
@@ -38,6 +39,7 @@ describe('readConfigFileSync', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
     });
+
     describe('when the file can not be found', () => {
       it('returns an empty object', () => {
         const client = require('cosmiconfig').cosmiconfigSync();
