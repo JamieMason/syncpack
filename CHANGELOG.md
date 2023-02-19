@@ -1,3 +1,26 @@
+## [9.7.4](https://github.com/JamieMason/syncpack/compare/9.3.2...9.7.4) (2023-02-19)
+
+
+### Bug Fixes
+
+* **indent:** use value from config file ([aa31244](https://github.com/JamieMason/syncpack/commit/aa312448156c6814213502e5f98c2671d7a166a8))
+* **npm:** update dependencies ([558d177](https://github.com/JamieMason/syncpack/commit/558d177026ca89606b534f3ce37958b80faa7b1a))
+
+
+### Features
+
+* **engines:** increase node from 10 to 14 ([603f058](https://github.com/JamieMason/syncpack/commit/603f0587a62d6d452c01bc24ec23827bc2fb582b))
+* **groups:** handle long and multi-line labels ([ecc58ff](https://github.com/JamieMason/syncpack/commit/ecc58fff645f9639f003934c109bc5d17af7b3d6))
+* **semver:** recognise ^6, >=5 etc as valid ([be637f0](https://github.com/JamieMason/syncpack/commit/be637f0349018b2b3d5f204613a4af187c8f7aa0)), closes [#122](https://github.com/JamieMason/syncpack/issues/122)
+* **versionGroups:** add optional snapTo property ([fd0edb6](https://github.com/JamieMason/syncpack/commit/fd0edb6a25ec14aefdaf72f796bbe5d3c22d3692)), closes [#87](https://github.com/JamieMason/syncpack/issues/87)
+
+
+### Performance Improvements
+
+* **imports:** skip barrel files where possible ([1ee2776](https://github.com/JamieMason/syncpack/commit/1ee2776b86c3ded344e9a34dd009efd5a879c48d))
+
+
+
 ## [9.3.2](https://github.com/JamieMason/syncpack/compare/9.1.2...9.3.2) (2023-02-17)
 
 

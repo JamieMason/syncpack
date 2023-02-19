@@ -38,6 +38,7 @@ npm test
 
 ## Dev Dependencies
 
+- [@tsconfig/node14](https://ghub.io/@tsconfig/node14): A base TSConfig for working with Node 14.
 - [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
 - [@types/glob](https://ghub.io/@types/glob): TypeScript definitions for glob
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
