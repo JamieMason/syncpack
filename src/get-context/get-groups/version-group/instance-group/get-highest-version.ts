@@ -1,39 +1,48 @@
-import coerce from 'semver/functions/coerce';
-import eq from 'semver/functions/eq';
-import gt from 'semver/functions/gt';
-import valid from 'semver/functions/valid';
-import { RANGE } from '../../../../constants';
-import { isSemver } from '../../../../lib/is-semver';
+import { R } from '@mobily/ts-belt';
+import { BaseError } from '../../../../lib/error';
+import { clean } from './lib/clean';
+import { compareSemver } from './lib/compare-semver';
+import { getRangeScore } from './lib/get-range-score';
 
-export function getHighestVersion(versions: string[]): string {
-  return versions.reduce<string>((rawHighest, raw) => {
-    const version = valid(coerce(raw)) || '';
-    const highest = valid(coerce(rawHighest)) || '';
-    if (raw === '*' || rawHighest === '*') return '*';
-    if (!isSemver(raw) || version === '') return rawHighest;
-    if (highest === '') return raw;
-    if (gt(version, highest)) return raw;
-    if (eq(version, highest) && getRangeScore(raw) > getRangeScore(rawHighest))
-      return raw;
-    return rawHighest;
-  }, '');
+interface HighestVersion {
+  withRange: string;
+  semver: string;
 }
 
-function getRangeScore(version: string): number {
-  if (version === '') return 0;
-  if (version === RANGE.ANY) return 8;
-  const range = getRange(version);
-  if (range === RANGE.GT) return 7;
-  if (range === RANGE.GTE) return 6;
-  if (range === RANGE.MINOR) return 5;
-  if (version.indexOf('.x') !== -1) return 4;
-  if (range === RANGE.PATCH) return 3;
-  if (range === RANGE.EXACT) return 2;
-  if (range === RANGE.LTE) return 1;
-  if (range === RANGE.LT) return 0;
-  return 0;
+export function getHighestVersion(
+  versions: string[],
+): R.Result<string, BaseError> {
+  let highest: HighestVersion | undefined;
+
+  for (const withRange of versions) {
+    switch (compareSemver(withRange, highest?.semver)) {
+      // highest possible, quit early
+      case '*': {
+        return R.Ok(withRange);
+      }
+      // impossible to know how the user wants to resolve unsupported versions
+      case 'invalid': {
+        return R.Error(new BaseError(`"${withRange}" is not supported`));
+      }
+      // we found a new highest version
+      case 'gt': {
+        highest = newHighestVersion(withRange);
+        continue;
+      }
+      // versions are the same, but one range might be greedier than another
+      case 'eq': {
+        const score = getRangeScore(withRange);
+        const highestScore = getRangeScore(`${highest?.withRange}`);
+        if (score > highestScore) highest = newHighestVersion(withRange);
+      }
+    }
+  }
+
+  return highest && highest.withRange
+    ? R.Ok(highest.withRange)
+    : R.Error(new BaseError(`getHighestVersion(): did not return a version`));
 }
 
-function getRange(version: string): string {
-  return version.slice(0, version.search(/[0-9]/));
+function newHighestVersion(withRange: string): HighestVersion {
+  return { withRange, semver: clean(withRange) };
 }

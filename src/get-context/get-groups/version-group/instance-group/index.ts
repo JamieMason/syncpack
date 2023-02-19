@@ -1,3 +1,4 @@
+import { R } from '@mobily/ts-belt';
 import type { VersionGroup } from '..';
 import { BaseError } from '../../../../lib/error';
 import { isSemver } from '../../../../lib/is-semver';
@@ -53,7 +54,7 @@ export class InstanceGroup {
         )}`,
       );
     }
-    return this.getHighestVersion();
+    return R.getExn(this.getHighestVersion());
   }
 
   getHighestVersion() {
