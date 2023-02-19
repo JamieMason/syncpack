@@ -15,11 +15,8 @@ export default function Home(): JSX.Element {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           className={css.video}
-          frameBorder={0}
-          height={631}
           src="https://www.youtube.com/embed/peJNp8BZ_dE"
           title="Fixing duplicate production dependencies in vercel/turborepo"
-          width={1425}
         ></iframe>
       </main>
     </Layout>
