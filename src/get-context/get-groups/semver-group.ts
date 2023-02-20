@@ -28,11 +28,11 @@ export class SemverGroup extends BaseGroup<Syncpack.Config.SemverGroup.Any> {
   }
 
   /** 1+ `Instance` has a version which does not follow the rules */
-  hasMismatches() {
+  hasMismatches(): boolean {
     return this.getMismatches().length > 0;
   }
 
-  isIgnored() {
+  isIgnored(): boolean {
     return (this.groupConfig as Ignored).isIgnored === true;
   }
 

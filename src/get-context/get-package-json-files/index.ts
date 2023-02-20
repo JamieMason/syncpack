@@ -12,11 +12,11 @@ import { PackageJsonFile } from './package-json-file';
 export function getPackageJsonFiles(
   disk: Disk,
   config: Syncpack.Config.Private,
-): PackageJsonFile[] {
+): R.Result<PackageJsonFile[], BaseError> {
   return pipe(
     getFilePaths(disk, config),
     R.flatMap($R.onlyOk<string, PackageJsonFile>(resolvePackageJson(disk))),
-    R.getWithDefault([] as PackageJsonFile[]),
+    R.recover([] as PackageJsonFile[]),
   );
 
   function resolvePackageJson(
@@ -25,6 +25,7 @@ export function getPackageJsonFiles(
     return flow(
       readJsonSafe<PackageJson>(disk),
       R.map((jsonFile) => new PackageJsonFile(jsonFile, config, disk)),
+      $R.tapErrVerbose,
     );
   }
 }

@@ -6,6 +6,8 @@ import {
   exhaustiveCheck,
   strategyByName,
 } from '../../get-config/path-strategy';
+import type { Delete } from '../../get-groups/version-group/instance-group';
+import { DELETE } from '../../get-groups/version-group/instance-group';
 
 type Entry = [string, string | undefined];
 
@@ -43,9 +45,9 @@ export class Instance {
    * In the case of banned dependencies, their version is set to `undefined`,
    * which causes them to be removed by `JSON.stringify`.
    */
-  setVersion(version: string | undefined): void {
+  setVersion(version: string | Delete): void {
     const strategyName = this.pathDef.strategy;
-    const entry: Entry = [this.name, version];
+    const entry: Entry = [this.name, version === DELETE ? undefined : version];
     const file = this.packageJsonFile;
     switch (strategyName) {
       case 'name@version':

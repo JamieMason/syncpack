@@ -1,7 +1,8 @@
+import { pipe, R } from '@mobily/ts-belt';
 import type { Disk } from '../lib/disk';
 import { disk as defaultDisk } from '../lib/disk';
 import type { Syncpack } from '../types';
-import { getAllInstances } from './get-all-instances';
+import { $R } from './$R';
 import { getConfig } from './get-config';
 import { getGroups } from './get-groups';
 import type { SemverGroup } from './get-groups/semver-group';
@@ -9,16 +10,14 @@ import type { VersionGroup } from './get-groups/version-group';
 import { getPackageJsonFiles } from './get-package-json-files';
 import type { PackageJsonFile } from './get-package-json-files/package-json-file';
 
-export type Context = Omit<
-  Syncpack.Config.Private,
-  'semverGroups' | 'versionGroups'
-> & {
+export interface Context {
+  config: Syncpack.Config.Private;
   disk: Disk;
   isInvalid: boolean;
   packageJsonFiles: PackageJsonFile[];
   semverGroups: SemverGroup[];
   versionGroups: VersionGroup[];
-};
+}
 
 /**
  * Every command in syncpack should accept the return value of this function as
@@ -32,17 +31,33 @@ export function getContext(
   program: Partial<Syncpack.Config.Cli>,
   disk: Disk = defaultDisk,
 ): Context {
-  const config = getConfig(disk, program);
-  const packageJsonFiles = getPackageJsonFiles(disk, config);
-  const instances = getAllInstances(packageJsonFiles);
-  const groups = getGroups(config, instances, packageJsonFiles);
-
-  return {
-    ...config,
-    disk,
-    isInvalid: false,
-    packageJsonFiles,
-    semverGroups: groups.semverGroups,
-    versionGroups: groups.versionGroups,
-  };
+  return pipe(
+    // merge CLI options, .syncpackrc contents, and default config
+    getConfig(disk, program),
+    R.flatMap((config) =>
+      pipe(
+        // get the package.json file which match the globs in config
+        getPackageJsonFiles(disk, config),
+        R.flatMap((packageJsonFiles) =>
+          pipe(
+            // allocate dependencies into semver and version groups
+            getGroups(config, packageJsonFiles),
+            // combine everything into the final config
+            R.map(({ semverGroups, versionGroups }) => ({
+              config,
+              disk,
+              isInvalid: false,
+              packageJsonFiles,
+              semverGroups,
+              versionGroups,
+            })),
+          ),
+        ),
+      ),
+    ),
+    // if anything errored at any stage, log it when in verbose mode
+    $R.tapErrVerbose,
+    // throw if anything errored, can't do anything without this data
+    R.getExn,
+  );
 }

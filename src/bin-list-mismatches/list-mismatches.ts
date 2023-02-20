@@ -1,3 +1,4 @@
+import { O, R } from '@mobily/ts-belt';
 import chalk from 'chalk';
 import type { InstanceGroup } from '../get-context/get-groups/version-group/instance-group';
 import type { Instance } from '../get-context/get-package-json-files/package-json-file/instance';
@@ -58,7 +59,7 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
 
   function logUnpinned(instanceGroup: InstanceGroup) {
     const name = instanceGroup.name;
-    const pinVersion = instanceGroup.versionGroup.getPinnedVersion();
+    const pinVersion = O.getExn(instanceGroup.versionGroup.getPinnedVersion());
     log.invalid(
       name,
       chalk`is pinned in this version group at {reset.green ${pinVersion}}`,
@@ -74,12 +75,14 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
   function logSnappedTo(instanceGroup: InstanceGroup) {
     const name = instanceGroup.name;
     const versionGroup = instanceGroup.versionGroup;
-    const snappedVersion = instanceGroup.getSnappedVersion();
-    const packages = versionGroup.getSnappedToPackages().join(' || ');
-    const version = instanceGroup.getExpectedVersion();
+    const snappedVersion = R.getExn(instanceGroup.getSnappedVersion());
+    const snappedToPackages = O.getExn(
+      versionGroup.getSnappedToPackages(),
+    ).join(' || ');
+    const version = R.getExn(instanceGroup.getExpectedVersion());
     log.invalid(
       name,
-      chalk`should snap to {reset.green ${version}}, used by ${packages}`,
+      chalk`should snap to {reset.green ${version}}, used by ${snappedToPackages}`,
     );
     // Log each of the dependencies mismatches
     instanceGroup.instances.forEach((instance) => {
@@ -91,9 +94,9 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
 
   function logWorkspaceMismatch(instanceGroup: InstanceGroup) {
     const name = instanceGroup.name;
-    const workspaceInstance = instanceGroup.getWorkspaceInstance();
+    const workspaceInstance = O.getExn(instanceGroup.getWorkspaceInstance());
     const shortPath = workspaceInstance?.packageJsonFile.shortPath;
-    const expected = instanceGroup.getExpectedVersion();
+    const expected = R.getExn(instanceGroup.getExpectedVersion());
     log.invalid(
       name,
       chalk`{reset.green ${expected}} {dim is developed in this repo at ${shortPath}}`,
@@ -108,7 +111,7 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
 
   function logHighestVersionMismatch(instanceGroup: InstanceGroup) {
     const name = instanceGroup.name;
-    const expected = instanceGroup.getExpectedVersion();
+    const expected = R.getExn(instanceGroup.getExpectedVersion());
     log.invalid(
       name,
       chalk`{reset.green ${expected}} {dim is the highest valid semver version in use}`,

@@ -1,4 +1,6 @@
+import { pipe, R } from '@mobily/ts-belt';
 import type { Disk } from '../../lib/disk';
+import { BaseError } from '../../lib/error';
 import { verbose } from '../../lib/log';
 import type { Syncpack } from '../../types';
 import { getCoreTypes } from './get-core-types';
@@ -10,10 +12,21 @@ import * as ConfigSchema from './schema';
  * Take all configuration from the command line and config file, combine it, and
  * set defaults for anything which hasn't been defined.
  */
-export const getConfig = (
+export function getConfig(
   disk: Disk,
   fromCli: Partial<Syncpack.Config.Cli>,
-): Syncpack.Config.Private => {
+): R.Result<Syncpack.Config.Private, BaseError> {
+  const ERR_READING_CONFIG = 'Error reading config';
+  return pipe(
+    R.fromExecution(() => unSafeGetConfig(disk, fromCli)),
+    R.mapError(BaseError.map(ERR_READING_CONFIG)),
+  );
+}
+
+function unSafeGetConfig(
+  disk: Disk,
+  fromCli: Partial<Syncpack.Config.Cli>,
+): Syncpack.Config.Private {
   verbose('cli arguments:', fromCli);
 
   const fromRcFile = disk.readConfigFileSync(fromCli.configPath);
@@ -71,4 +84,4 @@ export const getConfig = (
     if (typeof (fromRcFile as any)[name] !== 'undefined')
       return (fromRcFile as Syncpack.Config.Public)[name];
   }
-};
+}

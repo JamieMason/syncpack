@@ -49,7 +49,7 @@ export class BaseGroup<
   }
 
   /** Add this instance to this group */
-  add(instance: Instance) {
+  add(instance: Instance): void {
     if (!this.instancesByName[instance.name]) {
       this.instancesByName[instance.name] = [];
     }

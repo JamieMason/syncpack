@@ -1,10 +1,15 @@
-import { pipe, R } from '@mobily/ts-belt';
+import { O, pipe, R } from '@mobily/ts-belt';
+import { isNonEmptyString } from 'expect-more';
 import type { VersionGroup } from '..';
 import { BaseError } from '../../../../lib/error';
 import { isSemver } from '../../../../lib/is-semver';
 import { printStrings } from '../../../../lib/print-strings';
+import { props } from '../../../get-package-json-files/get-patterns/props';
 import type { Instance } from '../../../get-package-json-files/package-json-file/instance';
 import { getHighestVersion } from './get-highest-version';
+
+export const DELETE = Symbol('DELETE');
+export type Delete = typeof DELETE;
 
 /** Every `Instance` of eg `"lodash"` for a given `VersionGroup` */
 export class InstanceGroup {
@@ -21,19 +26,19 @@ export class InstanceGroup {
     this.versionGroup = versionGroup;
   }
 
-  hasUnsupportedVersion() {
+  hasUnsupportedVersion(): boolean {
     return this.instances.some((obj) => !isSemver(obj.version));
   }
 
-  getUniqueVersions() {
+  getUniqueVersions(): string[] {
     return Array.from(new Set(this.instances.map((obj) => obj.version))).sort();
   }
 
-  hasMismatchingVersions() {
+  hasMismatchingVersions(): boolean {
     return this.getUniqueVersions().length > 1;
   }
 
-  isInvalid() {
+  isInvalid(): boolean {
     return this.versionGroup.isIgnored()
       ? false
       : this.versionGroup.isBanned() ||
@@ -41,62 +46,93 @@ export class InstanceGroup {
           this.hasMismatchingVersions();
   }
 
-  getExpectedVersion(): string | undefined {
+  getExpectedVersion(): R.Result<string | Delete, BaseError> {
     const versionGroup = this.versionGroup;
-    const REMOVE_DEPENDENCY = undefined;
-    if (versionGroup.isBanned()) return REMOVE_DEPENDENCY;
-    if (versionGroup.isUnpinned()) return versionGroup.getPinnedVersion();
-    if (this.isUnsnapped()) return this.getSnappedVersion();
+    if (versionGroup.isBanned()) return R.Ok(DELETE);
+    if (versionGroup.isUnpinned())
+      return pipe(
+        versionGroup.getPinnedVersion(),
+        O.toResult(
+          new BaseError(
+            `${this.name} is in a versionGroup with pinVersion configuration, but the pinVersion value is not valid`,
+          ),
+        ),
+      );
+    if (versionGroup.hasSnappedToPackages() && R.getExn(this.isUnsnapped()))
+      return this.getSnappedVersion();
     if (this.hasWorkspaceInstance()) return this.getWorkspaceVersion();
     if (this.hasUnsupportedVersion()) {
-      throw new BaseError(
-        `${this.name} contains unsupported versions: ${printStrings(
-          this.getUniqueVersions(),
-        )}`,
+      return R.Error(
+        new BaseError(
+          `${this.name} contains unsupported versions: ${printStrings(
+            this.getUniqueVersions(),
+          )}`,
+        ),
       );
     }
     return this.getHighestVersion();
   }
 
-  getHighestVersion(): string {
-    return pipe(getHighestVersion(this.getUniqueVersions()), R.getExn);
+  /** If all versions are valid semver, return the newest one */
+  getHighestVersion(): R.Result<string, BaseError> {
+    return getHighestVersion(this.getUniqueVersions());
   }
 
-  getSnappedVersion(): string {
-    const snapTo = this.versionGroup.getSnappedToPackages();
-    const version = this.instances
-      .filter(({ pkgName }) => snapTo.includes(pkgName))
-      .map((instance) => instance.version)
-      .find(Boolean);
-    if (!version) {
-      const pkgNames = printStrings(snapTo);
-      throw new BaseError(
-        `${this.name} is in a versionGroup with snapTo:[${pkgNames}], but ${this.name} was not found in those packages`,
-      );
-    }
-    return version;
+  /** Get the first version matched by the `snapTo` packages */
+  getSnappedVersion(): R.Result<string, BaseError> {
+    return pipe(
+      this.versionGroup.getSnappedToPackages(),
+      O.flatMap((pkgNames) =>
+        O.fromFalsy(
+          this.instances
+            .filter(({ pkgName }) => pkgNames.includes(pkgName))
+            .map(({ version }) => version)
+            .find(Boolean),
+        ),
+      ),
+      O.filter<string>(isNonEmptyString),
+      O.toResult(
+        new BaseError(
+          `${this.name} is in a versionGroup with snapTo configuration, but ${this.name} was not found in those packages`,
+        ),
+      ),
+    );
   }
 
-  isUnsnapped(): boolean {
-    if (!this.versionGroup.hasSnappedToPackages()) return false;
-    const targetVersion = this.getSnappedVersion();
-    return this.instances.some(({ version }) => version !== targetVersion);
+  /** Is `snapTo` defined and this group does not match that version? */
+  isUnsnapped(): R.Result<boolean, BaseError> {
+    return this.versionGroup.hasSnappedToPackages()
+      ? pipe(
+          this.getSnappedVersion(),
+          R.map((nextVersion) =>
+            this.instances.some(({ version }) => version !== nextVersion),
+          ),
+        )
+      : R.Ok(false);
   }
 
   /** Get version of dependency which is developed in this monorepo */
-  getWorkspaceVersion() {
-    if (this.hasWorkspaceInstance()) {
-      return this.getWorkspaceInstance()?.packageJsonFile.contents.version;
-    }
-    throw new BaseError('getWorkspaceVersion invoked when there is none');
+  getWorkspaceVersion(): R.Result<string, BaseError> {
+    return pipe(
+      this.getWorkspaceInstance(),
+      props('packageJsonFile.contents.version', isNonEmptyString),
+      O.toResult(
+        new BaseError(
+          `Expected to find a package.json file developed in this monorepo with a "name" property of "${this.name}" and a valid "version" property`,
+        ),
+      ),
+    );
   }
 
   /** Find instance of this dependency which is developed in this monorepo */
-  getWorkspaceInstance(): Instance | undefined {
-    return this.instances.find(({ pathDef }) => pathDef.name === 'workspace');
+  getWorkspaceInstance(): O.Option<Instance> {
+    return O.fromFalsy(
+      this.instances.find(({ pathDef }) => pathDef.name === 'workspace'),
+    );
   }
 
+  /** Is an instance of this dependency developed in this monorepo? */
   hasWorkspaceInstance(): boolean {
-    return this.getWorkspaceInstance() !== undefined;
+    return pipe(this.getWorkspaceInstance(), O.toUndefined) !== undefined;
   }
 }

@@ -4,7 +4,8 @@ import { isObject } from 'expect-more/dist/is-object';
 import type { Syncpack } from '../types';
 
 export function format(ctx: Syncpack.Ctx): Syncpack.Ctx {
-  const { sortAz, sortFirst, packageJsonFiles } = ctx;
+  const { packageJsonFiles } = ctx;
+  const { sortAz, sortFirst } = ctx.config;
 
   packageJsonFiles.forEach((packageJsonFile) => {
     const { contents } = packageJsonFile;

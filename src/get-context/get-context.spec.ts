@@ -9,7 +9,7 @@ describe('getContext', () => {
     it('uses defaults when no CLI options or config are set', () => {
       const disk = mockDisk();
       expect(getContext({}, disk)).toHaveProperty(
-        'source',
+        'config.source',
         DEFAULT_CONFIG.source,
       );
     });
@@ -17,21 +17,23 @@ describe('getContext', () => {
     it('uses value from config when no CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      expect(getContext({}, disk)).toHaveProperty('source', ['foo']);
+      expect(getContext({}, disk)).toHaveProperty('config.source', ['foo']);
     });
 
     it('uses value from CLI when config and CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      expect(getContext({ source: ['bar'] }, disk)).toHaveProperty('source', [
-        'bar',
-      ]);
+      expect(getContext({ source: ['bar'] }, disk)).toHaveProperty(
+        'config.source',
+        ['bar'],
+      );
     });
 
     it('combines defaults, values from CLI options, and config', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      expect(getContext({ indent: '    ' }, disk)).toEqual(
+      expect(getContext({ indent: '    ' }, disk)).toHaveProperty(
+        'config',
         expect.objectContaining({
           semverRange: '',
           source: ['foo'],

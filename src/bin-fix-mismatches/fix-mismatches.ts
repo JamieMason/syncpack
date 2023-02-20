@@ -1,5 +1,7 @@
+import { pipe, R } from '@mobily/ts-belt';
 import { isObject } from 'expect-more/dist/is-object';
 import { isUndefined } from 'expect-more/dist/is-undefined';
+import { $R } from '../get-context/$R';
 import type { Syncpack } from '../types';
 
 export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
@@ -12,9 +14,14 @@ export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     // Set the correct version on each instance.
     invalidGroups.forEach((instanceGroup) => {
       if (!instanceGroup.hasUnsupportedVersion()) {
-        const nextVersion = instanceGroup.getExpectedVersion();
-        instanceGroup.instances.forEach((instance) =>
-          instance.setVersion(nextVersion),
+        pipe(
+          instanceGroup.getExpectedVersion(),
+          R.tap((nextVersion) => {
+            instanceGroup.instances.forEach((instance) =>
+              instance.setVersion(nextVersion),
+            );
+          }),
+          $R.tapErrVerbose,
         );
       }
     });

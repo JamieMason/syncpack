@@ -1,18 +1,33 @@
+import { pipe, R } from '@mobily/ts-belt';
+import { BaseError } from '../../lib/error';
 import { verbose } from '../../lib/log';
+import { sortByName } from '../../lib/sort-by-name';
 import type { Syncpack } from '../../types';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import type { Instance } from '../get-package-json-files/package-json-file/instance';
 import { SemverGroup } from './semver-group';
 import { VersionGroup } from './version-group';
 
-export function getGroups(
-  config: Syncpack.Config.Private,
-  instances: Instance[],
-  packageJsonFiles: PackageJsonFile[],
-): {
+interface GroupsByPropName {
   semverGroups: SemverGroup[];
   versionGroups: VersionGroup[];
-} {
+}
+
+export function getGroups(
+  config: Syncpack.Config.Private,
+  packageJsonFiles: PackageJsonFile[],
+): R.Result<GroupsByPropName, BaseError> {
+  const ERR_CREATING_GROUPS = 'Error creating semver and version groups';
+  return pipe(
+    R.fromExecution(() => unsafeGetGroups(config, packageJsonFiles)),
+    R.mapError(BaseError.map(ERR_CREATING_GROUPS)),
+  );
+}
+
+function unsafeGetGroups(
+  config: Syncpack.Config.Private,
+  packageJsonFiles: PackageJsonFile[],
+): GroupsByPropName {
+  type Key = keyof typeof groupsByName;
   const groupsByName = {
     semverGroups: config.semverGroups.map(
       (group) => new SemverGroup(config, group, packageJsonFiles),
@@ -21,8 +36,10 @@ export function getGroups(
       (group) => new VersionGroup(config, group, packageJsonFiles),
     ),
   };
-  type Key = keyof typeof groupsByName;
   const groupNames = Object.keys(groupsByName) as Key[];
+  const instances = packageJsonFiles
+    .flatMap((pkg) => pkg.getInstances())
+    .sort(sortByName);
 
   instances.forEach((instance) => {
     const { name, pkgName } = instance;

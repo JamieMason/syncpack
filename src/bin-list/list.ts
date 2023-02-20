@@ -1,5 +1,7 @@
+import { O, pipe, R } from '@mobily/ts-belt';
 import chalk from 'chalk';
 import { ICON } from '../constants';
+import { $R } from '../get-context/$R';
 import type { InstanceGroup } from '../get-context/get-groups/version-group/instance-group';
 import * as log from '../lib/log';
 import type { Syncpack } from '../types';
@@ -44,15 +46,21 @@ export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
   }
 
   function logVersionMismatch(instanceGroup: InstanceGroup): void {
-    console.log(
-      chalk`{red ${ICON.cross} ${instanceGroup.name}} ${instanceGroup
-        .getUniqueVersions()
-        .map((version) =>
-          version === instanceGroup.getExpectedVersion()
-            ? chalk.green(version)
-            : chalk.red(version),
-        )
-        .join(chalk.dim(', '))}`,
+    pipe(
+      instanceGroup.getExpectedVersion(),
+      R.tap((expectedVersion) => {
+        const uniqueVersions = instanceGroup.getUniqueVersions();
+        console.log(
+          chalk`{red ${ICON.cross} ${instanceGroup.name}} ${uniqueVersions
+            .map((version) =>
+              version === expectedVersion
+                ? chalk.green(version)
+                : chalk.red(version),
+            )
+            .join(chalk.dim(', '))}`,
+        );
+      }),
+      $R.tapErrVerbose,
     );
   }
 
@@ -69,7 +77,7 @@ export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
   }
 
   function logUnpinned(instanceGroup: InstanceGroup): void {
-    const pinVersion = instanceGroup.versionGroup.getPinnedVersion();
+    const pinVersion = O.getExn(instanceGroup.versionGroup.getPinnedVersion());
     console.log(
       chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is pinned to ${pinVersion} in this version group}`,
     );
