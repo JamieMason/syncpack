@@ -13,7 +13,12 @@ export function verbose(...values: unknown[]): void {
       ...values.map((value) =>
         isString(value)
           ? chalk.yellow(value)
-          : inspect(value, { showHidden: false, colors: true, depth: 20 }),
+          : inspect(value, {
+              colors: true,
+              compact: true,
+              depth: 20,
+              showHidden: false,
+            }),
       ),
     );
   }
