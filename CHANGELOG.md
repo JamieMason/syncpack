@@ -1,3 +1,12 @@
+## [9.8.4](https://github.com/JamieMason/syncpack/compare/9.7.4...9.8.4) (2023-02-21)
+
+
+### Features
+
+* **semver:** support resolving with lowest version ([a17e423](https://github.com/JamieMason/syncpack/commit/a17e4234730b433777f320bb5ca35e8c46545832)), closes [#110](https://github.com/JamieMason/syncpack/issues/110)
+
+
+
 ## [9.7.4](https://github.com/JamieMason/syncpack/compare/9.3.2...9.7.4) (2023-02-19)
 
 
