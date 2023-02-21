@@ -1,11 +1,10 @@
 import { z } from 'zod';
 import { DEFAULT_CONFIG } from '../../../constants';
+import { nonEmptyString } from './lib/non-empty-string';
 import * as paths from './paths';
 import * as semverGroup from './semver-group';
 import * as semverRange from './semver-range';
 import * as versionGroup from './version-group';
-
-const nonEmptyString = z.string().trim().min(1);
 
 const cliOnly = {
   configPath: z.string().optional(),
@@ -36,7 +35,7 @@ const privateOnly = {
   allTypes: z.array(paths.pathDefinition),
   enabledTypes: z.array(paths.pathDefinition),
   defaultSemverGroup: semverGroup.base,
-  defaultVersionGroup: versionGroup.base,
+  defaultVersionGroup: versionGroup.defaultGroup,
 } as const;
 
 export const Private = z.object({

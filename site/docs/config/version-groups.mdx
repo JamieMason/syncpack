@@ -229,3 +229,25 @@ that the dependency is not present in the earlier packages in the array.
   ]
 }
 ```
+
+## `preferVersion` string
+
+<Pills optional />
+
+Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
+
+To set this as your standard policy, create a version group which applies to
+every dependency as the last item in your `versionGroups` array. You can also
+just set this for some of the packages if you need to.
+
+```json title="Choose the lowest valid semver version when fixing mismatches"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["**"],
+      "packages": ["**"],
+      "preferVersion": "lowestSemver"
+    }
+  ]
+}
+```

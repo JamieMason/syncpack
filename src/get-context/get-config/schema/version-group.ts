@@ -1,9 +1,15 @@
 import { z } from 'zod';
 import { baseGroupFields } from './base-group';
+import { nonEmptyString } from './lib/non-empty-string';
 
-const nonEmptyString = z.string().trim().min(1);
+const preferVersion = z
+  .enum(['highestSemver', 'lowestSemver'])
+  .optional()
+  .default('highestSemver');
 
-export const standard = z.object(baseGroupFields).strict();
+export const standard = z
+  .object({ ...baseGroupFields, preferVersion })
+  .strict();
 
 export const banned = z
   .object({ ...baseGroupFields, isBanned: z.literal(true) })
@@ -21,8 +27,8 @@ export const snappedTo = z
   .object({ ...baseGroupFields, snapTo: z.array(nonEmptyString) })
   .strict();
 
-export const base = z
-  .object({ ...baseGroupFields, isDefault: z.literal(true) })
+export const defaultGroup = z
+  .object({ ...baseGroupFields, isDefault: z.literal(true), preferVersion })
   .strict();
 
 export const any = z.union([
@@ -31,5 +37,5 @@ export const any = z.union([
   ignored,
   pinned,
   snappedTo,
-  base,
+  defaultGroup,
 ]);

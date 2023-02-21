@@ -33,7 +33,7 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
       if (instanceGroup.hasWorkspaceInstance()) {
         return logWorkspaceMismatch(instanceGroup);
       }
-      logHighestVersionMismatch(instanceGroup);
+      logHighLowVersionMismatch(instanceGroup);
     });
   });
 
@@ -109,12 +109,17 @@ export function listMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
     });
   }
 
-  function logHighestVersionMismatch(instanceGroup: InstanceGroup) {
+  function logHighLowVersionMismatch(instanceGroup: InstanceGroup) {
     const name = instanceGroup.name;
+    const preference = (
+      instanceGroup.versionGroup
+        .groupConfig as Syncpack.Config.VersionGroup.Standard
+    ).preferVersion;
+    const direction = preference === 'highestSemver' ? 'highest' : 'lowest';
     const expected = R.getExn(instanceGroup.getExpectedVersion());
     log.invalid(
       name,
-      chalk`{reset.green ${expected}} {dim is the highest valid semver version in use}`,
+      chalk`{reset.green ${expected}} {dim is the ${direction} valid semver version in use}`,
     );
     // Log each of the dependencies mismatches
     instanceGroup.instances.forEach((instance) => {

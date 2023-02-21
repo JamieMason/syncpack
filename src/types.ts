@@ -90,7 +90,7 @@ export namespace Syncpack {
       /** Use these named packages as the source of truth for versions */
       export type SnappedTo = z.infer<T['snappedTo']>;
       /** @private */
-      export type Default = z.infer<T['base']>;
+      export type Default = z.infer<T['defaultGroup']>;
       /** Every valid type of VersionGroup */
       export type Any = z.infer<T['any']>;
     }

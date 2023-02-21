@@ -4,9 +4,13 @@ import type { VersionGroup } from '..';
 import { BaseError } from '../../../../lib/error';
 import { isSemver } from '../../../../lib/is-semver';
 import { printStrings } from '../../../../lib/print-strings';
+import type { Syncpack } from '../../../../types';
 import { props } from '../../../get-package-json-files/get-patterns/props';
 import type { Instance } from '../../../get-package-json-files/package-json-file/instance';
 import { getHighestVersion } from './get-highest-version';
+import { getLowestVersion } from './get-lowest-version';
+
+type Standard = Syncpack.Config.VersionGroup.Standard;
 
 export const DELETE = Symbol('DELETE');
 export type Delete = typeof DELETE;
@@ -70,12 +74,20 @@ export class InstanceGroup {
         ),
       );
     }
-    return this.getHighestVersion();
+    return (versionGroup.groupConfig as Standard).preferVersion ===
+      'lowestSemver'
+      ? this.getLowestVersion()
+      : this.getHighestVersion();
   }
 
   /** If all versions are valid semver, return the newest one */
   getHighestVersion(): R.Result<string, BaseError> {
     return getHighestVersion(this.getUniqueVersions());
+  }
+
+  /** If all versions are valid semver, return the lowest one */
+  getLowestVersion(): R.Result<string, BaseError> {
+    return getLowestVersion(this.getUniqueVersions());
   }
 
   /** Get the first version matched by the `snapTo` packages */
