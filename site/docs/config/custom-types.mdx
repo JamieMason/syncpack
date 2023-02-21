@@ -3,7 +3,11 @@ id: custom-types
 title: customTypes
 ---
 
+import Pills from '@site/src/components/pill';
+
 # `customTypes` object
+
+<Pills optional />
 
 Extend syncpack to find and fix versions in your packages which are not
 available by default. Custom types behave like any other dependency, so can be
@@ -35,6 +39,8 @@ The example below adds support for synchronising versions found in:
 
 ## customTypes\[name\]
 
+<Pills required />
+
 The key of each custom type is its name, this can be used in the following
 places to toggle when it is enabled:
 
@@ -45,10 +51,14 @@ places to toggle when it is enabled:
 
 ## customTypes\[name\].path
 
+<Pills required />
+
 Where the version can be found in each package.json file, such as `engines`,
 `packageManager` or `some.nested.property`.
 
 ## customTypes\[name\].strategy
+
+<Pills required />
 
 A strategy defines how syncpack needs to read and write dependency names and
 versions, there are 3 to choose from:
