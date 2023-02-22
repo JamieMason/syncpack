@@ -19,7 +19,6 @@ export const option = {
     '-s, --source [pattern]',
     'glob pattern for package.json files to read from',
     collect,
-    [] as string[],
   ],
   types: [
     '-t, --types <names>',

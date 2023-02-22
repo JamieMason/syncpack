@@ -42,7 +42,7 @@ function unSafeGetConfig(
     semverRange: getConfigByName('semverRange'),
     sortAz: getConfigByName('sortAz'),
     sortFirst: getConfigByName('sortFirst'),
-    source: getConfigByName('source'),
+    source: getConfigByName('source', []),
     types: fromCli?.types,
     versionGroups: getConfigByName('versionGroups'),
   });
@@ -78,10 +78,12 @@ function unSafeGetConfig(
 
   return allConfig;
 
-  function getConfigByName(name: keyof Syncpack.Config.Public): unknown {
+  function getConfigByName(name: keyof Syncpack.Config.Public, defaultValue?: any): unknown {
     if (typeof (fromCli as any)[name] !== 'undefined')
       return (fromCli as Syncpack.Config.Public)[name];
     if (typeof (fromRcFile as any)[name] !== 'undefined')
       return (fromRcFile as Syncpack.Config.Public)[name];
+    if (defaultValue)
+      return defaultValue
   }
 }

@@ -140,7 +140,7 @@ describe('semverRange', () => {
 });
 
 describe('source', () => {
-  it('uses default when not set', () => {
+  it('defaults to [] when not set', () => {
     const disk = mockDisk();
     const config = getConfig(disk, {});
     expect(R.getExn(config).source).toEqual([]);
