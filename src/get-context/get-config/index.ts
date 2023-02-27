@@ -1,4 +1,11 @@
 import { pipe, R } from '@mobily/ts-belt';
+import {
+  isArrayOfObjects,
+  isArrayOfStrings,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isString,
+} from 'expect-more';
 import type { Disk } from '../../lib/disk';
 import { BaseError } from '../../lib/error';
 import { verbose } from '../../lib/log';
@@ -34,17 +41,17 @@ function unSafeGetConfig(
   verbose('rcfile contents:', fromRcFile);
 
   const fromPublic = ConfigSchema.Public.parse({
-    customTypes: getConfigByName('customTypes'),
+    customTypes: getConfigByName('customTypes', isNonEmptyObject),
     dependencyTypes: fromRcFile?.dependencyTypes,
-    filter: getConfigByName('filter'),
-    indent: getConfigByName('indent'),
-    semverGroups: getConfigByName('semverGroups'),
-    semverRange: getConfigByName('semverRange'),
-    sortAz: getConfigByName('sortAz'),
-    sortFirst: getConfigByName('sortFirst'),
-    source: getConfigByName('source'),
+    filter: getConfigByName('filter', isNonEmptyString),
+    indent: getConfigByName('indent', isString),
+    semverGroups: getConfigByName('semverGroups', isArrayOfObjects),
+    semverRange: getConfigByName('semverRange', isString),
+    sortAz: getConfigByName('sortAz', isArrayOfStrings),
+    sortFirst: getConfigByName('sortFirst', isArrayOfStrings),
+    source: getConfigByName('source', isArrayOfStrings),
     types: fromCli?.types,
-    versionGroups: getConfigByName('versionGroups'),
+    versionGroups: getConfigByName('versionGroups', isArrayOfObjects),
   });
 
   verbose('user config:', fromPublic);
@@ -78,10 +85,13 @@ function unSafeGetConfig(
 
   return allConfig;
 
-  function getConfigByName(name: keyof Syncpack.Config.Public): unknown {
-    if (typeof (fromCli as any)[name] !== 'undefined')
+  function getConfigByName(
+    name: keyof Syncpack.Config.Public,
+    isValid: (value: unknown) => boolean,
+  ): unknown {
+    if (isValid((fromCli as any)[name]))
       return (fromCli as Syncpack.Config.Public)[name];
-    if (typeof (fromRcFile as any)[name] !== 'undefined')
+    if (isValid((fromRcFile as any)[name]))
       return (fromRcFile as Syncpack.Config.Public)[name];
   }
 }

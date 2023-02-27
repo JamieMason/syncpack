@@ -140,7 +140,7 @@ describe('semverRange', () => {
 });
 
 describe('source', () => {
-  it('uses default when not set', () => {
+  it('defaults to empty array when not set', () => {
     const disk = mockDisk();
     const config = getConfig(disk, {});
     expect(R.getExn(config).source).toEqual([]);
@@ -155,7 +155,7 @@ describe('source', () => {
   it('uses config value when set', () => {
     const disk = mockDisk();
     disk.readConfigFileSync.mockReturnValue({ source: ['projects/*'] });
-    const config = getConfig(disk, {});
+    const config = getConfig(disk, { source: [] });
     expect(R.getExn(config).source).toEqual(['projects/*']);
   });
 
