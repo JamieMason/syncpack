@@ -1,7 +1,11 @@
-import { O, pipe, R } from '@mobily/ts-belt';
-import { isObject } from 'expect-more/dist/is-object';
+import { get } from 'tightrope/fn/get';
+import { pipe } from 'tightrope/fn/pipe';
+import { andThen } from 'tightrope/result/and-then';
+import { fromTry } from 'tightrope/result/from-try';
+import { map } from 'tightrope/result/map';
+import { mapErr } from 'tightrope/result/map-err';
+import { tap } from 'tightrope/result/tap';
 import { BaseError } from '../../../lib/error';
-import { props } from '../../get-package-json-files/get-patterns/props';
 import { getNonEmptyStringProp } from './lib/get-non-empty-string-prop';
 import type { Entry, Strategy } from './types';
 
@@ -10,18 +14,18 @@ export const nameAndVersionProps: Strategy<'name~version'> = {
     return pipe(
       // get name prop
       getNonEmptyStringProp(pathDef.namePath, file),
-      R.mapError(
+      mapErr(
         () =>
           new BaseError(
             `Strategy<name~version> failed to get ${pathDef.namePath} in ${file.shortPath}`,
           ),
       ),
       // add the version prop
-      R.flatMap((name) =>
+      andThen((name) =>
         pipe(
           getNonEmptyStringProp(pathDef.path, file),
-          R.map((version) => ({ name, version })),
-          R.mapError(
+          map((version) => ({ name, version })),
+          mapErr(
             () =>
               new BaseError(
                 `Strategy<name~version> failed to get ${pathDef.path} in ${file.shortPath}`,
@@ -30,7 +34,7 @@ export const nameAndVersionProps: Strategy<'name~version'> = {
         ),
       ),
       // if both are non empty strings, we can return them
-      R.map(({ name, version }): Entry[] => [[name, version]]),
+      map(({ name, version }): Entry[] => [[name, version]]),
     );
   },
   write(file, pathDef, [, version]) {
@@ -42,22 +46,20 @@ export const nameAndVersionProps: Strategy<'name~version'> = {
       const pathToParent = fullPath.slice(0, fullPath.length - 1).join('.');
       const key = fullPath.slice(-1).join('');
       return pipe(
-        contents,
-        props(pathToParent, isObject),
-        O.toResult<Record<string, string | undefined>, BaseError>(onError()),
-        R.tap((parent) => {
+        get(contents, ...pathToParent.split('.')),
+        tap((parent) => {
           parent[key] = version;
         }),
-        R.mapError(onError),
-        R.map(() => file),
+        mapErr(onError),
+        map(() => file),
       );
     } else {
       return pipe(
-        R.fromExecution<void>(() => {
+        fromTry<void>(() => {
           contents[pathDef.path] = version;
         }),
-        R.mapError(onError),
-        R.map(() => file),
+        mapErr(onError),
+        map(() => file),
       );
     }
 

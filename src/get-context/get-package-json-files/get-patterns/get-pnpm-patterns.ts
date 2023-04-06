@@ -1,20 +1,19 @@
-import { F, O, pipe, R } from '@mobily/ts-belt';
 import { join } from 'path';
+import { get } from 'tightrope/fn/get';
+import { pipe } from 'tightrope/fn/pipe';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import type { Result } from 'tightrope/result';
+import { andThen } from 'tightrope/result/and-then';
+import { filter } from 'tightrope/result/filter';
 import { CWD } from '../../../constants';
 import type { Disk } from '../../../lib/disk';
-import { BaseError } from '../../../lib/error';
-import { getArrayOfStrings } from './lib/get-array-of-strings';
 import { readYamlSafe } from './read-yaml-safe';
 
 interface PnpmWorkspace {
   packages?: string[];
 }
 
-const getPackages = getArrayOfStrings('packages');
-
-export function getPnpmPatterns(
-  disk: Disk,
-): () => R.Result<string[], BaseError> {
+export function getPnpmPatterns(disk: Disk): () => Result<string[]> {
   return function getPnpmPatterns() {
     return pipe(
       // packages:
@@ -23,13 +22,8 @@ export function getPnpmPatterns(
       //   - "!**/test/**"
       join(CWD, 'pnpm-workspace.yaml'),
       readYamlSafe<PnpmWorkspace>(disk),
-      R.flatMap((packageJson) =>
-        pipe(
-          getPackages(packageJson),
-          O.match(F.identity, () => getPackages(packageJson)),
-          O.toResult(new BaseError('no pnpm patterns found')),
-        ),
-      ),
+      andThen((file) => get(file, 'packages')),
+      filter(isArrayOfStrings, 'no pnpm patterns found'),
     );
   };
 }

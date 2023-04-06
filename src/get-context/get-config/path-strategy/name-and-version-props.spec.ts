@@ -1,5 +1,5 @@
-import { R } from '@mobily/ts-belt';
 import { normalize } from 'path';
+import { Err, Ok } from 'tightrope/result';
 import { mockPackage } from '../../../../test/mock';
 import { mockDisk } from '../../../../test/mock-disk';
 import { BaseError } from '../../../lib/error';
@@ -18,9 +18,9 @@ it('gets and sets a name and version from 2 seperate locations', () => {
   const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
   const initial = [['foo', '1.2.3']];
   const updated = [['foo', '2.0.0']];
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(initial));
-  expect(fn.write(file, pathDef, ['foo', '2.0.0'])).toEqual(R.Ok(file));
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(updated));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(initial));
+  expect(fn.write(file, pathDef, ['foo', '2.0.0'])).toEqual(new Ok(file));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(updated));
 });
 
 it('gets and sets a name and version from 2 seperate nested locations', () => {
@@ -39,12 +39,12 @@ it('gets and sets a name and version from 2 seperate nested locations', () => {
   const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
   const initial = [['some-name', '1.2.3']];
   const updated = [['some-name', '2.0.0']];
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(initial));
-  expect(fn.write(file, pathDef, ['some-name', '2.0.0'])).toEqual(R.Ok(file));
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(updated));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(initial));
+  expect(fn.write(file, pathDef, ['some-name', '2.0.0'])).toEqual(new Ok(file));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(updated));
 });
 
-it('returns R.Error when namePath is not found', () => {
+it('returns new Err when namePath is not found', () => {
   const pathDef: PathDef<'name~version'> = {
     name: 'workspace',
     namePath: 'never.gonna',
@@ -54,7 +54,7 @@ it('returns R.Error when namePath is not found', () => {
   const jsonFile = mockPackage('foo', { otherProps: { version: '1.2.3' } });
   const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
   expect(fn.read(file, pathDef)).toEqual(
-    R.Error(
+    new Err(
       new BaseError(
         `Strategy<name~version> failed to get never.gonna in ${normalize(
           'foo/package.json',
@@ -64,7 +64,7 @@ it('returns R.Error when namePath is not found', () => {
   );
 });
 
-it('returns R.Error when version (path) is not found', () => {
+it('returns new Err when version (path) is not found', () => {
   const pathDef: PathDef<'name~version'> = {
     name: 'workspace',
     namePath: 'name',
@@ -74,7 +74,7 @@ it('returns R.Error when version (path) is not found', () => {
   const jsonFile = mockPackage('foo', {});
   const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
   expect(fn.read(file, pathDef)).toEqual(
-    R.Error(
+    new Err(
       new BaseError(
         `Strategy<name~version> failed to get never.gonna in ${normalize(
           'foo/package.json',

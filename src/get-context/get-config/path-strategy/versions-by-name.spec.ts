@@ -1,5 +1,5 @@
-import { R } from '@mobily/ts-belt';
 import { normalize } from 'path';
+import { Err, Ok } from 'tightrope/result';
 import { mockPackage } from '../../../../test/mock';
 import { mockDisk } from '../../../../test/mock-disk';
 import { BaseError } from '../../../lib/error';
@@ -23,9 +23,9 @@ it('gets and sets names and versions in an object', () => {
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(initial));
-  expect(fn.write(file, pathDef, ['bar', '2.0.0'])).toEqual(R.Ok(file));
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(updated));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(initial));
+  expect(fn.write(file, pathDef, ['bar', '2.0.0'])).toEqual(new Ok(file));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(updated));
 });
 
 it('gets and sets a name and version from a single string nested location', () => {
@@ -46,12 +46,12 @@ it('gets and sets a name and version from a single string nested location', () =
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(initial));
-  expect(fn.write(file, pathDef, ['bar', '2.0.0'])).toEqual(R.Ok(file));
-  expect(fn.read(file, pathDef)).toEqual(R.Ok(updated));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(initial));
+  expect(fn.write(file, pathDef, ['bar', '2.0.0'])).toEqual(new Ok(file));
+  expect(fn.read(file, pathDef)).toEqual(new Ok(updated));
 });
 
-it('returns R.Error when path is not found', () => {
+it('returns new Err when path is not found', () => {
   const pathDef: PathDef<'versionsByName'> = {
     name: 'workspace',
     path: 'never.gonna',
@@ -60,7 +60,7 @@ it('returns R.Error when path is not found', () => {
   const jsonFile = mockPackage('foo', {});
   const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
   expect(fn.read(file, pathDef)).toEqual(
-    R.Error(
+    new Err(
       new BaseError(
         `Strategy<versionsByName> failed to get never.gonna in ${normalize(
           'foo/package.json',

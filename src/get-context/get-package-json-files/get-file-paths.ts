@@ -1,14 +1,20 @@
-import { A, flow, pipe, R } from '@mobily/ts-belt';
-import { isArrayOfStrings } from 'expect-more/dist/is-array-of-strings';
-import { isEmptyArray } from 'expect-more/dist/is-empty-array';
+import { flat } from 'tightrope/array/flat';
+import { uniq } from 'tightrope/array/uniq';
+import { pipe } from 'tightrope/fn/pipe';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import type { Result } from 'tightrope/result';
+import { andThen } from 'tightrope/result/and-then';
+import { filter } from 'tightrope/result/filter';
+import { fromTry } from 'tightrope/result/from-try';
+import { map } from 'tightrope/result/map';
+import { mapErr } from 'tightrope/result/map-err';
 import { $R } from '../$R';
 import type { Disk } from '../../lib/disk';
-import { BaseError } from '../../lib/error';
 import { printStrings } from '../../lib/print-strings';
 import type { Syncpack } from '../../types';
 import { getPatterns } from './get-patterns';
 
-type SafeFilePaths = R.Result<string[], BaseError>;
+type SafeFilePaths = Result<string[]>;
 
 /**
  * Using --source options and/or config files on disk from npm/pnpm/yarn/lerna,
@@ -21,38 +27,25 @@ export function getFilePaths(
   disk: Disk,
   program: Syncpack.Config.SyncpackRc,
 ): SafeFilePaths {
-  return pipe(program, getPatterns(disk), R.flatMap(resolvePatterns));
-
-  function resolvePatterns(patterns: string[]): SafeFilePaths {
-    const quoted = printStrings(patterns);
-    const ERR_NO_MATCH = `No package.json files matched the patterns: ${quoted}`;
-    return pipe(
-      patterns,
-      $R.onlyOk<string, string[]>(resolvePattern),
-      R.mapError(BaseError.map(ERR_NO_MATCH)),
-      R.map(flow(A.flat, A.uniq, removeReadonlyType)),
-    );
-  }
-
-  function resolvePattern(pattern: string): SafeFilePaths {
-    const ERR_GLOB_MISS = `No package.json files match pattern "${pattern}"`;
-    const ERR_INVALID = `"glob" returned unexpected data on pattern "${pattern}"`;
-    const ERR_GLOB_THROW = `"glob" threw on pattern "${pattern}"`;
-    return pipe(
-      R.fromExecution(() => disk.globSync(pattern)),
-      R.mapError(BaseError.map(ERR_GLOB_THROW)),
-      R.flatMap((filePaths) =>
-        isEmptyArray(filePaths)
-          ? R.Error(new BaseError(ERR_GLOB_MISS))
-          : isArrayOfStrings(filePaths)
-          ? R.Ok(pipe(filePaths, A.flat, A.uniq, removeReadonlyType))
-          : R.Error(new BaseError(ERR_INVALID)),
-      ),
-    );
-  }
-
-  /** Remove unwanted readonly type */
-  function removeReadonlyType<T>(value: readonly T[]): T[] {
-    return value as T[];
-  }
+  return pipe(
+    program,
+    getPatterns(disk),
+    andThen(function resolvePatterns(patterns) {
+      return pipe(
+        patterns,
+        $R.onlyOk(function resolvePattern(pattern) {
+          return pipe(
+            fromTry(() => disk.globSync(pattern)),
+            filter(isArrayOfStrings, `"glob" did not match "${pattern}"`),
+            map(flat),
+            map(uniq),
+            $R.tapErrVerbose,
+          );
+        }),
+        map(flat),
+        map(uniq),
+        mapErr(() => new Error(`No files matched ${printStrings(patterns)}`)),
+      );
+    }),
+  );
 }

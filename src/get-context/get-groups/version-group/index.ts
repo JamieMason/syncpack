@@ -1,6 +1,11 @@
-import { O, pipe } from '@mobily/ts-belt';
-import { isArrayOfStrings } from 'expect-more';
-import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
+import { pipe } from 'tightrope/fn/pipe';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
+import type { Option } from 'tightrope/option';
+import { fromGuard } from 'tightrope/option/from-guard';
+import { isSome } from 'tightrope/option/is-some';
+import { map as mapO } from 'tightrope/option/map';
+import { unwrapOr } from 'tightrope/option/unwrap-or';
 import type { Syncpack } from '../../../types';
 import { BaseGroup } from '../base-group';
 import { InstanceGroup } from './instance-group';
@@ -20,14 +25,11 @@ export class VersionGroup extends BaseGroup<Syncpack.Config.VersionGroup.Any> {
   }
 
   hasSnappedToPackages(): boolean {
-    return O.isSome(this.getSnappedToPackages());
+    return isSome(this.getSnappedToPackages());
   }
 
-  getSnappedToPackages(): O.Option<string[]> {
-    return O.fromPredicate(
-      (this.groupConfig as SnappedTo).snapTo,
-      isArrayOfStrings,
-    );
+  getSnappedToPackages(): Option<string[]> {
+    return fromGuard(isArrayOfStrings, (this.groupConfig as SnappedTo).snapTo);
   }
 
   getAllInstanceGroups(): InstanceGroup[] {
@@ -40,21 +42,18 @@ export class VersionGroup extends BaseGroup<Syncpack.Config.VersionGroup.Any> {
     return this.getAllInstanceGroups().filter((group) => group.isInvalid());
   }
 
-  getPinnedVersion(): O.Option<string> {
-    return O.fromPredicate(
-      (this.groupConfig as Pinned).pinVersion,
-      isNonEmptyString,
-    );
+  getPinnedVersion(): Option<string> {
+    return fromGuard(isNonEmptyString, (this.groupConfig as Pinned).pinVersion);
   }
 
   /** Is `pinVersion` defined and this group does not match that version? */
   isUnpinned(): boolean {
     return pipe(
       this.getPinnedVersion(),
-      O.map((pinVersion) =>
+      mapO((pinVersion) =>
         this.instances.some((o) => o.version !== pinVersion),
       ),
-      O.getWithDefault<boolean>(false),
+      unwrapOr<boolean>(false),
     );
   }
 }

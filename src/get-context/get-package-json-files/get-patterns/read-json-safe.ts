@@ -1,6 +1,10 @@
-import { flow, pipe, R } from '@mobily/ts-belt';
+import { pipe } from 'tightrope/fn/pipe';
+import type { Result } from 'tightrope/result';
+import { andThen } from 'tightrope/result/and-then';
+import { fromTry } from 'tightrope/result/from-try';
+import { map } from 'tightrope/result/map';
+import { mapErr } from 'tightrope/result/map-err';
 import type { Disk } from '../../../lib/disk';
-import { BaseError } from '../../../lib/error';
 
 export interface JsonFile<T> {
   /** absolute path on disk to this file */
@@ -13,34 +17,18 @@ export interface JsonFile<T> {
 
 export function readJsonSafe<T>(
   disk: Disk,
-): (filePath: string) => R.Result<JsonFile<T>, BaseError> {
+): (filePath: string) => Result<JsonFile<T>> {
   return function readJsonSafe(filePath) {
     return pipe(
-      readFileSafe(filePath),
-      R.flatMap(
-        flow(
-          parseJsonSafe<T>,
-          R.mapError(BaseError.map(`Failed to parse JSON file at ${filePath}`)),
-          R.map(({ contents, json }) => ({ contents, filePath, json })),
+      fromTry(() => disk.readFileSync(filePath)),
+      andThen((json: string) =>
+        pipe(
+          fromTry(() => JSON.parse(json)),
+          map((contents: T) => ({ contents, json })),
         ),
       ),
+      map(({ contents, json }) => ({ contents, filePath, json })),
+      mapErr(() => new Error(`Failed to read JSON file at ${filePath}`)),
     );
   };
-
-  function readFileSafe(filePath: string): R.Result<string, BaseError> {
-    return pipe(
-      R.fromExecution(() => disk.readFileSync(filePath)),
-      R.mapError(BaseError.map(`Failed to read JSON file at ${filePath}`)),
-    );
-  }
-}
-
-function parseJsonSafe<T>(
-  json: string,
-): R.Result<{ contents: T; json: string }, BaseError> {
-  return pipe(
-    R.fromExecution(() => JSON.parse(json)),
-    R.mapError(BaseError.map('Failed to parse JSON')),
-    R.map((contents) => ({ contents, json })),
-  );
 }

@@ -1,6 +1,7 @@
-import { pipe, R } from '@mobily/ts-belt';
-import { isObject } from 'expect-more/dist/is-object';
-import { isUndefined } from 'expect-more/dist/is-undefined';
+import { pipe } from 'tightrope/fn/pipe';
+import { isObject } from 'tightrope/guard/is-object';
+import { isUndefined } from 'tightrope/guard/is-undefined';
+import { tap } from 'tightrope/result/tap';
 import { $R } from '../get-context/$R';
 import type { Syncpack } from '../types';
 
@@ -16,7 +17,7 @@ export function fixMismatches(ctx: Syncpack.Ctx): Syncpack.Ctx {
       if (!instanceGroup.hasUnsupportedVersion()) {
         pipe(
           instanceGroup.getExpectedVersion(),
-          R.tap((nextVersion) => {
+          tap((nextVersion) => {
             instanceGroup.instances.forEach((instance) =>
               instance.setVersion(nextVersion),
             );

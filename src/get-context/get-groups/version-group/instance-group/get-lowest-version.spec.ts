@@ -1,5 +1,5 @@
-import { R } from '@mobily/ts-belt';
 import 'expect-more-jest';
+import { Ok } from 'tightrope/result';
 import { shuffle } from '../../../../../test/shuffle';
 import { getLowestVersion } from './get-lowest-version';
 
@@ -19,42 +19,42 @@ describe('getLowestVersion', () => {
   const eitherFormat = expect.stringMatching(/^(1|1\.0\.0)$/);
 
   it('returns "*" when it is the only version', () => {
-    expect(getLowestVersion(a)).toEqual(R.Ok('*'));
+    expect(getLowestVersion(a)).toEqual(new Ok('*'));
   });
 
   it('returns ">1.0.0" when added', () => {
-    expect(getLowestVersion(b)).toEqual(R.Ok('>1.0.0'));
+    expect(getLowestVersion(b)).toEqual(new Ok('>1.0.0'));
   });
 
   it('returns ">=1.0.0" when added', () => {
-    expect(getLowestVersion(c)).toEqual(R.Ok('>=1.0.0'));
+    expect(getLowestVersion(c)).toEqual(new Ok('>=1.0.0'));
   });
 
   it('returns "^1.0.0" when added', () => {
-    expect(getLowestVersion(d)).toEqual(R.Ok('^1.0.0'));
+    expect(getLowestVersion(d)).toEqual(new Ok('^1.0.0'));
   });
 
   it('returns "1.x.x" when added', () => {
-    expect(getLowestVersion(e)).toEqual(R.Ok('1.x.x'));
+    expect(getLowestVersion(e)).toEqual(new Ok('1.x.x'));
   });
 
   it('returns "~1.0.0" when added', () => {
-    expect(getLowestVersion(f)).toEqual(R.Ok('~1.0.0'));
+    expect(getLowestVersion(f)).toEqual(new Ok('~1.0.0'));
   });
 
   it('returns "1.0.0" when added', () => {
-    expect(getLowestVersion(g)).toEqual(R.Ok('1.0.0'));
+    expect(getLowestVersion(g)).toEqual(new Ok('1.0.0'));
   });
 
   it('returns "1" when added', () => {
-    expect(getLowestVersion(h)).toEqual(R.Ok(eitherFormat));
+    expect(getLowestVersion(h)).toEqual(new Ok(eitherFormat));
   });
 
   it('returns "<=1.0.0" when added', () => {
-    expect(getLowestVersion(i)).toEqual(R.Ok('<=1.0.0'));
+    expect(getLowestVersion(i)).toEqual(new Ok('<=1.0.0'));
   });
 
   it('returns "<1.0.0" when added', () => {
-    expect(getLowestVersion(j)).toEqual(R.Ok('<1.0.0'));
+    expect(getLowestVersion(j)).toEqual(new Ok('<1.0.0'));
   });
 });

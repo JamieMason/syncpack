@@ -1,14 +1,14 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { isNonEmptyObject } from 'expect-more/dist/is-non-empty-object';
 import {
   readFileSync,
   readJsonSync,
   removeSync,
-  writeFileSync,
+  writeFileSync
 } from 'fs-extra';
 import { sync as globSync } from 'glob';
 import { join } from 'path';
 import { sync as readYamlSync } from 'read-yaml-file';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
 import { CWD } from '../constants';
 import type { Syncpack } from '../types';
 import { verbose } from './log';

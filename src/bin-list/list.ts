@@ -1,5 +1,7 @@
-import { O, pipe, R } from '@mobily/ts-belt';
 import chalk from 'chalk';
+import { pipe } from 'tightrope/fn/pipe';
+import { unwrap } from 'tightrope/option/unwrap';
+import { tap } from 'tightrope/result/tap';
 import { ICON } from '../constants';
 import { $R } from '../get-context/$R';
 import type { InstanceGroup } from '../get-context/get-groups/version-group/instance-group';
@@ -48,7 +50,7 @@ export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
   function logVersionMismatch(instanceGroup: InstanceGroup): void {
     pipe(
       instanceGroup.getExpectedVersion(),
-      R.tap((expectedVersion) => {
+      tap((expectedVersion) => {
         const uniqueVersions = instanceGroup.getUniqueVersions();
         console.log(
           chalk`{red ${ICON.cross} ${instanceGroup.name}} ${uniqueVersions
@@ -77,7 +79,7 @@ export function list(ctx: Syncpack.Ctx): Syncpack.Ctx {
   }
 
   function logUnpinned(instanceGroup: InstanceGroup): void {
-    const pinVersion = O.getExn(instanceGroup.versionGroup.getPinnedVersion());
+    const pinVersion = unwrap(instanceGroup.versionGroup.getPinnedVersion());
     console.log(
       chalk`{red ${ICON.cross} ${instanceGroup.name}} {dim.red is pinned to ${pinVersion} in this version group}`,
     );

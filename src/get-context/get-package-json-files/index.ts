@@ -1,7 +1,12 @@
-import { flow, pipe, R } from '@mobily/ts-belt';
+import { flow } from 'tightrope/fn/flow';
+import { pipe } from 'tightrope/fn/pipe';
+import type { Result } from 'tightrope/result';
+import { Ok } from 'tightrope/result';
+import { andThen } from 'tightrope/result/and-then';
+import { map } from 'tightrope/result/map';
+import { or } from 'tightrope/result/or';
 import { $R } from '../$R';
 import type { Disk } from '../../lib/disk';
-import type { BaseError } from '../../lib/error';
 import type { Syncpack } from '../../types';
 import { getFilePaths } from './get-file-paths';
 import { readJsonSafe } from './get-patterns/read-json-safe';
@@ -12,20 +17,18 @@ import { PackageJsonFile } from './package-json-file';
 export function getPackageJsonFiles(
   disk: Disk,
   config: Syncpack.Config.Private,
-): R.Result<PackageJsonFile[], BaseError> {
+): Result<PackageJsonFile[]> {
   return pipe(
     getFilePaths(disk, config),
-    R.flatMap($R.onlyOk<string, PackageJsonFile>(resolvePackageJson(disk))),
-    R.recover([] as PackageJsonFile[]),
+    andThen(
+      $R.onlyOk(
+        flow(
+          readJsonSafe<PackageJson>(disk),
+          map((jsonFile) => new PackageJsonFile(jsonFile, config, disk)),
+          $R.tapErrVerbose,
+        ),
+      ),
+    ),
+    or(new Ok([])),
   );
-
-  function resolvePackageJson(
-    disk: Disk,
-  ): (filePath: string) => R.Result<PackageJsonFile, BaseError> {
-    return flow(
-      readJsonSafe<PackageJson>(disk),
-      R.map((jsonFile) => new PackageJsonFile(jsonFile, config, disk)),
-      $R.tapErrVerbose,
-    );
-  }
 }

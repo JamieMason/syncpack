@@ -1,4 +1,5 @@
-import { R } from '@mobily/ts-belt';
+import type { Result } from 'tightrope/result';
+import { Err, Ok } from 'tightrope/result';
 import { BaseError } from '../../../../lib/error';
 import { clean } from './lib/clean';
 import { compareLt } from './lib/compare-semver';
@@ -9,9 +10,7 @@ interface LowestVersion {
   semver: string;
 }
 
-export function getLowestVersion(
-  versions: string[],
-): R.Result<string, BaseError> {
+export function getLowestVersion(versions: string[]): Result<string> {
   let lowest: LowestVersion | undefined;
 
   for (const withRange of versions) {
@@ -23,7 +22,7 @@ export function getLowestVersion(
       }
       // impossible to know how the user wants to resolve unsupported versions
       case 'invalid': {
-        return R.Error(new BaseError(`"${withRange}" is not supported`));
+        return new Err(new BaseError(`"${withRange}" is not supported`));
       }
       // we found a new lowest version
       case 'lt': {
@@ -40,8 +39,8 @@ export function getLowestVersion(
   }
 
   return lowest && lowest.withRange
-    ? R.Ok(lowest.withRange)
-    : R.Error(new BaseError(`getLowestVersion(): did not return a version`));
+    ? new Ok(lowest.withRange)
+    : new Err(new BaseError(`getLowestVersion(): did not return a version`));
 }
 
 function newLowestVersion(withRange: string): LowestVersion {

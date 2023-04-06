@@ -1,14 +1,16 @@
-import { pipe, R } from '@mobily/ts-belt';
+import { pipe } from 'tightrope/fn/pipe';
+import type { Result } from 'tightrope/result';
+import { fromTry } from 'tightrope/result/from-try';
+import { mapErr } from 'tightrope/result/map-err';
 import type { Disk } from '../../../lib/disk';
-import { BaseError } from '../../../lib/error';
 
 export function readYamlSafe<T = unknown>(
   disk: Disk,
-): (filePath: string) => R.Result<T, BaseError> {
+): (filePath: string) => Result<T> {
   return function readYamlSafe(filePath) {
     return pipe(
-      R.fromExecution(() => disk.readYamlFileSync<T>(filePath)),
-      R.mapError(BaseError.map(`Failed to read YAML file at ${filePath}`)),
+      fromTry(() => disk.readYamlFileSync<T>(filePath)),
+      mapErr(() => new Error(`Failed to read YAML file at ${filePath}`)),
     );
   };
 }

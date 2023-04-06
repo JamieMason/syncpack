@@ -1,5 +1,7 @@
-import { pipe, R } from '@mobily/ts-belt';
 import { relative } from 'path';
+import { pipe } from 'tightrope/fn/pipe';
+import { Ok } from 'tightrope/result';
+import { unwrapOr } from 'tightrope/result/unwrap-or';
 import { CWD } from '../../../constants';
 import type { Disk } from '../../../lib/disk';
 import { verbose } from '../../../lib/log';
@@ -7,7 +9,7 @@ import { newlines } from '../../../lib/newlines';
 import type { Syncpack } from '../../../types';
 import {
   exhaustiveCheck,
-  strategyByName,
+  strategyByName
 } from '../../get-config/path-strategy';
 import type { JsonFile } from '../get-patterns/read-json-safe';
 import { Instance } from './instance';
@@ -116,22 +118,22 @@ export class PackageJsonFile {
       case 'name@version':
         return pipe(
           strategyByName[strategyName].read(file, pathDef),
-          R.getWithDefault([] as Entry[]),
+          unwrapOr(new Ok([] as Entry[])),
         );
       case 'name~version':
         return pipe(
           strategyByName[strategyName].read(file, pathDef),
-          R.getWithDefault([] as Entry[]),
+          unwrapOr(new Ok([] as Entry[])),
         );
       case 'version':
         return pipe(
           strategyByName[strategyName].read(file, pathDef),
-          R.getWithDefault([] as Entry[]),
+          unwrapOr(new Ok([] as Entry[])),
         );
       case 'versionsByName':
         return pipe(
           strategyByName[strategyName].read(file, pathDef),
-          R.getWithDefault([] as Entry[]),
+          unwrapOr(new Ok([] as Entry[])),
         );
       default:
         return exhaustiveCheck(strategyName);

@@ -1,29 +1,28 @@
-import { F, O, pipe, R } from '@mobily/ts-belt';
 import { join } from 'path';
+import { get } from 'tightrope/fn/get';
+import { pipe } from 'tightrope/fn/pipe';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import type { Result } from 'tightrope/result';
+import { andThen } from 'tightrope/result/and-then';
+import { filter } from 'tightrope/result/filter';
+import { orElse } from 'tightrope/result/or-else';
 import { CWD } from '../../../constants';
 import type { Disk } from '../../../lib/disk';
-import { BaseError } from '../../../lib/error';
 import type { PackageJson } from '../package-json-file';
-import { getArrayOfStrings } from './lib/get-array-of-strings';
 import { readJsonSafe } from './read-json-safe';
 
-export function getYarnPatterns(
-  disk: Disk,
-): () => R.Result<string[], BaseError> {
-  const getPackages = getArrayOfStrings('workspaces');
-  const getPackagesNested = getArrayOfStrings('workspaces.packages');
-
+export function getYarnPatterns(disk: Disk): () => Result<string[]> {
   return function getYarnPatterns() {
     return pipe(
       join(CWD, 'package.json'),
       readJsonSafe<PackageJson>(disk),
-      R.flatMap(({ contents }) =>
+      andThen((file) =>
         pipe(
-          getPackages(contents),
-          O.match(F.identity, () => getPackagesNested(contents)),
-          O.toResult(new BaseError('no yarn patterns found')),
+          get(file, 'contents', 'workspaces', 'packages'),
+          orElse(() => get(file, 'contents', 'workspaces')),
         ),
       ),
+      filter(isArrayOfStrings, 'no yarn patterns found'),
     );
   };
 }

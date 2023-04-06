@@ -1,4 +1,7 @@
-import { pipe, R } from '@mobily/ts-belt';
+import { pipe } from 'tightrope/fn/pipe';
+import { andThen } from 'tightrope/result/and-then';
+import { map } from 'tightrope/result/map';
+import { unwrap } from 'tightrope/result/unwrap';
 import type { Disk } from '../lib/disk';
 import { disk as defaultDisk } from '../lib/disk';
 import type { Syncpack } from '../types';
@@ -34,16 +37,16 @@ export function getContext(
   return pipe(
     // merge CLI options, .syncpackrc contents, and default config
     getConfig(disk, program),
-    R.flatMap((config) =>
+    andThen((config) =>
       pipe(
         // get the package.json file which match the globs in config
         getPackageJsonFiles(disk, config),
-        R.flatMap((packageJsonFiles) =>
+        andThen((packageJsonFiles) =>
           pipe(
             // allocate dependencies into semver and version groups
             getGroups(config, packageJsonFiles),
             // combine everything into the final config
-            R.map(({ semverGroups, versionGroups }) => ({
+            map(({ semverGroups, versionGroups }) => ({
               config,
               disk,
               isInvalid: false,
@@ -58,6 +61,6 @@ export function getContext(
     // if anything errored at any stage, log it when in verbose mode
     $R.tapErrVerbose,
     // throw if anything errored, can't do anything without this data
-    R.getExn,
+    unwrap,
   );
 }

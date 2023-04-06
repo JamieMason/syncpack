@@ -1,19 +1,21 @@
-import type { R } from '@mobily/ts-belt';
-import { O, pipe } from '@mobily/ts-belt';
-import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
+import { get } from 'tightrope/fn/get';
+import { pipe } from 'tightrope/fn/pipe';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
+import type { Result } from 'tightrope/result';
+import { filter } from 'tightrope/result/filter';
+import { mapErr } from 'tightrope/result/map-err';
 import { BaseError } from '../../../../lib/error';
-import { props } from '../../../get-package-json-files/get-patterns/props';
 import type { PackageJsonFile } from '../../../get-package-json-files/package-json-file';
 
 export function getNonEmptyStringProp(
   propPath: string,
   file: PackageJsonFile,
-): R.Result<string, BaseError> {
+): Result<string> {
   return pipe(
-    file.contents,
-    props(propPath, isNonEmptyString),
-    O.toResult<string, BaseError>(
-      new BaseError(`Failed to get ${propPath} in ${file.shortPath}`),
+    get(file.contents, ...propPath.split('.')),
+    filter(isNonEmptyString, ''),
+    mapErr(
+      () => new BaseError(`Failed to get ${propPath} in ${file.shortPath}`),
     ),
   );
 }

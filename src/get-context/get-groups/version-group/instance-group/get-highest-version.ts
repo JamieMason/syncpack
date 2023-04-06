@@ -1,4 +1,5 @@
-import { R } from '@mobily/ts-belt';
+import type { Result } from 'tightrope/result';
+import { Err, Ok } from 'tightrope/result';
 import { BaseError } from '../../../../lib/error';
 import { clean } from './lib/clean';
 import { compareGt } from './lib/compare-semver';
@@ -9,20 +10,18 @@ interface HighestVersion {
   semver: string;
 }
 
-export function getHighestVersion(
-  versions: string[],
-): R.Result<string, BaseError> {
+export function getHighestVersion(versions: string[]): Result<string> {
   let highest: HighestVersion | undefined;
 
   for (const withRange of versions) {
     switch (compareGt(withRange, highest?.semver)) {
       // highest possible, quit early
       case '*': {
-        return R.Ok(withRange);
+        return new Ok(withRange);
       }
       // impossible to know how the user wants to resolve unsupported versions
       case 'invalid': {
-        return R.Error(new BaseError(`"${withRange}" is not supported`));
+        return new Err(new BaseError(`"${withRange}" is not supported`));
       }
       // we found a new highest version
       case 'gt': {
@@ -39,8 +38,8 @@ export function getHighestVersion(
   }
 
   return highest && highest.withRange
-    ? R.Ok(highest.withRange)
-    : R.Error(new BaseError(`getHighestVersion(): did not return a version`));
+    ? new Ok(highest.withRange)
+    : new Err(new BaseError(`getHighestVersion(): did not return a version`));
 }
 
 function newHighestVersion(withRange: string): HighestVersion {

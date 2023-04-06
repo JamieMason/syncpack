@@ -1,5 +1,5 @@
-import { R } from '@mobily/ts-belt';
 import 'expect-more-jest';
+import { Ok } from 'tightrope/result';
 import { shuffle } from '../../../../../test/shuffle';
 import { getHighestVersion } from './get-highest-version';
 
@@ -19,42 +19,42 @@ describe('getHighestVersion', () => {
   const eitherFormat = expect.stringMatching(/^(1|1\.0\.0)$/);
 
   it('returns "<1.0.0" when it is the only version', () => {
-    expect(getHighestVersion(a)).toEqual(R.Ok('<1.0.0'));
+    expect(getHighestVersion(a)).toEqual(new Ok('<1.0.0'));
   });
 
   it('returns "<=1.0.0" when added', () => {
-    expect(getHighestVersion(b)).toEqual(R.Ok('<=1.0.0'));
+    expect(getHighestVersion(b)).toEqual(new Ok('<=1.0.0'));
   });
 
   it('returns "1" when added', () => {
-    expect(getHighestVersion(c)).toEqual(R.Ok('1'));
+    expect(getHighestVersion(c)).toEqual(new Ok('1'));
   });
 
   it('returns "1.0.0" when added', () => {
-    expect(getHighestVersion(d)).toEqual(R.Ok(eitherFormat));
+    expect(getHighestVersion(d)).toEqual(new Ok(eitherFormat));
   });
 
   it('returns "~1.0.0" when added', () => {
-    expect(getHighestVersion(e)).toEqual(R.Ok('~1.0.0'));
+    expect(getHighestVersion(e)).toEqual(new Ok('~1.0.0'));
   });
 
   it('returns "1.x.x" when added', () => {
-    expect(getHighestVersion(f)).toEqual(R.Ok('1.x.x'));
+    expect(getHighestVersion(f)).toEqual(new Ok('1.x.x'));
   });
 
   it('returns "^1.0.0" when added', () => {
-    expect(getHighestVersion(g)).toEqual(R.Ok('^1.0.0'));
+    expect(getHighestVersion(g)).toEqual(new Ok('^1.0.0'));
   });
 
   it('returns ">=1.0.0" when added', () => {
-    expect(getHighestVersion(h)).toEqual(R.Ok('>=1.0.0'));
+    expect(getHighestVersion(h)).toEqual(new Ok('>=1.0.0'));
   });
 
   it('returns ">1.0.0" when added', () => {
-    expect(getHighestVersion(i)).toEqual(R.Ok('>1.0.0'));
+    expect(getHighestVersion(i)).toEqual(new Ok('>1.0.0'));
   });
 
   it('returns "*" when added', () => {
-    expect(getHighestVersion(j)).toEqual(R.Ok('*'));
+    expect(getHighestVersion(j)).toEqual(new Ok('*'));
   });
 });

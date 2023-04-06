@@ -1,40 +1,40 @@
-import { O, pipe, R } from '@mobily/ts-belt';
-import { isNonEmptyObject } from 'expect-more/dist/is-non-empty-object';
-import { isObject } from 'expect-more/dist/is-object';
+import { get } from 'tightrope/fn/get';
+import { pipe } from 'tightrope/fn/pipe';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
+import { filter } from 'tightrope/result/filter';
+import { map as mapR } from 'tightrope/result/map';
+import { mapErr } from 'tightrope/result/map-err';
+import { tap } from 'tightrope/result/tap';
 import { BaseError } from '../../../lib/error';
-import { props } from '../../get-package-json-files/get-patterns/props';
 import type { Strategy } from './types';
 
 export const versionsByName: Strategy<'versionsByName'> = {
   read(file, pathDef) {
     return pipe(
-      file.contents,
-      props(pathDef.path, isNonEmptyObject),
-      O.map(Object.entries),
-      O.toResult(
-        new BaseError(
-          `Strategy<versionsByName> failed to get ${pathDef.path} in ${file.shortPath}`,
-        ),
+      get(file.contents, ...pathDef.path.split('.')),
+      filter(isNonEmptyObject<string>, ''),
+      mapR(Object.entries<string>),
+      mapErr(
+        () =>
+          new BaseError(
+            `Strategy<versionsByName> failed to get ${pathDef.path} in ${file.shortPath}`,
+          ),
       ),
     );
   },
   write(file, pathDef, [name, version]) {
-    const { contents, shortPath } = file;
-
     return pipe(
-      contents,
-      props(pathDef.path, isObject),
-      O.toResult<Record<string, string | undefined>, BaseError>(onError()),
-      R.tap((parent) => {
+      get(file.contents, ...pathDef.path.split('.')),
+      tap((parent) => {
         parent[name] = version;
       }),
-      R.mapError(onError),
-      R.map(() => file),
+      mapErr(
+        () =>
+          new BaseError(
+            `Strategy<versionsByName> failed to set ${pathDef.path} in ${file.shortPath}`,
+          ),
+      ),
+      mapR(() => file),
     );
-
-    function onError() {
-      const msg = `Strategy<versionsByName> failed to set ${pathDef.path} in ${shortPath}`;
-      return new BaseError(msg);
-    }
   },
 };

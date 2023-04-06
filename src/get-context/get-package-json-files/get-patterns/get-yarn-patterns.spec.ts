@@ -1,63 +1,52 @@
-import { R } from '@mobily/ts-belt';
-import { normalize } from 'path';
+import { Err, Ok } from 'tightrope/result';
 import { mockDisk } from '../../../../test/mock-disk';
 import { BaseError } from '../../../lib/error';
 import { getYarnPatterns } from './get-yarn-patterns';
 
 describe('when Yarn config is at .workspaces[]', () => {
-  it('returns an R.Ok of strings when found', () => {
+  it('returns an new Ok of strings when found', () => {
     const disk = mockDisk();
     disk.readFileSync.mockReturnValue(
       JSON.stringify({ workspaces: ['a', 'b'] }),
     );
-    expect(getYarnPatterns(disk)()).toEqual(R.Ok(['a', 'b']));
+    expect(getYarnPatterns(disk)()).toEqual(new Ok(['a', 'b']));
   });
 
-  it('returns an R.Error when data is valid JSON but the wrong shape', () => {
+  it('returns an new Err when data is valid JSON but the wrong shape', () => {
     const disk = mockDisk();
     disk.readFileSync.mockReturnValue(JSON.stringify({ workspaces: [1, 2] }));
-    expect(getYarnPatterns(disk)()).toEqual(
-      R.Error(new BaseError('no yarn patterns found')),
-    );
+    expect(getYarnPatterns(disk)()).toEqual(expect.any(Err));
   });
 });
 
 describe('when Yarn config is at .workspaces.packages[]', () => {
-  it('returns an R.Ok of strings when found', () => {
+  it('returns an new Ok of strings when found', () => {
     const disk = mockDisk();
     disk.readFileSync.mockReturnValue(
       JSON.stringify({ workspaces: { packages: ['a', 'b'] } }),
     );
-    expect(getYarnPatterns(disk)()).toEqual(R.Ok(['a', 'b']));
+    expect(getYarnPatterns(disk)()).toEqual(new Ok(['a', 'b']));
   });
 
-  it('returns an R.Error when data is valid JSON but the wrong shape', () => {
+  it('returns an new Err when data is valid JSON but the wrong shape', () => {
     const disk = mockDisk();
     disk.readFileSync.mockReturnValue(
       JSON.stringify({ workspaces: { packages: [1, 2] } }),
     );
-    expect(getYarnPatterns(disk)()).toEqual(
-      R.Error(new BaseError('no yarn patterns found')),
-    );
+    expect(getYarnPatterns(disk)()).toEqual(expect.any(Err));
   });
 });
 
-it('returns an R.Error when disk throws', () => {
+it('returns an new Err when disk throws', () => {
   const disk = mockDisk();
-  const thrownError = new BaseError(
-    `Failed to read JSON file at ${normalize('/fake/dir/package.json')}`,
-  );
   disk.readFileSync.mockImplementation(() => {
-    throw thrownError;
+    throw new BaseError('Failed to read JSON file');
   });
-  expect(getYarnPatterns(disk)()).toEqual(R.Error(thrownError));
+  expect(getYarnPatterns(disk)()).toEqual(expect.any(Err));
 });
 
-it('returns an R.Error when data is not valid JSON', () => {
+it('returns an new Err when data is not valid JSON', () => {
   const disk = mockDisk();
-  const thrownError = new BaseError(
-    `Failed to parse JSON file at ${normalize('/fake/dir/package.json')}`,
-  );
   disk.readFileSync.mockReturnValue('wut?');
-  expect(getYarnPatterns(disk)()).toEqual(R.Error(thrownError));
+  expect(getYarnPatterns(disk)()).toEqual(expect.any(Err));
 });

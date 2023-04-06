@@ -1,10 +1,15 @@
-import { O, pipe, R } from '@mobily/ts-belt';
-import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
-import { isObject } from 'expect-more/dist/is-object';
+import { get } from 'tightrope/fn/get';
+import { pipe } from 'tightrope/fn/pipe';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
+import { Err, Ok } from 'tightrope/result';
+import { andThen } from 'tightrope/result/and-then';
+import { fromTry } from 'tightrope/result/from-try';
+import { map } from 'tightrope/result/map';
+import { mapErr } from 'tightrope/result/map-err';
+import { tap } from 'tightrope/result/tap';
 import { BaseError } from '../../../lib/error';
-import { props } from '../../get-package-json-files/get-patterns/props';
 import { getNonEmptyStringProp } from './lib/get-non-empty-string-prop';
-import type { Strategy } from './types';
+import type { Entry, Strategy } from './types';
 
 export const versionString: Strategy<'version'> = {
   read(file, pathDef) {
@@ -12,11 +17,11 @@ export const versionString: Strategy<'version'> = {
       // get version prop
       getNonEmptyStringProp(pathDef.path, file),
       // if it is a non empty string, we can read it
-      R.flatMap((version) => {
+      andThen((version) => {
         const name = pathDef.path.split('.').slice(-1).join('');
         return isNonEmptyString(version)
-          ? R.Ok([[name, version]])
-          : R.Error(
+          ? new Ok<Entry[]>([[name, version]])
+          : new Err(
               new BaseError(
                 `Strategy<version> failed to get ${pathDef.path} in ${file.shortPath}`,
               ),
@@ -32,22 +37,20 @@ export const versionString: Strategy<'version'> = {
       const pathToParent = fullPath.slice(0, fullPath.length - 1).join('.');
       const key = fullPath.slice(-1).join('');
       return pipe(
-        contents,
-        props(pathToParent, isObject),
-        O.toResult<Record<string, string | undefined>, BaseError>(onError()),
-        R.tap((parent) => {
+        get(contents, ...pathToParent.split('.')),
+        tap((parent) => {
           parent[key] = version;
         }),
-        R.mapError(onError),
-        R.map(() => file),
+        mapErr(onError),
+        map(() => file),
       );
     } else {
       return pipe(
-        R.fromExecution<void>(() => {
+        fromTry<void>(() => {
           contents[pathDef.path] = version;
         }),
-        R.mapError(onError),
-        R.map(() => file),
+        mapErr(onError),
+        map(() => file),
       );
     }
 

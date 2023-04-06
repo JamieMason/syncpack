@@ -1,11 +1,12 @@
-import { pipe, R } from '@mobily/ts-belt';
-import {
-  isArrayOfObjects,
-  isArrayOfStrings,
-  isNonEmptyObject,
-  isNonEmptyString,
-  isString,
-} from 'expect-more';
+import { pipe } from 'tightrope/fn/pipe';
+import { isArrayOfObjects } from 'tightrope/guard/is-array-of-objects';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
+import { isString } from 'tightrope/guard/is-string';
+import type { Result } from 'tightrope/result';
+import { fromTry } from 'tightrope/result/from-try';
+import { mapErr } from 'tightrope/result/map-err';
 import type { Disk } from '../../lib/disk';
 import { BaseError } from '../../lib/error';
 import { verbose } from '../../lib/log';
@@ -22,11 +23,11 @@ import * as ConfigSchema from './schema';
 export function getConfig(
   disk: Disk,
   fromCli: Partial<Syncpack.Config.Cli>,
-): R.Result<Syncpack.Config.Private, BaseError> {
+): Result<Syncpack.Config.Private> {
   const ERR_READING_CONFIG = 'Error reading config';
   return pipe(
-    R.fromExecution(() => unSafeGetConfig(disk, fromCli)),
-    R.mapError(BaseError.map(ERR_READING_CONFIG)),
+    fromTry(() => unSafeGetConfig(disk, fromCli)),
+    mapErr(BaseError.map(ERR_READING_CONFIG)),
   );
 }
 

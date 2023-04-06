@@ -1,4 +1,4 @@
-import { isObject } from 'expect-more/dist/is-object';
+import { isObject } from 'tightrope/guard/is-object';
 import type { Syncpack } from '../../types';
 
 type Options = Pick<Partial<Syncpack.Config.Public>, 'customTypes'>;

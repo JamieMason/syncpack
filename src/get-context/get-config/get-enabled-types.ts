@@ -1,6 +1,6 @@
-import { isArrayOfStrings } from 'expect-more/dist/is-array-of-strings';
-import { isNonEmptyArray } from 'expect-more/dist/is-non-empty-array';
-import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import type { Syncpack } from '../../types';
 
 type Options = Pick<

@@ -1,5 +1,5 @@
-import { isNonEmptyArray } from 'expect-more/dist/is-non-empty-array';
 import minimatch from 'minimatch';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
 import type { Syncpack } from '../../types';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import type { Instance } from '../get-package-json-files/package-json-file/instance';

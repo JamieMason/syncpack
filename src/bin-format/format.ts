@@ -1,6 +1,6 @@
-import { isArray } from 'expect-more/dist/is-array';
-import { isNonEmptyString } from 'expect-more/dist/is-non-empty-string';
-import { isObject } from 'expect-more/dist/is-object';
+import { isArray } from 'tightrope/guard/is-array';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
+import { isObject } from 'tightrope/guard/is-object';
 import type { Syncpack } from '../types';
 
 export function format(ctx: Syncpack.Ctx): Syncpack.Ctx {

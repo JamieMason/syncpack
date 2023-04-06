@@ -1,8 +1,12 @@
-import { A, F, pipe, R } from '@mobily/ts-belt';
-import { isArrayOfStrings } from 'expect-more/dist/is-array-of-strings';
+import { pipe } from 'tightrope/fn/pipe';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import type { Result } from 'tightrope/result';
+import { Ok } from 'tightrope/result';
+import { fromGuard } from 'tightrope/result/from-guard';
+import { map } from 'tightrope/result/map';
+import { orElse } from 'tightrope/result/or-else';
 import { DEFAULT_SOURCES } from '../../../constants';
 import type { Disk } from '../../../lib/disk';
-import { BaseError } from '../../../lib/error';
 import type { Syncpack } from '../../../types';
 import { getLernaPatterns } from './get-lerna-patterns';
 import { getPnpmPatterns } from './get-pnpm-patterns';
@@ -17,43 +21,22 @@ import { getYarnPatterns } from './get-yarn-patterns';
 export function getPatterns(disk: Disk) {
   return function getPatterns(
     program: Syncpack.Config.SyncpackRc,
-  ): R.Result<string[], BaseError> {
-    type PatternResult = R.Result<string[], BaseError>;
-    type SafeGetPatterns = () => PatternResult;
-
-    const getters: SafeGetPatterns[] = [
-      getCliPatterns,
-      getYarnPatterns(disk),
-      getPnpmPatterns(disk),
-      getLernaPatterns(disk),
-    ];
-
-    const initialResult = R.Error(
-      new BaseError('getPatterns did not try any sources'),
-    ) as PatternResult;
-
-    const res = A.reduce(
-      getters,
-      initialResult,
-      (previousResult, getNextResult) => {
-        if (R.isOk(previousResult)) return previousResult;
-        return getNextResult();
-      },
-    );
-
+  ): Result<string[]> {
     return pipe(
-      res,
-      R.map(addRootDir),
-      R.map(limitToPackageJson),
-      R.handleError(() => DEFAULT_SOURCES),
-      R.mapError(F.identity as () => BaseError),
+      getCliPatterns(),
+      orElse(getYarnPatterns(disk)),
+      orElse(getPnpmPatterns(disk)),
+      orElse(getLernaPatterns(disk)),
+      map(addRootDir),
+      map(limitToPackageJson),
+      orElse(() => new Ok(DEFAULT_SOURCES)),
     );
 
     function getCliPatterns() {
-      return R.fromPredicate(
-        program.source,
+      return fromGuard(
         isArrayOfStrings,
-        new BaseError('No --source options provided'),
+        new Error('No --source options provided'),
+        program.source,
       );
     }
 

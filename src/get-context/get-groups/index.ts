@@ -1,4 +1,7 @@
-import { pipe, R } from '@mobily/ts-belt';
+import { pipe } from 'tightrope/fn/pipe';
+import type { Result } from 'tightrope/result';
+import { fromTry } from 'tightrope/result/from-try';
+import { mapErr } from 'tightrope/result/map-err';
 import { BaseError } from '../../lib/error';
 import { verbose } from '../../lib/log';
 import { sortByName } from '../../lib/sort-by-name';
@@ -15,11 +18,11 @@ interface GroupsByPropName {
 export function getGroups(
   config: Syncpack.Config.Private,
   packageJsonFiles: PackageJsonFile[],
-): R.Result<GroupsByPropName, BaseError> {
+): Result<GroupsByPropName> {
   const ERR_CREATING_GROUPS = 'Error creating semver and version groups';
   return pipe(
-    R.fromExecution(() => unsafeGetGroups(config, packageJsonFiles)),
-    R.mapError(BaseError.map(ERR_CREATING_GROUPS)),
+    fromTry(() => unsafeGetGroups(config, packageJsonFiles)),
+    mapErr(BaseError.map(ERR_CREATING_GROUPS)),
   );
 }
 
