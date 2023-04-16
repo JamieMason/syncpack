@@ -77,7 +77,7 @@ and peer dependencies can be broader.
     {
       "range": "",
       "dependencyTypes": [
-        "dependencies",
+        "prod",
         "resolutions",
         "overrides",
         "pnpmOverrides",
@@ -88,13 +88,13 @@ and peer dependencies can be broader.
     },
     {
       "range": "~",
-      "dependencyTypes": ["devDependencies"],
+      "dependencyTypes": ["dev"],
       "dependencies": ["**"],
       "packages": ["**"]
     },
     {
       "range": "^",
-      "dependencyTypes": ["peerDependencies"],
+      "dependencyTypes": ["peer"],
       "dependencies": ["**"],
       "packages": ["**"]
     }
