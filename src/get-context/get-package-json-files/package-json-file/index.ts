@@ -9,7 +9,7 @@ import { newlines } from '../../../lib/newlines';
 import type { Syncpack } from '../../../types';
 import {
   exhaustiveCheck,
-  strategyByName
+  strategyByName,
 } from '../../get-config/path-strategy';
 import type { JsonFile } from '../get-patterns/read-json-safe';
 import { Instance } from './instance';

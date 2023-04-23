@@ -3,7 +3,7 @@ import {
   readFileSync,
   readJsonSync,
   removeSync,
-  writeFileSync
+  writeFileSync,
 } from 'fs-extra';
 import { sync as globSync } from 'glob';
 import { join } from 'path';

@@ -4,7 +4,7 @@ import { $R } from '../../$R';
 import type { Syncpack } from '../../../types';
 import {
   exhaustiveCheck,
-  strategyByName
+  strategyByName,
 } from '../../get-config/path-strategy';
 import type { Delete } from '../../get-groups/version-group/instance-group';
 import { DELETE } from '../../get-groups/version-group/instance-group';

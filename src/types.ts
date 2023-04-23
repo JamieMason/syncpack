@@ -5,7 +5,7 @@ import type {
   Cli as cli,
   Private as privateSchema,
   Public as publicSchema,
-  SyncpackRc as syncpackRc
+  SyncpackRc as syncpackRc,
 } from './get-context/get-config/schema';
 import type * as paths from './get-context/get-config/schema/paths';
 import type * as semverGroup from './get-context/get-config/schema/semver-group';
