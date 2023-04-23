@@ -4,7 +4,7 @@
         <title>Syncpack Blog</title>
         <link>https://jamiemason.github.io/syncpack/blog</link>
         <description>Syncpack Blog</description>
-        <lastBuildDate>Tue, 21 Feb 2023 17:39:12 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 23 Apr 2023 16:23:53 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -12,7 +12,7 @@
             <title><![CDATA[Blog]]></title>
             <link>https://jamiemason.github.io/syncpack/blog/index</link>
             <guid>https://jamiemason.github.io/syncpack/blog/index</guid>
-            <pubDate>Tue, 21 Feb 2023 17:39:12 GMT</pubDate>
+            <pubDate>Sun, 23 Apr 2023 16:23:53 GMT</pubDate>
         </item>
     </channel>
 </rss>
