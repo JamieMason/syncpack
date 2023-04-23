@@ -1,6 +1,6 @@
 # syncpack
 
-Manage multiple package.json files, such as in Lerna Monorepos and Yarn/Pnpm Workspaces
+Consistent dependency versions in large JavaScript Monorepos
 
 ## Installation
 
@@ -24,16 +24,15 @@ npm test
 
 ## Dependencies
 
-- [@mobily/ts-belt](https://ghub.io/@mobily/ts-belt): 🔧 Fast, modern, and practical utility library for FP in TypeScript.
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [cosmiconfig](https://ghub.io/cosmiconfig): Find and load configuration from a package.json property, rc file, or CommonJS module
-- [expect-more](https://ghub.io/expect-more): Curried JavaScript Type Testing Library with Zero Dependencies
 - [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
 - [glob](https://ghub.io/glob): a little globber
 - [minimatch](https://ghub.io/minimatch): a glob matcher in javascript
 - [read-yaml-file](https://ghub.io/read-yaml-file): Read and parse a YAML file
 - [semver](https://ghub.io/semver): The semantic version parser used by npm.
+- [tightrope](https://ghub.io/tightrope): Point-free functional utility library
 - [zod](https://ghub.io/zod): TypeScript-first schema declaration and validation library with static type inference
 
 ## Dev Dependencies

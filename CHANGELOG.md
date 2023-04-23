@@ -1,3 +1,13 @@
+## [9.8.6](https://github.com/JamieMason/syncpack/compare/9.8.4...9.8.6) (2023-04-23)
+
+
+### Bug Fixes
+
+* **config:** prevent default source overriding rcfile ([1d6a4ba](https://github.com/JamieMason/syncpack/commit/1d6a4bab953ceee90461d8f85ece44bd384d9cd7)), closes [#123](https://github.com/JamieMason/syncpack/issues/123)
+* **npm:** update minor dependencies ([91f4967](https://github.com/JamieMason/syncpack/commit/91f496767d834b7372565a094599ece935bb346d))
+
+
+
 ## [9.8.4](https://github.com/JamieMason/syncpack/compare/9.7.4...9.8.4) (2023-02-21)
 
 
