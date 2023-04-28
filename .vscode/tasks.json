@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "args": [
+        "${workspaceFolder}/${relativeFileDirname}/${fileBasenameNoExtension}.spec.ts"
+      ],
+      "command": "scripts/upsert-test.sh",
+      "group": "test",
+      "label": "Upsert test for current file",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "silent"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "args": ["src", "test"],
+      "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "group": "test",
+      "label": "Run tests",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "args": ["--watch", "--no-coverage", "src", "test"],
+      "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "group": "test",
+      "label": "Watch tests",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "args": ["--watch", "--no-coverage", "${relativeFile}"],
+      "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "group": "test",
+      "label": "Watch tests for current .spec.ts file",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    }
+  ]
+}

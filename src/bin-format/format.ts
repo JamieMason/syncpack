@@ -1,11 +1,14 @@
 import { isArray } from 'tightrope/guard/is-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
-import type { Syncpack } from '../types';
+import { getSortAz } from '../config/get-sort-az';
+import { getSortFirst } from '../config/get-sort-first';
+import type { Context } from '../get-context';
 
-export function format(ctx: Syncpack.Ctx): Syncpack.Ctx {
+export function format(ctx: Context): Context {
   const { packageJsonFiles } = ctx;
-  const { sortAz, sortFirst } = ctx.config;
+  const sortAz = getSortAz(ctx.config);
+  const sortFirst = getSortFirst(ctx.config);
 
   packageJsonFiles.forEach((packageJsonFile) => {
     const { contents } = packageJsonFile;

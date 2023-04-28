@@ -18,6 +18,7 @@
     "Aparajita Fishman (https://github.com/aparajita)",
     "Artur Wierzbicki (https://github.com/ArturWierzbicki)",
     "Daniel Silva (https://github.com/dsilvasc)",
+    "Jamie Haywood (https://github.com/jamiehaywood)",
     "Jamie Mason (https://github.com/JamieMason)",
     "Jody Heavener (https://github.com/jodyheavener)",
     "Luis Vieira (https://github.com/luisvieiragmr)",
@@ -35,7 +36,7 @@
     "read-yaml-file": "2.1.0",
     "semver": "7.5.0",
     "tightrope": "0.1.0",
-    "zod": "3.21.4"
+    "ts-toolbelt": "9.6.0"
   },
   "devDependencies": {
     "@tsconfig/node14": "1.0.3",
@@ -85,6 +86,7 @@
     "yarn"
   ],
   "license": "MIT",
+  "main": "dist/index.js",
   "repository": "JamieMason/syncpack",
   "resolutions": {
     "chalk": "4.1.2"
@@ -97,5 +99,6 @@
     "lint": "eslint --ext .ts .",
     "prepack": "yarn build",
     "test": "jest src test"
-  }
+  },
+  "types": "dist/index.d.ts"
 }

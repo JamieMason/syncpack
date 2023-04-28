@@ -22,7 +22,7 @@ The example below adds support for synchronising versions found in:
 1. The [`packageManager`](https://nodejs.org/api/packages.html#packagemanager)
    string.
 
-```json
+```json title=".syncpackrc"
 {
   "customTypes": {
     "engines": {
@@ -36,6 +36,13 @@ The example below adds support for synchronising versions found in:
   }
 }
 ```
+
+:::tip
+
+Syncpack config files also support
+[TypeScript IntelliSense](https://jamiemason.github.io/syncpack/config-file#typescript-intellisense).
+
+:::
 
 ## customTypes\[name\]
 

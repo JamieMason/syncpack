@@ -8,5 +8,5 @@
     "strict": true
   },
   "include": ["./package.json", "./src/**/*.ts"],
-  "exclude": ["./src/**/*.spec.ts"]
+  "exclude": ["./**/*.spec.ts"]
 }

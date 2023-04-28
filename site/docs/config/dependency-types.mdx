@@ -20,11 +20,18 @@ and
 [`devDependencies`](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#devDependencies)
 properties of package.json files will be inspected by syncpack:
 
-```json
+```json title=".syncpackrc"
 {
   "dependencyTypes": ["dev", "prod"]
 }
 ```
+
+:::tip
+
+Syncpack config files also support
+[TypeScript IntelliSense](https://jamiemason.github.io/syncpack/config-file#typescript-intellisense).
+
+:::
 
 :::tip
 

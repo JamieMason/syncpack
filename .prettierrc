@@ -4,5 +4,20 @@
   "proseWrap": "always",
   "quoteProps": "consistent",
   "singleQuote": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "overrides": [
+    {
+      "files": ["**/*.spec.*"],
+      "options": {
+        "printWidth": 100
+      }
+    },
+    {
+      "files": ["**/*.md"],
+      "options": {
+        "printWidth": 100,
+        "proseWrap": "always"
+      }
+    }
+  ]
 }

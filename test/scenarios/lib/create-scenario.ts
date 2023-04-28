@@ -1,9 +1,14 @@
 import minimatch from 'minimatch';
 import { join, normalize } from 'path';
 import { CWD } from '../../../src/constants';
-import type { JsonFile } from '../../../src/get-context/get-package-json-files/get-patterns/read-json-safe';
-import type { PackageJson } from '../../../src/get-context/get-package-json-files/package-json-file';
-import type { Syncpack } from '../../../src/types';
+import type { Context } from '../../../src/get-context';
+import { getContext } from '../../../src/get-context';
+import type { JsonFile } from '../../../src/get-package-json-files/get-patterns/read-json-safe';
+import type { PackageJson } from '../../../src/get-package-json-files/package-json-file';
+import type { SemverGroupReport } from '../../../src/get-semver-groups';
+import { getSemverGroups } from '../../../src/get-semver-groups';
+import type { VersionGroupReport } from '../../../src/get-version-groups';
+import { getVersionGroups } from '../../../src/get-version-groups';
 import type { MockDisk } from '../../mock-disk';
 import { mockDisk } from '../../mock-disk';
 
@@ -19,10 +24,14 @@ interface MockedFile {
 }
 
 export interface TestScenario {
-  config: Partial<Syncpack.Config.Public>;
+  config: Context['config']['rcFile'];
   disk: MockDisk;
   log: jest.SpyInstance;
   files: Record<string, MockedFile>;
+  report: {
+    semverGroups: SemverGroupReport[][];
+    versionGroups: VersionGroupReport[][];
+  };
 }
 
 export function createScenario(
@@ -31,7 +40,7 @@ export function createScenario(
     before: JsonFile<PackageJson>;
     after: JsonFile<PackageJson>;
   }[],
-  config: Partial<Syncpack.Config.Public>,
+  config: Context['config']['rcFile'],
 ): TestScenario {
   jest.clearAllMocks();
   const disk = mockDisk();
@@ -66,6 +75,10 @@ export function createScenario(
       relativePath,
     };
   });
+  // mock rcfile
+  disk.readConfigFileSync.mockImplementation(() => {
+    return config;
+  });
   // mock file system
   disk.readFileSync.mockImplementation((filePath): string | undefined => {
     return mockedFiles.find((file) => {
@@ -83,6 +96,12 @@ export function createScenario(
       })
       .map((file) => normalize(file.absolutePath));
   });
+  // create reports
+  const ctx = getContext({}, disk);
+  const versionGroups = getVersionGroups(ctx);
+  const versionGroupsReport = versionGroups.map((group) => group.inspect());
+  const semverGroups = getSemverGroups(ctx);
+  const semverGroupsReport = semverGroups.map((group) => group.inspect());
   // return API
   return {
     config,
@@ -92,6 +111,10 @@ export function createScenario(
       memo[file.id] = file;
       return memo;
     }, {} as Record<string, MockedFile>),
+    report: {
+      semverGroups: semverGroupsReport,
+      versionGroups: versionGroupsReport,
+    },
   };
 }
 

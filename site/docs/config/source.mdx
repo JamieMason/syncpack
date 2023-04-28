@@ -16,11 +16,18 @@ package.json files you want to manage with syncpack.
 
 Defaulted to match most Projects using Lerna or Yarn Workspaces
 
-```json
+```json title=".syncpackrc"
 {
   "source": ["package.json", "packages/*/package.json"]
 }
 ```
+
+:::tip
+
+Syncpack config files also support
+[TypeScript IntelliSense](https://jamiemason.github.io/syncpack/config-file#typescript-intellisense).
+
+:::
 
 ## Resolving Packages
 

@@ -1,9 +1,10 @@
+import type { SemverRange } from '../config/types';
 import { RANGE } from '../constants';
-import type { Syncpack } from '../types';
+
 import { isLooseSemver, isSemver, isValidSemverRange } from './is-semver';
 
 export function setSemverRange(
-  semverRange: Syncpack.Config.SemverRange.Value,
+  semverRange: SemverRange,
   version: string,
 ): string {
   if (!isSemver(version) || !isValidSemverRange(semverRange)) return version;

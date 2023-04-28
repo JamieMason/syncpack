@@ -1,22 +1,9 @@
 import { EOL } from 'os';
 import { join } from 'path';
 import { CWD } from '../src/constants';
-import type { JsonFile } from '../src/get-context/get-package-json-files/get-patterns/read-json-safe';
-import type { PackageJson } from '../src/get-context/get-package-json-files/package-json-file';
+import type { JsonFile } from '../src/get-package-json-files/get-patterns/read-json-safe';
+import type { PackageJson } from '../src/get-package-json-files/package-json-file';
 import { newlines } from '../src/lib/newlines';
-
-export function createPackageJsonFile(
-  contents: PackageJson,
-): JsonFile<PackageJson> {
-  return withJson({
-    contents,
-    filePath: join(CWD, 'some/package.json'),
-  });
-}
-
-export function toJson(contents: PackageJson): string {
-  return newlines.fix(`${JSON.stringify(contents, null, 2)}${EOL}`, EOL);
-}
 
 export const mockPackage = (
   dirName: string,
@@ -93,6 +80,10 @@ function withJson({
     filePath,
     json: toJson(contents),
   };
+}
+
+function toJson(contents: PackageJson): string {
+  return newlines.fix(`${JSON.stringify(contents, null, 2)}${EOL}`, EOL);
 }
 
 function toObject(identifiers: string[]): { [key: string]: string } {

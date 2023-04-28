@@ -50,3 +50,37 @@ option.
   "versionGroups": []
 }
 ```
+
+## TypeScript IntelliSense
+
+If you want intellisense for the configuration file, you can annotate your
+javascript config files with the following:
+
+:::caution
+
+Ensure that `"javascript.validate.enable": false` is NOT set in
+[VS Code](https://code.visualstudio.com/docs/getstarted/settings).
+
+:::
+
+```js title=".syncpackrc.js"
+// @ts-check
+
+/** @type {import("syncpack").RcFile} */
+const config = {
+  versionGroups: [
+    {
+      dependencies: ['@types/node'],
+      packages: ['**'],
+      pinVersion: '14.18.36',
+    },
+    {
+      dependencies: ['chalk'],
+      packages: ['**'],
+      pinVersion: '4.1.2',
+    },
+  ],
+};
+
+module.exports = config;
+```

@@ -2,8 +2,8 @@ import chalk from 'chalk';
 import { isString } from 'tightrope/guard/is-string';
 import { inspect } from 'util';
 import { ICON } from '../constants';
-import type { SemverGroup } from '../get-context/get-groups/semver-group';
-import type { VersionGroup } from '../get-context/get-groups/version-group';
+import type { AnySemverGroup } from '../get-semver-groups';
+import type { AnyVersionGroup } from '../get-version-groups';
 
 export function verbose(...values: unknown[]): void {
   /* istanbul ignore if */
@@ -24,45 +24,22 @@ export function verbose(...values: unknown[]): void {
   }
 }
 
-export function fixed(message: string): void {
-  console.log(chalk`{green ${ICON.tick}}`, message);
-}
-
-export function skip(message: string): void {
-  console.log(chalk.dim(ICON.skip), chalk.dim(message));
-}
-
-export function valid(message: string, comment?: string): void {
-  if (comment) {
-    console.log(chalk`{dim ${ICON.skip}} ${message} {dim ${comment}}`);
-  } else {
-    console.log(chalk`{dim ${ICON.skip}} ${message}`);
-  }
-}
-
-export function invalid(message: string, comment?: string): void {
-  if (comment) {
-    console.log(chalk`{red ${ICON.cross}} ${message} {dim ${comment}}`);
-  } else {
-    console.log(chalk`{red ${ICON.cross}} ${message}`);
-  }
-}
-
-export function semverGroupHeader(group: SemverGroup, i: number): void {
+export function semverGroupHeader(group: AnySemverGroup, i: number): void {
   logHeader(group, 'Semver', i);
 }
 
-export function versionGroupHeader(group: VersionGroup, i: number): void {
+export function versionGroupHeader(group: AnyVersionGroup, i: number): void {
   logHeader(group, 'Version', i);
 }
 
 function logHeader(
-  group: VersionGroup | SemverGroup,
+  group: AnyVersionGroup | AnySemverGroup,
   type: 'Semver' | 'Version',
   i: number,
 ) {
-  const customLabel = group.groupConfig.label;
-  const labelWhenDefault = group.isDefault ? `Default ${type} Group` : '';
+  const customLabel = group.config.label;
+  const labelWhenDefault =
+    group._tag === 'CatchAll' ? `Default ${type} Group` : '';
   const anonymousLabel = `${type} Group ${i + 1}`;
   const label = (customLabel || labelWhenDefault || anonymousLabel).trim();
   const hasNewLines = label.search(/[\r\n]/) !== -1;

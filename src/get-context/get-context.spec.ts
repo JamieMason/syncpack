@@ -2,98 +2,29 @@ import 'expect-more-jest';
 import { join } from 'path';
 import { getContext } from '.';
 import { mockDisk } from '../../test/mock-disk';
+import { getSource } from '../config/get-source';
 import { CWD, DEFAULT_CONFIG } from '../constants';
 
 describe('getContext', () => {
   describe('source', () => {
     it('uses defaults when no CLI options or config are set', () => {
       const disk = mockDisk();
-      expect(getContext({}, disk)).toHaveProperty(
-        'config.source',
-        DEFAULT_CONFIG.source,
-      );
+      const ctx = getContext({}, disk);
+      expect(getSource(ctx.config)).toEqual(DEFAULT_CONFIG.source);
     });
 
     it('uses value from config when no CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      expect(getContext({}, disk)).toHaveProperty('config.source', ['foo']);
+      const ctx = getContext({}, disk);
+      expect(getSource(ctx.config)).toEqual(['foo']);
     });
 
     it('uses value from CLI when config and CLI options are set', () => {
       const disk = mockDisk();
       disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      expect(getContext({ source: ['bar'] }, disk)).toHaveProperty(
-        'config.source',
-        ['bar'],
-      );
-    });
-
-    it('combines defaults, values from CLI options, and config', () => {
-      const disk = mockDisk();
-      disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      expect(getContext({ indent: '    ' }, disk)).toHaveProperty(
-        'config',
-        expect.objectContaining({
-          semverRange: '',
-          source: ['foo'],
-          indent: '    ',
-        }),
-      );
-    });
-
-    describe('only available in config files', () => {
-      it('merges semverGroups', () => {
-        const disk = mockDisk();
-        disk.readConfigFileSync.mockReturnValue({
-          semverGroups: [
-            {
-              range: '~',
-              dependencies: ['@alpha/*'],
-              packages: ['@myrepo/library'],
-            },
-          ],
-        });
-        expect(getContext({}, disk).semverGroups).toEqual([
-          expect.objectContaining({
-            groupConfig: expect.objectContaining({
-              dependencies: ['@alpha/*'],
-              packages: ['@myrepo/library'],
-              range: '~',
-            }),
-          }),
-          expect.objectContaining({
-            groupConfig: expect.objectContaining({
-              dependencies: ['**'],
-              packages: ['**'],
-              range: '',
-            }),
-          }),
-        ]);
-      });
-
-      it('merges versionGroups', () => {
-        const disk = mockDisk();
-        disk.readConfigFileSync.mockReturnValue({
-          versionGroups: [
-            { dependencies: ['chalk'], packages: ['foo', 'bar'] },
-          ],
-        });
-        expect(getContext({}, disk).versionGroups).toEqual([
-          expect.objectContaining({
-            groupConfig: expect.objectContaining({
-              dependencies: ['chalk'],
-              packages: ['foo', 'bar'],
-            }),
-          }),
-          expect.objectContaining({
-            groupConfig: expect.objectContaining({
-              dependencies: ['**'],
-              packages: ['**'],
-            }),
-          }),
-        ]);
-      });
+      const ctx = getContext({ source: ['bar'] }, disk);
+      expect(getSource(ctx.config)).toEqual(['bar']);
     });
   });
 
@@ -142,10 +73,7 @@ describe('getContext', () => {
       it('performs a default search', () => {
         const disk = mockDisk();
         getContext({}, disk);
-        expect(disk.globSync.mock.calls).toEqual([
-          ['package.json'],
-          ['packages/*/package.json'],
-        ]);
+        expect(disk.globSync.mock.calls).toEqual([['package.json'], ['packages/*/package.json']]);
       });
 
       describe('when yarn workspaces are defined', () => {
@@ -192,14 +120,10 @@ describe('getContext', () => {
             disk.globSync.mockReturnValue([filePath]);
             disk.readFileSync.mockImplementation((filePath) => {
               if (filePath.endsWith('package.json')) return json;
-              if (filePath.endsWith('lerna.json'))
-                return JSON.stringify({ packages: ['lerna/*'] });
+              if (filePath.endsWith('lerna.json')) return JSON.stringify({ packages: ['lerna/*'] });
             });
             getContext({}, disk);
-            expect(disk.globSync.mock.calls).toEqual([
-              ['package.json'],
-              ['lerna/*/package.json'],
-            ]);
+            expect(disk.globSync.mock.calls).toEqual([['package.json'], ['lerna/*/package.json']]);
           });
         });
 

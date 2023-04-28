@@ -24,6 +24,7 @@ export const RANGE = {
   LTE: '<=',
   MINOR: '^',
   PATCH: '~',
+  WORKSPACE: 'workspace:',
 } as const;
 
 export const DEFAULT_CONFIG = {

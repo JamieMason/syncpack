@@ -1,12 +1,10 @@
+import { pipe } from 'tightrope/fn/pipe';
+import type { CliConfig } from '../config/types';
 import { getContext } from '../get-context';
 import type { Disk } from '../lib/disk';
 import { exitIfInvalid } from '../lib/exit-if-invalid';
-import type { Syncpack } from '../types';
 import { listMismatches } from './list-mismatches';
 
-export function listMismatchesCli(
-  input: Partial<Syncpack.Config.Cli>,
-  disk: Disk,
-): void {
-  exitIfInvalid(listMismatches(getContext(input, disk)));
+export function listMismatchesCli(input: Partial<CliConfig>, disk: Disk): void {
+  pipe(getContext(input, disk), listMismatches, exitIfInvalid);
 }

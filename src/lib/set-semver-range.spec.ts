@@ -1,5 +1,4 @@
 import 'expect-more-jest';
-import type { Syncpack } from '../types';
 import { setSemverRange } from './set-semver-range';
 
 describe('setSemverRange', () => {
@@ -16,7 +15,7 @@ describe('setSemverRange', () => {
           ['<=', '<=1.2.3'],
           ['^', '^1.2.3'],
           ['~', '~1.2.3'],
-        ] as [Syncpack.Config.SemverRange.Value, string][]
+        ] satisfies [SemverRange, string][]
       ).forEach(([semverRange, expected]) => {
         expect(setSemverRange(semverRange, '<1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '<=1.2.3')).toEqual(expected);
@@ -26,9 +25,9 @@ describe('setSemverRange', () => {
         expect(setSemverRange(semverRange, '>=1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '>1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '*')).toEqual('*');
-        expect(
-          setSemverRange(semverRange, 'https://github.com/npm/npm.git'),
-        ).toEqual('https://github.com/npm/npm.git');
+        expect(setSemverRange(semverRange, 'https://github.com/npm/npm.git')).toEqual(
+          'https://github.com/npm/npm.git',
+        );
       });
     });
   });
