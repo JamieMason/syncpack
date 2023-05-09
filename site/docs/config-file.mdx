@@ -50,3 +50,16 @@ option.
   "versionGroups": []
 }
 ```
+
+## Intellisense
+If you want intellisense for the configuration file, you can annotate your javascript config files with the following:
+```javascript
+/**
+ * @typedef {import('syncpack').Syncpack.Config.Public} SyncpackConfig
+ * @type {SyncpackConfig}
+ **/
+export default {
+  customTypes: [],
+  ...
+}
+```

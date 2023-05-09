@@ -2,6 +2,7 @@
   "name": "syncpack",
   "description": "Consistent dependency versions in large JavaScript Monorepos",
   "version": "9.8.6",
+  "types": "dist/types.d.ts",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
     "syncpack": "dist/bin.js",
@@ -23,7 +24,8 @@
     "Luis Vieira (https://github.com/luisvieiragmr)",
     "Marais Rossouw (https://github.com/maraisr)",
     "Matt Sprague (https://github.com/uforic)",
-    "Tom Fletcher (https://github.com/tom-fletcher)"
+    "Tom Fletcher (https://github.com/tom-fletcher)",
+    "Jamie Haywood (https://github.com/jamiehaywood)"
   ],
   "dependencies": {
     "chalk": "4.1.2",
