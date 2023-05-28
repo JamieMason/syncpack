@@ -3,9 +3,6 @@ name: verify
 on:
   pull_request:
   push:
-    branches:
-      - main
-      - dev
 
 jobs:
   all:

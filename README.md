@@ -26,6 +26,11 @@ Organise package.json files according to a conventional format, where fields app
 order and nested fields are ordered alphabetically. Shorthand properties are used where available,
 such as the `"repository"` and `"bugs"` fields.
 
+### [lint](https://jamiemason.github.io/syncpack/lint)
+
+Lint all versions and ranges and exit with 0 or 1 based on whether all files match your Syncpack
+configuration file.
+
 ### [lint-semver-ranges](https://jamiemason.github.io/syncpack/lint-semver-ranges)
 
 Check whether dependency versions used within "dependencies", "devDependencies", etc follow a

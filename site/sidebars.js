@@ -20,6 +20,7 @@ const sidebars = {
       'fix-mismatches',
       'format',
       'lint-semver-ranges',
+      'lint',
       'list-mismatches',
       'list',
       'set-semver-ranges',

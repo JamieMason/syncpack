@@ -1,4 +1,5 @@
 import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
+import { lintCli } from '../../../src/bin-lint/lint-cli';
 import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
 import { listCli } from '../../../src/bin-list/list-cli';
 import { mockPackage } from '../../mock';
@@ -159,6 +160,14 @@ describe('versionGroups', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
           listMismatchesCli({}, scenario.disk);
+          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+        });
+      });
+
+      describe('lint', () => {
+        test('should exit with 1 on the mismatch', () => {
+          const scenario = getScenario();
+          lintCli({}, scenario.disk);
           expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
         });
       });

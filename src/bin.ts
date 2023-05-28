@@ -14,6 +14,9 @@ program
   .command('format', 'sort and shorten properties according to a convention', {
     executableFile: './bin-format/index.js',
   })
+  .command('lint', 'lint all versions and ranges', {
+    executableFile: './bin-lint/index.js',
+  })
   .command(
     'lint-semver-ranges',
     'check dependency versions comply with the given semver range format',

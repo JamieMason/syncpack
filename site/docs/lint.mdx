@@ -1,0 +1,23 @@
+---
+id: lint
+title: lint
+---
+
+Lint all versions and ranges and exit with 0 or 1 based on whether all files
+match your Syncpack configuration file.
+
+## CLI Options
+
+```
+-c, --config <path>         path to a syncpack config file
+-h, --help                  display help for command
+```
+
+## Examples
+
+```bash
+# uses config file for resolving packages
+syncpack lint
+# uses config file defined by --config when provided
+syncpack lint --config ./config/.syncpackrc
+```

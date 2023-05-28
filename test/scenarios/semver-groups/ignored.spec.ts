@@ -1,4 +1,5 @@
 import { lintSemverRangesCli } from '../../../src/bin-lint-semver-ranges/lint-semver-ranges-cli';
+import { lintCli } from '../../../src/bin-lint/lint-cli';
 import { listCli } from '../../../src/bin-list/list-cli';
 import { setSemverRangesCli } from '../../../src/bin-set-semver-ranges/set-semver-ranges-cli';
 import { mockPackage } from '../../mock';
@@ -165,6 +166,14 @@ describe('semverGroups', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
           lintSemverRangesCli({}, scenario.disk);
+          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('lint', () => {
+        test('should report as valid', () => {
+          const scenario = getScenario();
+          lintCli({}, scenario.disk);
           expect(scenario.disk.process.exit).not.toHaveBeenCalled();
         });
       });
