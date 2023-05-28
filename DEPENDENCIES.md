@@ -33,7 +33,7 @@ npm test
 - [read-yaml-file](https://ghub.io/read-yaml-file): Read and parse a YAML file
 - [semver](https://ghub.io/semver): The semantic version parser used by npm.
 - [tightrope](https://ghub.io/tightrope): Point-free functional utility library
-- [zod](https://ghub.io/zod): TypeScript-first schema declaration and validation library with static type inference
+- [ts-toolbelt](https://ghub.io/ts-toolbelt): TypeScript&#39;s largest utility library
 
 ## Dev Dependencies
 

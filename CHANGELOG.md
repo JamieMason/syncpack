@@ -1,3 +1,21 @@
+# [10.0.0](https://github.com/JamieMason/syncpack/compare/9.8.6...10.0.0) (2023-05-28)
+
+
+### Bug Fixes
+
+* **core:** rewrite core architecture ([dc9355f](https://github.com/JamieMason/syncpack/commit/dc9355f987bd39588fb611d3152c5af9ee875cc4)), closes [#124](https://github.com/JamieMason/syncpack/issues/124) [#124](https://github.com/JamieMason/syncpack/issues/124) [#130](https://github.com/JamieMason/syncpack/issues/130) [#131](https://github.com/JamieMason/syncpack/issues/131) [#130](https://github.com/JamieMason/syncpack/issues/130) [#131](https://github.com/JamieMason/syncpack/issues/131) [#109](https://github.com/JamieMason/syncpack/issues/109) [#114](https://github.com/JamieMason/syncpack/issues/114) [#125](https://github.com/JamieMason/syncpack/issues/125) [#114](https://github.com/JamieMason/syncpack/issues/114) [#111](https://github.com/JamieMason/syncpack/issues/111) [#132](https://github.com/JamieMason/syncpack/issues/132) [#48](https://github.com/JamieMason/syncpack/issues/48) [#3](https://github.com/JamieMason/syncpack/issues/3)
+* **npm:** update typescript ([2c5cd7f](https://github.com/JamieMason/syncpack/commit/2c5cd7f83cc46f0a95e4bfc09b80f6bd37181cae))
+
+
+### BREAKING CHANGES
+
+* **core:** - `fix-mismatches` will now exit with a status code of 1 if there are mismatches among unsupported versions which syncpack cannot auto-fix.
+- Although they are still not auto-fixable, unsupported versions which were previously ignored are now acknowledged, which may introduce mismatches which previously would have been considered valid.
+- This release was also a huge rewrite of Syncpack's internals and, while there is a large amount of tests, some scenarios may have been missed.
+- If you run into any problems, please create an issue.
+
+
+
 ## [9.8.6](https://github.com/JamieMason/syncpack/compare/9.8.4...9.8.6) (2023-04-23)
 
 
