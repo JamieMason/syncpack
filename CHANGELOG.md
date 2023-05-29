@@ -1,3 +1,12 @@
+# [10.1.0](https://github.com/JamieMason/syncpack/compare/10.0.0...10.1.0) (2023-05-29)
+
+
+### Features
+
+* **cli:** add lint command ([2e3df1c](https://github.com/JamieMason/syncpack/commit/2e3df1c2178755faaf1116c910fd610b3bb43807)), closes [#3](https://github.com/JamieMason/syncpack/issues/3)
+
+
+
 # [10.0.0](https://github.com/JamieMason/syncpack/compare/9.8.6...10.0.0) (2023-05-28)
 
 
