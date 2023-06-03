@@ -1,3 +1,12 @@
+# [10.2.0](https://github.com/JamieMason/syncpack/compare/10.1.0...10.2.0) (2023-06-03)
+
+
+### Features
+
+* **cli:** change output of lint command ([765376c](https://github.com/JamieMason/syncpack/commit/765376c17cf10422c349d76bb8335996046ea053)), closes [#134](https://github.com/JamieMason/syncpack/issues/134)
+
+
+
 # [10.1.0](https://github.com/JamieMason/syncpack/compare/10.0.0...10.1.0) (2023-05-29)
 
 
