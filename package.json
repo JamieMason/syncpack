@@ -7,6 +7,7 @@
     "syncpack": "dist/bin.js",
     "syncpack-fix-mismatches": "dist/bin-fix-mismatches/index.js",
     "syncpack-format": "dist/bin-format/index.js",
+    "syncpack-lint": "dist/bin-lint/index.js",
     "syncpack-lint-semver-ranges": "dist/bin-lint-semver-ranges/index.js",
     "syncpack-list": "dist/bin-list/index.js",
     "syncpack-list-mismatches": "dist/bin-list-mismatches/index.js",
