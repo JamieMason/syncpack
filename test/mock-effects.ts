@@ -1,4 +1,4 @@
-export interface MockDisk {
+export interface MockEffects {
   readonly askForChoice: jest.Mock<any, any>;
   readonly askForInput: jest.Mock<any, any>;
   readonly globSync: jest.Mock<any, any>;
@@ -12,7 +12,7 @@ export interface MockDisk {
   readonly writeFileSync: jest.Mock<any, any>;
 }
 
-export function mockDisk(): MockDisk {
+export function mockEffects(): MockEffects {
   return {
     askForChoice: jest.fn(() => Promise.resolve()),
     askForInput: jest.fn(() => Promise.resolve()),

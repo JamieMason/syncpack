@@ -7,15 +7,15 @@ import { andThen } from 'tightrope/result/and-then';
 import { filter } from 'tightrope/result/filter';
 import { orElse } from 'tightrope/result/or-else';
 import { CWD } from '../../constants';
-import type { Disk } from '../../lib/disk';
+import type { Effects } from '../../lib/effects';
 import type { PackageJson } from '../package-json-file';
 import { readJsonSafe } from './read-json-safe';
 
-export function getYarnPatterns(disk: Disk): () => Result<string[]> {
+export function getYarnPatterns(effects: Effects): () => Result<string[]> {
   return function getYarnPatterns() {
     return pipe(
       join(CWD, 'package.json'),
-      readJsonSafe<PackageJson>(disk),
+      readJsonSafe<PackageJson>(effects),
       andThen((file) =>
         pipe(
           get(file, 'contents', 'workspaces', 'packages'),

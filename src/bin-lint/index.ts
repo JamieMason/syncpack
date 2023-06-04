@@ -2,7 +2,7 @@
 
 import chalk from 'chalk';
 import { program } from 'commander';
-import { disk } from '../lib/disk';
+import { effects } from '../lib/effects';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { lintCli } from './lint-cli';
@@ -39,5 +39,5 @@ lintCli(
   {
     configPath: program.opts().config,
   },
-  disk,
+  effects,
 );

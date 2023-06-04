@@ -9,16 +9,16 @@ export function fixMismatches(ctx: Context): Context {
   let shouldPruneEmpty = false;
 
   versionGroups.forEach((versionGroup) => {
-    versionGroup.inspect().forEach((outcome) => {
-      if (!outcome.isValid) {
-        outcome.instances.forEach((instance) => {
-          switch (outcome.status) {
+    versionGroup.inspect().forEach((report) => {
+      if (!report.isValid) {
+        report.instances.forEach((instance) => {
+          switch (report.status) {
             case 'HIGHEST_SEMVER_MISMATCH':
             case 'LOWEST_SEMVER_MISMATCH':
             case 'PINNED_MISMATCH':
             case 'SNAPPED_TO_MISMATCH':
             case 'WORKSPACE_MISMATCH': {
-              instance.setVersion(outcome.expectedVersion);
+              instance.setVersion(report.expectedVersion);
               break;
             }
             case 'BANNED': {

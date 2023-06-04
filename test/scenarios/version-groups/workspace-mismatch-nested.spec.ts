@@ -159,11 +159,11 @@ describe('versionGroups', () => {
         describe('fix-mismatches', () => {
           test('should fix the mismatch', () => {
             const scenario = getScenario();
-            fixMismatchesCli({}, scenario.disk);
-            expect(scenario.disk.process.exit).not.toHaveBeenCalled();
-            expect(scenario.disk.writeFileSync.mock.calls).toEqual([
-              scenario.files['workspaces/a/packages/a/package.json'].diskWriteWhenChanged,
-              scenario.files['workspaces/b/packages/b/package.json'].diskWriteWhenChanged,
+            fixMismatchesCli({}, scenario.effects);
+            expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+            expect(scenario.effects.writeFileSync.mock.calls).toEqual([
+              scenario.files['workspaces/a/packages/a/package.json'].effectsWriteWhenChanged,
+              scenario.files['workspaces/b/packages/b/package.json'].effectsWriteWhenChanged,
             ]);
             expect(scenario.log.mock.calls).toEqual([
               scenario.files['workspaces/a/packages/a/package.json'].logEntryWhenChanged,
@@ -176,25 +176,25 @@ describe('versionGroups', () => {
         describe('list-mismatches', () => {
           test('should exit with 1 on the mismatch', () => {
             const scenario = getScenario();
-            listMismatchesCli({}, scenario.disk);
-            expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+            listMismatchesCli({}, scenario.effects);
+            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
           });
         });
 
         describe('list', () => {
           test('should exit with 1 on the mismatch', () => {
             const scenario = getScenario();
-            listCli({}, scenario.disk);
-            expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+            listCli({}, scenario.effects);
+            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
           });
         });
 
         describe('prompt', () => {
           test('should have nothing to do', () => {
             const scenario = getScenario();
-            promptCli({}, scenario.disk);
-            expect(scenario.disk.askForChoice).not.toHaveBeenCalled();
-            expect(scenario.disk.askForInput).not.toHaveBeenCalled();
+            promptCli({}, scenario.effects);
+            expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
+            expect(scenario.effects.askForInput).not.toHaveBeenCalled();
           });
         });
       });

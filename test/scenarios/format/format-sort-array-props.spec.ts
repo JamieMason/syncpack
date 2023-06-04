@@ -7,9 +7,9 @@ import { createScenario } from '../lib/create-scenario';
 describe('format', () => {
   it('sorts array properties alphabetically by value', () => {
     const scenario = getScenario();
-    formatCli(scenario.config, scenario.disk);
-    expect(scenario.disk.writeFileSync.mock.calls).toEqual([
-      scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+    formatCli(scenario.config, scenario.effects);
+    expect(scenario.effects.writeFileSync.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].effectsWriteWhenChanged,
     ]);
     expect(scenario.log.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].logEntryWhenChanged,

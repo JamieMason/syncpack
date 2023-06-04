@@ -4,7 +4,7 @@ module.exports = {
     'src/**/*.ts',
     '!src/bin.ts',
     '!src/bin*/index.ts',
-    '!src/lib/disk.ts',
+    '!src/lib/effects.ts',
     '!src/lib/log.ts',
     '!src/option.ts',
   ],

@@ -17,7 +17,7 @@ import type { RcConfig } from '../config/types';
 import { CWD } from '../constants';
 import { verbose } from './log';
 
-export type Disk = {
+export type Effects = {
   askForChoice: (opts: {
     message: string;
     choices: string[];
@@ -36,7 +36,7 @@ export type Disk = {
 
 const client = cosmiconfigSync('syncpack');
 
-export const disk: Disk = {
+export const effects: Effects = {
   askForChoice({ message, choices }) {
     return new Select({ name: 'choice', message, choices })
       .run()

@@ -1,13 +1,13 @@
 import { Err, Ok } from 'tightrope/result';
 import { mockPackage } from '../../test/mock';
-import { mockDisk } from '../../test/mock-disk';
+import { mockEffects } from '../../test/mock-effects';
 import { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import { UnnamedVersionStringStrategy } from './unnamed-version-string';
 
 it('gets and sets an anonymous version from a single string', () => {
   const strategy = new UnnamedVersionStringStrategy('workspace', 'someVersion');
   const jsonFile = mockPackage('foo', { otherProps: { someVersion: '1.2.3' } });
-  const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
+  const file = new PackageJsonFile(jsonFile, {} as any, mockEffects());
   const initial = [['someVersion', '1.2.3']];
   const updated = [['someVersion', '2.0.0']];
   expect(strategy.read(file)).toEqual(new Ok(initial));
@@ -22,7 +22,7 @@ it('gets and sets an anonymous version from a single string in a nested location
       engines: { node: '1.2.3' },
     },
   });
-  const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
+  const file = new PackageJsonFile(jsonFile, {} as any, mockEffects());
   const initial = [['node', '1.2.3']];
   const updated = [['node', '2.0.0']];
   expect(strategy.read(file)).toEqual(new Ok(initial));
@@ -33,6 +33,6 @@ it('gets and sets an anonymous version from a single string in a nested location
 it('returns new Err when path is not found', () => {
   const strategy = new UnnamedVersionStringStrategy('workspace', 'never.gonna');
   const jsonFile = mockPackage('foo', {});
-  const file = new PackageJsonFile(jsonFile, {} as any, mockDisk());
+  const file = new PackageJsonFile(jsonFile, {} as any, mockEffects());
   expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));
 });

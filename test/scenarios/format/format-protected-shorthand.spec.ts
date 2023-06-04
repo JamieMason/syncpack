@@ -6,8 +6,8 @@ import { createScenario } from '../lib/create-scenario';
 describe('format', () => {
   it('retains long form format for "repository" when directory property used', () => {
     const scenario = getScenario();
-    formatCli(scenario.config, scenario.disk);
-    expect(scenario.disk.writeFileSync.mock.calls).toEqual([]);
+    formatCli(scenario.config, scenario.effects);
+    expect(scenario.effects.writeFileSync.mock.calls).toEqual([]);
     expect(scenario.log.mock.calls).toEqual([
       scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
     ]);

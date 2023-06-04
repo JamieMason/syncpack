@@ -10,32 +10,32 @@ import { map } from 'tightrope/result/map';
 import { mapErr } from 'tightrope/result/map-err';
 import type { Context } from '../get-context';
 import { $R } from '../lib/$R';
-import type { Disk } from '../lib/disk';
+import type { Effects } from '../lib/effects';
 import { printStrings } from '../lib/print-strings';
 import { getPatterns } from './get-patterns';
 
 type SafeFilePaths = Result<string[]>;
 
 /**
- * Using --source options and/or config files on disk from npm/pnpm/yarn/lerna,
+ * Using --source options and/or config files on effects from npm/pnpm/yarn/lerna,
  * return an array of absolute paths to every package.json file the user is
  * working with.
  *
  * @returns Array of absolute file paths to package.json files
  */
 export function getFilePaths(
-  disk: Disk,
+  effects: Effects,
   config: Context['config'],
 ): SafeFilePaths {
   return pipe(
     config,
-    getPatterns(disk),
+    getPatterns(effects),
     andThen(function resolvePatterns(patterns) {
       return pipe(
         patterns,
         $R.onlyOk(function resolvePattern(pattern) {
           return pipe(
-            fromTry(() => disk.globSync(pattern)),
+            fromTry(() => effects.globSync(pattern)),
             filter(isArrayOfStrings, `"glob" did not match "${pattern}"`),
             map(flat),
             map(uniq),

@@ -153,9 +153,9 @@ describe('semverGroups', () => {
       describe('set-semver-ranges', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          setSemverRangesCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
-          expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
+          setSemverRangesCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          expect(scenario.effects.writeFileSync).not.toHaveBeenCalled();
           expect(scenario.log.mock.calls).toEqual([
             scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
             scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
@@ -166,33 +166,33 @@ describe('semverGroups', () => {
       describe('lint-semver-ranges', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          lintSemverRangesCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+          lintSemverRangesCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
         });
       });
 
       describe('lint', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          lintCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+          lintCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
         });
       });
 
       describe('list', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          listCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+          listCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
         });
       });
 
       describe('prompt', () => {
         test('should have nothing to do', () => {
           const scenario = getScenario();
-          promptCli({}, scenario.disk);
-          expect(scenario.disk.askForChoice).not.toHaveBeenCalled();
-          expect(scenario.disk.askForInput).not.toHaveBeenCalled();
+          promptCli({}, scenario.effects);
+          expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
         });
       });
     });

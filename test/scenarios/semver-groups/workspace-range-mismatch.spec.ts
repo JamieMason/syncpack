@@ -63,10 +63,10 @@ describe('semverGroups', () => {
       describe('set-semver-ranges', () => {
         test('should fix the mismatch', () => {
           const scenario = getScenario();
-          setSemverRangesCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
-          expect(scenario.disk.writeFileSync.mock.calls).toEqual([
-            scenario.files['packages/b/package.json'].diskWriteWhenChanged,
+          setSemverRangesCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          expect(scenario.effects.writeFileSync.mock.calls).toEqual([
+            scenario.files['packages/b/package.json'].effectsWriteWhenChanged,
           ]);
           expect(scenario.log.mock.calls).toEqual([
             scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
@@ -78,25 +78,25 @@ describe('semverGroups', () => {
       describe('lint-semver-ranges', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          lintSemverRangesCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+          lintSemverRangesCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list', () => {
         test('does not exit with 1 on semver range issues', () => {
           const scenario = getScenario();
-          listCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+          listCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
         });
       });
 
       describe('prompt', () => {
         test('should have nothing to do', () => {
           const scenario = getScenario();
-          promptCli({}, scenario.disk);
-          expect(scenario.disk.askForChoice).not.toHaveBeenCalled();
-          expect(scenario.disk.askForInput).not.toHaveBeenCalled();
+          promptCli({}, scenario.effects);
+          expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
         });
       });
     });

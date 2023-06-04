@@ -6,14 +6,14 @@ import type { Result } from 'tightrope/result';
 import { andThen } from 'tightrope/result/and-then';
 import { filter } from 'tightrope/result/filter';
 import { CWD } from '../../constants';
-import type { Disk } from '../../lib/disk';
+import type { Effects } from '../../lib/effects';
 import { readJsonSafe } from './read-json-safe';
 
-export function getLernaPatterns(disk: Disk): () => Result<string[]> {
+export function getLernaPatterns(effects: Effects): () => Result<string[]> {
   return function getLernaPatterns() {
     return pipe(
       join(CWD, 'lerna.json'),
-      readJsonSafe(disk),
+      readJsonSafe(effects),
       andThen((file) => get(file, 'contents', 'packages')),
       filter(isArrayOfStrings, 'no lerna patterns found'),
     );

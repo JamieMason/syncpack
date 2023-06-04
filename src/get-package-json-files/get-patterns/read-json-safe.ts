@@ -4,7 +4,7 @@ import { andThen } from 'tightrope/result/and-then';
 import { fromTry } from 'tightrope/result/from-try';
 import { map } from 'tightrope/result/map';
 import { mapErr } from 'tightrope/result/map-err';
-import type { Disk } from '../../lib/disk';
+import type { Effects } from '../../lib/effects';
 
 export interface JsonFile<T> {
   /** absolute path on disk to this file */
@@ -16,11 +16,11 @@ export interface JsonFile<T> {
 }
 
 export function readJsonSafe<T>(
-  disk: Disk,
+  effects: Effects,
 ): (filePath: string) => Result<JsonFile<T>> {
   return function readJsonSafe(filePath) {
     return pipe(
-      fromTry(() => disk.readFileSync(filePath)),
+      fromTry(() => effects.readFileSync(filePath)),
       andThen((json: string) =>
         pipe(
           fromTry(() => JSON.parse(json)),

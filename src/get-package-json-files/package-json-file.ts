@@ -5,7 +5,7 @@ import type { Strategy } from '../config/get-custom-types';
 import { getIndent } from '../config/get-indent';
 import { CWD } from '../constants';
 import type { Context } from '../get-context';
-import type { Disk } from '../lib/disk';
+import type { Effects } from '../lib/effects';
 import { verbose } from '../lib/log';
 import { newlines } from '../lib/newlines';
 import type { JsonFile } from './get-patterns/read-json-safe';
@@ -39,10 +39,10 @@ export class PackageJsonFile {
   /** parsed JSON contents of the file */
   contents: PackageJson;
 
-  /** api for writing to disk */
-  readonly disk: Disk;
+  /** api for writing to effects */
+  readonly effects: Effects;
 
-  /** absolute path on disk to this file */
+  /** absolute path on effects to this file */
   readonly filePath: string;
 
   /** raw file contents of the file */
@@ -51,17 +51,17 @@ export class PackageJsonFile {
   /** resolved configuration */
   readonly config: Context['config'];
 
-  /** relative path on disk to this file */
+  /** relative path on effects to this file */
   readonly shortPath: string;
 
   constructor(
     jsonFile: JsonFile<PackageJson>,
     config: Context['config'],
-    disk: Disk,
+    effects: Effects,
   ) {
     this.config = config;
     this.contents = jsonFile.contents;
-    this.disk = disk;
+    this.effects = effects;
     this.filePath = jsonFile.filePath;
     this.json = jsonFile.json;
     this.shortPath = relative(CWD, jsonFile.filePath);
@@ -72,7 +72,7 @@ export class PackageJsonFile {
   }
 
   write(): void {
-    this.disk.writeFileSync(this.filePath, this.getSource());
+    this.effects.writeFileSync(this.filePath, this.getSource());
   }
 
   getSource(): string {

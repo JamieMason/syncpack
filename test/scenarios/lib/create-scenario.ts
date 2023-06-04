@@ -9,14 +9,14 @@ import type { SemverGroupReport } from '../../../src/get-semver-groups';
 import { getSemverGroups } from '../../../src/get-semver-groups';
 import type { VersionGroupReport } from '../../../src/get-version-groups';
 import { getVersionGroups } from '../../../src/get-version-groups';
-import type { MockDisk } from '../../mock-disk';
-import { mockDisk } from '../../mock-disk';
+import type { MockEffects } from '../../mock-effects';
+import { mockEffects } from '../../mock-effects';
 
 interface MockedFile {
   absolutePath: string;
   after: JsonFile<PackageJson>;
   before: JsonFile<PackageJson>;
-  diskWriteWhenChanged: [string, string];
+  effectsWriteWhenChanged: [string, string];
   id: string;
   logEntryWhenChanged: [any, any];
   logEntryWhenUnchanged: [any, any];
@@ -25,7 +25,7 @@ interface MockedFile {
 
 export interface TestScenario {
   config: Context['config']['rcFile'];
-  disk: MockDisk;
+  effects: MockEffects;
   log: jest.SpyInstance;
   files: Record<string, MockedFile>;
   report: {
@@ -43,7 +43,7 @@ export function createScenario(
   config: Context['config']['rcFile'],
 ): TestScenario {
   jest.clearAllMocks();
-  const disk = mockDisk();
+  const effects = mockEffects();
   const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
   // resolve all paths
   const mockedFiles: MockedFile[] = fileMocks.map((file) => {
@@ -59,7 +59,7 @@ export function createScenario(
         ...file.before,
         filePath: absolutePath,
       },
-      diskWriteWhenChanged: [
+      effectsWriteWhenChanged: [
         expect.stringContaining(relativePath),
         file.after.json,
       ],
@@ -76,17 +76,17 @@ export function createScenario(
     };
   });
   // mock rcfile
-  disk.readConfigFileSync.mockImplementation(() => {
+  effects.readConfigFileSync.mockImplementation(() => {
     return config;
   });
   // mock file system
-  disk.readFileSync.mockImplementation((filePath): string | undefined => {
+  effects.readFileSync.mockImplementation((filePath): string | undefined => {
     return mockedFiles.find((file) => {
       return normalize(filePath) === normalize(file.absolutePath);
     })?.before?.json;
   });
   // mock globs
-  disk.globSync.mockImplementation((pattern): string[] => {
+  effects.globSync.mockImplementation((pattern): string[] => {
     return mockedFiles
       .filter((file) => {
         return minimatch(
@@ -97,7 +97,7 @@ export function createScenario(
       .map((file) => normalize(file.absolutePath));
   });
   // create reports
-  const ctx = getContext({}, disk);
+  const ctx = getContext({}, effects);
   const versionGroups = getVersionGroups(ctx);
   const versionGroupsReport = versionGroups.map((group) => group.inspect());
   const semverGroups = getSemverGroups(ctx);
@@ -105,7 +105,7 @@ export function createScenario(
   // return API
   return {
     config,
-    disk,
+    effects,
     log,
     files: mockedFiles.reduce((memo, file) => {
       memo[file.id] = file;

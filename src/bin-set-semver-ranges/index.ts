@@ -2,7 +2,7 @@
 
 import chalk from 'chalk';
 import { program } from 'commander';
-import { disk } from '../lib/disk';
+import { effects } from '../lib/effects';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { setSemverRangesCli } from './set-semver-ranges-cli';
@@ -81,5 +81,5 @@ setSemverRangesCli(
     source: program.opts().source,
     types: program.opts().types,
   },
-  disk,
+  effects,
 );

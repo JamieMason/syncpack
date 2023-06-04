@@ -8,7 +8,7 @@ import { orElse } from 'tightrope/result/or-else';
 import { getSource } from '../../config/get-source';
 import { DEFAULT_SOURCES } from '../../constants';
 import type { Context } from '../../get-context';
-import type { Disk } from '../../lib/disk';
+import type { Effects } from '../../lib/effects';
 import { getLernaPatterns } from './get-lerna-patterns';
 import { getPnpmPatterns } from './get-pnpm-patterns';
 import { getYarnPatterns } from './get-yarn-patterns';
@@ -19,13 +19,13 @@ import { getYarnPatterns } from './get-yarn-patterns';
  *
  * @returns `['./package.json', './packages/* /package.json']`
  */
-export function getPatterns(disk: Disk) {
+export function getPatterns(effects: Effects) {
   return function getPatterns(config: Context['config']): Result<string[]> {
     return pipe(
       getCliPatterns(),
-      orElse(getYarnPatterns(disk)),
-      orElse(getPnpmPatterns(disk)),
-      orElse(getLernaPatterns(disk)),
+      orElse(getYarnPatterns(effects)),
+      orElse(getPnpmPatterns(effects)),
+      orElse(getLernaPatterns(effects)),
       map(addRootDir),
       map(limitToPackageJson),
       orElse(() => new Ok(DEFAULT_SOURCES)),

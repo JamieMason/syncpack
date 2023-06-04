@@ -38,9 +38,9 @@ describe('versionGroups', () => {
       describe('fix-mismatches', () => {
         test('should exit with 1 on the unfixable mismatch', () => {
           const scenario = getScenario();
-          fixMismatchesCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
-          expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
+          fixMismatchesCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          expect(scenario.effects.writeFileSync).not.toHaveBeenCalled();
           expect(scenario.log.mock.calls).toEqual([
             scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
             scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
@@ -51,33 +51,33 @@ describe('versionGroups', () => {
       describe('list-mismatches', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          listMismatchesCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+          listMismatchesCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('lint', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          lintCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+          lintCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          listCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+          listCli({}, scenario.effects);
+          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('prompt', () => {
         test('should ask the user to choose the correct version', () => {
           const scenario = getScenario();
-          promptCli({}, scenario.disk);
-          expect(scenario.disk.askForChoice).toHaveBeenCalled();
-          expect(scenario.disk.askForInput).not.toHaveBeenCalled();
+          promptCli({}, scenario.effects);
+          expect(scenario.effects.askForChoice).toHaveBeenCalled();
+          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
         });
       });
     });

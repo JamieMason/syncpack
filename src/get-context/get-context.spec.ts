@@ -1,29 +1,29 @@
 import 'expect-more-jest';
 import { join } from 'path';
 import { getContext } from '.';
-import { mockDisk } from '../../test/mock-disk';
+import { mockEffects } from '../../test/mock-effects';
 import { getSource } from '../config/get-source';
 import { CWD, DEFAULT_CONFIG } from '../constants';
 
 describe('getContext', () => {
   describe('source', () => {
     it('uses defaults when no CLI options or config are set', () => {
-      const disk = mockDisk();
-      const ctx = getContext({}, disk);
+      const effects = mockEffects();
+      const ctx = getContext({}, effects);
       expect(getSource(ctx.config)).toEqual(DEFAULT_CONFIG.source);
     });
 
     it('uses value from config when no CLI options are set', () => {
-      const disk = mockDisk();
-      disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      const ctx = getContext({}, disk);
+      const effects = mockEffects();
+      effects.readConfigFileSync.mockReturnValue({ source: ['foo'] });
+      const ctx = getContext({}, effects);
       expect(getSource(ctx.config)).toEqual(['foo']);
     });
 
     it('uses value from CLI when config and CLI options are set', () => {
-      const disk = mockDisk();
-      disk.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      const ctx = getContext({ source: ['bar'] }, disk);
+      const effects = mockEffects();
+      effects.readConfigFileSync.mockReturnValue({ source: ['foo'] });
+      const ctx = getContext({ source: ['bar'] }, effects);
       expect(getSource(ctx.config)).toEqual(['bar']);
     });
   });
@@ -35,16 +35,16 @@ describe('getContext', () => {
           const filePath = join(CWD, 'package.json');
           const contents = { name: 'foo' };
           const json = '{"name":"foo"}';
-          const disk = mockDisk();
-          disk.globSync.mockReturnValue([filePath]);
-          disk.readFileSync.mockReturnValue(json);
-          const config = getContext({ source: ['package.json'] }, disk);
+          const effects = mockEffects();
+          effects.globSync.mockReturnValue([filePath]);
+          effects.readFileSync.mockReturnValue(json);
+          const config = getContext({ source: ['package.json'] }, effects);
           expect(config).toEqual(
             expect.objectContaining({
               packageJsonFiles: [
                 {
                   contents,
-                  disk: expect.toBeNonEmptyObject(),
+                  effects: expect.toBeNonEmptyObject(),
                   filePath,
                   json,
                   config: expect.toBeNonEmptyObject(),
@@ -58,22 +58,25 @@ describe('getContext', () => {
 
       describe('for a pattern that matches nothing', () => {
         it('returns an empty array', () => {
-          const disk = mockDisk();
-          disk.globSync.mockReturnValue([]);
-          expect(getContext({ source: ['typo.json'] }, disk)).toHaveProperty(
+          const effects = mockEffects();
+          effects.globSync.mockReturnValue([]);
+          expect(getContext({ source: ['typo.json'] }, effects)).toHaveProperty(
             'packageJsonFiles',
             [],
           );
-          expect(disk.readFileSync).not.toHaveBeenCalled();
+          expect(effects.readFileSync).not.toHaveBeenCalled();
         });
       });
     });
 
     describe('when no --source cli options are given', () => {
       it('performs a default search', () => {
-        const disk = mockDisk();
-        getContext({}, disk);
-        expect(disk.globSync.mock.calls).toEqual([['package.json'], ['packages/*/package.json']]);
+        const effects = mockEffects();
+        getContext({}, effects);
+        expect(effects.globSync.mock.calls).toEqual([
+          ['package.json'],
+          ['packages/*/package.json'],
+        ]);
       });
 
       describe('when yarn workspaces are defined', () => {
@@ -82,11 +85,11 @@ describe('getContext', () => {
             const filePath = join(CWD, 'package.json');
             const contents = { workspaces: ['as-array/*'] };
             const json = JSON.stringify(contents);
-            const disk = mockDisk();
-            disk.globSync.mockReturnValue([filePath]);
-            disk.readFileSync.mockReturnValue(json);
-            getContext({}, disk);
-            expect(disk.globSync.mock.calls).toEqual([
+            const effects = mockEffects();
+            effects.globSync.mockReturnValue([filePath]);
+            effects.readFileSync.mockReturnValue(json);
+            getContext({}, effects);
+            expect(effects.globSync.mock.calls).toEqual([
               ['package.json'],
               ['as-array/*/package.json'],
             ]);
@@ -98,11 +101,11 @@ describe('getContext', () => {
             const filePath = join(CWD, 'package.json');
             const contents = { workspaces: { packages: ['as-object/*'] } };
             const json = JSON.stringify(contents);
-            const disk = mockDisk();
-            disk.globSync.mockReturnValue([filePath]);
-            disk.readFileSync.mockReturnValue(json);
-            getContext({}, disk);
-            expect(disk.globSync.mock.calls).toEqual([
+            const effects = mockEffects();
+            effects.globSync.mockReturnValue([filePath]);
+            effects.readFileSync.mockReturnValue(json);
+            getContext({}, effects);
+            expect(effects.globSync.mock.calls).toEqual([
               ['package.json'],
               ['as-object/*/package.json'],
             ]);
@@ -116,14 +119,17 @@ describe('getContext', () => {
             const filePath = join(CWD, 'package.json');
             const contents = { name: 'foo' };
             const json = JSON.stringify(contents);
-            const disk = mockDisk();
-            disk.globSync.mockReturnValue([filePath]);
-            disk.readFileSync.mockImplementation((filePath) => {
+            const effects = mockEffects();
+            effects.globSync.mockReturnValue([filePath]);
+            effects.readFileSync.mockImplementation((filePath) => {
               if (filePath.endsWith('package.json')) return json;
               if (filePath.endsWith('lerna.json')) return JSON.stringify({ packages: ['lerna/*'] });
             });
-            getContext({}, disk);
-            expect(disk.globSync.mock.calls).toEqual([['package.json'], ['lerna/*/package.json']]);
+            getContext({}, effects);
+            expect(effects.globSync.mock.calls).toEqual([
+              ['package.json'],
+              ['lerna/*/package.json'],
+            ]);
           });
         });
 
@@ -132,13 +138,13 @@ describe('getContext', () => {
             describe('when pnpm workspaces are defined', () => {
               it('resolves pnpm packages', () => {
                 const filePath = join(CWD, 'package.json');
-                const disk = mockDisk();
-                disk.globSync.mockReturnValue([filePath]);
-                disk.readYamlFileSync.mockReturnValue({
+                const effects = mockEffects();
+                effects.globSync.mockReturnValue([filePath]);
+                effects.readYamlFileSync.mockReturnValue({
                   packages: ['from-pnpm/*'],
                 });
-                getContext({}, disk);
-                expect(disk.globSync.mock.calls).toEqual([
+                getContext({}, effects);
+                expect(effects.globSync.mock.calls).toEqual([
                   ['package.json'],
                   ['from-pnpm/*/package.json'],
                 ]);
@@ -148,13 +154,13 @@ describe('getContext', () => {
             describe('when pnpm config is invalid', () => {
               it('performs a default search', () => {
                 const filePath = join(CWD, 'package.json');
-                const disk = mockDisk();
-                disk.globSync.mockReturnValue([filePath]);
-                disk.readYamlFileSync.mockImplementation(() => {
+                const effects = mockEffects();
+                effects.globSync.mockReturnValue([filePath]);
+                effects.readYamlFileSync.mockImplementation(() => {
                   throw new Error('Some YAML Error');
                 });
-                getContext({}, disk);
-                expect(disk.globSync.mock.calls).toEqual([
+                getContext({}, effects);
+                expect(effects.globSync.mock.calls).toEqual([
                   ['package.json'],
                   ['packages/*/package.json'],
                 ]);

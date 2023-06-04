@@ -7,7 +7,7 @@ import { map } from 'tightrope/result/map';
 import { or } from 'tightrope/result/or';
 import type { Context } from '../get-context';
 import { $R } from '../lib/$R';
-import type { Disk } from '../lib/disk';
+import type { Effects } from '../lib/effects';
 import { getFilePaths } from './get-file-paths';
 import { readJsonSafe } from './get-patterns/read-json-safe';
 import type { PackageJson } from './package-json-file';
@@ -15,16 +15,16 @@ import { PackageJsonFile } from './package-json-file';
 
 /** Create an API for every package.json file needed. */
 export function getPackageJsonFiles(
-  disk: Disk,
+  effects: Effects,
   config: Context['config'],
 ): Result<PackageJsonFile[]> {
   return pipe(
-    getFilePaths(disk, config),
+    getFilePaths(effects, config),
     andThen(
       $R.onlyOk(
         flow(
-          readJsonSafe<PackageJson>(disk),
-          map((jsonFile) => new PackageJsonFile(jsonFile, config, disk)),
+          readJsonSafe<PackageJson>(effects),
+          map((jsonFile) => new PackageJsonFile(jsonFile, config, effects)),
           $R.tapErrVerbose,
         ),
       ),

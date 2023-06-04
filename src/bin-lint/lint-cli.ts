@@ -3,12 +3,12 @@ import { lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges';
 import { listMismatches } from '../bin-list-mismatches/list-mismatches';
 import type { CliConfig } from '../config/types';
 import { getContext } from '../get-context';
-import type { Disk } from '../lib/disk';
+import type { Effects } from '../lib/effects';
 import { exitIfInvalid } from '../lib/exit-if-invalid';
 
-export function lintCli(input: Partial<CliConfig>, disk: Disk): void {
+export function lintCli(input: Partial<CliConfig>, effects: Effects): void {
   pipe(
-    getContext(input, disk),
+    getContext(input, effects),
     listMismatches,
     lintSemverRanges,
     exitIfInvalid,
