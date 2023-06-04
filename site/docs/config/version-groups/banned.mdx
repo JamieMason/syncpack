@@ -1,0 +1,67 @@
+---
+id: banned
+title: Banned
+---
+
+import Pills from '@site/src/components/pill';
+import Packages from '@site/src/partials/version-group-config/packages.mdx';
+import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
+import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
+import Label from '@site/src/partials/version-group-config/label.mdx';
+
+# Banned
+
+Remove dependencies which you've decided should never be used.
+
+:::info
+
+- One of the possible values for the [`versionGroups`](../version-groups.mdx)
+  configuration array.
+- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
+
+:::
+
+## `isBanned` boolean
+
+<Pills required />
+
+```json title="Completely ban a dependency from being used anywhere"
+{
+  "versionGroups": [
+    {
+      "packages": ["**"],
+      "dependencies": ["never-gonna"],
+      "isBanned": true
+    }
+  ]
+}
+```
+
+```json title="Ban a dependency from being used in production"
+{
+  "versionGroups": [
+    {
+      "packages": ["my-fast-ui"],
+      "dependencies": ["huge-filesize-party"],
+      "dependencyTypes": ["prod"],
+      "isBanned": true
+    }
+  ]
+}
+```
+
+## `packages` string[]
+
+<Packages />
+
+## `dependencies` string[]
+
+<Dependencies />
+
+## `dependencyTypes` string[]
+
+<DependencyTypes />
+
+## `label` string
+
+<Label />

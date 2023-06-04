@@ -11,6 +11,7 @@ import { CatchAllVersionGroup } from './catch-all';
 import { FilteredOutVersionGroup } from './filtered-out';
 import { IgnoredVersionGroup } from './ignored';
 import { PinnedVersionGroup } from './pinned';
+import { SameRangeVersionGroup } from './same-range';
 import { SnappedToVersionGroup } from './snapped-to';
 import { StandardVersionGroup } from './standard';
 
@@ -20,6 +21,7 @@ export type AnyVersionGroup =
   | FilteredOutVersionGroup
   | IgnoredVersionGroup
   | PinnedVersionGroup
+  | SameRangeVersionGroup
   | SnappedToVersionGroup
   | StandardVersionGroup;
 
@@ -55,7 +57,7 @@ export type VersionGroupReport = {
       expectedVersion: string;
     }
   | {
-      status: 'SEMVER_UNSATISFIED';
+      status: 'SAME_RANGE_MISMATCH';
       isValid: false;
     }
   | {
@@ -76,10 +78,6 @@ export type VersionGroupReport = {
       isValid: false;
       expectedVersion: string;
       workspaceInstance: Instance;
-    }
-  | {
-      status: 'WORKSPACE_UNSATISFIED';
-      isValid: false;
     }
 );
 
@@ -169,6 +167,16 @@ function createVersionGroups(ctx: Context): AnyVersionGroup[] {
             label,
             packages,
             snapTo: config.snapTo,
+          }),
+        );
+      } else if (config.policy === 'sameRange') {
+        versionGroups.push(
+          new SameRangeVersionGroup({
+            dependencies,
+            dependencyTypes,
+            label,
+            packages,
+            policy: config.policy,
           }),
         );
       } else {

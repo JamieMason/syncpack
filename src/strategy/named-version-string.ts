@@ -29,7 +29,7 @@ export class NamedVersionStringStrategy {
       getNonEmptyStringProp(path, file),
       // if it is a non empty string, we can read it
       andThen((value) => {
-        const [name, version] = value.split('@');
+        const [name, version] = value.split(/@(.*)/);
         return isNonEmptyString(name) && isNonEmptyString(version)
           ? new Ok<[string, string][]>([[name, version]])
           : new Err(

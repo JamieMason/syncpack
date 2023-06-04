@@ -5,30 +5,29 @@ import { listCli } from '../../../src/bin-list/list-cli';
 import { createScenarioVariants } from './lib/create-scenario-variants';
 
 describe('versionGroups', () => {
-  describe('PINNED_MISMATCH', () => {
+  describe('SAME_RANGE_MISMATCH', () => {
     createScenarioVariants({
       config: {
         versionGroups: [
           {
             dependencies: ['**'],
             packages: ['**'],
-            pinVersion: '2.2.2',
+            policy: 'sameRange',
           },
         ],
       },
-      a: ['yarn@2.0.0', 'yarn@2.2.2'],
-      b: ['yarn@3.0.0', 'yarn@2.2.2'],
+      a: ['yarn@<=2.0.0', 'yarn@<=2.0.0'],
+      b: ['yarn@>=3.0.0', 'yarn@>=3.0.0'],
     }).forEach((getScenario) => {
       describe('versionGroup.inspect()', () => {
-        test('should identify as a mismatch where the pinned version must be used', () => {
+        test('should identify as a mismatch where not every semver range includes all the others', () => {
           const scenario = getScenario();
           expect(scenario.report.versionGroups).toEqual([
             [
               expect.objectContaining({
-                expectedVersion: '2.2.2',
                 isValid: false,
                 name: 'yarn',
-                status: 'PINNED_MISMATCH',
+                status: 'SAME_RANGE_MISMATCH',
               }),
             ],
           ]);
@@ -36,17 +35,14 @@ describe('versionGroups', () => {
       });
 
       describe('fix-mismatches', () => {
-        test('should fix the mismatch', () => {
+        test('should exit with 1 on the unfixable mismatch', () => {
           const scenario = getScenario();
           fixMismatchesCli({}, scenario.disk);
-          expect(scenario.disk.process.exit).not.toHaveBeenCalled();
-          expect(scenario.disk.writeFileSync.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].diskWriteWhenChanged,
-            scenario.files['packages/b/package.json'].diskWriteWhenChanged,
-          ]);
+          expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+          expect(scenario.disk.writeFileSync).not.toHaveBeenCalled();
           expect(scenario.log.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].logEntryWhenChanged,
-            scenario.files['packages/b/package.json'].logEntryWhenChanged,
+            scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
+            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
           ]);
         });
       });

@@ -4,6 +4,7 @@ import { CWD } from '../src/constants';
 import type { JsonFile } from '../src/get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJson } from '../src/get-package-json-files/package-json-file';
 import { newlines } from '../src/lib/newlines';
+import { splitNameAndVersion } from '../src/lib/split-name-and-version';
 
 export const mockPackage = (
   dirName: string,
@@ -88,9 +89,7 @@ function toJson(contents: PackageJson): string {
 
 function toObject(identifiers: string[]): { [key: string]: string } {
   return identifiers.reduce<{ [key: string]: string }>((memo, dep) => {
-    const ix = dep.lastIndexOf('@');
-    const name = dep.slice(0, ix);
-    const version = dep.slice(ix + 1);
+    const [name, version] = splitNameAndVersion(dep);
     memo[name] = version;
     return memo;
   }, {});

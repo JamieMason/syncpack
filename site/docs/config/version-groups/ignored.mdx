@@ -1,0 +1,54 @@
+---
+id: ignored
+title: Ignored
+---
+
+import Pills from '@site/src/components/pill';
+import Packages from '@site/src/partials/version-group-config/packages.mdx';
+import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
+import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
+import Label from '@site/src/partials/version-group-config/label.mdx';
+
+# Ignored
+
+Have syncpack ignore these dependencies completely.
+
+:::info
+
+- One of the possible values for the [`versionGroups`](../version-groups.mdx)
+  configuration array.
+- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
+
+:::
+
+## `isIgnored` boolean
+
+<Pills required />
+
+```json title="Hide dependencies from syncpack"
+{
+  "versionGroups": [
+    {
+      "packages": ["oops-moment", "workaround"],
+      "dependencies": ["**"],
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+## `packages` string[]
+
+<Packages />
+
+## `dependencies` string[]
+
+<Dependencies />
+
+## `dependencyTypes` string[]
+
+<DependencyTypes />
+
+## `label` string
+
+<Label />

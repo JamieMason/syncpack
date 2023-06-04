@@ -1,0 +1,20 @@
+import Pills from '@site/src/components/pill';
+
+<Pills optional />
+
+A short name or description to be displayed in a header in syncpack's output,
+above the dependencies which matched this group. If a `label` is not set, then
+the order which this group appears in your config will be used instead.
+
+```json title="Example where a label is used to give context to other Devs"
+{
+  "versionGroups": [
+    {
+      "label": "AWS dependencies must all share the same version",
+      "packages": ["**"],
+      "dependencies": ["@aws-sdk/**"],
+      "pinVersion": "3.272.0"
+    }
+  ]
+}
+```

@@ -64,6 +64,7 @@ export function list(ctx: Context): Context {
             );
             break;
           }
+          case 'SAME_RANGE_MISMATCH':
           case 'UNSUPPORTED_MISMATCH': {
             console.log(
               chalk`{red %s %s} %s`,
@@ -75,8 +76,6 @@ export function list(ctx: Context): Context {
             );
             break;
           }
-          // @TODO case 'SEMVER_UNSATISFIED': break;
-          // @TODO case 'WORKSPACE_UNSATISFIED': break;
         }
 
         function listColouredVersions(

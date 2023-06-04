@@ -43,7 +43,24 @@ const sidebars = {
       'config/sort-az',
       'config/sort-first',
       'config/source',
-      'config/version-groups',
+      {
+        type: 'category',
+        label: 'versionGroups',
+        collapsible: true,
+        collapsed: false,
+        link: {
+          type: 'doc',
+          id: 'config/version-groups',
+        },
+        items: [
+          'config/version-groups/banned',
+          'config/version-groups/ignored',
+          'config/version-groups/pinned',
+          'config/version-groups/same-range',
+          'config/version-groups/snapped-to',
+          'config/version-groups/standard',
+        ],
+      },
     ],
   },
 };

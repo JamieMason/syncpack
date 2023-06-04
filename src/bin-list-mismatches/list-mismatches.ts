@@ -103,6 +103,22 @@ export function listMismatches(ctx: Context): Context {
             });
             break;
           }
+          case 'SAME_RANGE_MISMATCH': {
+            console.log(
+              chalk`{red %s} %s {dim has mismatched semver range versions which syncpack cannot fix}`,
+              ICON.cross,
+              report.name,
+            );
+            report.instances.forEach((instance) => {
+              console.log(
+                chalk`  {yellow %s} {dim in %s of %s}`,
+                instance.version,
+                instance.strategy.path,
+                instance.packageJsonFile.shortPath,
+              );
+            });
+            break;
+          }
           case 'UNSUPPORTED_MISMATCH': {
             console.log(
               chalk`{red %s} %s {dim has mismatched versions which syncpack cannot fix}`,
@@ -139,8 +155,6 @@ export function listMismatches(ctx: Context): Context {
             });
             break;
           }
-          // @TODO case 'SEMVER_UNSATISFIED': break;
-          // @TODO case 'WORKSPACE_UNSATISFIED': break;
         }
       });
   });

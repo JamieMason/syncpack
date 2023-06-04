@@ -26,13 +26,12 @@ export function fixMismatches(ctx: Context): Context {
               instance.setVersion(DELETE);
               break;
             }
+            case 'SAME_RANGE_MISMATCH':
             case 'UNSUPPORTED_MISMATCH': {
               // @TODO Output something when fix-mismatches faces an unsupported mismatch
               ctx.isInvalid = true;
               break;
             }
-            // @TODO case 'SEMVER_UNSATISFIED': break;
-            // @TODO case 'WORKSPACE_UNSATISFIED': break;
           }
         });
       }

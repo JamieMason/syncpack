@@ -1,0 +1,58 @@
+---
+id: same-range
+title: Same Range
+---
+
+import Pills from '@site/src/components/pill';
+import Packages from '@site/src/partials/version-group-config/packages.mdx';
+import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
+import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
+import Label from '@site/src/partials/version-group-config/label.mdx';
+
+# Same Range
+
+Relax syncpack to ensure that all versions have semver ranges which all satisfy
+each other, instead of the default behaviour of them having to be identical.
+
+:::info
+
+- One of the possible values for the [`versionGroups`](../version-groups.mdx)
+  configuration array.
+- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
+
+:::
+
+## `policy` "sameRange"
+
+<Pills required />
+
+Currently the only custom policy in syncpack is "sameRange", which is what
+causes this version group to be used.
+
+```json title="..."
+{
+  "versionGroups": [
+    {
+      "dependencies": ["**"],
+      "packages": ["**"],
+      "policy": "sameRange"
+    }
+  ]
+}
+```
+
+## `packages` string[]
+
+<Packages />
+
+## `dependencies` string[]
+
+<Dependencies />
+
+## `dependencyTypes` string[]
+
+<DependencyTypes />
+
+## `label` string
+
+<Label />

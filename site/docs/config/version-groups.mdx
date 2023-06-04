@@ -3,10 +3,22 @@ id: version-groups
 title: versionGroups
 ---
 
-import Pills from '@site/src/components/pill';
 import DefaultDependencyTypes from '@site/src/partials/default-dependency-types.mdx';
 
 # `versionGroups` object[]
+
+Version groups are an array of objects which partition your monorepo into
+isolated sections which each have their own rules/policy/strategy for how
+versions should be managed.
+
+There are 6 types of version groups:
+
+- [Banned](./version-groups/banned.mdx)
+- [Ignored](./version-groups/ignored.mdx)
+- [Pinned](./version-groups/pinned.mdx)
+- [Same Range](./version-groups/same-range.mdx)
+- [Snapped To](./version-groups/snapped-to.mdx)
+- [Standard](./version-groups/standard.mdx)
 
 :::info
 
@@ -14,244 +26,64 @@ Learn more in our [guide to Version Groups](../guide/version-groups.mdx)
 
 :::
 
-## `packages` string[]
+## Example
 
-<Pills required />
+- Let's say your monorepo directly depends on `react`, 3 of your packages have
+  it under `dependencies` and another 2 have it under `peerDependencies`. Each
+  of those 5 specific places where `react` is depended on we refer to as an
+  "instance".
+- Every instance of every dependency in your repo is assigned to the first
+  version group it matches.
+- Each instance can only belong to one version group.
+- If you do not define any version groups, or a given instance of a dependency
+  does not match any of them, it is assigned to an internal catch-all
+  [Standard](./version-groups/standard.mdx) version group.
 
-An array of strings which should match the `name` properties of your
-package.json files. This is used in combination with the
-[`dependencies`](#dependencies-string) property to determine which dependencies
-should belong to this version group.
-
-The strings can any combination of exact matches or
-[minimatch](https://github.com/isaacs/minimatch) glob patterns:
+Here is an example which uses every kind of version group:
 
 ```json
-// match any package
-["**"]
-
-// match any package with a certain scope
-["@my-repo/**"]
-
-// match specific packages by name
-["my-server", "my-client"]
-```
-
-## `dependencies` string[]
-
-<Pills required />
-
-An array of strings which should match the names of dependencies you've
-installed or otherwise referenced in your package.json files. This is used in
-combination with the [`packages`](#packages-string) property to determine which
-dependencies should belong to this version group.
-
-```json title="Example of which strings are matched against"
-{
-  "name": "not-here",
-  "dependencies": { "HERE": "0.0.0" },
-  "devDependencies": { "HERE": "0.0.0" },
-  "overrides": { "HERE": "0.0.0" },
-  "peerDependencies": { "HERE": "0.0.0" },
-  "pnpm": { "overrides": { "HERE": "0.0.0" } },
-  "resolutions": { "HERE": "0.0.0" }
-}
-```
-
-The strings can any combination of exact matches or
-[minimatch](https://github.com/isaacs/minimatch) glob patterns:
-
-```json title="Examples of valid values"
-// match any dependency
-["**"]
-
-// match all dependencies with a certain scope
-["@aws-sdk/**"]
-
-// match specific dependencies by name
-["react", "react-dom"]
-```
-
-:::tip
-
-You can extend syncpack to look in more places by defining your own
-[`customTypes`](./custom-types.mdx). If you do that, then the names of any
-dependencies found by your `customTypes` can also be targeted using this field.
-
-:::
-
-## `dependencyTypes` string[]
-
-<Pills optional />
-
-Can be used in combination with the [`packages`](#packages-string) and
-[`dependencies`](#dependencies-string) properties to narrow further which
-dependencies should belong to this version group. When set, only dependencies
-present in the named locations will be considered a match for this version
-group.
-
-The possible values available by default are in the table below:
-
-<DefaultDependencyTypes />
-
-:::tip
-
-If you define your own [`customTypes`](./custom-types.mdx), their names can also
-be used in addition to those in the table above.
-
-:::
-
-In this example we define that all dependencies within `peerDependencies` in the
-repo must use `"*"` as its version number, regardless of what versions of the
-same dependencies might be used in `dependencies` or `devDependencies`.
-
-```json title="Ensure peerDependencies always use *"
 {
   "versionGroups": [
     {
+      // Pinned
+      "label": "Ensure AWS SDK dependencies always use the same version",
+      "packages": ["**"],
+      "dependencies": ["@aws-sdk/**"],
+      "pinVersion": "3.272.0"
+    },
+    {
+      // Banned
+      "label": "Please use lodash instead of underscore",
+      "packages": ["**"],
+      "dependencies": ["underscore"],
+      "isBanned": true
+    },
+    {
+      // Ignored
+      "label": "Ignore issues in these dodgy packages",
+      "packages": ["oops-moment", "workaround"],
+      "dependencies": ["**"],
+      "isIgnored": true
+    },
+    {
+      // Snapped
+      "label": "Ensure all packages use whatever version the mobile-core package is using",
+      "dependencies": ["react", "react-native"],
+      "packages": ["**"],
+      "snapTo": ["mobile-core"]
+    },
+    {
+      // Pinned
+      "label": "Use '*' under 'peerDependencies' everywhere",
       "packages": ["**"],
       "dependencies": ["**"],
       "dependencyTypes": ["peer"],
       "pinVersion": "*"
-    }
-  ]
-}
-```
-
-:::tip
-
-Syncpack config files also support
-[TypeScript IntelliSense](https://jamiemason.github.io/syncpack/config-file#typescript-intellisense).
-
-:::
-
-## `label` string
-
-<Pills optional />
-
-A short name or description to be displayed in a header in syncpack's output,
-above the dependencies which matched this group. If a `label` is not set, then
-the order which this group appears in your config will be used instead.
-
-```json title="Example where a label is used to give context to other Devs"
-{
-  "versionGroups": [
+    },
     {
-      "label": "AWS dependencies must all share the same version",
-      "packages": ["**"],
-      "dependencies": ["@aws-sdk/**"],
-      "pinVersion": "3.272.0"
-    }
-  ]
-}
-```
-
-## `isBanned` boolean
-
-<Pills optional />
-
-Remove dependencies which you've decided should never be used.
-
-```json title="Completely ban a dependency from being used anywhere"
-{
-  "versionGroups": [
-    {
-      "packages": ["**"],
-      "dependencies": ["never-gonna"],
-      "isBanned": true
-    }
-  ]
-}
-```
-
-```json title="Ban a dependency from being used in production"
-{
-  "versionGroups": [
-    {
-      "packages": ["my-fast-ui"],
-      "dependencies": ["huge-filesize-party"],
-      "dependencyTypes": ["prod"],
-      "isBanned": true
-    }
-  ]
-}
-```
-
-## `isIgnored` boolean
-
-<Pills optional />
-
-Have syncpack ignore these dependencies completely.
-
-```json title="Hide dependencies from syncpack"
-{
-  "versionGroups": [
-    {
-      "packages": ["oops-moment", "workaround"],
-      "dependencies": ["**"],
-      "isIgnored": true
-    }
-  ]
-}
-```
-
-## `pinVersion` string
-
-<Pills optional />
-
-Pin the version of all dependencies in this group to match this specific version
-you've defined.
-
-```json title="Ensure AWS dependencies always have the same version"
-{
-  "versionGroups": [
-    {
-      "dependencies": ["@aws-sdk/**"],
-      "packages": ["**"],
-      "pinVersion": "3.272.0"
-    }
-  ]
-}
-```
-
-## `snapTo` string[]
-
-<Pills optional />
-
-Pin the version of all dependencies in this group to match the version used by
-the package(s) named within the `snapTo` array. The values refer to the `name`
-property of the package.json files developed in your monorepo.
-
-Multiple values can be added to provide fallback packages to try in the event
-that the dependency is not present in the earlier packages in the array.
-
-```json title="Ensure all packages use whatever version mobile-app is using"
-{
-  "versionGroups": [
-    {
-      "dependencies": ["react", "react-native"],
-      "packages": ["**"],
-      "snapTo": ["mobile-app"]
-    }
-  ]
-}
-```
-
-## `preferVersion` string
-
-<Pills optional />
-
-Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
-
-To set this as your standard policy, create a version group which applies to
-every dependency as the last item in your `versionGroups` array. You can also
-just set this for some of the packages if you need to.
-
-```json title="Choose the lowest valid semver version when fixing mismatches"
-{
-  "versionGroups": [
-    {
-      "dependencies": ["**"],
+      // Standard
+      "label": "Resolve mismatches here with the oldest version instead of the newest",
+      "dependencies": ["@vintage/**"],
       "packages": ["**"],
       "preferVersion": "lowestSemver"
     }

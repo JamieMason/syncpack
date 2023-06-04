@@ -2,129 +2,23 @@ import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches
 import { lintCli } from '../../../src/bin-lint/lint-cli';
 import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
 import { listCli } from '../../../src/bin-list/list-cli';
-import { mockPackage } from '../../mock';
-import { createScenario } from '../lib/create-scenario';
+import { createScenarioVariants } from './lib/create-scenario-variants';
 
 describe('versionGroups', () => {
   describe('LOWEST_SEMVER_MISMATCH', () => {
-    [
-      () =>
-        createScenario(
-          [
-            {
-              path: 'packages/a/package.json',
-              before: mockPackage('a', { otherProps: { packageManager: 'yarn@3.5.2' } }),
-              after: mockPackage('a', { otherProps: { packageManager: 'yarn@1.0.1' } }),
-            },
-            {
-              path: 'packages/b/package.json',
-              before: mockPackage('b', { otherProps: { packageManager: 'yarn@1.0.1' } }),
-              after: mockPackage('b', { otherProps: { packageManager: 'yarn@1.0.1' } }),
-            },
-          ],
+    createScenarioVariants({
+      config: {
+        versionGroups: [
           {
-            customTypes: {
-              engines: {
-                strategy: 'name@version',
-                path: 'packageManager',
-              },
-            },
-            versionGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                preferVersion: 'lowestSemver',
-              },
-            ],
+            dependencies: ['**'],
+            packages: ['**'],
+            preferVersion: 'lowestSemver',
           },
-        ),
-      () =>
-        createScenario(
-          [
-            {
-              path: 'packages/a/package.json',
-              before: mockPackage('a', { otherProps: { deps: { custom: { yarn: '3.5.2' } } } }),
-              after: mockPackage('a', { otherProps: { deps: { custom: { yarn: '1.0.1' } } } }),
-            },
-            {
-              path: 'packages/b/package.json',
-              before: mockPackage('b', { otherProps: { deps: { custom: { yarn: '1.0.1' } } } }),
-              after: mockPackage('b', { otherProps: { deps: { custom: { yarn: '1.0.1' } } } }),
-            },
-          ],
-          {
-            customTypes: {
-              engines: {
-                strategy: 'versionsByName',
-                path: 'deps.custom',
-              },
-            },
-            versionGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                preferVersion: 'lowestSemver',
-              },
-            ],
-          },
-        ),
-      () =>
-        createScenario(
-          [
-            {
-              path: 'packages/a/package.json',
-              before: mockPackage('a', { otherProps: { deps: { custom: { yarn: '3.5.2' } } } }),
-              after: mockPackage('a', { otherProps: { deps: { custom: { yarn: '1.0.1' } } } }),
-            },
-            {
-              path: 'packages/b/package.json',
-              before: mockPackage('b', { otherProps: { deps: { custom: { yarn: '1.0.1' } } } }),
-              after: mockPackage('b', { otherProps: { deps: { custom: { yarn: '1.0.1' } } } }),
-            },
-          ],
-          {
-            customTypes: {
-              engines: {
-                strategy: 'version',
-                path: 'deps.custom.yarn',
-              },
-            },
-            versionGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                preferVersion: 'lowestSemver',
-              },
-            ],
-          },
-        ),
-      ...['deps', 'devDeps', 'overrides', 'peerDeps', 'pnpmOverrides', 'resolutions'].map(
-        (type: string) => () =>
-          createScenario(
-            [
-              {
-                path: 'packages/a/package.json',
-                before: mockPackage('a', { [type]: ['yarn@3.5.2'] }),
-                after: mockPackage('a', { [type]: ['yarn@1.0.1'] }),
-              },
-              {
-                path: 'packages/b/package.json',
-                before: mockPackage('b', { [type]: ['yarn@1.0.1'] }),
-                after: mockPackage('b', { [type]: ['yarn@1.0.1'] }),
-              },
-            ],
-            {
-              versionGroups: [
-                {
-                  dependencies: ['**'],
-                  packages: ['**'],
-                  preferVersion: 'lowestSemver',
-                },
-              ],
-            },
-          ),
-      ),
-    ].forEach((getScenario) => {
+        ],
+      },
+      a: ['yarn@3.5.2', 'yarn@1.0.1'],
+      b: ['yarn@1.0.1', 'yarn@1.0.1'],
+    }).forEach((getScenario) => {
       describe('versionGroup.inspect()', () => {
         test('should identify as a mismatch where the lowest valid semver version wins', () => {
           const scenario = getScenario();

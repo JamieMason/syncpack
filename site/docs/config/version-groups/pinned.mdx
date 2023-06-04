@@ -1,0 +1,55 @@
+---
+id: pinned
+title: Pinned
+---
+
+import Pills from '@site/src/components/pill';
+import Packages from '@site/src/partials/version-group-config/packages.mdx';
+import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
+import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
+import Label from '@site/src/partials/version-group-config/label.mdx';
+
+# Pinned
+
+Pin the version of all dependencies in this group to match a specific version
+you've defined.
+
+:::info
+
+- One of the possible values for the [`versionGroups`](../version-groups.mdx)
+  configuration array.
+- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
+
+:::
+
+## `pinVersion` string
+
+<Pills required />
+
+```json title="Ensure AWS dependencies always have the same version"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["@aws-sdk/**"],
+      "packages": ["**"],
+      "pinVersion": "3.272.0"
+    }
+  ]
+}
+```
+
+## `packages` string[]
+
+<Packages />
+
+## `dependencies` string[]
+
+<Dependencies />
+
+## `dependencyTypes` string[]
+
+<DependencyTypes />
+
+## `label` string
+
+<Label />

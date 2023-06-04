@@ -58,12 +58,20 @@ export namespace VersionGroupConfig {
     snapTo: string[];
   }
 
+  export interface SameRange extends GroupConfig {
+    policy: 'sameRange';
+  }
+
+  export interface SnappedTo extends GroupConfig {
+    snapTo: string[];
+  }
+
   export interface Standard extends GroupConfig {
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
 
   export type Any = Union.Strict<
-    Standard | Banned | Ignored | Pinned | SnappedTo
+    Banned | Ignored | Pinned | SameRange | SnappedTo | Standard
   >;
 }
 
