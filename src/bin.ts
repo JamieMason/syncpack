@@ -35,6 +35,9 @@ program
     executableFile: './bin-list/index.js',
     isDefault: true,
   })
+  .command('prompt', 'fix mismatches which syncpack cannot fix automatically', {
+    executableFile: './bin-prompt/index.js',
+  })
   .command('set-semver-ranges', 'set semver ranges to the given format', {
     executableFile: './bin-set-semver-ranges/index.js',
   })

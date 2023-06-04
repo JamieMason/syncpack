@@ -39,7 +39,6 @@ export class StandardVersionGroup {
       const wsFile = wsInstance?.packageJsonFile;
       const wsVersion = wsFile?.contents?.version;
       const isWorkspacePackage = wsInstance && wsVersion;
-
       if (isWorkspacePackage) {
         const nonWsInstances = getNonWorkspaceInstances(instances);
         if (!hasMismatch(nonWsInstances)) {

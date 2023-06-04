@@ -1,7 +1,9 @@
+import 'expect-more-jest';
 import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
 import { lintCli } from '../../../src/bin-lint/lint-cli';
 import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
 import { listCli } from '../../../src/bin-list/list-cli';
+import { promptCli } from '../../../src/bin-prompt/prompt-cli';
 import { createScenarioVariants } from './lib/create-scenario-variants';
 
 describe('versionGroups', () => {
@@ -74,6 +76,15 @@ describe('versionGroups', () => {
             const scenario = getScenario();
             listCli({}, scenario.disk);
             expect(scenario.disk.process.exit).toHaveBeenCalledWith(1);
+          });
+        });
+
+        describe('prompt', () => {
+          test('should ask the user to choose the correct version', () => {
+            const scenario = getScenario();
+            promptCli({}, scenario.disk);
+            expect(scenario.disk.askForChoice).toHaveBeenCalled();
+            expect(scenario.disk.askForInput).not.toHaveBeenCalled();
           });
         });
       });

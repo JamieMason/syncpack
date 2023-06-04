@@ -5,6 +5,8 @@ import { ICON } from '../constants';
 import type { Context } from '../get-context';
 import type { Instance } from '../get-package-json-files/instance';
 import { getVersionGroups } from '../get-version-groups';
+import { getUniqueVersions } from '../get-version-groups/lib/get-unique-versions';
+import { isSupported } from '../lib/is-semver';
 import * as log from '../lib/log';
 import { sortByName } from '../lib/sort-by-name';
 
@@ -70,8 +72,12 @@ export function list(ctx: Context): Context {
               chalk`{red %s %s} %s`,
               ICON.cross,
               report.name,
-              report.instances
-                .map((instance) => chalk.red(instance.version))
+              getUniqueVersions(report.instances)
+                .map((version) =>
+                  isSupported(version)
+                    ? chalk.red(version)
+                    : chalk.yellow(version),
+                )
                 .join(chalk.dim(', ')),
             );
             break;

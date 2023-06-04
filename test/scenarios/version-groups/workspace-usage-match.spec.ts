@@ -2,6 +2,7 @@ import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches
 import { lintCli } from '../../../src/bin-lint/lint-cli';
 import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
 import { listCli } from '../../../src/bin-list/list-cli';
+import { promptCli } from '../../../src/bin-prompt/prompt-cli';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
@@ -193,6 +194,15 @@ describe('versionGroups', () => {
           const scenario = getScenario();
           listCli({}, scenario.disk);
           expect(scenario.disk.process.exit).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('prompt', () => {
+        test('should have nothing to do', () => {
+          const scenario = getScenario();
+          promptCli({}, scenario.disk);
+          expect(scenario.disk.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.disk.askForInput).not.toHaveBeenCalled();
         });
       });
     });

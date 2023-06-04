@@ -1,4 +1,4 @@
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { join, normalize } from 'path';
 import { CWD } from '../../../src/constants';
 import type { Context } from '../../../src/get-context';

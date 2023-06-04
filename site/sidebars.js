@@ -23,6 +23,7 @@ const sidebars = {
       'lint',
       'list-mismatches',
       'list',
+      'prompt',
       'set-semver-ranges',
     ],
     'CLI Options': [

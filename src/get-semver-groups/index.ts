@@ -1,4 +1,4 @@
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
 import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';

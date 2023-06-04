@@ -1,4 +1,6 @@
 export interface MockDisk {
+  readonly askForChoice: jest.Mock<any, any>;
+  readonly askForInput: jest.Mock<any, any>;
   readonly globSync: jest.Mock<any, any>;
   readonly process: {
     exit: jest.Mock<any, any>;
@@ -12,6 +14,8 @@ export interface MockDisk {
 
 export function mockDisk(): MockDisk {
   return {
+    askForChoice: jest.fn(() => Promise.resolve()),
+    askForInput: jest.fn(() => Promise.resolve()),
     globSync: jest.fn(() => []),
     process: {
       exit: jest.fn(() => []),

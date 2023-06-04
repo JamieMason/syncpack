@@ -1,4 +1,7 @@
 import { cosmiconfigSync } from 'cosmiconfig';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore Select *does* exist
+import { Input, Select } from 'enquirer';
 import {
   readFileSync,
   readJsonSync,
@@ -12,14 +15,18 @@ import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
 import type { O } from 'ts-toolbelt';
 import type { RcConfig } from '../config/types';
 import { CWD } from '../constants';
-import type { Context } from '../get-context';
 import { verbose } from './log';
 
 export type Disk = {
+  askForChoice: (opts: {
+    message: string;
+    choices: string[];
+  }) => Promise<string>;
+  askForInput: (opts: { message: string }) => Promise<string>;
+  globSync: (pattern: string) => string[];
   process: {
     exit: (code: number) => void;
   };
-  globSync: (pattern: string) => string[];
   readConfigFileSync: (configPath?: string) => O.Partial<RcConfig, 'deep'>;
   readFileSync: (filePath: string) => string;
   readYamlFileSync: <T = unknown>(filePath: string) => T;
@@ -30,13 +37,15 @@ export type Disk = {
 const client = cosmiconfigSync('syncpack');
 
 export const disk: Disk = {
-  process: {
-    exit(code: number): void {
-      verbose('exit(', code, ')');
-      process.exit(code);
-    },
+  askForChoice({ message, choices }) {
+    return new Select({ name: 'choice', message, choices })
+      .run()
+      .catch(console.error);
   },
-  globSync(pattern: string): string[] {
+  askForInput({ message }) {
+    return new Input({ message }).run().catch(console.error);
+  },
+  globSync(pattern) {
     verbose('globSync(', pattern, ')');
     return globSync(pattern, {
       ignore: '**/node_modules/**',
@@ -44,7 +53,13 @@ export const disk: Disk = {
       cwd: CWD,
     });
   },
-  readConfigFileSync(configPath?: string): Context['config']['rcFile'] {
+  process: {
+    exit(code) {
+      verbose('exit(', code, ')');
+      process.exit(code);
+    },
+  },
+  readConfigFileSync(configPath) {
     verbose('readConfigFileSync(', configPath, ')');
     try {
       const result = configPath ? client.load(configPath) : client.search();
@@ -66,7 +81,7 @@ export const disk: Disk = {
       return {};
     }
   },
-  readFileSync(filePath: string): string {
+  readFileSync(filePath) {
     verbose('readFileSync(', filePath, ')');
     return readFileSync(filePath, { encoding: 'utf8' });
   },
@@ -74,11 +89,11 @@ export const disk: Disk = {
     verbose('readYamlFileSync(', filePath, ')');
     return readYamlSync<T>(filePath);
   },
-  removeSync(filePath: string): void {
+  removeSync(filePath) {
     verbose('removeSync(', filePath, ')');
     removeSync(filePath);
   },
-  writeFileSync(filePath: string, contents: string): void {
+  writeFileSync(filePath, contents) {
     verbose('writeFileSync(', filePath, contents, ')');
     writeFileSync(filePath, contents);
   },
