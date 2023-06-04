@@ -5,6 +5,7 @@ export function getSortAz({ rcFile }: Context['config']): string[] {
   return isArrayOfStrings(rcFile.sortAz)
     ? rcFile.sortAz
     : [
+        'bin',
         'contributors',
         'dependencies',
         'devDependencies',
