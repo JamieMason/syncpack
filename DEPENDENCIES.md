@@ -27,8 +27,9 @@ npm test
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [cosmiconfig](https://ghub.io/cosmiconfig): Find and load configuration from a package.json property, rc file, or CommonJS module
+- [enquirer](https://ghub.io/enquirer): Stylish, intuitive and user-friendly prompt system. Fast and lightweight enough for small projects, powerful and extensible enough for the most advanced use cases.
 - [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
-- [glob](https://ghub.io/glob): a little globber
+- [glob](https://ghub.io/glob): the most correct and second fastest glob implementation in JavaScript
 - [minimatch](https://ghub.io/minimatch): a glob matcher in javascript
 - [read-yaml-file](https://ghub.io/read-yaml-file): Read and parse a YAML file
 - [semver](https://ghub.io/semver): The semantic version parser used by npm.

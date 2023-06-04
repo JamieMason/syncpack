@@ -1,3 +1,19 @@
+## [10.5.1](https://github.com/JamieMason/syncpack/compare/10.2.0...10.5.1) (2023-06-04)
+
+
+### Bug Fixes
+
+* **cli:** add missing syncpack-lint binary ([ae265cb](https://github.com/JamieMason/syncpack/commit/ae265cbded2764f1f94ffad4e5fd528ed642add3))
+
+
+### Features
+
+* **cli:** add prompt to fix unsupported mismatches ([296fad5](https://github.com/JamieMason/syncpack/commit/296fad5b7ba29e5a1476285dad9320de199f4131))
+* **format:** sort bin property alphabetically ([f7c87a8](https://github.com/JamieMason/syncpack/commit/f7c87a87557379612e638d621822430e0d8e27d6))
+* **groups:** manage intersecting range versions ([96d6c6d](https://github.com/JamieMason/syncpack/commit/96d6c6d7837526c1e1dac603959b199d9d0b0f7d))
+
+
+
 # [10.2.0](https://github.com/JamieMason/syncpack/compare/10.1.0...10.2.0) (2023-06-03)
 
 
