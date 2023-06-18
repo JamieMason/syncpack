@@ -1,13 +1,15 @@
-import { lintSemverRangesCli } from '../../../src/bin-lint-semver-ranges/lint-semver-ranges-cli';
-import { listCli } from '../../../src/bin-list/list-cli';
-import { promptCli } from '../../../src/bin-prompt/prompt-cli';
-import { setSemverRangesCli } from '../../../src/bin-set-semver-ranges/set-semver-ranges-cli';
+import * as Effect from '@effect/io/Effect';
+import { lintSemverRanges } from '../../../src/bin-lint-semver-ranges/lint-semver-ranges';
+import { list } from '../../../src/bin-list/list';
+import { prompt } from '../../../src/bin-prompt/prompt';
+import { setSemverRanges } from '../../../src/bin-set-semver-ranges/set-semver-ranges';
 import { DEFAULT_CONFIG } from '../../../src/constants';
+import { toBeSemverRangeMismatch, toBeValid } from '../../matchers/semver-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
 describe('semverGroups', () => {
-  describe('SEMVER_RANGE_MISMATCH', () => {
+  describe('SemverRangeMismatch', () => {
     [
       () =>
         createScenario(
@@ -24,19 +26,22 @@ describe('semverGroups', () => {
             },
           ],
           {
-            customTypes: {
-              packageManager: {
-                strategy: 'name@version',
-                path: 'packageManager',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                packageManager: {
+                  strategy: 'name@version',
+                  path: 'packageManager',
+                },
               },
+              semverGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  range: '>=',
+                },
+              ],
             },
-            semverGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                range: '>=',
-              },
-            ],
           },
         ),
       () =>
@@ -54,19 +59,22 @@ describe('semverGroups', () => {
             },
           ],
           {
-            customTypes: {
-              custom: {
-                strategy: 'versionsByName',
-                path: 'deps.custom',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                custom: {
+                  strategy: 'versionsByName',
+                  path: 'deps.custom',
+                },
               },
+              semverGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  range: '>=',
+                },
+              ],
             },
-            semverGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                range: '>=',
-              },
-            ],
           },
         ),
       () =>
@@ -84,23 +92,26 @@ describe('semverGroups', () => {
             },
           ],
           {
-            customTypes: {
-              foo: {
-                strategy: 'version',
-                path: 'deps.custom.foo',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                foo: {
+                  strategy: 'version',
+                  path: 'deps.custom.foo',
+                },
+                bar: {
+                  strategy: 'version',
+                  path: 'deps.custom.bar',
+                },
               },
-              bar: {
-                strategy: 'version',
-                path: 'deps.custom.bar',
-              },
+              semverGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  range: '>=',
+                },
+              ],
             },
-            semverGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                range: '>=',
-              },
-            ],
           },
         ),
       ...['deps', 'devDeps', 'overrides', 'peerDeps', 'pnpmOverrides', 'resolutions'].map(
@@ -119,15 +130,18 @@ describe('semverGroups', () => {
               },
             ],
             {
-              semverGroups: [
-                {
-                  dependencies: ['**'],
-                  dependencyTypes: [...DEFAULT_CONFIG.dependencyTypes],
-                  label: 'Some group',
-                  packages: ['**'],
-                  range: '>=',
-                },
-              ],
+              cli: {},
+              rcFile: {
+                semverGroups: [
+                  {
+                    dependencies: ['**'],
+                    dependencyTypes: [...DEFAULT_CONFIG.dependencyTypes],
+                    label: 'Some group',
+                    packages: ['**'],
+                    range: '>=',
+                  },
+                ],
+              },
             },
           ),
       ),
@@ -137,17 +151,8 @@ describe('semverGroups', () => {
           const scenario = getScenario();
           expect(scenario.report.semverGroups).toEqual([
             [
-              expect.objectContaining({
-                expectedVersion: '>=2.0.0',
-                isValid: false,
-                name: 'foo',
-                status: 'SEMVER_RANGE_MISMATCH',
-              }),
-              expect.objectContaining({
-                isValid: true,
-                name: 'bar',
-                status: 'VALID',
-              }),
+              toBeValid({ name: 'bar' }),
+              toBeSemverRangeMismatch({ expectedVersion: '>=2.0.0', name: 'foo' }),
             ],
           ]);
         });
@@ -156,14 +161,10 @@ describe('semverGroups', () => {
       describe('set-semver-ranges', () => {
         test('should fix the mismatch', () => {
           const scenario = getScenario();
-          setSemverRangesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
-          expect(scenario.effects.writeFileSync.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].effectsWriteWhenChanged,
-          ]);
-          expect(scenario.log.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].logEntryWhenChanged,
-            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
+          Effect.runSync(setSemverRanges({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
+          expect(scenario.env.writeFileSync.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].diskWriteWhenChanged,
           ]);
         });
       });
@@ -171,25 +172,25 @@ describe('semverGroups', () => {
       describe('lint-semver-ranges', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          lintSemverRangesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          Effect.runSync(lintSemverRanges({}, scenario.env));
+          expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list', () => {
         test('does not exit with 1 on semver range issues', () => {
           const scenario = getScenario();
-          listCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          Effect.runSync(list({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
         });
       });
 
       describe('prompt', () => {
-        test('should have nothing to do', () => {
+        test('should have nothing to do', async () => {
           const scenario = getScenario();
-          promptCli({}, scenario.effects);
-          expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
-          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
+          await Effect.runPromise(prompt({}, scenario.env));
+          expect(scenario.env.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.env.askForInput).not.toHaveBeenCalled();
         });
       });
     });

@@ -4,13 +4,9 @@ import { program } from 'commander';
 
 program
   .version(require('../package.json').version)
-  .command(
-    'fix-mismatches',
-    'set dependencies used with different versions to the same version',
-    {
-      executableFile: './bin-fix-mismatches/index.js',
-    },
-  )
+  .command('fix-mismatches', 'set dependencies used with different versions to the same version', {
+    executableFile: './bin-fix-mismatches/index.js',
+  })
   .command('format', 'sort and shorten properties according to a convention', {
     executableFile: './bin-format/index.js',
   })

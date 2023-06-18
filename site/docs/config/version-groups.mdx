@@ -7,9 +7,8 @@ import DefaultDependencyTypes from '@site/src/partials/default-dependency-types.
 
 # `versionGroups` object[]
 
-Version groups are an array of objects which partition your monorepo into
-isolated sections which each have their own rules/policy/strategy for how
-versions should be managed.
+Version groups are an array of objects which partition your monorepo into isolated sections which
+each have their own rules/policy/strategy for how versions should be managed.
 
 There are 6 types of version groups:
 
@@ -28,16 +27,14 @@ Learn more in our [guide to Version Groups](../guide/version-groups.mdx)
 
 ## Example
 
-- Let's say your monorepo directly depends on `react`, 3 of your packages have
-  it under `dependencies` and another 2 have it under `peerDependencies`. Each
-  of those 5 specific places where `react` is depended on we refer to as an
-  "instance".
-- Every instance of every dependency in your repo is assigned to the first
-  version group it matches.
+- Let's say your monorepo directly depends on `react`, 3 of your packages have it under
+  `dependencies` and another 2 have it under `peerDependencies`. Each of those 5 specific places
+  where `react` is depended on we refer to as an "instance".
+- Every instance of every dependency in your repo is assigned to the first version group it matches.
 - Each instance can only belong to one version group.
-- If you do not define any version groups, or a given instance of a dependency
-  does not match any of them, it is assigned to an internal catch-all
-  [Standard](./version-groups/standard.mdx) version group.
+- If you do not define any version groups, or a given instance of a dependency does not match any of
+  them, it is assigned to an internal catch-all [Standard](./version-groups/standard.mdx) version
+  group.
 
 Here is an example which uses every kind of version group:
 

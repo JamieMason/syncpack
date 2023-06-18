@@ -1,11 +1,12 @@
+import * as Effect from '@effect/io/Effect';
 import { isArray } from 'tightrope/guard/is-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
 import { getSortAz } from '../config/get-sort-az';
 import { getSortFirst } from '../config/get-sort-first';
-import type { Context } from '../get-context';
+import type { Ctx } from '../get-context';
 
-export function format(ctx: Context): Context {
+export function format(ctx: Ctx): Effect.Effect<never, never, Ctx> {
   const { packageJsonFiles } = ctx;
   const sortAz = getSortAz(ctx.config);
   const sortFirst = getSortFirst(ctx.config);
@@ -34,12 +35,9 @@ export function format(ctx: Context): Context {
     sortObject(keys, contents);
   });
 
-  return ctx;
+  return Effect.succeed(ctx);
 
-  function sortObject(
-    sortedKeys: string[] | Set<string>,
-    obj: Record<string, unknown>,
-  ): void {
+  function sortObject(sortedKeys: string[] | Set<string>, obj: Record<string, unknown>): void {
     sortedKeys.forEach((key: string) => {
       const value = obj[key];
       delete obj[key];

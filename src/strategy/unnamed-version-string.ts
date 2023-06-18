@@ -1,5 +1,5 @@
+import { pipe } from '@effect/data/Function';
 import { get } from 'tightrope/fn/get';
-import { pipe } from 'tightrope/fn/pipe';
 import type { Result } from 'tightrope/result';
 import { fromTry } from 'tightrope/result/from-try';
 import { map } from 'tightrope/result/map';
@@ -33,10 +33,7 @@ export class UnnamedVersionStringStrategy {
     );
   }
 
-  write(
-    file: PackageJsonFile,
-    [, version]: [string, string | Delete],
-  ): Result<PackageJsonFile> {
+  write(file: PackageJsonFile, [, version]: [string, string | Delete]): Result<PackageJsonFile> {
     const path = this.path;
     const { contents } = file;
     const isNestedPath = path.includes('.');

@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { effects } from '../lib/effects';
+import { defaultEnv } from '../env/default-env';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
-import { fixMismatchesCli } from './fix-mismatches-cli';
+import { fixMismatches } from './fix-mismatches';
 
 program.description(
   chalk`
@@ -60,13 +61,15 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-fixMismatchesCli(
-  {
-    configPath: program.opts().config,
-    filter: program.opts().filter,
-    indent: program.opts().indent,
-    source: program.opts().source,
-    types: program.opts().types,
-  },
-  effects,
+Effect.runSync<never, unknown>(
+  fixMismatches(
+    {
+      configPath: program.opts().config,
+      filter: program.opts().filter,
+      indent: program.opts().indent,
+      source: program.opts().source,
+      types: program.opts().types,
+    },
+    defaultEnv,
+  ),
 );

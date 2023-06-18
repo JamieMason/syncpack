@@ -1,13 +1,15 @@
-import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
-import { lintCli } from '../../../src/bin-lint/lint-cli';
-import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
-import { listCli } from '../../../src/bin-list/list-cli';
-import { promptCli } from '../../../src/bin-prompt/prompt-cli';
+import * as Effect from '@effect/io/Effect';
+import { fixMismatches } from '../../../src/bin-fix-mismatches/fix-mismatches';
+import { lint } from '../../../src/bin-lint/lint';
+import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
+import { list } from '../../../src/bin-list/list';
+import { prompt } from '../../../src/bin-prompt/prompt';
+import { toBeSnappedToMismatch, toBeValid } from '../../matchers/version-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
 describe('versionGroups', () => {
-  describe('SNAPPED_TO_MISMATCH', () => {
+  describe('SnappedToMismatch', () => {
     [
       () =>
         createScenario(
@@ -29,19 +31,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'name@version',
-                path: 'packageManager',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'name@version',
+                  path: 'packageManager',
+                },
               },
+              versionGroups: [
+                {
+                  dependencies: ['react'],
+                  packages: ['**'],
+                  snapTo: ['a'],
+                },
+              ],
             },
-            versionGroups: [
-              {
-                dependencies: ['react'],
-                packages: ['**'],
-                snapTo: ['a'],
-              },
-            ],
           },
         ),
       () =>
@@ -64,19 +69,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'versionsByName',
-                path: 'deps.custom',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'versionsByName',
+                  path: 'deps.custom',
+                },
               },
+              versionGroups: [
+                {
+                  dependencies: ['react'],
+                  packages: ['**'],
+                  snapTo: ['a'],
+                },
+              ],
             },
-            versionGroups: [
-              {
-                dependencies: ['react'],
-                packages: ['**'],
-                snapTo: ['a'],
-              },
-            ],
           },
         ),
       () =>
@@ -99,19 +107,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'version',
-                path: 'customDeps.react',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'version',
+                  path: 'customDeps.react',
+                },
               },
+              versionGroups: [
+                {
+                  dependencies: ['react'],
+                  packages: ['**'],
+                  snapTo: ['a'],
+                },
+              ],
             },
-            versionGroups: [
-              {
-                dependencies: ['react'],
-                packages: ['**'],
-                snapTo: ['a'],
-              },
-            ],
           },
         ),
       ...['deps', 'devDeps', 'overrides', 'peerDeps', 'pnpmOverrides', 'resolutions'].map(
@@ -135,13 +146,16 @@ describe('versionGroups', () => {
               },
             ],
             {
-              versionGroups: [
-                {
-                  dependencies: ['react'],
-                  packages: ['**'],
-                  snapTo: ['a'],
-                },
-              ],
+              cli: {},
+              rcFile: {
+                versionGroups: [
+                  {
+                    dependencies: ['react'],
+                    packages: ['**'],
+                    snapTo: ['a'],
+                  },
+                ],
+              },
             },
           ),
       ),
@@ -150,21 +164,8 @@ describe('versionGroups', () => {
         test('should identify as a mismatch where the version present in package "a" should be followed', () => {
           const scenario = getScenario();
           expect(scenario.report.versionGroups).toEqual([
-            [
-              expect.objectContaining({
-                expectedVersion: '15.6.1',
-                isValid: false,
-                name: 'react',
-                status: 'SNAPPED_TO_MISMATCH',
-              }),
-            ],
-            [
-              expect.objectContaining({
-                isValid: true,
-                name: 'foo',
-                status: 'VALID',
-              }),
-            ],
+            [toBeSnappedToMismatch({ expectedVersion: '15.6.1', name: 'react' })],
+            [toBeValid({ name: 'foo' })],
           ]);
         });
       });
@@ -172,15 +173,10 @@ describe('versionGroups', () => {
       describe('fix-mismatches', () => {
         test('should fix the mismatch', () => {
           const scenario = getScenario();
-          fixMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
-          expect(scenario.effects.writeFileSync.mock.calls).toEqual([
-            scenario.files['packages/b/package.json'].effectsWriteWhenChanged,
-          ]);
-          expect(scenario.log.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
-            scenario.files['packages/b/package.json'].logEntryWhenChanged,
-            scenario.files['packages/c/package.json'].logEntryWhenUnchanged,
+          Effect.runSync(fixMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
+          expect(scenario.env.writeFileSync.mock.calls).toEqual([
+            scenario.files['packages/b/package.json'].diskWriteWhenChanged,
           ]);
         });
       });
@@ -188,33 +184,33 @@ describe('versionGroups', () => {
       describe('list-mismatches', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          listMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          Effect.runSync(listMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
         });
       });
 
       describe('lint', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          lintCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          Effect.runSync(lint({}, scenario.env));
+          expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          listCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          Effect.runSync(list({}, scenario.env));
+          expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
         });
       });
 
       describe('prompt', () => {
-        test('should have nothing to do', () => {
+        test('should have nothing to do', async () => {
           const scenario = getScenario();
-          promptCli({}, scenario.effects);
-          expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
-          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
+          await Effect.runPromise(prompt({}, scenario.env));
+          expect(scenario.env.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.env.askForInput).not.toHaveBeenCalled();
         });
       });
     });

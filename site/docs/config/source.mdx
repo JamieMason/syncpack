@@ -9,8 +9,8 @@ import Pills from '@site/src/components/pill';
 
 <Pills optional />
 
-Patterns supported by [glob](https://github.com/isaacs/node-glob) to find
-package.json files you want to manage with syncpack.
+Patterns supported by [glob](https://github.com/isaacs/node-glob) to find package.json files you
+want to manage with syncpack.
 
 ## Default Value
 
@@ -33,15 +33,12 @@ Syncpack config files also support
 
 package.json files are resolved in this order of precendence:
 
-1.  If `--source`
-    [glob patterns](https://github.com/isaacs/node-glob#glob-primer) are
-    provided, use those.
-2.  If using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/),
-    read `workspaces` from `./package.json`.
-3.  If using [Lerna](https://lerna.js.org/), read `packages` from
-    `./lerna.json`.
-4.  If using [Pnpm](https://pnpm.js.org/), read `packages` from
-    `./pnpm-workspace.yaml`.
+1.  If `--source` [glob patterns](https://github.com/isaacs/node-glob#glob-primer) are provided, use
+    those.
+2.  If using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/), read `workspaces` from
+    `./package.json`.
+3.  If using [Lerna](https://lerna.js.org/), read `packages` from `./lerna.json`.
+4.  If using [Pnpm](https://pnpm.js.org/), read `packages` from `./pnpm-workspace.yaml`.
 5.  Default to `'package.json'` and `'packages/*/package.json'`.
 
 :::tip
@@ -53,8 +50,7 @@ Always add quotes around your `--source` patterns
 
 :::info
 
-Your `source` configuration in your [config file](../config-file.mdx) can be
-overridden on an ad hoc basis using multiple [`--source`](../option/source.mdx)
-options – one for each glob pattern.
+Your `source` configuration in your [config file](../config-file.mdx) can be overridden on an ad hoc
+basis using multiple [`--source`](../option/source.mdx) options – one for each glob pattern.
 
 :::

@@ -4,10 +4,9 @@ import DefaultDependencyTypes from '@site/src/partials/default-dependency-types.
 <Pills optional />
 
 Can be used in combination with the [`packages`](#packages-string) and
-[`dependencies`](#dependencies-string) properties to narrow further which
-dependencies should belong to this version group. When set, only dependencies
-present in the named locations will be considered a match for this version
-group.
+[`dependencies`](#dependencies-string) properties to narrow further which dependencies should belong
+to this version group. When set, only dependencies present in the named locations will be considered
+a match for this version group.
 
 The possible values available by default are in the table below:
 
@@ -15,14 +14,14 @@ The possible values available by default are in the table below:
 
 :::tip
 
-If you define your own [`customTypes`](/config/custom-types), their names can
-also be used in addition to those in the table above.
+If you define your own [`customTypes`](/config/custom-types), their names can also be used in
+addition to those in the table above.
 
 :::
 
-In this example we define that all dependencies within `peerDependencies` in the
-repo must use `"*"` as its version number, regardless of what versions of the
-same dependencies might be used in `dependencies` or `devDependencies`.
+In this example we define that all dependencies within `peerDependencies` in the repo must use `"*"`
+as its version number, regardless of what versions of the same dependencies might be used in
+`dependencies` or `devDependencies`.
 
 ```json title="Ensure peerDependencies always use *"
 {

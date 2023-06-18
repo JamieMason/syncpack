@@ -1,13 +1,15 @@
-import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
-import { lintCli } from '../../../src/bin-lint/lint-cli';
-import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
-import { listCli } from '../../../src/bin-list/list-cli';
-import { promptCli } from '../../../src/bin-prompt/prompt-cli';
+import * as Effect from '@effect/io/Effect';
+import { fixMismatches } from '../../../src/bin-fix-mismatches/fix-mismatches';
+import { lint } from '../../../src/bin-lint/lint';
+import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
+import { list } from '../../../src/bin-list/list';
+import { prompt } from '../../../src/bin-prompt/prompt';
+import { toBeBanned } from '../../matchers/version-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
 describe('versionGroups', () => {
-  describe('BANNED', () => {
+  describe('Banned', () => {
     [
       () =>
         createScenario(
@@ -24,19 +26,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'name@version',
-                path: 'packageManager',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'name@version',
+                  path: 'packageManager',
+                },
               },
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  isBanned: true,
+                },
+              ],
             },
-            versionGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                isBanned: true,
-              },
-            ],
           },
         ),
       () =>
@@ -54,19 +59,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'versionsByName',
-                path: 'customDeps',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'versionsByName',
+                  path: 'customDeps',
+                },
               },
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  isBanned: true,
+                },
+              ],
             },
-            versionGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                isBanned: true,
-              },
-            ],
           },
         ),
       () =>
@@ -84,19 +92,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'version',
-                path: 'customDeps.yarn',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'version',
+                  path: 'customDeps.yarn',
+                },
               },
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  isBanned: true,
+                },
+              ],
             },
-            versionGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                isBanned: true,
-              },
-            ],
           },
         ),
       // @TODO remove empty pnpm.overrides after banning its only entry then
@@ -117,13 +128,16 @@ describe('versionGroups', () => {
               },
             ],
             {
-              versionGroups: [
-                {
-                  dependencies: ['**'],
-                  packages: ['**'],
-                  isBanned: true,
-                },
-              ],
+              cli: {},
+              rcFile: {
+                versionGroups: [
+                  {
+                    dependencies: ['**'],
+                    packages: ['**'],
+                    isBanned: true,
+                  },
+                ],
+              },
             },
           ),
       ),
@@ -131,30 +145,18 @@ describe('versionGroups', () => {
       describe('versionGroup.inspect()', () => {
         test('should identify as banned', () => {
           const scenario = getScenario();
-          expect(scenario.report.versionGroups).toEqual([
-            [
-              expect.objectContaining({
-                isValid: false,
-                name: 'yarn',
-                status: 'BANNED',
-              }),
-            ],
-          ]);
+          expect(scenario.report.versionGroups).toEqual([[toBeBanned({ name: 'yarn' })]]);
         });
       });
 
       describe('fix-mismatches', () => {
         test('should fix the mismatch', () => {
           const scenario = getScenario();
-          fixMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
-          expect(scenario.effects.writeFileSync.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].effectsWriteWhenChanged,
-            scenario.files['packages/b/package.json'].effectsWriteWhenChanged,
-          ]);
-          expect(scenario.log.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].logEntryWhenChanged,
-            scenario.files['packages/b/package.json'].logEntryWhenChanged,
+          Effect.runSync(fixMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
+          expect(scenario.env.writeFileSync.mock.calls).toEqual([
+            scenario.files['packages/a/package.json'].diskWriteWhenChanged,
+            scenario.files['packages/b/package.json'].diskWriteWhenChanged,
           ]);
         });
       });
@@ -162,33 +164,33 @@ describe('versionGroups', () => {
       describe('list-mismatches', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          listMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          Effect.runSync(listMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
         });
       });
 
       describe('lint', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          lintCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          Effect.runSync(lint({}, scenario.env));
+          expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list', () => {
         test('should exit with 1 on the mismatch', () => {
           const scenario = getScenario();
-          listCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+          Effect.runSync(list({}, scenario.env));
+          expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
         });
       });
 
       describe('prompt', () => {
-        test('should have nothing to do', () => {
+        test('should have nothing to do', async () => {
           const scenario = getScenario();
-          promptCli({}, scenario.effects);
-          expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
-          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
+          await Effect.runPromise(prompt({}, scenario.env));
+          expect(scenario.env.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.env.askForInput).not.toHaveBeenCalled();
         });
       });
     });

@@ -1,23 +1,38 @@
-import { Err, Ok } from 'tightrope/result';
-import { mockEffects } from '../../../test/mock-effects';
+import { match } from '@effect/data/Either';
+import { identity, pipe } from '@effect/data/Function';
+import * as O from '@effect/data/Option';
+import * as Effect from '@effect/io/Effect';
+import type { MockEnv } from '../../../test/mock-env';
+import { createMockEnv } from '../../../test/mock-env';
+import { createEnv } from '../../env/create-env';
+import { EnvTag } from '../../env/tags';
 import { getPnpmPatterns } from './get-pnpm-patterns';
 
-it('returns an new Ok of strings when found', () => {
-  const effects = mockEffects();
-  effects.readYamlFileSync.mockReturnValue({ packages: ['a', 'b'] });
-  expect(getPnpmPatterns(effects)()).toEqual(new Ok(['a', 'b']));
+function runSync(mockedEffects: MockEnv) {
+  return pipe(
+    Effect.runSyncEither(
+      pipe(getPnpmPatterns(), Effect.provideService(EnvTag, createEnv(mockedEffects))),
+    ),
+    match(identity, identity),
+  );
+}
+
+it('returns strings when found', () => {
+  const env = createMockEnv();
+  env.readYamlFileSync.mockReturnValue({ packages: ['a', 'b'] });
+  expect(runSync(env)).toEqual(O.some(['a', 'b']));
 });
 
-it('returns an new Err when effects throws', () => {
-  const effects = mockEffects();
-  effects.readYamlFileSync.mockImplementation(() => {
+it('returns none when a file cannot be read', () => {
+  const env = createMockEnv();
+  env.readYamlFileSync.mockImplementation(() => {
     throw new Error('Failed to read YAML file');
   });
-  expect(getPnpmPatterns(effects)()).toEqual(expect.any(Err));
+  expect(runSync(env)).toEqual(O.none());
 });
 
-it('returns an new Err when data is valid YAML but the wrong shape', () => {
-  const effects = mockEffects();
-  effects.readYamlFileSync.mockReturnValue({ packages: [1, 2] });
-  expect(getPnpmPatterns(effects)()).toEqual(expect.any(Err));
+it('returns none when data is valid YAML but the wrong shape', () => {
+  const env = createMockEnv();
+  env.readYamlFileSync.mockReturnValue({ packages: [1, 2] });
+  expect(runSync(env)).toEqual(O.none());
 });

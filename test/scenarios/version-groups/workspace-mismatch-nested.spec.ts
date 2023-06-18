@@ -1,12 +1,14 @@
-import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
-import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
-import { listCli } from '../../../src/bin-list/list-cli';
-import { promptCli } from '../../../src/bin-prompt/prompt-cli';
+import * as Effect from '@effect/io/Effect';
+import { fixMismatches } from '../../../src/bin-fix-mismatches/fix-mismatches';
+import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
+import { list } from '../../../src/bin-list/list';
+import { prompt } from '../../../src/bin-prompt/prompt';
+import { toBeWorkspaceMismatch } from '../../matchers/version-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
 describe('versionGroups', () => {
-  describe('WORKSPACE_MISMATCH', () => {
+  describe('WorkspaceMismatch', () => {
     describe('some packages are nested within sub-folders on the file system', () => {
       [
         () =>
@@ -29,18 +31,21 @@ describe('versionGroups', () => {
               },
             ],
             {
-              customTypes: {
-                engines: {
-                  strategy: 'name@version',
-                  path: 'packageManager',
+              cli: {},
+              rcFile: {
+                customTypes: {
+                  engines: {
+                    strategy: 'name@version',
+                    path: 'packageManager',
+                  },
                 },
+                dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
+                source: [
+                  'package.json',
+                  'workspaces/*/package.json',
+                  'workspaces/*/packages/*/package.json',
+                ],
               },
-              dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
-              source: [
-                'package.json',
-                'workspaces/*/package.json',
-                'workspaces/*/packages/*/package.json',
-              ],
             },
           ),
         () =>
@@ -63,18 +68,21 @@ describe('versionGroups', () => {
               },
             ],
             {
-              customTypes: {
-                engines: {
-                  strategy: 'versionsByName',
-                  path: 'deps.custom',
+              cli: {},
+              rcFile: {
+                customTypes: {
+                  engines: {
+                    strategy: 'versionsByName',
+                    path: 'deps.custom',
+                  },
                 },
+                dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
+                source: [
+                  'package.json',
+                  'workspaces/*/package.json',
+                  'workspaces/*/packages/*/package.json',
+                ],
               },
-              dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
-              source: [
-                'package.json',
-                'workspaces/*/package.json',
-                'workspaces/*/packages/*/package.json',
-              ],
             },
           ),
         () =>
@@ -97,18 +105,21 @@ describe('versionGroups', () => {
               },
             ],
             {
-              customTypes: {
-                engines: {
-                  strategy: 'version',
-                  path: 'deps.custom.c',
+              cli: {},
+              rcFile: {
+                customTypes: {
+                  engines: {
+                    strategy: 'version',
+                    path: 'deps.custom.c',
+                  },
                 },
+                dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
+                source: [
+                  'package.json',
+                  'workspaces/*/package.json',
+                  'workspaces/*/packages/*/package.json',
+                ],
               },
-              dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
-              source: [
-                'package.json',
-                'workspaces/*/package.json',
-                'workspaces/*/packages/*/package.json',
-              ],
             },
           ),
         () =>
@@ -131,12 +142,15 @@ describe('versionGroups', () => {
               },
             ],
             {
-              dependencyTypes: ['dev', 'prod', 'workspace'],
-              source: [
-                'package.json',
-                'workspaces/*/package.json',
-                'workspaces/*/packages/*/package.json',
-              ],
+              cli: {},
+              rcFile: {
+                dependencyTypes: ['dev', 'prod', 'workspace'],
+                source: [
+                  'package.json',
+                  'workspaces/*/package.json',
+                  'workspaces/*/packages/*/package.json',
+                ],
+              },
             },
           ),
       ].forEach((getScenario) => {
@@ -144,14 +158,7 @@ describe('versionGroups', () => {
           test('should identify as a mismatch against the canonical local package version', () => {
             const scenario = getScenario();
             expect(scenario.report.versionGroups).toEqual([
-              [
-                expect.objectContaining({
-                  expectedVersion: '0.0.1',
-                  isValid: false,
-                  name: 'c',
-                  status: 'WORKSPACE_MISMATCH',
-                }),
-              ],
+              [toBeWorkspaceMismatch({ expectedVersion: '0.0.1', name: 'c' })],
             ]);
           });
         });
@@ -159,16 +166,11 @@ describe('versionGroups', () => {
         describe('fix-mismatches', () => {
           test('should fix the mismatch', () => {
             const scenario = getScenario();
-            fixMismatchesCli({}, scenario.effects);
-            expect(scenario.effects.process.exit).not.toHaveBeenCalled();
-            expect(scenario.effects.writeFileSync.mock.calls).toEqual([
-              scenario.files['workspaces/a/packages/a/package.json'].effectsWriteWhenChanged,
-              scenario.files['workspaces/b/packages/b/package.json'].effectsWriteWhenChanged,
-            ]);
-            expect(scenario.log.mock.calls).toEqual([
-              scenario.files['workspaces/a/packages/a/package.json'].logEntryWhenChanged,
-              scenario.files['workspaces/b/packages/b/package.json'].logEntryWhenChanged,
-              scenario.files['workspaces/b/packages/c/package.json'].logEntryWhenUnchanged,
+            Effect.runSync(fixMismatches({}, scenario.env));
+            expect(scenario.env.exitProcess).not.toHaveBeenCalled();
+            expect(scenario.env.writeFileSync.mock.calls).toEqual([
+              scenario.files['workspaces/a/packages/a/package.json'].diskWriteWhenChanged,
+              scenario.files['workspaces/b/packages/b/package.json'].diskWriteWhenChanged,
             ]);
           });
         });
@@ -176,25 +178,25 @@ describe('versionGroups', () => {
         describe('list-mismatches', () => {
           test('should exit with 1 on the mismatch', () => {
             const scenario = getScenario();
-            listMismatchesCli({}, scenario.effects);
-            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+            Effect.runSync(listMismatches({}, scenario.env));
+            expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
           });
         });
 
         describe('list', () => {
           test('should exit with 1 on the mismatch', () => {
             const scenario = getScenario();
-            listCli({}, scenario.effects);
-            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+            Effect.runSync(list({}, scenario.env));
+            expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
           });
         });
 
         describe('prompt', () => {
-          test('should have nothing to do', () => {
+          test('should have nothing to do', async () => {
             const scenario = getScenario();
-            promptCli({}, scenario.effects);
-            expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
-            expect(scenario.effects.askForInput).not.toHaveBeenCalled();
+            await Effect.runPromise(prompt({}, scenario.env));
+            expect(scenario.env.askForChoice).not.toHaveBeenCalled();
+            expect(scenario.env.askForInput).not.toHaveBeenCalled();
           });
         });
       });

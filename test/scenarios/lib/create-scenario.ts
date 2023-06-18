@@ -1,7 +1,16 @@
+import * as Context from '@effect/data/Context';
+import { pipe } from '@effect/data/Function';
+import { unify } from '@effect/data/Unify';
+import * as Effect from '@effect/io/Effect';
 import { minimatch } from 'minimatch';
 import { join, normalize } from 'path';
+import { CliConfigTag } from '../../../src/config/types';
 import { CWD } from '../../../src/constants';
-import type { Context } from '../../../src/get-context';
+import type { SemverRangeEffects, VersionEffects } from '../../../src/create-program/effects';
+import { createEnv } from '../../../src/env/create-env';
+import { EnvTag } from '../../../src/env/tags';
+import type { ErrorHandlers } from '../../../src/error-handlers/create-error-handlers';
+import type { Ctx } from '../../../src/get-context';
 import { getContext } from '../../../src/get-context';
 import type { JsonFile } from '../../../src/get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJson } from '../../../src/get-package-json-files/package-json-file';
@@ -9,29 +18,45 @@ import type { SemverGroupReport } from '../../../src/get-semver-groups';
 import { getSemverGroups } from '../../../src/get-semver-groups';
 import type { VersionGroupReport } from '../../../src/get-version-groups';
 import { getVersionGroups } from '../../../src/get-version-groups';
-import type { MockEffects } from '../../mock-effects';
-import { mockEffects } from '../../mock-effects';
+import type { MockEnv } from '../../mock-env';
+import {
+  createMockEnv,
+  createMockErrorHandlers,
+  createMockSemverRangeEffects,
+  createMockVersionEffects,
+} from '../../mock-env';
 
 interface MockedFile {
   absolutePath: string;
   after: JsonFile<PackageJson>;
   before: JsonFile<PackageJson>;
-  effectsWriteWhenChanged: [string, string];
+  diskWriteWhenChanged: [string, string];
   id: string;
-  logEntryWhenChanged: [any, any];
-  logEntryWhenUnchanged: [any, any];
   relativePath: string;
 }
 
 export interface TestScenario {
-  config: Context['config']['rcFile'];
-  effects: MockEffects;
-  log: jest.SpyInstance;
-  files: Record<string, MockedFile>;
-  report: {
-    semverGroups: SemverGroupReport[][];
-    versionGroups: VersionGroupReport[][];
+  config: Ctx['config'];
+  env: MockEnv;
+  errorHandlers: ErrorHandlers<jest.Mock<any, any>>;
+  files: {
+    'packages/a/package.json': MockedFile;
+    'packages/api/package.json': MockedFile;
+    'packages/app/package.json': MockedFile;
+    'packages/b/package.json': MockedFile;
+    'packages/c/package.json': MockedFile;
+    'packages/shared/package.json': MockedFile;
+    'workspaces/a/packages/a/package.json': MockedFile;
+    'workspaces/b/packages/b/package.json': MockedFile;
+    'workspaces/b/packages/c/package.json': MockedFile;
   };
+  log: jest.SpyInstance;
+  report: {
+    semverGroups: SemverGroupReport.Any[][];
+    versionGroups: VersionGroupReport.Any[][];
+  };
+  semverEffects: SemverRangeEffects;
+  versionEffects: VersionEffects;
 }
 
 export function createScenario(
@@ -40,10 +65,13 @@ export function createScenario(
     before: JsonFile<PackageJson>;
     after: JsonFile<PackageJson>;
   }[],
-  config: Context['config']['rcFile'],
+  config: Ctx['config'],
 ): TestScenario {
   jest.clearAllMocks();
-  const effects = mockEffects();
+  const env = createMockEnv();
+  const semverEffects = createMockSemverRangeEffects();
+  const versionEffects = createMockVersionEffects();
+  const errorHandlers = createMockErrorHandlers();
   const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
   // resolve all paths
   const mockedFiles: MockedFile[] = fileMocks.map((file) => {
@@ -59,63 +87,91 @@ export function createScenario(
         ...file.before,
         filePath: absolutePath,
       },
-      effectsWriteWhenChanged: [
-        expect.stringContaining(relativePath),
-        file.after.json,
-      ],
+      diskWriteWhenChanged: [expect.stringContaining(relativePath), file.after.json],
       id: file.path,
-      logEntryWhenChanged: [
-        expect.stringMatching(/✓/),
-        expect.stringContaining(relativePath),
-      ],
-      logEntryWhenUnchanged: [
-        expect.stringMatching(/-/),
-        expect.stringContaining(relativePath),
-      ],
       relativePath,
     };
   });
   // mock rcfile
-  effects.readConfigFileSync.mockImplementation(() => {
-    return config;
+  env.readConfigFileSync.mockImplementation(() => {
+    return config.rcFile;
   });
   // mock file system
-  effects.readFileSync.mockImplementation((filePath): string | undefined => {
+  env.readFileSync.mockImplementation((filePath): string | undefined => {
     return mockedFiles.find((file) => {
       return normalize(filePath) === normalize(file.absolutePath);
     })?.before?.json;
   });
   // mock globs
-  effects.globSync.mockImplementation((pattern): string[] => {
-    return mockedFiles
-      .filter((file) => {
-        return minimatch(
-          normalize(file.absolutePath),
-          toPosix(join(CWD, pattern)),
-        );
-      })
-      .map((file) => normalize(file.absolutePath));
+  env.globSync.mockImplementation((patterns: string[]): string[] => {
+    return patterns.flatMap((pattern) =>
+      mockedFiles
+        .filter((file) => {
+          return minimatch(normalize(file.absolutePath), toPosix(join(CWD, pattern)));
+        })
+        .map((file) => normalize(file.absolutePath)),
+    );
   });
   // create reports
-  const ctx = getContext({}, effects);
-  const versionGroups = getVersionGroups(ctx);
-  const versionGroupsReport = versionGroups.map((group) => group.inspect());
-  const semverGroups = getSemverGroups(ctx);
-  const semverGroupsReport = semverGroups.map((group) => group.inspect());
-  // return API
-  return {
-    config,
-    effects,
-    log,
-    files: mockedFiles.reduce((memo, file) => {
-      memo[file.id] = file;
-      return memo;
-    }, {} as Record<string, MockedFile>),
-    report: {
-      semverGroups: semverGroupsReport,
-      versionGroups: versionGroupsReport,
-    },
-  };
+  return Effect.runSync(
+    pipe(
+      Effect.Do(),
+      Effect.bind('ctx', () => getContext()),
+      Effect.bind('semverGroups', ({ ctx }) => getSemverGroups(ctx)),
+      Effect.bind('versionGroups', ({ ctx }) => getVersionGroups(ctx)),
+      Effect.bind('semverGroupsReport', ({ semverGroups }) =>
+        Effect.succeed(
+          semverGroups.map((group) =>
+            Effect.runSync(
+              Effect.all(
+                group
+                  .inspect()
+                  .map((report) => pipe(unify(report), Effect.catchAll(Effect.succeed))),
+              ),
+            ),
+          ),
+        ),
+      ),
+      Effect.bind('versionGroupsReport', ({ versionGroups }) =>
+        Effect.succeed(
+          versionGroups.map((group) =>
+            Effect.runSync(
+              Effect.all(
+                group
+                  .inspect()
+                  .map((report) => pipe(unify(report), Effect.catchAll(Effect.succeed))),
+              ),
+            ),
+          ),
+        ),
+      ),
+      Effect.map(({ versionGroupsReport, semverGroupsReport }) => {
+        return {
+          config,
+          env,
+          errorHandlers,
+          semverEffects,
+          versionEffects,
+          log,
+          files: mockedFiles.reduce((memo, file) => {
+            memo[file.id] = file;
+            return memo;
+          }, {} as any),
+          report: {
+            semverGroups: semverGroupsReport,
+            versionGroups: versionGroupsReport,
+          },
+        };
+      }),
+      Effect.provideContext(
+        pipe(
+          Context.empty(),
+          Context.add(CliConfigTag, config.cli),
+          Context.add(EnvTag, createEnv(env)),
+        ),
+      ),
+    ),
+  );
 }
 
 function toPosix(value: string): string {

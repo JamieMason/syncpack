@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { effects } from '../lib/effects';
+import { defaultEnv } from '../env/default-env';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
-import { promptCli } from './prompt-cli';
+import { prompt } from './prompt';
 
 program.description(
   '  displays a series of prompts to fix mismatches which syncpack cannot fix automatically',
@@ -51,12 +52,14 @@ program
   .option(...option.types)
   .parse(process.argv);
 
-promptCli(
-  {
-    configPath: program.opts().config,
-    filter: program.opts().filter,
-    source: program.opts().source,
-    types: program.opts().types,
-  },
-  effects,
+Effect.runPromise<never, unknown>(
+  prompt(
+    {
+      configPath: program.opts().config,
+      filter: program.opts().filter,
+      source: program.opts().source,
+      types: program.opts().types,
+    },
+    defaultEnv,
+  ),
 );

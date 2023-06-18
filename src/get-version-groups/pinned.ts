@@ -1,47 +1,49 @@
-import type { VersionGroupReport } from '.';
+import * as Data from '@effect/data/Data';
+import * as Effect from '@effect/io/Effect';
+import { VersionGroupReport } from '.';
 import type { VersionGroupConfig } from '../config/types';
 import type { Instance } from '../get-package-json-files/instance';
 import { groupBy } from './lib/group-by';
 
-export class PinnedVersionGroup {
-  _tag = 'Pinned';
+export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
   config: VersionGroupConfig.Pinned;
   instances: Instance[];
-
+}> {
   constructor(config: VersionGroupConfig.Pinned) {
-    this.config = config;
-    this.instances = [];
+    super({
+      config,
+      instances: [],
+    });
   }
 
   canAdd(_: Instance): boolean {
     return true;
   }
 
-  inspect(): VersionGroupReport[] {
-    const report: VersionGroupReport[] = [];
+  inspect(): Effect.Effect<never, VersionGroupReport.PinnedMismatch, VersionGroupReport.Valid>[] {
     const instancesByName = groupBy('name', this.instances);
     const expectedVersion = this.config.pinVersion;
 
-    Object.entries(instancesByName).forEach(([name, instances]) => {
+    return Object.entries(instancesByName).map(([name, instances]) => {
       if (hasMismatch(expectedVersion, instances)) {
-        report.push({
-          expectedVersion,
-          instances,
-          isValid: false,
-          name,
-          status: 'PINNED_MISMATCH',
-        });
+        return Effect.fail(
+          new VersionGroupReport.PinnedMismatch({
+            name,
+            instances,
+            isValid: false,
+            expectedVersion,
+          }),
+        );
       } else {
-        report.push({
-          instances,
-          isValid: true,
-          name,
-          status: 'VALID',
-        });
+        return Effect.succeed(
+          new VersionGroupReport.Valid({
+            name,
+            instances,
+            isValid: true,
+          }),
+        );
       }
     });
-
-    return report;
   }
 }
 

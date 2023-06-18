@@ -1,8 +1,10 @@
-import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
-import { lintCli } from '../../../src/bin-lint/lint-cli';
-import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
-import { listCli } from '../../../src/bin-list/list-cli';
-import { promptCli } from '../../../src/bin-prompt/prompt-cli';
+import * as Effect from '@effect/io/Effect';
+import { fixMismatches } from '../../../src/bin-fix-mismatches/fix-mismatches';
+import { lint } from '../../../src/bin-lint/lint';
+import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
+import { list } from '../../../src/bin-list/list';
+import { prompt } from '../../../src/bin-prompt/prompt';
+import { toBeValid } from '../../matchers/version-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
@@ -29,19 +31,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'name@version',
-                path: 'packageManager',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'name@version',
+                  path: 'packageManager',
+                },
               },
+              semverGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  isIgnored: true,
+                },
+              ],
             },
-            semverGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                isIgnored: true,
-              },
-            ],
           },
         ),
       () =>
@@ -64,19 +69,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'versionsByName',
-                path: 'deps.custom',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'versionsByName',
+                  path: 'deps.custom',
+                },
               },
+              semverGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  isIgnored: true,
+                },
+              ],
             },
-            semverGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                isIgnored: true,
-              },
-            ],
           },
         ),
       () =>
@@ -99,19 +107,22 @@ describe('versionGroups', () => {
             },
           ],
           {
-            customTypes: {
-              engines: {
-                strategy: 'version',
-                path: 'deps.custom.c',
+            cli: {},
+            rcFile: {
+              customTypes: {
+                engines: {
+                  strategy: 'version',
+                  path: 'deps.custom.c',
+                },
               },
+              semverGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  isIgnored: true,
+                },
+              ],
             },
-            semverGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                isIgnored: true,
-              },
-            ],
           },
         ),
       () =>
@@ -134,75 +145,65 @@ describe('versionGroups', () => {
             },
           ],
           {
-            semverGroups: [
-              {
-                dependencies: ['**'],
-                packages: ['**'],
-                isIgnored: true,
-              },
-            ],
+            cli: {},
+            rcFile: {
+              semverGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  isIgnored: true,
+                },
+              ],
+            },
           },
         ),
     ].forEach((getScenario) => {
       describe('versionGroup.inspect()', () => {
         test('should identify as valid', () => {
           const scenario = getScenario();
-          expect(scenario.report.versionGroups).toEqual([
-            [
-              expect.objectContaining({
-                isValid: true,
-                name: 'c',
-                status: 'VALID',
-              }),
-            ],
-          ]);
+          expect(scenario.report.versionGroups).toEqual([[toBeValid({ name: 'c' })]]);
         });
       });
 
       describe('fix-mismatches', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          fixMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
-          expect(scenario.effects.writeFileSync).not.toHaveBeenCalled();
-          expect(scenario.log.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
-            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
-            scenario.files['packages/c/package.json'].logEntryWhenUnchanged,
-          ]);
+          Effect.runSync(fixMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
+          expect(scenario.env.writeFileSync).not.toHaveBeenCalled();
         });
       });
 
       describe('list-mismatches', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          listMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          Effect.runSync(listMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
         });
       });
 
       describe('lint', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          lintCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          Effect.runSync(lint({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
         });
       });
 
       describe('list', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          listCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          Effect.runSync(list({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
         });
       });
 
       describe('prompt', () => {
-        test('should have nothing to do', () => {
+        test('should have nothing to do', async () => {
           const scenario = getScenario();
-          promptCli({}, scenario.effects);
-          expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
-          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
+          await Effect.runPromise(prompt({}, scenario.env));
+          expect(scenario.env.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.env.askForInput).not.toHaveBeenCalled();
         });
       });
     });

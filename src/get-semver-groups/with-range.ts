@@ -1,65 +1,77 @@
-import type { SemverGroupReport } from '.';
+import * as Data from '@effect/data/Data';
+import * as Effect from '@effect/io/Effect';
+import { SemverGroupReport } from '.';
 import type { SemverGroupConfig } from '../config/types';
 import type { Instance } from '../get-package-json-files/instance';
-import { isSupported } from '../lib/is-semver';
+import { isSupported } from '../guards/is-supported';
 import { setSemverRange } from '../lib/set-semver-range';
 
-export class WithRangeSemverGroup {
-  _tag = 'WithRange';
+export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
   config: SemverGroupConfig.WithRange;
   instances: Instance[];
-
-  constructor(config: SemverGroupConfig.WithRange) {
-    this.config = config;
-    this.instances = [];
+  isCatchAll: boolean;
+}> {
+  constructor(isCatchAll: boolean, config: SemverGroupConfig.WithRange) {
+    super({
+      config,
+      instances: [],
+      isCatchAll,
+    });
   }
 
   canAdd(_: Instance): boolean {
     return true;
   }
 
-  inspect(): SemverGroupReport[] {
+  inspect(): Effect.Effect<
+    never,
+    | SemverGroupReport.UnsupportedVersion
+    | SemverGroupReport.WorkspaceSemverRangeMismatch
+    | SemverGroupReport.SemverRangeMismatch,
+    SemverGroupReport.Valid
+  >[] {
     return this.instances.map((instance) => {
       if (!isSupported(instance.version)) {
-        return {
-          status: 'UNSUPPORTED_VERSION',
-          instance,
-          isValid: false,
-          name: instance.name,
-        };
+        return Effect.fail(
+          new SemverGroupReport.UnsupportedVersion({
+            name: instance.name,
+            instance,
+            isValid: false,
+          }),
+        );
       }
 
       const isWsInstance = instance.strategy.name === 'workspace';
       const exactVersion = setSemverRange('', instance.version);
-      const expectedVersion = setSemverRange(
-        this.config.range,
-        instance.version,
-      );
+      const expectedVersion = setSemverRange(this.config.range, instance.version);
 
       if (isWsInstance && instance.version !== exactVersion) {
-        return {
-          status: 'WORKSPACE_SEMVER_RANGE_MISMATCH',
-          expectedVersion: exactVersion,
-          instance,
-          isValid: false,
-          name: instance.name,
-        };
+        return Effect.fail(
+          new SemverGroupReport.WorkspaceSemverRangeMismatch({
+            name: instance.name,
+            instance,
+            isValid: false,
+            expectedVersion: exactVersion,
+          }),
+        );
       }
       if (instance.version === expectedVersion) {
-        return {
-          status: 'VALID',
-          instance,
-          isValid: true,
-          name: instance.name,
-        };
+        return Effect.succeed(
+          new SemverGroupReport.Valid({
+            name: instance.name,
+            instance,
+            isValid: true,
+          }),
+        );
       }
-      return {
-        status: 'SEMVER_RANGE_MISMATCH',
-        expectedVersion,
-        instance,
-        isValid: false,
-        name: instance.name,
-      };
+      return Effect.fail(
+        new SemverGroupReport.SemverRangeMismatch({
+          name: instance.name,
+          instance,
+          isValid: false,
+          expectedVersion,
+        }),
+      );
     });
   }
 }

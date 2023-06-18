@@ -1,16 +1,26 @@
+import * as Data from '@effect/data/Data';
+import * as Effect from '@effect/io/Effect';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
+import { isBoolean } from 'tightrope/guard/is-boolean';
 import { isEmptyArray } from 'tightrope/guard/is-empty-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
-import type { Context } from '../get-context';
+import { DEFAULT_CONFIG } from '../constants';
+import type { Ctx } from '../get-context';
 import { NameAndVersionPropsStrategy } from '../strategy/name-and-version-props';
 import { VersionsByNameStrategy } from '../strategy/versions-by-name';
 import type { Strategy } from './get-custom-types';
 import { getCustomTypes } from './get-custom-types';
 
+export class DeprecatedTypesError extends Data.TaggedClass('DeprecatedTypesError')<{
+  readonly types: string[];
+}> {}
+
+// @TODO accept `dependencyTypes: ['**']`
+// @TODO support `dependencyTypes: ['!dev']`
 export function getEnabledTypes({
   cli,
   rcFile,
-}: Context['config']): Strategy.Any[] {
+}: Ctx['config']): Effect.Effect<never, DeprecatedTypesError, Strategy.Any[]> {
   const enabledTypes: Strategy.Any[] = [];
   const enabledTypeNames = (
     isNonEmptyString(cli.types)
@@ -19,9 +29,15 @@ export function getEnabledTypes({
       ? rcFile.dependencyTypes
       : []
   ).filter(isNonEmptyString);
-  // @TODO accept `dependencyTypes: ['**']`
-  // @TODO support `dependencyTypes: ['!dev']`
   const useDefaults = isEmptyArray(enabledTypeNames);
+
+  const deprecatedTypes = DEFAULT_CONFIG.dependencyTypes.filter((key) =>
+    isBoolean((rcFile as Record<string, boolean>)[key]),
+  );
+
+  if (deprecatedTypes.length > 0) {
+    return Effect.fail(new DeprecatedTypesError({ types: deprecatedTypes }));
+  }
 
   if (useDefaults || enabledTypeNames.includes('dev')) {
     enabledTypes.push(new VersionsByNameStrategy('dev', 'devDependencies'));
@@ -33,9 +49,7 @@ export function getEnabledTypes({
     enabledTypes.push(new VersionsByNameStrategy('peer', 'peerDependencies'));
   }
   if (useDefaults || enabledTypeNames.includes('pnpmOverrides')) {
-    enabledTypes.push(
-      new VersionsByNameStrategy('pnpmOverrides', 'pnpm.overrides'),
-    );
+    enabledTypes.push(new VersionsByNameStrategy('pnpmOverrides', 'pnpm.overrides'));
   }
   if (useDefaults || enabledTypeNames.includes('prod')) {
     enabledTypes.push(new VersionsByNameStrategy('prod', 'dependencies'));
@@ -44,9 +58,7 @@ export function getEnabledTypes({
     enabledTypes.push(new VersionsByNameStrategy('resolutions', 'resolutions'));
   }
   if (useDefaults || enabledTypeNames.includes('workspace')) {
-    enabledTypes.push(
-      new NameAndVersionPropsStrategy('workspace', 'version', 'name'),
-    );
+    enabledTypes.push(new NameAndVersionPropsStrategy('workspace', 'version', 'name'));
   }
 
   getCustomTypes({ cli, rcFile }).forEach((customType) => {
@@ -55,5 +67,5 @@ export function getEnabledTypes({
     }
   });
 
-  return enabledTypes;
+  return Effect.succeed(enabledTypes);
 }

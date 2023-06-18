@@ -7,6 +7,5 @@
     "outDir": "./dist",
     "strict": true
   },
-  "include": ["./package.json", "./src/**/*.ts"],
-  "exclude": ["./**/*.spec.ts"]
+  "include": ["./package.json", "./src/**/*.ts", "./test/**/*.ts"]
 }

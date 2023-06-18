@@ -1,3 +1,4 @@
+import * as Effect from '@effect/io/Effect';
 import { formatCli } from '../../../src/bin-format/format-cli';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
@@ -6,12 +7,9 @@ import { createScenario } from '../lib/create-scenario';
 describe('format', () => {
   it('uses github shorthand format for "repository"', () => {
     const scenario = getScenario();
-    formatCli(scenario.config, scenario.effects);
-    expect(scenario.effects.writeFileSync.mock.calls).toEqual([
-      scenario.files['packages/a/package.json'].effectsWriteWhenChanged,
-    ]);
-    expect(scenario.log.mock.calls).toEqual([
-      scenario.files['packages/a/package.json'].logEntryWhenChanged,
+    Effect.runSync(formatCli(scenario.config.cli, scenario.env));
+    expect(scenario.env.writeFileSync.mock.calls).toEqual([
+      scenario.files['packages/a/package.json'].diskWriteWhenChanged,
     ]);
 
     function getScenario() {
@@ -36,7 +34,7 @@ describe('format', () => {
             }),
           },
         ],
-        {},
+        { cli: {}, rcFile: {} },
       );
     }
   });

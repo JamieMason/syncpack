@@ -1,39 +1,51 @@
+import * as Data from '@effect/data/Data';
+import * as Effect from '@effect/io/Effect';
 import { unwrap } from 'tightrope/result/unwrap';
-import type { VersionGroupReport } from '.';
+import { VersionGroupReport } from '.';
 import type { VersionGroupConfig } from '../config/types';
 import type { Instance } from '../get-package-json-files/instance';
-import { isSupported } from '../lib/is-semver';
+import { isSupported } from '../guards/is-supported';
 import { getHighestVersion } from './lib/get-highest-version';
 import { getLowestVersion } from './lib/get-lowest-version';
 import { getUniqueVersions } from './lib/get-unique-versions';
 import { groupBy } from './lib/group-by';
 
-export class StandardVersionGroup {
-  _tag = 'Standard';
+export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
   config: VersionGroupConfig.Standard;
   instances: Instance[];
-
-  constructor(config: VersionGroupConfig.Standard) {
-    this.config = config;
-    this.instances = [];
+  isCatchAll: boolean;
+}> {
+  constructor(isCatchAll: boolean, config: VersionGroupConfig.Standard) {
+    super({
+      config,
+      instances: [],
+      isCatchAll,
+    });
   }
 
   canAdd(_: Instance): boolean {
     return true;
   }
 
-  inspect(): VersionGroupReport[] {
-    const report: VersionGroupReport[] = [];
+  inspect(): Effect.Effect<
+    never,
+    | VersionGroupReport.WorkspaceMismatch
+    | VersionGroupReport.UnsupportedMismatch
+    | VersionGroupReport.HighestSemverMismatch
+    | VersionGroupReport.LowestSemverMismatch,
+    VersionGroupReport.Valid
+  >[] {
     const instancesByName = groupBy('name', this.instances);
 
-    Object.entries(instancesByName).forEach(([name, instances]) => {
+    return Object.entries(instancesByName).map(([name, instances]) => {
       if (!hasMismatch(instances)) {
-        return report.push({
-          status: 'VALID',
-          instances,
-          isValid: true,
-          name,
-        });
+        return Effect.succeed(
+          new VersionGroupReport.Valid({
+            name,
+            instances,
+            isValid: true,
+          }),
+        );
       }
       const wsInstance = getWorkspaceInstance(instances);
       const wsFile = wsInstance?.packageJsonFile;
@@ -42,45 +54,51 @@ export class StandardVersionGroup {
       if (isWorkspacePackage) {
         const nonWsInstances = getNonWorkspaceInstances(instances);
         if (!hasMismatch(nonWsInstances)) {
-          return report.push({
-            status: 'VALID',
-            instances,
-            isValid: true,
-            name,
-          });
+          return Effect.succeed(
+            new VersionGroupReport.Valid({
+              name,
+              instances,
+              isValid: true,
+            }),
+          );
         }
-        return report.push({
-          status: 'WORKSPACE_MISMATCH',
-          expectedVersion: wsVersion,
-          instances,
-          isValid: false,
-          name,
-          workspaceInstance: wsInstance,
-        });
+        return Effect.fail(
+          new VersionGroupReport.WorkspaceMismatch({
+            name,
+            instances,
+            isValid: false,
+            expectedVersion: wsVersion,
+            workspaceInstance: wsInstance,
+          }),
+        );
       }
       if (hasUnsupported(instances)) {
-        return report.push({
-          status: 'UNSUPPORTED_MISMATCH',
-          instances,
-          isValid: false,
-          name,
-        });
+        return Effect.fail(
+          new VersionGroupReport.UnsupportedMismatch({
+            name,
+            instances,
+            isValid: false,
+          }),
+        );
       }
       const preferVersion = this.config.preferVersion;
       const expectedVersion = getExpectedVersion(preferVersion, instances);
-      return report.push({
-        status:
-          preferVersion === 'highestSemver'
-            ? 'HIGHEST_SEMVER_MISMATCH'
-            : 'LOWEST_SEMVER_MISMATCH',
-        expectedVersion,
-        instances,
-        isValid: false,
-        name,
-      });
+      return Effect.fail(
+        preferVersion === 'highestSemver'
+          ? new VersionGroupReport.HighestSemverMismatch({
+              name,
+              instances,
+              isValid: false,
+              expectedVersion,
+            })
+          : new VersionGroupReport.LowestSemverMismatch({
+              name,
+              instances,
+              isValid: false,
+              expectedVersion,
+            }),
+      );
     });
-
-    return report;
   }
 }
 
@@ -90,9 +108,7 @@ function getExpectedVersion(
 ): string {
   const versions = getUniqueVersions(instances);
   return unwrap(
-    preferVersion === 'highestSemver'
-      ? getHighestVersion(versions)
-      : getLowestVersion(versions),
+    preferVersion === 'highestSemver' ? getHighestVersion(versions) : getLowestVersion(versions),
   );
 }
 

@@ -3,20 +3,18 @@ id: config-file
 title: Configuration File
 ---
 
-Creating a configuration file is optional, syncpack will search up the directory
-tree in the following places:
+Creating a configuration file is optional, syncpack will search up the directory tree in the
+following places:
 
 - a `syncpack` property in `package.json`
 - a `.syncpackrc` file in JSON or YAML format
-- a `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`,
-  or `.syncpackrc.cjs` file
-- a `syncpack.config.js` or `syncpack.config.cjs` CommonJS module exporting an
-  object
+- a `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`, or
+  `.syncpackrc.cjs` file
+- a `syncpack.config.js` or `syncpack.config.cjs` CommonJS module exporting an object
 - a `config.syncpack` property in `package.json`
 
-If you want to specify a path to a configuration file, overriding the discovered
-configuration file (if present), you can use the [`--config`](./config-file.mdx)
-option.
+If you want to specify a path to a configuration file, overriding the discovered configuration file
+(if present), you can use the [`--config`](./config-file.mdx) option.
 
 ## Default Configuration
 
@@ -53,8 +51,8 @@ option.
 
 ## TypeScript IntelliSense
 
-If you want intellisense for the configuration file, you can annotate your
-javascript config files with the following:
+If you want intellisense for the configuration file, you can annotate your javascript config files
+with the following:
 
 :::caution
 

@@ -1,28 +1,33 @@
-import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
-import { lintCli } from '../../../src/bin-lint/lint-cli';
-import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
-import { listCli } from '../../../src/bin-list/list-cli';
-import { promptCli } from '../../../src/bin-prompt/prompt-cli';
+import * as Effect from '@effect/io/Effect';
+import { fixMismatches } from '../../../src/bin-fix-mismatches/fix-mismatches';
+import { lint } from '../../../src/bin-lint/lint';
+import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
+import { list } from '../../../src/bin-list/list';
+import { prompt } from '../../../src/bin-prompt/prompt';
+import { toBeValid } from '../../matchers/version-group';
 import { createScenarioVariants } from './lib/create-scenario-variants';
 
 describe('versionGroups', () => {
   describe('every semver range version covers the others', () => {
     createScenarioVariants({
       config: {
-        semverGroups: [
-          {
-            dependencies: ['**'],
-            packages: ['**'],
-            isIgnored: true,
-          },
-        ],
-        versionGroups: [
-          {
-            dependencies: ['**'],
-            packages: ['**'],
-            policy: 'sameRange',
-          },
-        ],
+        cli: {},
+        rcFile: {
+          semverGroups: [
+            {
+              dependencies: ['**'],
+              packages: ['**'],
+              isIgnored: true,
+            },
+          ],
+          versionGroups: [
+            {
+              dependencies: ['**'],
+              packages: ['**'],
+              policy: 'sameRange',
+            },
+          ],
+        },
       },
       a: ['yarn@^2.0.0', 'yarn@^2.0.0'],
       b: ['yarn@~2.0.0', 'yarn@~2.0.0'],
@@ -30,61 +35,49 @@ describe('versionGroups', () => {
       describe('versionGroup.inspect()', () => {
         test('should identify as valid', () => {
           const scenario = getScenario();
-          expect(scenario.report.versionGroups).toEqual([
-            [
-              expect.objectContaining({
-                isValid: true,
-                name: 'yarn',
-                status: 'VALID',
-              }),
-            ],
-          ]);
+          expect(scenario.report.versionGroups).toEqual([[toBeValid({ name: 'yarn' })]]);
         });
       });
 
       describe('fix-mismatches', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          fixMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
-          expect(scenario.effects.writeFileSync).not.toHaveBeenCalled();
-          expect(scenario.log.mock.calls).toEqual([
-            scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
-            scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
-          ]);
+          Effect.runSync(fixMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
+          expect(scenario.env.writeFileSync).not.toHaveBeenCalled();
         });
       });
 
       describe('list-mismatches', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          listMismatchesCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          Effect.runSync(listMismatches({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
         });
       });
 
       describe('lint', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          lintCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          Effect.runSync(lint({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
         });
       });
 
       describe('list', () => {
         test('should report as valid', () => {
           const scenario = getScenario();
-          listCli({}, scenario.effects);
-          expect(scenario.effects.process.exit).not.toHaveBeenCalled();
+          Effect.runSync(list({}, scenario.env));
+          expect(scenario.env.exitProcess).not.toHaveBeenCalled();
         });
       });
 
       describe('prompt', () => {
-        test('should have nothing to do', () => {
+        test('should have nothing to do', async () => {
           const scenario = getScenario();
-          promptCli({}, scenario.effects);
-          expect(scenario.effects.askForChoice).not.toHaveBeenCalled();
-          expect(scenario.effects.askForInput).not.toHaveBeenCalled();
+          await Effect.runPromise(prompt({}, scenario.env));
+          expect(scenario.env.askForChoice).not.toHaveBeenCalled();
+          expect(scenario.env.askForInput).not.toHaveBeenCalled();
         });
       });
     });

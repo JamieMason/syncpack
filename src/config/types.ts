@@ -1,3 +1,4 @@
+import * as Context from '@effect/data/Context';
 import type { Union } from 'ts-toolbelt';
 
 /**
@@ -70,9 +71,7 @@ export namespace VersionGroupConfig {
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
 
-  export type Any = Union.Strict<
-    Banned | Ignored | Pinned | SameRange | SnappedTo | Standard
-  >;
+  export type Any = Union.Strict<Banned | Ignored | Pinned | SameRange | SnappedTo | Standard>;
 }
 
 namespace CustomTypeConfig {
@@ -98,21 +97,20 @@ namespace CustomTypeConfig {
   }
 
   export type Any = Union.Strict<
-    | NameAndVersionProps
-    | NamedVersionString
-    | UnnamedVersionString
-    | VersionsByName
+    NameAndVersionProps | NamedVersionString | UnnamedVersionString | VersionsByName
   >;
 }
 
 export interface CliConfig {
-  configPath?: string;
-  filter: string;
-  indent: string;
-  semverRange: SemverRange;
-  source: string[];
-  types: string;
+  readonly configPath?: string;
+  readonly filter: string;
+  readonly indent: string;
+  readonly semverRange: SemverRange;
+  readonly source: string[];
+  readonly types: string;
 }
+
+export const CliConfigTag = Context.Tag<Partial<CliConfig>>();
 
 // @TODO formatBugs: boolean // whether to format "bugs" prop (default: true)
 // @TODO formatRepository: boolean // whether to format "repository" prop (default: true)

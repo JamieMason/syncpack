@@ -1,4 +1,4 @@
-import { pipe } from 'tightrope/fn/pipe';
+import { pipe } from '@effect/data/Function';
 import type { Strategy } from '../config/get-custom-types';
 import type { Delete } from '../get-version-groups/lib/delete';
 import { $R } from '../lib/$R';

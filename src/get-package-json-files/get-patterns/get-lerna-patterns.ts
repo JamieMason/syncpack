@@ -1,21 +1,25 @@
+import { pipe } from '@effect/data/Function';
+import * as O from '@effect/data/Option';
+import * as Effect from '@effect/io/Effect';
 import { join } from 'path';
-import { get } from 'tightrope/fn/get';
-import { pipe } from 'tightrope/fn/pipe';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import type { Result } from 'tightrope/result';
-import { andThen } from 'tightrope/result/and-then';
-import { filter } from 'tightrope/result/filter';
 import { CWD } from '../../constants';
-import type { Effects } from '../../lib/effects';
+import type { Env } from '../../env/create-env';
 import { readJsonSafe } from './read-json-safe';
 
-export function getLernaPatterns(effects: Effects): () => Result<string[]> {
-  return function getLernaPatterns() {
-    return pipe(
-      join(CWD, 'lerna.json'),
-      readJsonSafe(effects),
-      andThen((file) => get(file, 'contents', 'packages')),
-      filter(isArrayOfStrings, 'no lerna patterns found'),
-    );
-  };
+interface LernaJson {
+  packages?: string[];
+}
+
+export function getLernaPatterns(): Effect.Effect<Env, never, O.Option<string[]>> {
+  return pipe(
+    readJsonSafe<LernaJson>(join(CWD, 'lerna.json')),
+    Effect.map((file) =>
+      isArrayOfStrings(file?.contents?.packages) ? O.some(file.contents.packages) : O.none(),
+    ),
+    Effect.catchTags({
+      ReadFileError: () => Effect.succeed(O.none()),
+      JsonParseError: () => Effect.succeed(O.none()),
+    }),
+  );
 }

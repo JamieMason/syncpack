@@ -1,5 +1,5 @@
+import { pipe } from '@effect/data/Function';
 import { get } from 'tightrope/fn/get';
-import { pipe } from 'tightrope/fn/pipe';
 import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
 import type { Result } from 'tightrope/result';
 import { filter } from 'tightrope/result/filter';

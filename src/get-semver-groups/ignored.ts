@@ -1,27 +1,33 @@
-import type { SemverGroupReport } from '.';
+import * as Data from '@effect/data/Data';
+import * as Effect from '@effect/io/Effect';
+import { SemverGroupReport } from '.';
 import type { SemverGroupConfig } from '../config/types';
 import type { Instance } from '../get-package-json-files/instance';
 
-export class IgnoredSemverGroup {
-  _tag = 'Ignored';
+export class IgnoredSemverGroup extends Data.TaggedClass('Ignored')<{
   config: SemverGroupConfig.Ignored;
   instances: Instance[];
-
+}> {
   constructor(config: SemverGroupConfig.Ignored) {
-    this.config = config;
-    this.instances = [];
+    super({
+      config,
+      instances: [],
+    });
   }
 
   canAdd(_: Instance): boolean {
     return true;
   }
 
-  inspect(): SemverGroupReport[] {
-    return this.instances.map((instance) => ({
-      status: 'IGNORED',
-      instance,
-      isValid: true,
-      name: instance.name,
-    }));
+  inspect(): Effect.Effect<never, never, SemverGroupReport.Ignored>[] {
+    return this.instances.map((instance) =>
+      Effect.succeed(
+        new SemverGroupReport.Ignored({
+          name: instance.name,
+          instance,
+          isValid: true,
+        }),
+      ),
+    );
   }
 }

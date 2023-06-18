@@ -1,5 +1,5 @@
+import { pipe } from '@effect/data/Function';
 import { get } from 'tightrope/fn/get';
-import { pipe } from 'tightrope/fn/pipe';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import type { Result } from 'tightrope/result';
 import { Err, Ok } from 'tightrope/result';
@@ -32,11 +32,7 @@ export class NamedVersionStringStrategy {
         const [name, version] = value.split(/@(.*)/);
         return isNonEmptyString(name) && isNonEmptyString(version)
           ? new Ok<[string, string][]>([[name, version]])
-          : new Err(
-              new Error(
-                `Strategy<name@version> failed to get ${path} in ${file.shortPath}`,
-              ),
-            );
+          : new Err(new Error(`Strategy<name@version> failed to get ${path} in ${file.shortPath}`));
       }),
     );
   }

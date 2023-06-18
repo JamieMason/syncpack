@@ -1,3 +1,4 @@
+import * as Effect from '@effect/io/Effect';
 import { formatCli } from '../../../src/bin-format/format-cli';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
@@ -6,11 +7,8 @@ import { createScenario } from '../lib/create-scenario';
 describe('format', () => {
   it('retains long form format for "repository" when directory property used', () => {
     const scenario = getScenario();
-    formatCli(scenario.config, scenario.effects);
-    expect(scenario.effects.writeFileSync.mock.calls).toEqual([]);
-    expect(scenario.log.mock.calls).toEqual([
-      scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
-    ]);
+    Effect.runSync(formatCli(scenario.config.cli, scenario.env));
+    expect(scenario.env.writeFileSync.mock.calls).toEqual([]);
 
     function getScenario() {
       return createScenario(
@@ -39,7 +37,7 @@ describe('format', () => {
             }),
           },
         ],
-        {},
+        { cli: {}, rcFile: {} },
       );
     }
   });

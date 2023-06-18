@@ -1,51 +1,25 @@
-import chalk from 'chalk';
-import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
-import { ICON } from '../constants';
-import type { Context } from '../get-context';
-import { getSemverGroups } from '../get-semver-groups';
-import * as log from '../lib/log';
-import { sortByName } from '../lib/sort-by-name';
+import * as Context from '@effect/data/Context';
+import { pipe } from '@effect/data/Function';
+import * as Effect from '@effect/io/Effect';
+import { CliConfigTag, type CliConfig } from '../config/types';
+import { createSemverRangesProgram } from '../create-program/semver-ranges';
+import { createEnv } from '../env/create-env';
+import type { DefaultEnv } from '../env/default-env';
+import { exitIfInvalid } from '../env/exit-if-invalid';
+import { EnvTag } from '../env/tags';
+import { createErrorHandlers } from '../error-handlers/create-error-handlers';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import { getContext } from '../get-context';
+import { lintSemverRangesEffects } from './effects';
 
-export function lintSemverRanges(ctx: Context): Context {
-  const semverGroups = getSemverGroups(ctx);
-  const hasUserGroups = isNonEmptyArray(ctx.config.rcFile.semverGroups);
-
-  semverGroups.forEach((semverGroup, i) => {
-    semverGroup
-      .inspect()
-      .sort(sortByName)
-      .forEach((report, ii) => {
-        // Allow eg. CLI to exit with the correct status code.
-        if (!report.isValid) ctx.isInvalid = true;
-
-        switch (report.status) {
-          case 'WORKSPACE_SEMVER_RANGE_MISMATCH':
-          case 'SEMVER_RANGE_MISMATCH': {
-            // Annotate each group
-            if (ii === 0 && hasUserGroups)
-              log.semverGroupHeader(semverGroup, i);
-
-            console.log(
-              chalk`{red %s} %s {red %s} %s {green %s} {dim in %s of %s}`,
-              ICON.cross,
-              report.name,
-              report.instance.version,
-              ICON.rightArrow,
-              report.expectedVersion,
-              report.instance.strategy.path,
-              report.instance.packageJsonFile.shortPath,
-            );
-            break;
-          }
-          case 'IGNORED':
-          case 'UNSUPPORTED_VERSION':
-          case 'VALID': {
-            // no action needed
-            break;
-          }
-        }
-      });
-  });
-
-  return ctx;
+export function lintSemverRanges(cli: Partial<CliConfig>, env: DefaultEnv) {
+  return pipe(
+    getContext(),
+    Effect.flatMap((ctx) => createSemverRangesProgram(ctx, lintSemverRangesEffects)),
+    Effect.flatMap(exitIfInvalid),
+    Effect.catchTags(createErrorHandlers(defaultErrorHandlers)),
+    Effect.provideContext(
+      pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(EnvTag, createEnv(env))),
+    ),
+  );
 }

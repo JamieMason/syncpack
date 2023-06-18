@@ -9,15 +9,13 @@ import Pills from '@site/src/components/pill';
 
 <Pills optional />
 
-Override your [`dependencyTypes`](../config/dependency-types.mdx) configuration
-on an ad hoc basis.
+Override your [`dependencyTypes`](../config/dependency-types.mdx) configuration on an ad hoc basis.
 
-This can be used to work with every package in your monorepo, but only with a
-given property each time.
+This can be used to work with every package in your monorepo, but only with a given property each
+time.
 
-In this example we set all versions to use exact semver ranges in
-`dependencies`, then loose ranges within `devDependencies` and
-`peerDependencies` – across all of your packages:
+In this example we set all versions to use exact semver ranges in `dependencies`, then loose ranges
+within `devDependencies` and `peerDependencies` – across all of your packages:
 
 ```
 syncpack set-semver-ranges --types prod --semver-range ""
@@ -26,9 +24,9 @@ syncpack set-semver-ranges --types dev,peer --semver-range "^"
 
 :::tip
 
-Running syncpack multiple times with different options to target different parts
-of your package.json files is a lot of work to maintain, so
-[`semverGroups`](../config/semver-groups.mdx) exist to make this easier.
+Running syncpack multiple times with different options to target different parts of your
+package.json files is a lot of work to maintain, so [`semverGroups`](../config/semver-groups.mdx)
+exist to make this easier.
 
 The above example would would defined like so:
 

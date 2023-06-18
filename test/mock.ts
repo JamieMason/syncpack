@@ -1,9 +1,9 @@
 import { EOL } from 'os';
 import { join } from 'path';
 import { CWD } from '../src/constants';
+import { newlines } from '../src/env/write-if-changed';
 import type { JsonFile } from '../src/get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJson } from '../src/get-package-json-files/package-json-file';
-import { newlines } from '../src/lib/newlines';
 import { splitNameAndVersion } from '../src/lib/split-name-and-version';
 
 export const mockPackage = (

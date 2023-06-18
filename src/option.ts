@@ -7,10 +7,7 @@ export const option = {
     '-f, --filter [pattern]',
     chalk`only include dependencies whose {yellow name} matches this regex`,
   ],
-  indent: [
-    '-i, --indent [value]',
-    `override indentation. defaults to "${DEFAULT_CONFIG.indent}"`,
-  ],
+  indent: ['-i, --indent [value]', `override indentation. defaults to "${DEFAULT_CONFIG.indent}"`],
   semverRange: [
     '-r, --semver-range <range>',
     `see supported ranges below. defaults to "${DEFAULT_CONFIG.semverRange}"`,

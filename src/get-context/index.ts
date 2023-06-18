@@ -1,28 +1,39 @@
-import { unwrap } from 'tightrope/result/unwrap';
+import { pipe } from '@effect/data/Function';
+import * as Effect from '@effect/io/Effect';
 import type { O } from 'ts-toolbelt';
-import type { CliConfig, RcConfig } from '../config/types';
+import { CliConfigTag, type CliConfig, type RcConfig } from '../config/types';
+import type { Env } from '../env/create-env';
+import type { GlobError, ReadConfigFileError, ReadFileError } from '../env/tags';
+import { EnvTag } from '../env/tags';
 import { getPackageJsonFiles } from '../get-package-json-files';
+import type { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
+import type { JsonParseError } from '../get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import type { Effects } from '../lib/effects';
 
-export interface Context {
-  config: {
-    cli: Partial<CliConfig>;
-    rcFile: O.Partial<RcConfig, 'deep'>;
+export interface Ctx {
+  readonly config: {
+    readonly cli: Partial<CliConfig>;
+    readonly rcFile: O.Partial<RcConfig, 'deep'>;
   };
-  effects: Effects;
   isInvalid: boolean;
   packageJsonFiles: PackageJsonFile[];
 }
 
-export function getContext(cli: Partial<CliConfig>, effects: Effects): Context {
-  const rcFile = effects.readConfigFileSync(cli.configPath);
-  const config = { cli, rcFile };
-  const packageJsonFiles = unwrap(getPackageJsonFiles(effects, config));
-  return {
-    config,
-    effects,
-    isInvalid: false,
-    packageJsonFiles,
-  };
+export function getContext(): Effect.Effect<
+  Partial<CliConfig> | Env,
+  NoSourcesFoundError | GlobError | ReadFileError | JsonParseError | ReadConfigFileError,
+  Ctx
+> {
+  return pipe(
+    Effect.Do(),
+    Effect.bind('cli', () => CliConfigTag),
+    Effect.bind('env', () => EnvTag),
+    Effect.bind('rcFile', ({ cli, env }) => env.readConfigFileSync(cli.configPath)),
+    Effect.bind('packageJsonFiles', getPackageJsonFiles),
+    Effect.map(({ cli, rcFile, packageJsonFiles }) => ({
+      config: { cli, rcFile },
+      isInvalid: false,
+      packageJsonFiles,
+    })),
+  );
 }

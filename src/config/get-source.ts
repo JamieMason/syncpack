@@ -1,11 +1,10 @@
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import { DEFAULT_CONFIG } from '../constants';
-import type { Context } from '../get-context';
+import type { Ctx } from '../get-context';
 
-export function getSource({ cli, rcFile }: Context['config']): string[] {
+export function getSource({ cli, rcFile }: Ctx['config']): string[] {
   return isArrayOfStrings(cli.source)
     ? cli.source
     : isArrayOfStrings(rcFile.source)
     ? rcFile.source
-    : [...DEFAULT_CONFIG.source];
+    : [];
 }

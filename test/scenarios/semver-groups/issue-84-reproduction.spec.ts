@@ -1,3 +1,4 @@
+import { toBeSemverRangeMismatch } from '../../matchers/semver-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
@@ -7,14 +8,10 @@ import { createScenario } from '../lib/create-scenario';
 test('Issue 84 reproduction', () => {
   expect(getScenario().report.semverGroups).toEqual([
     [
-      expect.objectContaining({
+      toBeSemverRangeMismatch({
         expectedVersion: '^1.0.0',
-        instance: expect.objectContaining({
-          name: '@myscope/a',
-        }),
-        isValid: false,
-        status: 'SEMVER_RANGE_MISMATCH',
-      }),
+        name: '@myscope/a',
+      } as any),
     ],
   ]);
 
@@ -33,24 +30,27 @@ test('Issue 84 reproduction', () => {
         },
       ],
       {
-        semverGroups: [
-          {
-            range: '^',
-            dependencies: ['@myscope/**'],
-            dependencyTypes: [],
-            packages: ['**'],
-          },
-        ],
-        semverRange: '~',
-        dependencyTypes: [
-          'dev',
-          'overrides',
-          'pnpmOverrides',
-          'peer',
-          'prod',
-          'resolutions',
-          'workspace',
-        ],
+        cli: {},
+        rcFile: {
+          semverGroups: [
+            {
+              range: '^',
+              dependencies: ['@myscope/**'],
+              dependencyTypes: [],
+              packages: ['**'],
+            },
+          ],
+          semverRange: '~',
+          dependencyTypes: [
+            'dev',
+            'overrides',
+            'pnpmOverrides',
+            'peer',
+            'prod',
+            'resolutions',
+            'workspace',
+          ],
+        },
       },
     );
   }

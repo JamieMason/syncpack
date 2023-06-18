@@ -1,51 +1,43 @@
-import { flat } from 'tightrope/array/flat';
+import * as Data from '@effect/data/Data';
+import { pipe } from '@effect/data/Function';
+import * as Effect from '@effect/io/Effect';
 import { uniq } from 'tightrope/array/uniq';
-import { pipe } from 'tightrope/fn/pipe';
-import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import type { Result } from 'tightrope/result';
-import { andThen } from 'tightrope/result/and-then';
-import { filter } from 'tightrope/result/filter';
-import { fromTry } from 'tightrope/result/from-try';
-import { map } from 'tightrope/result/map';
-import { mapErr } from 'tightrope/result/map-err';
-import type { Context } from '../get-context';
-import { $R } from '../lib/$R';
-import type { Effects } from '../lib/effects';
-import { printStrings } from '../lib/print-strings';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
+import { CWD } from '../constants';
+import { type Env } from '../env/create-env';
+import type { GlobError } from '../env/tags';
+import { EnvTag } from '../env/tags';
+import type { Ctx } from '../get-context';
 import { getPatterns } from './get-patterns';
 
-type SafeFilePaths = Result<string[]>;
+export class NoSourcesFoundError extends Data.TaggedClass('NoSourcesFoundError')<{
+  readonly CWD: string;
+  readonly patterns: string[];
+}> {}
 
 /**
- * Using --source options and/or config files on effects from npm/pnpm/yarn/lerna,
- * return an array of absolute paths to every package.json file the user is
- * working with.
+ * Using --source options and/or config files on disk from
+ * npm/pnpm/yarn/lerna, return an array of absolute paths to every package.json
+ * file the user is working with.
  *
  * @returns Array of absolute file paths to package.json files
  */
 export function getFilePaths(
-  effects: Effects,
-  config: Context['config'],
-): SafeFilePaths {
+  config: Ctx['config'],
+): Effect.Effect<Env, GlobError | NoSourcesFoundError, string[]> {
   return pipe(
-    config,
-    getPatterns(effects),
-    andThen(function resolvePatterns(patterns) {
-      return pipe(
-        patterns,
-        $R.onlyOk(function resolvePattern(pattern) {
-          return pipe(
-            fromTry(() => effects.globSync(pattern)),
-            filter(isArrayOfStrings, `"glob" did not match "${pattern}"`),
-            map(flat),
-            map(uniq),
-            $R.tapErrVerbose,
-          );
-        }),
-        map(flat),
-        map(uniq),
-        mapErr(() => new Error(`No files matched ${printStrings(patterns)}`)),
-      );
-    }),
+    getPatterns(config),
+    Effect.flatMap((patterns) =>
+      pipe(
+        EnvTag,
+        Effect.flatMap((env) => env.globSync(patterns)),
+        Effect.map((arr) => uniq(arr.flat())),
+        Effect.flatMap((filePaths) =>
+          isNonEmptyArray(filePaths)
+            ? Effect.succeed(filePaths)
+            : Effect.fail(new NoSourcesFoundError({ CWD, patterns })),
+        ),
+      ),
+    ),
   );
 }

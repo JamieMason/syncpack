@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { effects } from '../lib/effects';
+import { defaultEnv } from '../env/default-env';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
-import { listMismatchesCli } from './list-mismatches-cli';
+import { listMismatches } from './list-mismatches';
 
 program.description(
   `
@@ -53,12 +54,14 @@ program
   .option(...option.types)
   .parse(process.argv);
 
-listMismatchesCli(
-  {
-    configPath: program.opts().config,
-    filter: program.opts().filter,
-    source: program.opts().source,
-    types: program.opts().types,
-  },
-  effects,
+Effect.runSync<never, unknown>(
+  listMismatches(
+    {
+      configPath: program.opts().config,
+      filter: program.opts().filter,
+      source: program.opts().source,
+      types: program.opts().types,
+    },
+    defaultEnv,
+  ),
 );

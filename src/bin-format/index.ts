@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { effects } from '../lib/effects';
+import { defaultEnv } from '../env/default-env';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { formatCli } from './format-cli';
@@ -50,11 +51,13 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-formatCli(
-  {
-    configPath: program.opts().config,
-    indent: program.opts().indent,
-    source: program.opts().source,
-  },
-  effects,
+Effect.runSync<never, unknown>(
+  formatCli(
+    {
+      configPath: program.opts().config,
+      indent: program.opts().indent,
+      source: program.opts().source,
+    },
+    defaultEnv,
+  ),
 );

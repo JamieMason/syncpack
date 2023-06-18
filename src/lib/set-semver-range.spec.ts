@@ -1,22 +1,22 @@
 import 'expect-more-jest';
+import type { SemverRange } from '../config/types';
 import { setSemverRange } from './set-semver-range';
 
 describe('setSemverRange', () => {
   describe('when the current value is Semver', () => {
     it('sets its semver range to the given range', () => {
-      (
-        [
-          ['*', '*'],
-          ['', '1.2.3'],
-          ['>', '>1.2.3'],
-          ['>=', '>=1.2.3'],
-          ['.x', '1.x.x'],
-          ['<', '<1.2.3'],
-          ['<=', '<=1.2.3'],
-          ['^', '^1.2.3'],
-          ['~', '~1.2.3'],
-        ] satisfies [SemverRange, string][]
-      ).forEach(([semverRange, expected]) => {
+      const cases: [SemverRange, string][] = [
+        ['*', '*'],
+        ['', '1.2.3'],
+        ['>', '>1.2.3'],
+        ['>=', '>=1.2.3'],
+        ['.x', '1.x.x'],
+        ['<', '<1.2.3'],
+        ['<=', '<=1.2.3'],
+        ['^', '^1.2.3'],
+        ['~', '~1.2.3'],
+      ];
+      cases.forEach(([semverRange, expected]) => {
         expect(setSemverRange(semverRange, '<1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '<=1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '1.2.3')).toEqual(expected);

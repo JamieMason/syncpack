@@ -13,6 +13,11 @@ const config = {
       packages: ['**'],
       pinVersion: '4.1.2',
     },
+    {
+      dependencies: ['globby'],
+      packages: ['**'],
+      pinVersion: '11.1.0',
+    },
   ],
 };
 

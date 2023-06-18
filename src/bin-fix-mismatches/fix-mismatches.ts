@@ -1,55 +1,27 @@
-import { isObject } from 'tightrope/guard/is-object';
-import { isUndefined } from 'tightrope/guard/is-undefined';
-import type { Context } from '../get-context';
-import { getVersionGroups } from '../get-version-groups';
-import { DELETE } from '../get-version-groups/lib/delete';
+import * as Context from '@effect/data/Context';
+import { pipe } from '@effect/data/Function';
+import * as Effect from '@effect/io/Effect';
+import { CliConfigTag, type CliConfig } from '../config/types';
+import { createVersionsProgram } from '../create-program/versions';
+import { createEnv } from '../env/create-env';
+import type { DefaultEnv } from '../env/default-env';
+import { exitIfInvalid } from '../env/exit-if-invalid';
+import { EnvTag } from '../env/tags';
+import { writeIfChanged } from '../env/write-if-changed';
+import { createErrorHandlers } from '../error-handlers/create-error-handlers';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import { getContext } from '../get-context';
+import { fixMismatchesEffects } from './effects';
 
-export function fixMismatches(ctx: Context): Context {
-  const versionGroups = getVersionGroups(ctx);
-  let shouldPruneEmpty = false;
-
-  versionGroups.forEach((versionGroup) => {
-    versionGroup.inspect().forEach((report) => {
-      if (!report.isValid) {
-        report.instances.forEach((instance) => {
-          switch (report.status) {
-            case 'HIGHEST_SEMVER_MISMATCH':
-            case 'LOWEST_SEMVER_MISMATCH':
-            case 'PINNED_MISMATCH':
-            case 'SNAPPED_TO_MISMATCH':
-            case 'WORKSPACE_MISMATCH': {
-              instance.setVersion(report.expectedVersion);
-              break;
-            }
-            case 'BANNED': {
-              shouldPruneEmpty = true;
-              instance.setVersion(DELETE);
-              break;
-            }
-            case 'SAME_RANGE_MISMATCH':
-            case 'UNSUPPORTED_MISMATCH': {
-              // @TODO Output something when fix-mismatches faces an unsupported mismatch
-              ctx.isInvalid = true;
-              break;
-            }
-          }
-        });
-      }
-    });
-  });
-
-  /** Remove empty objects such as `{"dependencies": {}}` left after deleting */
-  if (shouldPruneEmpty) {
-    ctx.packageJsonFiles.forEach((packageJsonFile) => {
-      const contents = packageJsonFile.contents;
-      Object.keys(contents).forEach((key) => {
-        const value = contents[key];
-        if (isObject(value) && Object.values(value).every(isUndefined)) {
-          delete contents[key];
-        }
-      });
-    });
-  }
-
-  return ctx;
+export function fixMismatches(cli: Partial<CliConfig>, env: DefaultEnv) {
+  return pipe(
+    getContext(),
+    Effect.flatMap((ctx) => createVersionsProgram(ctx, fixMismatchesEffects)),
+    Effect.flatMap(writeIfChanged),
+    Effect.flatMap(exitIfInvalid),
+    Effect.catchTags(createErrorHandlers(defaultErrorHandlers)),
+    Effect.provideContext(
+      pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(EnvTag, createEnv(env))),
+    ),
+  );
 }

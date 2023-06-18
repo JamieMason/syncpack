@@ -1,33 +1,11 @@
 import 'expect-more-jest';
 import { join } from 'path';
-import { getContext } from '.';
-import { mockEffects } from '../../test/mock-effects';
-import { getSource } from '../config/get-source';
-import { CWD, DEFAULT_CONFIG } from '../constants';
+import { createMockEnv } from '../../test/mock-env';
+import { runContextSync } from '../../test/run-context-sync';
+import { CWD } from '../constants';
+import { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
 
 describe('getContext', () => {
-  describe('source', () => {
-    it('uses defaults when no CLI options or config are set', () => {
-      const effects = mockEffects();
-      const ctx = getContext({}, effects);
-      expect(getSource(ctx.config)).toEqual(DEFAULT_CONFIG.source);
-    });
-
-    it('uses value from config when no CLI options are set', () => {
-      const effects = mockEffects();
-      effects.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      const ctx = getContext({}, effects);
-      expect(getSource(ctx.config)).toEqual(['foo']);
-    });
-
-    it('uses value from CLI when config and CLI options are set', () => {
-      const effects = mockEffects();
-      effects.readConfigFileSync.mockReturnValue({ source: ['foo'] });
-      const ctx = getContext({ source: ['bar'] }, effects);
-      expect(getSource(ctx.config)).toEqual(['bar']);
-    });
-  });
-
   describe('packageJsonFiles', () => {
     describe('when --source cli options are given', () => {
       describe('for a single package.json file', () => {
@@ -35,16 +13,15 @@ describe('getContext', () => {
           const filePath = join(CWD, 'package.json');
           const contents = { name: 'foo' };
           const json = '{"name":"foo"}';
-          const effects = mockEffects();
-          effects.globSync.mockReturnValue([filePath]);
-          effects.readFileSync.mockReturnValue(json);
-          const config = getContext({ source: ['package.json'] }, effects);
-          expect(config).toEqual(
+          const env = createMockEnv();
+          env.globSync.mockReturnValue([filePath]);
+          env.readFileSync.mockReturnValue(json);
+          const ctx = runContextSync({ source: ['package.json'] }, env);
+          expect(ctx).toEqual(
             expect.objectContaining({
               packageJsonFiles: [
                 {
                   contents,
-                  effects: expect.toBeNonEmptyObject(),
                   filePath,
                   json,
                   config: expect.toBeNonEmptyObject(),
@@ -57,26 +34,27 @@ describe('getContext', () => {
       });
 
       describe('for a pattern that matches nothing', () => {
-        it('returns an empty array', () => {
-          const effects = mockEffects();
-          effects.globSync.mockReturnValue([]);
-          expect(getContext({ source: ['typo.json'] }, effects)).toHaveProperty(
-            'packageJsonFiles',
-            [],
+        it('returns a relevant error', () => {
+          const env = createMockEnv();
+          env.globSync.mockReturnValue([]);
+          const ctx = runContextSync({ source: ['typo.json'] }, env);
+          expect(ctx).toEqual(
+            new NoSourcesFoundError({
+              CWD,
+              patterns: ['package.json', 'typo.json/package.json'],
+            }),
           );
-          expect(effects.readFileSync).not.toHaveBeenCalled();
+          expect(env.readFileSync).not.toHaveBeenCalled();
         });
       });
     });
 
     describe('when no --source cli options are given', () => {
       it('performs a default search', () => {
-        const effects = mockEffects();
-        getContext({}, effects);
-        expect(effects.globSync.mock.calls).toEqual([
-          ['package.json'],
-          ['packages/*/package.json'],
-        ]);
+        const env = createMockEnv();
+        runContextSync({}, env);
+        expect(env.globSync).toHaveBeenCalledWith(['package.json', 'packages/*/package.json']);
+        expect(env.globSync).toHaveBeenCalledTimes(1);
       });
 
       describe('when yarn workspaces are defined', () => {
@@ -85,14 +63,12 @@ describe('getContext', () => {
             const filePath = join(CWD, 'package.json');
             const contents = { workspaces: ['as-array/*'] };
             const json = JSON.stringify(contents);
-            const effects = mockEffects();
-            effects.globSync.mockReturnValue([filePath]);
-            effects.readFileSync.mockReturnValue(json);
-            getContext({}, effects);
-            expect(effects.globSync.mock.calls).toEqual([
-              ['package.json'],
-              ['as-array/*/package.json'],
-            ]);
+            const env = createMockEnv();
+            env.globSync.mockReturnValue([filePath]);
+            env.readFileSync.mockReturnValue(json);
+            runContextSync({}, env);
+            expect(env.globSync).toHaveBeenCalledWith(['package.json', 'as-array/*/package.json']);
+            expect(env.globSync).toHaveBeenCalledTimes(1);
           });
         });
 
@@ -101,14 +77,12 @@ describe('getContext', () => {
             const filePath = join(CWD, 'package.json');
             const contents = { workspaces: { packages: ['as-object/*'] } };
             const json = JSON.stringify(contents);
-            const effects = mockEffects();
-            effects.globSync.mockReturnValue([filePath]);
-            effects.readFileSync.mockReturnValue(json);
-            getContext({}, effects);
-            expect(effects.globSync.mock.calls).toEqual([
-              ['package.json'],
-              ['as-object/*/package.json'],
-            ]);
+            const env = createMockEnv();
+            env.globSync.mockReturnValue([filePath]);
+            env.readFileSync.mockReturnValue(json);
+            runContextSync({}, env);
+            expect(env.globSync).toHaveBeenCalledWith(['package.json', 'as-object/*/package.json']);
+            expect(env.globSync).toHaveBeenCalledTimes(1);
           });
         });
       });
@@ -119,17 +93,15 @@ describe('getContext', () => {
             const filePath = join(CWD, 'package.json');
             const contents = { name: 'foo' };
             const json = JSON.stringify(contents);
-            const effects = mockEffects();
-            effects.globSync.mockReturnValue([filePath]);
-            effects.readFileSync.mockImplementation((filePath) => {
+            const env = createMockEnv();
+            env.globSync.mockReturnValue([filePath]);
+            env.readFileSync.mockImplementation((filePath) => {
               if (filePath.endsWith('package.json')) return json;
               if (filePath.endsWith('lerna.json')) return JSON.stringify({ packages: ['lerna/*'] });
             });
-            getContext({}, effects);
-            expect(effects.globSync.mock.calls).toEqual([
-              ['package.json'],
-              ['lerna/*/package.json'],
-            ]);
+            runContextSync({}, env);
+            expect(env.globSync).toHaveBeenCalledWith(['package.json', 'lerna/*/package.json']);
+            expect(env.globSync).toHaveBeenCalledTimes(1);
           });
         });
 
@@ -138,32 +110,34 @@ describe('getContext', () => {
             describe('when pnpm workspaces are defined', () => {
               it('resolves pnpm packages', () => {
                 const filePath = join(CWD, 'package.json');
-                const effects = mockEffects();
-                effects.globSync.mockReturnValue([filePath]);
-                effects.readYamlFileSync.mockReturnValue({
+                const env = createMockEnv();
+                env.globSync.mockReturnValue([filePath]);
+                env.readYamlFileSync.mockReturnValue({
                   packages: ['from-pnpm/*'],
                 });
-                getContext({}, effects);
-                expect(effects.globSync.mock.calls).toEqual([
-                  ['package.json'],
-                  ['from-pnpm/*/package.json'],
+                runContextSync({}, env);
+                expect(env.globSync).toHaveBeenCalledWith([
+                  'package.json',
+                  'from-pnpm/*/package.json',
                 ]);
+                expect(env.globSync).toHaveBeenCalledTimes(1);
               });
             });
 
             describe('when pnpm config is invalid', () => {
               it('performs a default search', () => {
                 const filePath = join(CWD, 'package.json');
-                const effects = mockEffects();
-                effects.globSync.mockReturnValue([filePath]);
-                effects.readYamlFileSync.mockImplementation(() => {
+                const env = createMockEnv();
+                env.globSync.mockReturnValue([filePath]);
+                env.readYamlFileSync.mockImplementation(() => {
                   throw new Error('Some YAML Error');
                 });
-                getContext({}, effects);
-                expect(effects.globSync.mock.calls).toEqual([
-                  ['package.json'],
-                  ['packages/*/package.json'],
+                runContextSync({}, env);
+                expect(env.globSync).toHaveBeenCalledWith([
+                  'package.json',
+                  'packages/*/package.json',
                 ]);
+                expect(env.globSync).toHaveBeenCalledTimes(1);
               });
             });
           });

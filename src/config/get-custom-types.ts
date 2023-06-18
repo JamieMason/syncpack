@@ -1,7 +1,7 @@
 import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
-import type { Context } from '../get-context';
+import type { Ctx } from '../get-context';
 import { NameAndVersionPropsStrategy } from '../strategy/name-and-version-props';
 import { NamedVersionStringStrategy } from '../strategy/named-version-string';
 import { UnnamedVersionStringStrategy } from '../strategy/unnamed-version-string';
@@ -15,7 +15,7 @@ export namespace Strategy {
     | VersionsByNameStrategy;
 }
 
-export function getCustomTypes({ rcFile }: Context['config']): Strategy.Any[] {
+export function getCustomTypes({ rcFile }: Ctx['config']): Strategy.Any[] {
   if (!isNonEmptyObject(rcFile.customTypes)) return [];
   const ERR_OBJ = new Error('Invalid customType');
   const ERR_NAME = new Error('Invalid customType name');

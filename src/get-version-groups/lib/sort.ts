@@ -1,6 +1,6 @@
 import gt from 'semver/functions/gt';
 import lt from 'semver/functions/lt';
-import { isSupported } from '../../lib/is-semver';
+import { isSupported } from '../../guards/is-supported';
 import { clean } from './clean';
 import { getRangeScore } from './get-range-score';
 

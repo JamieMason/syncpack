@@ -1,34 +1,26 @@
-import { flow } from 'tightrope/fn/flow';
-import { pipe } from 'tightrope/fn/pipe';
-import type { Result } from 'tightrope/result';
-import { Ok } from 'tightrope/result';
-import { andThen } from 'tightrope/result/and-then';
-import { map } from 'tightrope/result/map';
-import { or } from 'tightrope/result/or';
-import type { Context } from '../get-context';
-import { $R } from '../lib/$R';
-import type { Effects } from '../lib/effects';
+import { pipe } from '@effect/data/Function';
+import * as Effect from '@effect/io/Effect';
+import type { Env } from '../env/create-env';
+import type { GlobError, ReadFileError } from '../env/tags';
+import type { Ctx } from '../get-context';
+import type { NoSourcesFoundError } from './get-file-paths';
 import { getFilePaths } from './get-file-paths';
+import type { JsonParseError } from './get-patterns/read-json-safe';
 import { readJsonSafe } from './get-patterns/read-json-safe';
 import type { PackageJson } from './package-json-file';
 import { PackageJsonFile } from './package-json-file';
 
 /** Create an API for every package.json file needed. */
 export function getPackageJsonFiles(
-  effects: Effects,
-  config: Context['config'],
-): Result<PackageJsonFile[]> {
+  config: Ctx['config'],
+): Effect.Effect<
+  Env,
+  NoSourcesFoundError | GlobError | ReadFileError | JsonParseError,
+  PackageJsonFile[]
+> {
   return pipe(
-    getFilePaths(effects, config),
-    andThen(
-      $R.onlyOk(
-        flow(
-          readJsonSafe<PackageJson>(effects),
-          map((jsonFile) => new PackageJsonFile(jsonFile, config, effects)),
-          $R.tapErrVerbose,
-        ),
-      ),
-    ),
-    or(new Ok([])),
+    getFilePaths(config),
+    Effect.flatMap((paths) => Effect.all(paths.map(readJsonSafe<PackageJson>))),
+    Effect.map((files) => files.map((file) => new PackageJsonFile(file, config))),
   );
 }

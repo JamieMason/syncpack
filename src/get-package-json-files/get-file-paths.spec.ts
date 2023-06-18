@@ -1,25 +1,43 @@
-import { Err, Ok } from 'tightrope/result';
-import { mockEffects } from '../../test/mock-effects';
-import { getContext } from '../get-context';
-import { getFilePaths } from './get-file-paths';
+import { match } from '@effect/data/Either';
+import { identity, pipe } from '@effect/data/Function';
+import * as Effect from '@effect/io/Effect';
+import 'expect-more-jest';
+import type { MockEnv } from '../../test/mock-env';
+import { createMockEnv } from '../../test/mock-env';
+import { CWD } from '../constants';
+import { createEnv } from '../env/create-env';
+import { EnvTag } from '../env/tags';
+import type { Ctx } from '../get-context';
+import { getFilePaths, NoSourcesFoundError } from './get-file-paths';
 
-it('returns new Err when patterns return no files', () => {
-  const effects = mockEffects();
-  const { config } = getContext({}, effects);
-  effects.globSync.mockReturnValue([]);
-  const message = 'No files matched "package.json", "packages/*/package.json"';
-  expect(getFilePaths(effects, config)).toEqual(new Err(new Error(message)));
+function runSync(config: Ctx['config'], mockedEffects: MockEnv) {
+  return pipe(
+    Effect.runSyncEither(
+      pipe(getFilePaths(config), Effect.provideService(EnvTag, createEnv(mockedEffects))),
+    ),
+    match(identity, identity),
+  );
+}
+
+it('return error when patterns return no files', () => {
+  const env = createMockEnv();
+  env.globSync.mockReturnValue([]);
+  const result = runSync({ cli: {}, rcFile: {} }, env);
+  expect(result).toEqual(
+    new NoSourcesFoundError({
+      CWD,
+      patterns: ['package.json', 'packages/*/package.json'],
+    }),
+  );
 });
 
-it('returns new Ok when patterns return files', () => {
-  const effects = mockEffects();
-  const { config } = getContext({}, effects);
+it('returns strings when patterns return files', () => {
+  const env = createMockEnv();
   const root = ['/fake/dir/package.json'];
   const packages = ['/fake/dir/packages/a/package.json', '/fake/dir/packages/b/package.json'];
-  effects.globSync.mockImplementation((pattern) => {
-    if (pattern === 'package.json') return root;
-    if (pattern === 'packages/*/package.json') return packages;
-    throw new Error('Unexpected pattern in test');
+  env.globSync.mockImplementation(() => {
+    return [...root, ...packages];
   });
-  expect(getFilePaths(effects, config)).toEqual(new Ok([...root, ...packages]));
+  const result = runSync({ cli: {}, rcFile: {} }, env);
+  expect(result).toEqual([...root, ...packages]);
 });

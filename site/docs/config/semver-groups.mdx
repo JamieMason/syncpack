@@ -9,14 +9,14 @@ import Pills from '@site/src/components/pill';
 
 <Pills optional />
 
-Allow some packages to have different semver range rules to the rest of your
-monorepo. Each dependency can only belong to one semver group, the first rule
-which matches a given dependency and package will apply.
+Allow some packages to have different semver range rules to the rest of your monorepo. Each
+dependency can only belong to one semver group, the first rule which matches a given dependency and
+package will apply.
 
 ## Example use cases
 
-1: Every dependency of `@myrepo/library` should have a semver range of `~`,
-regardless of what the rest of the monorepo uses:
+1: Every dependency of `@myrepo/library` should have a semver range of `~`, regardless of what the
+rest of the monorepo uses:
 
 ```json title=".syncpackrc"
 {
@@ -37,9 +37,8 @@ Syncpack config files also support
 
 :::
 
-2: Every dependency of `@myrepo/library` whose name matches `@alpha/**` should
-have a semver range of `^`, regardless of what the rest of that package or the
-rest of the monorepo uses:
+2: Every dependency of `@myrepo/library` whose name matches `@alpha/**` should have a semver range
+of `^`, regardless of what the rest of that package or the rest of the monorepo uses:
 
 ```json title=".syncpackrc"
 {
@@ -53,8 +52,8 @@ rest of the monorepo uses:
 }
 ```
 
-3: Every dependency in the monorepo whose name matches `@alpha/**` should have a
-semver range of `~`, regardless of what the rest of the monorepo uses:
+3: Every dependency in the monorepo whose name matches `@alpha/**` should have a semver range of
+`~`, regardless of what the rest of the monorepo uses:
 
 ```json title=".syncpackrc"
 {
@@ -68,21 +67,15 @@ semver range of `~`, regardless of what the rest of the monorepo uses:
 }
 ```
 
-3: Production dependencies should have fixed version numbers, but development
-and peer dependencies can be broader.
+3: Production dependencies should have fixed version numbers, but development and peer dependencies
+can be broader.
 
 ```json title=".syncpackrc"
 {
   "semverGroups": [
     {
       "range": "",
-      "dependencyTypes": [
-        "prod",
-        "resolutions",
-        "overrides",
-        "pnpmOverrides",
-        "workspace"
-      ],
+      "dependencyTypes": ["prod", "resolutions", "overrides", "pnpmOverrides", "workspace"],
       "dependencies": ["**"],
       "packages": ["**"]
     },
@@ -106,15 +99,13 @@ and peer dependencies can be broader.
 
 <Pills required />
 
-Which of the [Supported Ranges](./semver-range.mdx#supported-ranges) this group
-should use.
+Which of the [Supported Ranges](./semver-range.mdx#supported-ranges) this group should use.
 
 ## `semverGroup.dependencies`
 
 <Pills required />
 
-Works the same as
-[`versionGroup.dependencies`](./version-groups.mdx#dependencies).
+Works the same as [`versionGroup.dependencies`](./version-groups.mdx#dependencies).
 
 ## `semverGroup.isIgnored`
 
@@ -132,5 +123,4 @@ Works the same as [`versionGroup.packages`](./version-groups.mdx#packages).
 
 <Pills optional />
 
-Works the same as
-[`versionGroup.dependencyTypes`](./version-groups.mdx#dependencytypes).
+Works the same as [`versionGroup.dependencyTypes`](./version-groups.mdx#dependencytypes).

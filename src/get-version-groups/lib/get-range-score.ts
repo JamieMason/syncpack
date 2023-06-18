@@ -16,8 +16,6 @@ const scoresByRange: Record<string, number | undefined> = {
 /** Rank a Semver Range according to its greediness */
 export function getRangeScore(version: string): number {
   const range =
-    version.indexOf('.x') !== -1
-      ? RANGE.LOOSE
-      : version.slice(0, version.search(/[0-9]/));
+    version.indexOf('.x') !== -1 ? RANGE.LOOSE : version.slice(0, version.search(/[0-9]/));
   return scoresByRange[range] || 0;
 }

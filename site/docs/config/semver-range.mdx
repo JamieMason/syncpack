@@ -13,8 +13,7 @@ The semver range to be used consistently throughout your monorepo.
 
 ## Default Value
 
-Defaulted to `""` to ensure that exact dependency versions are used instead of
-loose ranges.
+Defaulted to `""` to ensure that exact dependency versions are used instead of loose ranges.
 
 ```json title=".syncpackrc"
 {
@@ -31,17 +30,15 @@ Syncpack config files also support
 
 :::tip
 
-If you want to use different ranges in different packages and/or types of
-dependencies, you can use [`semverGroups`](./semver-groups.mdx) to partition
-your repo into different sets of rules.
+If you want to use different ranges in different packages and/or types of dependencies, you can use
+[`semverGroups`](./semver-groups.mdx) to partition your repo into different sets of rules.
 
 :::
 
 :::info
 
-The `semverRange` configuration in your [config file](../config-file.mdx) can be
-overridden on an ad hoc basis using the
-[`--semver-range`](../option/semver-range.mdx) option.
+The `semverRange` configuration in your [config file](../config-file.mdx) can be overridden on an ad
+hoc basis using the [`--semver-range`](../option/semver-range.mdx) option.
 
 :::
 

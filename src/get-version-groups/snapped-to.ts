@@ -1,49 +1,56 @@
-import type { VersionGroupReport } from '.';
+import * as Data from '@effect/data/Data';
+import * as Effect from '@effect/io/Effect';
+import { VersionGroupReport } from '.';
 import type { VersionGroupConfig } from '../config/types';
 import type { Instance } from '../get-package-json-files/instance';
 import { groupBy } from './lib/group-by';
 
-export class SnappedToVersionGroup {
-  _tag = 'SnappedTo';
+export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
   config: VersionGroupConfig.SnappedTo;
   instances: Instance[];
-
+}> {
   constructor(config: VersionGroupConfig.SnappedTo) {
-    this.config = config;
-    this.instances = [];
+    super({
+      config,
+      instances: [],
+    });
   }
 
   canAdd(_: Instance): boolean {
     return true;
   }
 
-  inspect(): VersionGroupReport[] {
-    const report: VersionGroupReport[] = [];
+  inspect(): Effect.Effect<
+    never,
+    VersionGroupReport.SnappedToMismatch,
+    VersionGroupReport.Valid
+  >[] {
     const instancesByName = groupBy('name', this.instances);
 
-    Object.entries(instancesByName).forEach(([name, instances]) => {
+    return Object.entries(instancesByName).map(([name, instances]) => {
       const snapTo = this.config.snapTo;
       const expectedVersion = getExpectedVersion(snapTo, instances);
 
       if (hasMismatch(expectedVersion, instances)) {
-        report.push({
-          expectedVersion,
-          instances,
-          isValid: false,
-          name,
-          status: 'SNAPPED_TO_MISMATCH',
-        });
+        return Effect.fail(
+          new VersionGroupReport.SnappedToMismatch({
+            name,
+            instances,
+            isValid: false,
+            expectedVersion,
+            snapTo,
+          }),
+        );
       } else {
-        report.push({
-          instances,
-          isValid: true,
-          name,
-          status: 'VALID',
-        });
+        return Effect.succeed(
+          new VersionGroupReport.Valid({
+            name,
+            instances,
+            isValid: true,
+          }),
+        );
       }
     });
-
-    return report;
   }
 }
 
@@ -52,6 +59,7 @@ function getExpectedVersion(snapTo: string[], instances: Instance[]): string {
     .filter((i) => snapTo.includes(i.pkgName))
     .find((i) => i.version)?.version;
   if (expectedVersion) return expectedVersion;
+  // @FIXME: create tagged error for this
   throw new Error('versionGroup.snapTo does not match any package versions');
 }
 

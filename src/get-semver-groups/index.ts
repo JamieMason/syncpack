@@ -1,98 +1,152 @@
-import { minimatch } from 'minimatch';
+import * as Data from '@effect/data/Data';
+import { pipe } from '@effect/data/Function';
+import * as Effect from '@effect/io/Effect';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
 import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
+import type { Union } from 'ts-toolbelt';
+import type { DeprecatedTypesError } from '../config/get-enabled-types';
 import { getEnabledTypes } from '../config/get-enabled-types';
 import { getSemverRange } from '../config/get-semver-range';
-import type { Context } from '../get-context';
+import type { Ctx } from '../get-context';
 import type { Instance } from '../get-package-json-files/instance';
-import { isValidSemverRange } from '../lib/is-semver';
-import { CatchAllSemverGroup } from './catch-all';
+import { canAddToGroup } from '../guards/can-add-to-group';
+import { isValidSemverRange } from '../guards/is-valid-semver-range';
+import { sortByName } from '../lib/sort-by-name';
 import { FilteredOutSemverGroup } from './filtered-out';
 import { IgnoredSemverGroup } from './ignored';
 import { WithRangeSemverGroup } from './with-range';
 
-export type AnySemverGroup =
-  | CatchAllSemverGroup
-  | FilteredOutSemverGroup
-  | IgnoredSemverGroup
-  | WithRangeSemverGroup;
+export type AnySemverGroup = Union.Strict<
+  FilteredOutSemverGroup | IgnoredSemverGroup | WithRangeSemverGroup
+>;
 
-export type SemverGroupReport = {
-  name: string;
-  instance: Instance;
-} & (
-  | {
-      status: 'FILTERED_OUT';
-      isValid: true;
-    }
-  | {
-      status: 'IGNORED';
-      isValid: true;
-    }
-  | {
-      status: 'VALID';
-      isValid: true;
-    }
-  | {
-      status: 'WORKSPACE_SEMVER_RANGE_MISMATCH';
-      isValid: false;
-      expectedVersion: string;
-    }
-  | {
-      status: 'SEMVER_RANGE_MISMATCH';
-      isValid: false;
-      expectedVersion: string;
-    }
-  | {
-      status: 'UNSUPPORTED_VERSION';
-      isValid: false;
-    }
-);
+export namespace SemverGroupReport {
+  export class FilteredOut extends Data.TaggedClass('FilteredOut')<{
+    name: string;
+    instance: Instance;
+    readonly isValid: true;
+  }> {}
 
-export function getSemverGroups(ctx: Context): AnySemverGroup[] {
-  const enabledTypes = getEnabledTypes(ctx.config);
-  const semverGroups = createSemverGroups(ctx);
+  export class Ignored extends Data.TaggedClass('Ignored')<{
+    name: string;
+    instance: Instance;
+    readonly isValid: true;
+  }> {}
 
-  ctx.packageJsonFiles.forEach((file) => {
-    file.getInstances(enabledTypes).forEach((instance) => {
-      const { name, pkgName } = instance;
-      for (const group of semverGroups) {
-        const { dependencies, dependencyTypes, packages } = group.config;
-        if (
-          group.canAdd(instance) &&
-          (!isNonEmptyArray(dependencyTypes) ||
-            dependencyTypes.includes(instance.strategy.name)) &&
-          (!isNonEmptyArray(packages) ||
-            packages.some((pattern) => minimatch(instance.pkgName, pattern))) &&
-          (!isNonEmptyArray(dependencies) ||
-            dependencies.some((pattern) => minimatch(instance.name, pattern)))
-        ) {
-          group.instances.push(instance);
-          return;
-        }
-      }
-      throw new Error(`${name} in ${pkgName} did not match any semver groups`);
-    });
-  });
+  export class Valid extends Data.TaggedClass('Valid')<{
+    name: string;
+    instance: Instance;
+    readonly isValid: true;
+  }> {}
 
-  return semverGroups.filter((group) => isNonEmptyArray(group.instances));
+  export class WorkspaceSemverRangeMismatch extends Data.TaggedClass(
+    'WorkspaceSemverRangeMismatch',
+  )<{
+    name: string;
+    instance: Instance;
+    readonly isValid: false;
+    readonly expectedVersion: string;
+  }> {}
+
+  export class SemverRangeMismatch extends Data.TaggedClass('SemverRangeMismatch')<{
+    name: string;
+    instance: Instance;
+    readonly isValid: false;
+    readonly expectedVersion: string;
+  }> {}
+
+  export class UnsupportedVersion extends Data.TaggedClass('UnsupportedVersion')<{
+    name: string;
+    instance: Instance;
+    readonly isValid: false;
+  }> {}
+
+  export type ValidCases = Union.Strict<FilteredOut | Ignored | Valid>;
+
+  export type InvalidCases = Union.Strict<
+    SemverRangeMismatch | UnsupportedVersion | WorkspaceSemverRangeMismatch
+  >;
+
+  export type FixableCases = Union.Strict<SemverRangeMismatch | WorkspaceSemverRangeMismatch>;
+
+  export type UnfixableCases = Union.Strict<UnsupportedVersion>;
+
+  export type Any = Union.Strict<ValidCases | InvalidCases>;
 }
 
-function createSemverGroups(ctx: Context): AnySemverGroup[] {
+export class SemverGroupConfigError extends Data.TaggedClass('SemverGroupConfigError')<{
+  readonly config: unknown;
+  readonly error: string;
+}> {}
+
+export function getSemverGroups(
+  ctx: Ctx,
+): Effect.Effect<never, SemverGroupConfigError | DeprecatedTypesError, AnySemverGroup[]> {
+  return pipe(
+    Effect.Do(),
+    Effect.bind('enabledTypes', () => getEnabledTypes(ctx.config)),
+    Effect.bind('semverGroups', () => createSemverGroups(ctx)),
+    Effect.flatMap(({ enabledTypes, semverGroups }) => {
+      for (const file of ctx.packageJsonFiles) {
+        instances: for (const instance of file.getInstances(enabledTypes)) {
+          for (const group of semverGroups) {
+            if (canAddToGroup(group, instance)) {
+              group.instances.push(instance);
+              continue instances;
+            }
+          }
+        }
+      }
+      return Effect.succeed(
+        semverGroups.filter((group) => isNonEmptyArray(group.instances.sort(sortByName))),
+      );
+    }),
+  );
+}
+
+function createSemverGroups(
+  ctx: Ctx,
+): Effect.Effect<never, SemverGroupConfigError, AnySemverGroup[]> {
   const { cli, rcFile } = ctx.config;
-  const semverGroups: AnySemverGroup[] = [new FilteredOutSemverGroup(ctx)];
+  const semverGroups: Effect.Effect<never, SemverGroupConfigError, AnySemverGroup>[] = [
+    Effect.succeed(new FilteredOutSemverGroup(ctx)),
+  ];
 
   if (isNonEmptyArray(rcFile.semverGroups)) {
-    const ERR_OBJ = new Error('Invalid semverGroup');
-    const ERR_DEPS = new Error('Invalid semverGroup dependencies');
-    const ERR_PKGS = new Error('Invalid semverGroup packages');
-
     rcFile.semverGroups.forEach((config) => {
-      if (!isObject(config)) throw ERR_OBJ;
-      if (!isArrayOfStrings(config.dependencies)) throw ERR_DEPS;
-      if (!isArrayOfStrings(config.packages)) throw ERR_PKGS;
+      if (!isObject(config)) {
+        return semverGroups.push(
+          Effect.fail(
+            new SemverGroupConfigError({
+              config,
+              error: 'config is not an object',
+            }),
+          ),
+        );
+      }
+      if (!isArrayOfStrings(config.dependencies)) {
+        return semverGroups.push(
+          Effect.fail(
+            new SemverGroupConfigError({
+              config,
+              error: 'config.dependencies is not an array of strings',
+            }),
+          ),
+        );
+      }
+      if (!isArrayOfStrings(config.packages)) {
+        return semverGroups.push(
+          Effect.fail(
+            new SemverGroupConfigError({
+              config,
+              error: 'config.packages is not an array of strings',
+            }),
+          ),
+        );
+      }
+
       const { dependencies, packages } = config;
       const label = isNonEmptyString(config.label) ? config.label : '';
       const dependencyTypes = isArrayOfStrings(config.dependencyTypes)
@@ -101,36 +155,42 @@ function createSemverGroups(ctx: Context): AnySemverGroup[] {
 
       if (config.isIgnored === true) {
         semverGroups.push(
-          new IgnoredSemverGroup({
-            dependencies,
-            dependencyTypes,
-            isIgnored: true,
-            label,
-            packages,
-          }),
+          Effect.succeed(
+            new IgnoredSemverGroup({
+              dependencies,
+              dependencyTypes,
+              isIgnored: true,
+              label,
+              packages,
+            }),
+          ),
         );
       } else if (isValidSemverRange(config.range)) {
         semverGroups.push(
-          new WithRangeSemverGroup({
-            dependencies,
-            dependencyTypes,
-            label,
-            packages,
-            range: config.range,
-          }),
+          Effect.succeed(
+            new WithRangeSemverGroup(false, {
+              dependencies,
+              dependencyTypes,
+              label,
+              packages,
+              range: config.range,
+            }),
+          ),
         );
       }
     });
   }
 
   semverGroups.push(
-    new CatchAllSemverGroup({
-      dependencies: ['**'],
-      label: '',
-      packages: ['**'],
-      range: getSemverRange({ cli, rcFile }),
-    }),
+    Effect.succeed(
+      new WithRangeSemverGroup(true, {
+        dependencies: ['**'],
+        label: '',
+        packages: ['**'],
+        range: getSemverRange({ cli, rcFile }),
+      }),
+    ),
   );
 
-  return semverGroups;
+  return Effect.all(semverGroups);
 }

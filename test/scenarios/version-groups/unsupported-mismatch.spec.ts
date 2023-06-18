@@ -1,14 +1,16 @@
+import * as Effect from '@effect/io/Effect';
 import 'expect-more-jest';
-import { fixMismatchesCli } from '../../../src/bin-fix-mismatches/fix-mismatches-cli';
-import { lintCli } from '../../../src/bin-lint/lint-cli';
-import { listMismatchesCli } from '../../../src/bin-list-mismatches/list-mismatches-cli';
-import { listCli } from '../../../src/bin-list/list-cli';
-import { promptCli } from '../../../src/bin-prompt/prompt-cli';
+import { fixMismatches } from '../../../src/bin-fix-mismatches/fix-mismatches';
+import { lint } from '../../../src/bin-lint/lint';
+import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
+import { list } from '../../../src/bin-list/list';
+import { prompt } from '../../../src/bin-prompt/prompt';
+import { toBeUnsupportedMismatch } from '../../matchers/version-group';
 import { createScenarioVariants } from './lib/create-scenario-variants';
 
 describe('versionGroups', () => {
-  describe('UNSUPPORTED_MISMATCH', () => {
-    [
+  describe('UnsupportedMismatch', () => {
+    const cases: [string, string][] = [
       [
         'yarn@git://github.com/user/project.git#commit1',
         'yarn@git://github.com/user/project.git#commit2',
@@ -18,10 +20,11 @@ describe('versionGroups', () => {
         'yarn@patch:yarn@1.1.0#patches/yarn+1.1.0.patch',
         'yarn@patch:yarn@0.2.0#patches/yarn+0.2.0.patch',
       ],
-    ]
+    ];
+    cases
       .flatMap(([versionA, versionB]) =>
         createScenarioVariants({
-          config: {},
+          config: { cli: {}, rcFile: {} },
           a: [versionA, versionA],
           b: [versionB, versionB],
         }),
@@ -31,13 +34,7 @@ describe('versionGroups', () => {
           test('should identify as mismatching, but not possible to fix', () => {
             const scenario = getScenario();
             expect(scenario.report.versionGroups).toEqual([
-              [
-                expect.objectContaining({
-                  isValid: false,
-                  name: 'yarn',
-                  status: 'UNSUPPORTED_MISMATCH',
-                }),
-              ],
+              [toBeUnsupportedMismatch({ name: 'yarn' })],
             ]);
           });
         });
@@ -45,46 +42,42 @@ describe('versionGroups', () => {
         describe('fix-mismatches', () => {
           test('should exit with 1 on the unfixable mismatch', () => {
             const scenario = getScenario();
-            fixMismatchesCli({}, scenario.effects);
-            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
-            expect(scenario.effects.writeFileSync).not.toHaveBeenCalled();
-            expect(scenario.log.mock.calls).toEqual([
-              scenario.files['packages/a/package.json'].logEntryWhenUnchanged,
-              scenario.files['packages/b/package.json'].logEntryWhenUnchanged,
-            ]);
+            Effect.runSync(fixMismatches({}, scenario.env));
+            expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
+            expect(scenario.env.writeFileSync).not.toHaveBeenCalled();
           });
         });
 
         describe('list-mismatches', () => {
           test('should exit with 1 on the mismatch', () => {
             const scenario = getScenario();
-            listMismatchesCli({}, scenario.effects);
-            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+            Effect.runSync(listMismatches({}, scenario.env));
+            expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
           });
         });
 
         describe('lint', () => {
           test('should exit with 1 on the mismatch', () => {
             const scenario = getScenario();
-            lintCli({}, scenario.effects);
-            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+            Effect.runSync(lint({}, scenario.env));
+            expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
           });
         });
 
         describe('list', () => {
           test('should exit with 1 on the mismatch', () => {
             const scenario = getScenario();
-            listCli({}, scenario.effects);
-            expect(scenario.effects.process.exit).toHaveBeenCalledWith(1);
+            Effect.runSync(list({}, scenario.env));
+            expect(scenario.env.exitProcess).toHaveBeenCalledWith(1);
           });
         });
 
         describe('prompt', () => {
-          test('should ask the user to choose the correct version', () => {
+          test('should ask the user to choose the correct version', async () => {
             const scenario = getScenario();
-            promptCli({}, scenario.effects);
-            expect(scenario.effects.askForChoice).toHaveBeenCalled();
-            expect(scenario.effects.askForInput).not.toHaveBeenCalled();
+            await Effect.runPromise(prompt({}, scenario.env));
+            expect(scenario.env.askForChoice).toHaveBeenCalled();
+            expect(scenario.env.askForInput).not.toHaveBeenCalled();
           });
         });
       });

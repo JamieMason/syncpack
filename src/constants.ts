@@ -51,6 +51,6 @@ export const DEFAULT_CONFIG = {
     'scripts',
   ],
   sortFirst: ['name', 'description', 'version', 'author'],
-  source: [],
+  source: DEFAULT_SOURCES,
   versionGroups: [],
 } as const;

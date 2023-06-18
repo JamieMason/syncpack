@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { effects } from '../lib/effects';
+import { defaultEnv } from '../env/default-env';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
-import { lintCli } from './lint-cli';
+import { lint } from './lint';
 
 program.description('  lint all versions and ranges');
 
@@ -35,9 +36,11 @@ showHelpOnError(program);
 
 program.option(...option.config).parse(process.argv);
 
-lintCli(
-  {
-    configPath: program.opts().config,
-  },
-  effects,
+Effect.runSync<never, unknown>(
+  lint(
+    {
+      configPath: program.opts().config,
+    },
+    defaultEnv,
+  ),
 );

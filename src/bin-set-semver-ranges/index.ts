@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { effects } from '../lib/effects';
+import { defaultEnv } from '../env/default-env';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
-import { setSemverRangesCli } from './set-semver-ranges-cli';
+import { setSemverRanges } from './set-semver-ranges';
 
 program.description(
   chalk`
@@ -72,14 +73,16 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-setSemverRangesCli(
-  {
-    configPath: program.opts().config,
-    filter: program.opts().filter,
-    indent: program.opts().indent,
-    semverRange: program.opts().semverRange,
-    source: program.opts().source,
-    types: program.opts().types,
-  },
-  effects,
+Effect.runSync<never, unknown>(
+  setSemverRanges(
+    {
+      configPath: program.opts().config,
+      filter: program.opts().filter,
+      indent: program.opts().indent,
+      semverRange: program.opts().semverRange,
+      source: program.opts().source,
+      types: program.opts().types,
+    },
+    defaultEnv,
+  ),
 );

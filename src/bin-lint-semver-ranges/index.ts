@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { effects } from '../lib/effects';
+import { defaultEnv } from '../env/default-env';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
-import { lintSemverRangesCli } from './lint-semver-ranges-cli';
+import { lintSemverRanges } from './lint-semver-ranges';
 
 program.description(
   chalk`
@@ -69,13 +70,15 @@ program
   .option(...option.types)
   .parse(process.argv);
 
-lintSemverRangesCli(
-  {
-    configPath: program.opts().config,
-    filter: program.opts().filter,
-    semverRange: program.opts().semverRange,
-    source: program.opts().source,
-    types: program.opts().types,
-  },
-  effects,
+Effect.runSync<never, unknown>(
+  lintSemverRanges(
+    {
+      configPath: program.opts().config,
+      filter: program.opts().filter,
+      semverRange: program.opts().semverRange,
+      source: program.opts().source,
+      types: program.opts().types,
+    },
+    defaultEnv,
+  ),
 );

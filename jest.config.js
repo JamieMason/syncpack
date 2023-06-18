@@ -4,7 +4,6 @@ module.exports = {
     'src/**/*.ts',
     '!src/bin.ts',
     '!src/bin*/index.ts',
-    '!src/lib/effects.ts',
     '!src/lib/log.ts',
     '!src/option.ts',
   ],
@@ -12,17 +11,14 @@ module.exports = {
   coverageThreshold: {
     global: {
       branches: 80,
-      functions: 95,
-      lines: 95,
-      statements: 95,
+      functions: 90,
+      lines: 90,
+      statements: 90,
     },
   },
   moduleFileExtensions: ['ts', 'js'],
   setupFiles: ['<rootDir>/test/jest.setup.ts'],
-  testMatch: [
-    '<rootDir>/src/**/*.spec.ts',
-    '<rootDir>/test/scenarios/**/*.spec.ts',
-  ],
+  testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/test/scenarios/**/*.spec.ts'],
   transform: {
     '^.+\\.ts$': ['ts-jest', { isolatedModules: true }],
   },

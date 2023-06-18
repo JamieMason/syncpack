@@ -3,7 +3,7 @@ import type { Result } from 'tightrope/result';
 import { Err, Ok } from 'tightrope/result';
 import { isErr } from 'tightrope/result/is-err';
 import { unwrap } from 'tightrope/result/unwrap';
-import { verbose } from './log';
+import { logVerbose } from './log-verbose';
 
 export const $R = {
   /**
@@ -26,7 +26,7 @@ export const $R = {
   },
   /** Log verbose only when Result is an Err */
   tapErrVerbose<T extends AnyResult>(result: T) {
-    if (isErr(result)) verbose(result.value);
+    if (isErr(result)) logVerbose(result.value);
     return result;
   },
 };

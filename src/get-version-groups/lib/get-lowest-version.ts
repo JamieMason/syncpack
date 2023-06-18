@@ -1,4 +1,4 @@
-import { pipe } from 'tightrope/fn/pipe';
+import { pipe } from '@effect/data/Function';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import type { Result } from 'tightrope/result';
 import { filter } from 'tightrope/result/filter';
