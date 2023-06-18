@@ -1,3 +1,12 @@
+## [10.6.1](https://github.com/JamieMason/syncpack/compare/10.5.1...10.6.1) (2023-06-18)
+
+
+### Features
+
+* **core:** refactor and general improvements ([f35c486](https://github.com/JamieMason/syncpack/commit/f35c486ab51f697f6259c509ebd7e0c575ad2dac)), closes [#140](https://github.com/JamieMason/syncpack/issues/140) [#139](https://github.com/JamieMason/syncpack/issues/139) [#132](https://github.com/JamieMason/syncpack/issues/132) [#111](https://github.com/JamieMason/syncpack/issues/111)
+
+
+
 ## [10.5.1](https://github.com/JamieMason/syncpack/compare/10.2.0...10.5.1) (2023-06-04)
 
 

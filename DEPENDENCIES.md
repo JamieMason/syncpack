@@ -24,12 +24,15 @@ npm test
 
 ## Dependencies
 
+- [@effect/data](https://ghub.io/@effect/data): Consistent dependency versions in large JavaScript Monorepos
+- [@effect/io](https://ghub.io/@effect/io): Consistent dependency versions in large JavaScript Monorepos
+- [@effect/match](https://ghub.io/@effect/match): Consistent dependency versions in large JavaScript Monorepos
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [cosmiconfig](https://ghub.io/cosmiconfig): Find and load configuration from a package.json property, rc file, or CommonJS module
 - [enquirer](https://ghub.io/enquirer): Stylish, intuitive and user-friendly prompt system. Fast and lightweight enough for small projects, powerful and extensible enough for the most advanced use cases.
 - [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
-- [glob](https://ghub.io/glob): the most correct and second fastest glob implementation in JavaScript
+- [globby](https://ghub.io/globby): User-friendly glob matching
 - [minimatch](https://ghub.io/minimatch): a glob matcher in javascript
 - [read-yaml-file](https://ghub.io/read-yaml-file): Read and parse a YAML file
 - [semver](https://ghub.io/semver): The semantic version parser used by npm.
@@ -40,7 +43,6 @@ npm test
 
 - [@tsconfig/node14](https://ghub.io/@tsconfig/node14): A base TSConfig for working with Node 14.
 - [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
-- [@types/glob](https://ghub.io/@types/glob): TypeScript definitions for glob
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
 - [@types/node](https://ghub.io/@types/node): TypeScript definitions for Node.js
 - [@types/semver](https://ghub.io/@types/semver): TypeScript definitions for semver
