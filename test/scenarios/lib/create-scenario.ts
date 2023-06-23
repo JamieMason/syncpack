@@ -55,8 +55,8 @@ export interface TestScenario {
     semverGroups: SemverGroupReport.Any[][];
     versionGroups: VersionGroupReport.Any[][];
   };
-  semverEffects: SemverRangeEffects;
-  versionEffects: VersionEffects;
+  semverEffects: SemverRangeEffects<void>;
+  versionEffects: VersionEffects<void>;
 }
 
 export function createScenario(

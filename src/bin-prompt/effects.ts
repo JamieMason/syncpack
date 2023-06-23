@@ -8,47 +8,47 @@ import type { VersionGroupReport } from '../get-version-groups';
 import { getUniqueVersions } from '../get-version-groups/lib/get-unique-versions';
 import { logGroupHeader } from '../lib/log-group-header';
 
-export const promptEffects: VersionEffects = {
-  FilteredOut() {
+export const promptEffects: VersionEffects<void> = {
+  onFilteredOut() {
     return Effect.unit();
   },
-  Ignored() {
+  onIgnored() {
     return Effect.unit();
   },
-  Valid() {
+  onValid() {
     return Effect.unit();
   },
-  Banned() {
+  onBanned() {
     return Effect.unit();
   },
-  HighestSemverMismatch() {
+  onHighestSemverMismatch() {
     return Effect.unit();
   },
-  LowestSemverMismatch() {
+  onLowestSemverMismatch() {
     return Effect.unit();
   },
-  PinnedMismatch() {
+  onPinnedMismatch() {
     return Effect.unit();
   },
-  SameRangeMismatch(input) {
+  onSameRangeMismatch(input) {
     return pipe(
       Effect.sync(() => logHeader(input)),
       Effect.flatMap(askForNextVersion),
     );
   },
-  SnappedToMismatch() {
+  onSnappedToMismatch() {
     return Effect.unit();
   },
-  UnsupportedMismatch(input) {
+  onUnsupportedMismatch(input) {
     return pipe(
       Effect.sync(() => logHeader(input)),
       Effect.flatMap(askForNextVersion),
     );
   },
-  WorkspaceMismatch() {
+  onWorkspaceMismatch() {
     return Effect.unit();
   },
-  TearDown() {
+  onComplete() {
     return Effect.unit();
   },
 };

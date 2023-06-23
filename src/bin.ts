@@ -37,4 +37,7 @@ program
   .command('set-semver-ranges', 'set semver ranges to the given format', {
     executableFile: './bin-set-semver-ranges/index.js',
   })
+  .command('update', 'update to the latest versions on the npm registry', {
+    executableFile: './bin-update/index.js',
+  })
   .parse(process.argv);

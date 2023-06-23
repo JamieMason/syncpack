@@ -11,41 +11,41 @@ import type { VersionGroupReport } from '../get-version-groups';
 import { DELETE } from '../get-version-groups/lib/delete';
 import { logGroupHeader } from '../lib/log-group-header';
 
-export const fixMismatchesEffects: VersionEffects = {
-  FilteredOut() {
+export const fixMismatchesEffects: VersionEffects<void> = {
+  onFilteredOut() {
     return Effect.unit();
   },
-  Ignored() {
+  onIgnored() {
     return Effect.unit();
   },
-  Valid() {
+  onValid() {
     return Effect.unit();
   },
-  Banned: (input) => {
+  onBanned(input) {
     return Effect.sync(() => removeVersions(input));
   },
-  HighestSemverMismatch: (input) => {
+  onHighestSemverMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  LowestSemverMismatch: (input) => {
+  onLowestSemverMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  PinnedMismatch: (input) => {
+  onPinnedMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  SameRangeMismatch: (input) => {
+  onSameRangeMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logSameRangeMismatch));
   },
-  SnappedToMismatch: (input) => {
+  onSnappedToMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  UnsupportedMismatch: (input) => {
+  onUnsupportedMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logUnsupportedMismatch));
   },
-  WorkspaceMismatch: (input) => {
+  onWorkspaceMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  TearDown(ctx) {
+  onComplete(ctx) {
     return Effect.sync(() => deleteEmptyObjects(ctx));
   },
 };

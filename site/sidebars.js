@@ -25,6 +25,7 @@ const sidebars = {
       'list',
       'prompt',
       'set-semver-ranges',
+      'update',
     ],
     'CLI Options': [
       'option/config',

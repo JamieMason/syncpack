@@ -4,8 +4,6 @@ import type { Ctx } from '../get-context';
 import type { AnySemverGroup, SemverGroupReport as SR } from '../get-semver-groups';
 import type { AnyVersionGroup, VersionGroupReport as VR } from '../get-version-groups';
 
-type R = Effect.Effect<Env | never, never, void>;
-
 export interface SemverRangeEffectInput<T> {
   ctx: Ctx;
   group: AnySemverGroup;
@@ -20,29 +18,51 @@ export interface VersionEffectInput<T> {
   report: T;
 }
 
-export interface SemverRangeEffects {
-  FilteredOut: (input: SemverRangeEffectInput<SR.FilteredOut>) => R;
-  Ignored: (input: SemverRangeEffectInput<SR.Ignored>) => R;
-  SemverRangeMismatch: (input: SemverRangeEffectInput<SR.SemverRangeMismatch>) => R;
-  UnsupportedVersion: (input: SemverRangeEffectInput<SR.UnsupportedVersion>) => R;
-  Valid: (input: SemverRangeEffectInput<SR.Valid>) => R;
-  WorkspaceSemverRangeMismatch: (
+export interface SemverRangeEffects<A> {
+  onFilteredOut: (
+    input: SemverRangeEffectInput<SR.FilteredOut>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onIgnored: (input: SemverRangeEffectInput<SR.Ignored>) => Effect.Effect<Env | never, never, A>;
+  onSemverRangeMismatch: (
+    input: SemverRangeEffectInput<SR.SemverRangeMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onUnsupportedVersion: (
+    input: SemverRangeEffectInput<SR.UnsupportedVersion>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onValid: (input: SemverRangeEffectInput<SR.Valid>) => Effect.Effect<Env | never, never, A>;
+  onWorkspaceSemverRangeMismatch: (
     input: SemverRangeEffectInput<SR.WorkspaceSemverRangeMismatch>,
-  ) => R;
-  TearDown: (ctx: Ctx) => R;
+  ) => Effect.Effect<Env | never, never, A>;
+  onComplete: (ctx: Ctx, results: A[]) => Effect.Effect<Env | never, never, A>;
 }
 
-export interface VersionEffects {
-  Banned: (input: VersionEffectInput<VR.Banned>) => R;
-  FilteredOut: (input: VersionEffectInput<VR.FilteredOut>) => R;
-  HighestSemverMismatch: (input: VersionEffectInput<VR.HighestSemverMismatch>) => R;
-  Ignored: (input: VersionEffectInput<VR.Ignored>) => R;
-  LowestSemverMismatch: (input: VersionEffectInput<VR.LowestSemverMismatch>) => R;
-  PinnedMismatch: (input: VersionEffectInput<VR.PinnedMismatch>) => R;
-  SameRangeMismatch: (input: VersionEffectInput<VR.SameRangeMismatch>) => R;
-  SnappedToMismatch: (input: VersionEffectInput<VR.SnappedToMismatch>) => R;
-  UnsupportedMismatch: (input: VersionEffectInput<VR.UnsupportedMismatch>) => R;
-  Valid: (input: VersionEffectInput<VR.Valid>) => R;
-  WorkspaceMismatch: (input: VersionEffectInput<VR.WorkspaceMismatch>) => R;
-  TearDown: (ctx: Ctx) => R;
+export interface VersionEffects<A> {
+  onBanned: (input: VersionEffectInput<VR.Banned>) => Effect.Effect<Env | never, never, A>;
+  onFilteredOut: (
+    input: VersionEffectInput<VR.FilteredOut>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onHighestSemverMismatch: (
+    input: VersionEffectInput<VR.HighestSemverMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onIgnored: (input: VersionEffectInput<VR.Ignored>) => Effect.Effect<Env | never, never, A>;
+  onLowestSemverMismatch: (
+    input: VersionEffectInput<VR.LowestSemverMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onPinnedMismatch: (
+    input: VersionEffectInput<VR.PinnedMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onSameRangeMismatch: (
+    input: VersionEffectInput<VR.SameRangeMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onSnappedToMismatch: (
+    input: VersionEffectInput<VR.SnappedToMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onUnsupportedMismatch: (
+    input: VersionEffectInput<VR.UnsupportedMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onValid: (input: VersionEffectInput<VR.Valid>) => Effect.Effect<Env | never, never, A>;
+  onWorkspaceMismatch: (
+    input: VersionEffectInput<VR.WorkspaceMismatch>,
+  ) => Effect.Effect<Env | never, never, A>;
+  onComplete: (ctx: Ctx, results: A[]) => Effect.Effect<Env | never, never, A>;
 }

@@ -9,26 +9,26 @@ import type {
 import type { SemverGroupReport } from '../get-semver-groups';
 import { logGroupHeader } from '../lib/log-group-header';
 
-export const lintSemverRangesEffects: SemverRangeEffects = {
-  FilteredOut() {
+export const lintSemverRangesEffects: SemverRangeEffects<void> = {
+  onFilteredOut() {
     return Effect.unit();
   },
-  Ignored() {
+  onIgnored() {
     return Effect.unit();
   },
-  Valid() {
+  onValid() {
     return Effect.unit();
   },
-  SemverRangeMismatch(input) {
+  onSemverRangeMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logRangeMismatch));
   },
-  UnsupportedVersion(input) {
+  onUnsupportedVersion(input) {
     return Effect.sync(() => pipe(input, logHeader, logUnsupportedVersion));
   },
-  WorkspaceSemverRangeMismatch(input) {
+  onWorkspaceSemverRangeMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logRangeMismatch));
   },
-  TearDown() {
+  onComplete() {
     return Effect.unit();
   },
 };

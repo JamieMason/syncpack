@@ -10,41 +10,41 @@ import { getUniqueVersions } from '../get-version-groups/lib/get-unique-versions
 import { isSupported } from '../guards/is-supported';
 import { logGroupHeader } from '../lib/log-group-header';
 
-export const listEffects: VersionEffects = {
-  FilteredOut() {
+export const listEffects: VersionEffects<void> = {
+  onFilteredOut() {
     return Effect.unit();
   },
-  Ignored(input) {
+  onIgnored(input) {
     return Effect.sync(() => pipe(input, logHeader, logIgnored));
   },
-  Valid(input) {
+  onValid(input) {
     return Effect.sync(() => pipe(input, logHeader, logValid));
   },
-  Banned(input) {
+  onBanned(input) {
     return Effect.sync(() => pipe(input, logHeader, logBanned));
   },
-  HighestSemverMismatch(input) {
+  onHighestSemverMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
-  LowestSemverMismatch(input) {
+  onLowestSemverMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
-  PinnedMismatch(input) {
+  onPinnedMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
-  SameRangeMismatch(input) {
+  onSameRangeMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logUnfixableMismatch));
   },
-  SnappedToMismatch(input) {
+  onSnappedToMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
-  UnsupportedMismatch(input) {
+  onUnsupportedMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logUnfixableMismatch));
   },
-  WorkspaceMismatch(input) {
+  onWorkspaceMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
-  TearDown() {
+  onComplete() {
     return Effect.unit();
   },
 };

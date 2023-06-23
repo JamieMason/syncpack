@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node-version: [16.x]
+        node-version: [18.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +45,10 @@ jobs:
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
-      - uses: paambaati/codeclimate-action@v3.0.0
+
+      - name: Code Climate
+        uses: paambaati/codeclimate-action@v3.0.0
+        if: matrix.os == 'ubuntu-latest'
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:

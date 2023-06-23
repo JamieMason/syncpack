@@ -54,6 +54,12 @@ Displays a series of prompts to fix mismatches which syncpack cannot fix automat
 Ensure dependency versions used within `"dependencies"`, `"devDependencies"` etc follow a consistent
 format.
 
+### [update](https://jamiemason.github.io/syncpack/update)
+
+Interactively update packages to the latest versions from the npm registry, wherever they are in
+your monorepo. You can update every dependency, just dev/peer/prod dependencies, just packages which
+match a name filter, and more.
+
 ## Badges
 
 - [![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)

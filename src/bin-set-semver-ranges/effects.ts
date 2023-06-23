@@ -7,26 +7,26 @@ import type {
 } from '../create-program/effects';
 import type { SemverGroupReport } from '../get-semver-groups';
 
-export const setSemverRangesEffects: SemverRangeEffects = {
-  FilteredOut() {
+export const setSemverRangesEffects: SemverRangeEffects<void> = {
+  onFilteredOut() {
     return Effect.unit();
   },
-  Ignored() {
+  onIgnored() {
     return Effect.unit();
   },
-  Valid() {
+  onValid() {
     return Effect.unit();
   },
-  SemverRangeMismatch(input) {
+  onSemverRangeMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  UnsupportedVersion(input) {
+  onUnsupportedVersion(input) {
     return Effect.sync(() => logUnsupportedVersion(input));
   },
-  WorkspaceSemverRangeMismatch(input) {
+  onWorkspaceSemverRangeMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  TearDown() {
+  onComplete() {
     return Effect.unit();
   },
 };

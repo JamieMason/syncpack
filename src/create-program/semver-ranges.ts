@@ -9,65 +9,51 @@ import type { SemverGroupConfigError, SemverGroupReport } from '../get-semver-gr
 import { getSemverGroups } from '../get-semver-groups';
 import type { SemverRangeEffects } from './effects';
 
-export function createSemverRangesProgram(
+export function createSemverRangesProgram<T extends SemverRangeEffects<any>>(
   ctx: Ctx,
-  effects: SemverRangeEffects,
+  effects: T,
 ): Effect.Effect<Env, SemverGroupConfigError | DeprecatedTypesError, Ctx> {
   return pipe(
     getSemverGroups(ctx),
     Effect.flatMap((semverGroups) =>
-      Effect.all(
-        semverGroups.map((group) =>
-          Effect.all(
-            group.inspect().map((reportEffect, index) =>
-              pipe(
-                unify(reportEffect),
-                Effect.flatMap(
-                  pipe(
-                    Match.type<SemverGroupReport.ValidCases>(),
-                    Match.tagsExhaustive({
-                      FilteredOut: (report) =>
-                        pipe(
-                          effects.FilteredOut({ ctx, group, index, report }),
-                          Effect.map(() => report as SemverGroupReport.ValidCases),
-                        ),
-                      Ignored: (report) =>
-                        pipe(
-                          effects.Ignored({ ctx, group, index, report }),
-                          Effect.map(() => report as SemverGroupReport.ValidCases),
-                        ),
-                      Valid: (report) =>
-                        pipe(
-                          effects.Valid({ ctx, group, index, report }),
-                          Effect.map(() => report as SemverGroupReport.ValidCases),
-                        ),
-                    }),
-                  ),
+      Effect.allPar(
+        semverGroups.flatMap((group) =>
+          group.inspect().map((reportEffect, index) =>
+            pipe(
+              unify(reportEffect),
+              Effect.flatMap(
+                pipe(
+                  Match.type<SemverGroupReport.ValidCases>(),
+                  Match.tagsExhaustive({
+                    FilteredOut(report) {
+                      return effects.onFilteredOut({ ctx, group, index, report });
+                    },
+                    Ignored(report) {
+                      return effects.onIgnored({ ctx, group, index, report });
+                    },
+                    Valid(report) {
+                      return effects.onValid({ ctx, group, index, report });
+                    },
+                  }),
                 ),
-                Effect.catchTags({
-                  SemverRangeMismatch: (report) =>
-                    pipe(
-                      effects.SemverRangeMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  UnsupportedVersion: (report) =>
-                    pipe(
-                      effects.UnsupportedVersion({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  WorkspaceSemverRangeMismatch: (report) =>
-                    pipe(
-                      effects.WorkspaceSemverRangeMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                }),
               ),
+              Effect.catchTags({
+                SemverRangeMismatch(report) {
+                  return effects.onSemverRangeMismatch({ ctx, group, index, report });
+                },
+                UnsupportedVersion(report) {
+                  return effects.onUnsupportedVersion({ ctx, group, index, report });
+                },
+                WorkspaceSemverRangeMismatch(report) {
+                  return effects.onWorkspaceSemverRangeMismatch({ ctx, group, index, report });
+                },
+              }),
             ),
           ),
         ),
       ),
     ),
-    Effect.flatMap(() => effects.TearDown(ctx)),
+    Effect.flatMap((results) => effects.onComplete(ctx, results)),
     Effect.map(() => ctx),
   );
 }

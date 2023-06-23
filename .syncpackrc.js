@@ -18,6 +18,11 @@ const config = {
       packages: ['**'],
       pinVersion: '11.1.0',
     },
+    {
+      dependencies: ['ora'],
+      packages: ['**'],
+      pinVersion: '5.4.1',
+    },
   ],
 };
 

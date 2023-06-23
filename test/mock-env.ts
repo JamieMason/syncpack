@@ -40,31 +40,31 @@ export function createMockErrorHandlers(): ErrorHandlers<jest.Mock<any, any>> {
   };
 }
 
-export function createMockSemverRangeEffects(): SemverRangeEffects {
+export function createMockSemverRangeEffects(): SemverRangeEffects<void> {
   return {
-    FilteredOut: jest.fn(() => Effect.unit()),
-    Ignored: jest.fn(() => Effect.unit()),
-    SemverRangeMismatch: jest.fn(() => Effect.unit()),
-    TearDown: jest.fn(() => Effect.unit()),
-    UnsupportedVersion: jest.fn(() => Effect.unit()),
-    Valid: jest.fn(() => Effect.unit()),
-    WorkspaceSemverRangeMismatch: jest.fn(() => Effect.unit()),
+    onFilteredOut: jest.fn(() => Effect.unit()),
+    onIgnored: jest.fn(() => Effect.unit()),
+    onSemverRangeMismatch: jest.fn(() => Effect.unit()),
+    onComplete: jest.fn(() => Effect.unit()),
+    onUnsupportedVersion: jest.fn(() => Effect.unit()),
+    onValid: jest.fn(() => Effect.unit()),
+    onWorkspaceSemverRangeMismatch: jest.fn(() => Effect.unit()),
   };
 }
 
-export function createMockVersionEffects(): VersionEffects {
+export function createMockVersionEffects(): VersionEffects<void> {
   return {
-    Banned: jest.fn(() => Effect.unit()),
-    FilteredOut: jest.fn(() => Effect.unit()),
-    HighestSemverMismatch: jest.fn(() => Effect.unit()),
-    Ignored: jest.fn(() => Effect.unit()),
-    LowestSemverMismatch: jest.fn(() => Effect.unit()),
-    PinnedMismatch: jest.fn(() => Effect.unit()),
-    SameRangeMismatch: jest.fn(() => Effect.unit()),
-    SnappedToMismatch: jest.fn(() => Effect.unit()),
-    TearDown: jest.fn(() => Effect.unit()),
-    UnsupportedMismatch: jest.fn(() => Effect.unit()),
-    Valid: jest.fn(() => Effect.unit()),
-    WorkspaceMismatch: jest.fn(() => Effect.unit()),
+    onBanned: jest.fn(() => Effect.unit()),
+    onFilteredOut: jest.fn(() => Effect.unit()),
+    onHighestSemverMismatch: jest.fn(() => Effect.unit()),
+    onIgnored: jest.fn(() => Effect.unit()),
+    onLowestSemverMismatch: jest.fn(() => Effect.unit()),
+    onPinnedMismatch: jest.fn(() => Effect.unit()),
+    onSameRangeMismatch: jest.fn(() => Effect.unit()),
+    onSnappedToMismatch: jest.fn(() => Effect.unit()),
+    onComplete: jest.fn(() => Effect.unit()),
+    onUnsupportedMismatch: jest.fn(() => Effect.unit()),
+    onValid: jest.fn(() => Effect.unit()),
+    onWorkspaceMismatch: jest.fn(() => Effect.unit()),
   };
 }

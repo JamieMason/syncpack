@@ -9,90 +9,66 @@ import type { VersionGroupConfigError, VersionGroupReport } from '../get-version
 import { getVersionGroups } from '../get-version-groups';
 import type { VersionEffects } from './effects';
 
-export function createVersionsProgram(
+export function createVersionsProgram<T extends VersionEffects<any>>(
   ctx: Ctx,
-  effects: VersionEffects,
+  effects: T,
 ): Effect.Effect<Env, VersionGroupConfigError | DeprecatedTypesError, Ctx> {
   return pipe(
     getVersionGroups(ctx),
     Effect.flatMap((versionGroups) =>
-      Effect.all(
-        versionGroups.map((group) =>
-          Effect.all(
-            group.inspect().map((reportEffect, index) =>
-              pipe(
-                unify(reportEffect),
-                Effect.flatMap(
-                  pipe(
-                    Match.type<VersionGroupReport.ValidCases>(),
-                    Match.tagsExhaustive({
-                      FilteredOut: (report) =>
-                        pipe(
-                          effects.FilteredOut({ ctx, group, index, report }),
-                          Effect.map(() => report as VersionGroupReport.ValidCases),
-                        ),
-                      Ignored: (report) =>
-                        pipe(
-                          effects.Ignored({ ctx, group, index, report }),
-                          Effect.map(() => report as VersionGroupReport.ValidCases),
-                        ),
-                      Valid: (report) =>
-                        pipe(
-                          effects.Valid({ ctx, group, index, report }),
-                          Effect.map(() => report as VersionGroupReport.ValidCases),
-                        ),
-                    }),
-                  ),
+      Effect.allPar(
+        versionGroups.flatMap((group) =>
+          group.inspect().map((reportEffect, index) =>
+            pipe(
+              unify(reportEffect),
+              Effect.flatMap(
+                pipe(
+                  Match.type<VersionGroupReport.ValidCases>(),
+                  Match.tagsExhaustive({
+                    FilteredOut(report) {
+                      return effects.onFilteredOut({ ctx, group, index, report });
+                    },
+                    Ignored(report) {
+                      return effects.onIgnored({ ctx, group, index, report });
+                    },
+                    Valid(report) {
+                      return effects.onValid({ ctx, group, index, report });
+                    },
+                  }),
                 ),
-                Effect.catchTags({
-                  Banned: (report) =>
-                    pipe(
-                      effects.Banned({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  HighestSemverMismatch: (report) =>
-                    pipe(
-                      effects.HighestSemverMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  LowestSemverMismatch: (report) =>
-                    pipe(
-                      effects.LowestSemverMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  PinnedMismatch: (report) =>
-                    pipe(
-                      effects.PinnedMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  SameRangeMismatch: (report) =>
-                    pipe(
-                      effects.SameRangeMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  SnappedToMismatch: (report) =>
-                    pipe(
-                      effects.SnappedToMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  UnsupportedMismatch: (report) =>
-                    pipe(
-                      effects.UnsupportedMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                  WorkspaceMismatch: (report) =>
-                    pipe(
-                      effects.WorkspaceMismatch({ ctx, group, index, report }),
-                      Effect.map(() => report),
-                    ),
-                }),
               ),
+              Effect.catchTags({
+                Banned(report) {
+                  return effects.onBanned({ ctx, group, index, report });
+                },
+                HighestSemverMismatch(report) {
+                  return effects.onHighestSemverMismatch({ ctx, group, index, report });
+                },
+                LowestSemverMismatch(report) {
+                  return effects.onLowestSemverMismatch({ ctx, group, index, report });
+                },
+                PinnedMismatch(report) {
+                  return effects.onPinnedMismatch({ ctx, group, index, report });
+                },
+                SameRangeMismatch(report) {
+                  return effects.onSameRangeMismatch({ ctx, group, index, report });
+                },
+                SnappedToMismatch(report) {
+                  return effects.onSnappedToMismatch({ ctx, group, index, report });
+                },
+                UnsupportedMismatch(report) {
+                  return effects.onUnsupportedMismatch({ ctx, group, index, report });
+                },
+                WorkspaceMismatch(report) {
+                  return effects.onWorkspaceMismatch({ ctx, group, index, report });
+                },
+              }),
             ),
           ),
         ),
       ),
     ),
-    Effect.flatMap(() => effects.TearDown(ctx)),
+    Effect.flatMap((results) => effects.onComplete(ctx, results)),
     Effect.map(() => ctx),
   );
 }
