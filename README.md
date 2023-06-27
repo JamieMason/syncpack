@@ -54,13 +54,6 @@ Displays a series of prompts to fix mismatches which syncpack cannot fix automat
 Ensure dependency versions used within `"dependencies"`, `"devDependencies"` etc follow a consistent
 format.
 
-## Breaking Changes
-
-Version [9.0.0](https://github.com/JamieMason/syncpack/releases/tag/9.0.0) required some breaking
-API changes to add support for a new
-[`customTypes`](https://jamiemason.github.io/syncpack/config/custom-types) feature, but they are
-very simple to make.
-
 ## Badges
 
 - [![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
