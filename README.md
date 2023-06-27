@@ -45,6 +45,10 @@ List all dependencies required by your packages.
 List dependencies which are required by multiple packages, where the version is not the same across
 every package.
 
+### [prompt](https://jamiemason.github.io/syncpack/prompt)
+
+Displays a series of prompts to fix mismatches which syncpack cannot fix automatically.
+
 ### [set-semver-ranges](https://jamiemason.github.io/syncpack/set-semver-ranges)
 
 Ensure dependency versions used within `"dependencies"`, `"devDependencies"` etc follow a consistent
