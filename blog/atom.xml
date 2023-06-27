@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jamiemason.github.io/syncpack/blog</id>
     <title>Syncpack Blog</title>
-    <updated>2023-06-27T14:34:26.000Z</updated>
+    <updated>2023-06-27T20:15:42.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jamiemason.github.io/syncpack/blog"/>
     <subtitle>Syncpack Blog</subtitle>
@@ -11,6 +11,6 @@
         <title type="html"><![CDATA[Blog]]></title>
         <id>https://jamiemason.github.io/syncpack/blog/index</id>
         <link href="https://jamiemason.github.io/syncpack/blog/index"/>
-        <updated>2023-06-27T14:34:26.000Z</updated>
+        <updated>2023-06-27T20:15:42.000Z</updated>
     </entry>
 </feed>
