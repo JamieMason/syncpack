@@ -1,0 +1,54 @@
+---
+id: standard
+title: Standard
+---
+
+import Pills from '@site/src/components/pill';
+import Packages from '@site/src/partials/version-group-config/packages.mdx';
+import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
+import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
+import Label from '@site/src/partials/version-group-config/label.mdx';
+
+# Standard
+
+Ensure all dependencies within this group have the specified semver range.
+
+:::info
+
+One of the possible values for the [`semverGroups`](../semver-groups.mdx) configuration array.
+
+:::
+
+## `semverGroup.range`
+
+<Pills required />
+
+Which of the [Supported Ranges](../semver-range.mdx#supported-ranges) this group should use.
+
+```json title=".syncpackrc"
+{
+  "semverGroups": [
+    {
+      "range": "~",
+      "dependencies": ["@alpha/**"],
+      "packages": ["**"]
+    }
+  ]
+}
+```
+
+## `packages` string[]
+
+<Packages />
+
+## `dependencies` string[]
+
+<Dependencies />
+
+## `dependencyTypes` string[]
+
+<DependencyTypes />
+
+## `label` string
+
+<Label />

@@ -39,7 +39,17 @@ const sidebars = {
       'config/dependency-types',
       'config/filter',
       'config/indent',
-      'config/semver-groups',
+      {
+        type: 'category',
+        label: 'semverGroups',
+        collapsible: true,
+        collapsed: false,
+        link: {
+          type: 'doc',
+          id: 'config/semver-groups',
+        },
+        items: ['config/semver-groups/ignored', 'config/semver-groups/standard'],
+      },
       'config/semver-range',
       'config/sort-az',
       'config/sort-first',

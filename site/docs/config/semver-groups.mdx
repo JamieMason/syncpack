@@ -13,6 +13,11 @@ Allow some packages to have different semver range rules to the rest of your mon
 dependency can only belong to one semver group, the first rule which matches a given dependency and
 package will apply.
 
+There are 2 types of version groups:
+
+- [Ignored](./semver-groups/ignored.mdx)
+- [Standard](./semver-groups/standard.mdx)
+
 ## Example use cases
 
 1: Every dependency of `@myrepo/library` should have a semver range of `~`, regardless of what the
@@ -67,7 +72,7 @@ of `^`, regardless of what the rest of that package or the rest of the monorepo 
 }
 ```
 
-3: Production dependencies should have fixed version numbers, but development and peer dependencies
+4: Production dependencies should have fixed version numbers, but development and peer dependencies
 can be broader.
 
 ```json title=".syncpackrc"
@@ -94,33 +99,3 @@ can be broader.
   ]
 }
 ```
-
-## `semverGroup.range`
-
-<Pills required />
-
-Which of the [Supported Ranges](./semver-range.mdx#supported-ranges) this group should use.
-
-## `semverGroup.dependencies`
-
-<Pills required />
-
-Works the same as [`versionGroup.dependencies`](./version-groups.mdx#dependencies).
-
-## `semverGroup.isIgnored`
-
-<Pills optional />
-
-Works the same as [`versionGroup.isIgnored`](./version-groups.mdx#isignored).
-
-## `semverGroup.packages`
-
-<Pills required />
-
-Works the same as [`versionGroup.packages`](./version-groups.mdx#packages).
-
-## `semverGroup.dependencyTypes`
-
-<Pills optional />
-
-Works the same as [`versionGroup.dependencyTypes`](./version-groups.mdx#dependencytypes).
