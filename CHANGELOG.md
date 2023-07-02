@@ -1,3 +1,17 @@
+## [10.7.2](https://github.com/JamieMason/syncpack/compare/10.6.1...10.7.2) (2023-07-02)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([bf432a7](https://github.com/JamieMason/syncpack/commit/bf432a7b75acf95e49d9faccb432fbdff176bb42))
+
+
+### Features
+
+* **cli:** add command to update dependencies ([1c1be99](https://github.com/JamieMason/syncpack/commit/1c1be99461c9fccea66a3f0a0568b99577d1ffed))
+
+
+
 ## [10.6.1](https://github.com/JamieMason/syncpack/compare/10.5.1...10.6.1) (2023-06-18)
 
 
