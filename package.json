@@ -1,7 +1,7 @@
 {
   "name": "syncpack",
   "description": "Consistent dependency versions in large JavaScript Monorepos",
-  "version": "10.7.2",
+  "version": "10.7.3",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bin": {
     "syncpack": "dist/bin.js",

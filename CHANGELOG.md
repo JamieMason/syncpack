@@ -1,3 +1,12 @@
+## [10.7.3](https://github.com/JamieMason/syncpack/compare/10.7.2...10.7.3) (2023-07-03)
+
+
+### Bug Fixes
+
+* **workspace:** revert issue 95 ([5bea716](https://github.com/JamieMason/syncpack/commit/5bea7167d38be97dfca5f03dfdcd5070a5554c3d)), closes [#143](https://github.com/JamieMason/syncpack/issues/143) [#95](https://github.com/JamieMason/syncpack/issues/95)
+
+
+
 ## [10.7.2](https://github.com/JamieMason/syncpack/compare/10.6.1...10.7.2) (2023-07-02)
 
 
