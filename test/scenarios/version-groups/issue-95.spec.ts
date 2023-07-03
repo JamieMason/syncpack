@@ -34,7 +34,18 @@ describe('versionGroups', () => {
               }),
             },
           ],
-          { cli: {}, rcFile: {} },
+          {
+            cli: {},
+            rcFile: {
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  policy: 'sameRange',
+                },
+              ],
+            },
+          },
         ),
     ].forEach((getScenario) => {
       describe('versionGroup.inspect()', () => {

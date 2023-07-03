@@ -52,16 +52,6 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
       const wsVersion = wsFile?.contents?.version;
       const isWorkspacePackage = wsInstance && wsVersion;
       if (isWorkspacePackage) {
-        const nonWsInstances = getNonWorkspaceInstances(instances);
-        if (!hasMismatch(nonWsInstances)) {
-          return Effect.succeed(
-            new VersionGroupReport.Valid({
-              name,
-              instances,
-              isValid: true,
-            }),
-          );
-        }
         return Effect.fail(
           new VersionGroupReport.WorkspaceMismatch({
             name,
@@ -122,8 +112,4 @@ function hasUnsupported(instances: Instance[]): boolean {
 
 function getWorkspaceInstance(instances: Instance[]): Instance | undefined {
   return instances.find((instance) => instance.strategy.name === 'workspace');
-}
-
-function getNonWorkspaceInstances(instances: Instance[]) {
-  return instances.filter((instance) => instance.strategy.name !== 'workspace');
 }

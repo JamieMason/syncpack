@@ -53,5 +53,13 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
 /** Every range must fall within every other range */
 function hasMismatch(instances: Instance[]) {
   const loose = true;
-  return instances.some((a) => instances.some((b) => !intersects(a.version, b.version, loose)));
+  return instances.some((a) =>
+    instances.some(
+      (b) => !intersects(aliasWorkspaceRange(a.version), aliasWorkspaceRange(b.version), loose),
+    ),
+  );
+}
+
+function aliasWorkspaceRange(version: string): string {
+  return version.startsWith('workspace:*') ? '*' : version;
 }

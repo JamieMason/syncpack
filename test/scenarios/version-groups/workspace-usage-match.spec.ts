@@ -46,6 +46,13 @@ describe('versionGroups', () => {
                   isIgnored: true,
                 },
               ],
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  policy: 'sameRange',
+                },
+              ],
             },
           },
         ),
@@ -82,6 +89,13 @@ describe('versionGroups', () => {
                   dependencies: ['**'],
                   packages: ['**'],
                   isIgnored: true,
+                },
+              ],
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  policy: 'sameRange',
                 },
               ],
             },
@@ -122,6 +136,13 @@ describe('versionGroups', () => {
                   isIgnored: true,
                 },
               ],
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  policy: 'sameRange',
+                },
+              ],
             },
           },
         ),
@@ -152,6 +173,13 @@ describe('versionGroups', () => {
                   dependencies: ['**'],
                   packages: ['**'],
                   isIgnored: true,
+                },
+              ],
+              versionGroups: [
+                {
+                  dependencies: ['**'],
+                  packages: ['**'],
+                  policy: 'sameRange',
                 },
               ],
             },
