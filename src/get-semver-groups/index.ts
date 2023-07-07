@@ -17,6 +17,7 @@ import { sortByName } from '../lib/sort-by-name';
 import { FilteredOutSemverGroup } from './filtered-out';
 import { IgnoredSemverGroup } from './ignored';
 import { WithRangeSemverGroup } from './with-range';
+import type { SemverGroupConfig } from "../config/types";
 
 export type AnySemverGroup = Union.Strict<
   FilteredOutSemverGroup | IgnoredSemverGroup | WithRangeSemverGroup
@@ -115,7 +116,8 @@ function createSemverGroups(
   ];
 
   if (isNonEmptyArray(rcFile.semverGroups)) {
-    rcFile.semverGroups.forEach((config) => {
+    // @ts-expect-error TODO: fix this
+    rcFile.semverGroups.forEach((config: SemverGroupConfig.Any) => {
       if (!isObject(config)) {
         return semverGroups.push(
           Effect.fail(
@@ -152,7 +154,7 @@ function createSemverGroups(
       const dependencyTypes = isArrayOfStrings(config.dependencyTypes)
         ? config.dependencyTypes
         : [];
-
+      
       if (config.isIgnored === true) {
         semverGroups.push(
           Effect.succeed(

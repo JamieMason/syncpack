@@ -38,7 +38,7 @@ export namespace SemverGroupConfig {
     range: SemverRange;
   }
 
-  export type Any = GroupConfig & Partial<Ignored & WithRange>;
+  export type Any = Ignored | WithRange;
 }
 
 export namespace VersionGroupConfig {
@@ -70,7 +70,7 @@ export namespace VersionGroupConfig {
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
 
-  export type Any = GroupConfig & Partial<Banned & Ignored & Pinned & SameRange & SnappedTo & Standard>;
+  export type Any = Banned | Ignored | Pinned | SameRange | SnappedTo | Standard;
 }
 
 namespace CustomTypeConfig {

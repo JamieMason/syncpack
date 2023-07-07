@@ -151,6 +151,16 @@
       "type": "object"
     },
     "SemverGroupConfig.Any": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SemverGroupConfig.Ignored"
+        },
+        {
+          "$ref": "#/definitions/SemverGroupConfig.WithRange"
+        }
+      ]
+    },
+    "SemverGroupConfig.Ignored": {
       "additionalProperties": false,
       "properties": {
         "dependencies": {
@@ -177,6 +187,38 @@
             "type": "string"
           },
           "type": "array"
+        }
+      },
+      "required": [
+        "dependencies",
+        "isIgnored",
+        "packages"
+      ],
+      "type": "object"
+    },
+    "SemverGroupConfig.WithRange": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "range": {
           "$ref": "#/definitions/SemverRange"
@@ -184,7 +226,8 @@
       },
       "required": [
         "dependencies",
-        "packages"
+        "packages",
+        "range"
       ],
       "type": "object"
     },
@@ -205,6 +248,28 @@
       "type": "string"
     },
     "VersionGroupConfig.Any": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/VersionGroupConfig.Banned"
+        },
+        {
+          "$ref": "#/definitions/VersionGroupConfig.Ignored"
+        },
+        {
+          "$ref": "#/definitions/VersionGroupConfig.Pinned"
+        },
+        {
+          "$ref": "#/definitions/VersionGroupConfig.SameRange"
+        },
+        {
+          "$ref": "#/definitions/VersionGroupConfig.SnappedTo"
+        },
+        {
+          "$ref": "#/definitions/VersionGroupConfig.Standard"
+        }
+      ]
+    },
+    "VersionGroupConfig.Banned": {
       "additionalProperties": false,
       "properties": {
         "dependencies": {
@@ -223,6 +288,38 @@
           "const": true,
           "type": "boolean"
         },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dependencies",
+        "isBanned",
+        "packages"
+      ],
+      "type": "object"
+    },
+    "VersionGroupConfig.Ignored": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "isIgnored": {
           "const": true,
           "type": "boolean"
@@ -235,13 +332,147 @@
             "type": "string"
           },
           "type": "array"
+        }
+      },
+      "required": [
+        "dependencies",
+        "isIgnored",
+        "packages"
+      ],
+      "type": "object"
+    },
+    "VersionGroupConfig.Pinned": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "pinVersion": {
           "type": "string"
+        }
+      },
+      "required": [
+        "dependencies",
+        "packages",
+        "pinVersion"
+      ],
+      "type": "object"
+    },
+    "VersionGroupConfig.SameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "policy": {
           "const": "sameRange",
           "type": "string"
+        }
+      },
+      "required": [
+        "dependencies",
+        "packages",
+        "policy"
+      ],
+      "type": "object"
+    },
+    "VersionGroupConfig.SnappedTo": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "snapTo": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dependencies",
+        "packages",
+        "snapTo"
+      ],
+      "type": "object"
+    },
+    "VersionGroupConfig.Standard": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "preferVersion": {
           "enum": [
@@ -249,12 +480,6 @@
             "lowestSemver"
           ],
           "type": "string"
-        },
-        "snapTo": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
         }
       },
       "required": [

@@ -19,6 +19,7 @@ import { PinnedVersionGroup } from './pinned';
 import { SameRangeVersionGroup } from './same-range';
 import { SnappedToVersionGroup } from './snapped-to';
 import { StandardVersionGroup } from './standard';
+import type{ VersionGroupConfig } from "../config/types";
 
 export type AnyVersionGroup = Union.Strict<
   | BannedVersionGroup
@@ -175,7 +176,8 @@ function createVersionGroups(
   ];
 
   if (isNonEmptyArray(rcFile.versionGroups)) {
-    rcFile.versionGroups.forEach((config) => {
+    // @ts-expect-error TODO: fix this
+    rcFile.versionGroups.forEach((config: VersionGroupConfig.Any) => {
       if (!isObject(config)) {
         return versionGroups.push(
           Effect.fail(
