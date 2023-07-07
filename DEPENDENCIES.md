@@ -32,7 +32,6 @@ npm test
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [cosmiconfig](https://ghub.io/cosmiconfig): Find and load configuration from a package.json property, rc file, or CommonJS module
 - [enquirer](https://ghub.io/enquirer): Stylish, intuitive and user-friendly prompt system. Fast and lightweight enough for small projects, powerful and extensible enough for the most advanced use cases.
-- [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
 - [globby](https://ghub.io/globby): User-friendly glob matching
 - [minimatch](https://ghub.io/minimatch): a glob matcher in javascript
 - [ora](https://ghub.io/ora): Elegant terminal spinner
@@ -45,7 +44,6 @@ npm test
 ## Dev Dependencies
 
 - [@tsconfig/node18](https://ghub.io/@tsconfig/node18): A base TSConfig for working with Node 18.
-- [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
 - [@types/node](https://ghub.io/@types/node): TypeScript definitions for Node.js
 - [@types/prompts](https://ghub.io/@types/prompts): TypeScript definitions for prompts

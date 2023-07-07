@@ -1,8 +1,6 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore Select *does* exist
+// @ts-expect-error Select *does* exist
 import { Input, Select } from 'enquirer';
-import { readFileSync, readJsonSync, writeFileSync } from 'fs-extra';
 import * as globby from 'globby';
 import { join } from 'path';
 import * as readYamlFile from 'read-yaml-file';
@@ -11,6 +9,7 @@ import type { O } from 'ts-toolbelt';
 import type { RcConfig } from '../config/types';
 import { CWD } from '../constants';
 import { logVerbose } from '../lib/log-verbose';
+import * as fs from "fs";
 
 export interface DefaultEnv {
   readonly askForChoice: (opts: { message: string; choices: string[] }) => Promise<string>;
@@ -52,7 +51,8 @@ export const defaultEnv: DefaultEnv = {
     const result = configPath ? client.load(configPath) : client.search();
     if (!isNonEmptyObject(result)) {
       const rcPath = join(CWD, 'package.json');
-      const pjson = readJsonSync(rcPath, { throws: false });
+      const raw = fs.readFileSync(rcPath, { encoding: 'utf8' });
+      const pjson = JSON.parse(raw);
       const rcConfig = pjson?.config?.syncpack;
       if (isNonEmptyObject(rcConfig)) return rcConfig;
       logVerbose('no config file found');
@@ -67,7 +67,7 @@ export const defaultEnv: DefaultEnv = {
   /* istanbul ignore next */
   readFileSync(filePath) {
     logVerbose('readFileSync(', filePath, ')');
-    return readFileSync(filePath, { encoding: 'utf8' });
+    return fs.readFileSync(filePath, { encoding: 'utf8' });
   },
   /* istanbul ignore next */
   readYamlFileSync<T = unknown>(filePath: string): T {
@@ -77,6 +77,6 @@ export const defaultEnv: DefaultEnv = {
   /* istanbul ignore next */
   writeFileSync(filePath, contents) {
     logVerbose('writeFileSync(', filePath, contents, ')');
-    writeFileSync(filePath, contents);
+    fs.writeFileSync(filePath, contents);
   },
 };

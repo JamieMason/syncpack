@@ -39,7 +39,6 @@
     "commander": "11.0.0",
     "cosmiconfig": "8.2.0",
     "enquirer": "2.3.6",
-    "fs-extra": "11.1.1",
     "globby": "11.1.0",
     "minimatch": "9.0.2",
     "ora": "5.4.1",
@@ -51,7 +50,6 @@
   },
   "devDependencies": {
     "@tsconfig/node18": "18.2.0",
-    "@types/fs-extra": "11.0.1",
     "@types/jest": "29.5.2",
     "@types/node": "14.18.36",
     "@types/prompts": "2.4.4",
@@ -114,8 +112,9 @@
     "lint": "yarn lint:ts && yarn lint:eslint",
     "lint:eslint": "eslint --ext .ts .",
     "lint:ts": "tsc --noEmit --project tsconfig.json",
-    "prepack": "yarn build",
-    "test": "jest src test"
+    "prepack": "yarn build && yarn schema",
+    "test": "jest src test",
+    "schema": "ts-json-schema-generator --path ./src/index.ts --type RcFile -o schema.json"
   },
   "types": "dist/index.d.ts"
 }
