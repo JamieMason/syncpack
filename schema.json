@@ -1,0 +1,267 @@
+{
+  "$ref": "#/definitions/RcFile",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "CustomTypeConfig.Any": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/CustomTypeConfig.NameAndVersionProps"
+        },
+        {
+          "$ref": "#/definitions/CustomTypeConfig.NamedVersionString"
+        },
+        {
+          "$ref": "#/definitions/CustomTypeConfig.UnnamedVersionString"
+        },
+        {
+          "$ref": "#/definitions/CustomTypeConfig.VersionsByName"
+        }
+      ]
+    },
+    "CustomTypeConfig.NameAndVersionProps": {
+      "additionalProperties": false,
+      "properties": {
+        "namePath": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "strategy": {
+          "const": "name~version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "namePath",
+        "path",
+        "strategy"
+      ],
+      "type": "object"
+    },
+    "CustomTypeConfig.NamedVersionString": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "strategy": {
+          "const": "name@version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "strategy"
+      ],
+      "type": "object"
+    },
+    "CustomTypeConfig.UnnamedVersionString": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "strategy": {
+          "const": "version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "strategy"
+      ],
+      "type": "object"
+    },
+    "CustomTypeConfig.VersionsByName": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "strategy": {
+          "const": "versionsByName",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "strategy"
+      ],
+      "type": "object"
+    },
+    "RcFile": {
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "customTypes": {
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomTypeConfig.Any"
+          },
+          "type": "object"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "filter": {
+          "type": "string"
+        },
+        "indent": {
+          "type": "string"
+        },
+        "semverGroups": {
+          "items": {
+            "$ref": "#/definitions/SemverGroupConfig.Any"
+          },
+          "type": "array"
+        },
+        "semverRange": {
+          "$ref": "#/definitions/SemverRange"
+        },
+        "sortAz": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "sortFirst": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "source": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "versionGroups": {
+          "items": {
+            "$ref": "#/definitions/VersionGroupConfig.Any"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "SemverGroupConfig.Any": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "isIgnored": {
+          "const": true,
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "range": {
+          "$ref": "#/definitions/SemverRange"
+        }
+      },
+      "required": [
+        "dependencies",
+        "packages"
+      ],
+      "type": "object"
+    },
+    "SemverRange": {
+      "default": "",
+      "description": "Aliases for semver range formats supported by syncpack\n\nDefaults to `\"\"` to ensure that exact dependency versions are used instead of loose ranges, but this can be overridden in your config file or via the `--semver-range` command line option.\n\n| Supported Range |   Example | | --------------- | --------: | | `\"<\"`           |  `<1.4.2` | | `\"<=\"`          | `<=1.4.2` | | `\"\"`            |   `1.4.2` | | `\"~\"`           |  `~1.4.2` | | `\"^\"`           |  `^1.4.2` | | `\">=\"`          | `>=1.4.2` | | `\">\"`           |  `>1.4.2` | | `\"*\"`           |       `*` |",
+      "enum": [
+        "",
+        "*",
+        ">",
+        ">=",
+        ".x",
+        "<",
+        "<=",
+        "^",
+        "~"
+      ],
+      "type": "string"
+    },
+    "VersionGroupConfig.Any": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependencyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "isBanned": {
+          "const": true,
+          "type": "boolean"
+        },
+        "isIgnored": {
+          "const": true,
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pinVersion": {
+          "type": "string"
+        },
+        "policy": {
+          "const": "sameRange",
+          "type": "string"
+        },
+        "preferVersion": {
+          "enum": [
+            "highestSemver",
+            "lowestSemver"
+          ],
+          "type": "string"
+        },
+        "snapTo": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dependencies",
+        "packages"
+      ],
+      "type": "object"
+    }
+  }
+}

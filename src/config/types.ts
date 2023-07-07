@@ -1,5 +1,4 @@
 import * as Context from '@effect/data/Context';
-import type { Union } from 'ts-toolbelt';
 
 /**
  * Aliases for semver range formats supported by syncpack
@@ -39,7 +38,7 @@ export namespace SemverGroupConfig {
     range: SemverRange;
   }
 
-  export type Any = Union.Strict<Ignored | WithRange>;
+  export type Any = GroupConfig & Partial<Ignored & WithRange>;
 }
 
 export namespace VersionGroupConfig {
@@ -71,7 +70,7 @@ export namespace VersionGroupConfig {
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
 
-  export type Any = Union.Strict<Banned | Ignored | Pinned | SameRange | SnappedTo | Standard>;
+  export type Any = GroupConfig & Partial<Banned & Ignored & Pinned & SameRange & SnappedTo & Standard>;
 }
 
 namespace CustomTypeConfig {
@@ -96,9 +95,7 @@ namespace CustomTypeConfig {
     strategy: 'versionsByName';
   }
 
-  export type Any = Union.Strict<
-    NameAndVersionProps | NamedVersionString | UnnamedVersionString | VersionsByName
-  >;
+  export type Any = NameAndVersionProps | NamedVersionString | UnnamedVersionString | VersionsByName;
 }
 
 export interface CliConfig {
