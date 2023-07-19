@@ -11,11 +11,11 @@ const GT = 1;
 export function compareSemver(a: string, b: string): -1 | 0 | 1 {
   if (!isSupported(a)) throw new Error(`"${a}" is not supported`);
   if (!isSupported(b)) throw new Error(`"${b}" is not supported`);
-  if (a.startsWith('workspace:')) return LT;
-  if (b.startsWith('workspace:')) return GT;
   if (a === b) return EQ;
   if (a === '*') return GT;
   if (b === '*') return LT;
+  if (a.startsWith('workspace:')) return LT;
+  if (b.startsWith('workspace:')) return GT;
   const cleanA = clean(a);
   const cleanB = clean(b);
   if (gt(cleanA, cleanB)) return GT;
