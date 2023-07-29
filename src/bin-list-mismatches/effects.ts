@@ -35,11 +35,11 @@ export const listMismatchesEffects: VersionEffects<void> = {
   onSnappedToMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logSnappedToMismatch));
   },
-  onUnsupportedMismatch(input) {
-    return Effect.sync(() => pipe(input, logHeader, logUnsupportedMismatch));
+  onNonSemverMismatch(input) {
+    return Effect.sync(() => pipe(input, logHeader, logNonSemverMismatch));
   },
-  onWorkspaceMismatch(input) {
-    return Effect.sync(() => pipe(input, logHeader, logWorkspaceMismatch));
+  onLocalPackageMismatch(input) {
+    return Effect.sync(() => pipe(input, logHeader, logLocalPackageMismatch));
   },
   onComplete() {
     return Effect.unit();
@@ -59,7 +59,7 @@ function logBanned({ report, ctx }: Input<VersionGroupReport.Banned>) {
   report.instances.forEach((instance) => {
     console.log(
       chalk`  {red %s} {dim in %s of %s}`,
-      instance.version,
+      instance.specifier,
       instance.strategy.path,
       instance.packageJsonFile.shortPath,
     );
@@ -79,10 +79,10 @@ function logHighLowSemverMismatch({
     report._tag === 'LowestSemverMismatch' ? 'lowest' : 'highest',
   );
   report.instances.forEach((instance) => {
-    if (instance.version !== report.expectedVersion) {
+    if (instance.specifier !== report.expectedVersion) {
       console.log(
         chalk`  {red %s} {dim in %s of %s}`,
-        instance.version,
+        instance.specifier,
         instance.strategy.path,
         instance.packageJsonFile.shortPath,
       );
@@ -99,10 +99,10 @@ function logPinnedMismatch({ report, ctx }: Input<VersionGroupReport.PinnedMisma
     report.expectedVersion,
   );
   report.instances.forEach((instance) => {
-    if (instance.version !== report.expectedVersion) {
+    if (instance.specifier !== report.expectedVersion) {
       console.log(
         chalk`  {red %s} {dim in %s of %s}`,
-        instance.version,
+        instance.specifier,
         instance.strategy.path,
         instance.packageJsonFile.shortPath,
       );
@@ -120,10 +120,10 @@ function logSnappedToMismatch({ report, ctx }: Input<VersionGroupReport.SnappedT
     report.snapTo.join(' || '),
   );
   report.instances.forEach((instance) => {
-    if (instance.version !== report.expectedVersion) {
+    if (instance.specifier !== report.expectedVersion) {
       console.log(
         chalk`  {red %s} {dim in %s of %s}`,
-        instance.version,
+        instance.specifier,
         instance.strategy.path,
         instance.packageJsonFile.shortPath,
       );
@@ -142,14 +142,14 @@ function logSameRangeMismatch({ report, ctx }: Input<VersionGroupReport.SameRang
   report.instances.forEach((instance) => {
     console.log(
       chalk`  {yellow %s} {dim in %s of %s}`,
-      instance.version,
+      instance.specifier,
       instance.strategy.path,
       instance.packageJsonFile.shortPath,
     );
   });
 }
 
-function logUnsupportedMismatch({ report, ctx }: Input<VersionGroupReport.UnsupportedMismatch>) {
+function logNonSemverMismatch({ report, ctx }: Input<VersionGroupReport.NonSemverMismatch>) {
   ctx.isInvalid = true;
   console.log(
     chalk`{yellow %s %s} {dim has mismatched unsupported versions which syncpack cannot auto fix}%s`,
@@ -160,27 +160,27 @@ function logUnsupportedMismatch({ report, ctx }: Input<VersionGroupReport.Unsupp
   report.instances.forEach((instance) => {
     console.log(
       chalk`  {yellow %s} {dim in %s of %s}`,
-      instance.version,
+      instance.specifier,
       instance.strategy.path,
       instance.packageJsonFile.shortPath,
     );
   });
 }
 
-function logWorkspaceMismatch({ report, ctx }: Input<VersionGroupReport.WorkspaceMismatch>) {
+function logLocalPackageMismatch({ report, ctx }: Input<VersionGroupReport.LocalPackageMismatch>) {
   ctx.isInvalid = true;
   console.log(
     chalk`{red %s} %s {green %s} {dim is developed in this repo at %s}`,
     ICON.cross,
     report.name,
     report.expectedVersion,
-    report.workspaceInstance.packageJsonFile.shortPath,
+    report.localPackageInstance.packageJsonFile.shortPath,
   );
   report.instances.forEach((instance) => {
-    if (instance.version !== report.expectedVersion) {
+    if (instance.specifier !== report.expectedVersion) {
       console.log(
         chalk`  {red %s} {dim in %s of %s}`,
-        instance.version,
+        instance.specifier,
         instance.strategy.path,
         instance.packageJsonFile.shortPath,
       );

@@ -4,13 +4,13 @@ import { VersionGroupReport } from '.';
 import { getFilter } from '../config/get-filter';
 import type { GroupConfig } from '../config/types';
 import type { Ctx } from '../get-context';
-import type { Instance } from '../get-package-json-files/instance';
+import type { Instance } from '../instance';
 import { groupBy } from './lib/group-by';
 
 export class FilteredOutVersionGroup extends Data.TaggedClass('FilteredOut')<{
   config: GroupConfig;
   filter: string;
-  instances: Instance[];
+  instances: Instance.Any[];
 }> {
   constructor(ctx: Ctx) {
     super({
@@ -21,11 +21,11 @@ export class FilteredOutVersionGroup extends Data.TaggedClass('FilteredOut')<{
         packages: ['**'],
       },
       filter: getFilter(ctx.config),
-      instances: [] satisfies Instance[],
+      instances: [] satisfies Instance.Any[],
     });
   }
 
-  canAdd(instance: Instance): boolean {
+  canAdd(instance: Instance.Any): boolean {
     return instance.name.search(new RegExp(this.filter)) === -1;
   }
 

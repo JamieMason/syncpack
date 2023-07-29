@@ -4,10 +4,9 @@ import chalk from 'chalk';
 import { uniq } from 'tightrope/array/uniq';
 import { ICON } from '../constants';
 import type { VersionEffectInput as Input, VersionEffects } from '../create-program/effects';
-import type { Instance } from '../get-package-json-files/instance';
 import type { VersionGroupReport } from '../get-version-groups';
-import { getUniqueVersions } from '../get-version-groups/lib/get-unique-versions';
-import { isSupported } from '../guards/is-supported';
+import { getUniqueSpecifiers } from '../get-version-groups/lib/get-unique-specifiers';
+import type { Instance } from '../instance';
 import { logGroupHeader } from '../lib/log-group-header';
 
 export const listEffects: VersionEffects<void> = {
@@ -38,10 +37,10 @@ export const listEffects: VersionEffects<void> = {
   onSnappedToMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
-  onUnsupportedMismatch(input) {
+  onNonSemverMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logUnfixableMismatch));
   },
-  onWorkspaceMismatch(input) {
+  onLocalPackageMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
   onComplete() {
@@ -62,7 +61,7 @@ function logFixableMismatch<T extends VersionGroupReport.FixableCases>({ report,
     chalk`{red %s %s} %s`,
     ICON.cross,
     report.name,
-    listColouredVersions(report.expectedVersion, report.instances),
+    listColouredSpecifiers(report.expectedVersion, report.instances),
   );
 }
 
@@ -75,8 +74,12 @@ function logUnfixableMismatch<T extends VersionGroupReport.UnfixableCases>({
     chalk`{red %s %s} %s`,
     ICON.cross,
     report.name,
-    getUniqueVersions(report.instances)
-      .map((version) => (isSupported(version) ? chalk.red(version) : chalk.yellow(version)))
+    getUniqueSpecifiers(report.instances)
+      .map((instance) =>
+        instance.getSemverSpecifier() !== null
+          ? chalk.red(instance.specifier)
+          : chalk.yellow(instance.specifier),
+      )
       .join(chalk.dim(', ')),
   );
 }
@@ -95,11 +98,11 @@ function logIgnored({ report }: Input<VersionGroupReport.Ignored>) {
 }
 
 function logValid({ report }: Input<VersionGroupReport.Valid>) {
-  console.log(chalk`{dim -} {white %s} {dim %s}`, report.name, report.instances?.[0]?.version);
+  console.log(chalk`{dim -} {white %s} {dim %s}`, report.name, report.instances?.[0]?.specifier);
 }
 
-function listColouredVersions(pinVersion: string, instances: Instance[]) {
-  return getAllVersions(pinVersion, instances)
+function listColouredSpecifiers(pinVersion: string, instances: Instance.Any[]) {
+  return getAllSpecifiers(pinVersion, instances)
     .map((version) => withColour(pinVersion, version))
     .join(chalk.dim(', '));
 }
@@ -108,6 +111,6 @@ function withColour(pinVersion: string, version: string) {
   return version === pinVersion ? chalk.green(version) : chalk.red(version);
 }
 
-function getAllVersions(pinVersion: string, instances: Instance[]) {
-  return uniq([pinVersion].concat(instances.map((i) => i.version)));
+function getAllSpecifiers(pinVersion: string, instances: Instance.Any[]) {
+  return uniq([pinVersion].concat(instances.map((i) => i.specifier)));
 }

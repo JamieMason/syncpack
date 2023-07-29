@@ -1,12 +1,19 @@
 import 'expect-more-jest';
-import { Instance } from '../../src/get-package-json-files/instance';
 import type { VersionGroupReport } from '../../src/get-version-groups';
+
+export function toBeSupportedInstance() {
+  return expect.objectContaining({
+    _tag: expect.stringMatching(
+      /^(File|HostedGit|Url|Alias|Version|Range|Tag|WorkspaceProtocol|Unsupported)Instance$/,
+    ),
+  });
+}
 
 export function toBeBanned({ name }: Pick<VersionGroupReport.Banned, 'name'>) {
   return expect.objectContaining({
     _tag: 'Banned',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
   });
 }
@@ -15,7 +22,7 @@ export function toBeFilteredOut({ name }: Pick<VersionGroupReport.FilteredOut, '
   return expect.objectContaining({
     _tag: 'FilteredOut',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: true,
   });
 }
@@ -27,7 +34,7 @@ export function toBeHighestSemverMismatch({
   return expect.objectContaining({
     _tag: 'HighestSemverMismatch',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
     expectedVersion,
   });
@@ -37,7 +44,7 @@ export function toBeIgnored({ name }: Pick<VersionGroupReport.Ignored, 'name'>) 
   return expect.objectContaining({
     _tag: 'Ignored',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: true,
   });
 }
@@ -49,7 +56,7 @@ export function toBeLowestSemverMismatch({
   return expect.objectContaining({
     _tag: 'LowestSemverMismatch',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
     expectedVersion,
   });
@@ -62,7 +69,7 @@ export function toBePinnedMismatch({
   return expect.objectContaining({
     _tag: 'PinnedMismatch',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
     expectedVersion,
   });
@@ -74,7 +81,7 @@ export function toBeSameRangeMismatch({
   return expect.objectContaining({
     _tag: 'SameRangeMismatch',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
   });
 }
@@ -86,19 +93,19 @@ export function toBeSnappedToMismatch({
   return expect.objectContaining({
     _tag: 'SnappedToMismatch',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
     expectedVersion,
   });
 }
 
-export function toBeUnsupportedMismatch({
+export function toBeNonSemverMismatch({
   name,
-}: Pick<VersionGroupReport.UnsupportedMismatch, 'name'>) {
+}: Pick<VersionGroupReport.NonSemverMismatch, 'name'>) {
   return expect.objectContaining({
-    _tag: 'UnsupportedMismatch',
+    _tag: 'NonSemverMismatch',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
   });
 }
@@ -107,21 +114,21 @@ export function toBeValid({ name }: Pick<VersionGroupReport.Valid, 'name'>) {
   return expect.objectContaining({
     _tag: 'Valid',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: true,
   });
 }
 
-export function toBeWorkspaceMismatch({
+export function toBeLocalPackageMismatch({
   name,
   expectedVersion,
-}: Pick<VersionGroupReport.WorkspaceMismatch, 'name' | 'expectedVersion'>) {
+}: Pick<VersionGroupReport.LocalPackageMismatch, 'name' | 'expectedVersion'>) {
   return expect.objectContaining({
-    _tag: 'WorkspaceMismatch',
+    _tag: 'LocalPackageMismatch',
     name,
-    instances: expect.toBeArrayIncludingOnly([expect.any(Instance)]),
+    instances: expect.toBeArrayIncludingOnly([toBeSupportedInstance()]),
     isValid: false,
     expectedVersion,
-    workspaceInstance: expect.any(Instance),
+    localPackageInstance: toBeSupportedInstance(),
   });
 }

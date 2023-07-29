@@ -1,12 +1,12 @@
 import 'expect-more-jest';
-import { Instance } from '../../src/get-package-json-files/instance';
 import type { SemverGroupReport } from '../../src/get-semver-groups';
+import { toBeSupportedInstance } from './version-group';
 
 export function toBeFilteredOut({ name }: Pick<SemverGroupReport.FilteredOut, 'name'>) {
   return expect.objectContaining({
     _tag: 'FilteredOut',
     name,
-    instance: expect.any(Instance),
+    instance: toBeSupportedInstance(),
     isValid: true,
   });
 }
@@ -15,7 +15,7 @@ export function toBeIgnored({ name }: Pick<SemverGroupReport.Ignored, 'name'>) {
   return expect.objectContaining({
     _tag: 'Ignored',
     name,
-    instance: expect.any(Instance),
+    instance: toBeSupportedInstance(),
     isValid: true,
   });
 }
@@ -24,19 +24,19 @@ export function toBeValid({ name }: Pick<SemverGroupReport.Valid, 'name'>) {
   return expect.objectContaining({
     _tag: 'Valid',
     name,
-    instance: expect.any(Instance),
+    instance: toBeSupportedInstance(),
     isValid: true,
   });
 }
 
-export function toBeWorkspaceSemverRangeMismatch({
+export function toBeLocalPackageSemverRangeMismatch({
   name,
   expectedVersion,
-}: Pick<SemverGroupReport.WorkspaceSemverRangeMismatch, 'name' | 'expectedVersion'>) {
+}: Pick<SemverGroupReport.LocalPackageSemverRangeMismatch, 'name' | 'expectedVersion'>) {
   return expect.objectContaining({
-    _tag: 'WorkspaceSemverRangeMismatch',
+    _tag: 'LocalPackageSemverRangeMismatch',
     name,
-    instance: expect.any(Instance),
+    instance: toBeSupportedInstance(),
     isValid: false,
     expectedVersion,
   });
@@ -49,19 +49,17 @@ export function toBeSemverRangeMismatch({
   return expect.objectContaining({
     _tag: 'SemverRangeMismatch',
     name,
-    instance: expect.any(Instance),
+    instance: toBeSupportedInstance(),
     isValid: false,
     expectedVersion,
   });
 }
 
-export function toBeUnsupportedVersion({
-  name,
-}: Pick<SemverGroupReport.UnsupportedVersion, 'name'>) {
+export function toBeNonSemverVersion({ name }: Pick<SemverGroupReport.NonSemverVersion, 'name'>) {
   return expect.objectContaining({
-    _tag: 'UnsupportedVersion',
+    _tag: 'NonSemverVersion',
     name,
-    instance: expect.any(Instance),
+    instance: toBeSupportedInstance(),
     isValid: false,
   });
 }

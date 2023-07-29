@@ -3,12 +3,12 @@ import { fixMismatches } from '../../../src/bin-fix-mismatches/fix-mismatches';
 import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
 import { list } from '../../../src/bin-list/list';
 import { prompt } from '../../../src/bin-prompt/prompt';
-import { toBeWorkspaceMismatch } from '../../matchers/version-group';
+import { toBeLocalPackageMismatch } from '../../matchers/version-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
 describe('versionGroups', () => {
-  describe('WorkspaceMismatch', () => {
+  describe('LocalPackageMismatch', () => {
     describe('some packages are nested within sub-folders on the file system', () => {
       [
         () =>
@@ -158,7 +158,7 @@ describe('versionGroups', () => {
           test('should identify as a mismatch against the canonical local package version', () => {
             const scenario = getScenario();
             expect(scenario.report.versionGroups).toEqual([
-              [toBeWorkspaceMismatch({ expectedVersion: '0.0.1', name: 'c' })],
+              [toBeLocalPackageMismatch({ expectedVersion: '0.0.1', name: 'c' })],
             ]);
           });
         });

@@ -39,10 +39,10 @@ export const fixMismatchesEffects: VersionEffects<void> = {
   onSnappedToMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  onUnsupportedMismatch(input) {
-    return Effect.sync(() => pipe(input, logHeader, logUnsupportedMismatch));
+  onNonSemverMismatch(input) {
+    return Effect.sync(() => pipe(input, logHeader, logNonSemverMismatch));
   },
-  onWorkspaceMismatch(input) {
+  onLocalPackageMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
   onComplete(ctx) {
@@ -59,13 +59,13 @@ function logHeader<T extends VersionGroupReport.Any>(input: Input<T>) {
 
 function setVersions({ report }: Input<VersionGroupReport.FixableCases>) {
   report.instances.forEach((instance) => {
-    instance.setVersion(report.expectedVersion);
+    instance.setSpecifier(report.expectedVersion);
   });
 }
 
 function removeVersions({ report }: Input<VersionGroupReport.Banned>) {
   report.instances.forEach((instance) => {
-    instance.setVersion(DELETE);
+    instance.setSpecifier(DELETE);
   });
 }
 
@@ -79,7 +79,7 @@ function logSameRangeMismatch({ ctx, report }: Input<VersionGroupReport.SameRang
   );
 }
 
-function logUnsupportedMismatch({ ctx, report }: Input<VersionGroupReport.UnsupportedMismatch>) {
+function logNonSemverMismatch({ ctx, report }: Input<VersionGroupReport.NonSemverMismatch>) {
   ctx.isInvalid = true;
   console.log(
     chalk`{yellow %s %s} {dim has mismatched unsupported versions which syncpack cannot auto fix}%s`,

@@ -12,7 +12,7 @@ import { ICON } from '../constants';
 import type { VersionEffectInput as Input, VersionEffects } from '../create-program/effects';
 import type { VersionGroupReport } from '../get-version-groups';
 import { getHighestVersion } from '../get-version-groups/lib/get-highest-version';
-import { getUniqueVersions } from '../get-version-groups/lib/get-unique-versions';
+import { getUniqueSpecifiers } from '../get-version-groups/lib/get-unique-specifiers';
 import { logVerbose } from '../lib/log-verbose';
 import { getSemverRange, setSemverRange } from '../lib/set-semver-range';
 
@@ -57,10 +57,10 @@ export const updateEffects: VersionEffects<InputWithVersions | void> = {
   onSnappedToMismatch() {
     return Effect.unit();
   },
-  onUnsupportedMismatch() {
+  onNonSemverMismatch() {
     return Effect.unit();
   },
-  onWorkspaceMismatch() {
+  onLocalPackageMismatch() {
     return Effect.unit();
   },
   onComplete(ctx, results) {
@@ -131,7 +131,9 @@ function promptForUpdates(results: Array<InputWithVersions | void>) {
 
           const input = result.input;
           const latestVersion = result.versions.latest;
-          const uniqueVersions = getUniqueVersions(input.report.instances);
+          const uniqueVersions = getUniqueSpecifiers(input.report.instances).map(
+            (i) => i.specifier,
+          );
           const highestVersion = unwrap(getHighestVersion(uniqueVersions));
           const exactHighestVersion = setSemverRange('', highestVersion);
 
@@ -177,9 +179,9 @@ function promptForUpdates(results: Array<InputWithVersions | void>) {
       Effect.sync(() => {
         chosenUpdates.forEach(({ input, versions }) => {
           input.report.instances.forEach((instance) => {
-            const semverRange = getSemverRange(instance.version);
+            const semverRange = getSemverRange(instance.specifier);
             const latestWithRange = setSemverRange(semverRange, versions.latest);
-            instance.setVersion(latestWithRange);
+            instance.setSpecifier(latestWithRange);
           });
         });
       }),

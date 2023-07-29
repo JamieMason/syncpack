@@ -26,12 +26,12 @@ export interface SemverRangeEffects<A> {
   onSemverRangeMismatch: (
     input: SemverRangeEffectInput<SR.SemverRangeMismatch>,
   ) => Effect.Effect<Env | never, never, A>;
-  onUnsupportedVersion: (
-    input: SemverRangeEffectInput<SR.UnsupportedVersion>,
+  onNonSemverVersion: (
+    input: SemverRangeEffectInput<SR.NonSemverVersion>,
   ) => Effect.Effect<Env | never, never, A>;
   onValid: (input: SemverRangeEffectInput<SR.Valid>) => Effect.Effect<Env | never, never, A>;
-  onWorkspaceSemverRangeMismatch: (
-    input: SemverRangeEffectInput<SR.WorkspaceSemverRangeMismatch>,
+  onLocalPackageSemverRangeMismatch: (
+    input: SemverRangeEffectInput<SR.LocalPackageSemverRangeMismatch>,
   ) => Effect.Effect<Env | never, never, A>;
   onComplete: (ctx: Ctx, results: A[]) => Effect.Effect<Env | never, never, A>;
 }
@@ -57,12 +57,12 @@ export interface VersionEffects<A> {
   onSnappedToMismatch: (
     input: VersionEffectInput<VR.SnappedToMismatch>,
   ) => Effect.Effect<Env | never, never, A>;
-  onUnsupportedMismatch: (
-    input: VersionEffectInput<VR.UnsupportedMismatch>,
+  onNonSemverMismatch: (
+    input: VersionEffectInput<VR.NonSemverMismatch>,
   ) => Effect.Effect<Env | never, never, A>;
   onValid: (input: VersionEffectInput<VR.Valid>) => Effect.Effect<Env | never, never, A>;
-  onWorkspaceMismatch: (
-    input: VersionEffectInput<VR.WorkspaceMismatch>,
+  onLocalPackageMismatch: (
+    input: VersionEffectInput<VR.LocalPackageMismatch>,
   ) => Effect.Effect<Env | never, never, A>;
   onComplete: (ctx: Ctx, results: A[]) => Effect.Effect<Env | never, never, A>;
 }

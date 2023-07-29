@@ -9,8 +9,8 @@ import type { Union } from 'ts-toolbelt';
 import type { DeprecatedTypesError } from '../config/get-enabled-types';
 import { getEnabledTypes } from '../config/get-enabled-types';
 import type { Ctx } from '../get-context';
-import type { Instance } from '../get-package-json-files/instance';
 import { canAddToGroup } from '../guards/can-add-to-group';
+import type { Instance } from '../instance';
 import { sortByName } from '../lib/sort-by-name';
 import { BannedVersionGroup } from './banned';
 import { FilteredOutVersionGroup } from './filtered-out';
@@ -31,77 +31,125 @@ export type AnyVersionGroup = Union.Strict<
 >;
 
 export namespace VersionGroupReport {
+  /**
+   * Every instance in this `BannedVersionGroup` matched its configuration and
+   * will be removed if fixed
+   */
   export class Banned extends Data.TaggedClass('Banned')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
   }> {}
 
+  /**
+   * Every instance in this `FilteredOutVersionGroup` has name which does not
+   * match the RegExp produced by the `--filter` option.
+   */
   export class FilteredOut extends Data.TaggedClass('FilteredOut')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: true;
   }> {}
 
+  /**
+   * One or more instances has a version which is not identical to the others,
+   * to resolve this issue the highest semver version present should be used
+   */
   export class HighestSemverMismatch extends Data.TaggedClass('HighestSemverMismatch')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
     readonly expectedVersion: string;
   }> {}
 
+  /**
+   * Every instance in this `IgnoredVersionGroup` matched its configuration
+   */
   export class Ignored extends Data.TaggedClass('Ignored')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: true;
   }> {}
 
+  /**
+   * One or more instances has a version which is not identical to the others,
+   * to resolve this issue the lowest semver version present should be used
+   */
   export class LowestSemverMismatch extends Data.TaggedClass('LowestSemverMismatch')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
     readonly expectedVersion: string;
   }> {}
 
+  /**
+   * One or more instances has a version which is not identical to the
+   * `pinVersion` value set in this `PinnedVersionGroup`
+   */
   export class PinnedMismatch extends Data.TaggedClass('PinnedMismatch')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
     readonly expectedVersion: string;
   }> {}
 
+  /**
+   * One or more instances has a version which is not satisfied by the semver
+   * version ranges defined by every other instance of this same dependency. In
+   * a `SameRangeVersionGroup`, each version does not have to be indentical, but
+   * they do have to all satisfy the ranges set by the others.
+   */
   export class SameRangeMismatch extends Data.TaggedClass('SameRangeMismatch')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
   }> {}
 
+  /**
+   * One or more instances has a version which does not match the version used
+   * in any of the locally developed packages whose names are set in the
+   * `snapTo` array of this `SnappedToVersionGroup`
+   */
   export class SnappedToMismatch extends Data.TaggedClass('SnappedToMismatch')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
     readonly expectedVersion: string;
     readonly snapTo: string[];
   }> {}
 
-  export class UnsupportedMismatch extends Data.TaggedClass('UnsupportedMismatch')<{
+  /**
+   * One or more instances has a version which does not match the others and
+   * also, at least one of the instances has a version which is not semver.
+   * Syncpack cannot guess what any given Developer will want to do in this
+   * situation
+   */
+  export class NonSemverMismatch extends Data.TaggedClass('NonSemverMismatch')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
   }> {}
 
+  /**
+   * Every instance satisfies the rules of the Version Group they belong to
+   */
   export class Valid extends Data.TaggedClass('Valid')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: true;
   }> {}
 
-  export class WorkspaceMismatch extends Data.TaggedClass('WorkspaceMismatch')<{
+  /**
+   * This dependency is one of the packages developed in this monorepo and one
+   * or more of the packages in this monorepo depend on it with a version which
+   * is not identical to the `.version` property of its package.json file
+   */
+  export class LocalPackageMismatch extends Data.TaggedClass('LocalPackageMismatch')<{
     name: string;
-    instances: Instance[];
+    instances: Instance.Any[];
     readonly isValid: false;
     readonly expectedVersion: string;
-    readonly workspaceInstance: Instance;
+    readonly localPackageInstance: Instance.Any;
   }> {}
 
   export type ValidCases = Union.Strict<FilteredOut | Ignored | Valid>;
@@ -113,8 +161,8 @@ export namespace VersionGroupReport {
     | PinnedMismatch
     | SameRangeMismatch
     | SnappedToMismatch
-    | UnsupportedMismatch
-    | WorkspaceMismatch
+    | NonSemverMismatch
+    | LocalPackageMismatch
   >;
 
   export type FixableCases = Union.Strict<
@@ -122,11 +170,11 @@ export namespace VersionGroupReport {
     | LowestSemverMismatch
     | PinnedMismatch
     | SnappedToMismatch
-    | WorkspaceMismatch
+    | LocalPackageMismatch
   >;
 
   export type UnfixableCases = Union.Strict<
-    SameRangeMismatch | UnsupportedMismatch | WorkspaceMismatch
+    SameRangeMismatch | NonSemverMismatch | LocalPackageMismatch
   >;
 
   export type HighLowSemverMismatch =

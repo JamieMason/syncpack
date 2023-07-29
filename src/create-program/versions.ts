@@ -56,11 +56,11 @@ export function createVersionsProgram<T extends VersionEffects<any>>(
                 SnappedToMismatch(report) {
                   return effects.onSnappedToMismatch({ ctx, group, index, report });
                 },
-                UnsupportedMismatch(report) {
-                  return effects.onUnsupportedMismatch({ ctx, group, index, report });
+                NonSemverMismatch(report) {
+                  return effects.onNonSemverMismatch({ ctx, group, index, report });
                 },
-                WorkspaceMismatch(report) {
-                  return effects.onWorkspaceMismatch({ ctx, group, index, report });
+                LocalPackageMismatch(report) {
+                  return effects.onLocalPackageMismatch({ ctx, group, index, report });
                 },
               }),
             ),

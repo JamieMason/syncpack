@@ -4,12 +4,12 @@ import { lint } from '../../../src/bin-lint/lint';
 import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
 import { list } from '../../../src/bin-list/list';
 import { prompt } from '../../../src/bin-prompt/prompt';
-import { toBeWorkspaceMismatch } from '../../matchers/version-group';
+import { toBeLocalPackageMismatch } from '../../matchers/version-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
 describe('versionGroups', () => {
-  describe('WorkspaceMismatch', () => {
+  describe('LocalPackageMismatch', () => {
     [
       () =>
         createScenario(
@@ -162,7 +162,7 @@ describe('versionGroups', () => {
         test('should identify as a mismatch against the canonical local package version', () => {
           const scenario = getScenario();
           expect(scenario.report.versionGroups).toEqual([
-            [toBeWorkspaceMismatch({ expectedVersion: '0.0.1', name: 'c' })],
+            [toBeLocalPackageMismatch({ expectedVersion: '0.0.1', name: 'c' })],
           ]);
         });
       });

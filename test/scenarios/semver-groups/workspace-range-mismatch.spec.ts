@@ -3,7 +3,7 @@ import { lintSemverRanges } from '../../../src/bin-lint-semver-ranges/lint-semve
 import { list } from '../../../src/bin-list/list';
 import { prompt } from '../../../src/bin-prompt/prompt';
 import { setSemverRanges } from '../../../src/bin-set-semver-ranges/set-semver-ranges';
-import { toBeValid, toBeWorkspaceSemverRangeMismatch } from '../../matchers/semver-group';
+import { toBeLocalPackageSemverRangeMismatch, toBeValid } from '../../matchers/semver-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
@@ -49,7 +49,7 @@ describe('semverGroups', () => {
           const scenario = getScenario();
           expect(scenario.report.semverGroups).toEqual([
             [
-              toBeWorkspaceSemverRangeMismatch({ expectedVersion: '0.1.1', name: 'b' }),
+              toBeLocalPackageSemverRangeMismatch({ expectedVersion: '0.1.1', name: 'b' }),
               toBeValid({ name: 'foo' }),
             ],
           ]);

@@ -2,12 +2,12 @@ import * as Data from '@effect/data/Data';
 import * as Effect from '@effect/io/Effect';
 import { VersionGroupReport } from '.';
 import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-package-json-files/instance';
+import type { Instance } from '../instance';
 import { groupBy } from './lib/group-by';
 
 export class IgnoredVersionGroup extends Data.TaggedClass('Ignored')<{
   config: VersionGroupConfig.Ignored;
-  instances: Instance[];
+  instances: Instance.Any[];
 }> {
   constructor(config: VersionGroupConfig.Ignored) {
     super({
@@ -16,7 +16,7 @@ export class IgnoredVersionGroup extends Data.TaggedClass('Ignored')<{
     });
   }
 
-  canAdd(_: Instance): boolean {
+  canAdd(_: Instance.Any): boolean {
     return true;
   }
 

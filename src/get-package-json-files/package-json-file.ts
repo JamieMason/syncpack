@@ -1,12 +1,13 @@
 import { pipe } from '@effect/data/Function';
-import { relative } from 'path';
+import { dirname, relative } from 'path';
 import { map } from 'tightrope/result/map';
 import type { Strategy } from '../config/get-custom-types';
 import { CWD } from '../constants';
 import type { Ctx } from '../get-context';
+import type { Instance } from '../instance';
+import { createInstance } from '../instance/create';
 import { logVerbose } from '../lib/log-verbose';
 import type { JsonFile } from './get-patterns/read-json-safe';
-import { Instance } from './instance';
 
 export interface PackageJson {
   bugs?: { url: string } | string;
@@ -39,6 +40,9 @@ export class PackageJsonFile {
   /** absolute path on disk to this file */
   readonly filePath: string;
 
+  /** absolute path on disk to this file's directory */
+  readonly dirPath: string;
+
   /** raw file contents of the file */
   readonly json: string;
 
@@ -52,22 +56,23 @@ export class PackageJsonFile {
     this.config = config;
     this.contents = jsonFile.contents;
     this.filePath = jsonFile.filePath;
+    this.dirPath = dirname(jsonFile.filePath);
     this.json = jsonFile.json;
     this.shortPath = relative(CWD, jsonFile.filePath);
   }
 
-  getInstances(enabledTypes: Strategy.Any[]): Instance[] {
-    const instances: Instance[] = [];
+  getInstances(enabledTypes: Strategy.Any[]): Instance.Any[] {
+    const instances: Instance.Any[] = [];
 
     enabledTypes.forEach((strategy) => {
       pipe(
         strategy.read(this),
         map((entries) =>
-          entries.forEach(([name, version]) => {
+          entries.forEach(([name, specifier]) => {
             logVerbose(
-              `add ${name}@${version} to ${strategy.name}:${strategy._tag} ${this.shortPath}`,
+              `add ${name}@${specifier} to ${strategy.name}:${strategy._tag} ${this.shortPath}`,
             );
-            instances.push(new Instance(strategy, name, this, version));
+            instances.push(createInstance(strategy, name, this, specifier));
           }),
         ),
       );

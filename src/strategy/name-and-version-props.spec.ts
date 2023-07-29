@@ -4,7 +4,7 @@ import { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import { NameAndVersionPropsStrategy } from './name-and-version-props';
 
 it('gets and sets a name and version from 2 seperate locations', () => {
-  const strategy = new NameAndVersionPropsStrategy('workspace', 'version', 'name');
+  const strategy = new NameAndVersionPropsStrategy('localPackage', 'version', 'name');
   const jsonFile = mockPackage('foo', { otherProps: { version: '1.2.3' } });
   const file = new PackageJsonFile(jsonFile, {} as any);
   const initial = [['foo', '1.2.3']];
@@ -31,14 +31,14 @@ it('gets and sets a name and version from 2 seperate nested locations', () => {
 });
 
 it('returns new Err when namePath is not found', () => {
-  const strategy = new NameAndVersionPropsStrategy('workspace', 'version', 'never.gonna');
+  const strategy = new NameAndVersionPropsStrategy('localPackage', 'version', 'never.gonna');
   const jsonFile = mockPackage('foo', { otherProps: { version: '1.2.3' } });
   const file = new PackageJsonFile(jsonFile, {} as any);
   expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));
 });
 
 it('returns new Err when version (path) is not found', () => {
-  const strategy = new NameAndVersionPropsStrategy('workspace', 'never.gonna', 'name');
+  const strategy = new NameAndVersionPropsStrategy('localPackage', 'never.gonna', 'name');
   const jsonFile = mockPackage('foo', {});
   const file = new PackageJsonFile(jsonFile, {} as any);
   expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));

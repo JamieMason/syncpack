@@ -5,7 +5,7 @@ import { ICON } from '../constants';
 import type { VersionEffectInput as Input, VersionEffects } from '../create-program/effects';
 import { EnvTag } from '../env/tags';
 import type { VersionGroupReport } from '../get-version-groups';
-import { getUniqueVersions } from '../get-version-groups/lib/get-unique-versions';
+import { getUniqueSpecifiers } from '../get-version-groups/lib/get-unique-specifiers';
 import { logGroupHeader } from '../lib/log-group-header';
 
 export const promptEffects: VersionEffects<void> = {
@@ -39,13 +39,13 @@ export const promptEffects: VersionEffects<void> = {
   onSnappedToMismatch() {
     return Effect.unit();
   },
-  onUnsupportedMismatch(input) {
+  onNonSemverMismatch(input) {
     return pipe(
       Effect.sync(() => logHeader(input)),
       Effect.flatMap(askForNextVersion),
     );
   },
-  onWorkspaceMismatch() {
+  onLocalPackageMismatch() {
     return Effect.unit();
   },
   onComplete() {
@@ -69,7 +69,7 @@ function askForNextVersion({ report }: Input<VersionGroupReport.UnfixableCases>)
       const choice = yield* $(
         env.askForChoice({
           message: chalk`${report.name} {dim Choose a version to replace the others}`,
-          choices: [...getUniqueVersions(report.instances), OTHER, SKIP],
+          choices: [...getUniqueSpecifiers(report.instances).map((i) => i.specifier), OTHER, SKIP],
         }),
       );
       if (choice === SKIP) return;
@@ -84,7 +84,7 @@ function askForNextVersion({ report }: Input<VersionGroupReport.UnfixableCases>)
       yield* $(
         Effect.sync(() => {
           report.instances.forEach((instance) => {
-            instance.setVersion(nextVersion);
+            instance.setSpecifier(nextVersion);
           });
         }),
       );

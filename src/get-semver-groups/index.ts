@@ -10,9 +10,9 @@ import type { DeprecatedTypesError } from '../config/get-enabled-types';
 import { getEnabledTypes } from '../config/get-enabled-types';
 import { getSemverRange } from '../config/get-semver-range';
 import type { Ctx } from '../get-context';
-import type { Instance } from '../get-package-json-files/instance';
 import { canAddToGroup } from '../guards/can-add-to-group';
 import { isValidSemverRange } from '../guards/is-valid-semver-range';
+import type { Instance } from '../instance';
 import { sortByName } from '../lib/sort-by-name';
 import { FilteredOutSemverGroup } from './filtered-out';
 import { IgnoredSemverGroup } from './ignored';
@@ -25,53 +25,53 @@ export type AnySemverGroup = Union.Strict<
 export namespace SemverGroupReport {
   export class FilteredOut extends Data.TaggedClass('FilteredOut')<{
     name: string;
-    instance: Instance;
+    instance: Instance.Any;
     readonly isValid: true;
   }> {}
 
   export class Ignored extends Data.TaggedClass('Ignored')<{
     name: string;
-    instance: Instance;
+    instance: Instance.Any;
     readonly isValid: true;
   }> {}
 
   export class Valid extends Data.TaggedClass('Valid')<{
     name: string;
-    instance: Instance;
+    instance: Instance.Any;
     readonly isValid: true;
   }> {}
 
-  export class WorkspaceSemverRangeMismatch extends Data.TaggedClass(
-    'WorkspaceSemverRangeMismatch',
+  export class LocalPackageSemverRangeMismatch extends Data.TaggedClass(
+    'LocalPackageSemverRangeMismatch',
   )<{
     name: string;
-    instance: Instance;
+    instance: Instance.Any;
     readonly isValid: false;
     readonly expectedVersion: string;
   }> {}
 
   export class SemverRangeMismatch extends Data.TaggedClass('SemverRangeMismatch')<{
     name: string;
-    instance: Instance;
+    instance: Instance.Any;
     readonly isValid: false;
     readonly expectedVersion: string;
   }> {}
 
-  export class UnsupportedVersion extends Data.TaggedClass('UnsupportedVersion')<{
+  export class NonSemverVersion extends Data.TaggedClass('NonSemverVersion')<{
     name: string;
-    instance: Instance;
+    instance: Instance.Any;
     readonly isValid: false;
   }> {}
 
   export type ValidCases = Union.Strict<FilteredOut | Ignored | Valid>;
 
   export type InvalidCases = Union.Strict<
-    SemverRangeMismatch | UnsupportedVersion | WorkspaceSemverRangeMismatch
+    SemverRangeMismatch | NonSemverVersion | LocalPackageSemverRangeMismatch
   >;
 
-  export type FixableCases = Union.Strict<SemverRangeMismatch | WorkspaceSemverRangeMismatch>;
+  export type FixableCases = Union.Strict<SemverRangeMismatch | LocalPackageSemverRangeMismatch>;
 
-  export type UnfixableCases = Union.Strict<UnsupportedVersion>;
+  export type UnfixableCases = Union.Strict<NonSemverVersion>;
 
   export type Any = Union.Strict<ValidCases | InvalidCases>;
 }

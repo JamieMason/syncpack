@@ -4,7 +4,7 @@ import type { Result } from 'tightrope/result';
 import { filter } from 'tightrope/result/filter';
 import { fromTry } from 'tightrope/result/from-try';
 import { map } from 'tightrope/result/map';
-import { compareSemver } from './sort';
+import { compareSemver } from './compare-semver';
 
 export function getHighestVersion(versions: string[]): Result<string> {
   return pipe(

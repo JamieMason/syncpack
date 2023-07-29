@@ -1,6 +1,7 @@
 import type { SemverRange } from '../config/types';
 import { RANGE } from '../constants';
 
+/** @deprecated */
 export function isValidSemverRange(value: unknown): value is SemverRange {
   return (
     value === RANGE.ANY ||

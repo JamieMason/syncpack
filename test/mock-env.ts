@@ -46,9 +46,9 @@ export function createMockSemverRangeEffects(): SemverRangeEffects<void> {
     onIgnored: jest.fn(() => Effect.unit()),
     onSemverRangeMismatch: jest.fn(() => Effect.unit()),
     onComplete: jest.fn(() => Effect.unit()),
-    onUnsupportedVersion: jest.fn(() => Effect.unit()),
+    onNonSemverVersion: jest.fn(() => Effect.unit()),
     onValid: jest.fn(() => Effect.unit()),
-    onWorkspaceSemverRangeMismatch: jest.fn(() => Effect.unit()),
+    onLocalPackageSemverRangeMismatch: jest.fn(() => Effect.unit()),
   };
 }
 
@@ -63,8 +63,8 @@ export function createMockVersionEffects(): VersionEffects<void> {
     onSameRangeMismatch: jest.fn(() => Effect.unit()),
     onSnappedToMismatch: jest.fn(() => Effect.unit()),
     onComplete: jest.fn(() => Effect.unit()),
-    onUnsupportedMismatch: jest.fn(() => Effect.unit()),
+    onNonSemverMismatch: jest.fn(() => Effect.unit()),
     onValid: jest.fn(() => Effect.unit()),
-    onWorkspaceMismatch: jest.fn(() => Effect.unit()),
+    onLocalPackageMismatch: jest.fn(() => Effect.unit()),
   };
 }

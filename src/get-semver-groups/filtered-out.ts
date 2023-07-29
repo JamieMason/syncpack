@@ -4,12 +4,12 @@ import { SemverGroupReport } from '.';
 import { getFilter } from '../config/get-filter';
 import type { GroupConfig } from '../config/types';
 import type { Ctx } from '../get-context';
-import type { Instance } from '../get-package-json-files/instance';
+import type { Instance } from '../instance';
 
 export class FilteredOutSemverGroup extends Data.TaggedClass('FilteredOut')<{
   config: GroupConfig;
   filter: string;
-  instances: Instance[];
+  instances: Instance.Any[];
 }> {
   constructor(ctx: Ctx) {
     super({
@@ -24,7 +24,7 @@ export class FilteredOutSemverGroup extends Data.TaggedClass('FilteredOut')<{
     });
   }
 
-  canAdd(instance: Instance): boolean {
+  canAdd(instance: Instance.Any): boolean {
     return instance.name.search(new RegExp(this.filter)) === -1;
   }
 

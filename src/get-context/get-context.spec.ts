@@ -22,6 +22,7 @@ describe('getContext', () => {
               packageJsonFiles: [
                 {
                   contents,
+                  dirPath: CWD,
                   filePath,
                   json,
                   config: expect.toBeNonEmptyObject(),

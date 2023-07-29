@@ -2,11 +2,11 @@ import * as Data from '@effect/data/Data';
 import * as Effect from '@effect/io/Effect';
 import { SemverGroupReport } from '.';
 import type { SemverGroupConfig } from '../config/types';
-import type { Instance } from '../get-package-json-files/instance';
+import type { Instance } from '../instance';
 
 export class IgnoredSemverGroup extends Data.TaggedClass('Ignored')<{
   config: SemverGroupConfig.Ignored;
-  instances: Instance[];
+  instances: Instance.Any[];
 }> {
   constructor(config: SemverGroupConfig.Ignored) {
     super({
@@ -15,7 +15,7 @@ export class IgnoredSemverGroup extends Data.TaggedClass('Ignored')<{
     });
   }
 
-  canAdd(_: Instance): boolean {
+  canAdd(_: Instance.Any): boolean {
     return true;
   }
 

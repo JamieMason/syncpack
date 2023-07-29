@@ -58,7 +58,7 @@ export function getEnabledTypes({
     enabledTypes.push(new VersionsByNameStrategy('resolutions', 'resolutions'));
   }
   if (useDefaults || enabledTypeNames.includes('workspace')) {
-    enabledTypes.push(new NameAndVersionPropsStrategy('workspace', 'version', 'name'));
+    enabledTypes.push(new NameAndVersionPropsStrategy('localPackage', 'version', 'name'));
   }
 
   getCustomTypes({ cli, rcFile }).forEach((customType) => {

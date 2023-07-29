@@ -5,11 +5,11 @@ import { lint } from '../../../src/bin-lint/lint';
 import { listMismatches } from '../../../src/bin-list-mismatches/list-mismatches';
 import { list } from '../../../src/bin-list/list';
 import { prompt } from '../../../src/bin-prompt/prompt';
-import { toBeUnsupportedMismatch } from '../../matchers/version-group';
+import { toBeNonSemverMismatch } from '../../matchers/version-group';
 import { createScenarioVariants } from './lib/create-scenario-variants';
 
 describe('versionGroups', () => {
-  describe('UnsupportedMismatch', () => {
+  describe('NonSemverMismatch', () => {
     const cases: [string, string][] = [
       [
         'yarn@git://github.com/user/project.git#commit1',
@@ -34,7 +34,7 @@ describe('versionGroups', () => {
           test('should identify as mismatching, but not possible to fix', () => {
             const scenario = getScenario();
             expect(scenario.report.versionGroups).toEqual([
-              [toBeUnsupportedMismatch({ name: 'yarn' })],
+              [toBeNonSemverMismatch({ name: 'yarn' })],
             ]);
           });
         });

@@ -2,12 +2,12 @@ import * as Data from '@effect/data/Data';
 import * as Effect from '@effect/io/Effect';
 import { VersionGroupReport } from '.';
 import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-package-json-files/instance';
+import type { Instance } from '../instance';
 import { groupBy } from './lib/group-by';
 
 export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
   config: VersionGroupConfig.Pinned;
-  instances: Instance[];
+  instances: Instance.Any[];
 }> {
   constructor(config: VersionGroupConfig.Pinned) {
     super({
@@ -16,14 +16,13 @@ export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
     });
   }
 
-  canAdd(_: Instance): boolean {
+  canAdd(_: Instance.Any): boolean {
     return true;
   }
 
   inspect(): Effect.Effect<never, VersionGroupReport.PinnedMismatch, VersionGroupReport.Valid>[] {
     const instancesByName = groupBy('name', this.instances);
     const expectedVersion = this.config.pinVersion;
-
     return Object.entries(instancesByName).map(([name, instances]) => {
       if (hasMismatch(expectedVersion, instances)) {
         return Effect.fail(
@@ -47,6 +46,6 @@ export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
   }
 }
 
-function hasMismatch(pinVersion: string, instances: Instance[]) {
-  return instances.some((instance) => instance.version !== pinVersion);
+function hasMismatch(pinVersion: string, instances: Instance.Any[]) {
+  return instances.some((instance) => instance.specifier !== pinVersion);
 }

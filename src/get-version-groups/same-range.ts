@@ -3,12 +3,12 @@ import * as Effect from '@effect/io/Effect';
 import intersects from 'semver/ranges/intersects';
 import { VersionGroupReport } from '.';
 import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-package-json-files/instance';
+import type { Instance } from '../instance';
 import { groupBy } from './lib/group-by';
 
 export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
   config: VersionGroupConfig.SameRange;
-  instances: Instance[];
+  instances: Instance.Any[];
 }> {
   constructor(config: VersionGroupConfig.SameRange) {
     super({
@@ -17,7 +17,7 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
     });
   }
 
-  canAdd(_: Instance): boolean {
+  canAdd(_: Instance.Any): boolean {
     return true;
   }
 
@@ -27,7 +27,6 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
     VersionGroupReport.Valid
   >[] {
     const instancesByName = groupBy('name', this.instances);
-
     return Object.entries(instancesByName).map(([name, instances]) => {
       if (hasMismatch(instances)) {
         return Effect.fail(
@@ -51,11 +50,11 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
 }
 
 /** Every range must fall within every other range */
-function hasMismatch(instances: Instance[]) {
+function hasMismatch(instances: Instance.Any[]) {
   const loose = true;
   return instances.some((a) =>
     instances.some(
-      (b) => !intersects(aliasWorkspaceRange(a.version), aliasWorkspaceRange(b.version), loose),
+      (b) => !intersects(aliasWorkspaceRange(a.specifier), aliasWorkspaceRange(b.specifier), loose),
     ),
   );
 }

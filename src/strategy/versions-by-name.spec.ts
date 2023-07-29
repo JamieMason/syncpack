@@ -4,7 +4,7 @@ import { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import { VersionsByNameStrategy } from './versions-by-name';
 
 it('gets and sets names and versions in an object', () => {
-  const strategy = new VersionsByNameStrategy('workspace', 'dependencies');
+  const strategy = new VersionsByNameStrategy('localPackage', 'dependencies');
   const jsonFile = mockPackage('foo', { deps: ['bar@1.2.3', 'baz@4.4.4'] });
   const file = new PackageJsonFile(jsonFile, {} as any);
   const initial = [
@@ -40,7 +40,7 @@ it('gets and sets a name and version from a single string nested location', () =
 });
 
 it('returns new Err when path is not found', () => {
-  const strategy = new VersionsByNameStrategy('workspace', 'never.gonna');
+  const strategy = new VersionsByNameStrategy('localPackage', 'never.gonna');
   const jsonFile = mockPackage('foo', {});
   const file = new PackageJsonFile(jsonFile, {} as any);
   expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));

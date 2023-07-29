@@ -1,12 +1,12 @@
 import { minimatch } from 'minimatch';
 import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
-import type { Instance } from '../get-package-json-files/instance';
 import type { AnySemverGroup } from '../get-semver-groups';
 import type { AnyVersionGroup } from '../get-version-groups';
+import type { Instance } from '../instance';
 
 export function canAddToGroup(
   group: AnySemverGroup | AnyVersionGroup,
-  instance: Instance,
+  instance: Instance.Any,
 ): boolean {
   const { dependencies, dependencyTypes, packages } = group.config;
   return (

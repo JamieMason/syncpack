@@ -20,10 +20,10 @@ export const setSemverRangesEffects: SemverRangeEffects<void> = {
   onSemverRangeMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
-  onUnsupportedVersion(input) {
-    return Effect.sync(() => logUnsupportedVersion(input));
+  onNonSemverVersion(input) {
+    return Effect.sync(() => logNonSemverVersion(input));
   },
-  onWorkspaceSemverRangeMismatch(input) {
+  onLocalPackageSemverRangeMismatch(input) {
     return Effect.sync(() => setVersions(input));
   },
   onComplete() {
@@ -32,14 +32,14 @@ export const setSemverRangesEffects: SemverRangeEffects<void> = {
 };
 
 function setVersions({ report }: Input<SemverGroupReport.FixableCases>) {
-  report.instance.setVersion(report.expectedVersion);
+  report.instance.setSpecifier(report.expectedVersion);
 }
 
-function logUnsupportedVersion({ report }: Input<SemverGroupReport.UnsupportedVersion>) {
+function logNonSemverVersion({ report }: Input<SemverGroupReport.NonSemverVersion>) {
   console.log(
     chalk`{yellow %s} %s {yellow %s} {dim ignored as a format which syncpack cannot apply semver ranges to}`,
     ICON.panic,
     report.name,
-    report.instance.version,
+    report.instance.specifier,
   );
 }

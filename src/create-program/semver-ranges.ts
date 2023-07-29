@@ -41,11 +41,11 @@ export function createSemverRangesProgram<T extends SemverRangeEffects<any>>(
                 SemverRangeMismatch(report) {
                   return effects.onSemverRangeMismatch({ ctx, group, index, report });
                 },
-                UnsupportedVersion(report) {
-                  return effects.onUnsupportedVersion({ ctx, group, index, report });
+                NonSemverVersion(report) {
+                  return effects.onNonSemverVersion({ ctx, group, index, report });
                 },
-                WorkspaceSemverRangeMismatch(report) {
-                  return effects.onWorkspaceSemverRangeMismatch({ ctx, group, index, report });
+                LocalPackageSemverRangeMismatch(report) {
+                  return effects.onLocalPackageSemverRangeMismatch({ ctx, group, index, report });
                 },
               }),
             ),

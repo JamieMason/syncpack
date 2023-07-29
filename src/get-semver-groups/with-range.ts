@@ -1,14 +1,14 @@
 import * as Data from '@effect/data/Data';
+import * as Option from '@effect/data/Option';
 import * as Effect from '@effect/io/Effect';
 import { SemverGroupReport } from '.';
 import type { SemverGroupConfig } from '../config/types';
-import type { Instance } from '../get-package-json-files/instance';
-import { isSupported } from '../guards/is-supported';
+import type { Instance } from '../instance';
 import { setSemverRange } from '../lib/set-semver-range';
 
 export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
   config: SemverGroupConfig.WithRange;
-  instances: Instance[];
+  instances: Instance.Any[];
   isCatchAll: boolean;
 }> {
   constructor(isCatchAll: boolean, config: SemverGroupConfig.WithRange) {
@@ -19,21 +19,21 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
     });
   }
 
-  canAdd(_: Instance): boolean {
+  canAdd(_: Instance.Any): boolean {
     return true;
   }
 
   inspect(): Effect.Effect<
     never,
-    | SemverGroupReport.UnsupportedVersion
-    | SemverGroupReport.WorkspaceSemverRangeMismatch
+    | SemverGroupReport.NonSemverVersion
+    | SemverGroupReport.LocalPackageSemverRangeMismatch
     | SemverGroupReport.SemverRangeMismatch,
     SemverGroupReport.Valid
   >[] {
     return this.instances.map((instance) => {
-      if (!isSupported(instance.version)) {
+      if (Option.isNone(instance.getSemverSpecifier())) {
         return Effect.fail(
-          new SemverGroupReport.UnsupportedVersion({
+          new SemverGroupReport.NonSemverVersion({
             name: instance.name,
             instance,
             isValid: false,
@@ -41,13 +41,13 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
         );
       }
 
-      const isWsInstance = instance.strategy.name === 'workspace';
-      const exactVersion = setSemverRange('', instance.version);
-      const expectedVersion = setSemverRange(this.config.range, instance.version);
+      const isLocalPackageInstance = instance.strategy.name === 'localPackage';
+      const exactVersion = setSemverRange('', instance.specifier);
+      const expectedVersion = setSemverRange(this.config.range, instance.specifier);
 
-      if (isWsInstance && instance.version !== exactVersion) {
+      if (isLocalPackageInstance && instance.specifier !== exactVersion) {
         return Effect.fail(
-          new SemverGroupReport.WorkspaceSemverRangeMismatch({
+          new SemverGroupReport.LocalPackageSemverRangeMismatch({
             name: instance.name,
             instance,
             isValid: false,
@@ -55,7 +55,7 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
           }),
         );
       }
-      if (instance.version === expectedVersion) {
+      if (instance.specifier === expectedVersion) {
         return Effect.succeed(
           new SemverGroupReport.Valid({
             name: instance.name,
