@@ -22,7 +22,7 @@ describe('versionGroups', () => {
           ],
         },
       },
-      a: ['yarn@2.0.0', 'yarn@3.0.0'],
+      a: ['yarn@npm:yarn@2.0.0', 'yarn@npm:yarn@3.0.0'],
       b: ['yarn@3.0.0', 'yarn@3.0.0'],
     }).forEach((getScenario) => {
       describe('versionGroup.inspect()', () => {

@@ -11,7 +11,7 @@ import type {
 } from 'npm-package-arg';
 import type { Strategy } from '../config/get-custom-types';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import type { Delete } from '../get-version-groups/lib/delete';
+import { DELETE, type Delete } from '../get-version-groups/lib/delete';
 import { $R } from '../lib/$R';
 
 /** Extends npm/npm-package-arg to support "workspace:*" */
@@ -88,7 +88,16 @@ export namespace Instance {
 
   /** An `Instance` whose specifier is eg "npm:imageoptim-cli@3.1.7" */
   export class AliasInstance extends Data.TaggedClass('AliasInstance')<BaseInstance<AliasResult>> {
-    setSpecifier = setSpecifier;
+    setSpecifier(version: string | Delete): void {
+      if (version === DELETE) {
+        setSpecifier.call(this, version);
+      } else {
+        const subSpec = this.parsedSpecifier.subSpec;
+        const name = subSpec.name || '';
+        const specifier = `npm:${name}@${version}`;
+        setSpecifier.call(this, specifier);
+      }
+    }
 
     getSemverSpecifier(): Option.Option<string> {
       const subSpec = this.parsedSpecifier.subSpec;
