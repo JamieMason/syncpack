@@ -16,7 +16,7 @@ export function createSemverRangesProgram<T extends SemverRangeEffects<any>>(
   return pipe(
     getSemverGroups(ctx),
     Effect.flatMap((semverGroups) =>
-      Effect.allPar(
+      Effect.all(
         semverGroups.flatMap((group) =>
           group.inspect().map((reportEffect, index) =>
             pipe(
@@ -51,6 +51,7 @@ export function createSemverRangesProgram<T extends SemverRangeEffects<any>>(
             ),
           ),
         ),
+        { concurrency: 'inherit' },
       ),
     ),
     Effect.flatMap((results) => effects.onComplete(ctx, results)),

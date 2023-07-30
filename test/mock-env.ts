@@ -42,29 +42,29 @@ export function createMockErrorHandlers(): ErrorHandlers<jest.Mock<any, any>> {
 
 export function createMockSemverRangeEffects(): SemverRangeEffects<void> {
   return {
-    onFilteredOut: jest.fn(() => Effect.unit()),
-    onIgnored: jest.fn(() => Effect.unit()),
-    onSemverRangeMismatch: jest.fn(() => Effect.unit()),
-    onComplete: jest.fn(() => Effect.unit()),
-    onNonSemverVersion: jest.fn(() => Effect.unit()),
-    onValid: jest.fn(() => Effect.unit()),
-    onLocalPackageSemverRangeMismatch: jest.fn(() => Effect.unit()),
+    onFilteredOut: jest.fn(() => Effect.unit),
+    onIgnored: jest.fn(() => Effect.unit),
+    onSemverRangeMismatch: jest.fn(() => Effect.unit),
+    onComplete: jest.fn(() => Effect.unit),
+    onNonSemverVersion: jest.fn(() => Effect.unit),
+    onValid: jest.fn(() => Effect.unit),
+    onLocalPackageSemverRangeMismatch: jest.fn(() => Effect.unit),
   };
 }
 
 export function createMockVersionEffects(): VersionEffects<void> {
   return {
-    onBanned: jest.fn(() => Effect.unit()),
-    onFilteredOut: jest.fn(() => Effect.unit()),
-    onHighestSemverMismatch: jest.fn(() => Effect.unit()),
-    onIgnored: jest.fn(() => Effect.unit()),
-    onLowestSemverMismatch: jest.fn(() => Effect.unit()),
-    onPinnedMismatch: jest.fn(() => Effect.unit()),
-    onSameRangeMismatch: jest.fn(() => Effect.unit()),
-    onSnappedToMismatch: jest.fn(() => Effect.unit()),
-    onComplete: jest.fn(() => Effect.unit()),
-    onNonSemverMismatch: jest.fn(() => Effect.unit()),
-    onValid: jest.fn(() => Effect.unit()),
-    onLocalPackageMismatch: jest.fn(() => Effect.unit()),
+    onBanned: jest.fn(() => Effect.unit),
+    onFilteredOut: jest.fn(() => Effect.unit),
+    onHighestSemverMismatch: jest.fn(() => Effect.unit),
+    onIgnored: jest.fn(() => Effect.unit),
+    onLowestSemverMismatch: jest.fn(() => Effect.unit),
+    onPinnedMismatch: jest.fn(() => Effect.unit),
+    onSameRangeMismatch: jest.fn(() => Effect.unit),
+    onSnappedToMismatch: jest.fn(() => Effect.unit),
+    onComplete: jest.fn(() => Effect.unit),
+    onNonSemverMismatch: jest.fn(() => Effect.unit),
+    onValid: jest.fn(() => Effect.unit),
+    onLocalPackageMismatch: jest.fn(() => Effect.unit),
   };
 }

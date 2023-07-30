@@ -193,7 +193,7 @@ export function getVersionGroups(
   ctx: Ctx,
 ): Effect.Effect<never, VersionGroupConfigError | DeprecatedTypesError, AnyVersionGroup[]> {
   return pipe(
-    Effect.Do(),
+    Effect.Do,
     Effect.bind('enabledTypes', () => getEnabledTypes(ctx.config)),
     Effect.bind('versionGroups', () => createVersionGroups(ctx)),
     Effect.flatMap(({ enabledTypes, versionGroups }) => {

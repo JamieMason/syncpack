@@ -9,13 +9,13 @@ import type { SemverGroupReport } from '../get-semver-groups';
 
 export const setSemverRangesEffects: SemverRangeEffects<void> = {
   onFilteredOut() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onIgnored() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onValid() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onSemverRangeMismatch(input) {
     return Effect.sync(() => setVersions(input));
@@ -27,7 +27,7 @@ export const setSemverRangesEffects: SemverRangeEffects<void> = {
     return Effect.sync(() => setVersions(input));
   },
   onComplete() {
-    return Effect.unit();
+    return Effect.unit;
   },
 };
 

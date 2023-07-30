@@ -25,15 +25,15 @@ export function readJsonSafe<T>(
   filePath: string,
 ): Effect.Effect<Env, ReadFileError | JsonParseError, JsonFile<T>> {
   return pipe(
-    Effect.Do(),
+    Effect.Do,
     Effect.bind('env', () => EnvTag),
     Effect.bind('json', ({ env }) => env.readFileSync(filePath)),
     Effect.bind('contents', ({ json }) =>
       // @TODO: move to env.parseJson
-      Effect.tryCatch(
-        () => JSON.parse(json),
-        (err) => new JsonParseError({ error: String(err), filePath, json }),
-      ),
+      Effect.try({
+        try: () => JSON.parse(json),
+        catch: (err) => new JsonParseError({ error: String(err), filePath, json }),
+      }),
     ),
     Effect.map(({ contents, json }) => ({ contents, filePath, json })),
   );

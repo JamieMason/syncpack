@@ -11,13 +11,13 @@ import { logGroupHeader } from '../lib/log-group-header';
 
 export const lintSemverRangesEffects: SemverRangeEffects<void> = {
   onFilteredOut() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onIgnored() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onValid() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onSemverRangeMismatch(input) {
     return Effect.sync(() => pipe(input, logHeader, logRangeMismatch));
@@ -29,7 +29,7 @@ export const lintSemverRangesEffects: SemverRangeEffects<void> = {
     return Effect.sync(() => pipe(input, logHeader, logRangeMismatch));
   },
   onComplete() {
-    return Effect.unit();
+    return Effect.unit;
   },
 };
 

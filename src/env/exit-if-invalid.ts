@@ -8,7 +8,7 @@ import { EnvTag } from './tags';
 export function exitIfInvalid(ctx: Ctx): Effect.Effect<Env, never, Ctx> {
   return pipe(
     EnvTag,
-    Effect.flatMap((env) => (ctx.isInvalid ? env.exitProcess(1) : Effect.unit())),
+    Effect.flatMap((env) => (ctx.isInvalid ? env.exitProcess(1) : Effect.unit)),
     Effect.map(() => ctx),
   );
 }

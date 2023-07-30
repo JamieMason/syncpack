@@ -9,13 +9,13 @@ import { logGroupHeader } from '../lib/log-group-header';
 
 export const listMismatchesEffects: VersionEffects<void> = {
   onFilteredOut() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onIgnored() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onValid() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onBanned(input) {
     return Effect.sync(() => pipe(input, logHeader, logBanned));
@@ -42,7 +42,7 @@ export const listMismatchesEffects: VersionEffects<void> = {
     return Effect.sync(() => pipe(input, logHeader, logLocalPackageMismatch));
   },
   onComplete() {
-    return Effect.unit();
+    return Effect.unit;
   },
 };
 

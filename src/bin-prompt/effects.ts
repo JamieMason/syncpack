@@ -10,25 +10,25 @@ import { logGroupHeader } from '../lib/log-group-header';
 
 export const promptEffects: VersionEffects<void> = {
   onFilteredOut() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onIgnored() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onValid() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onBanned() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onHighestSemverMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onLowestSemverMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onPinnedMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onSameRangeMismatch(input) {
     return pipe(
@@ -37,7 +37,7 @@ export const promptEffects: VersionEffects<void> = {
     );
   },
   onSnappedToMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onNonSemverMismatch(input) {
     return pipe(
@@ -46,10 +46,10 @@ export const promptEffects: VersionEffects<void> = {
     );
   },
   onLocalPackageMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onComplete() {
-    return Effect.unit();
+    return Effect.unit;
   },
 };
 

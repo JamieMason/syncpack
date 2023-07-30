@@ -31,37 +31,37 @@ let fetchCount = 0;
 
 export const updateEffects: VersionEffects<InputWithVersions | void> = {
   onFilteredOut() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onIgnored() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onValid(input) {
     return fetchPackageVersions(input);
   },
   onBanned() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onHighestSemverMismatch(input) {
     return fetchPackageVersions(input);
   },
   onLowestSemverMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onPinnedMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onSameRangeMismatch(input) {
     return fetchPackageVersions(input);
   },
   onSnappedToMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onNonSemverMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onLocalPackageMismatch() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onComplete(ctx, results) {
     return promptForUpdates(results);
@@ -122,7 +122,7 @@ function fetchPackageVersions<T extends VersionGroupReport.Any>(input: Input<T>)
 function promptForUpdates(results: Array<InputWithVersions | void>) {
   spinner.stop();
   return pipe(
-    Effect.Do(),
+    Effect.Do,
     Effect.bind('choices', () =>
       Effect.sync(() =>
         results.reduce((arr: ChoiceAndResult[], result): ChoiceAndResult[] => {
@@ -157,8 +157,8 @@ function promptForUpdates(results: Array<InputWithVersions | void>) {
       ),
     ),
     Effect.bind('chosenUpdates', ({ choices }) =>
-      Effect.tryCatchPromise(
-        () =>
+      Effect.tryPromise({
+        try: () =>
           prompts([
             {
               name: 'indexes',
@@ -172,8 +172,8 @@ function promptForUpdates(results: Array<InputWithVersions | void>) {
           ])
             .then(({ indexes = [] }: { indexes: number[] }) => ({ choices, indexes }))
             .then(({ choices, indexes }) => indexes.map((i) => choices[i]!.result)),
-        () => new Error('Prompt failed'),
-      ),
+        catch: () => new Error('Prompt failed'),
+      }),
     ),
     Effect.flatMap(({ chosenUpdates }) =>
       Effect.sync(() => {
@@ -186,7 +186,7 @@ function promptForUpdates(results: Array<InputWithVersions | void>) {
         });
       }),
     ),
-    Effect.catchAll(() => Effect.unit()),
+    Effect.catchAll(() => Effect.unit),
   );
 }
 
@@ -210,10 +210,10 @@ function fetchUrl(url: string): Effect.Effect<never, HttpError | JsonParseError,
         });
     }),
     Effect.flatMap((body) =>
-      Effect.tryCatch(
-        () => JSON.parse(body),
-        (err) => new JsonParseError({ error: String(err) }),
-      ),
+      Effect.try({
+        try: () => JSON.parse(body),
+        catch: (err) => new JsonParseError({ error: String(err) }),
+      }),
     ),
   );
 }

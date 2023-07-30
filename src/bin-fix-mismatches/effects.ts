@@ -13,13 +13,13 @@ import { logGroupHeader } from '../lib/log-group-header';
 
 export const fixMismatchesEffects: VersionEffects<void> = {
   onFilteredOut() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onIgnored() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onValid() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onBanned(input) {
     return Effect.sync(() => removeVersions(input));

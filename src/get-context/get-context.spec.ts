@@ -16,21 +16,22 @@ describe('getContext', () => {
           const env = createMockEnv();
           env.globSync.mockReturnValue([filePath]);
           env.readFileSync.mockReturnValue(json);
-          const ctx = runContextSync({ source: ['package.json'] }, env);
-          expect(ctx).toEqual(
-            expect.objectContaining({
-              packageJsonFiles: [
-                {
-                  contents,
-                  dirPath: CWD,
-                  filePath,
-                  json,
-                  config: expect.toBeNonEmptyObject(),
-                  shortPath: 'package.json',
-                },
-              ],
-            }),
-          );
+          runContextSync({ source: ['package.json'] }, env, (ctx) => {
+            expect(ctx).toEqual(
+              expect.objectContaining({
+                packageJsonFiles: [
+                  {
+                    contents,
+                    dirPath: CWD,
+                    filePath,
+                    json,
+                    config: expect.toBeNonEmptyObject(),
+                    shortPath: 'package.json',
+                  },
+                ],
+              }),
+            );
+          });
         });
       });
 
@@ -38,14 +39,15 @@ describe('getContext', () => {
         it('returns a relevant error', () => {
           const env = createMockEnv();
           env.globSync.mockReturnValue([]);
-          const ctx = runContextSync({ source: ['typo.json'] }, env);
-          expect(ctx).toEqual(
-            new NoSourcesFoundError({
-              CWD,
-              patterns: ['package.json', 'typo.json/package.json'],
-            }),
-          );
-          expect(env.readFileSync).not.toHaveBeenCalled();
+          runContextSync({ source: ['typo.json'] }, env, (ctx) => {
+            expect(ctx).toEqual(
+              new NoSourcesFoundError({
+                CWD,
+                patterns: ['package.json', 'typo.json/package.json'],
+              }),
+            );
+            expect(env.readFileSync).not.toHaveBeenCalled();
+          });
         });
       });
     });
@@ -53,9 +55,10 @@ describe('getContext', () => {
     describe('when no --source cli options are given', () => {
       it('performs a default search', () => {
         const env = createMockEnv();
-        runContextSync({}, env);
-        expect(env.globSync).toHaveBeenCalledWith(['package.json', 'packages/*/package.json']);
-        expect(env.globSync).toHaveBeenCalledTimes(1);
+        runContextSync({}, env, () => {
+          expect(env.globSync).toHaveBeenCalledWith(['package.json', 'packages/*/package.json']);
+          expect(env.globSync).toHaveBeenCalledTimes(1);
+        });
       });
 
       describe('when yarn workspaces are defined', () => {
@@ -67,9 +70,13 @@ describe('getContext', () => {
             const env = createMockEnv();
             env.globSync.mockReturnValue([filePath]);
             env.readFileSync.mockReturnValue(json);
-            runContextSync({}, env);
-            expect(env.globSync).toHaveBeenCalledWith(['package.json', 'as-array/*/package.json']);
-            expect(env.globSync).toHaveBeenCalledTimes(1);
+            runContextSync({}, env, () => {
+              expect(env.globSync).toHaveBeenCalledWith([
+                'package.json',
+                'as-array/*/package.json',
+              ]);
+              expect(env.globSync).toHaveBeenCalledTimes(1);
+            });
           });
         });
 
@@ -81,9 +88,13 @@ describe('getContext', () => {
             const env = createMockEnv();
             env.globSync.mockReturnValue([filePath]);
             env.readFileSync.mockReturnValue(json);
-            runContextSync({}, env);
-            expect(env.globSync).toHaveBeenCalledWith(['package.json', 'as-object/*/package.json']);
-            expect(env.globSync).toHaveBeenCalledTimes(1);
+            runContextSync({}, env, () => {
+              expect(env.globSync).toHaveBeenCalledWith([
+                'package.json',
+                'as-object/*/package.json',
+              ]);
+              expect(env.globSync).toHaveBeenCalledTimes(1);
+            });
           });
         });
       });
@@ -100,9 +111,10 @@ describe('getContext', () => {
               if (filePath.endsWith('package.json')) return json;
               if (filePath.endsWith('lerna.json')) return JSON.stringify({ packages: ['lerna/*'] });
             });
-            runContextSync({}, env);
-            expect(env.globSync).toHaveBeenCalledWith(['package.json', 'lerna/*/package.json']);
-            expect(env.globSync).toHaveBeenCalledTimes(1);
+            runContextSync({}, env, () => {
+              expect(env.globSync).toHaveBeenCalledWith(['package.json', 'lerna/*/package.json']);
+              expect(env.globSync).toHaveBeenCalledTimes(1);
+            });
           });
         });
 
@@ -116,12 +128,13 @@ describe('getContext', () => {
                 env.readYamlFileSync.mockReturnValue({
                   packages: ['from-pnpm/*'],
                 });
-                runContextSync({}, env);
-                expect(env.globSync).toHaveBeenCalledWith([
-                  'package.json',
-                  'from-pnpm/*/package.json',
-                ]);
-                expect(env.globSync).toHaveBeenCalledTimes(1);
+                runContextSync({}, env, () => {
+                  expect(env.globSync).toHaveBeenCalledWith([
+                    'package.json',
+                    'from-pnpm/*/package.json',
+                  ]);
+                  expect(env.globSync).toHaveBeenCalledTimes(1);
+                });
               });
             });
 
@@ -133,12 +146,13 @@ describe('getContext', () => {
                 env.readYamlFileSync.mockImplementation(() => {
                   throw new Error('Some YAML Error');
                 });
-                runContextSync({}, env);
-                expect(env.globSync).toHaveBeenCalledWith([
-                  'package.json',
-                  'packages/*/package.json',
-                ]);
-                expect(env.globSync).toHaveBeenCalledTimes(1);
+                runContextSync({}, env, () => {
+                  expect(env.globSync).toHaveBeenCalledWith([
+                    'package.json',
+                    'packages/*/package.json',
+                  ]);
+                  expect(env.globSync).toHaveBeenCalledTimes(1);
+                });
               });
             });
           });

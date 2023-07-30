@@ -11,7 +11,7 @@ import { logGroupHeader } from '../lib/log-group-header';
 
 export const listEffects: VersionEffects<void> = {
   onFilteredOut() {
-    return Effect.unit();
+    return Effect.unit;
   },
   onIgnored(input) {
     return Effect.sync(() => pipe(input, logHeader, logIgnored));
@@ -44,7 +44,7 @@ export const listEffects: VersionEffects<void> = {
     return Effect.sync(() => pipe(input, logHeader, logFixableMismatch));
   },
   onComplete() {
-    return Effect.unit();
+    return Effect.unit;
   },
 };
 

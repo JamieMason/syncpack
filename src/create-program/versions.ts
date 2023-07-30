@@ -16,7 +16,7 @@ export function createVersionsProgram<T extends VersionEffects<any>>(
   return pipe(
     getVersionGroups(ctx),
     Effect.flatMap((versionGroups) =>
-      Effect.allPar(
+      Effect.all(
         versionGroups.flatMap((group) =>
           group.inspect().map((reportEffect, index) =>
             pipe(
@@ -66,6 +66,7 @@ export function createVersionsProgram<T extends VersionEffects<any>>(
             ),
           ),
         ),
+        { concurrency: 'inherit' },
       ),
     ),
     Effect.flatMap((results) => effects.onComplete(ctx, results)),

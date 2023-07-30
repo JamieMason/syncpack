@@ -25,7 +25,7 @@ export function getContext(): Effect.Effect<
   Ctx
 > {
   return pipe(
-    Effect.Do(),
+    Effect.Do,
     Effect.bind('cli', () => CliConfigTag),
     Effect.bind('env', () => EnvTag),
     Effect.bind('rcFile', ({ cli, env }) => env.readConfigFileSync(cli.configPath)),

@@ -311,62 +311,34 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@effect/data@0.12.9", "@effect/data@^0.12.7", "@effect/data@^0.12.9", "@effect/data@~0.12.6":
-  version "0.12.9"
-  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.12.9.tgz#c9748d0312e4d521caf30b860cd03b1a45dfe652"
-  integrity sha512-nuzFo+2LK4yG9H16WRv51MDhUAIuUGhmKYkuSrgCApwwLy2eUATaioQEbbR2rHOTprOiYpbIYKwvPsylEm/Fdw==
+"@effect/data@0.17.1", "@effect/data@^0.17.0", "@effect/data@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.17.1.tgz#8a5904c16ae67fa132641a6d9490a46b840522fd"
+  integrity sha512-QCYkLE5Y5Dm5Yax5R3GmW4ZIgTx7W+kSZ7yq5eqQ/mFWa8i4yxbLuu8cudqzdeZtRtTGZKlhDxfFfgVtMywXJg==
 
-"@effect/data@~0.12.2":
-  version "0.12.5"
-  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.12.5.tgz#8e524e90c4fd48749433f7e0dc083a42b5364bd6"
-  integrity sha512-gmHSsG4earpIWufwCNT1R1pZ5BIe7z0bMmexnAFOT9csc8bwTSzk1e5QAd/65/vyczf/cMMrXgjpasdxlJ5POA==
-
-"@effect/io@0.27.0":
-  version "0.27.0"
-  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.27.0.tgz#d3196b01e2a62788423c7c2d77053c1f642a4c97"
-  integrity sha512-3ZUaf6B+aH83HPJ84KTthd4glgrRk6DXj9M915OB9G4cMbbJAwE/709tgamzD2IxcfSlqPowtvx73Cs4N7Ywrw==
+"@effect/io@0.37.1", "@effect/io@^0.37.0":
+  version "0.37.1"
+  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.37.1.tgz#53ecd1ab8438cead598f3b0dd75edc84db817720"
+  integrity sha512-Ez3GfcG+gDDfAiBXtSjJpSrPU5Guiyw69LsYkMtIukFwyNwpHWLhYaVgfVbVjoQasil8KiFSQJSd5DbJL6nqPg==
   dependencies:
-    "@effect/data" "~0.12.6"
+    "@effect/data" "^0.17.0"
 
-"@effect/io@^0.26.0":
-  version "0.26.0"
-  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.26.0.tgz#c09e7f4618cac47f1cc471bcda491ee8dad18cb6"
-  integrity sha512-umwZ/sRoV7zb/8WwoiK7xWoypqvY6C1EXWEGORpViAFUTx3/bXc9i7JtdttTWVokXb3qogrxGX2SHopB20I4vQ==
+"@effect/match@0.31.0":
+  version "0.31.0"
+  resolved "https://registry.yarnpkg.com/@effect/match/-/match-0.31.0.tgz#557a00d1814f84f95e045d0c9ab97a77576808a5"
+  integrity sha512-QT0HSh19Y6iHAghc51Yt/rYDU9/jhs7O+2kSEQiJqj4xqCLjfJONWsK19xBCNbuV5bt3ZO1NGFqvsWeNR7ZhDg==
   dependencies:
-    "@effect/data" "~0.12.2"
+    "@effect/data" "^0.17.1"
+    "@effect/schema" "^0.32.0"
 
-"@effect/io@^0.27.0":
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.27.2.tgz#a490f2ca47f31225cd6ae8ccc1bc970f5d2f24e4"
-  integrity sha512-J9s+v2JyGUKzxG5I6v1/X5v+I/e9dST4Afk3y6ZYBEXzU3Slo+3ZDf7XlazicS7koAoTEnvJ6zt79aM4LLkoWA==
+"@effect/schema@0.32.0", "@effect/schema@^0.32.0":
+  version "0.32.0"
+  resolved "https://registry.yarnpkg.com/@effect/schema/-/schema-0.32.0.tgz#fb29b86c35cd0364ac22683506c29a6859839d22"
+  integrity sha512-4HJK/cFkVPdIjYICy0eRsL7JuuLJ6mE3aJC5rX9OuUIei/qfctFEEX2NaARjtGX7hACBrRcuJCNwiq+54TTjFw==
   dependencies:
-    "@effect/data" "~0.12.6"
-
-"@effect/match@0.24.5":
-  version "0.24.5"
-  resolved "https://registry.yarnpkg.com/@effect/match/-/match-0.24.5.tgz#90e9d14bcc58d58a47961f9df5353ecc9bfb96f9"
-  integrity sha512-mMoQLGt8s0AmXQR1yUTdBCbdzNIn8d5Ujf1o0T4mldiap4/eq3pf8cvyQm8dHK1Y8KyT4dA2ukJq56rSMIBZXA==
-  dependencies:
-    "@effect/data" "^0.12.9"
-    "@effect/schema" "^0.20.2"
-
-"@effect/schema@0.21.0":
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/@effect/schema/-/schema-0.21.0.tgz#f7dc4cb6ecb77a08b846003b8e0d63bba233e9ba"
-  integrity sha512-IFB6hnwuTzHKaMGrAuzp0LBIIkPtW8gaXXQAik/h7ZnPpE8sOkSWKyDHuD4lpOqgsFp1G55NobVKpJUPcL8Onw==
-  dependencies:
-    "@effect/data" "^0.12.9"
-    "@effect/io" "^0.27.0"
-    fast-check "^3.10.0"
-
-"@effect/schema@^0.20.2":
-  version "0.20.3"
-  resolved "https://registry.yarnpkg.com/@effect/schema/-/schema-0.20.3.tgz#55aee99526af93a16c447ab368079bead96aeb1a"
-  integrity sha512-pjJW9QkHZd2/fq7Bhd6pAOidMJ0OUODOeUlesPDK0jpo62AaU9g+IGXt3v5NU8rXSX77igZgfK08XhmofwHn0A==
-  dependencies:
-    "@effect/data" "^0.12.7"
-    "@effect/io" "^0.26.0"
-    fast-check "^3.10.0"
+    "@effect/data" "^0.17.1"
+    "@effect/io" "^0.37.0"
+    fast-check "^3.12.0"
 
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
@@ -1848,10 +1820,10 @@ expect@^29.0.0, expect@^29.5.0:
     jest-message-util "^29.5.0"
     jest-util "^29.5.0"
 
-fast-check@^3.10.0:
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.10.0.tgz#dccdf925c123f65910754454118ff3d6461b1733"
-  integrity sha512-I2FldZwnCbcY6iL+H0rp9m4D+O3PotuFu9FasWjMCzUedYHMP89/37JbSt6/n7Yq/IZmJDW0B2h30sPYdzrfzw==
+fast-check@^3.12.0:
+  version "3.12.0"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.12.0.tgz#440949277387a053f7f82cd532fa3fcf67346ba1"
+  integrity sha512-SqahE9mlL3+lhjJ39joMLwcj6F+24hfZdf/tchlNO8sHcTdrUUdA5P/ZbSFZM9Xpzs36XaneGwE0FWepm/zyOA==
   dependencies:
     pure-rand "^6.0.0"
 

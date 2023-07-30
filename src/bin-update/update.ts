@@ -23,7 +23,7 @@ export function update(cli: Partial<CliConfig>, env: DefaultEnv) {
     Effect.flatMap(writeIfChanged),
     Effect.flatMap(exitIfInvalid),
     Effect.catchTags(createErrorHandlers(defaultErrorHandlers)),
-    Effect.withParallelism(10),
+    Effect.withConcurrency(10),
     Effect.provideContext(
       pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(EnvTag, createEnv(env))),
     ),

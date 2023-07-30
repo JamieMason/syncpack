@@ -38,16 +38,16 @@ export interface Env {
 export function createEnv(env: DefaultEnv): Env {
   return {
     askForChoice(opts) {
-      return Effect.tryCatchPromise(
-        () => env.askForChoice(opts),
-        (err) => new AskForChoiceError({ error: String(err) }),
-      );
+      return Effect.tryPromise({
+        try: () => env.askForChoice(opts),
+        catch: (err) => new AskForChoiceError({ error: String(err) }),
+      });
     },
     askForInput(opts) {
-      return Effect.tryCatchPromise(
-        () => env.askForInput(opts),
-        (err) => new AskForInputError({ error: String(err) }),
-      );
+      return Effect.tryPromise({
+        try: () => env.askForInput(opts),
+        catch: (err) => new AskForInputError({ error: String(err) }),
+      });
     },
     // @FIXME: process.exit is probably handled some other way in effect-ts
     exitProcess(code) {
@@ -56,34 +56,34 @@ export function createEnv(env: DefaultEnv): Env {
       });
     },
     globSync(patterns) {
-      return Effect.tryCatch(
-        () => env.globSync(patterns),
-        (err) => new GlobError({ error: String(err) }),
-      );
+      return Effect.try({
+        try: () => env.globSync(patterns),
+        catch: (err) => new GlobError({ error: String(err) }),
+      });
     },
     readConfigFileSync(filePath) {
-      return Effect.tryCatch(
-        () => env.readConfigFileSync(filePath),
-        (err) => new ReadConfigFileError({ filePath: filePath || '', error: String(err) }),
-      );
+      return Effect.try({
+        try: () => env.readConfigFileSync(filePath),
+        catch: (err) => new ReadConfigFileError({ filePath: filePath || '', error: String(err) }),
+      });
     },
     readFileSync(filePath) {
-      return Effect.tryCatch(
-        () => env.readFileSync(filePath),
-        (err) => new ReadFileError({ filePath, error: String(err) }),
-      );
+      return Effect.try({
+        try: () => env.readFileSync(filePath),
+        catch: (err) => new ReadFileError({ filePath, error: String(err) }),
+      });
     },
     readYamlFileSync(filePath) {
-      return Effect.tryCatch(
-        () => env.readYamlFileSync(filePath),
-        (err) => new ReadYamlFileError({ filePath, error: String(err) }),
-      );
+      return Effect.try({
+        try: () => env.readYamlFileSync(filePath),
+        catch: (err) => new ReadYamlFileError({ filePath, error: String(err) }),
+      });
     },
     writeFileSync(filePath, contents) {
-      return Effect.tryCatch(
-        () => env.writeFileSync(filePath, contents),
-        (err) => new WriteFileError({ filePath, error: String(err) }),
-      );
+      return Effect.try({
+        try: () => env.writeFileSync(filePath, contents),
+        catch: (err) => new WriteFileError({ filePath, error: String(err) }),
+      });
     },
   };
 }

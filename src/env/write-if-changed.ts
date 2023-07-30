@@ -17,7 +17,7 @@ export function writeIfChanged(ctx: Ctx): Effect.Effect<Env, WriteFileError, Ctx
       Effect.all(
         ctx.packageJsonFiles.map((file: PackageJsonFile) =>
           pipe(
-            Effect.Do(),
+            Effect.Do,
             Effect.bind('nextJson', () => toJson(file)),
             Effect.bind('hasChanged', ({ nextJson }) => Effect.succeed(file.json !== nextJson)),
             Effect.flatMap(({ hasChanged, nextJson }) =>

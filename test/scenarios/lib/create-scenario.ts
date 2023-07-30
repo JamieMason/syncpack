@@ -115,7 +115,7 @@ export function createScenario(
   // create reports
   return Effect.runSync(
     pipe(
-      Effect.Do(),
+      Effect.Do,
       Effect.bind('ctx', () => getContext()),
       Effect.bind('semverGroups', ({ ctx }) => getSemverGroups(ctx)),
       Effect.bind('versionGroups', ({ ctx }) => getVersionGroups(ctx)),

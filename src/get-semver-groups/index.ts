@@ -85,7 +85,7 @@ export function getSemverGroups(
   ctx: Ctx,
 ): Effect.Effect<never, SemverGroupConfigError | DeprecatedTypesError, AnySemverGroup[]> {
   return pipe(
-    Effect.Do(),
+    Effect.Do,
     Effect.bind('enabledTypes', () => getEnabledTypes(ctx.config)),
     Effect.bind('semverGroups', () => createSemverGroups(ctx)),
     Effect.flatMap(({ enabledTypes, semverGroups }) => {
