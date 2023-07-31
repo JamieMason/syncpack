@@ -4,7 +4,7 @@ import { unify } from '@effect/data/Unify';
 import * as Effect from '@effect/io/Effect';
 import { minimatch } from 'minimatch';
 import { join, normalize } from 'path';
-import { CliConfigTag } from '../../../src/config/types';
+import { CliConfigTag } from '../../../src/config/tag';
 import { CWD } from '../../../src/constants';
 import type { SemverRangeEffects, VersionEffects } from '../../../src/create-program/effects';
 import { createEnv } from '../../../src/env/create-env';

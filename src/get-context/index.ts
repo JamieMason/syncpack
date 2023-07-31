@@ -1,7 +1,8 @@
 import { pipe } from '@effect/data/Function';
 import * as Effect from '@effect/io/Effect';
 import type { O } from 'ts-toolbelt';
-import { CliConfigTag, type CliConfig, type RcConfig } from '../config/types';
+import { type CliConfig, type RcConfig } from '../config/types';
+import { CliConfigTag } from '../config/tag';
 import type { Env } from '../env/create-env';
 import type { GlobError, ReadConfigFileError, ReadFileError } from '../env/tags';
 import { EnvTag } from '../env/tags';

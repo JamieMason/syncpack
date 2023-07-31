@@ -1,7 +1,8 @@
 import * as Context from '@effect/data/Context';
 import { pipe } from '@effect/data/Function';
 import * as Effect from '@effect/io/Effect';
-import { CliConfigTag, type CliConfig } from '../config/types';
+import { type CliConfig } from '../config/types';
+import { CliConfigTag } from '../config/tag';
 import { createEnv } from '../env/create-env';
 import type { DefaultEnv } from '../env/default-env';
 import { exitIfInvalid } from '../env/exit-if-invalid';

@@ -1,4 +1,3 @@
-import * as Context from '@effect/data/Context';
 import type { Union } from 'ts-toolbelt';
 
 /**
@@ -109,8 +108,6 @@ export interface CliConfig {
   readonly source: string[];
   readonly types: string;
 }
-
-export const CliConfigTag = Context.Tag<Partial<CliConfig>>();
 
 // @TODO formatBugs: boolean // whether to format "bugs" prop (default: true)
 // @TODO formatRepository: boolean // whether to format "repository" prop (default: true)
