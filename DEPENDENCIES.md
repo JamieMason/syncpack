@@ -35,6 +35,7 @@ npm test
 - [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
 - [globby](https://ghub.io/globby): User-friendly glob matching
 - [minimatch](https://ghub.io/minimatch): a glob matcher in javascript
+- [npm-package-arg](https://ghub.io/npm-package-arg): Parse the things that can be arguments to `npm install`
 - [ora](https://ghub.io/ora): Elegant terminal spinner
 - [prompts](https://ghub.io/prompts): Lightweight, beautiful and user-friendly prompts
 - [read-yaml-file](https://ghub.io/read-yaml-file): Read and parse a YAML file
@@ -48,6 +49,7 @@ npm test
 - [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
 - [@types/node](https://ghub.io/@types/node): TypeScript definitions for Node.js
+- [@types/npm-package-arg](https://ghub.io/@types/npm-package-arg): TypeScript definitions for npm-package-arg
 - [@types/prompts](https://ghub.io/@types/prompts): TypeScript definitions for prompts
 - [@types/semver](https://ghub.io/@types/semver): TypeScript definitions for semver
 - [@typescript-eslint/eslint-plugin](https://ghub.io/@typescript-eslint/eslint-plugin): TypeScript plugin for ESLint

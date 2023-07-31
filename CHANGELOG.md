@@ -1,3 +1,13 @@
+## [10.9.3](https://github.com/JamieMason/syncpack/compare/10.7.3...10.9.3) (2023-07-31)
+
+
+### Features
+
+* **node:** support >=16 ([ea6cacf](https://github.com/JamieMason/syncpack/commit/ea6cacf2066cb909ec4866d52f2bb93d297c052a)), closes [#148](https://github.com/JamieMason/syncpack/issues/148)
+* **versions:** support npm: alias protocol ([2a7ef86](https://github.com/JamieMason/syncpack/commit/2a7ef8645d458f0a65c51bf362f99902a0691800)), closes [#151](https://github.com/JamieMason/syncpack/issues/151)
+
+
+
 ## [10.7.3](https://github.com/JamieMason/syncpack/compare/10.7.2...10.7.3) (2023-07-03)
 
 
