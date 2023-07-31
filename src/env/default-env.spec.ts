@@ -2,6 +2,13 @@ import 'expect-more-jest';
 
 beforeEach(() => {
   jest.resetModules();
+  jest.mock('fs', () => {
+    return {
+      ...jest.requireActual('fs'),
+      readFileSync: jest.fn(),
+      writeFileSync: jest.fn(),
+    };
+  });
   jest.mock('cosmiconfig', () => {
     const load = jest.fn();
     const search = jest.fn();

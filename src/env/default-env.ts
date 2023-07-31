@@ -1,12 +1,19 @@
 import { cosmiconfigSync } from 'cosmiconfig';
+import { pipe } from 'tightrope/fn/pipe';
+import { fromTry } from 'tightrope/result/from-try';
+import { unwrapOrElse } from 'tightrope/result/unwrap-or-else';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore Select *does* exist
 import { Input, Select } from 'enquirer';
-import { readFileSync, readJsonSync, writeFileSync } from 'fs-extra';
+import { readFileSync, writeFileSync } from 'fs';
 import * as globby from 'globby';
 import { join } from 'path';
 import * as readYamlFile from 'read-yaml-file';
 import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
+import { Ok } from 'tightrope/result';
+import { filter } from 'tightrope/result/filter';
+import { map } from 'tightrope/result/map';
+import { mapErr } from 'tightrope/result/map-err';
 import type { O } from 'ts-toolbelt';
 import type { RcConfig } from '../config/types';
 import { CWD } from '../constants';
@@ -52,11 +59,17 @@ export const defaultEnv: DefaultEnv = {
     const result = configPath ? client.load(configPath) : client.search();
     if (!isNonEmptyObject(result)) {
       const rcPath = join(CWD, 'package.json');
-      const pjson = readJsonSync(rcPath, { throws: false });
-      const rcConfig = pjson?.config?.syncpack;
-      if (isNonEmptyObject(rcConfig)) return rcConfig;
-      logVerbose('no config file found');
-      return {};
+      return pipe(
+        fromTry(() => readFileSync(rcPath, { encoding: 'utf8' })),
+        map(JSON.parse),
+        map((pjson) => pjson?.config?.syncpack),
+        filter(isNonEmptyObject, 'no config file found'),
+        mapErr((err) => {
+          logVerbose('no config file found');
+          return err;
+        }),
+        unwrapOrElse(() => new Ok({})),
+      );
     }
     const rcPath = result.filepath;
     const rcConfig = result.config;
