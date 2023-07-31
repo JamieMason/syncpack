@@ -74,3 +74,26 @@ const config = {
 
 module.exports = config;
 ```
+
+## JSON Schema
+
+From syncpack 11.2.1 and up, a JSON Schema file is available. Just ensure that the version number
+you reference matches the version of syncpack you have installed.
+
+```json title=".syncpackrc"
+{
+  "$schema": "https://unpkg.com/syncpack@11.2.1/dist/schema.json",
+  "versionGroups": [
+    {
+      "dependencies": ["@types/node"],
+      "packages": ["**"],
+      "pinVersion": "14.18.36"
+    },
+    {
+      "dependencies": ["chalk"],
+      "packages": ["**"],
+      "pinVersion": "4.1.2"
+    }
+  ]
+}
+```
