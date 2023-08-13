@@ -35,6 +35,13 @@ export const defaultErrorHandlers: ErrorHandlers<void> = {
     console.log(chalk.red('  File:', err.filePath));
     console.log(chalk.red('  Error:', err.error));
   },
+  RenamedWorkspaceTypeError() {
+    const url = 'https://github.com/JamieMason/syncpack/releases/tag/11.2.1';
+    console.log(
+      chalk.red(ICON.panic, `The "workspace" dependency type was renamed to "local" in ${url}`),
+    );
+    console.log(chalk.red('  Docs: https://jamiemason.github.io/syncpack/config/dependency-types'));
+  },
   SemverGroupConfigError(err) {
     console.log(chalk.red(ICON.panic, 'Your semver group config contains an error'));
     console.log(chalk.red('  Error:', err.error));

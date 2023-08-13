@@ -9,7 +9,7 @@ import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
 
 describe('versionGroups', () => {
-  describe('installs of a workspace package match each other but not the canonical source', () => {
+  describe('installs of a local package match each other but not the canonical source', () => {
     [
       () =>
         createScenario(

@@ -28,15 +28,7 @@ export const RANGE = {
 } as const;
 
 export const DEFAULT_CONFIG = {
-  dependencyTypes: [
-    'dev',
-    'overrides',
-    'peer',
-    'pnpmOverrides',
-    'prod',
-    'resolutions',
-    'workspace',
-  ],
+  dependencyTypes: ['dev', 'local', 'overrides', 'peer', 'pnpmOverrides', 'prod', 'resolutions'],
   filter: '.',
   indent: '  ',
   semverGroups: [],

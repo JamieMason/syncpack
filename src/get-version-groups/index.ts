@@ -6,7 +6,7 @@ import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
 import type { Union } from 'ts-toolbelt';
-import type { DeprecatedTypesError } from '../config/get-enabled-types';
+import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
 import { getEnabledTypes } from '../config/get-enabled-types';
 import type { Ctx } from '../get-context';
 import { canAddToGroup } from '../guards/can-add-to-group';
@@ -191,7 +191,11 @@ export class VersionGroupConfigError extends Data.TaggedClass('VersionGroupConfi
 
 export function getVersionGroups(
   ctx: Ctx,
-): Effect.Effect<never, VersionGroupConfigError | DeprecatedTypesError, AnyVersionGroup[]> {
+): Effect.Effect<
+  never,
+  VersionGroupConfigError | DeprecatedTypesError | RenamedWorkspaceTypeError,
+  AnyVersionGroup[]
+> {
   return pipe(
     Effect.Do,
     Effect.bind('enabledTypes', () => getEnabledTypes(ctx.config)),

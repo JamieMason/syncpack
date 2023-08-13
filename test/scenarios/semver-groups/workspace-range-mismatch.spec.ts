@@ -45,7 +45,7 @@ describe('semverGroups', () => {
         ),
     ].forEach((getScenario) => {
       describe('semverGroup.inspect()', () => {
-        test("should identify as a workspace mismatch as a package's version must be exact", () => {
+        test("should identify as a local mismatch as a package's version must be exact", () => {
           const scenario = getScenario();
           expect(scenario.report.semverGroups).toEqual([
             [

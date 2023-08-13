@@ -7,7 +7,7 @@ import { CWD } from '../constants';
 import { createEnv } from '../env/create-env';
 import { EnvTag } from '../env/tags';
 import type { Ctx } from '../get-context';
-import { NoSourcesFoundError, getFilePaths } from './get-file-paths';
+import { getFilePaths, NoSourcesFoundError } from './get-file-paths';
 
 function runSync(config: Ctx['config'], mockedEffects: MockEnv, onValue: (value: any) => void) {
   Effect.runSync(

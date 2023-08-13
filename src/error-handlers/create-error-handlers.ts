@@ -1,5 +1,5 @@
 import * as Effect from '@effect/io/Effect';
-import type { DeprecatedTypesError } from '../config/get-enabled-types';
+import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
 import type { GlobError, ReadConfigFileError, ReadFileError, WriteFileError } from '../env/tags';
 import type { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
 import type { JsonParseError } from '../get-package-json-files/get-patterns/read-json-safe';
@@ -13,6 +13,7 @@ export interface ErrorHandlers<R = Effect.Effect<never, never, void>> {
   NoSourcesFoundError(err: NoSourcesFoundError): R;
   ReadConfigFileError(err: ReadConfigFileError): R;
   ReadFileError(err: ReadFileError): R;
+  RenamedWorkspaceTypeError(err: RenamedWorkspaceTypeError): R;
   SemverGroupConfigError(err: SemverGroupConfigError): R;
   VersionGroupConfigError(err: VersionGroupConfigError): R;
   WriteFileError(err: WriteFileError): R;
@@ -36,6 +37,9 @@ export const createErrorHandlers = (errorHandlers: ErrorHandlers<void>): ErrorHa
   },
   ReadFileError(err) {
     return Effect.sync(() => errorHandlers.ReadFileError(err));
+  },
+  RenamedWorkspaceTypeError(err) {
+    return Effect.sync(() => errorHandlers.RenamedWorkspaceTypeError(err));
   },
   SemverGroupConfigError(err) {
     return Effect.sync(() => errorHandlers.SemverGroupConfigError(err));

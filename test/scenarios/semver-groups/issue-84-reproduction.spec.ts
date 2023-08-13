@@ -48,7 +48,7 @@ test('Issue 84 reproduction', () => {
             'peer',
             'prod',
             'resolutions',
-            'workspace',
+            'local',
           ],
         },
       },

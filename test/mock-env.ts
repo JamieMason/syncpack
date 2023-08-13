@@ -34,6 +34,7 @@ export function createMockErrorHandlers(): ErrorHandlers<jest.Mock<any, any>> {
     NoSourcesFoundError: jest.fn(),
     ReadConfigFileError: jest.fn(),
     ReadFileError: jest.fn(),
+    RenamedWorkspaceTypeError: jest.fn(),
     SemverGroupConfigError: jest.fn(),
     VersionGroupConfigError: jest.fn(),
     WriteFileError: jest.fn(),

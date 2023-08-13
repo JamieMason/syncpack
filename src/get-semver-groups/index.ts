@@ -6,7 +6,7 @@ import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
 import type { Union } from 'ts-toolbelt';
-import type { DeprecatedTypesError } from '../config/get-enabled-types';
+import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
 import { getEnabledTypes } from '../config/get-enabled-types';
 import { getSemverRange } from '../config/get-semver-range';
 import type { Ctx } from '../get-context';
@@ -83,7 +83,11 @@ export class SemverGroupConfigError extends Data.TaggedClass('SemverGroupConfigE
 
 export function getSemverGroups(
   ctx: Ctx,
-): Effect.Effect<never, SemverGroupConfigError | DeprecatedTypesError, AnySemverGroup[]> {
+): Effect.Effect<
+  never,
+  SemverGroupConfigError | DeprecatedTypesError | RenamedWorkspaceTypeError,
+  AnySemverGroup[]
+> {
   return pipe(
     Effect.Do,
     Effect.bind('enabledTypes', () => getEnabledTypes(ctx.config)),

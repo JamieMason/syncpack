@@ -1,8 +1,8 @@
 import * as Context from '@effect/data/Context';
 import { pipe } from '@effect/data/Function';
 import * as Effect from '@effect/io/Effect';
-import type { CliConfig } from '../src/config/types';
 import { CliConfigTag } from '../src/config/tag';
+import type { CliConfig } from '../src/config/types';
 import { createEnv } from '../src/env/create-env';
 import { EnvTag } from '../src/env/tags';
 import { getContext } from '../src/get-context';

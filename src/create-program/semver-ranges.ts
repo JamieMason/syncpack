@@ -2,7 +2,7 @@ import { pipe } from '@effect/data/Function';
 import { unify } from '@effect/data/Unify';
 import * as Effect from '@effect/io/Effect';
 import * as Match from '@effect/match';
-import type { DeprecatedTypesError } from '../config/get-enabled-types';
+import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
 import type { Env } from '../env/create-env';
 import type { Ctx } from '../get-context';
 import type { SemverGroupConfigError, SemverGroupReport } from '../get-semver-groups';
@@ -12,7 +12,11 @@ import type { SemverRangeEffects } from './effects';
 export function createSemverRangesProgram<T extends SemverRangeEffects<any>>(
   ctx: Ctx,
   effects: T,
-): Effect.Effect<Env, SemverGroupConfigError | DeprecatedTypesError, Ctx> {
+): Effect.Effect<
+  Env,
+  SemverGroupConfigError | DeprecatedTypesError | RenamedWorkspaceTypeError,
+  Ctx
+> {
   return pipe(
     getSemverGroups(ctx),
     Effect.flatMap((semverGroups) =>

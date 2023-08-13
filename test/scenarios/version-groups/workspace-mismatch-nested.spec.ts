@@ -39,7 +39,7 @@ describe('versionGroups', () => {
                     path: 'packageManager',
                   },
                 },
-                dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
+                dependencyTypes: ['dev', 'engines', 'prod', 'local'],
                 source: [
                   'package.json',
                   'workspaces/*/package.json',
@@ -76,7 +76,7 @@ describe('versionGroups', () => {
                     path: 'deps.custom',
                   },
                 },
-                dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
+                dependencyTypes: ['dev', 'engines', 'prod', 'local'],
                 source: [
                   'package.json',
                   'workspaces/*/package.json',
@@ -113,7 +113,7 @@ describe('versionGroups', () => {
                     path: 'deps.custom.c',
                   },
                 },
-                dependencyTypes: ['dev', 'engines', 'prod', 'workspace'],
+                dependencyTypes: ['dev', 'engines', 'prod', 'local'],
                 source: [
                   'package.json',
                   'workspaces/*/package.json',
@@ -144,7 +144,7 @@ describe('versionGroups', () => {
             {
               cli: {},
               rcFile: {
-                dependencyTypes: ['dev', 'prod', 'workspace'],
+                dependencyTypes: ['dev', 'prod', 'local'],
                 source: [
                   'package.json',
                   'workspaces/*/package.json',

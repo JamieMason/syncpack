@@ -50,11 +50,13 @@ an ad hoc basis using the [`--types`](../option/types.mdx) option.
 
 <DefaultDependencyTypes />
 
-## The `workspace` type
+## The `local` type
+
+<i id="the-workspace-type">{/* support old deep links for this type's previous name */}</i>
 
 This option synchronises the versions of your dependencies with the
 [`version`](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#version) properties of the
-package.json files developed in your own local workspace/project, when they relate to eachother.
+package.json files developed in your own local project, when they relate to eachother.
 
 Take this example, `@your-repo/fetch` is developed in your repo:
 
@@ -79,5 +81,5 @@ and another package developed in your repo depends on it:
 }
 ```
 
-When `workspace` is enabled, syncpack will fix `@your-repo/ui` so it depends on version `1.0.2` of
+When `local` is enabled, syncpack will fix `@your-repo/ui` so it depends on version `1.0.2` of
 `@your-repo/fetch`.

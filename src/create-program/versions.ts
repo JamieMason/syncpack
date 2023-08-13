@@ -2,7 +2,7 @@ import { pipe } from '@effect/data/Function';
 import { unify } from '@effect/data/Unify';
 import * as Effect from '@effect/io/Effect';
 import * as Match from '@effect/match';
-import type { DeprecatedTypesError } from '../config/get-enabled-types';
+import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
 import type { Env } from '../env/create-env';
 import type { Ctx } from '../get-context';
 import type { VersionGroupConfigError, VersionGroupReport } from '../get-version-groups';
@@ -12,7 +12,11 @@ import type { VersionEffects } from './effects';
 export function createVersionsProgram<T extends VersionEffects<any>>(
   ctx: Ctx,
   effects: T,
-): Effect.Effect<Env, VersionGroupConfigError | DeprecatedTypesError, Ctx> {
+): Effect.Effect<
+  Env,
+  VersionGroupConfigError | DeprecatedTypesError | RenamedWorkspaceTypeError,
+  Ctx
+> {
   return pipe(
     getVersionGroups(ctx),
     Effect.flatMap((versionGroups) =>

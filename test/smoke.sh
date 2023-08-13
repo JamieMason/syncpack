@@ -6,7 +6,7 @@ function check_options {
   node dist/bin.js $command_name --filter "."
   node dist/bin.js $command_name --source package.json
   node dist/bin.js $command_name --types dev
-  node dist/bin.js $command_name --types dev,workspace
+  node dist/bin.js $command_name --types dev,local
 }
 
 check_options "fix-mismatches"

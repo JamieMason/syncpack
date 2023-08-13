@@ -15,12 +15,20 @@ export class DeprecatedTypesError extends Data.TaggedClass('DeprecatedTypesError
   readonly types: string[];
 }> {}
 
+export class RenamedWorkspaceTypeError extends Data.TaggedClass('RenamedWorkspaceTypeError')<
+  Record<string, never>
+> {}
+
 // @TODO accept `dependencyTypes: ['**']`
 // @TODO support `dependencyTypes: ['!dev']`
 export function getEnabledTypes({
   cli,
   rcFile,
-}: Ctx['config']): Effect.Effect<never, DeprecatedTypesError, Strategy.Any[]> {
+}: Ctx['config']): Effect.Effect<
+  never,
+  DeprecatedTypesError | RenamedWorkspaceTypeError,
+  Strategy.Any[]
+> {
   const enabledTypes: Strategy.Any[] = [];
   const enabledTypeNames = (
     isNonEmptyString(cli.types)
@@ -37,6 +45,10 @@ export function getEnabledTypes({
 
   if (deprecatedTypes.length > 0) {
     return Effect.fail(new DeprecatedTypesError({ types: deprecatedTypes }));
+  }
+
+  if (enabledTypeNames.includes('workspace')) {
+    return Effect.fail(new RenamedWorkspaceTypeError({}));
   }
 
   if (useDefaults || enabledTypeNames.includes('dev')) {
@@ -57,7 +69,7 @@ export function getEnabledTypes({
   if (useDefaults || enabledTypeNames.includes('resolutions')) {
     enabledTypes.push(new VersionsByNameStrategy('resolutions', 'resolutions'));
   }
-  if (useDefaults || enabledTypeNames.includes('workspace')) {
+  if (useDefaults || enabledTypeNames.includes('local')) {
     enabledTypes.push(new NameAndVersionPropsStrategy('localPackage', 'version', 'name'));
   }
 
