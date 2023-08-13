@@ -1,9 +1,6 @@
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.env.MOCK_CWD || process.cwd();
 
-/** Where to search for packages if none are provided by the user */
-export const DEFAULT_SOURCES = ['package.json', 'packages/*/package.json'];
-
 /** Single source of truth for icons used in output */
 export const ICON = {
   cross: '✘',
@@ -43,6 +40,6 @@ export const DEFAULT_CONFIG = {
     'scripts',
   ],
   sortFirst: ['name', 'description', 'version', 'author'],
-  source: DEFAULT_SOURCES,
+  source: ['package.json', 'packages/*/package.json'],
   versionGroups: [],
 } as const;

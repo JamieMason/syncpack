@@ -3,7 +3,7 @@ import * as Effect from '@effect/io/Effect';
 import { getPatterns } from '.';
 import type { MockEnv } from '../../../test/mock-env';
 import { createMockEnv } from '../../../test/mock-env';
-import { DEFAULT_SOURCES } from '../../constants';
+import { DEFAULT_CONFIG } from '../../constants';
 import { createEnv } from '../../env/create-env';
 import { EnvTag } from '../../env/tags';
 import type { Ctx } from '../../get-context';
@@ -19,7 +19,7 @@ function runSync(config: Ctx['config'], mockedEffects: MockEnv) {
 it('returns default patterns when nothing is available', () => {
   const env = createMockEnv();
   const result = runSync({ cli: {}, rcFile: {} }, env);
-  expect(result).toEqual(DEFAULT_SOURCES);
+  expect(result).toEqual(DEFAULT_CONFIG.source);
 });
 
 it('CLI --source options take precedence', () => {
@@ -48,7 +48,7 @@ describe('Yarn takes precedence after CLI --source options', () => {
       }
     });
     const result = runSync({ cli: {}, rcFile: {} }, env);
-    expect(result).toEqual(DEFAULT_SOURCES);
+    expect(result).toEqual(DEFAULT_CONFIG.source);
   });
 });
 
@@ -68,7 +68,7 @@ describe('Pnpm takes precedence after Yarn', () => {
       throw new Error('Reason does not matter to this test');
     });
     const result = runSync({ cli: {}, rcFile: {} }, env);
-    expect(result).toEqual(DEFAULT_SOURCES);
+    expect(result).toEqual(DEFAULT_CONFIG.source);
   });
 });
 
@@ -92,6 +92,6 @@ describe('Lerna takes precedence after Pnpm', () => {
       }
     });
     const result = runSync({ cli: {}, rcFile: {} }, env);
-    expect(result).toEqual(DEFAULT_SOURCES);
+    expect(result).toEqual(DEFAULT_CONFIG.source);
   });
 });

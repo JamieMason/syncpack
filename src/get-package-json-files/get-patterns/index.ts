@@ -3,7 +3,7 @@ import * as O from '@effect/data/Option';
 import * as Effect from '@effect/io/Effect';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
 import { getSource } from '../../config/get-source';
-import { DEFAULT_SOURCES } from '../../constants';
+import { DEFAULT_CONFIG } from '../../constants';
 import type { Env } from '../../env/create-env';
 import type { Ctx } from '../../get-context';
 import { getLernaPatterns } from './get-lerna-patterns';
@@ -27,7 +27,7 @@ export function getPatterns(config: Ctx['config']): Effect.Effect<Env, never, st
         option,
         O.map(addRootDir),
         O.map(limitToPackageJson),
-        O.getOrElse(() => DEFAULT_SOURCES),
+        O.getOrElse(() => [...DEFAULT_CONFIG.source]),
       ),
     ),
   );
