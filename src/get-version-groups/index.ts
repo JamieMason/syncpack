@@ -280,7 +280,7 @@ function createVersionGroups(
       const label = isNonEmptyString(config.label) ? config.label : '';
       const dependencyTypes = isArrayOfStrings(config.dependencyTypes)
         ? config.dependencyTypes
-        : [];
+        : ['**'];
 
       if (config.isBanned === true) {
         versionGroups.push(

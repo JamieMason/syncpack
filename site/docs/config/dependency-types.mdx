@@ -24,6 +24,15 @@ properties of package.json files will be inspected by syncpack:
 }
 ```
 
+Negated types are also supported, so here everything **except** `dependencies` and `devDependencies`
+will be inspected:
+
+```json title=".syncpackrc"
+{
+  "dependencyTypes": ["!dev", "!prod"]
+}
+```
+
 :::tip
 
 Syncpack config files also support

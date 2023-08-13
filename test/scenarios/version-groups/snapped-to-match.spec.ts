@@ -39,6 +39,7 @@ describe('versionGroups', () => {
                   path: 'packageManager',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['react'],
@@ -77,6 +78,7 @@ describe('versionGroups', () => {
                   path: 'deps.custom',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['react'],
@@ -115,6 +117,7 @@ describe('versionGroups', () => {
                   path: 'customDeps.react',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['react'],
@@ -148,6 +151,7 @@ describe('versionGroups', () => {
             {
               cli: {},
               rcFile: {
+                dependencyTypes: ['**'],
                 versionGroups: [
                   {
                     dependencies: ['react'],

@@ -13,6 +13,7 @@ describe('versionGroups', () => {
       config: {
         cli: {},
         rcFile: {
+          dependencyTypes: ['**'],
           versionGroups: [
             {
               dependencies: ['**'],

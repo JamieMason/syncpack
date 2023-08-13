@@ -3,7 +3,7 @@ import { lintSemverRanges } from '../../../src/bin-lint-semver-ranges/lint-semve
 import { list } from '../../../src/bin-list/list';
 import { prompt } from '../../../src/bin-prompt/prompt';
 import { setSemverRanges } from '../../../src/bin-set-semver-ranges/set-semver-ranges';
-import { DEFAULT_CONFIG } from '../../../src/constants';
+import { INTERNAL_TYPES } from '../../../src/constants';
 import { toBeSemverRangeMismatch, toBeValid } from '../../matchers/semver-group';
 import { mockPackage } from '../../mock';
 import { createScenario } from '../lib/create-scenario';
@@ -34,6 +34,7 @@ describe('semverGroups', () => {
                   path: 'packageManager',
                 },
               },
+              dependencyTypes: ['**'],
               semverGroups: [
                 {
                   dependencies: ['**'],
@@ -67,6 +68,7 @@ describe('semverGroups', () => {
                   path: 'deps.custom',
                 },
               },
+              dependencyTypes: ['**'],
               semverGroups: [
                 {
                   dependencies: ['**'],
@@ -104,6 +106,7 @@ describe('semverGroups', () => {
                   path: 'deps.custom.bar',
                 },
               },
+              dependencyTypes: ['**'],
               semverGroups: [
                 {
                   dependencies: ['**'],
@@ -132,10 +135,11 @@ describe('semverGroups', () => {
             {
               cli: {},
               rcFile: {
+                dependencyTypes: ['**'],
                 semverGroups: [
                   {
                     dependencies: ['**'],
-                    dependencyTypes: [...DEFAULT_CONFIG.dependencyTypes],
+                    dependencyTypes: [...INTERNAL_TYPES],
                     label: 'Some group',
                     packages: ['**'],
                     range: '>=',

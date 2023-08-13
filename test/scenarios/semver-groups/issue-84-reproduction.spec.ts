@@ -36,7 +36,7 @@ test('Issue 84 reproduction', () => {
             {
               range: '^',
               dependencies: ['@myscope/**'],
-              dependencyTypes: [],
+              dependencyTypes: ['**'],
               packages: ['**'],
             },
           ],

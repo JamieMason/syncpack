@@ -11,10 +11,37 @@ export function canAddToGroup(
   const { dependencies, dependencyTypes, packages } = group.config;
   return (
     group.canAdd(instance) &&
-    (!isNonEmptyArray(dependencyTypes) || dependencyTypes.includes(instance.strategy.name)) &&
-    (!isNonEmptyArray(packages) ||
-      packages.some((pattern) => minimatch(instance.pkgName, pattern))) &&
-    (!isNonEmptyArray(dependencies) ||
-      dependencies.some((pattern) => minimatch(instance.name, pattern)))
+    matchesDependencyTypes(dependencyTypes, instance) &&
+    matchesPackages(packages, instance) &&
+    matchesDependencies(dependencies, instance)
   );
+}
+
+function matchesDependencies(dependencies: string[], instance: Instance.Any): boolean {
+  // matches if not defined
+  if (!isNonEmptyArray(dependencies)) return true;
+  return dependencies.some((pattern) => minimatch(instance.name, pattern));
+}
+
+function matchesPackages(packages: string[], instance: Instance.Any) {
+  // matches if not defined
+  if (!isNonEmptyArray(packages)) return true;
+  return packages.some((pattern) => minimatch(instance.pkgName, pattern));
+}
+
+function matchesDependencyTypes(dependencyTypes: string[] | undefined, instance: Instance.Any) {
+  // matches if not defined
+  if (!isNonEmptyArray(dependencyTypes)) return true;
+  if (dependencyTypes.join('') === '**') return true;
+  const negative: string[] = [];
+  const positive: string[] = [];
+  dependencyTypes.forEach((name) => {
+    if (name.startsWith('!')) {
+      negative.push(name.replace('!', ''));
+    } else {
+      positive.push(name);
+    }
+  });
+  if (isNonEmptyArray(negative) && !negative.includes(instance.strategy.name)) return true;
+  return isNonEmptyArray(positive) && positive.includes(instance.strategy.name);
 }

@@ -24,8 +24,18 @@ export const RANGE = {
   WORKSPACE: 'workspace:',
 } as const;
 
+export const INTERNAL_TYPES = [
+  'dev',
+  'local',
+  'overrides',
+  'peer',
+  'pnpmOverrides',
+  'prod',
+  'resolutions',
+] as const;
+
 export const DEFAULT_CONFIG = {
-  dependencyTypes: ['dev', 'local', 'overrides', 'peer', 'pnpmOverrides', 'prod', 'resolutions'],
+  dependencyTypes: ['**'],
   filter: '.',
   indent: '  ',
   semverGroups: [],

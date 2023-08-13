@@ -110,5 +110,5 @@ function hasNonSemverSpecifiers(instances: Instance.Any[]): boolean {
 }
 
 function getLocalPackageInstance(instances: Instance.Any[]): Instance.Any | undefined {
-  return instances.find((instance) => instance.strategy.name === 'localPackage');
+  return instances.find((instance) => instance.strategy.name === 'local');
 }

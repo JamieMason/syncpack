@@ -36,6 +36,22 @@ as its version number, regardless of what versions of the same dependencies migh
 }
 ```
 
+Negated types are also supported, so here everything **except** `dependencies` and `devDependencies`
+will be assigned to this group:
+
+```json title="Negated types"
+{
+  "versionGroups": [
+    {
+      "packages": ["**"],
+      "dependencies": ["**"],
+      "dependencyTypes": ["!dev", "!prod"],
+      "isIgnored": true
+    }
+  ]
+}
+```
+
 :::tip
 
 Syncpack config files also support

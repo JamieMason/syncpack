@@ -4,7 +4,7 @@ import { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import { NamedVersionStringStrategy } from './named-version-string';
 
 it('gets and sets a name and version from a single string', () => {
-  const strategy = new NamedVersionStringStrategy('localPackage', 'packageManager');
+  const strategy = new NamedVersionStringStrategy('local', 'packageManager');
   const jsonFile = mockPackage('foo', { otherProps: { packageManager: 'yarn@1.2.3' } });
   const file = new PackageJsonFile(jsonFile, {} as any);
   const initial = [['yarn', '1.2.3']];
@@ -30,7 +30,7 @@ it('gets and sets a name and version from a single string nested location', () =
 });
 
 it('returns new Err when path is not found', () => {
-  const strategy = new NamedVersionStringStrategy('localPackage', 'never.gonna');
+  const strategy = new NamedVersionStringStrategy('local', 'never.gonna');
   const jsonFile = mockPackage('foo', {});
   const file = new PackageJsonFile(jsonFile, {} as any);
   expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));

@@ -33,6 +33,7 @@ describe('semverGroups', () => {
                   path: 'packageManager',
                 },
               },
+              dependencyTypes: ['**'],
               semverGroups: [
                 {
                   dependencies: ['**'],
@@ -66,6 +67,7 @@ describe('semverGroups', () => {
                   path: 'deps.custom',
                 },
               },
+              dependencyTypes: ['**'],
               semverRange: '*',
             },
           },
@@ -97,6 +99,7 @@ describe('semverGroups', () => {
                   path: 'deps.custom.bar',
                 },
               },
+              dependencyTypes: ['**'],
               semverRange: '*',
             },
           },
@@ -119,6 +122,7 @@ describe('semverGroups', () => {
             {
               cli: {},
               rcFile: {
+                dependencyTypes: ['**'],
                 semverGroups: [
                   {
                     dependencies: ['**'],

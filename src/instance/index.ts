@@ -48,7 +48,7 @@ export namespace Instance {
    * `RegistryResult` types from npm/npm-package-arg. Instead of grouping them
    * together we are being more specific
    */
-  type SpecificRegistryResult<T extends RegistryResult['type'] | 'localPackage'> = Omit<
+  type SpecificRegistryResult<T extends RegistryResult['type'] | 'local'> = Omit<
     RegistryResult,
     'type'
   > & {

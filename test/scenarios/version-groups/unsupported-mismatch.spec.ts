@@ -24,7 +24,7 @@ describe('versionGroups', () => {
     cases
       .flatMap(([versionA, versionB]) =>
         createScenarioVariants({
-          config: { cli: {}, rcFile: {} },
+          config: { cli: {}, rcFile: { dependencyTypes: ['**'] } },
           a: [versionA, versionA],
           b: [versionB, versionB],
         }),

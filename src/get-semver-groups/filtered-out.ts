@@ -15,7 +15,7 @@ export class FilteredOutSemverGroup extends Data.TaggedClass('FilteredOut')<{
     super({
       config: {
         dependencies: ['**'],
-        dependencyTypes: [],
+        dependencyTypes: ['**'],
         label: 'Filtered out',
         packages: ['**'],
       },

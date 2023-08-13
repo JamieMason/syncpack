@@ -34,6 +34,7 @@ describe('versionGroups', () => {
                   path: 'packageManager',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -67,6 +68,7 @@ describe('versionGroups', () => {
                   path: 'customDeps',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -100,6 +102,7 @@ describe('versionGroups', () => {
                   path: 'customDeps.yarn',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -130,6 +133,7 @@ describe('versionGroups', () => {
             {
               cli: {},
               rcFile: {
+                dependencyTypes: ['**'],
                 versionGroups: [
                   {
                     dependencies: ['**'],

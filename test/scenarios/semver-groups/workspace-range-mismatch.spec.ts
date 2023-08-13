@@ -33,6 +33,7 @@ describe('semverGroups', () => {
                   path: 'packageManager',
                 },
               },
+              dependencyTypes: ['**'],
               semverGroups: [
                 {
                   dependencies: ['**'],

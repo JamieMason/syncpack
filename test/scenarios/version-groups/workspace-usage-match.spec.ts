@@ -39,6 +39,7 @@ describe('versionGroups', () => {
                   path: 'packageManager',
                 },
               },
+              dependencyTypes: ['**'],
               semverGroups: [
                 {
                   dependencies: ['**'],
@@ -91,6 +92,7 @@ describe('versionGroups', () => {
                   isIgnored: true,
                 },
               ],
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -136,6 +138,7 @@ describe('versionGroups', () => {
                   isIgnored: true,
                 },
               ],
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -175,6 +178,7 @@ describe('versionGroups', () => {
                   isIgnored: true,
                 },
               ],
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],

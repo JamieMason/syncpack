@@ -4,7 +4,7 @@ import { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import { UnnamedVersionStringStrategy } from './unnamed-version-string';
 
 it('gets and sets an anonymous version from a single string', () => {
-  const strategy = new UnnamedVersionStringStrategy('localPackage', 'someVersion');
+  const strategy = new UnnamedVersionStringStrategy('local', 'someVersion');
   const jsonFile = mockPackage('foo', { otherProps: { someVersion: '1.2.3' } });
   const file = new PackageJsonFile(jsonFile, {} as any);
   const initial = [['someVersion', '1.2.3']];
@@ -30,7 +30,7 @@ it('gets and sets an anonymous version from a single string in a nested location
 });
 
 it('returns new Err when path is not found', () => {
-  const strategy = new UnnamedVersionStringStrategy('localPackage', 'never.gonna');
+  const strategy = new UnnamedVersionStringStrategy('local', 'never.gonna');
   const jsonFile = mockPackage('foo', {});
   const file = new PackageJsonFile(jsonFile, {} as any);
   expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));

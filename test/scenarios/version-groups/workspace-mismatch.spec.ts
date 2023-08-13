@@ -39,6 +39,7 @@ describe('versionGroups', () => {
                   path: 'packageManager',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -77,6 +78,7 @@ describe('versionGroups', () => {
                   path: 'deps.custom',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -115,6 +117,7 @@ describe('versionGroups', () => {
                   path: 'deps.custom.c',
                 },
               },
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],
@@ -147,6 +150,7 @@ describe('versionGroups', () => {
           {
             cli: {},
             rcFile: {
+              dependencyTypes: ['**'],
               versionGroups: [
                 {
                   dependencies: ['**'],

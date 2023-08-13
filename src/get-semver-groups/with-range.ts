@@ -41,7 +41,7 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
         );
       }
 
-      const isLocalPackageInstance = instance.strategy.name === 'localPackage';
+      const isLocalPackageInstance = instance.strategy.name === 'local';
       const exactVersion = setSemverRange('', instance.specifier);
       const expectedVersion = setSemverRange(this.config.range, instance.specifier);
 

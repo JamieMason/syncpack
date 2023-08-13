@@ -14,7 +14,9 @@ describe('versionGroups', () => {
         cli: {
           filter: 'matchesNone',
         },
-        rcFile: {},
+        rcFile: {
+          dependencyTypes: ['**'],
+        },
       },
       a: ['yarn@2.0.0', 'yarn@3.0.0'],
       b: ['yarn@3.0.0', 'yarn@3.0.0'],
