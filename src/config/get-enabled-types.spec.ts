@@ -1,5 +1,5 @@
-import { getEnabledTypes } from './get-enabled-types';
 import * as Effect from '@effect/io/Effect';
+import { getEnabledTypes } from './get-enabled-types';
 
 const prod = expect.objectContaining({ path: 'dependencies' });
 const dev = expect.objectContaining({ path: 'devDependencies' });
