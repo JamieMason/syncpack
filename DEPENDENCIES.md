@@ -25,14 +25,13 @@ npm test
 ## Dependencies
 
 - [@effect/data](https://ghub.io/@effect/data): Consistent dependency versions in large JavaScript Monorepos
-- [@effect/io](https://ghub.io/@effect/io): Consistent dependency versions in large JavaScript Monorepos
-- [@effect/match](https://ghub.io/@effect/match): Consistent dependency versions in large JavaScript Monorepos
-- [@effect/schema](https://ghub.io/@effect/schema): Consistent dependency versions in large JavaScript Monorepos
+- [@effect/io](https://ghub.io/@effect/io): Functional programming in TypeScript
+- [@effect/match](https://ghub.io/@effect/match): Pattern matching for TypeScript
+- [@effect/schema](https://ghub.io/@effect/schema): Modeling the schema of data structures as first-class values
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
 - [cosmiconfig](https://ghub.io/cosmiconfig): Find and load configuration from a package.json property, rc file, or CommonJS module
 - [enquirer](https://ghub.io/enquirer): Stylish, intuitive and user-friendly prompt system. Fast and lightweight enough for small projects, powerful and extensible enough for the most advanced use cases.
-- [fs-extra](https://ghub.io/fs-extra): fs-extra contains methods that aren&#39;t included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.
 - [globby](https://ghub.io/globby): User-friendly glob matching
 - [minimatch](https://ghub.io/minimatch): a glob matcher in javascript
 - [npm-package-arg](https://ghub.io/npm-package-arg): Parse the things that can be arguments to `npm install`
@@ -46,7 +45,6 @@ npm test
 ## Dev Dependencies
 
 - [@tsconfig/node18](https://ghub.io/@tsconfig/node18): A base TSConfig for working with Node 18.
-- [@types/fs-extra](https://ghub.io/@types/fs-extra): TypeScript definitions for fs-extra
 - [@types/jest](https://ghub.io/@types/jest): TypeScript definitions for Jest
 - [@types/node](https://ghub.io/@types/node): TypeScript definitions for Node.js
 - [@types/npm-package-arg](https://ghub.io/@types/npm-package-arg): TypeScript definitions for npm-package-arg
@@ -64,6 +62,7 @@ npm test
 - [ts-jest](https://ghub.io/ts-jest): A Jest transformer with source map support that lets you use Jest to test projects written in TypeScript
 - [ts-node](https://ghub.io/ts-node): TypeScript execution environment and REPL for node.js, with source map support
 - [typescript](https://ghub.io/typescript): TypeScript is a language for application scale JavaScript development
+- [typescript-json-schema](https://ghub.io/typescript-json-schema): typescript-json-schema generates JSON Schema files from your Typescript sources
 
 ## License
 

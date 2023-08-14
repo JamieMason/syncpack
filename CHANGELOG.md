@@ -1,3 +1,19 @@
+## [11.2.1](https://github.com/JamieMason/syncpack/compare/10.9.3...11.2.1) (2023-08-14)
+
+
+### Bug Fixes
+
+* **npm:** update dependencies ([c8a5cab](https://github.com/JamieMason/syncpack/commit/c8a5cabf51ca1bdf793c1e7d688a82fa68bee66f))
+
+
+### Features
+
+* **config:** add a json schema ([d35ace5](https://github.com/JamieMason/syncpack/commit/d35ace59fa123949f18e8eb03ab76fb5340f6c8c)), closes [#146](https://github.com/JamieMason/syncpack/issues/146) [#147](https://github.com/JamieMason/syncpack/issues/147)
+* **depTypes:** handle '!peer' and '**' ([06f2e88](https://github.com/JamieMason/syncpack/commit/06f2e880735b21078191c9deaddb24445f0666c0))
+* **depTypes:** rename 'workspace' to 'local' ([463c936](https://github.com/JamieMason/syncpack/commit/463c936076c84ffb587c101c905c0151f48b2211)), closes [#154](https://github.com/JamieMason/syncpack/issues/154)
+
+
+
 ## [10.9.3](https://github.com/JamieMason/syncpack/compare/10.7.3...10.9.3) (2023-07-31)
 
 
