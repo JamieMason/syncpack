@@ -46,15 +46,6 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
           }),
         );
       }
-      if (hasNonSemverSpecifiers(instances)) {
-        return Effect.fail(
-          new VersionGroupReport.NonSemverMismatch({
-            name,
-            instances,
-            isValid: false,
-          }),
-        );
-      }
       const localPackageInstance = getLocalPackageInstance(instances);
       const localPackageFile = localPackageInstance?.packageJsonFile;
       const localPackageVersion = localPackageFile?.contents?.version;
@@ -67,6 +58,15 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
             isValid: false,
             expectedVersion: localPackageVersion,
             localPackageInstance,
+          }),
+        );
+      }
+      if (hasNonSemverSpecifiers(instances)) {
+        return Effect.fail(
+          new VersionGroupReport.NonSemverMismatch({
+            name,
+            instances,
+            isValid: false,
           }),
         );
       }
