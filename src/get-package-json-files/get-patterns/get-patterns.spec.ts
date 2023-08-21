@@ -1,8 +1,8 @@
 import { pipe } from '@effect/data/Function';
 import * as Effect from '@effect/io/Effect';
 import { getPatterns } from '.';
-import type { MockEnv } from '../../../test/mock-env';
-import { createMockEnv } from '../../../test/mock-env';
+import type { MockEnv } from '../../../test/lib/mock-env';
+import { createMockEnv } from '../../../test/lib/mock-env';
 import { DEFAULT_CONFIG } from '../../constants';
 import { createEnv } from '../../env/create-env';
 import { EnvTag } from '../../env/tags';

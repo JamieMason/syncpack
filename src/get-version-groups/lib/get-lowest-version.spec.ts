@@ -1,6 +1,6 @@
 import 'expect-more-jest';
 import { Ok } from 'tightrope/result';
-import { shuffle } from '../../../test/shuffle';
+import { shuffle } from '../../../test/lib/shuffle';
 import { getLowestVersion } from './get-lowest-version';
 
 describe('getLowestVersion', () => {

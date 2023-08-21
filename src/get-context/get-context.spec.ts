@@ -1,7 +1,7 @@
 import 'expect-more-jest';
 import { join } from 'path';
-import { createMockEnv } from '../../test/mock-env';
-import { runContextSync } from '../../test/run-context-sync';
+import { createMockEnv } from '../../test/lib/mock-env';
+import { runContextSync } from '../../test/lib/run-context-sync';
 import { CWD } from '../constants';
 import { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
 

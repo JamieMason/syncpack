@@ -1,5 +1,5 @@
 import { Err, Ok } from 'tightrope/result';
-import { mockPackage } from '../../test/mock';
+import { mockPackage } from '../../test/lib/mock';
 import { PackageJsonFile } from '../get-package-json-files/package-json-file';
 import { NameAndVersionPropsStrategy } from './name-and-version-props';
 

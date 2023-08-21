@@ -1,8 +1,8 @@
 import { pipe } from '@effect/data/Function';
 import * as O from '@effect/data/Option';
 import * as Effect from '@effect/io/Effect';
-import type { MockEnv } from '../../../test/mock-env';
-import { createMockEnv } from '../../../test/mock-env';
+import type { MockEnv } from '../../../test/lib/mock-env';
+import { createMockEnv } from '../../../test/lib/mock-env';
 import { createEnv } from '../../env/create-env';
 import { EnvTag } from '../../env/tags';
 import { getYarnPatterns } from './get-yarn-patterns';
