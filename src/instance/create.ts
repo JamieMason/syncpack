@@ -11,7 +11,7 @@ export function createInstance(
   packageJsonFile: PackageJsonFile,
   specifier: string,
 ): Instance.Any {
-  const pkgName = packageJsonFile.contents.name || 'PACKAGE_JSON_HAS_NO_NAME';
+  const pkgName = packageJsonFile.jsonFile.contents.name || 'PACKAGE_JSON_HAS_NO_NAME';
   try {
     const parsedSpecifier = parseSpecifier(name, specifier, packageJsonFile);
     switch (parsedSpecifier.type) {
@@ -137,7 +137,7 @@ function parseSpecifier(
     const parsed = npa.resolve(
       name,
       specifier.replace('workspace:', 'file:'),
-      packageJsonFile.dirPath,
+      packageJsonFile.jsonFile.dirPath,
     ) as FileResult;
     return {
       type: 'workspaceProtocol',
@@ -149,5 +149,5 @@ function parseSpecifier(
       saveSpec: parsed.saveSpec.replace('file:', 'workspace:'),
     };
   }
-  return npa.resolve(name, specifier, packageJsonFile.dirPath);
+  return npa.resolve(name, specifier, packageJsonFile.jsonFile.dirPath);
 }

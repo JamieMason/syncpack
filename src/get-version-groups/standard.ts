@@ -48,7 +48,7 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
       }
       const localPackageInstance = getLocalPackageInstance(instances);
       const localPackageFile = localPackageInstance?.packageJsonFile;
-      const localPackageVersion = localPackageFile?.contents?.version;
+      const localPackageVersion = localPackageFile?.jsonFile?.contents?.version;
       const isLocalPackage = localPackageInstance && localPackageVersion;
       if (isLocalPackage) {
         return Effect.fail(

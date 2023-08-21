@@ -61,7 +61,7 @@ function logBanned({ report, ctx }: Input<VersionGroupReport.Banned>) {
       chalk`  {red %s} {dim in %s of %s}`,
       instance.specifier,
       instance.strategy.path,
-      instance.packageJsonFile.shortPath,
+      instance.packageJsonFile.jsonFile.shortPath,
     );
   });
 }
@@ -84,7 +84,7 @@ function logHighLowSemverMismatch({
         chalk`  {red %s} {dim in %s of %s}`,
         instance.specifier,
         instance.strategy.path,
-        instance.packageJsonFile.shortPath,
+        instance.packageJsonFile.jsonFile.shortPath,
       );
     }
   });
@@ -104,7 +104,7 @@ function logPinnedMismatch({ report, ctx }: Input<VersionGroupReport.PinnedMisma
         chalk`  {red %s} {dim in %s of %s}`,
         instance.specifier,
         instance.strategy.path,
-        instance.packageJsonFile.shortPath,
+        instance.packageJsonFile.jsonFile.shortPath,
       );
     }
   });
@@ -125,7 +125,7 @@ function logSnappedToMismatch({ report, ctx }: Input<VersionGroupReport.SnappedT
         chalk`  {red %s} {dim in %s of %s}`,
         instance.specifier,
         instance.strategy.path,
-        instance.packageJsonFile.shortPath,
+        instance.packageJsonFile.jsonFile.shortPath,
       );
     }
   });
@@ -144,7 +144,7 @@ function logSameRangeMismatch({ report, ctx }: Input<VersionGroupReport.SameRang
       chalk`  {yellow %s} {dim in %s of %s}`,
       instance.specifier,
       instance.strategy.path,
-      instance.packageJsonFile.shortPath,
+      instance.packageJsonFile.jsonFile.shortPath,
     );
   });
 }
@@ -162,7 +162,7 @@ function logNonSemverMismatch({ report, ctx }: Input<VersionGroupReport.NonSemve
       chalk`  {yellow %s} {dim in %s of %s}`,
       instance.specifier,
       instance.strategy.path,
-      instance.packageJsonFile.shortPath,
+      instance.packageJsonFile.jsonFile.shortPath,
     );
   });
 }
@@ -174,7 +174,7 @@ function logLocalPackageMismatch({ report, ctx }: Input<VersionGroupReport.Local
     ICON.cross,
     report.name,
     report.expectedVersion,
-    report.localPackageInstance.packageJsonFile.shortPath,
+    report.localPackageInstance.packageJsonFile.jsonFile.shortPath,
   );
   report.instances.forEach((instance) => {
     if (instance.specifier !== report.expectedVersion) {
@@ -182,7 +182,7 @@ function logLocalPackageMismatch({ report, ctx }: Input<VersionGroupReport.Local
         chalk`  {red %s} {dim in %s of %s}`,
         instance.specifier,
         instance.strategy.path,
-        instance.packageJsonFile.shortPath,
+        instance.packageJsonFile.jsonFile.shortPath,
       );
     }
   });

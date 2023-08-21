@@ -91,8 +91,8 @@ function logNonSemverMismatch({ ctx, report }: Input<VersionGroupReport.NonSemve
 
 /** Remove empty objects such as `{"dependencies": {}}` left after deleting */
 function deleteEmptyObjects(ctx: Ctx) {
-  ctx.packageJsonFiles.forEach((packageJsonFile) => {
-    const contents = packageJsonFile.contents;
+  ctx.packageJsonFiles.forEach((file) => {
+    const contents = file.jsonFile.contents;
     Object.keys(contents).forEach((key) => {
       const value = contents[key];
       if (isObject(value) && Object.values(value).every(isUndefined)) {

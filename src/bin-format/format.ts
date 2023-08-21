@@ -11,8 +11,8 @@ export function format(ctx: Ctx): Effect.Effect<never, never, Ctx> {
   const sortAz = getSortAz(ctx.config);
   const sortFirst = getSortFirst(ctx.config);
 
-  packageJsonFiles.forEach((packageJsonFile) => {
-    const { contents } = packageJsonFile;
+  packageJsonFiles.forEach((file) => {
+    const { contents } = file.jsonFile;
     const sortedKeys = Object.keys(contents).sort();
     const keys = new Set<string>(sortFirst.concat(sortedKeys));
 

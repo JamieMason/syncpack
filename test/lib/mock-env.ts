@@ -1,10 +1,12 @@
 import * as Effect from '@effect/io/Effect';
+import { CWD } from '../../src/constants';
 import type { SemverRangeEffects, VersionEffects } from '../../src/create-program/effects';
 import type { ErrorHandlers } from '../../src/error-handlers/create-error-handlers';
 
 export interface MockEnv {
   readonly askForChoice: jest.Mock<any, any>;
   readonly askForInput: jest.Mock<any, any>;
+  readonly CWD: string;
   readonly exitProcess: jest.Mock<any, any>;
   readonly globSync: jest.Mock<any, any>;
   readonly readConfigFileSync: jest.Mock<any, any>;
@@ -18,6 +20,7 @@ export function createMockEnv(): MockEnv {
     askForChoice: jest.fn(() => Promise.resolve()),
     askForInput: jest.fn(() => Promise.resolve()),
     exitProcess: jest.fn(() => []),
+    CWD: CWD,
     globSync: jest.fn(() => []),
     readConfigFileSync: jest.fn(() => ({})),
     readFileSync: jest.fn(() => ''),

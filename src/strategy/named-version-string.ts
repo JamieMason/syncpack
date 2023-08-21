@@ -32,7 +32,11 @@ export class NamedVersionStringStrategy {
         const [name, version] = value.split(/@(.*)/);
         return isNonEmptyString(name) && isNonEmptyString(version)
           ? new Ok<[string, string][]>([[name, version]])
-          : new Err(new Error(`Strategy<name@version> failed to get ${path} in ${file.shortPath}`));
+          : new Err(
+              new Error(
+                `Strategy<name@version> failed to get ${path} in ${file.jsonFile.shortPath}`,
+              ),
+            );
       }),
     );
   }
@@ -41,7 +45,7 @@ export class NamedVersionStringStrategy {
     file: PackageJsonFile,
     [name, version]: [string, string | Delete],
   ): Result<PackageJsonFile> {
-    const { contents } = file;
+    const { contents } = file.jsonFile;
     const path = this.path;
     const isNestedPath = path.includes('.');
     const nextValue = version === DELETE ? undefined : `${name}@${version}`;

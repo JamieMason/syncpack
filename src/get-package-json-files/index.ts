@@ -1,12 +1,11 @@
 import { pipe } from '@effect/data/Function';
 import * as Effect from '@effect/io/Effect';
 import type { Env } from '../env/create-env';
-import type { GlobError, ReadFileError } from '../env/tags';
+import type { JsonParseError } from '../env/tags';
+import { EnvTag, type GlobError, type ReadFileError } from '../env/tags';
 import type { Ctx } from '../get-context';
 import type { NoSourcesFoundError } from './get-file-paths';
 import { getFilePaths } from './get-file-paths';
-import type { JsonParseError } from './get-patterns/read-json-safe';
-import { readJsonSafe } from './get-patterns/read-json-safe';
 import type { PackageJson } from './package-json-file';
 import { PackageJsonFile } from './package-json-file';
 
@@ -19,8 +18,12 @@ export function getPackageJsonFiles(
   PackageJsonFile[]
 > {
   return pipe(
-    getFilePaths(config),
-    Effect.flatMap((paths) => Effect.all(paths.map(readJsonSafe<PackageJson>))),
-    Effect.map((files) => files.map((file) => new PackageJsonFile(file, config))),
+    Effect.Do,
+    Effect.bind('env', () => EnvTag),
+    Effect.bind('filePaths', () => getFilePaths(config)),
+    Effect.bind('files', ({ env, filePaths }) =>
+      Effect.all(filePaths.map(env.readJsonFileSync<PackageJson>)),
+    ),
+    Effect.map(({ files }) => files.map((file) => new PackageJsonFile(file, config))),
   );
 }

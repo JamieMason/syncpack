@@ -1,8 +1,13 @@
 import * as Effect from '@effect/io/Effect';
 import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
-import type { GlobError, ReadConfigFileError, ReadFileError, WriteFileError } from '../env/tags';
+import type {
+  GlobError,
+  JsonParseError,
+  ReadConfigFileError,
+  ReadFileError,
+  WriteFileError,
+} from '../env/tags';
 import type { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
-import type { JsonParseError } from '../get-package-json-files/get-patterns/read-json-safe';
 import type { SemverGroupConfigError } from '../get-semver-groups';
 import type { VersionGroupConfigError } from '../get-version-groups';
 

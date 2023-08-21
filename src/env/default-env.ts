@@ -20,6 +20,7 @@ import { logVerbose } from '../lib/log-verbose';
 export interface DefaultEnv {
   readonly askForChoice: (opts: { message: string; choices: string[] }) => Promise<string>;
   readonly askForInput: (opts: { message: string }) => Promise<string>;
+  readonly CWD: string;
   readonly exitProcess: (code: number) => void;
   readonly globSync: (patterns: string[]) => string[];
   readonly readConfigFileSync: (configPath?: string) => O.Partial<RcConfig, 'deep'>;
@@ -29,7 +30,6 @@ export interface DefaultEnv {
 }
 
 export const defaultEnv: DefaultEnv = {
-  /* istanbul ignore next */
   askForChoice({ message, choices }) {
     return prompt({
       type: 'select',
@@ -38,7 +38,6 @@ export const defaultEnv: DefaultEnv = {
       choices,
     });
   },
-  /* istanbul ignore next */
   askForInput({ message }) {
     return prompt({
       name: 'version',
@@ -46,26 +45,25 @@ export const defaultEnv: DefaultEnv = {
       message,
     });
   },
-  /* istanbul ignore next */
+  CWD,
+  exitProcess(code) {
+    logVerbose('exit(', code, ')');
+    process.exit(code);
+  },
   globSync(patterns) {
     logVerbose('globSync(', patterns, ')');
     return globby.sync(patterns, {
       ignore: ['**/node_modules/**'],
       absolute: true,
-      cwd: CWD,
+      cwd: defaultEnv.CWD,
     });
-  },
-  /* istanbul ignore next */
-  exitProcess(code) {
-    logVerbose('exit(', code, ')');
-    process.exit(code);
   },
   readConfigFileSync(configPath) {
     logVerbose('readConfigFileSync(', configPath, ')');
     const client = cosmiconfigSync('syncpack');
     const result = configPath ? client.load(configPath) : client.search();
     if (!isNonEmptyObject(result)) {
-      const rcPath = join(CWD, 'package.json');
+      const rcPath = join(defaultEnv.CWD, 'package.json');
       return pipe(
         fromTry(() => readFileSync(rcPath, { encoding: 'utf8' })),
         map(JSON.parse),
@@ -84,17 +82,14 @@ export const defaultEnv: DefaultEnv = {
     logVerbose('.syncpackrc contents:', rcConfig);
     return rcConfig;
   },
-  /* istanbul ignore next */
   readFileSync(filePath) {
     logVerbose('readFileSync(', filePath, ')');
     return readFileSync(filePath, { encoding: 'utf8' });
   },
-  /* istanbul ignore next */
   readYamlFileSync<T = unknown>(filePath: string): T {
     logVerbose('readYamlFileSync(', filePath, ')');
     return readYamlFile.sync<T>(filePath);
   },
-  /* istanbul ignore next */
   writeFileSync(filePath, contents) {
     logVerbose('writeFileSync(', filePath, contents, ')');
     writeFileSync(filePath, contents);

@@ -1,8 +1,8 @@
 import { EOL } from 'os';
-import { join } from 'path';
+import { dirname, join, relative } from 'path';
 import { CWD } from '../../src/constants';
+import type { JsonFile } from '../../src/env/tags';
 import { newlines } from '../../src/env/write-if-changed';
-import type { JsonFile } from '../../src/get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJson } from '../../src/get-package-json-files/package-json-file';
 import { splitNameAndVersion } from '../../src/lib/split-name-and-version';
 
@@ -78,8 +78,10 @@ function withJson({
 }): JsonFile<PackageJson> {
   return {
     contents,
+    dirPath: dirname(filePath),
     filePath,
     json: toJson(contents),
+    shortPath: relative(CWD, filePath),
   };
 }
 

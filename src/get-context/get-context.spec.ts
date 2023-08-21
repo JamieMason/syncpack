@@ -21,12 +21,14 @@ describe('getContext', () => {
               expect.objectContaining({
                 packageJsonFiles: [
                   {
-                    contents,
-                    dirPath: CWD,
-                    filePath,
-                    json,
                     config: expect.toBeNonEmptyObject(),
-                    shortPath: 'package.json',
+                    jsonFile: {
+                      contents,
+                      dirPath: CWD,
+                      filePath,
+                      json,
+                      shortPath: 'package.json',
+                    },
                   },
                 ],
               }),

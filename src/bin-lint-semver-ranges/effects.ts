@@ -50,7 +50,7 @@ function logRangeMismatch({ report, ctx }: Input<SemverGroupReport.FixableCases>
     ICON.rightArrow,
     report.expectedVersion,
     report.instance.strategy.path,
-    report.instance.packageJsonFile.shortPath,
+    report.instance.packageJsonFile.jsonFile.shortPath,
   );
 }
 

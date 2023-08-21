@@ -35,7 +35,7 @@ export class UnnamedVersionStringStrategy {
 
   write(file: PackageJsonFile, [, version]: [string, string | Delete]): Result<PackageJsonFile> {
     const path = this.path;
-    const { contents } = file;
+    const { contents } = file.jsonFile;
     const isNestedPath = path.includes('.');
     const nextValue = version === DELETE ? undefined : version;
     if (isNestedPath) {

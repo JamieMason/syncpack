@@ -8,8 +8,8 @@ import type { PackageJsonFile } from '../../get-package-json-files/package-json-
 
 export function getNonEmptyStringProp(propPath: string, file: PackageJsonFile): Result<string> {
   return pipe(
-    get(file.contents, ...propPath.split('.')),
+    get(file.jsonFile.contents, ...propPath.split('.')),
     filter(isNonEmptyString, ''),
-    mapErr(() => new Error(`Failed to get ${propPath} in ${file.shortPath}`)),
+    mapErr(() => new Error(`Failed to get ${propPath} in ${file.jsonFile.shortPath}`)),
   );
 }

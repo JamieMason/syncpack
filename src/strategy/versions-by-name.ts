@@ -22,7 +22,7 @@ export class VersionsByNameStrategy {
   read(file: PackageJsonFile): Result<[string, string][]> {
     const path = this.path;
     return pipe(
-      get(file.contents, ...path.split('.')),
+      get(file.jsonFile.contents, ...path.split('.')),
       filter(isNonEmptyObject<string>, ''),
       mapR(Object.entries<string>),
     );
@@ -35,7 +35,7 @@ export class VersionsByNameStrategy {
     const path = this.path;
     const nextValue = version === DELETE ? undefined : version;
     return pipe(
-      get(file.contents, ...path.split('.')),
+      get(file.jsonFile.contents, ...path.split('.')),
       tap((parent) => {
         parent[name] = nextValue;
       }),

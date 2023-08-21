@@ -3,9 +3,8 @@ import * as O from '@effect/data/Option';
 import * as Effect from '@effect/io/Effect';
 import { join } from 'path';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import { CWD } from '../../constants';
 import type { Env } from '../../env/create-env';
-import { readJsonSafe } from './read-json-safe';
+import { EnvTag } from '../../env/tags';
 
 interface LernaJson {
   packages?: string[];
@@ -13,7 +12,8 @@ interface LernaJson {
 
 export function getLernaPatterns(): Effect.Effect<Env, never, O.Option<string[]>> {
   return pipe(
-    readJsonSafe<LernaJson>(join(CWD, 'lerna.json')),
+    EnvTag,
+    Effect.flatMap((env) => env.readJsonFileSync<LernaJson>(join(env.CWD, 'lerna.json'))),
     Effect.map((file) =>
       isArrayOfStrings(file?.contents?.packages) ? O.some(file.contents.packages) : O.none(),
     ),

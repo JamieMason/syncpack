@@ -19,19 +19,21 @@ export function writeIfChanged(ctx: Ctx): Effect.Effect<Env, WriteFileError, Ctx
           pipe(
             Effect.Do,
             Effect.bind('nextJson', () => toJson(file)),
-            Effect.bind('hasChanged', ({ nextJson }) => Effect.succeed(file.json !== nextJson)),
+            Effect.bind('hasChanged', ({ nextJson }) =>
+              Effect.succeed(file.jsonFile.json !== nextJson),
+            ),
             Effect.flatMap(({ hasChanged, nextJson }) =>
               hasChanged
                 ? pipe(
-                    env.writeFileSync(file.filePath, nextJson),
+                    env.writeFileSync(file.jsonFile.filePath, nextJson),
                     Effect.flatMap(() =>
                       Effect.sync(() => {
-                        console.log(chalk`{green ${ICON.tick}}`, file.shortPath);
+                        console.log(chalk`{green ${ICON.tick}}`, file.jsonFile.shortPath);
                       }),
                     ),
                   )
                 : Effect.sync(() => {
-                    console.log(chalk.dim(ICON.skip), chalk.dim(file.shortPath));
+                    console.log(chalk.dim(ICON.skip), chalk.dim(file.jsonFile.shortPath));
                   }),
             ),
           ),
@@ -42,9 +44,9 @@ export function writeIfChanged(ctx: Ctx): Effect.Effect<Env, WriteFileError, Ctx
   );
 
   function toJson(file: PackageJsonFile): Effect.Effect<never, never, string> {
-    const contents = file.contents;
+    const contents = file.jsonFile.contents;
     const indent = getIndent(ctx.config);
-    const EOL = newlines.detect(file.json);
+    const EOL = newlines.detect(file.jsonFile.json);
     const source = `${JSON.stringify(contents, null, indent)}${EOL}`;
     return Effect.succeed(newlines.fix(source, EOL));
   }

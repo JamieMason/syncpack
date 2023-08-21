@@ -4,11 +4,10 @@ import type { O } from 'ts-toolbelt';
 import { CliConfigTag } from '../config/tag';
 import { type CliConfig, type RcConfig } from '../config/types';
 import type { Env } from '../env/create-env';
-import type { GlobError, ReadConfigFileError, ReadFileError } from '../env/tags';
+import type { GlobError, JsonParseError, ReadConfigFileError, ReadFileError } from '../env/tags';
 import { EnvTag } from '../env/tags';
 import { getPackageJsonFiles } from '../get-package-json-files';
 import type { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
-import type { JsonParseError } from '../get-package-json-files/get-patterns/read-json-safe';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
 
 export interface Ctx {

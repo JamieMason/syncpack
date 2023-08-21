@@ -3,7 +3,6 @@ import { pipe } from '@effect/data/Function';
 import * as Effect from '@effect/io/Effect';
 import { uniq } from 'tightrope/array/uniq';
 import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
-import { CWD } from '../constants';
 import { type Env } from '../env/create-env';
 import type { GlobError } from '../env/tags';
 import { EnvTag } from '../env/tags';
@@ -26,18 +25,20 @@ export function getFilePaths(
   config: Ctx['config'],
 ): Effect.Effect<Env, GlobError | NoSourcesFoundError, string[]> {
   return pipe(
-    getPatterns(config),
-    Effect.flatMap((patterns) =>
-      pipe(
-        EnvTag,
-        Effect.flatMap((env) => env.globSync(patterns)),
-        Effect.map((arr) => uniq(arr.flat())),
-        Effect.flatMap((filePaths) =>
-          isNonEmptyArray(filePaths)
-            ? Effect.succeed(filePaths)
-            : Effect.fail(new NoSourcesFoundError({ CWD, patterns })),
-        ),
-      ),
+    Effect.Do,
+    Effect.bind('env', () => EnvTag),
+    Effect.bind('patterns', () => getPatterns(config)),
+    Effect.bind('filePaths', ({ env, patterns }) => env.globSync(patterns)),
+    Effect.bind('flatFilePaths', ({ filePaths }) => Effect.sync(() => uniq(filePaths.flat()))),
+    Effect.flatMap(({ env, flatFilePaths, patterns }) =>
+      isNonEmptyArray(flatFilePaths)
+        ? Effect.succeed(flatFilePaths)
+        : Effect.fail(
+            new NoSourcesFoundError({
+              CWD: env.CWD,
+              patterns,
+            }),
+          ),
     ),
   );
 }
