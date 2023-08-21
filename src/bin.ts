@@ -29,7 +29,6 @@ program
   )
   .command('list', 'list every dependency used in your packages', {
     executableFile: './bin-list/index.js',
-    isDefault: true,
   })
   .command('prompt', 'fix mismatches which syncpack cannot fix automatically', {
     executableFile: './bin-prompt/index.js',
