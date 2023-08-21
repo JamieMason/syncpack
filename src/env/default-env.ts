@@ -1,19 +1,17 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { pipe } from 'tightrope/fn/pipe';
-import { fromTry } from 'tightrope/result/from-try';
-import { unwrapOrElse } from 'tightrope/result/unwrap-or-else';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore Select *does* exist
-import { Input, Select } from 'enquirer';
+import { prompt } from 'enquirer';
 import { readFileSync, writeFileSync } from 'fs';
 import * as globby from 'globby';
 import { join } from 'path';
 import * as readYamlFile from 'read-yaml-file';
+import { pipe } from 'tightrope/fn/pipe';
 import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
 import { Ok } from 'tightrope/result';
 import { filter } from 'tightrope/result/filter';
+import { fromTry } from 'tightrope/result/from-try';
 import { map } from 'tightrope/result/map';
 import { mapErr } from 'tightrope/result/map-err';
+import { unwrapOrElse } from 'tightrope/result/unwrap-or-else';
 import type { O } from 'ts-toolbelt';
 import type { RcConfig } from '../config/types';
 import { CWD } from '../constants';
@@ -33,11 +31,20 @@ export interface DefaultEnv {
 export const defaultEnv: DefaultEnv = {
   /* istanbul ignore next */
   askForChoice({ message, choices }) {
-    return new Select({ name: 'choice', message, choices }).run();
+    return prompt({
+      type: 'select',
+      name: 'choice',
+      message,
+      choices,
+    });
   },
   /* istanbul ignore next */
   askForInput({ message }) {
-    return new Input({ message }).run();
+    return prompt({
+      name: 'version',
+      type: 'input',
+      message,
+    });
   },
   /* istanbul ignore next */
   globSync(patterns) {
