@@ -1,6 +1,6 @@
 import { isString } from 'tightrope/guard/is-string';
 
-/** @deprecated */
+/** @deprecated migrate to make better use of npm-package-arg */
 export function isSemver(version: unknown): boolean {
   const range = '(~|\\^|>=|>|<=|<)?';
   const ints = '[0-9]+';

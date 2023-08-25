@@ -1,25 +1,20 @@
-import { pipe } from '@effect/data/Function';
-import * as O from '@effect/data/Option';
-import * as Effect from '@effect/io/Effect';
+import { Effect, Option as O, pipe } from 'effect';
 import { join } from 'path';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import { type Env } from '../../env/create-env';
-import { EnvTag } from '../../env/tags';
+import { type Io } from '../../io';
+import { readYamlFileSync } from '../../io/read-yaml-file-sync';
 
 interface PnpmWorkspace {
   packages?: string[];
 }
 
-export function getPnpmPatterns(): Effect.Effect<Env, never, O.Option<string[]>> {
+export function getPnpmPatterns(io: Io): Effect.Effect<never, never, O.Option<string[]>> {
   return pipe(
     // packages:
     //   - "packages/**"
     //   - "components/**"
     //   - "!**/test/**"
-    EnvTag,
-    Effect.flatMap((env) =>
-      env.readYamlFileSync<PnpmWorkspace>(join(env.CWD, 'pnpm-workspace.yaml')),
-    ),
+    readYamlFileSync<PnpmWorkspace>(io, join(io.process.cwd(), 'pnpm-workspace.yaml')),
     Effect.map((file) => (isArrayOfStrings(file?.packages) ? O.some(file.packages) : O.none())),
     Effect.catchTags({
       ReadYamlFileError: () => Effect.succeed(O.none()),

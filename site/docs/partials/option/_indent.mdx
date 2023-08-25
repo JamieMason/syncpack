@@ -1,0 +1,18 @@
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+
+```
+-i, --indent [value]
+```
+
+Override your <Link to="/config/indent">indent</Link> configuration, which is 2 spaces by default.
+
+<CodeBlock language="bash">
+  {`# four spaces
+syncpack ${props.command} --indent "    "
+# one tab
+syncpack ${props.command} --indent '\t'
+# \\t is converted into a tab
+syncpack ${props.command} --indent '\\t'
+`.trim()}
+</CodeBlock>

@@ -1,0 +1,10 @@
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+
+```
+-c, --config <path>
+```
+
+Syncpack uses <Link to="https://github.com/cosmiconfig/cosmiconfig">cosmiconfig</Link> to discover your config file, but a custom location can be provided instead.
+
+<CodeBlock>{`syncpack ${props.command} --config ./config/.syncpackrc`}</CodeBlock>

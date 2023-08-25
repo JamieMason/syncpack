@@ -1,14 +1,12 @@
-import { pipe } from '@effect/data/Function';
-import { get } from 'tightrope/fn/get';
-import type { Result } from 'tightrope/result';
-import { andThen } from 'tightrope/result/and-then';
-import { fromTry } from 'tightrope/result/from-try';
-import { map } from 'tightrope/result/map';
-import { tap } from 'tightrope/result/tap';
+import { Effect, identity, Option, pipe } from 'effect';
+import { isObject } from 'tightrope/guard/is-object';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import type { Delete } from '../get-version-groups/lib/delete';
-import { DELETE } from '../get-version-groups/lib/delete';
+import { get } from '../lib/get';
+import type { Delete } from '../version-group/lib/delete';
+import { DELETE } from '../version-group/lib/delete';
 import { getNonEmptyStringProp } from './lib/get-non-empty-string-prop';
+
+const getOptionOfObject = Option.liftPredicate(isObject<any>);
 
 export class NameAndVersionPropsStrategy {
   _tag = 'name~version';
@@ -22,25 +20,46 @@ export class NameAndVersionPropsStrategy {
     this.namePath = namePath;
   }
 
-  read(file: PackageJsonFile): Result<[string, string][]> {
-    const path = this.path;
-    const namePath = this.namePath;
+  read(file: PackageJsonFile): Effect.Effect<never, never, [string, string][]> {
     return pipe(
-      // get name prop
-      getNonEmptyStringProp(namePath, file),
+      Effect.Do,
+      // get the name prop
+      Effect.bind('name', () => getNonEmptyStringProp(this.namePath, file)),
       // add the version prop
-      andThen((name) =>
+      Effect.bind('version', () =>
         pipe(
-          getNonEmptyStringProp(path, file),
-          map((version) => ({ name, version })),
+          getNonEmptyStringProp(this.path, file),
+          /**
+           * In order to report an `InstanceReport.MissingLocalVersion`, we need
+           * to ensure that a value is returned for `local` package .version
+           * properties so we can know that `this.name` is a package developed
+           * in this repo but that its version is missing.
+           *
+           * Not doing this results in the invalid local package being ignored
+           * and each installation of it being checked for mismatches amongst
+           * themselves.
+           */
+          this.name === 'local'
+            ? Effect.catchAll(() => Effect.succeed('PACKAGE_JSON_HAS_NO_VERSION'))
+            : Effect.map(identity),
         ),
       ),
       // if both are non empty strings, we can return them
-      map(({ name, version }): [string, string][] => [[name, version]]),
+      Effect.map(({ name, version }): [string, string][] => [[name, version]]),
+      Effect.tapError(() =>
+        Effect.logDebug(
+          `NameAndVersionPropsStrategy#${this.name} found nothing at <${file.jsonFile.shortPath}>.${this.path} & .${this.namePath}`,
+        ),
+      ),
+      // if either are invalid, default to empty
+      Effect.catchAll(() => Effect.succeed([])),
     );
   }
 
-  write(file: PackageJsonFile, [, version]: [string, string | Delete]): Result<PackageJsonFile> {
+  write(
+    file: PackageJsonFile,
+    [, version]: [string, string | Delete],
+  ): Effect.Effect<never, never, PackageJsonFile> {
     const path = this.path;
     const { contents } = file.jsonFile;
     const isNestedPath = path.includes('.');
@@ -52,17 +71,35 @@ export class NameAndVersionPropsStrategy {
       const key = fullPath.slice(-1).join('');
       return pipe(
         get(contents, ...pathToParent.split('.')),
-        tap((parent) => {
-          parent[key] = version;
-        }),
-        map(() => file),
+        Effect.flatMap(getOptionOfObject),
+        Effect.flatMap((parent) =>
+          Effect.try(() => {
+            parent[key] = nextValue;
+          }),
+        ),
+        Effect.tapError(() =>
+          Effect.logDebug(
+            `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
+          ),
+        ),
+        Effect.catchAll(() => Effect.succeed(file)),
+        Effect.map(() => file),
       );
     } else {
       return pipe(
-        fromTry<void>(() => {
-          contents[path] = nextValue;
-        }),
-        map(() => file),
+        getOptionOfObject(contents),
+        Effect.flatMap((parent) =>
+          Effect.try(() => {
+            parent[this.path] = nextValue;
+          }),
+        ),
+        Effect.tapError(() =>
+          Effect.logDebug(
+            `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
+          ),
+        ),
+        Effect.catchAll(() => Effect.succeed(file)),
+        Effect.map(() => file),
       );
     }
   }

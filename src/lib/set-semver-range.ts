@@ -1,16 +1,10 @@
+import { isString } from 'tightrope/guard/is-string';
 import type { SemverRange } from '../config/types';
 import { RANGE } from '../constants';
-import { isLooseSemver } from '../guards/is-loose-semver';
 import { isSemver } from '../guards/is-semver';
 import { isValidSemverRange } from '../guards/is-valid-semver-range';
 
-export function getSemverRange(version: string): SemverRange {
-  if (version === '*') return version;
-  const from1stNumber = version.search(/[0-9]/);
-  const semverRange = version.slice(0, from1stNumber);
-  return isValidSemverRange(semverRange) ? semverRange : '';
-}
-
+/** @deprecated migrate to make better use of npm-package-arg */
 export function setSemverRange(semverRange: SemverRange, version: string): string {
   if (!isSemver(version) || !isValidSemverRange(semverRange)) return version;
   if (semverRange === '*') return semverRange;
@@ -20,4 +14,8 @@ export function setSemverRange(semverRange: SemverRange, version: string): strin
   return semverRange === RANGE.LOOSE
     ? `${nextVersion.slice(from1stNumber, from1stDot)}.x.x`
     : `${semverRange}${nextVersion.slice(from1stNumber)}`;
+}
+
+function isLooseSemver(version: unknown): boolean {
+  return isString(version) && isSemver(version) && version.search(/\.x(\.|$)/) !== -1;
 }

@@ -1,0 +1,44 @@
+---
+id: fix-mismatches
+title: fix-mismatches
+---
+
+import ConfigOption from '../partials/option/_config.mdx';
+import FilterOption from '../partials/option/_filter.mdx';
+import HelpOption from '../partials/option/_help.mdx';
+import IndentOption from '../partials/option/_indent.mdx';
+import SourceOption from '../partials/option/_source.mdx';
+import TypesOption from '../partials/option/_types.mdx';
+import LogLevelOption from '../partials/option/_log-level.mdx';
+
+Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg. `react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
+
+## CLI Options
+
+### source
+
+<SourceOption command="fix-mismatches" />
+
+### filter
+
+<FilterOption command="fix-mismatches" />
+
+### config
+
+<ConfigOption command="fix-mismatches" />
+
+### types
+
+<TypesOption command="fix-mismatches" />
+
+### indent
+
+<IndentOption command="fix-mismatches" />
+
+### help
+
+<HelpOption command="fix-mismatches" />
+
+## Troubleshooting
+
+<LogLevelOption command="fix-mismatches" />

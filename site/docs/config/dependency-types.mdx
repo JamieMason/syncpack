@@ -3,20 +3,21 @@ id: dependency-types
 title: dependencyTypes
 ---
 
-import DefaultDependencyTypes from '@site/src/partials/default-dependency-types.mdx';
+import { href } from '@site/src/data';
+import ConfigOption from '../partials/option/_config.mdx';
+import DefaultDependencyTypes from '../partials/_default-dependency-types.mdx';
+import Intellisense from '../partials/_intellisense.mdx';
+import JsonSchema from '../partials/_json-schema.mdx';
+import Link from '@docusaurus/Link';
+import NodeEngineExample from '../partials/examples/_engines-node.mdx';
 import Pills from '@site/src/components/pill';
 
-# `dependencyTypes` string[]
+Areas where versions are usually defined can be toggled on and off via this property.
 
-<Pills optional />
+<details>
+  <summary>Example: Only include <code>dependencies</code> and <code>devDependencies</code></summary>
 
-All of the [default dependency types](#default-dependency-types) are enabled by default, but can be
-reduced to a smaller list via the `dependencyTypes` property of your config file.
-
-In this example, only dependencies found in the
-[`dependencies`](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies) and
-[`devDependencies`](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#devDependencies)
-properties of package.json files will be inspected by syncpack:
+**Only** `dependencies` and `devDependencies` will be inspected:
 
 ```json title=".syncpackrc"
 {
@@ -24,8 +25,12 @@ properties of package.json files will be inspected by syncpack:
 }
 ```
 
-Negated types are also supported, so here everything **except** `dependencies` and `devDependencies`
-will be inspected:
+</details>
+
+<details>
+  <summary>Example: Exclude <code>dependencies</code> and <code>devDependencies</code></summary>
+
+Everything **except** `dependencies` and `devDependencies` will be inspected:
 
 ```json title=".syncpackrc"
 {
@@ -33,62 +38,16 @@ will be inspected:
 }
 ```
 
-:::tip
-
-Syncpack config files also support
-[TypeScript IntelliSense](https://jamiemason.github.io/syncpack/config-file#typescript-intellisense).
-
-:::
-
-:::tip
-
-The [default dependency types](#default-dependency-types) can be extended with your own
-[`customTypes`](./custom-types.mdx), so you can find and fix versions found in other parts of your
-package.json files.
-
-:::
-
-:::info
-
-Your `dependencyTypes` configuration in your [config file](../config-file.mdx) can be overridden on
-an ad hoc basis using the [`--types`](../option/types.mdx) option.
-
-:::
+</details>
 
 ## Default dependency types
 
+All are enabled by default.
+
 <DefaultDependencyTypes />
 
-## The `local` type
+:::tip
 
-<i id="the-workspace-type">{/* support old deep links for this type's previous name */}</i>
+Learn more about the <Link to="/guide/local-package-versions">`local` dependency type</Link>.
 
-This option synchronises the versions of your dependencies with the
-[`version`](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#version) properties of the
-package.json files developed in your own local project, when they relate to eachother.
-
-Take this example, `@your-repo/fetch` is developed in your repo:
-
-```jsonc
-{
-  "name": "@your-repo/fetch",
-  "version": "1.0.2"
-  // ...rest of the file
-}
-```
-
-and another package developed in your repo depends on it:
-
-```jsonc
-{
-  "name": "@your-repo/ui",
-  // ...other stuff
-  "dependencies": {
-    "@your-repo/fetch": "0.9.4"
-  }
-  // ...rest of the file
-}
-```
-
-When `local` is enabled, syncpack will fix `@your-repo/ui` so it depends on version `1.0.2` of
-`@your-repo/fetch`.
+:::

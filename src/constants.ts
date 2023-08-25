@@ -1,10 +1,14 @@
+import type { SemverRange } from './config/types';
+
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.env.MOCK_CWD || process.cwd();
 
 /** Single source of truth for icons used in output */
 export const ICON = {
+  banned: '⦸',
   cross: '✘',
   debug: '?',
+  info: 'i',
   panic: '!',
   rightArrow: '→',
   skip: '-',
@@ -24,6 +28,8 @@ export const RANGE = {
   WORKSPACE: 'workspace:',
 } as const;
 
+export const FIXABLE_RANGES: SemverRange[] = [RANGE.EXACT, RANGE.MINOR, RANGE.PATCH];
+
 export const INTERNAL_TYPES = [
   'dev',
   'local',
@@ -39,7 +45,6 @@ export const DEFAULT_CONFIG = {
   filter: '.',
   indent: '  ',
   semverGroups: [],
-  semverRange: '',
   sortAz: [
     'contributors',
     'dependencies',

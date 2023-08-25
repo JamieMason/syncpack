@@ -1,0 +1,21 @@
+import Link from '@docusaurus/Link';
+import { href } from '@site/src/data';
+
+<p>
+  Add support for managing versions in <Link to={href.engines}>engines</Link> and <Link to={href.packageManager}>packageManager</Link> properties of your package.json files.
+</p>
+
+```json title=".syncpackrc"
+{
+  "customTypes": {
+    "engines": {
+      "path": "engines",
+      "strategy": "versionsByName"
+    },
+    "packageManager": {
+      "path": "packageManager",
+      "strategy": "name@version"
+    }
+  }
+}
+```

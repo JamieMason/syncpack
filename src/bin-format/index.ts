@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { defaultEnv } from '../env/default-env';
+import { Effect } from 'effect';
+import { io } from '../io';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
-import { formatCli } from './format-cli';
+import { format } from './format';
 
 program.description(
   chalk`
@@ -52,12 +52,12 @@ program
   .parse(process.argv);
 
 Effect.runSync<never, unknown>(
-  formatCli(
-    {
+  format({
+    io,
+    cli: {
       configPath: program.opts().config,
       indent: program.opts().indent,
       source: program.opts().source,
     },
-    defaultEnv,
-  ),
+  }),
 );

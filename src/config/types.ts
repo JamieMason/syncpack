@@ -3,9 +3,8 @@ import type { Union } from 'ts-toolbelt';
 /**
  * Aliases for semver range formats supported by syncpack
  *
- * Defaults to `""` to ensure that exact dependency versions are used
- * instead of loose ranges, but this can be overridden in your config file
- * or via the `--semver-range` command line option.
+ * Defaults to `""` to ensure that exact dependency versions are used instead of
+ * loose ranges, but this can be overridden in your config file.
  *
  * | Supported Range |   Example |
  * | --------------- | --------: |
@@ -23,13 +22,17 @@ import type { Union } from 'ts-toolbelt';
 export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~';
 
 export interface GroupConfig {
-  dependencies: string[];
+  dependencies?: string[];
   dependencyTypes?: string[];
   label?: string;
-  packages: string[];
+  packages?: string[];
 }
 
 export namespace SemverGroupConfig {
+  export interface Disabled extends GroupConfig {
+    isDisabled: true;
+  }
+
   export interface Ignored extends GroupConfig {
     isIgnored: true;
   }
@@ -38,7 +41,7 @@ export namespace SemverGroupConfig {
     range: SemverRange;
   }
 
-  export type Any = Union.Strict<Ignored | WithRange>;
+  export type Any = Union.Strict<Disabled | Ignored | WithRange>;
 }
 
 export namespace VersionGroupConfig {
@@ -104,7 +107,6 @@ export interface CliConfig {
   readonly configPath?: string;
   readonly filter: string;
   readonly indent: string;
-  readonly semverRange: SemverRange;
   readonly source: string[];
   readonly types: string;
 }
@@ -124,8 +126,6 @@ export interface RcConfig {
   indent: string;
   /** @see https://jamiemason.github.io/syncpack/config/semver-groups */
   semverGroups: SemverGroupConfig.Any[];
-  /** @see https://jamiemason.github.io/syncpack/config/semver-range */
-  semverRange: SemverRange;
   /** @see https://jamiemason.github.io/syncpack/config/sort-az */
   sortAz: string[];
   /** @see https://jamiemason.github.io/syncpack/config/sort-first */

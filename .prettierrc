@@ -9,7 +9,7 @@
     {
       "files": ["**/*.spec.*"],
       "options": {
-        "printWidth": 100
+        "printWidth": 120
       }
     },
     {
@@ -17,6 +17,13 @@
       "options": {
         "printWidth": 100,
         "proseWrap": "always"
+      }
+    },
+    {
+      "files": ["**/*.mdx"],
+      "options": {
+        "printWidth": 500,
+        "proseWrap": "never"
       }
     }
   ]

@@ -1,165 +1,397 @@
+import { expect } from '@jest/globals';
+import { Effect, pipe } from 'effect';
 import 'expect-more-jest';
-import { join } from 'path';
-import { createMockEnv } from '../../test/lib/mock-env';
-import { runContextSync } from '../../test/lib/run-context-sync';
-import { CWD } from '../constants';
+import { normalize } from 'path';
+import { getContext } from '.';
+import { createScenario } from '../../test/lib/create-scenario';
+import { shape } from '../../test/lib/matchers';
+import { DEFAULT_CONFIG } from '../constants';
 import { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
+import { JsonParseError } from '../io/read-json-file-sync';
 
-describe('getContext', () => {
-  describe('packageJsonFiles', () => {
-    describe('when --source cli options are given', () => {
-      describe('for a single package.json file', () => {
-        it('reads that file only', () => {
-          const filePath = join(CWD, 'package.json');
-          const contents = { name: 'foo' };
-          const json = '{"name":"foo"}';
-          const env = createMockEnv();
-          env.globSync.mockReturnValue([filePath]);
-          env.readFileSync.mockReturnValue(json);
-          runContextSync({ source: ['package.json'] }, env, (ctx) => {
-            expect(ctx).toEqual(
-              expect.objectContaining({
-                packageJsonFiles: [
-                  {
-                    config: expect.toBeNonEmptyObject(),
-                    jsonFile: {
-                      contents,
-                      dirPath: CWD,
-                      filePath,
-                      json,
-                      shortPath: 'package.json',
-                    },
-                  },
-                ],
-              }),
-            );
-          });
-        });
-      });
+it('errors when no package.json is found', () => {
+  const scenario = createScenario({})();
+  Effect.runSyncExit(pipe(getContext(scenario), Effect.merge));
+  expect(scenario.errorHandlers.NoSourcesFoundError).toHaveBeenCalledWith(
+    new NoSourcesFoundError({
+      CWD: '/fake/dir',
+      patterns: [...DEFAULT_CONFIG.source],
+    }),
+  );
+});
 
-      describe('for a pattern that matches nothing', () => {
-        it('returns a relevant error', () => {
-          const env = createMockEnv();
-          env.globSync.mockReturnValue([]);
-          runContextSync({ source: ['typo.json'] }, env, (ctx) => {
-            expect(ctx).toEqual(
-              new NoSourcesFoundError({
-                CWD,
-                patterns: ['package.json', 'typo.json/package.json'],
-              }),
-            );
-            expect(env.readFileSync).not.toHaveBeenCalled();
-          });
-        });
-      });
+it('errors when package.json is invalid', () => {
+  const scenario = createScenario({
+    'package.json': 'THIS-IS-NOT-VALID-JSON',
+    'packages/bar/package.json': {
+      name: 'bar',
+    },
+  })();
+  Effect.runSyncExit(pipe(getContext(scenario), Effect.merge));
+  expect(scenario.errorHandlers.JsonParseError).toHaveBeenCalledWith(
+    new JsonParseError({
+      error: expect.any(SyntaxError),
+      filePath: expect.stringContaining('/package.json') as unknown as string,
+      json: 'THIS-IS-NOT-VALID-JSON',
+    }),
+  );
+});
+
+it('uses empty config and default sources when no user config is found', () => {
+  const scenario = createScenario({
+    'package.json': {
+      name: 'foo',
+    },
+    'packages/bar/package.json': {
+      name: 'bar',
+    },
+  })();
+  const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+  expect(ctx).toHaveProperty('config', {
+    cli: scenario.cli,
+    rcFile: {},
+  });
+  expect(ctx).toHaveProperty('packageJsonFiles', [
+    shape.PackageJsonFile({
+      shortPath: 'package.json',
+    }),
+    shape.PackageJsonFile({
+      shortPath: normalize('packages/bar/package.json'),
+    }),
+  ]);
+  expect(ctx).toEqual(
+    expect.objectContaining({
+      packageJsonFilesByName: expect.any(Object),
+    }),
+  );
+});
+
+describe('finds package.json files', () => {
+  test('in .syncpackrc', () => {
+    const scenario = createScenario({
+      '.syncpackrc': {
+        source: ['apps/**'],
+      },
+      'apps/bar/package.json': {
+        name: 'bar',
+      },
+      'package.json': {
+        name: 'foo',
+      },
+    })();
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {
+        source: ['apps/**'],
+      },
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: normalize('apps/bar/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in --source options', () => {
+    const scenario = createScenario(
+      {
+        '.syncpackrc': {
+          source: ['apps/**'],
+        },
+        'apps/bar/package.json': {
+          name: 'bar',
+        },
+        'apps/baz/package.json': {
+          name: 'baz',
+        },
+        'package.json': {
+          name: 'foo',
+        },
+      },
+      {
+        source: ['apps/baz/package.json'],
+      },
+    )();
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {
+        source: ['apps/**'],
+      },
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: normalize('apps/baz/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in `.workspaces.packages` for yarn', () => {
+    const scenario = createScenario({
+      'package.json': {
+        name: 'foo',
+        workspaces: {
+          packages: ['apps/**'],
+        },
+      },
+      'apps/bar/package.json': {
+        name: 'bar',
+      },
+    })();
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {},
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+      shape.PackageJsonFile({
+        shortPath: normalize('apps/bar/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in `.workspaces` for yarn', () => {
+    const scenario = createScenario({
+      'package.json': {
+        name: 'foo',
+        workspaces: ['apps/**'],
+      },
+      'apps/bar/package.json': {
+        name: 'bar',
+      },
+    })();
+
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {},
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+      shape.PackageJsonFile({
+        shortPath: normalize('apps/bar/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in pnpm-workspace.yaml', () => {
+    const scenario = createScenario({
+      'package.json': {
+        name: 'foo',
+      },
+      'apps/bar/package.json': {
+        name: 'bar',
+      },
+      'pnpm-workspace.yaml': {
+        packages: ['apps/**'],
+      },
+    })();
+
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {},
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+      shape.PackageJsonFile({
+        shortPath: normalize('apps/bar/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in lerna.json when pnpm-workspace.yaml is invalid', () => {
+    const scenario = createScenario({
+      'package.json': {
+        name: 'foo',
+      },
+      'apps/bar/package.json': {
+        name: 'bar',
+      },
+      'components/baz/package.json': {
+        name: 'baz',
+      },
+      'lerna.json': {
+        packages: ['components/**'],
+      },
+      'pnpm-workspace.yaml': {
+        packages: ['apps/**'],
+      },
+    })();
+    const spy = jest.spyOn(scenario.io.readYamlFile, 'sync');
+    spy.mockImplementation(() => {
+      throw new Error('some error');
     });
 
-    describe('when no --source cli options are given', () => {
-      it('performs a default search', () => {
-        const env = createMockEnv();
-        runContextSync({}, env, () => {
-          expect(env.globSync).toHaveBeenCalledWith(['package.json', 'packages/*/package.json']);
-          expect(env.globSync).toHaveBeenCalledTimes(1);
-        });
-      });
-
-      describe('when yarn workspaces are defined', () => {
-        describe('as an array', () => {
-          it('resolves yarn workspace packages', () => {
-            const filePath = join(CWD, 'package.json');
-            const contents = { workspaces: ['as-array/*'] };
-            const json = JSON.stringify(contents);
-            const env = createMockEnv();
-            env.globSync.mockReturnValue([filePath]);
-            env.readFileSync.mockReturnValue(json);
-            runContextSync({}, env, () => {
-              expect(env.globSync).toHaveBeenCalledWith([
-                'package.json',
-                'as-array/*/package.json',
-              ]);
-              expect(env.globSync).toHaveBeenCalledTimes(1);
-            });
-          });
-        });
-
-        describe('as an object', () => {
-          it('resolves yarn workspace packages', () => {
-            const filePath = join(CWD, 'package.json');
-            const contents = { workspaces: { packages: ['as-object/*'] } };
-            const json = JSON.stringify(contents);
-            const env = createMockEnv();
-            env.globSync.mockReturnValue([filePath]);
-            env.readFileSync.mockReturnValue(json);
-            runContextSync({}, env, () => {
-              expect(env.globSync).toHaveBeenCalledWith([
-                'package.json',
-                'as-object/*/package.json',
-              ]);
-              expect(env.globSync).toHaveBeenCalledTimes(1);
-            });
-          });
-        });
-      });
-
-      describe('when yarn workspaces are not defined', () => {
-        describe('when lerna.json is defined', () => {
-          it('resolves lerna packages', () => {
-            const filePath = join(CWD, 'package.json');
-            const contents = { name: 'foo' };
-            const json = JSON.stringify(contents);
-            const env = createMockEnv();
-            env.globSync.mockReturnValue([filePath]);
-            env.readFileSync.mockImplementation((filePath) => {
-              if (filePath.endsWith('package.json')) return json;
-              if (filePath.endsWith('lerna.json')) return JSON.stringify({ packages: ['lerna/*'] });
-            });
-            runContextSync({}, env, () => {
-              expect(env.globSync).toHaveBeenCalledWith(['package.json', 'lerna/*/package.json']);
-              expect(env.globSync).toHaveBeenCalledTimes(1);
-            });
-          });
-        });
-
-        describe('when lerna.json is not defined', () => {
-          describe('when pnpm config is present', () => {
-            describe('when pnpm workspaces are defined', () => {
-              it('resolves pnpm packages', () => {
-                const filePath = join(CWD, 'package.json');
-                const env = createMockEnv();
-                env.globSync.mockReturnValue([filePath]);
-                env.readYamlFileSync.mockReturnValue({
-                  packages: ['from-pnpm/*'],
-                });
-                runContextSync({}, env, () => {
-                  expect(env.globSync).toHaveBeenCalledWith([
-                    'package.json',
-                    'from-pnpm/*/package.json',
-                  ]);
-                  expect(env.globSync).toHaveBeenCalledTimes(1);
-                });
-              });
-            });
-
-            describe('when pnpm config is invalid', () => {
-              it('performs a default search', () => {
-                const filePath = join(CWD, 'package.json');
-                const env = createMockEnv();
-                env.globSync.mockReturnValue([filePath]);
-                env.readYamlFileSync.mockImplementation(() => {
-                  throw new Error('Some YAML Error');
-                });
-                runContextSync({}, env, () => {
-                  expect(env.globSync).toHaveBeenCalledWith([
-                    'package.json',
-                    'packages/*/package.json',
-                  ]);
-                  expect(env.globSync).toHaveBeenCalledTimes(1);
-                });
-              });
-            });
-          });
-        });
-      });
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {},
     });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+      shape.PackageJsonFile({
+        shortPath: normalize('components/baz/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in defaults when lerna.json is invalid', () => {
+    const scenario = createScenario({
+      'package.json': {
+        name: 'foo',
+      },
+      'packages/bar/package.json': {
+        name: 'bar',
+      },
+      'lerna.json': 'NOT-VALID-JSON',
+    })();
+
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {},
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+      shape.PackageJsonFile({
+        shortPath: normalize('packages/bar/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in defaults when lerna.json does not have the required data', () => {
+    const scenario = createScenario({
+      'package.json': {
+        name: 'foo',
+      },
+      'packages/bar/package.json': {
+        name: 'bar',
+      },
+      'lerna.json': {
+        something: 'else',
+      },
+    })();
+
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {},
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+      shape.PackageJsonFile({
+        shortPath: normalize('packages/bar/package.json'),
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+});
+
+describe('finds syncpack config file', () => {
+  test('in .syncpackrc', () => {
+    const scenario = createScenario({
+      '.syncpackrc': {
+        dependencyTypes: ['prod'],
+      },
+      'package.json': {
+        name: 'foo',
+      },
+    })();
+
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {
+        dependencyTypes: ['prod'],
+      },
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('when alternative configPath is given', () => {
+    const scenario = createScenario(
+      {
+        '.foorc': {
+          dependencyTypes: ['dev'],
+        },
+        '.syncpackrc': {
+          dependencyTypes: ['prod'],
+        },
+        'package.json': {
+          name: 'foo',
+        },
+      },
+      {
+        configPath: '.foorc',
+      },
+    )();
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {
+        dependencyTypes: ['dev'],
+      },
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+    ]);
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
+  });
+
+  test('in package.json when no .syncpackrc is present', () => {
+    const scenario = createScenario({
+      'package.json': {
+        name: 'foo',
+        config: {
+          syncpack: {
+            dependencyTypes: ['peer'],
+          },
+        },
+      },
+    })();
+
+    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    expect(ctx).toHaveProperty('config', {
+      cli: scenario.cli,
+      rcFile: {
+        dependencyTypes: ['peer'],
+      },
+    });
+    expect(ctx).toHaveProperty('packageJsonFiles', [
+      shape.PackageJsonFile({
+        shortPath: 'package.json',
+      }),
+    ]);
+
+    expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 });

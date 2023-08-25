@@ -3,32 +3,42 @@ id: banned
 title: Banned
 ---
 
+import BanAlwaysExample from '../../partials/examples/_ban-always.mdx';
+import BanTypesExample from '../../partials/examples/_ban-types.mdx';
+import Dependencies from '@site/docs/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/docs/partials/group-config/_dependency-types.mdx';
+import Label from '@site/docs/partials/group-config/_label.mdx';
+import Packages from '@site/docs/partials/group-config/_packages.mdx';
 import Pills from '@site/src/components/pill';
-import Packages from '@site/src/partials/version-group-config/packages.mdx';
-import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
-import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
-import Label from '@site/src/partials/version-group-config/label.mdx';
 
-# Banned
+Find and remove dependencies which you've decided should never be used.
 
-Remove dependencies which you've decided should never be used.
+## Examples
 
-:::info
+<details>
+  <summary>Example: Completely ban a dependency from being used</summary>
+  <BanAlwaysExample level="h3" />
+</details>
 
-- One of the possible values for the [`versionGroups`](../version-groups.mdx) configuration array.
-- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
+<details>
+  <summary>
+    Example: Ensure <code>@types</code> are only installed as <code>devDependencies</code>
+  </summary>
+  <BanTypesExample level="h3" />
+</details>
 
-:::
+## Configuration
 
-## `isBanned` boolean
+### isBanned
 
 <Pills required />
 
-```json title="Completely ban a dependency from being used anywhere"
+This property activates this behaviour for a given Version Group.
+
+```json title=".syncpackrc"
 {
   "versionGroups": [
     {
-      "packages": ["**"],
       "dependencies": ["never-gonna"],
       "isBanned": true
     }
@@ -36,31 +46,18 @@ Remove dependencies which you've decided should never be used.
 }
 ```
 
-```json title="Ban a dependency from being used in production"
-{
-  "versionGroups": [
-    {
-      "packages": ["my-fast-ui"],
-      "dependencies": ["huge-filesize-party"],
-      "dependencyTypes": ["prod"],
-      "isBanned": true
-    }
-  ]
-}
-```
-
-## `packages` string[]
-
-<Packages />
-
-## `dependencies` string[]
+### dependencies
 
 <Dependencies />
 
-## `dependencyTypes` string[]
+### dependencyTypes
 
 <DependencyTypes />
 
-## `label` string
+### label
 
 <Label />
+
+### packages
+
+<Packages />

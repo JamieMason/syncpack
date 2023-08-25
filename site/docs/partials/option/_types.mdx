@@ -1,0 +1,20 @@
+import CodeBlock from '@theme/CodeBlock';
+import Link from '@docusaurus/Link';
+
+```
+-t, --types <names>
+```
+
+<p>
+  Override your <Link to="/config/dependency-types">dependencyTypes</Link> configuration to run <code>syncpack {props.command}</code> on only eg. <code>peerDependencies</code> in every package in your monorepo.
+</p>
+
+<CodeBlock language="bash">
+  {`# only include peerDependencies
+syncpack ${props.command} --types 'peer'
+# only include dependencies and devDependencies
+syncpack ${props.command} --types 'prod,dev'
+# exclude local package.json versions
+syncpack ${props.command} --types '!local'
+`.trim()}
+</CodeBlock>

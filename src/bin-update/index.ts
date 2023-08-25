@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { defaultEnv } from '../env/default-env';
+import { Effect } from 'effect';
+import { io } from '../io';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { update } from './update';
@@ -51,13 +51,10 @@ program
   .parse(process.argv);
 
 Effect.runPromise<never, unknown>(
-  update(
-    {
-      configPath: program.opts().config,
-      filter: program.opts().filter,
-      source: program.opts().source,
-      types: program.opts().types,
-    },
-    defaultEnv,
-  ),
+  update(io, {
+    configPath: program.opts().config,
+    filter: program.opts().filter,
+    source: program.opts().source,
+    types: program.opts().types,
+  }),
 );

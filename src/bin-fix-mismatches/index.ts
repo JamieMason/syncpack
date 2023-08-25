@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { defaultEnv } from '../env/default-env';
+import { Effect } from 'effect';
+import { io } from '../io';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { fixMismatches } from './fix-mismatches';
@@ -62,14 +62,14 @@ program
   .parse(process.argv);
 
 Effect.runSync<never, unknown>(
-  fixMismatches(
-    {
+  fixMismatches({
+    io,
+    cli: {
       configPath: program.opts().config,
       filter: program.opts().filter,
       indent: program.opts().indent,
       source: program.opts().source,
       types: program.opts().types,
     },
-    defaultEnv,
-  ),
+  }),
 );

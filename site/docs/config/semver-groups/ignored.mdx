@@ -4,20 +4,14 @@ title: Ignored
 ---
 
 import Pills from '@site/src/components/pill';
-import Packages from '@site/src/partials/version-group-config/packages.mdx';
-import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
-import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
-import Label from '@site/src/partials/version-group-config/label.mdx';
+import Packages from '@site/docs/partials/group-config/_packages.mdx';
+import Dependencies from '@site/docs/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/docs/partials/group-config/_dependency-types.mdx';
+import Label from '@site/docs/partials/group-config/_label.mdx';
 
 # Ignored
 
-Have syncpack ignore these dependencies completely.
-
-:::info
-
-One of the possible values for the [`semverGroups`](../semver-groups.mdx) configuration array.
-
-:::
+Have syncpack ignore the semver ranges of these dependencies completely.
 
 ## `isIgnored` boolean
 
@@ -35,18 +29,18 @@ One of the possible values for the [`semverGroups`](../semver-groups.mdx) config
 }
 ```
 
-## `packages` string[]
-
-<Packages />
-
-## `dependencies` string[]
+### dependencies
 
 <Dependencies />
 
-## `dependencyTypes` string[]
+### dependencyTypes
 
 <DependencyTypes />
 
-## `label` string
+### label
 
 <Label />
+
+### packages
+
+<Packages />

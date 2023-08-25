@@ -1,28 +1,154 @@
-import * as Context from '@effect/data/Context';
-import { pipe } from '@effect/data/Function';
-import * as Effect from '@effect/io/Effect';
+import chalk from 'chalk';
+import { Context, Effect, pipe } from 'effect';
+import { isObject } from 'tightrope/guard/is-object';
+import { isUndefined } from 'tightrope/guard/is-undefined';
+import { logIgnoredSize } from '../bin-lint-semver-ranges/lint-semver-ranges';
+import {
+  logMissingLocalVersion,
+  logMissingSnappedToMismatch,
+  logSameRangeMismatch,
+  logUnsupportedMismatch,
+} from '../bin-list-mismatches/list-mismatches';
 import { CliConfigTag } from '../config/tag';
 import { type CliConfig } from '../config/types';
-import { createVersionsProgram } from '../create-program/versions';
-import { createEnv } from '../env/create-env';
-import type { DefaultEnv } from '../env/default-env';
-import { exitIfInvalid } from '../env/exit-if-invalid';
-import { EnvTag } from '../env/tags';
-import { writeIfChanged } from '../env/write-if-changed';
-import { createErrorHandlers } from '../error-handlers/create-error-handlers';
-import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import { ICON } from '../constants';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
+import { chainErrorHandlers, defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import type { Ctx } from '../get-context';
 import { getContext } from '../get-context';
-import { fixMismatchesEffects } from './effects';
+import { getInstances } from '../get-instances';
+import type { Io } from '../io';
+import { IoTag } from '../io';
+import { exitIfInvalid } from '../io/exit-if-invalid';
+import { writeIfChanged } from '../io/write-if-changed';
+import { getVersionGroupHeader } from '../lib/get-group-header';
+import { padStart } from '../lib/pad-start';
+import { withLogger } from '../lib/with-logger';
+import type { Report } from '../report';
+import { DELETE } from '../version-group/lib/delete';
 
-export function fixMismatches(cli: Partial<CliConfig>, env: DefaultEnv) {
+interface Input {
+  io: Io;
+  cli: Partial<CliConfig>;
+  errorHandlers?: ErrorHandlers;
+}
+
+export function fixMismatches({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
   return pipe(
-    getContext(),
-    Effect.flatMap((ctx) => createVersionsProgram(ctx, fixMismatchesEffects)),
-    Effect.flatMap(writeIfChanged),
-    Effect.flatMap(exitIfInvalid),
-    Effect.catchTags(createErrorHandlers(defaultErrorHandlers)),
-    Effect.provideContext(
-      pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(EnvTag, createEnv(env))),
+    getContext({ io, cli, errorHandlers }),
+    Effect.flatMap((ctx) =>
+      pipe(
+        Effect.gen(function* ($) {
+          const { versionGroups } = yield* $(getInstances(ctx, io, errorHandlers));
+          let index = 0;
+          for (const group of versionGroups) {
+            const groupSize = group.instances.length;
+            let fixedCount = 0;
+            let unfixableCount = 0;
+            let validCount = 0;
+
+            if (group._tag === 'FilteredOut') {
+              index++;
+              continue;
+            }
+
+            yield* $(Effect.logInfo(getVersionGroupHeader({ group, index })));
+
+            if (group._tag === 'Ignored') {
+              yield* $(logIgnoredSize(groupSize));
+              index++;
+              continue;
+            }
+
+            for (const groupReport of yield* $(group.inspectAll())) {
+              for (const report of groupReport.reports) {
+                const _tag = report._tag;
+                if (_tag === 'Valid') {
+                  validCount++;
+                } else if (
+                  _tag === 'Banned' ||
+                  _tag === 'HighestSemverMismatch' ||
+                  _tag === 'LocalPackageMismatch' ||
+                  _tag === 'LowestSemverMismatch' ||
+                  _tag === 'PinnedMismatch' ||
+                  _tag === 'SemverRangeMismatch' ||
+                  _tag === 'SnappedToMismatch'
+                ) {
+                  fixedCount++;
+                  yield* $(fixMismatch(report));
+                } else if (_tag === 'MissingLocalVersion') {
+                  ctx.isInvalid = true;
+                  unfixableCount++;
+                  yield* $(logMissingLocalVersion(report));
+                } else if (_tag === 'MissingSnappedToMismatch') {
+                  ctx.isInvalid = true;
+                  unfixableCount++;
+                  yield* $(logMissingSnappedToMismatch(report));
+                } else if (_tag === 'UnsupportedMismatch') {
+                  ctx.isInvalid = true;
+                  unfixableCount++;
+                  yield* $(logUnsupportedMismatch(report));
+                } else if (_tag === 'SameRangeMismatch') {
+                  ctx.isInvalid = true;
+                  unfixableCount++;
+                  yield* $(logSameRangeMismatch(report));
+                }
+              }
+            }
+
+            if (validCount) yield* $(logAlreadyValidSize(validCount));
+            if (fixedCount) yield* $(logFixedSize(fixedCount));
+            if (unfixableCount) yield* $(logUnfixableSize(unfixableCount));
+
+            index++;
+          }
+
+          yield* $(removeEmptyObjects(ctx));
+
+          return ctx;
+        }),
+        Effect.flatMap(writeIfChanged),
+        Effect.catchTags(chainErrorHandlers(ctx, errorHandlers)),
+        Effect.flatMap(exitIfInvalid),
+      ),
     ),
+    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    withLogger,
   );
+}
+
+export function fixMismatch(report: Report.Version.Fixable.Any) {
+  return report.fixable.instance.write(report._tag === 'Banned' ? DELETE : report.fixable.raw);
+}
+
+/** Remove empty objects such as `{"dependencies": {}}` left after deleting */
+function removeEmptyObjects(ctx: Ctx) {
+  return Effect.sync(() => {
+    ctx.packageJsonFiles.forEach((file) => {
+      const contents = file.jsonFile.contents;
+      Object.keys(contents).forEach((key) => {
+        const value = contents[key];
+        if (isObject(value) && Object.values(value).every(isUndefined)) {
+          delete contents[key];
+        }
+      });
+    });
+  });
+}
+
+export function logAlreadyValidSize(amount: number) {
+  const msg = chalk`${padStart(amount)} {green ${ICON.tick}} already valid`;
+  return Effect.logInfo(msg);
+}
+
+export function logFixedSize(amount: number) {
+  const msg = chalk`${padStart(amount)} {green ${ICON.tick}} fixed`;
+  return Effect.logInfo(msg);
+}
+
+export function logUnfixableSize(amount: number) {
+  const msg = chalk`{red ${padStart(amount)} ${
+    ICON.panic
+  } can be fixed manually using} {blue syncpack prompt}`;
+  return Effect.logInfo(msg);
 }

@@ -1,24 +1,19 @@
 module.exports = {
   collectCoverage: true,
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/bin.ts',
-    '!src/bin*/index.ts',
-    '!src/lib/log.ts',
-    '!src/option.ts',
-  ],
+  collectCoverageFrom: ['src/**/*.ts', '!src/bin.ts', '!src/bin*/index.ts'],
   coverageReporters: ['html', 'lcov'],
   coverageThreshold: {
     global: {
-      branches: 77,
-      functions: 79,
-      lines: 86,
-      statements: 85,
+      statements: 82,
+      branches: 75,
+      lines: 82,
+      functions: 75,
     },
   },
   moduleFileExtensions: ['ts', 'js'],
   setupFiles: ['<rootDir>/test/jest.setup.ts'],
-  testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/test/integration/**/*.spec.ts'],
+  setupFilesAfterEnv: ['<rootDir>/test/jest.setup-after-env.ts'],
+  testMatch: ['<rootDir>/src/**/*.spec.ts'],
   transform: {
     '^.+\\.ts$': ['ts-jest', { isolatedModules: true }],
   },

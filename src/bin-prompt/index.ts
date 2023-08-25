@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { defaultEnv } from '../env/default-env';
+import { Effect } from 'effect';
+import { io } from '../io';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { prompt } from './prompt';
@@ -27,6 +27,8 @@ program.on('--help', () => {
   syncpack prompt --types dev
   {dim # only inspect "devDependencies" and "peerDependencies"}
   syncpack prompt --types dev,peer
+  {dim # indent package.json with 4 spaces instead of 2}
+  syncpack prompt --indent {yellow "    "}
 
 Resolving Packages:
   1. If {yellow --source} globs are provided, use those.
@@ -50,16 +52,18 @@ program
   .option(...option.filter)
   .option(...option.config)
   .option(...option.types)
+  .option(...option.indent)
   .parse(process.argv);
 
 Effect.runPromise<never, unknown>(
-  prompt(
-    {
+  prompt({
+    io,
+    cli: {
       configPath: program.opts().config,
       filter: program.opts().filter,
       source: program.opts().source,
       types: program.opts().types,
+      indent: program.opts().indent,
     },
-    defaultEnv,
-  ),
+  }),
 );

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { defaultEnv } from '../env/default-env';
+import { Effect } from 'effect';
+import { io } from '../io';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { setSemverRanges } from './set-semver-ranges';
@@ -28,12 +28,6 @@ Examples:
   syncpack set-semver-ranges --source {yellow "apps/*/package.json"} --source {yellow "core/*/package.json"}
   {dim # uses dependencies regular expression defined by --filter when provided}
   syncpack set-semver-ranges --filter {yellow "typescript|tslint"}
-  {dim # use ~ range instead of default ""}
-  syncpack set-semver-ranges --semver-range ~
-  {dim # set ~ range in "devDependencies"}
-  syncpack set-semver-ranges --types dev --semver-range ~
-  {dim # set ~ range in "devDependencies" and "peerDependencies"}
-  syncpack set-semver-ranges --types dev,peer --semver-range ~
   {dim # indent package.json with 4 spaces instead of 2}
   syncpack set-semver-ranges --indent {yellow "    "}
 
@@ -68,21 +62,19 @@ program
   .option(...option.source)
   .option(...option.filter)
   .option(...option.config)
-  .option(...option.semverRange)
   .option(...option.types)
   .option(...option.indent)
   .parse(process.argv);
 
 Effect.runSync<never, unknown>(
-  setSemverRanges(
-    {
+  setSemverRanges({
+    io,
+    cli: {
       configPath: program.opts().config,
       filter: program.opts().filter,
       indent: program.opts().indent,
-      semverRange: program.opts().semverRange,
       source: program.opts().source,
       types: program.opts().types,
     },
-    defaultEnv,
-  ),
+  }),
 );

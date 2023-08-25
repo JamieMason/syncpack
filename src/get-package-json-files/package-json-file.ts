@@ -1,14 +1,13 @@
-import { pipe } from '@effect/data/Function';
-import { map } from 'tightrope/result/map';
+import { Effect, pipe } from 'effect';
+import type { RcFile } from '..';
 import type { Strategy } from '../config/get-custom-types';
-import type { JsonFile } from '../env/tags';
 import type { Ctx } from '../get-context';
-import type { Instance } from '../instance';
-import { createInstance } from '../instance/create';
-import { logVerbose } from '../lib/log-verbose';
+import { Instance } from '../get-instances/instance';
+import type { JsonFile } from '../io/read-json-file-sync';
 
-export interface PackageJson {
+export type PackageJson = {
   bugs?: { url: string } | string;
+  config?: { syncpack?: RcFile };
   dependencies?: Record<string, string>;
   description?: string;
   devDependencies?: Record<string, string>;
@@ -24,42 +23,63 @@ export interface PackageJson {
   scripts?: Record<string, string>;
   version?: string;
   workspaces?: string[] | { packages?: string[] };
-  [otherProps: string]:
-    | Record<string, string | string[] | Record<string, string | string[]>>
-    | string
-    | string[]
-    | undefined;
-}
+} & Record<
+  string,
+  | Record<string, string | string[] | Record<string, string | string[]>>
+  | string
+  | string[]
+  | undefined
+>;
 
 export class PackageJsonFile {
   /** resolved configuration */
   readonly config: Ctx['config'];
+  /** ensure only one set of instances is ever created and shared */
+  private _instances: Instance[] | null;
 
   /** the wrapped package.json file */
   jsonFile: JsonFile<PackageJson>;
 
+  /** the .name property from the package.json file */
+  name: string | undefined;
+
   constructor(jsonFile: JsonFile<PackageJson>, config: Ctx['config']) {
+    this._instances = null;
     this.config = config;
     this.jsonFile = jsonFile;
+    this.name = jsonFile.contents.name;
   }
 
-  getInstances(enabledTypes: Strategy.Any[]): Instance.Any[] {
-    const instances: Instance.Any[] = [];
-
-    enabledTypes.forEach((strategy) => {
-      pipe(
-        strategy.read(this),
-        map((entries) =>
-          entries.forEach(([name, specifier]) => {
-            logVerbose(
-              `add ${name}@${specifier} to ${strategy.name}:${strategy._tag} ${this.jsonFile.shortPath}`,
-            );
-            instances.push(createInstance(strategy, name, this, specifier));
+  getInstances(enabledTypes: Strategy.Any[]): Effect.Effect<never, never, Instance[]> {
+    if (!this._instances) {
+      return pipe(
+        Effect.all(
+          enabledTypes.map((strategy) =>
+            pipe(
+              strategy.read(this),
+              Effect.map((entries) =>
+                entries.map(
+                  ([name, rawSpecifier]) => new Instance(name, rawSpecifier, this, strategy),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Effect.map((array) => array.flat()),
+        Effect.tapBoth({
+          onSuccess: (instances) =>
+            Effect.logDebug(`found ${instances.length} instances in <${this.jsonFile.shortPath}>`),
+          onFailure: () =>
+            Effect.logError(`failed to get instances from <${this.jsonFile.shortPath}>`),
+        }),
+        Effect.catchAll(() => Effect.succeed([])),
+        Effect.tap((instances) =>
+          Effect.sync(() => {
+            this._instances = instances;
           }),
         ),
       );
-    });
-
-    return instances;
+    }
+    return Effect.succeed(this._instances);
   }
 }

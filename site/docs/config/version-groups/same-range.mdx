@@ -4,54 +4,56 @@ title: Same Range
 ---
 
 import Pills from '@site/src/components/pill';
-import Packages from '@site/src/partials/version-group-config/packages.mdx';
-import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
-import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
-import Label from '@site/src/partials/version-group-config/label.mdx';
+import Packages from '@site/docs/partials/group-config/_packages.mdx';
+import Dependencies from '@site/docs/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/docs/partials/group-config/_dependency-types.mdx';
+import Label from '@site/docs/partials/group-config/_label.mdx';
+import Example from '../../partials/examples/_same-range.mdx';
 
-# Same Range
+Relax syncpack to ensure that all versions have semver ranges which all satisfy each other, instead of having to be identical.
 
-Relax syncpack to ensure that all versions have semver ranges which all satisfy each other, instead
-of the default behaviour of them having to be identical.
+## Examples
 
-:::info
+<details>
+  <summary>
+    Example: Check that a dependency's semver ranges always match
+  </summary>
 
-- One of the possible values for the [`versionGroups`](../version-groups.mdx) configuration array.
-- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
+<Example level="h3" />
 
-:::
+</details>
 
-## `policy` "sameRange"
+## Configuration
+
+### policy
 
 <Pills required />
 
-Currently the only custom policy in syncpack is "sameRange", which is what causes this version group
-to be used.
+Currently the only custom policy in syncpack is "sameRange", which is what causes this behaviour to be applied to a Version Group.
 
-```json title="..."
+```json title=".syncpackrc"
 {
   "versionGroups": [
     {
-      "dependencies": ["**"],
-      "packages": ["**"],
+      "dependencies": ["prod", "dev", "peer"],
       "policy": "sameRange"
     }
   ]
 }
 ```
 
-## `packages` string[]
-
-<Packages />
-
-## `dependencies` string[]
+### dependencies
 
 <Dependencies />
 
-## `dependencyTypes` string[]
+### dependencyTypes
 
 <DependencyTypes />
 
-## `label` string
+### label
 
 <Label />
+
+### packages
+
+<Packages />

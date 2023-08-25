@@ -1,0 +1,17 @@
+import CodeBlock from '@theme/CodeBlock';
+
+```
+-f, --filter [pattern]
+```
+
+<p>
+  Only run <code>syncpack {props.command}</code> on dependencies whose names match the given string, which will be passed to <code>new RegExp()</code>.
+</p>
+
+<CodeBlock language="bash">
+  {`# only include react, react-dom, preact etc
+syncpack ${props.command} --types 'react'
+# only include typescript or eslint packages
+syncpack ${props.command} --types 'typescript|eslint'
+`.trim()}
+</CodeBlock>

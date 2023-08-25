@@ -1,12 +1,23 @@
-import { Err, Ok } from 'tightrope/result';
-import { mockPackage } from '../../test/lib/mock';
-import { PackageJsonFile } from '../get-package-json-files/package-json-file';
+import { Effect } from 'effect';
+import type { TestScenario } from '../../test/lib/create-scenario';
+import { createScenario } from '../../test/lib/create-scenario';
 import { VersionsByNameStrategy } from './versions-by-name';
+
+function getRootPackage(filesByName: TestScenario['filesByName']) {
+  return createScenario(filesByName)().getRootPackage();
+}
 
 it('gets and sets names and versions in an object', () => {
   const strategy = new VersionsByNameStrategy('local', 'dependencies');
-  const jsonFile = mockPackage('foo', { deps: ['bar@1.2.3', 'baz@4.4.4'] });
-  const file = new PackageJsonFile(jsonFile, {} as any);
+  const file = getRootPackage({
+    'package.json': {
+      name: 'foo',
+      dependencies: {
+        bar: '1.2.3',
+        baz: '4.4.4',
+      },
+    },
+  });
   const initial = [
     ['bar', '1.2.3'],
     ['baz', '4.4.4'],
@@ -15,17 +26,24 @@ it('gets and sets names and versions in an object', () => {
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(strategy.read(file)).toEqual(new Ok(initial));
-  expect(strategy.write(file, ['bar', '2.0.0'])).toEqual(new Ok(file));
-  expect(strategy.read(file)).toEqual(new Ok(updated));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(initial));
+  expect(Effect.runSyncExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(updated));
 });
 
 it('gets and sets a name and version from a single string nested location', () => {
   const strategy = new VersionsByNameStrategy('custom', 'deeper.deps');
-  const jsonFile = mockPackage('foo', {
-    otherProps: { deeper: { deps: { bar: '1.2.3', baz: '4.4.4' } } },
+  const file = getRootPackage({
+    'package.json': {
+      name: 'foo',
+      deeper: {
+        deps: {
+          bar: '1.2.3',
+          baz: '4.4.4',
+        },
+      },
+    },
   });
-  const file = new PackageJsonFile(jsonFile, {} as any);
   const initial = [
     ['bar', '1.2.3'],
     ['baz', '4.4.4'],
@@ -34,14 +52,17 @@ it('gets and sets a name and version from a single string nested location', () =
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(strategy.read(file)).toEqual(new Ok(initial));
-  expect(strategy.write(file, ['bar', '2.0.0'])).toEqual(new Ok(file));
-  expect(strategy.read(file)).toEqual(new Ok(updated));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(initial));
+  expect(Effect.runSyncExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(updated));
 });
 
-it('returns new Err when path is not found', () => {
+it('returns empty array when path is not found', () => {
   const strategy = new VersionsByNameStrategy('local', 'never.gonna');
-  const jsonFile = mockPackage('foo', {});
-  const file = new PackageJsonFile(jsonFile, {} as any);
-  expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));
+  const file = getRootPackage({
+    'package.json': {
+      name: 'foo',
+    },
+  });
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed([]));
 });

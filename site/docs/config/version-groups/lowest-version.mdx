@@ -1,0 +1,51 @@
+---
+id: lowest-version
+title: Lowest Version
+---
+
+import Pills from '@site/src/components/pill';
+import Packages from '@site/docs/partials/group-config/_packages.mdx';
+import Dependencies from '@site/docs/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/docs/partials/group-config/_dependency-types.mdx';
+import Label from '@site/docs/partials/group-config/_label.mdx';
+
+Fix mismatched versions in this group by choosing the lowest/oldest semver version in use.
+
+## Examples
+
+```json title="Choose the lowest valid semver version when fixing mismatches"
+{
+  "versionGroups": [
+    {
+      "packages": ["**"],
+      "dependencies": ["**"],
+      "dependencyTypes": ["**"],
+      "preferVersion": "lowestSemver"
+    }
+  ]
+}
+```
+
+## Configuration
+
+### preferVersion
+
+<Pills required />
+
+Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

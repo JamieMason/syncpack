@@ -1,47 +1,49 @@
-import { pipe } from '@effect/data/Function';
-import * as O from '@effect/data/Option';
-import * as Effect from '@effect/io/Effect';
-import type { MockEnv } from '../../../test/lib/mock-env';
-import { createMockEnv } from '../../../test/lib/mock-env';
-import { createEnv } from '../../env/create-env';
-import { EnvTag } from '../../env/tags';
+import { Effect, Option as O, pipe } from 'effect';
+import { createScenario, type TestScenario } from '../../../test/lib/create-scenario';
 import { getPnpmPatterns } from './get-pnpm-patterns';
 
-function runSync(mockedEffects: MockEnv, onValue: (value: any) => void) {
-  Effect.runSync(
-    pipe(
-      getPnpmPatterns(),
-      Effect.match({
-        onFailure: onValue,
-        onSuccess: onValue,
-      }),
-      Effect.provideService(EnvTag, createEnv(mockedEffects)),
-    ),
-  );
+function runScenario(getScenario: () => TestScenario) {
+  const scenario = getScenario();
+  return Effect.runSync(pipe(getPnpmPatterns(scenario.io), Effect.merge));
 }
 
 it('returns strings when found', () => {
-  const env = createMockEnv();
-  env.readYamlFileSync.mockReturnValue({ packages: ['a', 'b'] });
-  runSync(env, (value) => {
-    expect(value).toEqual(O.some(['a', 'b']));
-  });
+  expect(
+    runScenario(
+      createScenario({
+        'pnpm-workspace.yaml': {
+          packages: ['apps/**'],
+        },
+      }),
+    ),
+  ).toEqual(O.some(['apps/**']));
 });
 
-it('returns none when a file cannot be read', () => {
-  const env = createMockEnv();
-  env.readYamlFileSync.mockImplementation(() => {
-    throw new Error('Failed to read YAML file');
-  });
-  runSync(env, (value) => {
-    expect(value).toEqual(O.none());
-  });
+it('returns none when pnpm-workspace.yaml cannot be read', () => {
+  expect(runScenario(createScenario({}))).toEqual(O.none());
 });
 
-it('returns none when data is valid YAML but the wrong shape', () => {
-  const env = createMockEnv();
-  env.readYamlFileSync.mockReturnValue({ packages: [1, 2] });
-  runSync(env, (value) => {
-    expect(value).toEqual(O.none());
+it('returns none when pnpm-workspace.yaml is valid YAML but the wrong shape', () => {
+  expect(
+    runScenario(
+      createScenario({
+        'pnpm-workspace.yaml': {
+          wrong: 'shape',
+        },
+      }),
+    ),
+  ).toEqual(O.none());
+});
+
+it('returns none when pnpm-workspace.yaml is invalid', () => {
+  const getScenario = createScenario({
+    'pnpm-workspace.yaml': {
+      see: 'mockFn',
+    },
   });
+  const scenario = getScenario();
+  scenario.mockIo.readYamlFile.sync.mockImplementation(() => {
+    throw new Error('wat?');
+  });
+  expect(Effect.runSync(pipe(getPnpmPatterns(scenario.io), Effect.merge))).toEqual(O.none());
 });

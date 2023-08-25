@@ -25,9 +25,7 @@ describe('setSemverRange', () => {
         expect(setSemverRange(semverRange, '>=1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '>1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '*')).toEqual('*');
-        expect(setSemverRange(semverRange, 'https://github.com/npm/npm.git')).toEqual(
-          'https://github.com/npm/npm.git',
-        );
+        expect(setSemverRange(semverRange, 'https://github.com/npm/npm.git')).toEqual('https://github.com/npm/npm.git');
       });
     });
   });

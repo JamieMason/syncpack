@@ -1,0 +1,81 @@
+---
+id: semver-groups
+title: Semver Groups
+---
+
+import Link from '@docusaurus/Link';
+
+This is an addendum to the <Link to='/guide/getting-started'>Getting Started</Link> guide.
+
+Allow some packages to have different semver range rules to the rest of your monorepo. Each dependency can only belong to one semver group, the first rule which matches a given dependency and package will apply.
+
+## Examples
+
+1: Every dependency of `@myrepo/library` should have a semver range of `~`, regardless of what the rest of the monorepo uses:
+
+```json title=".syncpackrc"
+{
+  "semverGroups": [
+    {
+      "range": "~",
+      "dependencies": ["**"],
+      "packages": ["@myrepo/library"]
+    }
+  ]
+}
+```
+
+2: Every dependency of `@myrepo/library` whose name matches `@alpha/**` should have a semver range of `^`, regardless of what the rest of that package or the rest of the monorepo uses:
+
+```json title=".syncpackrc"
+{
+  "semverGroups": [
+    {
+      "range": "^",
+      "dependencies": ["@alpha/**"],
+      "packages": ["@myrepo/library"]
+    }
+  ]
+}
+```
+
+3: Every dependency in the monorepo whose name matches `@alpha/**` should have a semver range of `~`, regardless of what the rest of the monorepo uses:
+
+```json title=".syncpackrc"
+{
+  "semverGroups": [
+    {
+      "range": "~",
+      "dependencies": ["@alpha/**"],
+      "packages": ["**"]
+    }
+  ]
+}
+```
+
+4: Production dependencies should have fixed version numbers, but development and peer dependencies can be broader.
+
+```json title=".syncpackrc"
+{
+  "semverGroups": [
+    {
+      "range": "",
+      "dependencyTypes": ["prod", "resolutions", "overrides", "pnpmOverrides", "local"],
+      "dependencies": ["**"],
+      "packages": ["**"]
+    },
+    {
+      "range": "~",
+      "dependencyTypes": ["dev"],
+      "dependencies": ["**"],
+      "packages": ["**"]
+    },
+    {
+      "range": "^",
+      "dependencyTypes": ["peer"],
+      "dependencies": ["**"],
+      "packages": ["**"]
+    }
+  ]
+}
+```

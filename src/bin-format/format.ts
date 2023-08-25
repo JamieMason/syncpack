@@ -1,55 +1,81 @@
-import * as Effect from '@effect/io/Effect';
+import { Context, Effect, pipe } from 'effect';
 import { isArray } from 'tightrope/guard/is-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
 import { getSortAz } from '../config/get-sort-az';
 import { getSortFirst } from '../config/get-sort-first';
-import type { Ctx } from '../get-context';
+import { CliConfigTag } from '../config/tag';
+import { type CliConfig } from '../config/types';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
+import { chainErrorHandlers, defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import { getContext } from '../get-context';
+import type { Io } from '../io';
+import { IoTag } from '../io';
+import { exitIfInvalid } from '../io/exit-if-invalid';
+import { writeIfChanged } from '../io/write-if-changed';
+import { withLogger } from '../lib/with-logger';
 
-export function format(ctx: Ctx): Effect.Effect<never, never, Ctx> {
-  const { packageJsonFiles } = ctx;
-  const sortAz = getSortAz(ctx.config);
-  const sortFirst = getSortFirst(ctx.config);
+interface Input {
+  io: Io;
+  cli: Partial<CliConfig>;
+  errorHandlers?: ErrorHandlers;
+}
 
-  packageJsonFiles.forEach((file) => {
-    const { contents } = file.jsonFile;
-    const sortedKeys = Object.keys(contents).sort();
-    const keys = new Set<string>(sortFirst.concat(sortedKeys));
+export function format({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
+  return pipe(
+    getContext({ io, cli, errorHandlers }),
+    Effect.map((ctx) => {
+      const { packageJsonFiles } = ctx;
+      const sortAz = getSortAz(ctx.config);
+      const sortFirst = getSortFirst(ctx.config);
 
-    const optionalChaining: any = contents;
-    const bugsUrl = optionalChaining?.bugs?.url;
-    const repoUrl = optionalChaining?.repository?.url;
-    const repoDir = optionalChaining?.repository?.directory;
+      packageJsonFiles.forEach((file) => {
+        const { contents } = file.jsonFile;
+        const sortedKeys = Object.keys(contents).sort();
+        const keys = new Set<string>(sortFirst.concat(sortedKeys));
 
-    if (bugsUrl) {
-      contents.bugs = bugsUrl;
-    }
+        const optionalChaining: any = contents;
+        const bugsUrl = optionalChaining?.bugs?.url;
+        const repoUrl = optionalChaining?.repository?.url;
+        const repoDir = optionalChaining?.repository?.directory;
 
-    if (isNonEmptyString(repoUrl) && !isNonEmptyString(repoDir)) {
-      contents.repository = repoUrl.includes('github.com')
-        ? repoUrl.replace(/^.+github\.com\//, '')
-        : repoUrl;
-    }
+        if (bugsUrl) {
+          contents.bugs = bugsUrl;
+        }
 
-    sortAz.forEach((key) => sortAlphabetically(contents[key]));
-    sortObject(keys, contents);
-  });
+        if (isNonEmptyString(repoUrl) && !isNonEmptyString(repoDir)) {
+          contents.repository = repoUrl.includes('github.com')
+            ? repoUrl.replace(/^.+github\.com\//, '')
+            : repoUrl;
+        }
 
-  return Effect.succeed(ctx);
+        sortAz.forEach((key) => sortAlphabetically(contents[key]));
+        sortObject(keys, contents);
+      });
 
-  function sortObject(sortedKeys: string[] | Set<string>, obj: Record<string, unknown>): void {
-    sortedKeys.forEach((key: string) => {
-      const value = obj[key];
-      delete obj[key];
-      obj[key] = value;
-    });
-  }
+      return ctx;
 
-  function sortAlphabetically(value: unknown): void {
-    if (isArray(value)) {
-      value.sort();
-    } else if (isObject(value)) {
-      sortObject(Object.keys(value).sort(), value);
-    }
-  }
+      function sortObject(sortedKeys: string[] | Set<string>, obj: Record<string, unknown>): void {
+        sortedKeys.forEach((key: string) => {
+          const value = obj[key];
+          delete obj[key];
+          obj[key] = value;
+        });
+      }
+
+      function sortAlphabetically(value: unknown): void {
+        if (isArray(value)) {
+          value.sort();
+        } else if (isObject(value)) {
+          sortObject(Object.keys(value).sort(), value);
+        }
+      }
+    }),
+    Effect.flatMap((ctx) =>
+      pipe(writeIfChanged(ctx), Effect.catchTags(chainErrorHandlers(ctx, errorHandlers))),
+    ),
+    Effect.flatMap(exitIfInvalid),
+    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    withLogger,
+  );
 }

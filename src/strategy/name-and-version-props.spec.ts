@@ -1,45 +1,89 @@
-import { Err, Ok } from 'tightrope/result';
-import { mockPackage } from '../../test/lib/mock';
-import { PackageJsonFile } from '../get-package-json-files/package-json-file';
+import { Effect } from 'effect';
+import type { TestScenario } from '../../test/lib/create-scenario';
+import { createScenario } from '../../test/lib/create-scenario';
 import { NameAndVersionPropsStrategy } from './name-and-version-props';
 
+function getRootPackage(filesByName: TestScenario['filesByName']) {
+  return createScenario(filesByName)().getRootPackage();
+}
+
 it('gets and sets a name and version from 2 seperate locations', () => {
+  const file = getRootPackage({
+    'package.json': {
+      name: 'foo',
+      version: '1.2.3',
+    },
+  });
   const strategy = new NameAndVersionPropsStrategy('local', 'version', 'name');
-  const jsonFile = mockPackage('foo', { otherProps: { version: '1.2.3' } });
-  const file = new PackageJsonFile(jsonFile, {} as any);
   const initial = [['foo', '1.2.3']];
   const updated = [['foo', '2.0.0']];
-  expect(strategy.read(file)).toEqual(new Ok(initial));
-  expect(strategy.write(file, ['foo', '2.0.0'])).toEqual(new Ok(file));
-  expect(strategy.read(file)).toEqual(new Ok(updated));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(initial));
+  expect(Effect.runSyncExit(strategy.write(file, ['foo', '2.0.0']))).toEqual(Effect.succeed(file));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(updated));
 });
 
 it('gets and sets a name and version from 2 seperate nested locations', () => {
   const strategy = new NameAndVersionPropsStrategy('custom', 'deeper.versionNumber', 'sibling.id');
-  const jsonFile = mockPackage('foo', {
-    otherProps: {
-      sibling: { id: 'some-name' },
-      deeper: { versionNumber: '1.2.3' },
+  const file = getRootPackage({
+    'package.json': {
+      name: 'foo',
+      sibling: {
+        id: 'some-name',
+      },
+      deeper: {
+        versionNumber: '1.2.3',
+      },
     },
   });
-  const file = new PackageJsonFile(jsonFile, {} as any);
   const initial = [['some-name', '1.2.3']];
   const updated = [['some-name', '2.0.0']];
-  expect(strategy.read(file)).toEqual(new Ok(initial));
-  expect(strategy.write(file, ['some-name', '2.0.0'])).toEqual(new Ok(file));
-  expect(strategy.read(file)).toEqual(new Ok(updated));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(initial));
+  expect(Effect.runSyncExit(strategy.write(file, ['some-name', '2.0.0']))).toEqual(Effect.succeed(file));
+  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(updated));
 });
 
-it('returns new Err when namePath is not found', () => {
-  const strategy = new NameAndVersionPropsStrategy('local', 'version', 'never.gonna');
-  const jsonFile = mockPackage('foo', { otherProps: { version: '1.2.3' } });
-  const file = new PackageJsonFile(jsonFile, {} as any);
-  expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));
+describe('when name is "local" used internally for local packages', () => {
+  it('returns empty array when namePath is not found', () => {
+    const strategy = new NameAndVersionPropsStrategy('local', 'version', 'never.gonna');
+    const file = getRootPackage({
+      'package.json': {
+        version: '0.0.0',
+      },
+    });
+    expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed([]));
+  });
+
+  it('returns an entry marked as missing when version (path) is not found', () => {
+    const strategy = new NameAndVersionPropsStrategy('local', 'never.gonna', 'name');
+    const file = getRootPackage({
+      'package.json': {
+        name: 'foo',
+        version: '0.0.0',
+      },
+    });
+    expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed([['foo', 'PACKAGE_JSON_HAS_NO_VERSION']]));
+  });
 });
 
-it('returns new Err when version (path) is not found', () => {
-  const strategy = new NameAndVersionPropsStrategy('local', 'never.gonna', 'name');
-  const jsonFile = mockPackage('foo', {});
-  const file = new PackageJsonFile(jsonFile, {} as any);
-  expect(strategy.read(file)).toEqual(new Err(expect.any(Error)));
+describe('when name is not "local"', () => {
+  it('returns empty array when namePath is not found', () => {
+    const strategy = new NameAndVersionPropsStrategy('someName', 'version', 'never.gonna');
+    const file = getRootPackage({
+      'package.json': {
+        version: '0.0.0',
+      },
+    });
+    expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed([]));
+  });
+
+  it('returns empty array when version (path) is not found', () => {
+    const strategy = new NameAndVersionPropsStrategy('someName', 'never.gonna', 'name');
+    const file = getRootPackage({
+      'package.json': {
+        name: 'foo',
+        version: '0.0.0',
+      },
+    });
+    expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed([]));
+  });
 });

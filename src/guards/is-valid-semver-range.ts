@@ -1,7 +1,7 @@
 import type { SemverRange } from '../config/types';
 import { RANGE } from '../constants';
 
-/** @deprecated */
+/** @deprecated migrate to make better use of npm-package-arg */
 export function isValidSemverRange(value: unknown): value is SemverRange {
   return (
     value === RANGE.ANY ||

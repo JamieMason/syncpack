@@ -1,68 +1,74 @@
-import type * as Effect from '@effect/io/Effect';
-import type { Env } from '../env/create-env';
+import type { Effect } from 'effect';
 import type { Ctx } from '../get-context';
-import type { AnySemverGroup, SemverGroupReport as SR } from '../get-semver-groups';
-import type { AnyVersionGroup, VersionGroupReport as VR } from '../get-version-groups';
+import type { Io } from '../io';
+import type { Report } from '../report';
+import type { SemverGroup } from '../semver-group';
+import type { VersionGroup } from '../version-group';
 
-export interface SemverRangeEffectInput<T> {
+export interface SemverRangeEffectInput<T extends Report.Semver.Any> {
+  _tag: T['_tag'];
   ctx: Ctx;
-  group: AnySemverGroup;
+  group: SemverGroup.Any;
   index: number;
   report: T;
 }
 
-export interface VersionEffectInput<T> {
+export interface VersionEffectInput<T extends Report.Version.Any> {
+  _tag: T['_tag'];
   ctx: Ctx;
-  group: AnyVersionGroup;
+  group: VersionGroup.Any;
   index: number;
   report: T;
 }
 
-export interface SemverRangeEffects<A> {
-  onFilteredOut: (
-    input: SemverRangeEffectInput<SR.FilteredOut>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onIgnored: (input: SemverRangeEffectInput<SR.Ignored>) => Effect.Effect<Env | never, never, A>;
-  onSemverRangeMismatch: (
-    input: SemverRangeEffectInput<SR.SemverRangeMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onNonSemverVersion: (
-    input: SemverRangeEffectInput<SR.NonSemverVersion>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onValid: (input: SemverRangeEffectInput<SR.Valid>) => Effect.Effect<Env | never, never, A>;
-  onLocalPackageSemverRangeMismatch: (
-    input: SemverRangeEffectInput<SR.LocalPackageSemverRangeMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onComplete: (ctx: Ctx, results: A[]) => Effect.Effect<Env | never, never, A>;
+export type Handler<I> = (input: I) => Effect.Effect<Io | never, never, void>;
+type SemverHandler<I extends Report.Semver.Any> = Handler<SemverRangeEffectInput<I>>;
+type VersionHandler<I extends Report.Version.Any> = Handler<VersionEffectInput<I>>;
+
+export interface SemverRangeEffects {
+  // Misc
+  onSemverGroup: Handler<{
+    ctx: Ctx;
+    group: SemverGroup.Any;
+    index: number;
+  }>;
+  // Valid Instances
+  onDisabled: SemverHandler<Report.Disabled>;
+  onFilteredOut: SemverHandler<Report.FilteredOut>;
+  onIgnored: SemverHandler<Report.Ignored>;
+  onValid: SemverHandler<Report.Valid>;
+  // Fixable Instances
+  onSemverRangeMismatch: SemverHandler<Report.SemverRangeMismatch>;
+  // Unfixable Instances
+  onUnsupportedMismatch: SemverHandler<Report.UnsupportedMismatch>;
 }
 
-export interface VersionEffects<A> {
-  onBanned: (input: VersionEffectInput<VR.Banned>) => Effect.Effect<Env | never, never, A>;
-  onFilteredOut: (
-    input: VersionEffectInput<VR.FilteredOut>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onHighestSemverMismatch: (
-    input: VersionEffectInput<VR.HighestSemverMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onIgnored: (input: VersionEffectInput<VR.Ignored>) => Effect.Effect<Env | never, never, A>;
-  onLowestSemverMismatch: (
-    input: VersionEffectInput<VR.LowestSemverMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onPinnedMismatch: (
-    input: VersionEffectInput<VR.PinnedMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onSameRangeMismatch: (
-    input: VersionEffectInput<VR.SameRangeMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onSnappedToMismatch: (
-    input: VersionEffectInput<VR.SnappedToMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onNonSemverMismatch: (
-    input: VersionEffectInput<VR.NonSemverMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onValid: (input: VersionEffectInput<VR.Valid>) => Effect.Effect<Env | never, never, A>;
-  onLocalPackageMismatch: (
-    input: VersionEffectInput<VR.LocalPackageMismatch>,
-  ) => Effect.Effect<Env | never, never, A>;
-  onComplete: (ctx: Ctx, results: A[]) => Effect.Effect<Env | never, never, A>;
+export interface VersionEffects {
+  // Misc
+  onComplete: (ctx: Ctx) => Effect.Effect<never, never, void>;
+  onVersionGroup: Handler<{
+    ctx: Ctx;
+    group: VersionGroup.Any;
+    index: number;
+  }>;
+  // Valid Instances
+  onDisabled: VersionHandler<Report.Disabled>;
+  onFilteredOut: VersionHandler<Report.FilteredOut>;
+  onIgnored: VersionHandler<Report.Ignored>;
+  onValid: VersionHandler<Report.Valid>;
+  // Fixable Instances
+  onFixable: VersionHandler<Report.Version.Fixable.Any>;
+  onBanned: VersionHandler<Report.Banned>;
+  onHighestSemverMismatch: VersionHandler<Report.HighestSemverMismatch>;
+  onLocalPackageMismatch: VersionHandler<Report.LocalPackageMismatch>;
+  onLowestSemverMismatch: VersionHandler<Report.LowestSemverMismatch>;
+  onPinnedMismatch: VersionHandler<Report.PinnedMismatch>;
+  onSemverRangeMismatch: VersionHandler<Report.SemverRangeMismatch>;
+  onSnappedToMismatch: VersionHandler<Report.SnappedToMismatch>;
+  // Unfixable Instances
+  onUnfixable: VersionHandler<Report.Version.Unfixable.Any>;
+  onMissingLocalVersion: VersionHandler<Report.MissingLocalVersion>;
+  onMissingSnappedToMismatch: VersionHandler<Report.MissingSnappedToMismatch>;
+  onUnsupportedMismatch: VersionHandler<Report.UnsupportedMismatch>;
+  onSameRangeMismatch: VersionHandler<Report.SameRangeMismatch>;
 }

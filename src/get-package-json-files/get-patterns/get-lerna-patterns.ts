@@ -1,21 +1,18 @@
-import { pipe } from '@effect/data/Function';
-import * as O from '@effect/data/Option';
-import * as Effect from '@effect/io/Effect';
+import { Effect, Option as O, pipe } from 'effect';
 import { join } from 'path';
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import type { Env } from '../../env/create-env';
-import { EnvTag } from '../../env/tags';
+import type { Io } from '../../io';
+import { readJsonFileSync } from '../../io/read-json-file-sync';
 
 interface LernaJson {
   packages?: string[];
 }
 
-export function getLernaPatterns(): Effect.Effect<Env, never, O.Option<string[]>> {
+export function getLernaPatterns(io: Io): Effect.Effect<never, never, O.Option<string[]>> {
   return pipe(
-    EnvTag,
-    Effect.flatMap((env) => env.readJsonFileSync<LernaJson>(join(env.CWD, 'lerna.json'))),
+    readJsonFileSync<LernaJson>(io, join(io.process.cwd(), 'lerna.json')),
     Effect.map((file) =>
-      isArrayOfStrings(file?.contents?.packages) ? O.some(file.contents.packages) : O.none(),
+      isArrayOfStrings(file.contents.packages) ? O.some(file.contents.packages) : O.none(),
     ),
     Effect.catchTags({
       ReadFileError: () => Effect.succeed(O.none()),

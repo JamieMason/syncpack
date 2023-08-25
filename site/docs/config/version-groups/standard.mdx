@@ -4,54 +4,43 @@ title: Standard
 ---
 
 import Pills from '@site/src/components/pill';
-import Packages from '@site/src/partials/version-group-config/packages.mdx';
-import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
-import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
-import Label from '@site/src/partials/version-group-config/label.mdx';
+import Packages from '@site/docs/partials/group-config/_packages.mdx';
+import Dependencies from '@site/docs/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/docs/partials/group-config/_dependency-types.mdx';
+import Label from '@site/docs/partials/group-config/_label.mdx';
 
-# Standard
+## Configuration
+
+### preferVersion
+
+<Pills optional />
 
 Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
 
-To set this as your standard policy, create a version group which applies to every dependency as the
-last item in your `versionGroups` array. You can also just set this for some of the packages if you
-need to.
-
-:::info
-
-- One of the possible values for the [`versionGroups`](../version-groups.mdx) configuration array.
-- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
-
-:::
-
-## `preferVersion` string
-
-<Pills optional />
+To set this as your standard policy, create a version group which applies to every dependency as the last item in your `versionGroups` array. You can also just set this for some of the packages if you need to.
 
 ```json title="Choose the lowest valid semver version when fixing mismatches"
 {
   "versionGroups": [
     {
-      "dependencies": ["**"],
-      "packages": ["**"],
       "preferVersion": "lowestSemver"
     }
   ]
 }
 ```
 
-## `packages` string[]
-
-<Packages />
-
-## `dependencies` string[]
+### dependencies
 
 <Dependencies />
 
-## `dependencyTypes` string[]
+### dependencyTypes
 
 <DependencyTypes />
 
-## `label` string
+### label
 
 <Label />
+
+### packages
+
+<Packages />

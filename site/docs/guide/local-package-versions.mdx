@@ -1,0 +1,98 @@
+---
+id: local-package-versions
+title: Local Package Versions
+---
+
+import Link from '@docusaurus/Link';
+import { href } from '@site/src/data';
+import PinWorkspaceExample from '../partials/examples/_pin-workspace.mdx';
+import SameRangeExample from '../partials/examples/_same-range.mdx';
+
+This is an addendum to the <Link to='/guide/getting-started'>Getting Started</Link> guide.
+
+When some of the packages developed in your monorepo are installed as dependencies in other packages developed in your monorepo, syncpack can check that the versions used are valid and consistent.
+
+## Target Problem
+
+A Node.js client to communicate with your HTTP API is developed in your repo:
+
+```json title="packages/node-client/package.json"
+{
+  "name": "@your-repo/node-client",
+  "version": "1.2.1"
+}
+```
+
+As-is a front-end application which depends on it:
+
+```json title="apps/dashboard-ui/package.json"
+{
+  "name": "dashboard-ui",
+  "version": "0.3.1",
+  "dependencies": {
+    "@your-repo/node-client": "1.1.4",
+    "@your-repo/node-client-plugin-retry": "1.7.1"
+  }
+}
+```
+
+And a plugin which extends it:
+
+```json title="packages/node-client-plugin-retry/package.json"
+{
+  "name": "@your-repo/node-client-plugin-retry",
+  "version": "1.7.1",
+  "devDependencies": {
+    "@your-repo/node-client": "workspace:*"
+  },
+  "peerDependencies": {
+    "@your-repo/node-client": "^1.0.0"
+  }
+}
+```
+
+The Developers of this project:
+
+1. Provide a Web Service which their customers interact with via their Node.js Client and various Plugins.
+1. The Plugins are developed to be compatible with any version of the Node.js Client in the entire 1.x range, as defined in their `peerDependencies`. Companies around the world depend on this Client and Plugin and there is no reason to impose that all of them must use the same exact version of the Client.
+1. Use the <Link to={href.workspaceProtocol}>pnpm `workspace:*`</Link> protocol to ensure that the local workspace package of the Client is resolved when working locally on the Plugin.
+1. Want exact versions of the Client and its Retry Plugin when running their Dashboard UI in production.
+
+## The `local` dependency type
+
+The "local"{' '}<Link to="/config/dependency-types"><code>dependencyType</code></Link> relates to the<Link to={href.version}><code>version</code></Link> properties of the package.json files from your own packages being developed in your monorepo.
+
+When `local` is enabled, syncpack can see that:
+
+1. ❌ The UI is not using the latest client developed locally (`1.2.1`).
+1. ✅ The UI is using the latest plugin developed locally (`1.7.1`).
+1. ❌ `workspace:*` is not identical to `1.2.1` (see below).
+1. ❌ `^1.0.0` is not identical to `1.2.1` (see below).
+
+## Zero Configuration?
+
+As a sensible default, syncpack defines a monorepo-wide exact version policy as a starting point which can be tuned from there. If your project uses exact versions everywhere, and you always want them to be identical, you will not need to define any configuration.
+
+But most projects are not like that, and we will need to use configuration for syncpack to know what our requirements are.
+
+## Possible Solutions
+
+Let's look at `workspace:*` under `devDependencies` first and decide on a rule for that:
+
+<details>
+  <summary>
+    Option 1: Pin local versions to <code>workspace:*</code>
+  </summary>
+
+<PinWorkspaceExample level="h3" />
+
+</details>
+
+The fix for the Peer Dependency of <code>^1.0.0</code> can also be used to fix the use of <code>workspace:\*</code>. Since the current version of <code>1.2.1</code> of the Client is satisfied by both of these ranges, a <Link to="/config/version-groups/same-range">Same Range Version Group</Link> can be used.
+
+The versions will be considered a match unless eg. `2.0.0` of the Client is released, or one of its dependents uses a range which does not include its current version.
+
+<details>
+  <summary>Option 2: Check that a dependency's semver ranges always match</summary>
+  <SameRangeExample level="h3" />
+</details>

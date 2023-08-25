@@ -19,6 +19,6 @@ node dist/bin.js format
 node dist/bin.js format --source package.json
 node dist/bin.js format --indent "    "
 
-node dist/bin.js lint-semver-ranges --semver-range ""
+node dist/bin.js lint-semver-ranges
 
-node dist/bin.js set-semver-ranges --semver-range ""
+node dist/bin.js set-semver-ranges

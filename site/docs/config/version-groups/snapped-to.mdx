@@ -4,55 +4,57 @@ title: Snapped To
 ---
 
 import Pills from '@site/src/components/pill';
-import Packages from '@site/src/partials/version-group-config/packages.mdx';
-import Dependencies from '@site/src/partials/version-group-config/dependencies.mdx';
-import DependencyTypes from '@site/src/partials/version-group-config/dependency-types.mdx';
-import Label from '@site/src/partials/version-group-config/label.mdx';
+import Packages from '@site/docs/partials/group-config/_packages.mdx';
+import Dependencies from '@site/docs/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/docs/partials/group-config/_dependency-types.mdx';
+import Label from '@site/docs/partials/group-config/_label.mdx';
+import Example from '../../partials/examples/_react-native.mdx';
 
-# Snapped To
+Pin the version of all dependencies in this group to follow the versions used by the other packages named within the `snapTo` array.
 
-Pin the version of all dependencies in this group to match the version used by the package(s) named
-within the `snapTo` array. The values refer to the `name` property of the package.json files
-developed in your monorepo.
+## Examples
 
-Multiple values can be added to provide fallback packages to try in the event that the dependency is
-not present in the earlier packages in the array.
+<details>
+  <summary>
+    Example: Fix React Native version mismatch
+  </summary>
 
-:::info
+<Example level="h3" />
 
-- One of the possible values for the [`versionGroups`](../version-groups.mdx) configuration array.
-- Learn more in our [guide to Version Groups](../../guide/version-groups.mdx).
+</details>
 
-:::
+## Configuration
 
-## `snapTo` string[]
+### snapTo
 
 <Pills required />
 
-```json title="Ensure all packages use whatever version mobile-app is using"
+- The values refer to the `name` property of the package.json files developed in your monorepo.
+- Multiple values can be added to provide fallback packages to try in the event that the dependency is not present in the earlier packages in the array.
+
+```json title="Ensure all packages use whatever version of react that mobile-app is using"
 {
   "versionGroups": [
     {
       "dependencies": ["react", "react-native"],
-      "packages": ["**"],
       "snapTo": ["mobile-app"]
     }
   ]
 }
 ```
 
-## `packages` string[]
-
-<Packages />
-
-## `dependencies` string[]
+### dependencies
 
 <Dependencies />
 
-## `dependencyTypes` string[]
+### dependencyTypes
 
 <DependencyTypes />
 
-## `label` string
+### label
 
 <Label />
+
+### packages
+
+<Packages />

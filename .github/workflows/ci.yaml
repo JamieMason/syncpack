@@ -35,6 +35,7 @@ jobs:
         run: ./test/smoke.sh
 
       - name: Lint
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
         run: yarn lint
         env:
           FORCE_COLOR: 3
@@ -48,7 +49,7 @@ jobs:
 
       - name: Code Climate
         uses: paambaati/codeclimate-action@v3.0.0
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:

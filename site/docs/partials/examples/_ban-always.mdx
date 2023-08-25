@@ -1,0 +1,34 @@
+import Link from '@docusaurus/Link';
+import { href } from '@site/src/data';
+import { Hx } from '@site/src/components/hx';
+
+export const level = 'h1';
+
+Ban a dependency from being used anywhere in your monorepo.
+
+<Hx level={props.level}>1. Add a version group</Hx>
+
+```json title=".syncpackrc"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["never-gonna"],
+      "isBanned": true
+    }
+  ]
+}
+```
+
+<Hx level={props.level}>2. Look for mismatches</Hx>
+
+Now when you run any syncpack command, banned dependencies will be listed:
+
+```bash
+syncpack list
+```
+
+And can be removed:
+
+```bash
+syncpack fix-mismatches
+```

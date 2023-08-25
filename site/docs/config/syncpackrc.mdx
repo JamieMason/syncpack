@@ -1,0 +1,52 @@
+---
+id: syncpackrc
+title: .syncpackrc
+---
+
+import { href } from '@site/src/data';
+import ConfigOption from '../partials/option/_config.mdx';
+import DefaultDependencyTypes from '../partials/_default-dependency-types.mdx';
+import Intellisense from '../partials/_intellisense.mdx';
+import JsonSchema from '../partials/_json-schema.mdx';
+import Link from '@docusaurus/Link';
+import NodeEngineExample from '../partials/examples/_engines-node.mdx';
+import Pills from '@site/src/components/pill';
+
+## Configuration File
+
+Syncpack uses <Link
+to="https://github.com/cosmiconfig/cosmiconfig">cosmiconfig</Link> to search the current and ancestor directories for a:
+
+- `.syncpackrc` file in JSON or YAML format.
+- `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`, `.syncpackrc.cjs`, `syncpack.config.js`, `syncpack.config.cjs` file.
+- `config.syncpack` or `syncpack` property in `package.json`.
+
+A custom name and location can be provided instead:
+
+```bash
+syncpack list --config ./config/syncpack.json
+```
+
+## Defaults
+
+Your config file only needs to define values for those you want to change from the defaults below.
+
+```js title=".syncpackrc.js"
+// @ts-check
+
+/** @type {import("syncpack").RcFile} */
+const config = {
+  customTypes: [],
+  dependencyTypes: ['dev', 'local', 'overrides', 'peer', 'pnpmOverrides', 'prod', 'resolutions'],
+  filter: '.',
+  indent: '  ',
+  semverGroups: [],
+  semverRange: '',
+  sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'resolutions', 'scripts'],
+  sortFirst: ['name', 'description', 'version', 'author'],
+  source: ['package.json', 'packages/*/package.json'],
+  versionGroups: [],
+};
+
+module.exports = config;
+```

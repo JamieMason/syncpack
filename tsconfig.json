@@ -2,11 +2,8 @@
   "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
-    "outDir": "./dist",
-    "strict": true,
-    "target": "ES2015"
+    "outDir": "./dist"
   },
   "include": ["./package.json", "./src/**/*.ts", "./test/**/*.ts"]
 }

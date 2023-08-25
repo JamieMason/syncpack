@@ -3,67 +3,52 @@ id: custom-types
 title: customTypes
 ---
 
+import { href } from '@site/src/data';
+import ConfigOption from '../partials/option/_config.mdx';
+import DefaultDependencyTypes from '../partials/_default-dependency-types.mdx';
+import Intellisense from '../partials/_intellisense.mdx';
+import JsonSchema from '../partials/_json-schema.mdx';
+import Link from '@docusaurus/Link';
+import NodeEngineExample from '../partials/examples/_engines-node.mdx';
 import Pills from '@site/src/components/pill';
 
-# `customTypes` object
+Extend syncpack to manage other parts of your package.json files than those provided by default.
 
-<Pills optional />
+Custom types behave indentically to the default dependency types (such as `prod` or `peer`) and can be used in all of the same places.
 
-Extend syncpack to find and fix versions in your packages which are not available by default. Custom
-types behave like any other dependency, so can be included in [versionGroups](./version-groups.mdx)
-or [semverGroups](./semver-groups.mdx) etc.
+<details>
+  <summary>
+    Example: Manage <code>engines</code> property of package.json files
+  </summary>
+  <NodeEngineExample level="h4" />
+</details>
 
-The example below adds support for synchronising versions found in:
+<details>
+  <summary>Example: Synchronise Node.js version</summary>
+  <NodeEngineExample level="h4" />
+</details>
 
-1. The [`engines`](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#engines) object.
-1. The [`packageManager`](https://nodejs.org/api/packages.html#packagemanager) string.
-
-```json title=".syncpackrc"
-{
-  "customTypes": {
-    "engines": {
-      "path": "engines",
-      "strategy": "versionsByName"
-    },
-    "packageManager": {
-      "path": "packageManager",
-      "strategy": "name@version"
-    }
-  }
-}
-```
-
-:::tip
-
-Syncpack config files also support
-[TypeScript IntelliSense](https://jamiemason.github.io/syncpack/config-file#typescript-intellisense).
-
-:::
-
-## customTypes\[name\]
+## \[name\]
 
 <Pills required />
 
-The key of each custom type is its name, this can be used in the following places to toggle when it
-is enabled:
+The key of each custom type is its name, this is equivalent to the default names such as `prod` and `dev` and can be used in all of the same places those can:
 
-1. [`--types`](../option/types.mdx) and [`dependencyTypes`](./dependency-types.mdx).
-1. [`versionGroup.dependencyTypes`](./version-groups.mdx#dependencytypes)
-1. [`semverGroup.dependencyTypes`](./semver-groups.mdx#dependencytypes)
+1. `--types` and `dependencyTypes`
+1. `versionGroup.dependencyTypes`
+1. `semverGroup.dependencyTypes`
 
-## customTypes\[name\].path
-
-<Pills required />
-
-Where the version can be found in each package.json file, such as `engines`, `packageManager` or
-`some.nested.property`.
-
-## customTypes\[name\].strategy
+## \[name\].path
 
 <Pills required />
 
-A strategy defines how syncpack needs to read and write dependency names and versions, there are 3
-to choose from:
+Where the version can be found in each package.json file, such as `engines`, `packageManager` or `some.nested.property`.
+
+## \[name\].strategy
+
+<Pills required />
+
+A strategy defines how syncpack needs to read and write dependency names and versions, there are 3 to choose from:
 
 | Name             | Example                                |
 | ---------------- | -------------------------------------- |

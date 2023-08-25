@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { defaultEnv } from '../env/default-env';
+import { Effect } from 'effect';
+import { io } from '../io';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { lint } from './lint';
@@ -37,10 +37,10 @@ showHelpOnError(program);
 program.option(...option.config).parse(process.argv);
 
 Effect.runSync<never, unknown>(
-  lint(
-    {
+  lint({
+    io,
+    cli: {
       configPath: program.opts().config,
     },
-    defaultEnv,
-  ),
+  }),
 );

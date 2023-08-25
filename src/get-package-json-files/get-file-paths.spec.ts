@@ -1,48 +1,105 @@
-import { pipe } from '@effect/data/Function';
-import * as Effect from '@effect/io/Effect';
+import { Effect, pipe } from 'effect';
 import 'expect-more-jest';
-import type { MockEnv } from '../../test/lib/mock-env';
-import { createMockEnv } from '../../test/lib/mock-env';
+import type { TestScenario } from '../../test/lib/create-scenario';
+import { createScenario } from '../../test/lib/create-scenario';
 import { CWD } from '../constants';
-import { createEnv } from '../env/create-env';
-import { EnvTag } from '../env/tags';
-import type { Ctx } from '../get-context';
 import { getFilePaths, NoSourcesFoundError } from './get-file-paths';
 
-function runSync(config: Ctx['config'], mockedEffects: MockEnv, onValue: (value: any) => void) {
-  Effect.runSync(
+function runScenario(getScenario: () => TestScenario) {
+  const scenario = getScenario();
+  return Effect.runSync(
     pipe(
-      getFilePaths(config),
-      Effect.match({
-        onFailure: onValue,
-        onSuccess: onValue,
+      getFilePaths(scenario.io, {
+        cli: scenario.cli,
+        rcFile: scenario.filesByName['.syncpackrc'] || {},
       }),
-      Effect.provideService(EnvTag, createEnv(mockedEffects)),
+      Effect.merge,
     ),
   );
 }
 
-it('return error when patterns return no files', () => {
-  const env = createMockEnv();
-  env.globSync.mockReturnValue([]);
-  runSync({ cli: {}, rcFile: {} }, env, (result) => {
-    expect(result).toEqual(
-      new NoSourcesFoundError({
-        CWD,
-        patterns: ['package.json', 'packages/*/package.json'],
+it('returns error when patterns match no files', () => {
+  expect(
+    runScenario(
+      createScenario({
+        '.syncpackrc': {
+          source: ['matches-nothing/**'],
+        },
       }),
-    );
-  });
+    ),
+  ).toEqual(
+    new NoSourcesFoundError({
+      CWD,
+      patterns: ['matches-nothing/**/package.json'],
+    }),
+  );
 });
 
 it('returns strings when patterns return files', () => {
-  const env = createMockEnv();
-  const root = ['/fake/dir/package.json'];
-  const packages = ['/fake/dir/packages/a/package.json', '/fake/dir/packages/b/package.json'];
-  env.globSync.mockImplementation(() => {
-    return [...root, ...packages];
-  });
-  runSync({ cli: {}, rcFile: {} }, env, (result) => {
-    expect(result).toEqual([...root, ...packages]);
-  });
+  expect(
+    runScenario(
+      createScenario(
+        {
+          'packages/bar/package.json': {
+            name: 'bar',
+          },
+        },
+        {
+          source: ['packages/**'],
+        },
+      ),
+    ),
+  ).toEqual([expect.stringContaining('/packages/bar/package.json')]);
+});
+
+it('adds root package.json when using yarn workspaces', () => {
+  expect(
+    runScenario(
+      createScenario({
+        'package.json': {
+          name: 'foo',
+          workspaces: ['apps/**'],
+        },
+        'apps/bar/package.json': {
+          name: 'bar',
+        },
+      }),
+    ),
+  ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
+});
+
+it('adds root package.json when using lerna', () => {
+  expect(
+    runScenario(
+      createScenario({
+        'package.json': {
+          name: 'foo',
+        },
+        'lerna.json': {
+          packages: ['apps/**'],
+        },
+        'apps/bar/package.json': {
+          name: 'bar',
+        },
+      }),
+    ),
+  ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
+});
+
+it('adds root package.json when using pnpm workspaces', () => {
+  expect(
+    runScenario(
+      createScenario({
+        'package.json': {
+          name: 'foo',
+        },
+        'pnpm-workspace.yaml': {
+          packages: ['apps/**'],
+        },
+        'apps/bar/package.json': {
+          name: 'bar',
+        },
+      }),
+    ),
+  ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
 });

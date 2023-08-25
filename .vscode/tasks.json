@@ -14,8 +14,9 @@
       "type": "shell"
     },
     {
-      "args": ["src", "test"],
+      "args": ["--silent", "false", "src", "test"],
       "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "options": { "env": { "NODE_ENV": "test" } },
       "group": "test",
       "label": "Run tests",
       "presentation": {
@@ -26,8 +27,9 @@
       "type": "shell"
     },
     {
-      "args": ["--watch", "--no-coverage", "src", "test"],
+      "args": ["--silent", "false", "--watch", "--no-coverage", "--verbose=false", "src", "test"],
       "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "options": { "env": { "NODE_ENV": "test" } },
       "group": "test",
       "label": "Watch tests",
       "presentation": {
@@ -38,8 +40,9 @@
       "type": "shell"
     },
     {
-      "args": ["--watch", "--no-coverage", "${relativeFile}"],
+      "args": ["--silent", "false", "--watch", "--verbose=false", "${relativeFile}"],
       "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "options": { "env": { "NODE_ENV": "test" } },
       "group": "test",
       "label": "Watch tests for current .spec.ts file",
       "presentation": {

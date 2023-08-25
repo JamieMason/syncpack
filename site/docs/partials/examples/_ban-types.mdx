@@ -1,0 +1,35 @@
+import Link from '@docusaurus/Link';
+import { href } from '@site/src/data';
+import { Hx } from '@site/src/components/hx';
+
+export const level = 'h1';
+
+Only allow TypeScript <Link to={href['@types']}>@types</Link> packages from being used anywhere other than in the <code>devDependencies</code> section of package.json.
+
+<Hx level={props.level}>1. Add a version group</Hx>
+
+- Match all **dependencies** whose name starts with `@types/`.
+- Only match those dependencies when they appear anywhere **except** `devDependencies`.
+- Define the behaviour of this group as **isBanned**.
+- Add a **label** to document the decision/expectation.
+
+```json title=".syncpackrc"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["@types/**"],
+      "dependencyTypes": ["!dev"],
+      "isBanned": true,
+      "label": "@types packages should only be under devDependencies"
+    }
+  ]
+}
+```
+
+<Hx level={props.level}>2. Look for mismatches</Hx>
+
+Any `@types` packages which are in the wrong location can then be found and manually moved:
+
+```bash
+syncpack list-mismatches
+```

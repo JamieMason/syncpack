@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import * as Effect from '@effect/io/Effect';
 import chalk from 'chalk';
 import { program } from 'commander';
-import { defaultEnv } from '../env/default-env';
+import { Effect } from 'effect';
+import { io } from '../io';
 import { showHelpOnError } from '../lib/show-help-on-error';
 import { option } from '../option';
 import { lintSemverRanges } from './lint-semver-ranges';
@@ -28,12 +28,6 @@ Examples:
   syncpack lint-semver-ranges --source {yellow "apps/*/package.json"} --source {yellow "core/*/package.json"}
   {dim # uses dependencies regular expression defined by --filter when provided}
   syncpack lint-semver-ranges --filter {yellow "typescript|tslint"}
-  {dim # use ~ range instead of default ""}
-  syncpack lint-semver-ranges --semver-range ~
-  {dim # use ~ range in "devDependencies"}
-  syncpack lint-semver-ranges --types dev --semver-range ~
-  {dim # use ~ range in "devDependencies" and "peerDependencies"}
-  syncpack lint-semver-ranges --types dev,peer semver-range ~
 
 Supported Ranges:
   <  {dim <1.4.2}
@@ -65,20 +59,18 @@ showHelpOnError(program);
 program
   .option(...option.source)
   .option(...option.filter)
-  .option(...option.semverRange)
   .option(...option.config)
   .option(...option.types)
   .parse(process.argv);
 
 Effect.runSync<never, unknown>(
-  lintSemverRanges(
-    {
+  lintSemverRanges({
+    io,
+    cli: {
       configPath: program.opts().config,
       filter: program.opts().filter,
-      semverRange: program.opts().semverRange,
       source: program.opts().source,
       types: program.opts().types,
     },
-    defaultEnv,
-  ),
+  }),
 );

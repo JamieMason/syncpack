@@ -1,29 +1,32 @@
-import * as Context from '@effect/data/Context';
-import { pipe } from '@effect/data/Function';
-import * as Effect from '@effect/io/Effect';
-import { lintSemverRangesEffects } from '../bin-lint-semver-ranges/effects';
-import { listMismatchesEffects } from '../bin-list-mismatches/effects';
+import chalk from 'chalk';
+import { Context, Effect, pipe } from 'effect';
+import { pipeline as lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges';
+import { pipeline as listMismatches } from '../bin-list-mismatches/list-mismatches';
 import { CliConfigTag } from '../config/tag';
 import { type CliConfig } from '../config/types';
-import { createSemverRangesProgram } from '../create-program/semver-ranges';
-import { createVersionsProgram } from '../create-program/versions';
-import { createEnv } from '../env/create-env';
-import type { DefaultEnv } from '../env/default-env';
-import { exitIfInvalid } from '../env/exit-if-invalid';
-import { EnvTag } from '../env/tags';
-import { createErrorHandlers } from '../error-handlers/create-error-handlers';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
 import { getContext } from '../get-context';
+import type { Io } from '../io';
+import { IoTag } from '../io';
+import { exitIfInvalid } from '../io/exit-if-invalid';
+import { withLogger } from '../lib/with-logger';
 
-export function lint(cli: Partial<CliConfig>, env: DefaultEnv) {
+interface Input {
+  io: Io;
+  cli: Partial<CliConfig>;
+  errorHandlers?: ErrorHandlers;
+}
+
+export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
   return pipe(
-    getContext(),
-    Effect.flatMap((ctx) => createVersionsProgram(ctx, listMismatchesEffects)),
-    Effect.flatMap((ctx) => createSemverRangesProgram(ctx, lintSemverRangesEffects)),
+    getContext({ io, cli, errorHandlers }),
+    Effect.tap(() => Effect.logInfo(chalk`{yellow Versions}`)),
+    Effect.flatMap((ctx) => listMismatches(ctx, io, errorHandlers)),
+    Effect.tap(() => Effect.logInfo(chalk`{yellow Semver Ranges}`)),
+    Effect.flatMap((ctx) => lintSemverRanges(ctx, io, errorHandlers)),
     Effect.flatMap(exitIfInvalid),
-    Effect.catchTags(createErrorHandlers(defaultErrorHandlers)),
-    Effect.provideContext(
-      pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(EnvTag, createEnv(env))),
-    ),
+    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    withLogger,
   );
 }
