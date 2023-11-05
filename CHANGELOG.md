@@ -1,3 +1,19 @@
+# [12.0.0-alpha.0](https://github.com/JamieMason/syncpack/compare/11.2.1...12.0.0-alpha.0) (2023-11-05)
+
+
+### Bug Fixes
+
+* **local:** do not replace version with workspace:* ([d8a4eaa](https://github.com/JamieMason/syncpack/commit/d8a4eaa23819ccba72c454f90f79914ca1903ebe))
+* **npm:** update dependencies ([f016552](https://github.com/JamieMason/syncpack/commit/f016552c618df84e4a05527589f8380ce921534d))
+
+
+### Features
+
+* **cli:** throw if command is not found ([0608605](https://github.com/JamieMason/syncpack/commit/0608605cce74352a4d66177ef70876e0e376ee48))
+* **core:** broaden version specifier support ([46a0143](https://github.com/JamieMason/syncpack/commit/46a0143fc260f0f4cb55c13f8eec3478290641ac)), closes [#161](https://github.com/JamieMason/syncpack/issues/161) [#162](https://github.com/JamieMason/syncpack/issues/162) [#157](https://github.com/JamieMason/syncpack/issues/157) [/github.com/user/project.git#0](https://github.com//github.com/user/project.git/issues/0)
+
+
+
 ## [11.2.1](https://github.com/JamieMason/syncpack/compare/10.9.3...11.2.1) (2023-08-14)
 
 

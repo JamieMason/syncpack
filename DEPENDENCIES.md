@@ -24,13 +24,12 @@ npm test
 
 ## Dependencies
 
-- [@effect/data](https://ghub.io/@effect/data): Consistent dependency versions in large JavaScript Monorepos
-- [@effect/io](https://ghub.io/@effect/io): Functional programming in TypeScript
 - [@effect/match](https://ghub.io/@effect/match): Pattern matching for TypeScript
 - [@effect/schema](https://ghub.io/@effect/schema): Modeling the schema of data structures as first-class values
 - [chalk](https://ghub.io/chalk): Terminal string styling done right
 - [commander](https://ghub.io/commander): the complete solution for node.js command-line programs
-- [cosmiconfig](https://ghub.io/cosmiconfig): Find and load configuration from a package.json property, rc file, or CommonJS module
+- [cosmiconfig](https://ghub.io/cosmiconfig): Find and load configuration from a package.json property, rc file, TypeScript module, and more!
+- [effect](https://ghub.io/effect): Functional programming in TypeScript
 - [enquirer](https://ghub.io/enquirer): Stylish, intuitive and user-friendly prompt system. Fast and lightweight enough for small projects, powerful and extensible enough for the most advanced use cases.
 - [globby](https://ghub.io/globby): User-friendly glob matching
 - [minimatch](https://ghub.io/minimatch): a glob matcher in javascript
@@ -56,7 +55,9 @@ npm test
 - [eslint-plugin-import](https://ghub.io/eslint-plugin-import): Import with sanity.
 - [eslint-plugin-jest](https://ghub.io/eslint-plugin-jest): ESLint rules for Jest
 - [expect-more-jest](https://ghub.io/expect-more-jest): Write Beautiful Specs with Custom Matchers for Jest
+- [immer](https://ghub.io/immer): Create your next immutable state by mutating the current one
 - [jest](https://ghub.io/jest): Delightful JavaScript Testing.
+- [memfs](https://ghub.io/memfs): In-memory file-system with Node&#39;s fs API.
 - [prettier](https://ghub.io/prettier): Prettier is an opinionated code formatter
 - [rimraf](https://ghub.io/rimraf): A deep deletion module for node (like `rm -rf`)
 - [ts-jest](https://ghub.io/ts-jest): A Jest transformer with source map support that lets you use Jest to test projects written in TypeScript
