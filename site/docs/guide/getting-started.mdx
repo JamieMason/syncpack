@@ -28,13 +28,13 @@ npx syncpack list
 
 ## Install
 
-It's best to install syncpack as a dev dependency so that everyone working on your project uses the same version.
+It's best to install syncpack as a dev dependency, so that everyone working on your project uses the same version.
 
 ```bash
 npm install syncpack --save-dev
 ```
 
-Anyone on the team can now use [npm exec](https://docs.npmjs.com/cli/v10/commands/npm-exec) to access their local installation of syncpack like so:
+Anyone on the team can now use [npm exec](https://docs.npmjs.com/cli/v10/commands/npm-exec) to access their local installation of syncpack:
 
 ```bash
 npm exec syncpack -- list
@@ -88,7 +88,7 @@ Here are two common examples where a single version policy is unsuitable.
 
    In the root package.json you have `"eslint": "8.53.0"` installed under `devDependencies` because you use ESLint to lint the monorepo.
 
-   That's a version mismatch because ESLint is referenced twice with different versions. As Developers on the project we know this is Ok but, from one project to another, a tool like syncpack can't know whether any given mismatch is deliberate or a mistake without information about the project.
+   That's a version mismatch because ESLint is referenced twice with different versions. As Developers on the project we know this is Ok but a tool like syncpack can't know whether any given mismatch is deliberate or a mistake, without information about the project.
 
 1. ### `workspace:*`
 
@@ -181,7 +181,7 @@ syncpack lint-semver-ranges
 
 ### Adding overrides
 
-Sometims you fill have exceptions to a rule, instances which for whatever reason can't conform to a broader policy and need special treatment. To override a Semver or Version Group, define a more specific group nearer the start of the `semverGroups` or `versionGroups` array.
+Sometimes you will have exceptions to a rule, instances which for whatever reason can't conform to a broader policy and need special treatment. To override a Semver or Version Group, define a more specific one nearer the start of the `semverGroups` or `versionGroups` array.
 
 For example, to use `^` in just one package we could use the following config, where `dashboard-ui` is the `name` property of the package.json file we want to make an exception for.
 
