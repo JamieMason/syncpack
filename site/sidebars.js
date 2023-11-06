@@ -89,6 +89,7 @@ const sidebars = {
         },
       ],
     },
+    'status-codes',
   ],
   examples: [
     {

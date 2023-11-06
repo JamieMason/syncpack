@@ -106,7 +106,7 @@ Now take a look at your production dependencies:
 syncpack list
 ```
 
-You will likely see some warnings, and each warning will display an error code to identify the reason it is invalid. Every warning is explained in the <Link to='/error-codes'>Error Codes</Link> documentation.
+You will likely see some warnings, and each warning will display an error code to identify the reason it is invalid. Every warning is explained in the <Link to='/status-codes'>Error Codes</Link> documentation.
 
 We'll look at how to fix mismatching versions, but first let's look at the semver ranges.
 
@@ -228,7 +228,7 @@ Now that we're using consistent semver ranges under `dependencies`, let's return
 syncpack list-mismatches
 ```
 
-The most common of syncpack's <Link to='/error-codes'>Error Codes</Link> is `HighestSemverMismatch` which tells us that all versions used for that dependency are valid semver, but they are not identical and the one with the highest semver version should be used by all.
+The most common of syncpack's <Link to='/status-codes'>Error Codes</Link> is `HighestSemverMismatch` which tells us that all versions used for that dependency are valid semver, but they are not identical and the one with the highest semver version should be used by all.
 
 If you don't have any special requirements, they can be fixed automatically
 
