@@ -13,14 +13,7 @@
       }
     },
     {
-      "files": ["**/*.md"],
-      "options": {
-        "printWidth": 100,
-        "proseWrap": "always"
-      }
-    },
-    {
-      "files": ["**/*.mdx"],
+      "files": ["**/*.md", "**/*.mdx"],
       "options": {
         "printWidth": 500,
         "proseWrap": "never"

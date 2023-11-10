@@ -8,6 +8,13 @@
 npm install --save-dev syncpack
 ```
 
+<!-- prettier-ignore-start -->
+
+> [!NOTE]
+> syncpack 🚀 [12.0.0-alpha.0](https://github.com/JamieMason/syncpack/releases/tag/12.0.0-alpha.0) is available to trial and give feedback. This release adds support for a much wider range of npm version specifiers than before, console output improvements, and more.
+
+<!-- prettier-ignore-end -->
+
 ## Documentation
 
 Full information can be found in the documentation at https://jamiemason.github.io/syncpack/.
@@ -16,25 +23,19 @@ Full information can be found in the documentation at https://jamiemason.github.
 
 ### [fix-mismatches](https://jamiemason.github.io/syncpack/fix-mismatches)
 
-Ensure that multiple packages requiring the same dependency define the same version, so that every
-package requires eg. `react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and
-`react@16.0.0`.
+Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg. `react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
 
 ### [format](https://jamiemason.github.io/syncpack/format)
 
-Organise package.json files according to a conventional format, where fields appear in a predictable
-order and nested fields are ordered alphabetically. Shorthand properties are used where available,
-such as the `"repository"` and `"bugs"` fields.
+Organise package.json files according to a conventional format, where fields appear in a predictable order and nested fields are ordered alphabetically. Shorthand properties are used where available, such as the `"repository"` and `"bugs"` fields.
 
 ### [lint](https://jamiemason.github.io/syncpack/lint)
 
-Lint all versions and ranges and exit with 0 or 1 based on whether all files match your Syncpack
-configuration file.
+Lint all versions and ranges and exit with 0 or 1 based on whether all files match your Syncpack configuration file.
 
 ### [lint-semver-ranges](https://jamiemason.github.io/syncpack/lint-semver-ranges)
 
-Check whether dependency versions used within "dependencies", "devDependencies", etc follow a
-consistent format.
+Check whether dependency versions used within "dependencies", "devDependencies", etc follow a consistent format.
 
 ### [list](https://jamiemason.github.io/syncpack/list)
 
@@ -42,8 +43,7 @@ List all dependencies required by your packages.
 
 ### [list-mismatches](https://jamiemason.github.io/syncpack/list-mismatches)
 
-List dependencies which are required by multiple packages, where the version is not the same across
-every package.
+List dependencies which are required by multiple packages, where the version is not the same across every package.
 
 ### [prompt](https://jamiemason.github.io/syncpack/prompt)
 
@@ -51,14 +51,11 @@ Displays a series of prompts to fix mismatches which syncpack cannot fix automat
 
 ### [set-semver-ranges](https://jamiemason.github.io/syncpack/set-semver-ranges)
 
-Ensure dependency versions used within `"dependencies"`, `"devDependencies"` etc follow a consistent
-format.
+Ensure dependency versions used within `"dependencies"`, `"devDependencies"` etc follow a consistent format.
 
 ### [update](https://jamiemason.github.io/syncpack/update)
 
-Interactively update packages to the latest versions from the npm registry, wherever they are in
-your monorepo. You can update every dependency, just dev/peer/prod dependencies, just packages which
-match a name filter, and more.
+Interactively update packages to the latest versions from the npm registry, wherever they are in your monorepo. You can update every dependency, just dev/peer/prod dependencies, just packages which match a name filter, and more.
 
 ## Badges
 
