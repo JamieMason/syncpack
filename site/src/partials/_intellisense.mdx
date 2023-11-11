@@ -1,0 +1,29 @@
+To enable validation and autocompletion for your [configuration file](/config/syncpackrc), you must use a JavaScript config file and annotate in keeping with the below example:
+
+```js title=".syncpackrc.js"
+// @ts-check
+
+/** @type {import("syncpack").RcFile} */
+const config = {
+  versionGroups: [
+    {
+      dependencies: ['@types/node'],
+      packages: ['**'],
+      pinVersion: '14.18.36',
+    },
+    {
+      dependencies: ['chalk'],
+      packages: ['**'],
+      pinVersion: '4.1.2',
+    },
+  ],
+};
+
+module.exports = config;
+```
+
+:::tip
+
+Ensure that `"javascript.validate.enable": false` is **not** set in [VS Code](https://code.visualstudio.com/docs/getstarted/settings).
+
+:::

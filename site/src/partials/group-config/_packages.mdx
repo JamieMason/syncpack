@@ -1,0 +1,31 @@
+import OptionalPill from '@site/components/pill/optional.astro';
+
+<OptionalPill />
+
+- An array of strings which should match the `name` properties of your package.json files.
+- If omitted, the default behaviour is to match every package.
+- The strings can be any combination of exact matches or [minimatch](https://github.com/isaacs/minimatch) glob patterns:
+
+```json title="Examples of valid values"
+// ✅ match any package name
+packages: ["**"]
+
+// ✅ match any package name with this scope
+packages: ["@my-repo/**"]
+
+// ✅ match specific packages by name
+packages: ["my-server", "my-client"]
+
+// ❌ not file system paths, name properties of package.json files
+packages: ["packages/my-client"]
+
+// ❌ not file system globs, name properties of package.json files
+packages: ["packages/**"]
+```
+
+```json title="Where this pattern is matched against"
+{
+  "name": "HERE",
+  "version": "1.0.2"
+}
+```

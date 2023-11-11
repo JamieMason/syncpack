@@ -1,0 +1,30 @@
+import OptionalPill from '@site/components/pill/optional.astro';
+
+<OptionalPill />
+
+- An array of names of dependencies you've installed or otherwise reference in your package.json files.
+- If omitted, the default behaviour is to match every dependency.
+- The strings can be any combination of exact matches or [minimatch](https://github.com/isaacs/minimatch) glob patterns:
+
+```json title="Examples of valid values"
+// match any dependency
+dependencies: ["**"]
+
+// match all dependencies with a certain scope
+dependencies: ["@aws-sdk/**"]
+
+// match specific dependencies by name
+dependencies: ["react", "react-dom"]
+```
+
+```json title="Where this pattern is matched against"
+{
+  "name": "HERE",
+  "dependencies": { "HERE": "0.0.0" },
+  "devDependencies": { "HERE": "0.0.0" },
+  "overrides": { "HERE": "0.0.0" },
+  "peerDependencies": { "HERE": "0.0.0" },
+  "pnpm": { "overrides": { "HERE": "0.0.0" } },
+  "resolutions": { "HERE": "0.0.0" }
+}
+```

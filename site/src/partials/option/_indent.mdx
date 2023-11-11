@@ -1,0 +1,16 @@
+```
+-i, --indent [value]
+```
+
+Override your [indent](/config/indent) configuration, which is 2 spaces by default.
+
+{/* prettier-ignore-start */}
+<pre><code>{`
+\# four spaces
+syncpack ${props.command} --indent "    "
+\# one tab
+syncpack ${props.command} --indent '\t'
+\# \\t is converted into a tab
+syncpack ${props.command} --indent '\\t'
+`.trim()}</code></pre>
+{/* prettier-ignore-end */}

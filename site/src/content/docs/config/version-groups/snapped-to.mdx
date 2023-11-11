@@ -1,0 +1,57 @@
+---
+title: Snapped To
+---
+
+import RequiredPill from '@site/components/pill/required.astro';
+import Packages from '@site/partials/group-config/_packages.mdx';
+import Dependencies from '@site/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/partials/group-config/_dependency-types.mdx';
+import Label from '@site/partials/group-config/_label.mdx';
+import Example from '@site/partials/examples/_react-native.mdx';
+import Details from '@site/components/details.astro';
+
+Pin the version of all dependencies in this group to follow the versions used by the other packages named within the `snapTo` array.
+
+## Examples
+
+<Details title="Example: Fix React Native version mismatch">
+
+<Example level="h3" />
+
+</Details>
+
+## Configuration
+
+### snapTo
+
+<RequiredPill />
+
+- The values refer to the `name` property of the package.json files developed in your monorepo.
+- Multiple values can be added to provide fallback packages to try in the event that the dependency is not present in the earlier packages in the array.
+
+```json title="Ensure all packages use whatever version of react that mobile-app is using"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react", "react-native"],
+      "snapTo": ["mobile-app"]
+    }
+  ]
+}
+```
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

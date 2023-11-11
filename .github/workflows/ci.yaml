@@ -18,14 +18,14 @@ jobs:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
-          cache: yarn
+          cache: npm
           node-version: ${{ matrix.node-version }}
 
       - name: Install
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Build
-        run: yarn build
+        run: npm run build
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
@@ -36,13 +36,13 @@ jobs:
 
       - name: Lint
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
-        run: yarn lint
+        run: npm run lint
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
 
       - name: Test
-        run: yarn test
+        run: npm run test
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color

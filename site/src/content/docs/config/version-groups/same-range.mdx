@@ -1,0 +1,56 @@
+---
+title: Same Range
+---
+
+import RequiredPill from '@site/components/pill/required.astro';
+import Packages from '@site/partials/group-config/_packages.mdx';
+import Dependencies from '@site/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/partials/group-config/_dependency-types.mdx';
+import Label from '@site/partials/group-config/_label.mdx';
+import Example from '@site/partials/examples/_same-range.mdx';
+import Details from '@site/components/details.astro';
+
+Relax syncpack to ensure that all versions have semver ranges which all satisfy each other, instead of having to be identical.
+
+## Examples
+
+<Details title="Example: Check that a dependency's semver ranges always match">
+
+<Example level="h3" />
+
+</Details>
+
+## Configuration
+
+### policy
+
+<RequiredPill />
+
+Currently the only custom policy in syncpack is "sameRange", which is what causes this behaviour to be applied to a Version Group.
+
+```json title=".syncpackrc"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["prod", "dev", "peer"],
+      "policy": "sameRange"
+    }
+  ]
+}
+```
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

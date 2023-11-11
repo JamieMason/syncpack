@@ -1,6 +1,8 @@
+.astro/
+.DS_Store
+.idea
 *.log
 *.log.*
 coverage
-dist
-node_modules
-.idea
+dist/
+node_modules/

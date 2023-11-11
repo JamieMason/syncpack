@@ -1,0 +1,45 @@
+---
+title: Standard
+---
+
+import OptionalPill from '@site/components/pill/optional.astro';
+import Packages from '@site/partials/group-config/_packages.mdx';
+import Dependencies from '@site/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/partials/group-config/_dependency-types.mdx';
+import Label from '@site/partials/group-config/_label.mdx';
+
+## Configuration
+
+### preferVersion
+
+<OptionalPill />
+
+Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
+
+To set this as your standard policy, create a version group which applies to every dependency as the last item in your `versionGroups` array. You can also just set this for some of the packages if you need to.
+
+```json title="Choose the lowest valid semver version when fixing mismatches"
+{
+  "versionGroups": [
+    {
+      "preferVersion": "lowestSemver"
+    }
+  ]
+}
+```
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

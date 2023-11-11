@@ -1,0 +1,47 @@
+---
+title: customTypes
+---
+
+import NodeEngineExample from '@site/partials/examples/_engines-node.mdx';
+import RequiredPill from '@site/components/pill/required.astro';
+import Details from '@site/components/details.astro';
+
+Extend syncpack to manage other parts of your package.json files than those provided by default.
+
+Custom types behave indentically to the default dependency types (such as `prod` or `peer`) and can be used in all of the same places.
+
+<Details title="Example: Manage `engines` property of package.json files">
+  <NodeEngineExample level="h4" />
+</Details>
+
+<Details title="Example: Synchronise Node.js version">
+  <NodeEngineExample level="h4" />
+</Details>
+
+## \[name\]
+
+<RequiredPill />
+
+The key of each custom type is its name, this is equivalent to the default names such as `prod` and `dev` and can be used in all of the same places those can:
+
+1. `--types` and `dependencyTypes`
+1. `versionGroup.dependencyTypes`
+1. `semverGroup.dependencyTypes`
+
+## \[name\].path
+
+<RequiredPill />
+
+Where the version can be found in each package.json file, such as `engines`, `packageManager` or `some.nested.property`.
+
+## \[name\].strategy
+
+<RequiredPill />
+
+A strategy defines how syncpack needs to read and write dependency names and versions, there are 3 to choose from:
+
+| Name             | Example                                |
+| ---------------- | -------------------------------------- |
+| `name@version`   | `pnpm@7.27.0`                          |
+| `version`        | `12.4.2`                               |
+| `versionsByName` | `{"pnpm":"7.27.0", "semver": "7.3.8"}` |

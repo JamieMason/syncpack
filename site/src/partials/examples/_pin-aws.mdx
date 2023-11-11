@@ -1,0 +1,37 @@
+import Hx from '@site/components/hx.astro';
+
+export const level = 'h1';
+
+Pin all dependencies from [@aws-sdk]({import.meta.env.HREF_AWS_SDK}) so that they are always identical.
+
+<Hx level={props.level}>1. Add a pinned version group</Hx>
+
+- Match all **dependencies** whose name starts with `@aws-sdk/`.
+- Mark the version as being pinned to **3.272.0** in this case.
+- Add a **label** to document the decision/expectation.
+
+```json title=".syncpackrc"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["@aws-sdk/**"],
+      "pinVersion": "3.272.0",
+      "label": "AWS SDK Dependencies should all have the same version"
+    }
+  ]
+}
+```
+
+<Hx level={props.level}>2. Look for mismatches</Hx>
+
+Any `@aws-sdk` packages which do not have the expected version can then be found:
+
+```bash
+syncpack list-mismatches
+```
+
+And fixed:
+
+```bash
+syncpack fix-mismatches
+```

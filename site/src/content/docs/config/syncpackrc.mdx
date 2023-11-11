@@ -1,0 +1,41 @@
+---
+title: .syncpackrc
+---
+
+## Configuration File
+
+Syncpack uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) to search the current and ancestor directories for a:
+
+- `.syncpackrc` file in JSON or YAML format.
+- `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`, `.syncpackrc.cjs`, `syncpack.config.js`, `syncpack.config.cjs` file.
+- `config.syncpack` or `syncpack` property in `package.json`.
+
+A custom name and location can be provided instead:
+
+```bash
+syncpack list --config ./config/syncpack.json
+```
+
+## Defaults
+
+Your config file only needs to define values for those you want to change from the defaults below.
+
+```js title=".syncpackrc.js"
+// @ts-check
+
+/** @type {import("syncpack").RcFile} */
+const config = {
+  customTypes: [],
+  dependencyTypes: ['dev', 'local', 'overrides', 'peer', 'pnpmOverrides', 'prod', 'resolutions'],
+  filter: '.',
+  indent: '  ',
+  semverGroups: [],
+  semverRange: '',
+  sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'resolutions', 'scripts'],
+  sortFirst: ['name', 'description', 'version', 'author'],
+  source: ['package.json', 'packages/*/package.json'],
+  versionGroups: [],
+};
+
+module.exports = config;
+```

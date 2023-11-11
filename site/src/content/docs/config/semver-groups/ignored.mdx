@@ -1,0 +1,43 @@
+---
+title: Ignored
+---
+
+import RequiredPill from '@site/components/pill/required.astro';
+import Packages from '@site/partials/group-config/_packages.mdx';
+import Dependencies from '@site/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/partials/group-config/_dependency-types.mdx';
+import Label from '@site/partials/group-config/_label.mdx';
+
+Have syncpack ignore the semver ranges of these dependencies completely.
+
+## `isIgnored` boolean
+
+<RequiredPill />
+
+```json title="Hide dependencies from syncpack"
+{
+  "semverGroups": [
+    {
+      "packages": ["oops-moment", "workaround"],
+      "dependencies": ["**"],
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

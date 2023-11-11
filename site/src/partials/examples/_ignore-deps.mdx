@@ -1,0 +1,26 @@
+import Hx from '@site/components/hx.astro';
+
+export const level = 'h1';
+
+Ignore one or more dependencies so that syncpack does not inspect them.
+
+<Hx level={props.level}>1. Add an ignored version group</Hx>
+
+- Match 2 specific **packages** in the repo.
+- Match only the **peerDependencies** in those packages.
+- Add a **label** to document the decision/expectation.
+
+```json title=".syncpackrc"
+{
+  "versionGroups": [
+    {
+      "label": "Nothing to see here, will fix soon",
+      "packages": ["oops-moment", "workaround"],
+      "dependencyTypes": ["peer"],
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+With this configuration in place, syncpack will now completely ignore every dependency listed under `peerDependencies` in the two named packages `oops-moment` and `workaround` only.

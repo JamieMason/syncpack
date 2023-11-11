@@ -1,0 +1,66 @@
+---
+title: Version Groups
+---
+
+This is an addendum to the [Getting Started](/guide/getting-started) guide.
+
+Version groups are an array of objects which partition your monorepo into isolated sections which each have their own rules/policy/strategy for how versions should be managed.
+
+## Examples
+
+- Let's say your monorepo directly depends on `react`, 3 of your packages have it under `dependencies` and another 2 have it under `peerDependencies`. Each of those 5 specific places where `react` is depended on we refer to as an "instance".
+- Every instance of every dependency in your repo is assigned to the first version group it matches.
+- Each instance can only belong to one version group.
+- If you do not define any version groups, or a given instance of a dependency does not match any of them, it is assigned to an internal catch-all version group.
+
+Here is an example which uses every kind of version group:
+
+```json
+{
+  "versionGroups": [
+    {
+      // Pinned
+      "label": "Ensure AWS SDK dependencies always use the same version",
+      "packages": ["**"],
+      "dependencies": ["@aws-sdk/**"],
+      "pinVersion": "3.272.0"
+    },
+    {
+      // Banned
+      "label": "Please use lodash instead of underscore",
+      "packages": ["**"],
+      "dependencies": ["underscore"],
+      "isBanned": true
+    },
+    {
+      // Ignored
+      "label": "Ignore issues in these dodgy packages",
+      "packages": ["oops-moment", "workaround"],
+      "dependencies": ["**"],
+      "isIgnored": true
+    },
+    {
+      // Snapped
+      "label": "Ensure all packages use whatever version the mobile-core package is using",
+      "dependencies": ["react", "react-native"],
+      "packages": ["**"],
+      "snapTo": ["mobile-core"]
+    },
+    {
+      // Pinned
+      "label": "Use '*' under 'peerDependencies' everywhere",
+      "packages": ["**"],
+      "dependencies": ["**"],
+      "dependencyTypes": ["peer"],
+      "pinVersion": "*"
+    },
+    {
+      // Standard
+      "label": "Resolve mismatches here with the oldest version instead of the newest",
+      "dependencies": ["@vintage/**"],
+      "packages": ["**"],
+      "preferVersion": "lowestSemver"
+    }
+  ]
+}
+```

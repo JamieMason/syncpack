@@ -1,0 +1,14 @@
+import OptionalPill from '@site/components/pill/optional.astro';
+import DefaultDependencyTypes from '@site/partials/_default-dependency-types.mdx';
+import CustomTypesTip from '@site/partials/tips/_custom-types.mdx';
+
+<OptionalPill />
+<CustomTypesTip />
+
+- When set, only dependencies present in the named locations will be assigned to this group.
+- If omitted, the default behaviour is to match dependencies everywhere they are found.
+- Negated types are also supported, so a value of `["!dev", "!prod"]` would assign everything **except** `dependencies` and `devDependencies` to this group.
+
+#### Default values
+
+<DefaultDependencyTypes />

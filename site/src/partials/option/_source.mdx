@@ -1,0 +1,24 @@
+export const issueHref = 'https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769';
+
+```
+-s, --source [pattern]
+```
+
+Override your [source](/config/source) configuration to run `syncpack {props.command}` on only some package.json files.
+
+{/* prettier-ignore-start */}
+<pre><code>{`
+\# only the root package
+syncpack ${props.command} --source 'package.json'
+\# only packages matching a glob
+syncpack ${props.command} --source 'packages/beta-*'
+\# multiple values can be provided
+syncpack ${props.command} --source 'package.json' --source 'packages/beta-*'
+`.trim()}</code></pre>
+{/* prettier-ignore-end */}
+
+:::tip
+
+Add quotes around your `--source` patterns so your shell does not interpret them before they're received by syncpack.
+
+:::

@@ -1,0 +1,55 @@
+---
+title: Pinned
+---
+
+import RequiredPill from '@site/components/pill/required.astro';
+import Packages from '@site/partials/group-config/_packages.mdx';
+import Dependencies from '@site/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/partials/group-config/_dependency-types.mdx';
+import Label from '@site/partials/group-config/_label.mdx';
+import AwsExample from '@site/partials/examples/_pin-aws.mdx';
+import Details from '@site/components/details.astro';
+
+Pin the version of all dependencies in this group to match a specific version you've defined.
+
+## Examples
+
+<Details title="Example: Ensure AWS SDK dependencies always have the same version">
+
+  <AwsExample level="h3" />
+</Details>
+
+## Configuration
+
+### pinVersion
+
+<RequiredPill />
+
+The version specifier you would like to use, this can be anything supported by a package manager.
+
+```json title=".syncpackrc"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["@types/node"],
+      "pinVersion": "18.14.2"
+    }
+  ]
+}
+```
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

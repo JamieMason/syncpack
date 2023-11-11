@@ -1,0 +1,16 @@
+Add support for managing versions in [engines]({import.meta.env.HREF_ENGINES}) and [packageManager]({import.meta.env.HREF_PACKAGE_MANAGER}) properties of your package.json files.
+
+```json title=".syncpackrc"
+{
+  "customTypes": {
+    "engines": {
+      "path": "engines",
+      "strategy": "versionsByName"
+    },
+    "packageManager": {
+      "path": "packageManager",
+      "strategy": "name@version"
+    }
+  }
+}
+```

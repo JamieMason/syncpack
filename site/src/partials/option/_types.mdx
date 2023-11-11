@@ -1,0 +1,16 @@
+```
+-t, --types <names>
+```
+
+Override your [dependencyTypes](/config/dependency-types) configuration to run `syncpack {props.command}` on only eg. `peerDependencies` in every package in your monorepo.
+
+{/* prettier-ignore-start */}
+<pre><code>{`
+\# only include peerDependencies
+syncpack ${props.command} --types 'peer'
+\# only include dependencies and devDependencies
+syncpack ${props.command} --types 'prod,dev'
+\# exclude local package.json versions
+syncpack ${props.command} --types '!local'
+`.trim()}</code></pre>
+{/* prettier-ignore-end */}

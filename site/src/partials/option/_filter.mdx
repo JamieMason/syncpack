@@ -1,0 +1,14 @@
+```
+-f, --filter [pattern]
+```
+
+Only run `syncpack {props.command}` on dependencies whose names match the given string, which will be passed to `new RegExp()`.
+
+{/* prettier-ignore-start */}
+<pre><code>{`
+\# only include react, react-dom, preact etc
+syncpack ${props.command} --types 'react'
+\# only include typescript or eslint packages
+syncpack ${props.command} --types 'typescript|eslint'
+`.trim()}</code></pre>
+{/* prettier-ignore-end */}

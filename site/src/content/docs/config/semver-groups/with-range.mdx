@@ -1,0 +1,45 @@
+---
+title: With Range
+---
+
+import RequiredPill from '@site/components/pill/required.astro';
+import Packages from '@site/partials/group-config/_packages.mdx';
+import Dependencies from '@site/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/partials/group-config/_dependency-types.mdx';
+import Label from '@site/partials/group-config/_label.mdx';
+
+Ensure all dependencies within this group have the specified semver range.
+
+## `semverGroup.range`
+
+<RequiredPill />
+
+Which of the Supported Ranges this group should use.
+
+```json title=".syncpackrc"
+{
+  "semverGroups": [
+    {
+      "range": "~",
+      "dependencies": ["@alpha/**"],
+      "packages": ["**"]
+    }
+  ]
+}
+```
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

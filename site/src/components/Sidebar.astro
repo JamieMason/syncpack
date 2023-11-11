@@ -1,0 +1,23 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+
+const renames: Record<string, string> = {
+  'semver-groups': 'Semver Groups',
+  'version-groups': 'Version Groups',
+};
+
+function renameSidebarGroupLabels(sidebar: Props['sidebar']): Props['sidebar'] {
+  return sidebar.map((item) => {
+    if (item.type === 'link') return item;
+
+    return {
+      ...item,
+      label: item.label in renames ? renames[item.label] : item.label,
+      entries: renameSidebarGroupLabels(item.entries),
+    };
+  });
+}
+---
+
+<Default {...Astro.props} sidebar={renameSidebarGroupLabels(Astro.props.sidebar)}><slot /></Default>

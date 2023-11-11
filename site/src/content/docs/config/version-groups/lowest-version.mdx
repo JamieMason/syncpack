@@ -1,0 +1,50 @@
+---
+title: Lowest Version
+---
+
+import RequiredPill from '@site/components/pill/required.astro';
+import Packages from '@site/partials/group-config/_packages.mdx';
+import Dependencies from '@site/partials/group-config/_dependencies.mdx';
+import DependencyTypes from '@site/partials/group-config/_dependency-types.mdx';
+import Label from '@site/partials/group-config/_label.mdx';
+
+Fix mismatched versions in this group by choosing the lowest/oldest semver version in use.
+
+## Examples
+
+```json title="Choose the lowest valid semver version when fixing mismatches"
+{
+  "versionGroups": [
+    {
+      "packages": ["**"],
+      "dependencies": ["**"],
+      "dependencyTypes": ["**"],
+      "preferVersion": "lowestSemver"
+    }
+  ]
+}
+```
+
+## Configuration
+
+### preferVersion
+
+<RequiredPill />
+
+Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
+
+### dependencies
+
+<Dependencies />
+
+### dependencyTypes
+
+<DependencyTypes />
+
+### label
+
+<Label />
+
+### packages
+
+<Packages />

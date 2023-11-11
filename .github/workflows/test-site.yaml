@@ -6,8 +6,9 @@ defaults:
     working-directory: site
 
 on:
-  pull_request:
   push:
+    branches:
+      - main
 
 jobs:
   test-deploy:
@@ -18,9 +19,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: yarn
+          cache: npm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
       - name: Test build website
-        run: yarn build
+        run: npm run build
