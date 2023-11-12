@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunksite=self.webpackChunksite||[]).push([[9605],{9604:e=>{e.exports=JSON.parse('{"title":"Examples","description":" ","slug":"/examples","permalink":"/syncpack/examples","navigation":{"next":{"title":"Ban dependency from monorepo","permalink":"/syncpack/examples/ban-dependency-from-monorepo"}}}')}}]);
