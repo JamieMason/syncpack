@@ -32,6 +32,10 @@ export default defineConfig({
       },
       sidebar: [
         {
+          label: 'Github',
+          link: 'https://github.com/JamieMason/syncpack',
+        },
+        {
           label: 'Guides',
           autogenerate: { directory: 'guide' },
         },
