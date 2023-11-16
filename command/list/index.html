@@ -32,7 +32,7 @@
 <h2 id="cli-options">CLI Options</h2>
 <h3 id="source">source</h3>
 <pre class="astro-code css-variables" style="background-color:var(--astro-code-color-background);color:var(--astro-code-color-text);overflow-x:auto" tabindex="0" lang="plaintext" dir="ltr"><code><span class="line"><span>-s, --source [pattern]</span></span></code></pre>
-<p>Override your <a href="/config/source">source</a> configuration to run <code dir="auto">syncpack {props.command}</code> on only some package.json files.</p>
+<p>Override your <a href="/syncpack/config/source">source</a> configuration to run <code dir="auto">syncpack {props.command}</code> on only some package.json files.</p>
 
 <pre><code># only the root package
 syncpack list --source &#39;package.json&#39;
@@ -59,7 +59,7 @@ syncpack list --types &#39;typescript|eslint&#39;</code></pre>
 
 <h3 id="types">types</h3>
 <pre class="astro-code css-variables" style="background-color:var(--astro-code-color-background);color:var(--astro-code-color-text);overflow-x:auto" tabindex="0" lang="plaintext" dir="ltr"><code><span class="line"><span>-t, --types &lt;names&gt;</span></span></code></pre>
-<p>Override your <a href="/config/dependency-types">dependencyTypes</a> configuration to run <code dir="auto">syncpack {props.command}</code> on only eg. <code dir="auto">peerDependencies</code> in every package in your monorepo.</p>
+<p>Override your <a href="/syncpack/config/dependency-types">dependencyTypes</a> configuration to run <code dir="auto">syncpack {props.command}</code> on only eg. <code dir="auto">peerDependencies</code> in every package in your monorepo.</p>
 
 <pre><code># only include peerDependencies
 syncpack list --types &#39;peer&#39;

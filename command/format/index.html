@@ -32,7 +32,7 @@
 <h2 id="cli-options">CLI Options</h2>
 <h3 id="source">source</h3>
 <pre class="astro-code css-variables" style="background-color:var(--astro-code-color-background);color:var(--astro-code-color-text);overflow-x:auto" tabindex="0" lang="plaintext" dir="ltr"><code><span class="line"><span>-s, --source [pattern]</span></span></code></pre>
-<p>Override your <a href="/config/source">source</a> configuration to run <code dir="auto">syncpack {props.command}</code> on only some package.json files.</p>
+<p>Override your <a href="/syncpack/config/source">source</a> configuration to run <code dir="auto">syncpack {props.command}</code> on only some package.json files.</p>
 
 <pre><code># only the root package
 syncpack format --source &#39;package.json&#39;
@@ -50,7 +50,7 @@ syncpack format --source &#39;package.json&#39; --source &#39;packages/beta-*&#3
 
 <h3 id="indent">indent</h3>
 <pre class="astro-code css-variables" style="background-color:var(--astro-code-color-background);color:var(--astro-code-color-text);overflow-x:auto" tabindex="0" lang="plaintext" dir="ltr"><code><span class="line"><span>-i, --indent [value]</span></span></code></pre>
-<p>Override your <a href="/config/indent">indent</a> configuration, which is 2 spaces by default.</p>
+<p>Override your <a href="/syncpack/config/indent">indent</a> configuration, which is 2 spaces by default.</p>
 
 <pre><code># four spaces
 syncpack format --indent &quot;    &quot;
