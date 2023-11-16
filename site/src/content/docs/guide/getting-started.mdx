@@ -65,7 +65,7 @@ syncpack list --types local
 
 When setting up a project, I'd recommend that you start small and focus on only production dependencies. Monorepos are large and complex and I think it's better to tackle them in stages.
 
-Create the following config file in the root of your project:
+Create the following [config file](/syncpack/config/syncpackrc) at `.syncpackrc` in the root of your project:
 
 ```json .syncpackrc
 {
@@ -105,14 +105,13 @@ Now take a look at your production dependencies:
 syncpack list
 ```
 
-You will likely see some warnings, and each warning will display an error code to identify the reason it is invalid. Every warning is explained in the [Error Codes](/status-codes) documentation.
+You will likely see some warnings, and each warning will display an error code to identify the reason it is invalid. Every warning is explained in the [Status Codes](/syncpack/guide/status-codes) documentation.
 
 We'll look at how to fix mismatching versions, but first let's look at the semver ranges.
 
 ## Semver Ranges
 
 <Details title="Examples of Semver Ranges">
-
   <SupportedRanges />
 </Details>
 
@@ -137,11 +136,11 @@ Supposing you prefer exact version numbers, you can define a policy to standardi
 
 :::tip
 
-[packages](/config/semver-groups/with-range#packages) and [dependencies](/config/semver-groups/with-range#dependencies) match all by default, so you can remove those properties from your config if you prefer.
+[packages](/syncpack/config/semver-groups/with-range#packages) and [dependencies](/syncpack/config/semver-groups/with-range#dependencies) match all by default, so you can remove those properties from your config if you prefer.
 
 :::
 
-What we've created is called a [Semver Group](/config/semver-groups/with-range). Whenever syncpack finds an [instance of a dependency](#whats-an-instance), it walks through your `semverGroups` array in source code order until it finds a match – the first match wins and syncpack stops searching. An instance can only belong to one Semver Group (and one [Version Group](/config/version-groups/standard), which we'll see later) and the groups an instance belongs to define the rules that form its version policy.
+What we've created is called a [Semver Group](/syncpack/config/semver-groups/with-range). Whenever syncpack finds an [instance of a dependency](#whats-an-instance), it walks through your `semverGroups` array in source code order until it finds a match – the first match wins and syncpack stops searching. An instance can only belong to one Semver Group (and one [Version Group](/syncpack/config/version-groups/standard), which we'll see later) and the groups an instance belongs to define the rules that form its version policy.
 
 In our case we've decided that every instance under a `dependencies` object must always have a semver range of `""` for an exact version number.
 
@@ -227,7 +226,7 @@ Now that we're using consistent semver ranges under `dependencies`, let's return
 syncpack list-mismatches
 ```
 
-The most common of syncpack's [Status Codes](/guide/status-codes) is `HighestSemverMismatch` which tells us that all versions used for that dependency are valid semver, but they are not identical and the one with the highest semver version should be used by all.
+The most common of syncpack's [Status Codes](/syncpack/guide/status-codes) is `HighestSemverMismatch` which tells us that all versions used for that dependency are valid semver, but they are not identical and the one with the highest semver version should be used by all.
 
 If you don't have any special requirements, they can be fixed automatically
 
@@ -245,11 +244,11 @@ syncpack prompt
 
 ### Adding overrides
 
-We saw earlier how to handle overrides for [Semver Groups](/config/semver-groups/with-range) and [Version Groups](/config/version-groups/standard) work in exactly the same way.
+We saw earlier how to handle overrides for [Semver Groups](/syncpack/config/semver-groups/with-range) and [Version Groups](/syncpack/config/version-groups/standard) work in exactly the same way.
 
 A group can be applied to an entire monorepo, specific instances, or anything in between. Groups can be layered over others to apply overrides as we saw in the previous section.
 
-You should hopefully now have a good intuition for how instances get assigned to groups. All that remains is to choose groups which exhibit the behaviour you need and to apply combinations of the [dependencies](/config/version-groups/standard#dependencies), [dependencyTypes](/config/version-groups/standard#dependencyTypes), and [packages](/config/version-groups/standard#packages) properties to them to target the instances you need to.
+You should hopefully now have a good intuition for how instances get assigned to groups. All that remains is to choose groups which exhibit the behaviour you need and to apply combinations of the [dependencies](/syncpack/config/version-groups/standard#dependencies), [dependencyTypes](/syncpack/config/version-groups/standard#dependencyTypes), and [packages](/syncpack/config/version-groups/standard#packages) properties to them to target the instances you need to.
 
 Version Groups provide a lot of really useful functionality, let's look at them some more.
 
@@ -310,7 +309,7 @@ A 3rd party framework has had a major update which requires breaking changes but
 
 :::caution[Remember, We've only been linting "dependencies"]
 
-At the start of this guide we used [dependencyTypes](/config/dependency-types) to configure syncpack to only look at `dependencies`, so the rest of our monorepo is currently being ignored.
+At the start of this guide we used [dependencyTypes](/syncpack/config/dependency-types) to configure syncpack to only look at `dependencies`, so the rest of our monorepo is currently being ignored.
 
 Move onto `dev` for `devDependencies` next and repeat the process we just followed.
 

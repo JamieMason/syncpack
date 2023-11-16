@@ -6,7 +6,7 @@ import PinWorkspaceExample from '@site/partials/examples/_pin-workspace.mdx';
 import SameRangeExample from '@site/partials/examples/_same-range.mdx';
 import Details from '@site/components/details.astro';
 
-This is an addendum to the [Getting Started](/guide/getting-started) guide.
+This is an addendum to the [Getting Started](/syncpack/guide/getting-started) guide.
 
 When some of the packages developed in your monorepo are installed as dependencies in other packages developed in your monorepo, syncpack can check that the versions used are valid and consistent.
 
@@ -58,7 +58,7 @@ The Developers of this project:
 
 ## The `local` dependency type
 
-The "local" [`dependencyType`](/config/dependency-types) relates to the [`version`]({import.meta.env.HREF_VERSION}) properties of the package.json files from your own packages being developed in your monorepo.
+The "local" [`dependencyType`](/syncpack/config/dependency-types) relates to the [`version`]({import.meta.env.HREF_VERSION}) properties of the package.json files from your own packages being developed in your monorepo.
 
 When `local` is enabled, syncpack can see that:
 
@@ -83,7 +83,7 @@ Let's look at `workspace:*` under `devDependencies` first and decide on a rule f
 
 </Details>
 
-The fix for the Peer Dependency of `^1.0.0` can also be used to fix the use of `workspace:\*</code>. Since the current version of `1.2.1` of the Client is satisfied by both of these ranges, a [Same Range Version Group](/config/version-groups/same-range) can be used.
+The fix for the Peer Dependency of `^1.0.0` can also be used to fix the use of `workspace:\*</code>. Since the current version of `1.2.1` of the Client is satisfied by both of these ranges, a [Same Range Version Group](/syncpack/config/version-groups/same-range) can be used.
 
 The versions will be considered a match unless eg. `2.0.0` of the Client is released, or one of its dependents uses a range which does not include its current version.
 
