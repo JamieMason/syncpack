@@ -7,8 +7,8 @@ Only run `syncpack {props.command}` on dependencies whose names match the given 
 {/* prettier-ignore-start */}
 <pre><code>{`
 \# only include react, react-dom, preact etc
-syncpack ${props.command} --types 'react'
+syncpack ${props.command} --filter 'react'
 \# only include typescript or eslint packages
-syncpack ${props.command} --types 'typescript|eslint'
+syncpack ${props.command} --filter 'typescript|eslint'
 `.trim()}</code></pre>
 {/* prettier-ignore-end */}
