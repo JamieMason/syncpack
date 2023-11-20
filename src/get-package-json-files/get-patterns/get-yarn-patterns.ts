@@ -14,8 +14,8 @@ export function getYarnPatterns(io: Io): Effect.Effect<never, never, O.Option<st
       isArrayOfStrings(file.contents.workspaces.packages)
         ? O.some(file.contents.workspaces.packages)
         : isArrayOfStrings(file.contents.workspaces)
-        ? O.some(file.contents.workspaces)
-        : O.none(),
+          ? O.some(file.contents.workspaces)
+          : O.none(),
     ),
     Effect.catchTags({
       ReadFileError: () => Effect.succeed(O.none()),

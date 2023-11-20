@@ -5,6 +5,6 @@ export function getSource({ cli, rcFile }: Ctx['config']): string[] {
   return isArrayOfStrings(cli.source)
     ? cli.source
     : isArrayOfStrings(rcFile.source)
-    ? rcFile.source
-    : [];
+      ? rcFile.source
+      : [];
 }

@@ -59,15 +59,15 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
                 specifier: current,
               })
             : // if it is already like this on disk
-            instance.rawSpecifier === valid.raw
-            ? // it is a match
-              new Report.Valid({
-                specifier: current,
-              })
-            : // it is a mismatch and should be this one
-              new Report.SemverRangeMismatch({
-                fixable: valid,
-              }),
+              instance.rawSpecifier === valid.raw
+              ? // it is a match
+                new Report.Valid({
+                  specifier: current,
+                })
+              : // it is a mismatch and should be this one
+                new Report.SemverRangeMismatch({
+                  fixable: valid,
+                }),
 
         // if range is NOT fixable, it is a mismatch we can't auto-fix
         // as it seems to not be semver

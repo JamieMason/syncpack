@@ -75,8 +75,8 @@ export function getEnabledTypes({
             provided: (isNonEmptyString(cli.types)
               ? cli.types.split(',')
               : isArrayOfStrings(rcFile.dependencyTypes)
-              ? rcFile.dependencyTypes
-              : []
+                ? rcFile.dependencyTypes
+                : []
             ).filter(isNonEmptyString),
             enabled: [],
             positive: [],

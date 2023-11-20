@@ -5,6 +5,6 @@ export function getIndent({ cli, rcFile }: Ctx['config']): string {
   return isNonEmptyString(cli.indent)
     ? cli.indent.replaceAll('\\t', '\t')
     : isNonEmptyString(rcFile.indent)
-    ? rcFile.indent
-    : '  ';
+      ? rcFile.indent
+      : '  ';
 }

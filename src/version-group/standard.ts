@@ -161,16 +161,16 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                                 // ✓ current version matches expected version
                                 new Report.Valid({ specifier: current })
                               : current.instance.rawSpecifier === expectedVersion.raw
-                              ? // ✓ every version is semver
-                                // ✓ current version matches expected version
-                                // ✘ current version does not match expected semver
-                                // ✓ is a mismatch we can auto-fix
-                                new Report.SemverRangeMismatch({ fixable: expectedRange })
-                              : // ✓ every version is semver
-                                // ✘ current version does not match expected version
-                                // ✘ expected version does not match expected semver
-                                // ✓ is a mismatch we can auto-fix
-                                new PreferredMismatch({ fixable: expectedRange }),
+                                ? // ✓ every version is semver
+                                  // ✓ current version matches expected version
+                                  // ✘ current version does not match expected semver
+                                  // ✓ is a mismatch we can auto-fix
+                                  new Report.SemverRangeMismatch({ fixable: expectedRange })
+                                : // ✓ every version is semver
+                                  // ✘ current version does not match expected version
+                                  // ✘ expected version does not match expected semver
+                                  // ✓ is a mismatch we can auto-fix
+                                  new PreferredMismatch({ fixable: expectedRange }),
                         }),
                       ),
                     ),

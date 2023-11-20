@@ -6,6 +6,6 @@ export function getFilter({ cli, rcFile }: Ctx['config']): string {
   return isNonEmptyString(cli.filter)
     ? cli.filter
     : isNonEmptyString(rcFile.filter)
-    ? rcFile.filter
-    : '.';
+      ? rcFile.filter
+      : '.';
 }

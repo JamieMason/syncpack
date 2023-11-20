@@ -20,7 +20,7 @@ export function withLogger(program: Effect.Effect<never, never, unknown>) {
     process.env.SYNCPACK_VERBOSE === 'true'
       ? LogLevel.Debug
       : process.env.NODE_ENV === 'test'
-      ? LogLevel.None
-      : LogLevel.Info;
+        ? LogLevel.None
+        : LogLevel.Info;
   return Effect.provide(Logger.withMinimumLogLevel(program, logLevel), layer);
 }
