@@ -47,9 +47,9 @@ syncpack set-semver-ranges --source &#39;package.json&#39; --source &#39;package
 <p>Only run <code dir="auto">syncpack {props.command}</code> on dependencies whose names match the given string, which will be passed to <code dir="auto">new RegExp()</code>.</p>
 
 <pre><code># only include react, react-dom, preact etc
-syncpack set-semver-ranges --types &#39;react&#39;
+syncpack set-semver-ranges --filter &#39;react&#39;
 # only include typescript or eslint packages
-syncpack set-semver-ranges --types &#39;typescript|eslint&#39;</code></pre>
+syncpack set-semver-ranges --filter &#39;typescript|eslint&#39;</code></pre>
 
 <h3 id="config">config</h3>
 <pre class="astro-code css-variables" style="background-color:var(--astro-code-color-background);color:var(--astro-code-color-text);overflow-x:auto" tabindex="0" lang="plaintext" dir="ltr"><code><span class="line"><span>-c, --config &lt;path&gt;</span></span></code></pre>
