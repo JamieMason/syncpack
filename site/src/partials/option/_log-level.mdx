@@ -1,7 +1,5 @@
+import { Code } from 'astro:components';
+
 Verbose logging can be enabled by prefixing syncpack with the following environment variable:
 
-{/* prettier-ignore-start */}
-<pre><code>{`
-SYNCPACK_VERBOSE=true syncpack ${props.command}
-`.trim()}</code></pre>
-{/* prettier-ignore-end */}
+<Code code={`SYNCPACK_VERBOSE=true syncpack ${props.command}`} lang="bash" />

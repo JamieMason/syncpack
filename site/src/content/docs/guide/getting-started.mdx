@@ -67,7 +67,7 @@ When setting up a project, I'd recommend that you start small and focus on only 
 
 Create the following [config file](/syncpack/config/syncpackrc) at `.syncpackrc` in the root of your project:
 
-```json .syncpackrc
+```json title=".syncpackrc"
 {
   "dependencyTypes": ["prod"]
 }
@@ -119,18 +119,18 @@ Looking at your `syncpack list` output, which semver range is used in the majori
 
 Supposing you prefer exact version numbers, you can define a policy to standardise them:
 
-```json .syncpackrc focus=3:11
+```diff lang="json" title=".syncpackrc"
 {
   "dependencyTypes": ["prod"],
-  "semverGroups": [
-    {
-      "label": "use exact version numbers in production",
-      "packages": ["**"],
-      "dependencyTypes": ["prod"],
-      "dependencies": ["**"],
-      "range": ""
-    }
-  ]
++  "semverGroups": [
++    {
++      "label": "use exact version numbers in production",
++      "packages": ["**"],
++      "dependencyTypes": ["prod"],
++      "dependencies": ["**"],
++      "range": ""
++    }
++  ]
 }
 ```
 
@@ -183,17 +183,17 @@ Sometimes you will have exceptions to a rule, instances which for whatever reaso
 
 For example, to use `^` in just one package we could use the following config, where `dashboard-ui` is the `name` property of the package.json file we want to make an exception for.
 
-```json .syncpackrc focus=4:10
+```diff lang="json" title=".syncpackrc"
 {
   "dependencyTypes": ["prod"],
   "semverGroups": [
-    {
-      "label": "use caret ranges in the dashboard-ui in production",
-      "packages": ["dashboard-ui"],
-      "dependencyTypes": ["prod"],
-      "dependencies": ["**"],
-      "range": "^"
-    },
++    {
++      "label": "use caret ranges in the dashboard-ui in production",
++      "packages": ["dashboard-ui"],
++      "dependencyTypes": ["prod"],
++      "dependencies": ["**"],
++      "range": "^"
++    },
     {
       "label": "use exact version numbers in production",
       "packages": ["**"],
@@ -265,7 +265,7 @@ A 3rd party framework has had a major update which requires breaking changes but
 1. You **do** want those groups to use **different versions to each other** and not have Syncpack make them all the same.
 1. You only have this problem with `next` and `react`, other dependencies can continue to be kept consistent with each other throughout the full monorepo.
 
-```json .syncpackrc focus=19:26
+```diff lang="json" title=".syncpackrc"
 {
   "dependencyTypes": ["prod"],
   "semverGroups": [
@@ -284,38 +284,38 @@ A 3rd party framework has had a major update which requires breaking changes but
       "range": ""
     }
   ],
-  "versionGroups": [
-    {
-      "label": "These packages are stuck on next@11 for now",
-      "packages": ["@stricken/server", "@stricken/ui"],
-      "dependencyTypes": ["prod"],
-      "dependencies": ["next", "react", "react-dom"]
-    }
-  ]
++  "versionGroups": [
++    {
++      "label": "These packages are stuck on next@11 for now",
++      "packages": ["@stricken/server", "@stricken/ui"],
++      "dependencyTypes": ["prod"],
++      "dependencies": ["next", "react", "react-dom"]
++    }
++  ]
 }
 ```
 
-:::tip[Syncpack will make ensure that]
+:::tip[Syncpack will ensure that]
 
 - The versions of `next` and `react`
-  - Are the same between `@stricken/server` and `@stricken/ui`.
-  - Are the same across every package **except** `@stricken/server` and `@stricken/ui`.
-  - Can be different in `@stricken/server` and `@stricken/ui` to the other packages.
-- The versions of every **other** dependency in the monorepo (eg `lodash`) are the same across every package **including** `@stricken/server` and `@stricken/ui`.
+  - are the same between `@stricken/server` and `@stricken/ui`.
+  - are the same across every package **except** `@stricken/server` and `@stricken/ui`.
+  - can be different in `@stricken/server` and `@stricken/ui` to the other packages.
+- The versions of every **other** dependency in the monorepo (eg `lodash`)
+  - are the same across every package **including** `@stricken/server` and `@stricken/ui`.
 
 :::
 
 ## Keep going
 
-:::caution[Remember, We've only been linting "dependencies"]
+:::caution[Remember we've only been linting "dependencies"]
 
 At the start of this guide we used [dependencyTypes](/syncpack/config/dependency-types) to configure syncpack to only look at `dependencies`, so the rest of our monorepo is currently being ignored.
 
 Move onto `dev` for `devDependencies` next and repeat the process we just followed.
 
-```json .syncpackrc
+```json title=".syncpackrc" ins=', "dev"'
 {
-  // focus[31:35]
   "dependencyTypes": ["prod", "dev"]
 }
 ```

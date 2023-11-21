@@ -1,16 +1,13 @@
-```
--t, --types <names>
-```
+import { Code } from 'astro:components';
 
-Override your [dependencyTypes](/syncpack/config/dependency-types) configuration to run `syncpack {props.command}` on only eg. `peerDependencies` in every package in your monorepo.
+Override your [dependencyTypes](/syncpack/config/dependency-types) configuration to run <code>{`syncpack ${props.command}`}</code> on only eg. `peerDependencies` in every package in your monorepo.
 
-{/* prettier-ignore-start */}
-<pre><code>{`
-\# only include peerDependencies
+<Code
+  code={`# only include peerDependencies
 syncpack ${props.command} --types 'peer'
-\# only include dependencies and devDependencies
+# only include dependencies and devDependencies
 syncpack ${props.command} --types 'prod,dev'
-\# exclude local package.json versions
-syncpack ${props.command} --types '!local'
-`.trim()}</code></pre>
-{/* prettier-ignore-end */}
+# exclude local package.json versions
+syncpack ${props.command} --types '!local'`}
+  lang="bash"
+/>

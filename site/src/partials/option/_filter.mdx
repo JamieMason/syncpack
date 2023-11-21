@@ -1,14 +1,12 @@
-```
--f, --filter [pattern]
-```
+import { Code } from 'astro:components';
 
-Only run `syncpack {props.command}` on dependencies whose names match the given string, which will be passed to `new RegExp()`.
+Only run <code>{`syncpack ${props.command}`}</code> on dependencies whose names match the given string, which will be passed to `new RegExp()`.
 
-{/* prettier-ignore-start */}
-<pre><code>{`
-\# only include react, react-dom, preact etc
+<Code
+  code={`# only include react, react-dom, preact etc
 syncpack ${props.command} --filter 'react'
-\# only include typescript or eslint packages
-syncpack ${props.command} --filter 'typescript|eslint'
-`.trim()}</code></pre>
-{/* prettier-ignore-end */}
+# only include typescript or eslint packages
+syncpack ${props.command} --filter 'typescript|eslint'`}
+  lang="bash"
+
+/>

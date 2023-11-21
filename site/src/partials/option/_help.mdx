@@ -1,11 +1,5 @@
-```
--h, --help
-```
+import { Code } from 'astro:components';
 
 Display a list of CLI options and other help information.
 
-{/* prettier-ignore-start */}
-<pre><code>{`
-syncpack ${props.command} --help
-`.trim()}</code></pre>
-{/* prettier-ignore-end */}
+<Code code={`syncpack ${props.command} --help`} lang="bash" />
