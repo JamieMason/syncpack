@@ -14,7 +14,7 @@ const config = {
   versionGroups: [
     {
       dependencies: ['@types/node'],
-      pinVersion: '14.18.36',
+      pinVersion: '18.19.3',
     },
     {
       dependencies: ['chalk'],

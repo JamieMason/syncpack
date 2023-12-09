@@ -1,5 +1,4 @@
-import { expect } from '@jest/globals';
-import 'expect-more-jest';
+import { expect } from 'vitest';
 import type {
   PackageJson,
   PackageJsonFile,

@@ -1,9 +1,10 @@
-import { jest } from '@jest/globals';
 import { Effect } from 'effect';
 import type * as fs from 'fs';
 import * as globby from 'globby';
 import { createFsFromVolume, Volume } from 'memfs';
 import { EOL } from 'os';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 import type { CliConfig } from '../../src/config/types';
 import type { ErrorHandlers } from '../../src/error-handlers/default-error-handlers';
 import { defaultErrorHandlers } from '../../src/error-handlers/default-error-handlers';
@@ -20,6 +21,8 @@ import type { Report } from '../../src/report';
 
 type NodeFs = typeof fs;
 
+type MockFn<F extends (...args: any) => any> = Mock<Parameters<F>, ReturnType<F>>;
+
 export interface TestScenario {
   cli: Partial<CliConfig>;
   errorHandlers: ErrorHandlers;
@@ -32,18 +35,18 @@ export interface TestScenario {
   mockIo: {
     cosmiconfig: Io['cosmiconfig'];
     enquirer: {
-      prompt: jest.Mock<Io['enquirer']['prompt']>;
+      prompt: MockFn<Io['enquirer']['prompt']>;
     };
     fs: NodeFs;
     globby: {
-      sync: jest.Mock<Io['globby']['sync']>;
+      sync: MockFn<Io['globby']['sync']>;
     };
     process: {
       cwd: Io['process']['cwd'];
-      exit: jest.Mock<Io['process']['exit']>;
+      exit: MockFn<Io['process']['exit']>;
     };
     readYamlFile: {
-      sync: jest.Mock<Io['readYamlFile']['sync']>;
+      sync: MockFn<Io['readYamlFile']['sync']>;
     };
   };
   readPackages(): Record<string, PackageJson>;
@@ -130,7 +133,7 @@ const mock = {
     };
 
     function mockErrorHandler(name: string) {
-      return jest.fn((defaultErrorHandlers as any)[name]).mockName(`defaultErrorHandlers.${name}`);
+      return vi.fn((defaultErrorHandlers as any)[name]).mockName(`defaultErrorHandlers.${name}`);
     }
   },
   fs(filesByName: Record<string, any>): NodeFs {
@@ -169,21 +172,21 @@ const mock = {
         },
       },
       enquirer: {
-        prompt: jest.fn<Io['enquirer']['prompt']>().mockName('enquirer.prompt'),
+        prompt: vi.fn().mockName('enquirer.prompt'),
       },
       fs: fs,
       globby: {
-        sync: jest.fn<Io['globby']['sync']>(globby.sync).mockName('globby.sync') as any,
+        sync: vi.fn(globby.sync).mockName('globby.sync') as any,
       },
       process: {
         cwd: () => cwd,
-        exit: jest.fn<Io['process']['exit']>().mockName('process.exit'),
+        exit: vi.fn().mockName('process.exit') as any,
       },
       readYamlFile: {
-        sync: jest
+        sync: vi
           // pnpm-workspace.yaml is the only YAML file syncpack ever reads
-          .fn<Io['readYamlFile']['sync']>(() => filesByName['pnpm-workspace.yaml'])
-          .mockName('readYamlFile.sync'),
+          .fn(() => filesByName['pnpm-workspace.yaml'])
+          .mockName('readYamlFile.sync') as any,
       },
     };
   },

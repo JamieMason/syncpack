@@ -1,5 +1,5 @@
 import { Effect, pipe } from 'effect';
-import 'expect-more-jest';
+import { expect, it } from 'vitest';
 import type { TestScenario } from '../../test/lib/create-scenario';
 import { createScenario } from '../../test/lib/create-scenario';
 import { CWD } from '../constants';

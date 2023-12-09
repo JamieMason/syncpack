@@ -1,4 +1,4 @@
-import 'expect-more-jest';
+import { describe, expect, it } from 'vitest';
 import { sortByName } from './sort-by-name';
 
 describe('sortByName', () => {

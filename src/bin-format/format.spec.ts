@@ -1,4 +1,5 @@
 import { Effect } from 'effect';
+import { expect, it } from 'vitest';
 import { createScenario } from '../../test/lib/create-scenario';
 import { format } from './format';
 

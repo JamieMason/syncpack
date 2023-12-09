@@ -1,4 +1,5 @@
 import { Effect } from 'effect';
+import { describe, expect, it } from 'vitest';
 import { createScenario } from '../../test/lib/create-scenario';
 import { fixMismatches } from '../bin-fix-mismatches/fix-mismatches';
 import { lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges';

@@ -1,5 +1,5 @@
 import { Effect } from 'effect';
-import 'expect-more-jest';
+import { describe, expect, it } from 'vitest';
 import { shuffle } from '../../../test/lib/shuffle';
 import type { Specifier } from '../../specifier';
 import { getHighestVersion } from './get-highest-version';

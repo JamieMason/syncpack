@@ -1,4 +1,5 @@
 import { Effect, pipe } from 'effect';
+import { expect, it } from 'vitest';
 import { InvalidCustomTypeError } from './get-custom-types';
 import { DeprecatedTypesError, getEnabledTypes, RenamedWorkspaceTypeError } from './get-enabled-types';
 

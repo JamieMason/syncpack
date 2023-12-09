@@ -1,4 +1,4 @@
-import 'expect-more-jest';
+import { describe, expect, test } from 'vitest';
 import { createScenario } from '../../test/lib/create-scenario';
 
 describe('supported version formats', () => {

@@ -14,8 +14,8 @@
       "type": "shell"
     },
     {
-      "args": ["--silent", "false", "src", "test"],
-      "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["run", "src", "test"],
+      "command": "${workspaceFolder}/node_modules/.bin/vitest",
       "options": { "env": { "NODE_ENV": "test" } },
       "group": "test",
       "label": "Run tests",
@@ -27,8 +27,8 @@
       "type": "shell"
     },
     {
-      "args": ["--silent", "false", "--watch", "--no-coverage", "--verbose=false", "src", "test"],
-      "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--no-coverage", "src", "test"],
+      "command": "${workspaceFolder}/node_modules/.bin/vitest",
       "options": { "env": { "NODE_ENV": "test" } },
       "group": "test",
       "label": "Watch tests",
@@ -40,8 +40,8 @@
       "type": "shell"
     },
     {
-      "args": ["--silent", "false", "--watch", "--verbose=false", "${relativeFile}"],
-      "command": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--no-coverage", "${relativeFile}"],
+      "command": "${workspaceFolder}/node_modules/.bin/vitest",
       "options": { "env": { "NODE_ENV": "test" } },
       "group": "test",
       "label": "Watch tests for current .spec.ts file",

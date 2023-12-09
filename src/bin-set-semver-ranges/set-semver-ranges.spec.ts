@@ -1,4 +1,5 @@
 import { Effect } from 'effect';
+import { describe, expect, it } from 'vitest';
 import { createScenario } from '../../test/lib/create-scenario';
 import { setSemverRanges } from './set-semver-ranges';
 

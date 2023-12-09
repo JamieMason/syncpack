@@ -1,7 +1,6 @@
-import { expect } from '@jest/globals';
 import { Effect, pipe } from 'effect';
-import 'expect-more-jest';
 import { normalize } from 'path';
+import { describe, expect, it, test, vi } from 'vitest';
 import { getContext } from '.';
 import { createScenario } from '../../test/lib/create-scenario';
 import { shape } from '../../test/lib/matchers';
@@ -231,7 +230,7 @@ describe('finds package.json files', () => {
         packages: ['apps/**'],
       },
     })();
-    const spy = jest.spyOn(scenario.io.readYamlFile, 'sync');
+    const spy = vi.spyOn(scenario.io.readYamlFile, 'sync');
     spy.mockImplementation(() => {
       throw new Error('some error');
     });

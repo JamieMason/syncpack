@@ -1,4 +1,4 @@
-import 'expect-more-jest';
+import { describe, expect, it } from 'vitest';
 import type { SemverRange } from '../config/types';
 import { setSemverRange } from './set-semver-range';
 

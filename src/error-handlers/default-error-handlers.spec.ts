@@ -1,4 +1,5 @@
 import { Effect } from 'effect';
+import { describe, expect, it, vi } from 'vitest';
 import { createScenario } from '../../test/lib/create-scenario';
 import { fixMismatches } from '../bin-fix-mismatches/fix-mismatches';
 import { listMismatches } from '../bin-list-mismatches/list-mismatches';
@@ -16,7 +17,7 @@ describe('Disk Errors', () => {
     describe('list', () => {
       it('exits 1', () => {
         const scenario = getScenario();
-        jest.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
+        vi.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
         Effect.runSyncExit(list(scenario));
@@ -32,7 +33,7 @@ describe('Disk Errors', () => {
     describe('list-mismatches', () => {
       it('exits 1', () => {
         const scenario = getScenario();
-        jest.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
+        vi.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
         Effect.runSyncExit(listMismatches(scenario));
@@ -48,7 +49,7 @@ describe('Disk Errors', () => {
     describe('fix-mismatches', () => {
       it('exits 1', () => {
         const scenario = getScenario();
-        jest.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
+        vi.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
         Effect.runSyncExit(fixMismatches(scenario));
@@ -80,7 +81,7 @@ describe('Disk Errors', () => {
     describe('fix-mismatches', () => {
       it('exits 1', () => {
         const scenario = getScenario();
-        jest.spyOn(scenario.fs, 'writeFileSync').mockImplementation(() => {
+        vi.spyOn(scenario.fs, 'writeFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
         Effect.runSyncExit(fixMismatches(scenario));
@@ -319,7 +320,7 @@ describe('Config Errors', () => {
     describe('fix-mismatches', () => {
       it('exits 1', () => {
         const scenario = getScenario();
-        jest.spyOn(scenario.io.globby, 'sync').mockImplementation(() => {
+        vi.spyOn(scenario.io.globby, 'sync').mockImplementation(() => {
           throw new Error('wat');
         });
         Effect.runSyncExit(fixMismatches(scenario));

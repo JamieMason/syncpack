@@ -8,8 +8,8 @@
       "type": "node",
       "request": "launch",
       "name": "Debug tests for current .spec.ts file",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand", "--silent=false", "--verbose=false", "${relativeFile}"],
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/vitest",
+      "args": ["${relativeFile}"],
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
