@@ -1,7 +1,7 @@
 import { Data, Effect } from 'effect';
 import type { Io } from '.';
 
-export class ReadYamlFileError extends Data.TaggedClass('ReadYamlFileError')<{
+class ReadYamlFileError extends Data.TaggedClass('ReadYamlFileError')<{
   readonly filePath: string;
   readonly error: string;
 }> {}

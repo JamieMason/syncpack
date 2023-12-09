@@ -1,5 +1,3 @@
-import type { SemverRange } from './config/types';
-
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.env.MOCK_CWD || process.cwd();
 
@@ -27,8 +25,6 @@ export const RANGE = {
   PATCH: '~',
   WORKSPACE: 'workspace:',
 } as const;
-
-export const FIXABLE_RANGES: SemverRange[] = [RANGE.EXACT, RANGE.MINOR, RANGE.PATCH];
 
 export const INTERNAL_TYPES = [
   'dev',

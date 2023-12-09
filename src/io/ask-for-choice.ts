@@ -2,7 +2,7 @@ import { Data, Effect, pipe } from 'effect';
 import type { Io } from '.';
 import { IoTag } from '.';
 
-export class AskForChoiceError extends Data.TaggedClass('AskForChoiceError')<{
+class AskForChoiceError extends Data.TaggedClass('AskForChoiceError')<{
   readonly error: string;
 }> {}
 
