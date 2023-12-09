@@ -1,9 +1,8 @@
 import chalk from 'chalk';
-import { Effect, flow } from 'effect';
+import { Effect } from 'effect';
 import { EOL } from 'os';
 import type { InvalidCustomTypeError } from '../config/get-custom-types';
 import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
-import type { Ctx } from '../get-context';
 import type { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
 import type { GlobError } from '../io/glob-sync';
 import type { ReadFileError } from '../io/read-file-sync';
@@ -28,25 +27,6 @@ export interface ErrorHandlers {
   ReadFileError(err: ReadFileError): R;
   // writeFileIfChanged
   WriteFileError(err: WriteFileError): R;
-}
-
-export function chainErrorHandlers(ctx: Ctx, errorHandlers: ErrorHandlers) {
-  const markAsInvalid = Effect.map(() => {
-    ctx.isInvalid = true;
-    return ctx;
-  });
-  return {
-    DeprecatedTypesError: flow(errorHandlers.DeprecatedTypesError, markAsInvalid),
-    GlobError: flow(errorHandlers.GlobError, markAsInvalid),
-    InvalidCustomTypeError: flow(errorHandlers.InvalidCustomTypeError, markAsInvalid),
-    JsonParseError: flow(errorHandlers.JsonParseError, markAsInvalid),
-    NoSourcesFoundError: flow(errorHandlers.NoSourcesFoundError, markAsInvalid),
-    ReadFileError: flow(errorHandlers.ReadFileError, markAsInvalid),
-    RenamedWorkspaceTypeError: flow(errorHandlers.RenamedWorkspaceTypeError, markAsInvalid),
-    SemverGroupConfigError: flow(errorHandlers.SemverGroupConfigError, markAsInvalid),
-    VersionGroupConfigError: flow(errorHandlers.VersionGroupConfigError, markAsInvalid),
-    WriteFileError: flow(errorHandlers.WriteFileError, markAsInvalid),
-  };
 }
 
 export const defaultErrorHandlers: ErrorHandlers = {

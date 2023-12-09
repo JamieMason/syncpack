@@ -2,6 +2,7 @@
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
+    "downlevelIteration": true,
     "noUncheckedIndexedAccess": true,
     "outDir": "./dist"
   },

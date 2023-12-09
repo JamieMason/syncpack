@@ -1,11 +1,11 @@
 import chalk from 'chalk';
-import { Context, Effect, pipe } from 'effect';
+import { Context, Effect, flow, pipe } from 'effect';
 import { gtr } from 'semver';
 import { CliConfigTag } from '../config/tag';
 import { type CliConfig } from '../config/types';
 import { ICON } from '../constants';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { chainErrorHandlers, defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
 import { getContext } from '../get-context';
 import { getInstances } from '../get-instances';
 import type { Instance } from '../get-instances/instance';
@@ -105,7 +105,18 @@ export function update(
       ),
     ),
     Effect.flatMap(({ ctx }) =>
-      pipe(writeIfChanged(ctx), Effect.catchTags(chainErrorHandlers(ctx, errorHandlers))),
+      pipe(
+        writeIfChanged(ctx),
+        Effect.catchTags({
+          WriteFileError: flow(
+            errorHandlers.WriteFileError,
+            Effect.map(() => {
+              ctx.isInvalid = true;
+              return ctx;
+            }),
+          ),
+        }),
+      ),
     ),
     Effect.flatMap(exitIfInvalid),
     Effect.withConcurrency(10),

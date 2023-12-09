@@ -1,4 +1,4 @@
-import { Context, Effect, pipe } from 'effect';
+import { Context, Effect, flow, pipe } from 'effect';
 import { isArray } from 'tightrope/guard/is-array';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
@@ -7,7 +7,7 @@ import { getSortFirst } from '../config/get-sort-first';
 import { CliConfigTag } from '../config/tag';
 import { type CliConfig } from '../config/types';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { chainErrorHandlers, defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
 import { getContext } from '../get-context';
 import type { Io } from '../io';
 import { IoTag } from '../io';
@@ -72,7 +72,18 @@ export function format({ io, cli, errorHandlers = defaultErrorHandlers }: Input)
       }
     }),
     Effect.flatMap((ctx) =>
-      pipe(writeIfChanged(ctx), Effect.catchTags(chainErrorHandlers(ctx, errorHandlers))),
+      pipe(
+        writeIfChanged(ctx),
+        Effect.catchTags({
+          WriteFileError: flow(
+            errorHandlers.WriteFileError,
+            Effect.map(() => {
+              ctx.isInvalid = true;
+              return ctx;
+            }),
+          ),
+        }),
+      ),
     ),
     Effect.flatMap(exitIfInvalid),
     Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),

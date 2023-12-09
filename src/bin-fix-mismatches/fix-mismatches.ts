@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Context, Effect, pipe } from 'effect';
+import { Context, Effect, flow, pipe } from 'effect';
 import { isObject } from 'tightrope/guard/is-object';
 import { isUndefined } from 'tightrope/guard/is-undefined';
 import { logIgnoredSize } from '../bin-lint-semver-ranges/lint-semver-ranges';
@@ -13,7 +13,7 @@ import { CliConfigTag } from '../config/tag';
 import { type CliConfig } from '../config/types';
 import { ICON } from '../constants';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { chainErrorHandlers, defaultErrorHandlers } from '../error-handlers/default-error-handlers';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
 import type { Ctx } from '../get-context';
 import { getContext } from '../get-context';
 import { getInstances } from '../get-instances';
@@ -108,7 +108,15 @@ export function fixMismatches({ io, cli, errorHandlers = defaultErrorHandlers }:
           return ctx;
         }),
         Effect.flatMap(writeIfChanged),
-        Effect.catchTags(chainErrorHandlers(ctx, errorHandlers)),
+        Effect.catchTags({
+          WriteFileError: flow(
+            errorHandlers.WriteFileError,
+            Effect.map(() => {
+              ctx.isInvalid = true;
+              return ctx;
+            }),
+          ),
+        }),
         Effect.flatMap(exitIfInvalid),
       ),
     ),
