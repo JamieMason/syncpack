@@ -27,6 +27,7 @@
     "Luis Vieira (https://github.com/luisvieiragmr)",
     "Marais Rossouw (https://github.com/maraisr)",
     "Matt Sprague (https://github.com/uforic)",
+    "Michał Warać (https://github.com/auto200)",
     "Siraj (https://github.com/Syhner)",
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
@@ -108,17 +109,17 @@
   },
   "repository": "JamieMason/syncpack",
   "scripts": {
-    "build": "yarn clean && yarn build:source && yarn build:json-schema",
+    "build": "npm run clean && npm run build:source && npm run build:json-schema",
     "build:json-schema": "typescript-json-schema --noExtraProps src/index.ts RcFile --out dist/schema.json",
     "build:source": "tsc --project tsconfig.build.json",
     "clean": "rm -rf ./dist",
-    "format": "yarn format:lint && yarn format:source",
-    "format:lint": "yarn lint --fix",
+    "format": "npm run format:lint && npm run format:source",
+    "format:lint": "eslint --ext .ts . --fix",
     "format:source": "prettier --write .",
-    "lint": "yarn lint:ts && yarn lint:eslint",
+    "lint": "npm run lint:ts && npm run lint:eslint",
     "lint:eslint": "eslint --ext .ts .",
     "lint:ts": "tsc --noEmit --project tsconfig.json",
-    "prepack": "yarn build",
+    "prepack": "npm run build",
     "release": "release-it --increment=prerelease",
     "test": "vitest run --config vitest.config.ts"
   }

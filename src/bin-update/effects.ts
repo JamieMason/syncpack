@@ -12,6 +12,7 @@ import { isArray } from 'tightrope/guard/is-array';
 import { isEmptyObject } from 'tightrope/guard/is-empty-object';
 import { ICON } from '../constants';
 import type { Instance } from '../get-instances/instance';
+import { formatRepositoryUrl } from '../lib/format-repository-url';
 import { RingBuffer } from '../lib/ring-buffer';
 import { setSemverRange } from '../lib/set-semver-range';
 import { Specifier } from '../specifier';
@@ -25,6 +26,7 @@ class Releases extends Data.TaggedClass('Releases')<{
     all: string[];
     latest: string;
   };
+  repoUrl: string | undefined;
 }> {}
 
 // https://github.com/terkelg/prompts?tab=readme-ov-file#prompts
@@ -137,22 +139,27 @@ export const updateEffects = {
           Schema.struct({
             'dist-tags': Schema.struct({ latest: Schema.string }),
             'time': Schema.record(Schema.string, Schema.string),
+            'homepage': Schema.optional(Schema.string),
+            'repository': Schema.optional(
+              Schema.union(Schema.string, Schema.struct({ url: Schema.optional(Schema.string) })),
+            ),
           }),
         ),
       ),
       // transform it into something more appropriate
-      Effect.map(
-        (struct) =>
-          new Releases({
-            instance,
-            versions: {
-              all: Object.keys(struct.time).filter(
-                (key) => key !== 'modified' && key !== 'created',
-              ),
-              latest: struct['dist-tags'].latest,
-            },
-          }),
-      ),
+      Effect.map((struct) => {
+        const rawRepoUrl =
+          typeof struct.repository === 'object' ? struct.repository.url : struct.repository;
+
+        return new Releases({
+          instance,
+          versions: {
+            all: Object.keys(struct.time).filter((key) => key !== 'modified' && key !== 'created'),
+            latest: struct['dist-tags'].latest,
+          },
+          repoUrl: formatRepositoryUrl(rawRepoUrl),
+        });
+      }),
       // hide ParseErrors and just treat them as another kind of NpmRegistryError
       Effect.catchTags({
         ParseError: () =>
@@ -253,11 +260,24 @@ function promptForReleaseType(
               // @ts-expect-error optionsPerPage *does* exist https://github.com/terkelg/prompts#options-7
               optionsPerPage,
               message: `${releases.length} ${releaseType} updates`,
-              choices: releases.map((updateable) => ({
-                title: chalk`${updateable.instance.name} {gray ${updateable.instance.rawSpecifier} ${ICON.rightArrow}} {green ${updateable.versions.latest}}`,
-                selected: true,
-                value: updateable,
-              })),
+              choices: releases.map((updateable) => {
+                const spacingValue =
+                  50 -
+                  updateable.instance.name.length -
+                  updateable.instance.rawSpecifier.length -
+                  updateable.versions.latest.length;
+                const spacing = Array.from({ length: spacingValue }).fill(' ').join('');
+
+                const repoUrl = updateable.repoUrl
+                  ? chalk`${spacing} {white - ${updateable.repoUrl}}`
+                  : '';
+
+                return {
+                  title: chalk`${updateable.instance.name} {gray ${updateable.instance.rawSpecifier} ${ICON.rightArrow}} {green ${updateable.versions.latest}} ${repoUrl}`,
+                  selected: true,
+                  value: updateable,
+                };
+              }),
             }),
           catch: identity,
         }),
