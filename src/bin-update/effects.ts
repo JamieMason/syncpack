@@ -25,6 +25,7 @@ class Releases extends Data.TaggedClass('Releases')<{
     all: string[];
     latest: string;
   };
+  repoUrl: string;
 }> {}
 
 // https://github.com/terkelg/prompts?tab=readme-ov-file#prompts
@@ -137,6 +138,8 @@ export const updateEffects = {
           Schema.struct({
             'dist-tags': Schema.struct({ latest: Schema.string }),
             'time': Schema.record(Schema.string, Schema.string),
+            'homepage': Schema.string,
+            'repository': Schema.struct({ url: Schema.string }),
           }),
         ),
       ),
@@ -151,6 +154,9 @@ export const updateEffects = {
               ),
               latest: struct['dist-tags'].latest,
             },
+            repoUrl:
+              struct.repository.url.match(/https?:\/\/[^\s]+/)?.[0]?.replace('.git', '') ??
+              struct.homepage,
           }),
       ),
       // hide ParseErrors and just treat them as another kind of NpmRegistryError
@@ -254,7 +260,7 @@ function promptForReleaseType(
               optionsPerPage,
               message: `${releases.length} ${releaseType} updates`,
               choices: releases.map((updateable) => ({
-                title: chalk`${updateable.instance.name} {gray ${updateable.instance.rawSpecifier} ${ICON.rightArrow}} {green ${updateable.versions.latest}}`,
+                title: chalk`${updateable.instance.name} {gray ${updateable.instance.rawSpecifier} ${ICON.rightArrow}} {green ${updateable.versions.latest}} {white - ${updateable.repoUrl}}`,
                 selected: true,
                 value: updateable,
               })),

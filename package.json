@@ -114,6 +114,7 @@
     "build": "yarn clean && yarn build:source && yarn build:json-schema",
     "build:json-schema": "typescript-json-schema --noExtraProps src/index.ts RcFile --out dist/schema.json",
     "build:source": "tsc --project tsconfig.build.json",
+    "build:source:watch": "tsc --project tsconfig.build.json --watch",
     "clean": "rm -rf ./dist",
     "format": "yarn format:lint && yarn format:source",
     "format:lint": "yarn lint --fix",
