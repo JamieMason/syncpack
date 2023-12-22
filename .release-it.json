@@ -1,0 +1,26 @@
+{
+  "git": {
+    "changelog": "npm exec auto-changelog -- --stdout --commit-limit false --unreleased --breaking-pattern 'BREAKING CHANGE:' --template https://raw.githubusercontent.com/release-it/release-it/main/templates/changelog-compact.hbs",
+    "commitMessage": "chore(release): ${version}",
+    "push": false,
+    "requireBranch": "main"
+  },
+  "github": {
+    "release": true,
+    "releaseName": "${version}"
+  },
+  "hooks": {
+    "after:bump": "npm exec auto-changelog -- -p --breaking-pattern 'BREAKING CHANGE:' && git add CHANGELOG.md"
+  },
+  "npm": {
+    "publish": false
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits"
+      },
+      "strictSemver": true
+    }
+  }
+}

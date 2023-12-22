@@ -49,6 +49,7 @@
     "ts-toolbelt": "9.6.0"
   },
   "devDependencies": {
+    "@release-it/conventional-changelog": "8.0.1",
     "@tsconfig/node18": "18.2.2",
     "@types/node": "20.10.5",
     "@types/npm-package-arg": "6.1.4",
@@ -57,11 +58,13 @@
     "@typescript-eslint/eslint-plugin": "6.15.0",
     "@typescript-eslint/parser": "6.15.0",
     "@vitest/coverage-v8": "1.1.0",
+    "auto-changelog": "2.4.0",
     "eslint": "8.56.0",
     "eslint-plugin-import": "2.29.1",
     "memfs": "4.6.0",
     "prettier": "3.1.1",
     "prettier-plugin-astro": "0.12.2",
+    "release-it": "17.0.1",
     "ts-node": "10.9.2",
     "typescript": "5.3.3",
     "typescript-json-schema": "0.62.0",
@@ -99,8 +102,6 @@
   "overrides": {
     "chalk": "4.1.2",
     "effect": "2.0.0-next.62",
-    "globby": "11.1.0",
-    "ora": "5.4.1",
     "string-width": "<5.0.0",
     "strip-ansi": "<7.0.0",
     "wrap-ansi": "<8.0.0"
@@ -118,6 +119,7 @@
     "lint:eslint": "eslint --ext .ts .",
     "lint:ts": "tsc --noEmit --project tsconfig.json",
     "prepack": "yarn build",
+    "release": "release-it --increment=prerelease",
     "test": "vitest run --config vitest.config.ts"
   }
 }
