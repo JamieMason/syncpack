@@ -11,7 +11,7 @@ npm install --save-dev syncpack
 <!-- prettier-ignore-start -->
 
 > [!NOTE]
-> syncpack 🚀 [12.0.0-alpha.0](https://github.com/JamieMason/syncpack/releases/tag/12.0.0-alpha.0) is available to trial and give feedback. This release adds support for a much wider range of npm version specifiers than before, console output improvements, and more.
+> [v12.0.0-alpha-*](https://github.com/JamieMason/syncpack/releases?q=alpha) versions are available to trial and give feedback. This milestone adds support for a much wider range of npm version specifiers, console output improvements, and more. If you have tried it, please [leave a comment](https://github.com/JamieMason/syncpack/commit/ab9928008e7d44d096068602f3e6f2a561d4e31e#comments) to confirm it is stable.
 
 <!-- prettier-ignore-end -->
 
