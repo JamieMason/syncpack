@@ -109,7 +109,7 @@ function logSemverRangeMismatch(report: Report.SemverRangeMismatch) {
   const filePath = instance.packageJsonFile.jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${filePath} > ${propPath}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${filePath} > ${propPath}} {blue [${_tag}]}`,
   );
 }
 
@@ -122,6 +122,6 @@ function logUnsupportedMismatch(report: Report.UnsupportedMismatch) {
   const filePath = instance.packageJsonFile.jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross} name {white ${name}} or version {white ${actual}} are not supported} {gray ${filePath} > ${propPath}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross} name {white ${name}} or version {white ${actual}} are not supported} {gray ${filePath} > ${propPath}} {blue [${_tag}]}`,
   );
 }

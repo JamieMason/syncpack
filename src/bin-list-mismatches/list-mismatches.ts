@@ -151,7 +151,7 @@ function logBanned(report: Report.Banned) {
   const shortPath = jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red banned} {gray ${shortPath} > ${path}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red banned} {gray ${shortPath} > ${path}} {blue [${_tag}]}`,
   );
 }
 
@@ -167,7 +167,7 @@ function logHighestSemverMismatch(report: Report.HighestSemverMismatch) {
   const shortPath = jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {blue [${_tag}]}`,
   );
 }
 
@@ -182,7 +182,7 @@ function logLocalPackageMismatch(report: Report.LocalPackageMismatch) {
   const shortPath = instance.packageJsonFile.jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {blue [${_tag}]}`,
   );
 }
 
@@ -197,7 +197,7 @@ function logLowestSemverMismatch(report: Report.LowestSemverMismatch) {
   const shortPath = instance.packageJsonFile.jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {blue [${_tag}]}`,
   );
 }
 
@@ -212,7 +212,7 @@ function logPinnedMismatch(report: Report.PinnedMismatch) {
   const shortPath = instance.packageJsonFile.jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {blue [${_tag}]}`,
   );
 }
 
@@ -227,7 +227,7 @@ function logSemverRangeMismatch(report: Report.SemverRangeMismatch) {
   const shortPath = instance.packageJsonFile.jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {blue [${_tag}]}`,
   );
 }
 
@@ -242,7 +242,7 @@ function logSnappedToMismatch(report: Report.SnappedToMismatch) {
   const shortPath = instance.packageJsonFile.jsonFile.shortPath;
 
   return Effect.logInfo(
-    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {gray.dim [${_tag}]}`,
+    chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {green ${expected}} {gray ${shortPath} > ${path}} {blue [${_tag}]}`,
   );
 }
 
@@ -257,7 +257,7 @@ export function logMissingLocalVersion(report: Report.MissingLocalVersion) {
 
   return Effect.logInfo(
     [
-      chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {red ???} {gray ${shortPath} > ${path}} {gray.dim [missing local version]}`,
+      chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {red ???} {gray ${shortPath} > ${path}} {blue [MissingLocalVersion]}`,
       chalk`  {red ${localPath} does not have a .version property which is exact semver}`,
     ].join(EOL),
   );
@@ -273,7 +273,7 @@ export function logMissingSnappedToMismatch(report: Report.MissingSnappedToMisma
 
   return Effect.logInfo(
     [
-      chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {red ???} {gray ${shortPath} > ${path}} {gray.dim [missing snapTo version]}`,
+      chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {red ???} {gray ${shortPath} > ${path}} {blue [MissingSnappedToMismatch]}`,
       chalk`  {red no package in this groups .snapTo array depend on ${name}}`,
     ].join(EOL),
   );
@@ -289,7 +289,7 @@ export function logUnsupportedMismatch(report: Report.UnsupportedMismatch) {
 
   return Effect.logInfo(
     [
-      chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {red ???} {gray ${shortPath} > ${path}} {gray.dim [unsupported mismatch]}`,
+      chalk`{red ${ICON.cross}} ${name} {red ${actual}} {dim ${ICON.rightArrow}} {red ???} {gray ${shortPath} > ${path}} {blue [UnsupportedMismatch]}`,
       chalk`  {red use {blue syncpack prompt} to fix this manually}`,
     ].join(EOL),
   );
@@ -308,7 +308,7 @@ export function logSameRangeMismatch(report: Report.SameRangeMismatch) {
     [
       chalk`{red ${ICON.cross}} ${name} {red range ${actual} does not include ${mismatches.join(
         ', ',
-      )}} {gray ${shortPath} > ${path}} {gray.dim [same range mismatch]}`,
+      )}} {gray ${shortPath} > ${path}} {blue [SameRangeMismatch]}`,
       chalk`  {gray use {blue syncpack prompt} to fix this manually}`,
     ].join(EOL),
   );

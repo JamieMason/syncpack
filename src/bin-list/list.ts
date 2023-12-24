@@ -70,7 +70,7 @@ export function list({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
                 const actual = report.specifier.raw;
                 matches.add(
                   report.specifier._tag === 'UnsupportedSpecifier'
-                    ? chalk`{gray ${actual}} {gray.dim [UnsupportedSpecifier]}`
+                    ? chalk`{gray ${actual}} {blue [UnsupportedMismatch]}`
                     : chalk`{gray ${actual}}`,
                 );
               } else if (
@@ -134,13 +134,13 @@ function getLogForFixable(report: Report.Version.Fixable.Any) {
   const _tag = report._tag;
   const actual = report.fixable.instance.rawSpecifier;
   const expected = report.fixable.raw;
-  return chalk`{red ${actual}} {gray ${ICON.rightArrow}} {green ${expected}} {gray.dim [${_tag}]}`;
+  return chalk`{red ${actual}} {gray ${ICON.rightArrow}} {green ${expected}} {blue [${_tag}]}`;
 }
 
 function getLogForUnfixable(report: Report.Version.Unfixable.Any) {
   const _tag = report._tag;
   const actual = report.unfixable.rawSpecifier;
-  return chalk`{red ${actual}} {gray ${ICON.rightArrow}} {gray.dim [${_tag}]}`;
+  return chalk`{red ${actual}} {gray ${ICON.rightArrow}} {blue [${_tag}]}`;
 }
 
 export function logOtherCommands() {
