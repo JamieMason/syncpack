@@ -120,7 +120,7 @@
     "lint:eslint": "eslint --ext .ts .",
     "lint:ts": "tsc --noEmit --project tsconfig.json",
     "prepack": "npm run build",
-    "release": "release-it --increment=prerelease",
+    "release": "release-it",
     "test": "vitest run --config vitest.config.ts"
   }
 }
