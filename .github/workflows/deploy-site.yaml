@@ -18,15 +18,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: npm
-
+          node-version: 20
+          cache: 'pnpm'
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
       - name: Build website
-        run: npm run build
+        run: pnpm run build
 
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus

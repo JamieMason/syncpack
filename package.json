@@ -24,6 +24,7 @@
     "Jamie Haywood (https://github.com/jamiehaywood)",
     "Jamie Mason (https://github.com/JamieMason)",
     "Jody Heavener (https://github.com/jodyheavener)",
+    "Keyan Zhang (https://github.com/keyz)",
     "Luis Vieira (https://github.com/luisvieiragmr)",
     "Marais Rossouw (https://github.com/maraisr)",
     "Matt Sprague (https://github.com/uforic)",
@@ -32,13 +33,13 @@
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
   "dependencies": {
-    "@effect/match": "0.40.0",
     "@effect/schema": "0.56.0",
     "chalk": "4.1.2",
     "commander": "11.1.0",
     "cosmiconfig": "9.0.0",
     "effect": "2.0.0-next.62",
     "enquirer": "2.4.1",
+    "fast-check": "3.15.0",
     "globby": "11.1.0",
     "minimatch": "9.0.3",
     "npm-package-arg": "11.0.1",
@@ -65,8 +66,11 @@
     "memfs": "4.6.0",
     "prettier": "3.1.1",
     "prettier-plugin-astro": "0.12.2",
+    "quill-delta": "5.1.0",
     "release-it": "17.0.1",
+    "rxjs": "7.8.1",
     "ts-node": "10.9.2",
+    "tslib": "2.6.2",
     "typescript": "5.3.3",
     "typescript-json-schema": "0.62.0",
     "vitest": "1.1.0"
@@ -100,26 +104,28 @@
   ],
   "license": "MIT",
   "main": "dist/index.js",
-  "overrides": {
-    "chalk": "4.1.2",
-    "effect": "2.0.0-next.62",
-    "string-width": "<5.0.0",
-    "strip-ansi": "<7.0.0",
-    "wrap-ansi": "<8.0.0"
+  "pnpm": {
+    "overrides": {
+      "chalk": "4.1.2",
+      "effect": "2.0.0-next.62",
+      "string-width": "<5.0.0",
+      "strip-ansi": "<7.0.0",
+      "wrap-ansi": "<8.0.0"
+    }
   },
   "repository": "JamieMason/syncpack",
   "scripts": {
-    "build": "npm run clean && npm run build:source && npm run build:json-schema",
+    "build": "pnpm run clean && pnpm run build:source && pnpm run build:json-schema",
     "build:json-schema": "typescript-json-schema --noExtraProps src/index.ts RcFile --out dist/schema.json",
     "build:source": "tsc --project tsconfig.build.json",
     "clean": "rm -rf ./dist",
-    "format": "npm run format:lint && npm run format:source",
+    "format": "pnpm run format:lint && pnpm run format:source",
     "format:lint": "eslint --ext .ts . --fix",
     "format:source": "prettier --write .",
-    "lint": "npm run lint:ts && npm run lint:eslint",
+    "lint": "pnpm run lint:ts && pnpm run lint:eslint",
     "lint:eslint": "eslint --ext .ts .",
     "lint:ts": "tsc --noEmit --project tsconfig.json",
-    "prepack": "npm run build",
+    "prepack": "pnpm run build",
     "release": "release-it",
     "test": "vitest run --config vitest.config.ts"
   }

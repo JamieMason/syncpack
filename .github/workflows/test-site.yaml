@@ -18,10 +18,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: npm
-
+          node-version: 20
+          cache: 'pnpm'
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
       - name: Test build website
-        run: npm run build
+        run: pnpm run build

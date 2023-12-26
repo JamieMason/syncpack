@@ -14,18 +14,21 @@ jobs:
         node-version: [16.x, 18.x, 20.x]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
         with:
-          cache: npm
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          cache: 'pnpm'
           node-version: ${{ matrix.node-version }}
 
       - name: Install
-        run: npm ci
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
@@ -36,20 +39,20 @@ jobs:
 
       - name: Lint
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
-        run: npm run lint
+        run: pnpm run lint
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
 
       - name: Test
-        run: npm run test
+        run: pnpm run test
         env:
           FORCE_COLOR: 3
           TERM: xterm-256color
 
       - name: Code Climate
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
-        uses: paambaati/codeclimate-action@v3.0.0
+        uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
