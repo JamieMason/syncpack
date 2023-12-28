@@ -37,10 +37,6 @@ export class DisabledSemverGroup extends Data.TaggedClass('Disabled')<{
   }
 
   inspect(instance: Instance): Effect.Effect<never, never, Report.Disabled> {
-    return Effect.succeed(
-      new Report.Disabled({
-        instance,
-      }),
-    );
+    return Effect.succeed(new Report.Disabled(instance));
   }
 }

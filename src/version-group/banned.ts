@@ -31,9 +31,7 @@ export class BannedVersionGroup extends Data.TaggedClass('Banned')<{
           (instance) =>
             // ✘ package should not be used
             // ✓ is a mismatch we can auto-fix
-            new Report.Banned({
-              fixable: Specifier.create(instance, DELETE),
-            }),
+            new Report.Banned(Specifier.create(instance, DELETE)),
         ),
       })),
     );

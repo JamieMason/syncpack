@@ -1,5 +1,4 @@
 import { Data } from 'effect';
-import type { Union } from 'ts-toolbelt';
 import type { BannedVersionGroup } from './banned';
 import type { FilteredOutVersionGroup } from './filtered-out';
 import type { IgnoredVersionGroup } from './ignored';
@@ -17,9 +16,7 @@ export namespace VersionGroup {
   export type SnappedTo = SnappedToVersionGroup;
   export type Standard = StandardVersionGroup;
 
-  export type Any = Union.Strict<
-    Banned | FilteredOut | Ignored | Pinned | SameRange | SnappedTo | Standard
-  >;
+  export type Any = Banned | FilteredOut | Ignored | Pinned | SameRange | SnappedTo | Standard;
 
   export class ConfigError extends Data.TaggedClass('VersionGroupConfigError')<{
     readonly config: unknown;

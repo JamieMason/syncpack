@@ -32,10 +32,6 @@ export class IgnoredSemverGroup extends Data.TaggedClass('Ignored')<{
   }
 
   inspect(instance: Instance): Effect.Effect<never, never, Report.Ignored> {
-    return Effect.succeed(
-      new Report.Ignored({
-        instance,
-      }),
-    );
+    return Effect.succeed(new Report.Ignored(instance));
   }
 }

@@ -22,7 +22,7 @@ export function createVersionGroups(
   ];
 
   if (isNonEmptyArray(rcFile.versionGroups)) {
-    rcFile.versionGroups.forEach((config) => {
+    rcFile.versionGroups.forEach((config: unknown) => {
       if (!isObject(config)) {
         return versionGroups.push(
           Effect.fail(

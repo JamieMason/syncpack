@@ -55,26 +55,17 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
           instance.versionGroup._tag === 'Pinned' &&
           instance.rawSpecifier === instance.versionGroup.config.pinVersion
             ? // the pinned version takes precendence and is a match
-              new Report.Valid({
-                specifier: current,
-              })
+              new Report.Valid(current)
             : // if it is already like this on disk
               instance.rawSpecifier === valid.raw
               ? // it is a match
-                new Report.Valid({
-                  specifier: current,
-                })
+                new Report.Valid(current)
               : // it is a mismatch and should be this one
-                new Report.SemverRangeMismatch({
-                  fixable: valid,
-                }),
+                new Report.SemverRangeMismatch(valid),
 
         // if range is NOT fixable, it is a mismatch we can't auto-fix
         // as it seems to not be semver
-        onFailure: () =>
-          new Report.UnsupportedMismatch({
-            unfixable: instance,
-          }),
+        onFailure: () => new Report.UnsupportedMismatch(instance),
       }),
     );
   }

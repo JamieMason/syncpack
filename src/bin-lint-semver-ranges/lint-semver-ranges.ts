@@ -61,14 +61,15 @@ export function pipeline(
         yield* $(Effect.logInfo(getSemverGroupHeader({ group, index })));
         for (const instance of group.instances) {
           const report = yield* $(group.inspect(instance));
+          if (report._tag === 'Valid') {
+            validCount++;
+            continue;
+          }
+          ctx.isInvalid = true;
           if (report._tag === 'SemverRangeMismatch') {
-            ctx.isInvalid = true;
             yield* $(logSemverRangeMismatch(report));
           } else if (report._tag === 'UnsupportedMismatch') {
-            ctx.isInvalid = true;
             yield* $(logUnsupportedMismatch(report));
-          } else {
-            validCount++;
           }
         }
       }

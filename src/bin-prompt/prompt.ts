@@ -95,11 +95,14 @@ function askForNextVersion(
   return pipe(
     Effect.gen(function* ($) {
       const choices = uniq(
-        groupReport.reports.map(
-          (instanceReport) =>
-            instanceReport.specifier?.raw ||
-            instanceReport.fixable?.raw ||
-            instanceReport.unfixable?.rawSpecifier,
+        groupReport.reports.map((report) =>
+          report._tagGroup === 'Fixable'
+            ? report.fixable.raw
+            : report._tagGroup === 'Unfixable'
+              ? report.unfixable.rawSpecifier
+              : report._tagGroup === 'Valid'
+                ? report.specifier.raw
+                : null,
         ),
       ).filter(isString);
 

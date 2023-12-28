@@ -37,7 +37,7 @@ export class FilteredOutVersionGroup extends Data.TaggedClass('FilteredOut')<{
         reports: instances.map(
           (instance) =>
             // ✓ is ignored and dismissed as valid
-            new Report.FilteredOut({ instance }),
+            new Report.FilteredOut(instance),
         ),
       })),
     );

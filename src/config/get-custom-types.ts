@@ -2,6 +2,7 @@ import { Data, Effect } from 'effect';
 import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
 import { isObject } from 'tightrope/guard/is-object';
+import { DEFAULT_CONFIG } from '../constants';
 import type { Ctx } from '../get-context';
 import { NameAndVersionPropsStrategy } from '../strategy/name-and-version-props';
 import { NamedVersionStringStrategy } from '../strategy/named-version-string';
@@ -27,38 +28,40 @@ export function getCustomTypes({
   if (!isNonEmptyObject(rcFile.customTypes)) return Effect.succeed([]);
 
   return Effect.all(
-    Object.entries(rcFile.customTypes).map(([name, config]) => {
-      const ERR_OBJ = 'Invalid customType';
-      const ERR_PATH = 'Invalid customType.path';
-      const ERR_NAME_PATH = 'Invalid customType.namePath';
-      const ERR_STRATEGY = 'Invalid customType.strategy';
+    [...Object.entries(rcFile.customTypes), ...Object.entries(DEFAULT_CONFIG.customTypes)].map(
+      ([name, config]) => {
+        const ERR_OBJ = 'Invalid customType';
+        const ERR_PATH = 'Invalid customType.path';
+        const ERR_NAME_PATH = 'Invalid customType.namePath';
+        const ERR_STRATEGY = 'Invalid customType.strategy';
 
-      if (!isObject(config)) return createError(config, ERR_OBJ);
-      if (!isNonEmptyString(config.path)) return createError(config, ERR_PATH);
+        if (!isObject(config)) return createError(config, ERR_OBJ);
+        if (!isNonEmptyString(config.path)) return createError(config, ERR_PATH);
 
-      const path = config.path;
-      const strategy = config.strategy;
+        const path = config.path;
+        const strategy = config.strategy;
 
-      switch (strategy) {
-        case 'name~version': {
-          const namePath = config.namePath;
-          if (!isNonEmptyString(namePath)) return createError(config, ERR_NAME_PATH);
-          return Effect.succeed(new NameAndVersionPropsStrategy(name, path, namePath));
+        switch (strategy) {
+          case 'name~version': {
+            const namePath = config.namePath;
+            if (!isNonEmptyString(namePath)) return createError(config, ERR_NAME_PATH);
+            return Effect.succeed(new NameAndVersionPropsStrategy(name, path, namePath));
+          }
+          case 'name@version': {
+            return Effect.succeed(new NamedVersionStringStrategy(name, path));
+          }
+          case 'version': {
+            return Effect.succeed(new UnnamedVersionStringStrategy(name, path));
+          }
+          case 'versionsByName': {
+            return Effect.succeed(new VersionsByNameStrategy(name, path));
+          }
+          default: {
+            return createError(config, ERR_STRATEGY);
+          }
         }
-        case 'name@version': {
-          return Effect.succeed(new NamedVersionStringStrategy(name, path));
-        }
-        case 'version': {
-          return Effect.succeed(new UnnamedVersionStringStrategy(name, path));
-        }
-        case 'versionsByName': {
-          return Effect.succeed(new VersionsByNameStrategy(name, path));
-        }
-        default: {
-          return createError(config, ERR_STRATEGY);
-        }
-      }
-    }),
+      },
+    ),
   );
 }
 

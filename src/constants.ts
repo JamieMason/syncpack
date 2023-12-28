@@ -1,3 +1,5 @@
+import type { RcConfig, SemverRange } from "./config/types";
+
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.env.MOCK_CWD || process.cwd();
 
@@ -24,7 +26,7 @@ export const RANGE = {
   MINOR: '^',
   PATCH: '~',
   WORKSPACE: 'workspace:',
-} as const;
+} as const satisfies Record<string, SemverRange>;
 
 export const INTERNAL_TYPES = [
   'dev',
@@ -37,6 +39,37 @@ export const INTERNAL_TYPES = [
 ] as const;
 
 export const DEFAULT_CONFIG = {
+  customTypes: {
+    dev: {
+      strategy: 'versionsByName',
+      path: 'devDependencies',
+    },
+    local: {
+      strategy: 'name~version',
+      namePath: 'name',
+      path: 'version',
+    },
+    overrides: {
+      strategy: 'versionsByName',
+      path: 'overrides',
+    },
+    peer: {
+      strategy: 'versionsByName',
+      path: 'peerDependencies',
+    },
+    pnpmOverrides: {
+      strategy: 'versionsByName',
+      path: 'pnpm.overrides',
+    },
+    prod: {
+      strategy: 'versionsByName',
+      path: 'dependencies',
+    },
+    resolutions: {
+      strategy: 'versionsByName',
+      path: 'resolutions',
+    },
+  },
   dependencyTypes: ['**'],
   filter: '.',
   indent: '  ',
@@ -53,4 +86,4 @@ export const DEFAULT_CONFIG = {
   sortFirst: ['name', 'description', 'version', 'author'],
   source: ['package.json', 'packages/*/package.json'],
   versionGroups: [],
-} as const;
+} satisfies RcConfig;

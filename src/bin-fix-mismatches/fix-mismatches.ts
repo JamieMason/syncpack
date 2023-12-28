@@ -62,35 +62,23 @@ export function fixMismatches({ io, cli, errorHandlers = defaultErrorHandlers }:
 
             for (const groupReport of yield* $(group.inspectAll())) {
               for (const report of groupReport.reports) {
-                const _tag = report._tag;
-                if (_tag === 'Valid') {
+                if (report._tagGroup === 'Valid') {
                   validCount++;
-                } else if (
-                  _tag === 'Banned' ||
-                  _tag === 'HighestSemverMismatch' ||
-                  _tag === 'LocalPackageMismatch' ||
-                  _tag === 'LowestSemverMismatch' ||
-                  _tag === 'PinnedMismatch' ||
-                  _tag === 'SemverRangeMismatch' ||
-                  _tag === 'SnappedToMismatch'
-                ) {
+                } else if (report._tagGroup === 'Fixable') {
                   fixedCount++;
                   yield* $(fixMismatch(report));
-                } else if (_tag === 'MissingLocalVersion') {
+                } else if (report._tagGroup === 'Unfixable') {
                   ctx.isInvalid = true;
                   unfixableCount++;
+                }
+
+                if (report._tag === 'MissingLocalVersion') {
                   yield* $(logMissingLocalVersion(report));
-                } else if (_tag === 'MissingSnappedToMismatch') {
-                  ctx.isInvalid = true;
-                  unfixableCount++;
+                } else if (report._tag === 'MissingSnappedToMismatch') {
                   yield* $(logMissingSnappedToMismatch(report));
-                } else if (_tag === 'UnsupportedMismatch') {
-                  ctx.isInvalid = true;
-                  unfixableCount++;
+                } else if (report._tag === 'UnsupportedMismatch') {
                   yield* $(logUnsupportedMismatch(report));
-                } else if (_tag === 'SameRangeMismatch') {
-                  ctx.isInvalid = true;
-                  unfixableCount++;
+                } else if (report._tag === 'SameRangeMismatch') {
                   yield* $(logSameRangeMismatch(report));
                 }
               }

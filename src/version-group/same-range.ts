@@ -44,7 +44,7 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
                       Effect.fail(
                         // ✘ expected version is not semver
                         // ✘ is a mismatch we can't auto-fix
-                        new Report.UnsupportedMismatch({ unfixable: specifier.instance }),
+                        new Report.UnsupportedMismatch(specifier.instance),
                       ),
                     onSuccess: () =>
                       pipe(
@@ -55,9 +55,7 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
                               // ✓ expected version is semver
                               // ✘ expected version is not fixable by its semver group
                               // ✘ is a mismatch we can't auto-fix
-                              new Report.UnsupportedMismatch({
-                                unfixable: specifier.instance,
-                              }),
+                              new Report.UnsupportedMismatch(specifier.instance),
                             ),
                           onSuccess: (valid) =>
                             specifier.instance.rawSpecifier === valid.raw
@@ -65,14 +63,14 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
                                   // ✓ expected version is semver
                                   // ✓ expected version matches its semver group
                                   // ✓ current version matches expected
-                                  new Report.Valid({ specifier }),
+                                  new Report.Valid(specifier),
                                 )
                               : Effect.fail(
                                   // ✓ expected version is semver
                                   // ✓ expected version matches its semver group
                                   // ✘ current version mismatches expected
                                   // ✓ is a mismatch we can auto-fix
-                                  new Report.SemverRangeMismatch({ fixable: valid }),
+                                  new Report.SemverRangeMismatch(valid),
                                 ),
                         }),
                       ),
@@ -107,12 +105,10 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
                   // ✓ current version matches expected
                   // ! is not the original local package
                   // ✘ current specifier does not match every other specifier
-                  return new Report.SameRangeMismatch({
-                    unfixable: thisMatch.specifier.instance,
-                    mismatches: uniq(
-                      mismatches.map((report) => report.specifier.instance.rawSpecifier),
-                    ),
-                  });
+                  return new Report.SameRangeMismatch(
+                    thisMatch.specifier.instance,
+                    uniq(mismatches.map((report) => report.specifier.instance.rawSpecifier)),
+                  );
                 })
               : // ✘ not every instance is valid on its own
                 // ! report on their validity individually ! when all are valid

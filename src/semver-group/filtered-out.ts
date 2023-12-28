@@ -44,10 +44,6 @@ export class FilteredOutSemverGroup extends Data.TaggedClass('FilteredOut')<{
   }
 
   inspect(instance: Instance): Effect.Effect<never, never, Report.FilteredOut> {
-    return Effect.succeed(
-      new Report.FilteredOut({
-        instance,
-      }),
-    );
+    return Effect.succeed(new Report.FilteredOut(instance));
   }
 }

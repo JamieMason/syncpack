@@ -34,11 +34,11 @@ export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
                 instance.rawSpecifier === expected.raw
                   ? // ✓ pinned takes precedence over any semver group
                     // ✓ current version matches expected
-                    new Report.Valid({ specifier: expected })
+                    new Report.Valid(expected)
                   : // ✓ pinned takes precedence over any semver group
                     // ✘ current version mismatches expected
                     // ✓ is a mismatch we can auto-fix
-                    new Report.PinnedMismatch({ fixable: expected }),
+                    new Report.PinnedMismatch(expected),
               ),
             ),
           ),

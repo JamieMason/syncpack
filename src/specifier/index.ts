@@ -1,4 +1,3 @@
-import type { Union } from 'ts-toolbelt';
 import type { Instance } from '../get-instances/instance';
 import { DELETE, type Delete } from '../version-group/lib/delete';
 import { AliasSpecifier } from './alias';
@@ -25,7 +24,7 @@ export namespace Specifier {
   export const Version = VersionSpecifier;
   export const WorkspaceProtocol = WorkspaceProtocolSpecifier;
 
-  export type Any = Union.Strict<
+  export type Any =
     | AliasSpecifier
     | DeleteSpecifier
     | FileSpecifier
@@ -35,8 +34,7 @@ export namespace Specifier {
     | UnsupportedSpecifier
     | UrlSpecifier
     | VersionSpecifier
-    | WorkspaceProtocolSpecifier
-  >;
+    | WorkspaceProtocolSpecifier;
 
   export function create(instance: Instance, raw: string | Delete): Specifier.Any {
     if (raw === DELETE) return new Specifier.Delete({ instance, raw });

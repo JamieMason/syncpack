@@ -1,5 +1,3 @@
-import type { Union } from 'ts-toolbelt';
-
 /**
  * Aliases for semver range formats supported by syncpack
  *
@@ -19,7 +17,7 @@ import type { Union } from 'ts-toolbelt';
  *
  * @default ""
  */
-export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~';
+export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~' | 'workspace:';
 
 export interface GroupConfig {
   dependencies?: string[];
@@ -41,7 +39,7 @@ export namespace SemverGroupConfig {
     range: SemverRange;
   }
 
-  export type Any = Union.Strict<Disabled | Ignored | WithRange>;
+  export type Any = Disabled | Ignored | WithRange;
 }
 
 export namespace VersionGroupConfig {
@@ -73,7 +71,7 @@ export namespace VersionGroupConfig {
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
 
-  export type Any = Union.Strict<Banned | Ignored | Pinned | SameRange | SnappedTo | Standard>;
+  export type Any = Banned | Ignored | Pinned | SameRange | SnappedTo | Standard;
 }
 
 namespace CustomTypeConfig {
@@ -98,9 +96,11 @@ namespace CustomTypeConfig {
     strategy: 'versionsByName';
   }
 
-  export type Any = Union.Strict<
-    NameAndVersionProps | NamedVersionString | UnnamedVersionString | VersionsByName
-  >;
+  export type Any =
+    | NameAndVersionProps
+    | NamedVersionString
+    | UnnamedVersionString
+    | VersionsByName;
 }
 
 export interface CliConfig {

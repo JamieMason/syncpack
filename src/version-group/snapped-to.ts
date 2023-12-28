@@ -34,7 +34,7 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
                   (instance) =>
                     // ✘ none of the snapTo packages contain this dependency
                     // ✘ is a user configuration error we can't auto-fix
-                    new Report.MissingSnappedToMismatch({ unfixable: instance }),
+                    new Report.MissingSnappedToMismatch(instance),
                 ),
               ),
             onSuccess: (expected) =>
@@ -62,23 +62,18 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
                                   // ✘ expected version is not semver
                                   // ✘ semver group expects semver
                                   // ✘ is a mismatch we can't auto-fix
-                                  new Report.UnsupportedMismatch({
-                                    unfixable: specifier.instance,
-                                  }),
+                                  new Report.UnsupportedMismatch(specifier.instance),
                                 onSuccess: (valid) =>
                                   specifier.instance.rawSpecifier === valid.raw
                                     ? // ! expected version is not semver
                                       // ✓ semver group is disabled/ignored
                                       // ✓ current version matches expected
-                                      new Report.Valid({ specifier })
+                                      new Report.Valid(specifier)
                                     : // ! expected version is not semver
                                       // ✓ semver group is disabled/ignored
                                       // ✘ current version mismatches expected
                                       // ✓ is a mismatch we can auto-fix by replacing with the non-semver version
-                                      new Report.SnappedToMismatch({
-                                        fixable: valid,
-                                        localInstance: expected.instance,
-                                      }),
+                                      new Report.SnappedToMismatch(valid, expected.instance),
                               }),
                             ),
                           onSuccess: () =>
@@ -91,23 +86,18 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
                                   // ✘ expected version is not fixable by its semver group
                                   // ✘ is a mismatch we can't auto-fix
                                   // ✘ this should be impossible - we already proved the local version is exact semver
-                                  new Report.UnsupportedMismatch({
-                                    unfixable: specifier.instance,
-                                  }),
+                                  new Report.UnsupportedMismatch(specifier.instance),
                                 onSuccess: (valid) =>
                                   specifier.instance.rawSpecifier === valid.raw
                                     ? // ✓ expected version is semver
                                       // ✓ expected version matches its semver group
                                       // ✓ current version matches expected
-                                      new Report.Valid({ specifier })
+                                      new Report.Valid(specifier)
                                     : // ✓ expected version is semver
                                       // ✓ expected version matches its semver group
                                       // ✘ current version mismatches expected
                                       // ✓ is a mismatch we can auto-fix
-                                      new Report.SnappedToMismatch({
-                                        fixable: valid,
-                                        localInstance: expected.instance,
-                                      }),
+                                      new Report.SnappedToMismatch(valid, expected.instance),
                               }),
                             ),
                         }),

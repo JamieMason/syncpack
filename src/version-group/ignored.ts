@@ -28,7 +28,7 @@ export class IgnoredVersionGroup extends Data.TaggedClass('Ignored')<{
         reports: instances.map(
           (instance) =>
             // ✓ is ignored and dismissed as valid
-            new Report.Ignored({ instance }),
+            new Report.Ignored(instance),
         ),
       })),
     );

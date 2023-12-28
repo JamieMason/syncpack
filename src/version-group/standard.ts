@@ -41,10 +41,7 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                     // ! dependency is a package developed in this repo
                     // ✘ local package is missing a .version property
                     // ✘ is a mismatch we can't auto-fix
-                    new Report.MissingLocalVersion({
-                      localInstance,
-                      unfixable: instance,
-                    }),
+                    new Report.MissingLocalVersion(instance, localInstance),
                 ),
               })
             : pipe(
@@ -56,12 +53,7 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                           // ! dependency is a package developed in this repo
                           // ✘ local package has an invalid .version property
                           // ✘ is a mismatch we can't auto-fix
-                          Effect.succeed(
-                            new Report.MissingLocalVersion({
-                              localInstance,
-                              unfixable: instance,
-                            }),
-                          ),
+                          Effect.succeed(new Report.MissingLocalVersion(instance, localInstance)),
                         )
                       : instances.flatMap((instance) =>
                           pipe(
@@ -71,7 +63,7 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                                 ? // ✓ this is the local package which the others should match
                                   // ! its version must always remain as exact semver
                                   // ! other instances need to be adjusted for their semver groups
-                                  Effect.succeed(new Report.Valid({ specifier }))
+                                  Effect.succeed(new Report.Valid(specifier))
                                 : pipe(
                                     specifier.replaceWith(local),
                                     specifier.instance.semverGroup.getFixed,
@@ -81,22 +73,17 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                                         // ✘ local version is not fixable by this semver group
                                         // ✘ is a mismatch we can't auto-fix
                                         // ✘ this should be impossible - we already proved the local version is exact semver
-                                        new Report.UnsupportedMismatch({
-                                          unfixable: specifier.instance,
-                                        }),
+                                        new Report.UnsupportedMismatch(specifier.instance),
                                       onSuccess: (valid) =>
                                         specifier.instance.rawSpecifier === valid.raw
                                           ? // ! is not the local package instance
                                             // ✓ local version matches this semver group
                                             // ✓ current version matches local
-                                            new Report.Valid({ specifier })
+                                            new Report.Valid(specifier)
                                           : // ! is not the local package instance
                                             // ✓ local version matches this semver group
                                             // ✘ current version mismatches local
-                                            new Report.LocalPackageMismatch({
-                                              fixable: valid,
-                                              localInstance,
-                                            }),
+                                            new Report.LocalPackageMismatch(valid, localInstance),
                                     }),
                                   ),
                             ),
@@ -130,14 +117,14 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                             // ✘ not every version is semver
                             // ✓ every version is identical
                             // ✓ is a match
-                            new Report.Valid({ specifier }),
+                            new Report.Valid(specifier),
                         )
                       : instances.map(
                           (instance) =>
                             // ✘ not every version is semver
                             // ✘ some versions are not identical
                             // ✘ is a mismatch we can't auto-fix
-                            new Report.UnsupportedMismatch({ unfixable: instance }),
+                            new Report.UnsupportedMismatch(instance),
                         ),
                   ),
                 onSuccess: (expectedVersion) =>
@@ -153,24 +140,24 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                             // ✘ expected version is not fixable by its semver group
                             // ✘ is a mismatch we can't auto-fix
                             // ✘ this should be impossible - any valid semver is fixable by a semver group
-                            new Report.UnsupportedMismatch({ unfixable: current.instance }),
+                            new Report.UnsupportedMismatch(current.instance),
                           onSuccess: (expectedRange) =>
                             current.instance.rawSpecifier === expectedRange.raw
                               ? // ✓ every version is semver
                                 // ✓ current version matches expected semver
                                 // ✓ current version matches expected version
-                                new Report.Valid({ specifier: current })
+                                new Report.Valid(current)
                               : current.instance.rawSpecifier === expectedVersion.raw
                                 ? // ✓ every version is semver
                                   // ✓ current version matches expected version
                                   // ✘ current version does not match expected semver
                                   // ✓ is a mismatch we can auto-fix
-                                  new Report.SemverRangeMismatch({ fixable: expectedRange })
+                                  new Report.SemverRangeMismatch(expectedRange)
                                 : // ✓ every version is semver
                                   // ✘ current version does not match expected version
                                   // ✘ expected version does not match expected semver
                                   // ✓ is a mismatch we can auto-fix
-                                  new PreferredMismatch({ fixable: expectedRange }),
+                                  new PreferredMismatch(expectedRange),
                         }),
                       ),
                     ),

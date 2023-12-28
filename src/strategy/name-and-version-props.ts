@@ -30,10 +30,10 @@ export class NameAndVersionPropsStrategy {
         pipe(
           getNonEmptyStringProp(this.path, file),
           /**
-           * In order to report an `InstanceReport.MissingLocalVersion`, we need
-           * to ensure that a value is returned for `local` package .version
-           * properties so we can know that `this.name` is a package developed
-           * in this repo but that its version is missing.
+           * In order to report a `MissingLocalVersion`, we need to ensure that
+           * a value is returned for `local` package .version properties so we
+           * can know that `this.name` is a package developed in this repo but
+           * that its version is missing.
            *
            * Not doing this results in the invalid local package being ignored
            * and each installation of it being checked for mismatches amongst

@@ -29,7 +29,7 @@ export function createSemverGroups(
   ];
 
   if (isNonEmptyArray(rcFile.semverGroups)) {
-    rcFile.semverGroups.forEach((config) => {
+    rcFile.semverGroups.forEach((config: unknown) => {
       if (!isObject(config)) {
         return semverGroups.push(
           Effect.fail(
