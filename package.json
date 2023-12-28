@@ -116,7 +116,7 @@
   "repository": "JamieMason/syncpack",
   "scripts": {
     "build": "pnpm run clean && pnpm run build:source && pnpm run build:json-schema",
-    "build:json-schema": "typescript-json-schema --noExtraProps src/index.ts RcFile --out dist/schema.json",
+    "build:json-schema": "typescript-json-schema --esModuleInterop --noExtraProps src/index.ts RcFile --out dist/schema.json",
     "build:source": "tsc --project tsconfig.build.json",
     "clean": "rm -rf ./dist",
     "format": "pnpm run format:lint && pnpm run format:source",
