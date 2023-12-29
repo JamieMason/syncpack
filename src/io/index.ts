@@ -1,4 +1,4 @@
-import { cosmiconfigSync } from 'cosmiconfig';
+import { cosmiconfig } from 'cosmiconfig';
 import { Context } from 'effect';
 import { prompt } from 'enquirer';
 import * as fs from 'fs';
@@ -7,7 +7,7 @@ import * as readYamlFile from 'read-yaml-file';
 
 export interface Io {
   cosmiconfig: {
-    cosmiconfigSync: typeof cosmiconfigSync;
+    cosmiconfig: typeof cosmiconfig;
   };
   enquirer: {
     prompt: typeof prompt<any>;
@@ -29,7 +29,7 @@ export const IoTag = Context.Tag<Io>();
 
 export const io: Io = {
   cosmiconfig: {
-    cosmiconfigSync,
+    cosmiconfig,
   },
   enquirer: {
     prompt,

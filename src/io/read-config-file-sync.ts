@@ -17,9 +17,9 @@ export function readConfigFileSync(
   configPath?: string,
 ): Effect.Effect<never, never, UnverifiedRcConfig> {
   return pipe(
-    Effect.try(() => io.cosmiconfig.cosmiconfigSync('syncpack')),
+    Effect.try(() => io.cosmiconfig.cosmiconfig('syncpack')),
     Effect.flatMap((client) =>
-      Effect.try(() => (configPath ? client.load(configPath) : client.search())),
+      Effect.tryPromise(() => (configPath ? client.load(configPath) : client.search())),
     ),
     Effect.flatMap((result) =>
       result !== null ? getValueFromCosmiconfig(result) : findConfigInPackageJson(io),

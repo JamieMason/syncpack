@@ -153,14 +153,14 @@ const mock = {
     const cwd = '/fake/dir';
     return {
       cosmiconfig: {
-        cosmiconfigSync() {
+        cosmiconfig() {
           return {
-            load(configPath: string) {
+            async load(configPath: string) {
               const config = filesByName[configPath];
               const filepath = `/fake/dir/${configPath}`;
               return config ? { config, filepath } : null;
             },
-            search() {
+            async search() {
               const config = filesByName['.syncpackrc'];
               const filepath = '/fake/dir/.syncpackrc';
               return config ? { config, filepath } : null;
