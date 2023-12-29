@@ -64,6 +64,9 @@ export function createSemverGroups(
         : ['**'];
       const dependencies = isArrayOfStrings(config.dependencies) ? config.dependencies : ['**'];
       const packages = isArrayOfStrings(config.packages) ? config.packages : ['**'];
+      const specifierTypes = isArrayOfStrings(config.specifierTypes)
+        ? config.specifierTypes
+        : ['**'];
 
       if (config.isIgnored === true) {
         semverGroups.push(
@@ -71,6 +74,7 @@ export function createSemverGroups(
             new IgnoredSemverGroup({
               dependencies,
               dependencyTypes,
+              specifierTypes,
               isIgnored: true,
               label,
               packages,
@@ -83,6 +87,7 @@ export function createSemverGroups(
             new WithRangeSemverGroup(false, {
               dependencies,
               dependencyTypes,
+              specifierTypes,
               label,
               packages,
               range: config.range,
@@ -98,6 +103,7 @@ export function createSemverGroups(
       new DisabledSemverGroup(true, {
         dependencies: ['**'],
         dependencyTypes: ['**'],
+        specifierTypes: ['**'],
         label: 'Default Semver Group',
         packages: ['**'],
         isDisabled: true,

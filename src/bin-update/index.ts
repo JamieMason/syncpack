@@ -47,6 +47,7 @@ program
   .option(...option.source)
   .option(...option.filter)
   .option(...option.config)
+  .option(...option.specs)
   .option(...option.types)
   .parse(process.argv);
 
@@ -55,6 +56,7 @@ Effect.runPromise<never, unknown>(
     configPath: program.opts().config,
     filter: program.opts().filter,
     source: program.opts().source,
+    specs: program.opts().specs,
     types: program.opts().types,
   }),
 );

@@ -56,6 +56,7 @@ showHelpOnError(program);
 program
   .option(...option.source)
   .option(...option.filter)
+  .option(...option.specs)
   .option(...option.types)
   .option(...option.config)
   .option(...option.indent)
@@ -69,6 +70,7 @@ Effect.runPromise<never, unknown>(
       filter: program.opts().filter,
       indent: program.opts().indent,
       source: program.opts().source,
+      specs: program.opts().specs,
       types: program.opts().types,
     },
   }),

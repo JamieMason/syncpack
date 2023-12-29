@@ -2,6 +2,7 @@ import type { Instance } from '../get-instances/instance';
 import { DELETE, type Delete } from '../version-group/lib/delete';
 import { AliasSpecifier } from './alias';
 import { DeleteSpecifier } from './delete';
+import { ExactSpecifier } from './exact';
 import { FileSpecifier } from './file';
 import { HostedGitSpecifier } from './hosted-git';
 import { parseSpecifier } from './lib/parse-specifier';
@@ -9,7 +10,6 @@ import { RangeSpecifier } from './range';
 import { TagSpecifier } from './tag';
 import { UnsupportedSpecifier } from './unsupported';
 import { UrlSpecifier } from './url';
-import { VersionSpecifier } from './version';
 import { WorkspaceProtocolSpecifier } from './workspace-protocol';
 
 export namespace Specifier {
@@ -21,7 +21,7 @@ export namespace Specifier {
   export const Tag = TagSpecifier;
   export const Unsupported = UnsupportedSpecifier;
   export const Url = UrlSpecifier;
-  export const Version = VersionSpecifier;
+  export const Version = ExactSpecifier;
   export const WorkspaceProtocol = WorkspaceProtocolSpecifier;
 
   export type Any =
@@ -33,7 +33,7 @@ export namespace Specifier {
     | TagSpecifier
     | UnsupportedSpecifier
     | UrlSpecifier
-    | VersionSpecifier
+    | ExactSpecifier
     | WorkspaceProtocolSpecifier;
 
   export function create(instance: Instance, raw: string | Delete): Specifier.Any {

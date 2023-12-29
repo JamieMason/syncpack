@@ -104,7 +104,7 @@ function logSemverRangeMismatch(report: Report.SemverRangeMismatch) {
   const _tag = report._tag;
   const instance = report.fixable.instance;
   const name = instance.name;
-  const actual = instance.rawSpecifier;
+  const actual = instance.rawSpecifier.raw;
   const expected = report.fixable.raw;
   const propPath = instance.strategy.path;
   const filePath = instance.packageJsonFile.jsonFile.shortPath;
@@ -118,7 +118,7 @@ function logUnsupportedMismatch(report: Report.UnsupportedMismatch) {
   const _tag = report._tag;
   const instance = report.unfixable;
   const name = instance.name;
-  const actual = instance.rawSpecifier;
+  const actual = instance.rawSpecifier.raw;
   const propPath = instance.strategy.path;
   const filePath = instance.packageJsonFile.jsonFile.shortPath;
 

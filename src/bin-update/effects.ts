@@ -96,10 +96,10 @@ export const updateEffects = {
     inFlight.delete(format(instance));
     const latest = versions?.latest;
     if (latest) {
-      if (gtr(latest, instance.rawSpecifier, true)) {
+      if (gtr(latest, String(instance.rawSpecifier.raw), true)) {
         outdatedCount++;
         mostRecent.push(
-          chalk`${instance.name} {gray {red ${instance.rawSpecifier}} ${ICON.rightArrow}} {green ${latest}}`,
+          chalk`${instance.name} {gray {red ${instance.rawSpecifier.raw}} ${ICON.rightArrow}} {green ${latest}}`,
         );
       } else {
         mostRecent.push(chalk`{green ${instance.name}}`);
@@ -116,7 +116,7 @@ export const updateEffects = {
   onOutdated(instance: Instance, latest: string) {
     outdatedCount++;
     mostRecent.push(
-      chalk`${instance.name} {gray {red ${instance.rawSpecifier}} ${ICON.rightArrow}} {green ${latest}}`,
+      chalk`${instance.name} {gray {red ${instance.rawSpecifier.raw}} ${ICON.rightArrow}} {green ${latest}}`,
     );
     return Effect.unit;
   },
@@ -264,7 +264,7 @@ function promptForReleaseType(
                 const spacingValue =
                   50 -
                   updateable.instance.name.length -
-                  updateable.instance.rawSpecifier.length -
+                  String(updateable.instance.rawSpecifier).length -
                   updateable.versions.latest.length;
                 const spacing = Array.from({ length: spacingValue }).fill(' ').join('');
 
@@ -273,7 +273,7 @@ function promptForReleaseType(
                   : '';
 
                 return {
-                  title: chalk`${updateable.instance.name} {gray ${updateable.instance.rawSpecifier} ${ICON.rightArrow}} {green ${updateable.versions.latest}} ${repoUrl}`,
+                  title: chalk`${updateable.instance.name} {gray ${updateable.instance.rawSpecifier.raw} ${ICON.rightArrow}} {green ${updateable.versions.latest}} ${repoUrl}`,
                   selected: true,
                   value: updateable,
                 };
@@ -304,7 +304,7 @@ function groupByReleaseType(releases: Releases[]): Effect.Effect<never, never, R
   return Effect.succeed(
     releases.reduce(
       (releasesByType: ReleasesByType, release) => {
-        const previous = setSemverRange('', release.instance.rawSpecifier);
+        const previous = setSemverRange('', String(release.instance.rawSpecifier.raw));
         const latest = release.versions.latest;
         try {
           const type = diff(previous, latest);

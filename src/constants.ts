@@ -1,4 +1,4 @@
-import type { RcConfig, SemverRange } from "./config/types";
+import type { RcConfig, SemverRange } from './config/types';
 
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.env.MOCK_CWD || process.cwd();
@@ -38,38 +38,40 @@ export const INTERNAL_TYPES = [
   'resolutions',
 ] as const;
 
-export const DEFAULT_CONFIG = {
-  customTypes: {
-    dev: {
-      strategy: 'versionsByName',
-      path: 'devDependencies',
-    },
-    local: {
-      strategy: 'name~version',
-      namePath: 'name',
-      path: 'version',
-    },
-    overrides: {
-      strategy: 'versionsByName',
-      path: 'overrides',
-    },
-    peer: {
-      strategy: 'versionsByName',
-      path: 'peerDependencies',
-    },
-    pnpmOverrides: {
-      strategy: 'versionsByName',
-      path: 'pnpm.overrides',
-    },
-    prod: {
-      strategy: 'versionsByName',
-      path: 'dependencies',
-    },
-    resolutions: {
-      strategy: 'versionsByName',
-      path: 'resolutions',
-    },
+export const CUSTOM_TYPES = {
+  dev: {
+    strategy: 'versionsByName',
+    path: 'devDependencies',
   },
+  local: {
+    strategy: 'name~version',
+    namePath: 'name',
+    path: 'version',
+  },
+  overrides: {
+    strategy: 'versionsByName',
+    path: 'overrides',
+  },
+  peer: {
+    strategy: 'versionsByName',
+    path: 'peerDependencies',
+  },
+  pnpmOverrides: {
+    strategy: 'versionsByName',
+    path: 'pnpm.overrides',
+  },
+  prod: {
+    strategy: 'versionsByName',
+    path: 'dependencies',
+  },
+  resolutions: {
+    strategy: 'versionsByName',
+    path: 'resolutions',
+  },
+} as const;
+
+export const DEFAULT_CONFIG = {
+  customTypes: CUSTOM_TYPES,
   dependencyTypes: ['**'],
   filter: '.',
   indent: '  ',
@@ -85,5 +87,6 @@ export const DEFAULT_CONFIG = {
   ],
   sortFirst: ['name', 'description', 'version', 'author'],
   source: ['package.json', 'packages/*/package.json'],
+  specifierTypes: ['**'],
   versionGroups: [],
 } satisfies RcConfig;

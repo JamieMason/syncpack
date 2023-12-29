@@ -1,4 +1,5 @@
-import type { DEFAULT_CONFIG } from '../constants';
+import type { CUSTOM_TYPES } from '../constants';
+import type { Specifier } from '../specifier';
 
 /**
  * Aliases for semver range formats supported by syncpack
@@ -21,16 +22,9 @@ import type { DEFAULT_CONFIG } from '../constants';
  */
 export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~' | 'workspace:';
 
-type DefaultDependencyType = keyof typeof DEFAULT_CONFIG.customTypes;
+type DefaultDependencyType = keyof typeof CUSTOM_TYPES;
 
 export type DependencyType =
-  | 'dev'
-  | 'local'
-  | 'overrides'
-  | 'peer'
-  | 'pnpmOverrides'
-  | 'prod'
-  | 'resolutions'
   | DefaultDependencyType
   | `!${DefaultDependencyType}`
   // This is done to allow any other `string` while also offering intellisense
@@ -41,6 +35,10 @@ export type DependencyType =
   //
   // eslint-disable-next-line @typescript-eslint/ban-types
   | (string & {});
+
+export type SpecifierType =
+  | Specifier.Any['_tag']
+  | `!${Specifier.Any['_tag']}`
   // This is done to allow any other `string` while also offering intellisense
   // for the internal dependency types above. `(string & {})` is needed to
   // prevent typescript from ignoring these specific strings and merging them
@@ -55,6 +53,7 @@ export interface GroupConfig {
   dependencyTypes?: DependencyType[];
   label?: string;
   packages?: string[];
+  specifierTypes?: SpecifierType[];
 }
 
 export namespace SemverGroupConfig {
@@ -139,6 +138,7 @@ export interface CliConfig {
   readonly filter: string;
   readonly indent: string;
   readonly source: string[];
+  readonly specs: string;
   readonly types: string;
 }
 
@@ -150,7 +150,7 @@ export interface RcConfig {
   /** @see https://jamiemason.github.io/syncpack/config/custom-types */
   customTypes: Record<string, CustomTypeConfig.Any>;
   /** @see https://jamiemason.github.io/syncpack/config/dependency-types */
-  dependencyTypes: string[];
+  dependencyTypes: DependencyType[];
   /** @see https://jamiemason.github.io/syncpack/config/filter */
   filter: string;
   /** @see https://jamiemason.github.io/syncpack/config/indent */
@@ -163,6 +163,8 @@ export interface RcConfig {
   sortFirst: string[];
   /** @see https://jamiemason.github.io/syncpack/config/source */
   source: string[];
+  /** @see https://jamiemason.github.io/syncpack/config/specifier-types */
+  specifierTypes: SpecifierType[];
   /** @see https://jamiemason.github.io/syncpack/config/version-groups */
   versionGroups: VersionGroupConfig.Any[];
 }

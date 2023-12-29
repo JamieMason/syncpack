@@ -39,8 +39,8 @@ export function update(
               (instance.versionGroup._tag === 'SameRange' ||
                 instance.versionGroup._tag === 'Standard')
             ) {
-              const specifier = Specifier.create(instance, instance.rawSpecifier);
-              if (specifier._tag === 'RangeSpecifier' || specifier._tag === 'VersionSpecifier') {
+              const specifier = Specifier.create(instance, instance.rawSpecifier.raw);
+              if (specifier._tag === 'Range' || specifier._tag === 'Exact') {
                 isVisitedByName[instance.name] = true;
                 updateable.push(instance);
               }
@@ -64,7 +64,7 @@ export function update(
                   }),
                   // move up to date dependencies to error channel
                   Effect.flatMap((updateable) =>
-                    gtr(updateable.versions.latest, instance.rawSpecifier)
+                    gtr(updateable.versions.latest, String(instance.rawSpecifier.raw))
                       ? pipe(
                           updateEffects.onOutdated(instance, updateable.versions.latest),
                           Effect.map(() => updateable),

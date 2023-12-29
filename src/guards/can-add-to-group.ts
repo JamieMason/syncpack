@@ -10,12 +10,13 @@ export function canAddToGroup(
   group: SemverGroup.Any | VersionGroup.Any,
   instance: Instance,
 ): boolean {
-  const { dependencies, dependencyTypes, packages } = group.config;
+  const { dependencies, dependencyTypes, packages, specifierTypes } = group.config;
   return (
     group.canAdd(instance) &&
     matchesDependencyTypes(dependencyTypes, instance) &&
     matchesPackages(packages, instance) &&
-    matchesDependencies(packageJsonFilesByName, group, dependencies, instance)
+    matchesDependencies(packageJsonFilesByName, group, dependencies, instance) &&
+    matchesSpecifierTypes(specifierTypes, instance)
   );
 }
 
@@ -43,19 +44,27 @@ function matchesPackages(packages: unknown, instance: Instance) {
   return packages.some((pattern) => minimatch(instance.pkgName, pattern));
 }
 
-function matchesDependencyTypes(dependencyTypes: unknown, instance: Instance) {
+function matchesDependencyTypes(dependencyTypes: unknown, instance: Instance): boolean {
+  return matchesKnownList(dependencyTypes, instance.strategy.name);
+}
+
+function matchesSpecifierTypes(specifierTypes: unknown, instance: Instance): boolean {
+  return matchesKnownList(specifierTypes, instance.rawSpecifier._tag);
+}
+
+function matchesKnownList(values: unknown, value: string): boolean {
   // matches if not defined
-  if (!isNonEmptyArray(dependencyTypes)) return true;
-  if (dependencyTypes.join('') === '**') return true;
+  if (!isNonEmptyArray(values)) return true;
+  if (values.join('') === '**') return true;
   const negative: string[] = [];
   const positive: string[] = [];
-  dependencyTypes.forEach((name) => {
+  values.forEach((name) => {
     if (name.startsWith('!')) {
       negative.push(name.replace('!', ''));
     } else {
       positive.push(name);
     }
   });
-  if (isNonEmptyArray(negative) && !negative.includes(instance.strategy.name)) return true;
-  return isNonEmptyArray(positive) && positive.includes(instance.strategy.name);
+  if (isNonEmptyArray(negative) && !negative.includes(value)) return true;
+  return isNonEmptyArray(positive) && positive.includes(value);
 }

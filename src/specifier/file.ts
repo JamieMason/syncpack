@@ -3,5 +3,5 @@ import { BaseSpecifier } from './base';
 
 /** @example */
 export class FileSpecifier extends BaseSpecifier<FileResult> {
-  _tag = 'FileSpecifier';
+  _tag = 'File' as const;
 }

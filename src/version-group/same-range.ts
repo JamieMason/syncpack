@@ -35,7 +35,7 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
           instances,
           Effect.partition((instance) =>
             pipe(
-              Effect.succeed(Specifier.create(instance, instance.rawSpecifier)),
+              Effect.succeed(Specifier.create(instance, instance.rawSpecifier.raw)),
               Effect.flatMap((specifier) =>
                 pipe(
                   specifier.getSemver(),
@@ -58,7 +58,7 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
                               new Report.UnsupportedMismatch(specifier.instance),
                             ),
                           onSuccess: (valid) =>
-                            specifier.instance.rawSpecifier === valid.raw
+                            specifier.instance.rawSpecifier.raw === valid.raw
                               ? Effect.succeed(
                                   // ✓ expected version is semver
                                   // ✓ expected version matches its semver group
@@ -107,7 +107,11 @@ export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
                   // ✘ current specifier does not match every other specifier
                   return new Report.SameRangeMismatch(
                     thisMatch.specifier.instance,
-                    uniq(mismatches.map((report) => report.specifier.instance.rawSpecifier)),
+                    uniq(
+                      mismatches.map((report) =>
+                        String(report.specifier.instance.rawSpecifier.raw),
+                      ),
+                    ),
                   );
                 })
               : // ✘ not every instance is valid on its own
@@ -140,10 +144,10 @@ function matchesRange(ctx: Ctx, a: Report.Valid, b: Report.Valid): boolean {
 
 /** Get the semver version synchronously from a specifier known to contain semver */
 function unwrapSemver(ctx: Ctx, specifier: Specifier.Any): string {
-  if (specifier._tag === 'RangeSpecifier' || specifier._tag === 'VersionSpecifier') {
+  if (specifier._tag === 'Range' || specifier._tag === 'Exact') {
     return specifier.raw as string;
   }
-  if (specifier._tag === 'WorkspaceProtocolSpecifier') {
+  if (specifier._tag === 'WorkspaceProtocol') {
     return Effect.runSync((specifier as WorkspaceProtocolSpecifier).getSemverEquivalent(ctx));
   }
   return Effect.runSync(specifier.getSemver());

@@ -4,7 +4,7 @@ import { BaseSpecifier } from './base';
 
 /** A instance which should be deleted */
 export class DeleteSpecifier {
-  _tag = 'DeleteSpecifier';
+  _tag = 'Delete' as const;
 
   raw: Delete;
   instance: Instance;

@@ -62,6 +62,7 @@ program
   .option(...option.source)
   .option(...option.filter)
   .option(...option.config)
+  .option(...option.specs)
   .option(...option.types)
   .option(...option.indent)
   .parse(process.argv);
@@ -74,6 +75,7 @@ Effect.runPromise<never, unknown>(
       filter: program.opts().filter,
       indent: program.opts().indent,
       source: program.opts().source,
+      specs: program.opts().specs,
       types: program.opts().types,
     },
   }),

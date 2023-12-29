@@ -45,7 +45,7 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
     never,
     Report.UnsupportedMismatch | Report.SemverRangeMismatch | Report.Valid
   > {
-    const current = Specifier.create(instance, instance.rawSpecifier);
+    const current = Specifier.create(instance, instance.rawSpecifier.raw);
     return pipe(
       this.getFixed(current),
       Effect.match({
@@ -53,11 +53,11 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
         onSuccess: (valid) =>
           // if it is pinned and matches its pin
           instance.versionGroup._tag === 'Pinned' &&
-          instance.rawSpecifier === instance.versionGroup.config.pinVersion
+          instance.rawSpecifier.raw === instance.versionGroup.config.pinVersion
             ? // the pinned version takes precendence and is a match
               new Report.Valid(current)
             : // if it is already like this on disk
-              instance.rawSpecifier === valid.raw
+              instance.rawSpecifier.raw === valid.raw
               ? // it is a match
                 new Report.Valid(current)
               : // it is a mismatch and should be this one

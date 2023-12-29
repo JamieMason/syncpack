@@ -57,6 +57,9 @@ export function createVersionGroups(
         : ['**'];
       const dependencies = isArrayOfStrings(config.dependencies) ? config.dependencies : ['**'];
       const packages = isArrayOfStrings(config.packages) ? config.packages : ['**'];
+      const specifierTypes = isArrayOfStrings(config.specifierTypes)
+        ? config.specifierTypes
+        : ['**'];
 
       if (config.isBanned === true) {
         versionGroups.push(
@@ -64,6 +67,7 @@ export function createVersionGroups(
             new BannedVersionGroup({
               dependencies,
               dependencyTypes,
+              specifierTypes,
               isBanned: true,
               label,
               packages,
@@ -76,6 +80,7 @@ export function createVersionGroups(
             new IgnoredVersionGroup({
               dependencies,
               dependencyTypes,
+              specifierTypes,
               isIgnored: true,
               label,
               packages,
@@ -88,6 +93,7 @@ export function createVersionGroups(
             new PinnedVersionGroup({
               dependencies,
               dependencyTypes,
+              specifierTypes,
               label,
               packages,
               pinVersion: config.pinVersion,
@@ -100,6 +106,7 @@ export function createVersionGroups(
             new SnappedToVersionGroup({
               dependencies,
               dependencyTypes,
+              specifierTypes,
               label,
               packages,
               snapTo: config.snapTo,
@@ -112,6 +119,7 @@ export function createVersionGroups(
             new SameRangeVersionGroup(ctx, {
               dependencies,
               dependencyTypes,
+              specifierTypes,
               label,
               packages,
               policy: config.policy,
@@ -124,6 +132,7 @@ export function createVersionGroups(
             new StandardVersionGroup(false, {
               dependencies,
               dependencyTypes,
+              specifierTypes,
               label,
               packages,
               preferVersion:
@@ -139,6 +148,8 @@ export function createVersionGroups(
     Effect.succeed(
       new StandardVersionGroup(true, {
         dependencies: ['**'],
+        dependencyTypes: ['**'],
+        specifierTypes: ['**'],
         label: 'Default Version Group',
         packages: ['**'],
         preferVersion: 'highestSemver',

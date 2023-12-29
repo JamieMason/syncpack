@@ -32,12 +32,12 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
         const localInstance = getLocalInstance(instances);
 
         if (localInstance) {
-          const localVersion = localInstance?.rawSpecifier;
+          const localVersion = localInstance?.rawSpecifier.raw;
           return pipe(
             Effect.succeed(Specifier.create(localInstance, localVersion)),
             Effect.flatMap((local) =>
               Effect.all(
-                local._tag !== 'VersionSpecifier' && instances.length > 1
+                local._tag !== 'Exact' && instances.length > 1
                   ? instances.map((instance) =>
                       // ! dependency is a package developed in this repo
                       // ✘ local package has an invalid .version property
@@ -47,7 +47,7 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                   : instances.flatMap((instance) =>
                       // instances.flatMap((instance) =>
                       pipe(
-                        Effect.succeed(Specifier.create(instance, instance.rawSpecifier)),
+                        Effect.succeed(Specifier.create(instance, instance.rawSpecifier.raw)),
                         Effect.flatMap((specifier) =>
                           specifier.instance === localInstance
                             ? // ✓ this is the local package which the others should match
@@ -65,7 +65,7 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                                     // ✘ this should be impossible - we already proved the local version is exact semver
                                     new Report.UnsupportedMismatch(specifier.instance),
                                   onSuccess: (valid) =>
-                                    specifier.instance.rawSpecifier === valid.raw
+                                    specifier.instance.rawSpecifier.raw === valid.raw
                                       ? // ! is not the local package instance
                                         // ✓ local version matches this semver group
                                         // ✓ current version matches local
@@ -102,7 +102,7 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
 
         return pipe(
           Effect.succeed(
-            instances.map((instance) => Specifier.create(instance, instance.rawSpecifier)),
+            instances.map((instance) => Specifier.create(instance, instance.rawSpecifier.raw)),
           ),
           Effect.flatMap((specifiers) =>
             pipe(
@@ -110,8 +110,8 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
               Effect.matchEffect({
                 onFailure: () =>
                   Effect.succeed(
-                    uniq(specifiers.map((specifier) => specifier.instance.rawSpecifier)).length ===
-                      1
+                    uniq(specifiers.map((specifier) => specifier.instance.rawSpecifier.raw))
+                      .length === 1
                       ? specifiers.map(
                           (specifier) =>
                             // ✘ not every version is semver
@@ -142,12 +142,12 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
                             // ✘ this should be impossible - any valid semver is fixable by a semver group
                             new Report.UnsupportedMismatch(current.instance),
                           onSuccess: (expectedRange) =>
-                            current.instance.rawSpecifier === expectedRange.raw
+                            current.instance.rawSpecifier.raw === expectedRange.raw
                               ? // ✓ every version is semver
                                 // ✓ current version matches expected semver
                                 // ✓ current version matches expected version
                                 new Report.Valid(current)
-                              : current.instance.rawSpecifier === expectedVersion.raw
+                              : current.instance.rawSpecifier.raw === expectedVersion.raw
                                 ? // ✓ every version is semver
                                   // ✓ current version matches expected version
                                   // ✘ current version does not match expected semver

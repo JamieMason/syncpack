@@ -162,14 +162,14 @@ function logMismatchingReport(groupReport: Report.Version.Group, messages: Set<s
 
 function getLogForFixable(report: Report.Version.Fixable.Any) {
   const _tag = report._tag;
-  const actual = report.fixable.instance.rawSpecifier;
+  const actual = report.fixable.instance.rawSpecifier.raw;
   const expected = report.fixable.raw;
   return chalk`{red ${actual}} {gray ${ICON.rightArrow}} {green ${expected}} {gray [${_tag}]}`;
 }
 
 function getLogForUnfixable(report: Report.Version.Unfixable.Any) {
   const _tag = report._tag;
-  const actual = report.unfixable.rawSpecifier;
+  const actual = report.unfixable.rawSpecifier.raw;
   return chalk`{red ${actual}} {gray ${ICON.rightArrow}} {gray [${_tag}]}`;
 }
 

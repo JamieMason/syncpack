@@ -44,10 +44,10 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
                   pipe(
                     Effect.Do,
                     Effect.bind('specifier', () =>
-                      Effect.succeed(Specifier.create(instance, instance.rawSpecifier)),
+                      Effect.succeed(Specifier.create(instance, instance.rawSpecifier.raw)),
                     ),
                     Effect.bind('expected', () =>
-                      Effect.succeed(Specifier.create(instance, expected.rawSpecifier)),
+                      Effect.succeed(Specifier.create(instance, expected.rawSpecifier.raw)),
                     ),
                     Effect.flatMap(({ expected, specifier }) =>
                       pipe(
@@ -64,7 +64,7 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
                                   // ✘ is a mismatch we can't auto-fix
                                   new Report.UnsupportedMismatch(specifier.instance),
                                 onSuccess: (valid) =>
-                                  specifier.instance.rawSpecifier === valid.raw
+                                  specifier.instance.rawSpecifier.raw === valid.raw
                                     ? // ! expected version is not semver
                                       // ✓ semver group is disabled/ignored
                                       // ✓ current version matches expected
@@ -88,7 +88,7 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
                                   // ✘ this should be impossible - we already proved the local version is exact semver
                                   new Report.UnsupportedMismatch(specifier.instance),
                                 onSuccess: (valid) =>
-                                  specifier.instance.rawSpecifier === valid.raw
+                                  specifier.instance.rawSpecifier.raw === valid.raw
                                     ? // ✓ expected version is semver
                                       // ✓ expected version matches its semver group
                                       // ✓ current version matches expected
@@ -120,12 +120,14 @@ function findSnappedToInstance(
   instances: Instance[],
 ): Effect.Effect<never, string, Instance> {
   for (const instance of instances) {
-    if (snapTo.includes(instance.pkgName) && instance.rawSpecifier) {
+    if (snapTo.includes(instance.pkgName) && instance.rawSpecifier.raw) {
       return pipe(
         Effect.succeed(instance),
         Effect.tap(() =>
           Effect.logDebug(
-            `found snapped to version ${instance.rawSpecifier} for ${name} in <${instance.packageJsonFile.jsonFile.shortPath}>`,
+            `found snapped to version ${String(instance.rawSpecifier.raw)} for ${name} in <${
+              instance.packageJsonFile.jsonFile.shortPath
+            }>`,
           ),
         ),
       );

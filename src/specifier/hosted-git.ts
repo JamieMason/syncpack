@@ -7,7 +7,7 @@ import { NonSemverError } from './lib/non-semver-error';
 
 /** @example "git+https://github.com/user/foo" */
 export class HostedGitSpecifier extends BaseSpecifier<HostedGitResult> {
-  _tag = 'HostedGitSpecifier';
+  _tag = 'HostedGit' as const;
 
   /** Return the git tag if it is valid semver */
   getSemver(): Effect.Effect<never, NonSemverError, string> {

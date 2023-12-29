@@ -7,7 +7,7 @@ import { parseSpecifier } from './lib/parse-specifier';
 
 export class BaseSpecifier<T extends NpmPackageArgResult | unknown> {
   /** should be overridden by sub classes */
-  _tag = 'BaseSpecifier';
+  _tag = 'Base';
   /** The raw semver/workspace:/git etc version value */
   raw: string;
   /**
@@ -51,12 +51,15 @@ export class BaseSpecifier<T extends NpmPackageArgResult | unknown> {
   }
 
   /** Return the version portion if it is valid semver */
-  getSemver(): Effect.Effect<never, NonSemverError, string> {
+  getSemver(this: Specifier.Any): Effect.Effect<never, NonSemverError, string> {
     return NonSemverError.asEffect(this);
   }
 
   /** Get a new `Specifier` from the given semver version applied to this one */
-  setSemver(_version: string): Effect.Effect<never, NonSemverError, Specifier.Any> {
+  setSemver(
+    this: Specifier.Any,
+    _version: string,
+  ): Effect.Effect<never, NonSemverError, Specifier.Any> {
     return NonSemverError.asEffect(this);
   }
 

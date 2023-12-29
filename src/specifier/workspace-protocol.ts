@@ -6,7 +6,7 @@ import type { WorkspaceProtocolResult } from './lib/parse-specifier';
 
 /** Represents "workspace:*" and "workspace:~" */
 export class WorkspaceProtocolSpecifier extends BaseSpecifier<WorkspaceProtocolResult> {
-  _tag = 'WorkspaceProtocolSpecifier';
+  _tag = 'WorkspaceProtocol' as const;
 
   /**
    * Return an equivalent value which actually is semver, so that it can be used

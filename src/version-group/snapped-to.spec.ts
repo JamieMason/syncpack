@@ -625,7 +625,7 @@ describe('mismatches', () => {
           expect(reports).toHaveLength(4);
           expect(reports).toHaveProperty('2.unfixable.name', 'foo');
           expect(reports).toHaveProperty('2._tag', 'UnsupportedMismatch');
-          expect(reports).toHaveProperty('2.unfixable.rawSpecifier', 'git://github.com/user/project.git#commit1');
+          expect(reports).toHaveProperty('2.unfixable.rawSpecifier.raw', 'git://github.com/user/project.git#commit1');
         });
       });
 

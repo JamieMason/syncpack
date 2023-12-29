@@ -31,7 +31,7 @@ export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
             pipe(
               Effect.succeed(Specifier.create(instance, this.config.pinVersion)),
               Effect.map((expected) =>
-                instance.rawSpecifier === expected.raw
+                instance.rawSpecifier.raw === expected.raw
                   ? // ✓ pinned takes precedence over any semver group
                     // ✓ current version matches expected
                     new Report.Valid(expected)

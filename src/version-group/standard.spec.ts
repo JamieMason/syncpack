@@ -163,9 +163,9 @@ describe('the "local" dependency type', () => {
         expect(reports).toHaveLength(2);
         expect(reports).toHaveProperty('1.name', 'foo');
         expect(reports).toHaveProperty('1.reports.0._tag', 'MissingLocalVersion');
-        expect(reports).toHaveProperty('1.reports.0.unfixable.rawSpecifier', '~0.2.0');
+        expect(reports).toHaveProperty('1.reports.0.unfixable.rawSpecifier.raw', '~0.2.0');
         expect(reports).toHaveProperty('1.reports.1._tag', 'MissingLocalVersion');
-        expect(reports).toHaveProperty('1.reports.1.unfixable.rawSpecifier', '~0.2.0');
+        expect(reports).toHaveProperty('1.reports.1.unfixable.rawSpecifier.raw', '~0.2.0');
       });
     });
 
