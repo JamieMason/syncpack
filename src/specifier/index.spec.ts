@@ -165,8 +165,8 @@ describe('supported version formats', () => {
       version: '~1.0.0',
     },
     {
-      name: 'range',
-      expected: 'Range',
+      name: 'latest',
+      expected: 'Latest',
       version: '*',
     },
     {

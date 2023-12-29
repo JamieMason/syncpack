@@ -5,6 +5,7 @@ import { DeleteSpecifier } from './delete';
 import { ExactSpecifier } from './exact';
 import { FileSpecifier } from './file';
 import { HostedGitSpecifier } from './hosted-git';
+import { LatestSpecifier } from './latest';
 import { parseSpecifier } from './lib/parse-specifier';
 import { RangeSpecifier } from './range';
 import { TagSpecifier } from './tag';
@@ -15,25 +16,27 @@ import { WorkspaceProtocolSpecifier } from './workspace-protocol';
 export namespace Specifier {
   export const Alias = AliasSpecifier;
   export const Delete = DeleteSpecifier;
+  export const Exact = ExactSpecifier;
   export const File = FileSpecifier;
   export const HostedGit = HostedGitSpecifier;
+  export const Latest = LatestSpecifier;
   export const Range = RangeSpecifier;
   export const Tag = TagSpecifier;
   export const Unsupported = UnsupportedSpecifier;
   export const Url = UrlSpecifier;
-  export const Version = ExactSpecifier;
   export const WorkspaceProtocol = WorkspaceProtocolSpecifier;
 
   export type Any =
     | AliasSpecifier
     | DeleteSpecifier
+    | ExactSpecifier
     | FileSpecifier
     | HostedGitSpecifier
+    | LatestSpecifier
     | RangeSpecifier
     | TagSpecifier
     | UnsupportedSpecifier
     | UrlSpecifier
-    | ExactSpecifier
     | WorkspaceProtocolSpecifier;
 
   export function create(instance: Instance, raw: string | Delete): Specifier.Any {
@@ -44,7 +47,8 @@ export namespace Specifier {
       const parsed = parseSpecifier(instance.name, raw, instance.packageJsonFile);
       const type = parsed.type;
       const data = { instance, raw };
-      if (type === 'version') return new Specifier.Version(data);
+      if (raw === '*') return new Specifier.Latest(data);
+      if (type === 'version') return new Specifier.Exact(data);
       if (type === 'range') return new Specifier.Range(data);
       if (type === 'workspaceProtocol') return new Specifier.WorkspaceProtocol(data);
       if (type === 'alias') return new Specifier.Alias(data);

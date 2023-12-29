@@ -7,10 +7,10 @@ import type { SpecificRegistryResult } from './lib/specific-registry-result';
 type T = SpecificRegistryResult<'range'>;
 
 /**
- * @example "^1.2.3"
+ * @example "*"
  */
-export class RangeSpecifier extends BaseSpecifier<T> {
-  _tag = 'Range' as const;
+export class LatestSpecifier extends BaseSpecifier<T> {
+  _tag = 'Latest' as const;
 
   /** Return the semver version including the range */
   getSemver(): Effect.Effect<never, NonSemverError, string> {
