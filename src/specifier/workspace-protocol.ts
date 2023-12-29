@@ -17,10 +17,11 @@ export class WorkspaceProtocolSpecifier extends BaseSpecifier<WorkspaceProtocolR
     if (this.raw === 'workspace:*') {
       return Effect.succeed('*');
     }
-    if (this.raw === 'workspace:~') {
+    if (this.raw === 'workspace:~' || this.raw === 'workspace:^') {
+      const range = this.raw.replace('workspace:', '');
       const local = ctx.packageJsonFilesByName[this.instance.name];
       const version = local?.jsonFile?.contents?.version;
-      if (version) return Effect.succeed(`~${version}`);
+      if (version) return Effect.succeed(`${range}${version}`);
     }
     return Effect.succeed('0.0.0');
   }

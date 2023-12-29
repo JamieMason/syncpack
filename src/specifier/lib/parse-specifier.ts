@@ -20,7 +20,7 @@ export function parseSpecifier(
   specifier: string,
   packageJsonFile: PackageJsonFile,
 ): NpmPackageArgResult {
-  if (specifier === 'workspace:*' || specifier === 'workspace:~') {
+  if (specifier === 'workspace:*' || specifier === 'workspace:~' || specifier === 'workspace:^') {
     const parsed = npa.resolve(
       name,
       packageJsonFile.jsonFile.dirPath,

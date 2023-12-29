@@ -204,6 +204,11 @@ describe('supported version formats', () => {
       expected: 'WorkspaceProtocolSpecifier',
       version: 'workspace:~',
     },
+    {
+      name: 'workspace-protocol',
+      expected: 'WorkspaceProtocolSpecifier',
+      version: 'workspace:^',
+    },
   ])('"$version" is a "$expected"', ({ name, version, expected }) => {
     const getScenario = createScenario({
       'package.json': {
