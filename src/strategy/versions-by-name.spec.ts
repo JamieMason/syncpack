@@ -8,9 +8,9 @@ function getRootPackage(filesByName: TestScenario['filesByName']) {
   return createScenario(filesByName)().getRootPackage();
 }
 
-it('gets and sets names and versions in an object', () => {
+it('gets and sets names and versions in an object', async () => {
   const strategy = new VersionsByNameStrategy('local', 'dependencies');
-  const file = getRootPackage({
+  const file = await getRootPackage({
     'package.json': {
       name: 'foo',
       dependencies: {
@@ -27,14 +27,14 @@ it('gets and sets names and versions in an object', () => {
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(Effect.runSyncExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
+  expect(await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
 });
 
-it('gets and sets a name and version from a single string nested location', () => {
+it('gets and sets a name and version from a single string nested location', async () => {
   const strategy = new VersionsByNameStrategy('custom', 'deeper.deps');
-  const file = getRootPackage({
+  const file = await getRootPackage({
     'package.json': {
       name: 'foo',
       deeper: {
@@ -53,17 +53,17 @@ it('gets and sets a name and version from a single string nested location', () =
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(Effect.runSyncExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
+  expect(await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
 });
 
-it('returns empty array when path is not found', () => {
+it('returns empty array when path is not found', async () => {
   const strategy = new VersionsByNameStrategy('local', 'never.gonna');
-  const file = getRootPackage({
+  const file = await getRootPackage({
     'package.json': {
       name: 'foo',
     },
   });
-  expect(Effect.runSyncExit(strategy.read(file))).toEqual(Effect.succeed([]));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed([]));
 });

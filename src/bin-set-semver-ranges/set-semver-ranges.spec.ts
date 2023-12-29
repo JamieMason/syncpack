@@ -40,9 +40,9 @@ describe('when a semver group contains mismatches', () => {
     });
 
     describe('set-semver-ranges', () => {
-      it('fixes all dependencies to use "*", except for .version properties', () => {
+      it('fixes all dependencies to use "*", except for .version properties', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(setSemverRanges(scenario));
+        await Effect.runPromiseExit(setSemverRanges(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.version', '0.0.1');
         expect(filesByName).toHaveProperty('a.dependencies.foo', '*');

@@ -39,9 +39,9 @@ const nameAndVersion = expect.objectContaining({
   path: 'version',
 });
 
-it('defaults to all when nothing is provided', () => {
+it('defaults to all when nothing is provided', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -53,9 +53,9 @@ it('defaults to all when nothing is provided', () => {
   ).toEqual([dev, local, overrides, peerDependencies, pnpmOverrides, prod, resolutions]);
 });
 
-it('uses every type except a negated type such as "!prod"', () => {
+it('uses every type except a negated type such as "!prod"', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {
@@ -69,9 +69,9 @@ it('uses every type except a negated type such as "!prod"', () => {
   ).toEqual([dev, local, overrides, peerDependencies, pnpmOverrides, resolutions]);
 });
 
-it('handles multiple negated types', () => {
+it('handles multiple negated types', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {
@@ -85,9 +85,9 @@ it('handles multiple negated types', () => {
   ).toEqual([local, overrides, peerDependencies, pnpmOverrides, resolutions]);
 });
 
-it('uses only provided type when defined', () => {
+it('uses only provided type when defined', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {
@@ -101,9 +101,9 @@ it('uses only provided type when defined', () => {
   ).toEqual([dev]);
 });
 
-it('handles multiple types', () => {
+it('handles multiple types', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {
@@ -117,9 +117,9 @@ it('handles multiple types', () => {
   ).toEqual([dev, peerDependencies]);
 });
 
-it('gives precedence to cli options', () => {
+it('gives precedence to cli options', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {
@@ -135,9 +135,9 @@ it('gives precedence to cli options', () => {
   ).toEqual([dev]);
 });
 
-it('includes custom types when others are negated', () => {
+it('includes custom types when others are negated', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {
@@ -158,9 +158,9 @@ it('includes custom types when others are negated', () => {
   ).toEqual([local, overrides, peerDependencies, pnpmOverrides, prod, resolutions, engines]);
 });
 
-it('includes custom types when named', () => {
+it('includes custom types when named', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -180,9 +180,9 @@ it('includes custom types when named', () => {
   ).toEqual([dev, engines]);
 });
 
-it('includes every type when "**" is provided', () => {
+it('includes every type when "**" is provided', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {
@@ -203,9 +203,9 @@ it('includes every type when "**" is provided', () => {
   ).toEqual([dev, local, overrides, peerDependencies, pnpmOverrides, prod, resolutions, engines]);
 });
 
-it('includes every kind of custom type when named', () => {
+it('includes every kind of custom type when named', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -238,9 +238,9 @@ it('includes every kind of custom type when named', () => {
   ).toEqual([dev, engines, packageManager, specificEngine, nameAndVersion]);
 });
 
-it('returns error when deprecated boolean configs are used', () => {
+it('returns error when deprecated boolean configs are used', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -258,9 +258,9 @@ it('returns error when deprecated boolean configs are used', () => {
   );
 });
 
-it('returns error when deprecated "workspace" name is used', () => {
+it('returns error when deprecated "workspace" name is used', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -274,9 +274,9 @@ it('returns error when deprecated "workspace" name is used', () => {
   ).toEqual(new RenamedWorkspaceTypeError({}));
 });
 
-it('returns error when custom type is not an object', () => {
+it('returns error when custom type is not an object', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -297,9 +297,9 @@ it('returns error when custom type is not an object', () => {
   );
 });
 
-it('returns error when custom type has invalid path', () => {
+it('returns error when custom type has invalid path', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -320,9 +320,9 @@ it('returns error when custom type has invalid path', () => {
   );
 });
 
-it('returns error when custom type has invalid strategy', () => {
+it('returns error when custom type has invalid strategy', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},
@@ -347,9 +347,9 @@ it('returns error when custom type has invalid strategy', () => {
   );
 });
 
-it('returns error when custom name~version strategy has invalid path', () => {
+it('returns error when custom name~version strategy has invalid path', async () => {
   expect(
-    Effect.runSync(
+    await Effect.runPromise(
       pipe(
         getEnabledTypes({
           cli: {},

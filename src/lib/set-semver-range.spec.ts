@@ -4,7 +4,7 @@ import { setSemverRange } from './set-semver-range';
 
 describe('setSemverRange', () => {
   describe('when the current value is Semver', () => {
-    it('sets its semver range to the given range', () => {
+    it('sets its semver range to the given range', async () => {
       const cases: [SemverRange, string][] = [
         ['*', '*'],
         ['', '1.2.3'],
@@ -31,7 +31,7 @@ describe('setSemverRange', () => {
   });
 
   describe('when the current value contains a wildcard patch', () => {
-    it('sets its semver range to the given range', () => {
+    it('sets its semver range to the given range', async () => {
       const current = '1.2.x';
       expect(setSemverRange('', current)).toEqual('1.2.0');
       expect(setSemverRange('>', current)).toEqual('>1.2.0');
@@ -45,7 +45,7 @@ describe('setSemverRange', () => {
   });
 
   describe('when the current value contains a wildcard minor and patch', () => {
-    it('sets its semver range to the given range', () => {
+    it('sets its semver range to the given range', async () => {
       const current = '1.x.x';
       expect(setSemverRange('', current)).toEqual('1.0.0');
       expect(setSemverRange('>', current)).toEqual('>1.0.0');
@@ -59,7 +59,7 @@ describe('setSemverRange', () => {
   });
 
   describe('when the current value contains multiple versions', () => {
-    it('leaves the version unchanged', () => {
+    it('leaves the version unchanged', async () => {
       const current = '>=16.8.0 <17.0.0';
       expect(setSemverRange('', current)).toEqual(current);
       expect(setSemverRange('>', current)).toEqual(current);

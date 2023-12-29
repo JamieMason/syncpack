@@ -34,8 +34,8 @@ describe('matches', () => {
       },
     });
 
-    it('is valid because they are identical', () => {
-      const reports = getScenario().getVersionReports();
+    it('is valid because they are identical', async () => {
+      const reports = await getScenario().getVersionReports();
       expect(reports).toHaveLength(3);
       expect(reports).toHaveProperty('0.name', 'foo');
       expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
@@ -43,41 +43,41 @@ describe('matches', () => {
     });
 
     describe('lint', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
+        await Effect.runPromiseExit(lint(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('lintSemverRanges', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lintSemverRanges(scenario));
+        await Effect.runPromiseExit(lintSemverRanges(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list-mismatches', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('fix-mismatches', () => {
-      it('does not change anything', () => {
+      it('does not change anything', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.dependencies.foo', '0.1.0');
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
@@ -114,8 +114,8 @@ describe('mismatches', () => {
     });
 
     describe('version group report', () => {
-      it('is invalid because the version does not match the one used in "a"', () => {
-        const reports = getScenario().getVersionReports();
+      it('is invalid because the version does not match the one used in "a"', async () => {
+        const reports = await getScenario().getVersionReports();
         expect(reports).toHaveLength(3);
         expect(reports).toHaveProperty('0.name', 'foo');
         expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
@@ -124,41 +124,41 @@ describe('mismatches', () => {
     });
 
     describe('lint', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
+        await Effect.runPromiseExit(lint(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('lintSemverRanges', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lintSemverRanges(scenario));
+        await Effect.runPromiseExit(lintSemverRanges(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('list-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('fix-mismatches', () => {
-      it('fixes them to match the snapped to version', () => {
+      it('fixes them to match the snapped to version', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.dependencies.foo', '0.1.0');
         expect(filesByName).toHaveProperty('b.dependencies.foo', '0.1.0');
@@ -201,8 +201,8 @@ describe('mismatches', () => {
     });
 
     describe('version group report', () => {
-      it('is invalid because the version does not match the one used in "c"', () => {
-        const reports = getScenario().getVersionReports();
+      it('is invalid because the version does not match the one used in "c"', async () => {
+        const reports = await getScenario().getVersionReports();
         expect(reports).toHaveLength(5);
         expect(reports).toHaveProperty('0.name', 'foo');
         expect(reports).toHaveProperty('0.reports.0._tag', 'SnappedToMismatch');
@@ -212,41 +212,41 @@ describe('mismatches', () => {
     });
 
     describe('lint', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
+        await Effect.runPromiseExit(lint(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('lintSemverRanges', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lintSemverRanges(scenario));
+        await Effect.runPromiseExit(lintSemverRanges(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('list-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('fix-mismatches', () => {
-      it('fixes them to match the snapped to version', () => {
+      it('fixes them to match the snapped to version', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.dependencies.foo', '0.2.0');
         expect(filesByName).toHaveProperty('b.dependencies.bar', '0.1.0');
@@ -276,8 +276,8 @@ describe('mismatches', () => {
     });
 
     describe('version group report', () => {
-      it('is invalid because the version does not match the one used in "a"', () => {
-        const reports = getScenario().getVersionReports();
+      it('is invalid because the version does not match the one used in "a"', async () => {
+        const reports = await getScenario().getVersionReports();
         expect(reports).toHaveLength(2);
         expect(reports).toHaveProperty('0.name', 'foo');
         expect(reports).toHaveProperty('0.reports.0._tag', 'MissingSnappedToMismatch');
@@ -285,41 +285,41 @@ describe('mismatches', () => {
     });
 
     describe('lint', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
+        await Effect.runPromiseExit(lint(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('lintSemverRanges', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lintSemverRanges(scenario));
+        await Effect.runPromiseExit(lintSemverRanges(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('list-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
@@ -353,8 +353,8 @@ describe('mismatches', () => {
       });
 
       describe('version group report', () => {
-        it('is invalid because it does not match the snapped to package', () => {
-          const reports = getScenario().getVersionReports();
+        it('is invalid because it does not match the snapped to package', async () => {
+          const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
@@ -363,40 +363,40 @@ describe('mismatches', () => {
       });
 
       describe('lint', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lint(scenario));
+          await Effect.runPromiseExit(lint(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('lintSemverRanges', () => {
-        it('exits 0', () => {
+        it('exits 0', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lintSemverRanges(scenario));
+          await Effect.runPromiseExit(lintSemverRanges(scenario));
           expect(scenario.io.process.exit).not.toHaveBeenCalled();
         });
       });
 
       describe('list', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(list(scenario));
+          await Effect.runPromiseExit(list(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list-mismatches', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(listMismatches(scenario));
+          await Effect.runPromiseExit(listMismatches(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
-      it('fixes them to match the snapped to version', () => {
+      it('fixes them to match the snapped to version', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.dependencies.foo', 'git://github.com/user/project.git#commit1');
         expect(filesByName).toHaveProperty('b.dependencies.foo', 'git://github.com/user/project.git#commit1');
@@ -437,8 +437,8 @@ describe('mismatches', () => {
       });
 
       describe('version group report', () => {
-        it('is invalid because it does not match the snapped to package and that is incompatible with the semver group', () => {
-          const reports = getScenario().getVersionReports();
+        it('is invalid because it does not match the snapped to package and that is incompatible with the semver group', async () => {
+          const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
@@ -447,8 +447,8 @@ describe('mismatches', () => {
       });
 
       describe('semver report', () => {
-        it('is valid because the current range before applying the version group rule matches the semver group', () => {
-          const reports = getScenario().getSemverReports();
+        it('is valid because the current range before applying the version group rule matches the semver group', async () => {
+          const reports = await getScenario().getSemverReports();
           expect(reports).toHaveLength(4);
           expect(reports).toHaveProperty('2.specifier.instance.name', 'foo');
           expect(reports).toHaveProperty('2._tag', 'Valid');
@@ -457,41 +457,41 @@ describe('mismatches', () => {
       });
 
       describe('lint', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lint(scenario));
+          await Effect.runPromiseExit(lint(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('lintSemverRanges', () => {
-        it('exits 0', () => {
+        it('exits 0', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lintSemverRanges(scenario));
+          await Effect.runPromiseExit(lintSemverRanges(scenario));
           expect(scenario.io.process.exit).not.toHaveBeenCalled();
         });
       });
 
       describe('list', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(list(scenario));
+          await Effect.runPromiseExit(list(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list-mismatches', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(listMismatches(scenario));
+          await Effect.runPromiseExit(listMismatches(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('fix-mismatches', () => {
-        it('exits 1 as it cannot fix the non-semver version with the semver group', () => {
+        it('exits 1 as it cannot fix the non-semver version with the semver group', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(fixMismatches(scenario));
+          await Effect.runPromiseExit(fixMismatches(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
@@ -526,8 +526,8 @@ describe('mismatches', () => {
       });
 
       describe('version group report', () => {
-        it('is invalid because it does not match', () => {
-          const reports = getScenario().getVersionReports();
+        it('is invalid because it does not match', async () => {
+          const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
@@ -536,40 +536,40 @@ describe('mismatches', () => {
       });
 
       describe('lint', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lint(scenario));
+          await Effect.runPromiseExit(lint(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('lintSemverRanges', () => {
-        it('exits 0', () => {
+        it('exits 0', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lintSemverRanges(scenario));
+          await Effect.runPromiseExit(lintSemverRanges(scenario));
           expect(scenario.io.process.exit).not.toHaveBeenCalled();
         });
       });
 
       describe('list', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(list(scenario));
+          await Effect.runPromiseExit(list(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list-mismatches', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(listMismatches(scenario));
+          await Effect.runPromiseExit(listMismatches(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
-      it('fixes them to match the snapped to version', () => {
+      it('fixes them to match the snapped to version', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.dependencies.foo', '1.1.1');
         expect(filesByName).toHaveProperty('b.dependencies.foo', '1.1.1');
@@ -610,8 +610,8 @@ describe('mismatches', () => {
       });
 
       describe('version group report', () => {
-        it('is invalid because it does not match the snapped to package or the semver group', () => {
-          const reports = getScenario().getVersionReports();
+        it('is invalid because it does not match the snapped to package or the semver group', async () => {
+          const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
@@ -620,8 +620,8 @@ describe('mismatches', () => {
       });
 
       describe('semver report', () => {
-        it('is invalid because the range does not match the group', () => {
-          const reports = getScenario().getSemverReports();
+        it('is invalid because the range does not match the group', async () => {
+          const reports = await getScenario().getSemverReports();
           expect(reports).toHaveLength(4);
           expect(reports).toHaveProperty('2.unfixable.name', 'foo');
           expect(reports).toHaveProperty('2._tag', 'UnsupportedMismatch');
@@ -630,40 +630,40 @@ describe('mismatches', () => {
       });
 
       describe('lint', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lint(scenario));
+          await Effect.runPromiseExit(lint(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('lintSemverRanges', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(lintSemverRanges(scenario));
+          await Effect.runPromiseExit(lintSemverRanges(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(list(scenario));
+          await Effect.runPromiseExit(list(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
       describe('list-mismatches', () => {
-        it('exits 1', () => {
+        it('exits 1', async () => {
           const scenario = getScenario();
-          Effect.runSyncExit(listMismatches(scenario));
+          await Effect.runPromiseExit(listMismatches(scenario));
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
 
-      it('fixes them to match the snapped to version', () => {
+      it('fixes them to match the snapped to version', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.dependencies.foo', '1.1.1');
         expect(filesByName).toHaveProperty('b.dependencies.foo', '~1.1.1');

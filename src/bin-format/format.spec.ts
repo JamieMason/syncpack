@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 import { createScenario } from '../../test/lib/create-scenario';
 import { format } from './format';
 
-it('uses github shorthand format for "repository"', () => {
+it('uses github shorthand format for "repository"', async () => {
   const scenario = createScenario({
     'package.json': {
       name: 'a',
@@ -13,7 +13,7 @@ it('uses github shorthand format for "repository"', () => {
       },
     },
   })();
-  Effect.runSyncExit(format(scenario));
+  await Effect.runPromiseExit(format(scenario));
 
   expect(scenario.readPackages()).toHaveProperty('a', {
     name: 'a',
@@ -22,7 +22,7 @@ it('uses github shorthand format for "repository"', () => {
   expect(scenario.io.process.exit).not.toHaveBeenCalled();
 });
 
-it('retains long form format for "repository" when directory property used', () => {
+it('retains long form format for "repository" when directory property used', async () => {
   const scenario = createScenario({
     'package.json': {
       name: 'a',
@@ -33,7 +33,7 @@ it('retains long form format for "repository" when directory property used', () 
       },
     },
   })();
-  Effect.runSyncExit(format(scenario));
+  await Effect.runPromiseExit(format(scenario));
   expect(scenario.readPackages()).toHaveProperty('a', {
     name: 'a',
     repository: {
@@ -45,7 +45,7 @@ it('retains long form format for "repository" when directory property used', () 
   expect(scenario.io.process.exit).not.toHaveBeenCalled();
 });
 
-it('uses shorthand format for "bugs" and "repository"', () => {
+it('uses shorthand format for "bugs" and "repository"', async () => {
   const scenario = createScenario({
     'package.json': {
       name: 'a',
@@ -58,7 +58,7 @@ it('uses shorthand format for "bugs" and "repository"', () => {
       },
     },
   })();
-  Effect.runSyncExit(format(scenario));
+  await Effect.runPromiseExit(format(scenario));
   expect(scenario.readPackages()).toHaveProperty('a', {
     name: 'a',
     bugs: 'https://github.com/User/repo/issues',
@@ -67,7 +67,7 @@ it('uses shorthand format for "bugs" and "repository"', () => {
   expect(scenario.io.process.exit).not.toHaveBeenCalled();
 });
 
-it('sorts object properties alphabetically by key', () => {
+it('sorts object properties alphabetically by key', async () => {
   const scenario = createScenario({
     '.syncpackrc': {
       sortAz: ['scripts'],
@@ -80,7 +80,7 @@ it('sorts object properties alphabetically by key', () => {
       },
     },
   })();
-  Effect.runSyncExit(format(scenario));
+  await Effect.runPromiseExit(format(scenario));
   expect(scenario.readPackages()).toHaveProperty('a.scripts', {
     A: '',
     B: '',
@@ -88,7 +88,7 @@ it('sorts object properties alphabetically by key', () => {
   expect(scenario.io.process.exit).not.toHaveBeenCalled();
 });
 
-it('sorts array members alphabetically by value', () => {
+it('sorts array members alphabetically by value', async () => {
   const scenario = createScenario({
     '.syncpackrc': {
       sortAz: ['keywords'],
@@ -98,7 +98,7 @@ it('sorts array members alphabetically by value', () => {
       keywords: ['B', 'A'],
     },
   })();
-  Effect.runSyncExit(format(scenario));
+  await Effect.runPromiseExit(format(scenario));
   expect(scenario.readPackages()).toHaveProperty('a', {
     name: 'a',
     keywords: ['A', 'B'],
@@ -106,7 +106,7 @@ it('sorts array members alphabetically by value', () => {
   expect(scenario.io.process.exit).not.toHaveBeenCalled();
 });
 
-it('sorts named properties first, then the rest alphabetically', () => {
+it('sorts named properties first, then the rest alphabetically', async () => {
   const scenario = createScenario({
     '.syncpackrc': {
       sortFirst: ['name', 'F', 'E', 'D'],
@@ -120,7 +120,7 @@ it('sorts named properties first, then the rest alphabetically', () => {
       E: '',
     },
   })();
-  Effect.runSyncExit(format(scenario));
+  await Effect.runPromiseExit(format(scenario));
   expect(scenario.readPackages()).toHaveProperty('a', {
     name: 'a',
     F: '',

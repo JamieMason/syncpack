@@ -31,8 +31,8 @@ describe('matches', () => {
       },
     );
 
-    it('is valid because it is excluded from the filter', () => {
-      const reports = getScenario().getVersionReports();
+    it('is valid because it is excluded from the filter', async () => {
+      const reports = await getScenario().getVersionReports();
       expect(reports).toHaveLength(3);
       expect(reports).toHaveProperty('2.name', 'foo');
       expect(reports).toHaveProperty('2.reports.0._tag', 'FilteredOut');
@@ -40,41 +40,41 @@ describe('matches', () => {
     });
 
     describe('lint', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
+        await Effect.runPromiseExit(lint(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('lintSemverRanges', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lintSemverRanges(scenario));
+        await Effect.runPromiseExit(lintSemverRanges(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list-mismatches', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('fix-mismatches', () => {
-      it('does not change anything', () => {
+      it('does not change anything', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
         expect(filesByName).toHaveProperty('a.dependencies.foo', '0.1.0');
         expect(filesByName).toHaveProperty('b.dependencies.foo', '0.3.0');

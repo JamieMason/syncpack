@@ -27,91 +27,91 @@ describe('getHighestVersion', () => {
   // "1" and "1.0.0" are equal and first match wins
   const eitherFormat = expect.stringMatching(/^(1|1\.0\.0)$/);
 
-  it('returns "workspace:*" when it is the only version', () => {
+  it('returns "workspace:*" when it is the only version', async () => {
     const specifiers = a.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: 'workspace:*',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "<1.0.0" when added', () => {
+  it('returns "<1.0.0" when added', async () => {
     const specifiers = b.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '<1.0.0',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "<=1.0.0" when added', () => {
+  it('returns "<=1.0.0" when added', async () => {
     const specifiers = c.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '<=1.0.0',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "1" when added', () => {
+  it('returns "1" when added', async () => {
     const specifiers = d.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '1',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "1.0.0" when added', () => {
+  it('returns "1.0.0" when added', async () => {
     const specifiers = e.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: eitherFormat,
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "~1.0.0" when added', () => {
+  it('returns "~1.0.0" when added', async () => {
     const specifiers = f.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '~1.0.0',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "1.x.x" when added', () => {
+  it('returns "1.x.x" when added', async () => {
     const specifiers = g.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '1.x.x',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "^1.0.0" when added', () => {
+  it('returns "^1.0.0" when added', async () => {
     const specifiers = h.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '^1.0.0',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns ">=1.0.0" when added', () => {
+  it('returns ">=1.0.0" when added', async () => {
     const specifiers = i.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '>=1.0.0',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns ">1.0.0" when added', () => {
+  it('returns ">1.0.0" when added', async () => {
     const specifiers = j.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '>1.0.0',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 
-  it('returns "*" when added', () => {
+  it('returns "*" when added', async () => {
     const specifiers = k.map(toSpecifier);
     const expected = expect.objectContaining({
       raw: '*',
     });
-    expect(Effect.runSync(getHighestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getHighestVersion(specifiers))).toEqual(expected);
   });
 });

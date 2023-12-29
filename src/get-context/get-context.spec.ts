@@ -8,9 +8,9 @@ import { DEFAULT_CONFIG } from '../constants';
 import { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
 import { JsonParseError } from '../io/read-json-file-sync';
 
-it('errors when no package.json is found', () => {
+it('errors when no package.json is found', async () => {
   const scenario = createScenario({})();
-  Effect.runSyncExit(pipe(getContext(scenario), Effect.merge));
+  await Effect.runPromiseExit(pipe(getContext(scenario), Effect.merge));
   expect(scenario.errorHandlers.NoSourcesFoundError).toHaveBeenCalledWith(
     new NoSourcesFoundError({
       CWD: '/fake/dir',
@@ -19,14 +19,14 @@ it('errors when no package.json is found', () => {
   );
 });
 
-it('errors when package.json is invalid', () => {
+it('errors when package.json is invalid', async () => {
   const scenario = createScenario({
     'package.json': 'THIS-IS-NOT-VALID-JSON',
     'packages/bar/package.json': {
       name: 'bar',
     },
   })();
-  Effect.runSyncExit(pipe(getContext(scenario), Effect.merge));
+  await Effect.runPromiseExit(pipe(getContext(scenario), Effect.merge));
   expect(scenario.errorHandlers.JsonParseError).toHaveBeenCalledWith(
     new JsonParseError({
       error: expect.any(SyntaxError),
@@ -36,7 +36,7 @@ it('errors when package.json is invalid', () => {
   );
 });
 
-it('uses empty config and default sources when no user config is found', () => {
+it('uses empty config and default sources when no user config is found', async () => {
   const scenario = createScenario({
     'package.json': {
       name: 'foo',
@@ -45,7 +45,7 @@ it('uses empty config and default sources when no user config is found', () => {
       name: 'bar',
     },
   })();
-  const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+  const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
   expect(ctx).toHaveProperty('config', {
     cli: scenario.cli,
     rcFile: {},
@@ -66,7 +66,7 @@ it('uses empty config and default sources when no user config is found', () => {
 });
 
 describe('finds package.json files', () => {
-  test('in .syncpackrc', () => {
+  test('in .syncpackrc', async () => {
     const scenario = createScenario({
       '.syncpackrc': {
         source: ['apps/**'],
@@ -78,7 +78,7 @@ describe('finds package.json files', () => {
         name: 'foo',
       },
     })();
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -93,7 +93,7 @@ describe('finds package.json files', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in --source options', () => {
+  test('in --source options', async () => {
     const scenario = createScenario(
       {
         '.syncpackrc': {
@@ -113,7 +113,7 @@ describe('finds package.json files', () => {
         source: ['apps/baz/package.json'],
       },
     )();
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -128,7 +128,7 @@ describe('finds package.json files', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in `.workspaces.packages` for yarn', () => {
+  test('in `.workspaces.packages` for yarn', async () => {
     const scenario = createScenario({
       'package.json': {
         name: 'foo',
@@ -140,7 +140,7 @@ describe('finds package.json files', () => {
         name: 'bar',
       },
     })();
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -156,7 +156,7 @@ describe('finds package.json files', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in `.workspaces` for yarn', () => {
+  test('in `.workspaces` for yarn', async () => {
     const scenario = createScenario({
       'package.json': {
         name: 'foo',
@@ -167,7 +167,7 @@ describe('finds package.json files', () => {
       },
     })();
 
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -183,7 +183,7 @@ describe('finds package.json files', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in pnpm-workspace.yaml', () => {
+  test('in pnpm-workspace.yaml', async () => {
     const scenario = createScenario({
       'package.json': {
         name: 'foo',
@@ -196,7 +196,7 @@ describe('finds package.json files', () => {
       },
     })();
 
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -212,7 +212,7 @@ describe('finds package.json files', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in lerna.json when pnpm-workspace.yaml is invalid', () => {
+  test('in lerna.json when pnpm-workspace.yaml is invalid', async () => {
     const scenario = createScenario({
       'package.json': {
         name: 'foo',
@@ -235,7 +235,7 @@ describe('finds package.json files', () => {
       throw new Error('some error');
     });
 
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -251,7 +251,7 @@ describe('finds package.json files', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in defaults when lerna.json is invalid', () => {
+  test('in defaults when lerna.json is invalid', async () => {
     const scenario = createScenario({
       'package.json': {
         name: 'foo',
@@ -262,7 +262,7 @@ describe('finds package.json files', () => {
       'lerna.json': 'NOT-VALID-JSON',
     })();
 
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -278,7 +278,7 @@ describe('finds package.json files', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in defaults when lerna.json does not have the required data', () => {
+  test('in defaults when lerna.json does not have the required data', async () => {
     const scenario = createScenario({
       'package.json': {
         name: 'foo',
@@ -291,7 +291,7 @@ describe('finds package.json files', () => {
       },
     })();
 
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -309,7 +309,7 @@ describe('finds package.json files', () => {
 });
 
 describe('finds syncpack config file', () => {
-  test('in .syncpackrc', () => {
+  test('in .syncpackrc', async () => {
     const scenario = createScenario({
       '.syncpackrc': {
         dependencyTypes: ['prod'],
@@ -319,7 +319,7 @@ describe('finds syncpack config file', () => {
       },
     })();
 
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -334,7 +334,7 @@ describe('finds syncpack config file', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('when alternative configPath is given', () => {
+  test('when alternative configPath is given', async () => {
     const scenario = createScenario(
       {
         '.foorc': {
@@ -351,7 +351,7 @@ describe('finds syncpack config file', () => {
         configPath: '.foorc',
       },
     )();
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -366,7 +366,7 @@ describe('finds syncpack config file', () => {
     expect(ctx).toHaveProperty('packageJsonFilesByName', expect.any(Object));
   });
 
-  test('in package.json when no .syncpackrc is present', () => {
+  test('in package.json when no .syncpackrc is present', async () => {
     const scenario = createScenario({
       'package.json': {
         name: 'foo',
@@ -378,7 +378,7 @@ describe('finds syncpack config file', () => {
       },
     })();
 
-    const ctx = Effect.runSync(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {

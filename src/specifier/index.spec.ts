@@ -209,7 +209,7 @@ describe('supported version formats', () => {
       expected: 'WorkspaceProtocolSpecifier',
       version: 'workspace:^',
     },
-  ])('"$version" is a "$expected"', ({ name, version, expected }) => {
+  ])('"$version" is a "$expected"', async ({ name, version, expected }) => {
     const getScenario = createScenario({
       'package.json': {
         name,
@@ -219,7 +219,7 @@ describe('supported version formats', () => {
         },
       },
     });
-    const reports = getScenario().getVersionReports();
+    const reports = await getScenario().getVersionReports();
     const report = reports.find(({ name }) => name === 'foo');
     expect(report).toHaveProperty('reports.0._tag', 'Valid');
     expect(report).toHaveProperty('reports.0.specifier._tag', expected);

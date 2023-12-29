@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { sortByName } from './sort-by-name';
 
 describe('sortByName', () => {
-  it('orders installed packages by name', () => {
+  it('orders installed packages by name', async () => {
     const toShape = (name: string) => ({
       name,
     });

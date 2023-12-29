@@ -28,9 +28,9 @@ export interface TestScenario {
   errorHandlers: ErrorHandlers;
   filesByName: Record<string, any>;
   fs: NodeFs;
-  getRootPackage(): PackageJsonFile;
-  getSemverReports(): Report.Semver.Any[];
-  getVersionReports(): Report.Version.Group[];
+  getRootPackage(): Promise<PackageJsonFile>;
+  getSemverReports(): Promise<Report.Semver.Any[]>;
+  getVersionReports(): Promise<Report.Version.Group[]>;
   io: Io;
   mockIo: {
     cosmiconfig: Io['cosmiconfig'];
@@ -69,15 +69,15 @@ export function createScenario(filesByName: Record<string, any>, cli: Partial<Cl
       errorHandlers: mockErrorHandlers,
       filesByName,
       fs: mockFs,
-      getRootPackage(): PackageJsonFile {
+      async getRootPackage(): Promise<PackageJsonFile> {
         const scenario = createScenario(filesByName)();
         const config = { cli: scenario.cli, rcFile: {} };
-        const [file] = Effect.runSync(getPackageJsonFiles(scenario.io, config));
+        const [file] = await Effect.runPromise(getPackageJsonFiles(scenario.io, config));
         if (!file) throw new Error('Invalid Test Scenario');
         return file;
       },
-      getSemverReports() {
-        return Effect.runSync(
+      async getSemverReports() {
+        return await Effect.runPromise(
           Effect.gen(function* ($) {
             const ctx = yield* $(getContext({ io, cli, errorHandlers: mockErrorHandlers as any }));
             const { semverGroups } = yield* $(getInstances(ctx, io, mockErrorHandlers));
@@ -87,8 +87,8 @@ export function createScenario(filesByName: Record<string, any>, cli: Partial<Cl
           }),
         );
       },
-      getVersionReports() {
-        return Effect.runSync(
+      async getVersionReports() {
+        return await Effect.runPromise(
           Effect.gen(function* ($) {
             const ctx = yield* $(getContext({ io, cli, errorHandlers: mockErrorHandlers as any }));
             const { versionGroups } = yield* $(getInstances(ctx, io, mockErrorHandlers));

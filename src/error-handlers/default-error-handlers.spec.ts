@@ -15,12 +15,12 @@ describe('Disk Errors', () => {
     });
 
     describe('list', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
         vi.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         expect(scenario.errorHandlers.ReadFileError).toHaveBeenCalledWith({
           _tag: 'ReadFileError',
@@ -31,12 +31,12 @@ describe('Disk Errors', () => {
     });
 
     describe('list-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
         vi.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         expect(scenario.errorHandlers.ReadFileError).toHaveBeenCalledWith({
           _tag: 'ReadFileError',
@@ -47,12 +47,12 @@ describe('Disk Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
         vi.spyOn(scenario.fs, 'readFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         expect(scenario.errorHandlers.ReadFileError).toHaveBeenCalledWith({
           _tag: 'ReadFileError',
@@ -79,12 +79,12 @@ describe('Disk Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
         vi.spyOn(scenario.fs, 'writeFileSync').mockImplementation(() => {
           throw new Error('wat');
         });
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.WriteFileError).toHaveBeenCalledWith({
           _tag: 'WriteFileError',
           error: 'Error: wat',
@@ -103,9 +103,9 @@ describe('Broken Projects', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.JsonParseError).toHaveBeenCalledWith({
           _tag: 'JsonParseError',
           error: expect.any(SyntaxError),
@@ -125,9 +125,9 @@ describe('Broken Projects', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.NoSourcesFoundError).toHaveBeenCalledWith({
           _tag: 'NoSourcesFoundError',
           CWD: '/fake/dir',
@@ -152,9 +152,9 @@ describe('Config Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.RenamedWorkspaceTypeError).toHaveBeenCalledWith({
           _tag: 'RenamedWorkspaceTypeError',
         });
@@ -175,9 +175,9 @@ describe('Config Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.SemverGroupConfigError).toHaveBeenCalledWith({
           _tag: 'SemverGroupConfigError',
           config: 'wrong',
@@ -205,9 +205,9 @@ describe('Config Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.SemverGroupConfigError).toHaveBeenCalledWith({
           _tag: 'SemverGroupConfigError',
           config: {
@@ -233,9 +233,9 @@ describe('Config Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.VersionGroupConfigError).toHaveBeenCalledWith({
           _tag: 'VersionGroupConfigError',
           config: 'wrong',
@@ -263,9 +263,9 @@ describe('Config Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.VersionGroupConfigError).toHaveBeenCalledWith({
           _tag: 'VersionGroupConfigError',
           config: {
@@ -291,9 +291,9 @@ describe('Config Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.DeprecatedTypesError).toHaveBeenCalledWith({
           _tag: 'DeprecatedTypesError',
           types: ['dev'],
@@ -318,12 +318,12 @@ describe('Config Errors', () => {
     );
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
         vi.spyOn(scenario.io.globby, 'sync').mockImplementation(() => {
           throw new Error('wat');
         });
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.GlobError).toHaveBeenCalledWith({
           _tag: 'GlobError',
           error: 'Error: wat',
@@ -347,9 +347,9 @@ describe('Config Errors', () => {
     });
 
     describe('fix-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.InvalidCustomTypeError).toHaveBeenCalledWith({
           _tag: 'InvalidCustomTypeError',
           config: 'wrong',

@@ -3,14 +3,14 @@ import { expect, it } from 'vitest';
 import { createScenario, type TestScenario } from '../../../test/lib/create-scenario';
 import { getPnpmPatterns } from './get-pnpm-patterns';
 
-function runScenario(getScenario: () => TestScenario) {
+async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();
-  return Effect.runSync(pipe(getPnpmPatterns(scenario.io), Effect.merge));
+  return await Effect.runPromise(pipe(getPnpmPatterns(scenario.io), Effect.merge));
 }
 
-it('returns strings when found', () => {
+it('returns strings when found', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'pnpm-workspace.yaml': {
           packages: ['apps/**'],
@@ -20,13 +20,13 @@ it('returns strings when found', () => {
   ).toEqual(O.some(['apps/**']));
 });
 
-it('returns none when pnpm-workspace.yaml cannot be read', () => {
-  expect(runScenario(createScenario({}))).toEqual(O.none());
+it('returns none when pnpm-workspace.yaml cannot be read', async () => {
+  expect(await runScenario(createScenario({}))).toEqual(O.none());
 });
 
-it('returns none when pnpm-workspace.yaml is valid YAML but the wrong shape', () => {
+it('returns none when pnpm-workspace.yaml is valid YAML but the wrong shape', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'pnpm-workspace.yaml': {
           wrong: 'shape',
@@ -36,7 +36,7 @@ it('returns none when pnpm-workspace.yaml is valid YAML but the wrong shape', ()
   ).toEqual(O.none());
 });
 
-it('returns none when pnpm-workspace.yaml is invalid', () => {
+it('returns none when pnpm-workspace.yaml is invalid', async () => {
   const getScenario = createScenario({
     'pnpm-workspace.yaml': {
       see: 'mockFn',
@@ -46,5 +46,5 @@ it('returns none when pnpm-workspace.yaml is invalid', () => {
   scenario.mockIo.readYamlFile.sync.mockImplementation(() => {
     throw new Error('wat?');
   });
-  expect(Effect.runSync(pipe(getPnpmPatterns(scenario.io), Effect.merge))).toEqual(O.none());
+  expect(await Effect.runPromise(pipe(getPnpmPatterns(scenario.io), Effect.merge))).toEqual(O.none());
 });

@@ -5,9 +5,9 @@ import { createScenario } from '../../test/lib/create-scenario';
 import { CWD } from '../constants';
 import { getFilePaths, NoSourcesFoundError } from './get-file-paths';
 
-function runScenario(getScenario: () => TestScenario) {
+async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();
-  return Effect.runSync(
+  return await Effect.runPromise(
     pipe(
       getFilePaths(scenario.io, {
         cli: scenario.cli,
@@ -18,9 +18,9 @@ function runScenario(getScenario: () => TestScenario) {
   );
 }
 
-it('returns error when patterns match no files', () => {
+it('returns error when patterns match no files', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         '.syncpackrc': {
           source: ['matches-nothing/**'],
@@ -35,9 +35,9 @@ it('returns error when patterns match no files', () => {
   );
 });
 
-it('returns strings when patterns return files', () => {
+it('returns strings when patterns return files', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario(
         {
           'packages/bar/package.json': {
@@ -52,9 +52,9 @@ it('returns strings when patterns return files', () => {
   ).toEqual([expect.stringContaining('/packages/bar/package.json')]);
 });
 
-it('adds root package.json when using yarn workspaces', () => {
+it('adds root package.json when using yarn workspaces', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'package.json': {
           name: 'foo',
@@ -68,9 +68,9 @@ it('adds root package.json when using yarn workspaces', () => {
   ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
 });
 
-it('adds root package.json when using lerna', () => {
+it('adds root package.json when using lerna', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'package.json': {
           name: 'foo',
@@ -86,9 +86,9 @@ it('adds root package.json when using lerna', () => {
   ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
 });
 
-it('adds root package.json when using pnpm workspaces', () => {
+it('adds root package.json when using pnpm workspaces', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'package.json': {
           name: 'foo',

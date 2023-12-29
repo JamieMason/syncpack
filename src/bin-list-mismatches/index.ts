@@ -54,7 +54,7 @@ program
   .option(...option.types)
   .parse(process.argv);
 
-Effect.runSync<never, unknown>(
+Effect.runPromise<never, unknown>(
   listMismatches({
     io,
     cli: {

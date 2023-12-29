@@ -28,33 +28,33 @@ describe('matches', () => {
     });
 
     describe('lint', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
+        await Effect.runPromiseExit(lint(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('list-mismatches', () => {
-      it('exits 0', () => {
+      it('exits 0', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
 
     describe('fix-mismatches', () => {
-      it('does not remove others', () => {
+      it('does not remove others', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.readPackages()).toHaveProperty('a.dependencies.bar', '0.1.0');
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
@@ -83,41 +83,41 @@ describe('mismatches', () => {
       },
     });
 
-    it('is invalid because it should not be used', () => {
-      const reports = getScenario().getVersionReports();
+    it('is invalid because it should not be used', async () => {
+      const reports = await getScenario().getVersionReports();
       expect(reports).toHaveLength(2);
       expect(reports).toHaveProperty('0.name', 'foo');
       expect(reports).toHaveProperty('0.reports.0._tag', 'Banned');
     });
 
     describe('lint', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
+        await Effect.runPromiseExit(lint(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('list', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
+        await Effect.runPromiseExit(list(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('list-mismatches', () => {
-      it('exits 1', () => {
+      it('exits 1', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
+        await Effect.runPromiseExit(listMismatches(scenario));
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
 
     describe('fix-mismatches', () => {
-      it('removes them', () => {
+      it('removes them', async () => {
         const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
+        await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.readPackages()).not.toHaveProperty('a.dependencies.foo');
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });

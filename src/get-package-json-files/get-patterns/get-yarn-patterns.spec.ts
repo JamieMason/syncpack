@@ -4,15 +4,15 @@ import type { TestScenario } from '../../../test/lib/create-scenario';
 import { createScenario } from '../../../test/lib/create-scenario';
 import { getYarnPatterns } from './get-yarn-patterns';
 
-function runScenario(getScenario: () => TestScenario) {
+async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();
-  return Effect.runSync(pipe(getYarnPatterns(scenario.io), Effect.merge));
+  return await Effect.runPromise(pipe(getYarnPatterns(scenario.io), Effect.merge));
 }
 
 describe('when Yarn config is at .workspaces[]', () => {
-  it('returns strings when found', () => {
+  it('returns strings when found', async () => {
     expect(
-      runScenario(
+      await runScenario(
         createScenario({
           'package.json': {
             workspaces: ['apps/**'],
@@ -22,9 +22,9 @@ describe('when Yarn config is at .workspaces[]', () => {
     ).toEqual(O.some(['apps/**']));
   });
 
-  it('returns none when data is valid JSON but the wrong shape', () => {
+  it('returns none when data is valid JSON but the wrong shape', async () => {
     expect(
-      runScenario(
+      await runScenario(
         createScenario({
           'package.json': {
             wrong: 'shape',
@@ -36,9 +36,9 @@ describe('when Yarn config is at .workspaces[]', () => {
 });
 
 describe('when Yarn config is at .workspaces.packages[]', () => {
-  it('returns an strings when found', () => {
+  it('returns an strings when found', async () => {
     expect(
-      runScenario(
+      await runScenario(
         createScenario({
           'package.json': {
             workspaces: {
@@ -50,9 +50,9 @@ describe('when Yarn config is at .workspaces.packages[]', () => {
     ).toEqual(O.some(['apps/**']));
   });
 
-  it('returns none when data is valid JSON but the wrong shape', () => {
+  it('returns none when data is valid JSON but the wrong shape', async () => {
     expect(
-      runScenario(
+      await runScenario(
         createScenario({
           'package.json': {
             workspaces: {
@@ -65,13 +65,13 @@ describe('when Yarn config is at .workspaces.packages[]', () => {
   });
 });
 
-it('returns none when package.json cannot be read', () => {
-  expect(runScenario(createScenario({}))).toEqual(O.none());
+it('returns none when package.json cannot be read', async () => {
+  expect(await runScenario(createScenario({}))).toEqual(O.none());
 });
 
-it('returns none when file is not valid JSON', () => {
+it('returns none when file is not valid JSON', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'package.json': 'NOT-JSON',
       }),

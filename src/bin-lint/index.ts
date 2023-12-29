@@ -36,7 +36,7 @@ showHelpOnError(program);
 
 program.option(...option.config).parse(process.argv);
 
-Effect.runSync<never, unknown>(
+Effect.runPromise<never, unknown>(
   lint({
     io,
     cli: {

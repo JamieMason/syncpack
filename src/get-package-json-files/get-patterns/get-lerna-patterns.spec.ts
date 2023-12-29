@@ -3,14 +3,14 @@ import { expect, it } from 'vitest';
 import { createScenario, type TestScenario } from '../../../test/lib/create-scenario';
 import { getLernaPatterns } from './get-lerna-patterns';
 
-function runScenario(getScenario: () => TestScenario) {
+async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();
-  return Effect.runSync(pipe(getLernaPatterns(scenario.io), Effect.merge));
+  return await Effect.runPromise(pipe(getLernaPatterns(scenario.io), Effect.merge));
 }
 
-it('returns strings when found', () => {
+it('returns strings when found', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'lerna.json': {
           packages: ['apps/**'],
@@ -20,13 +20,13 @@ it('returns strings when found', () => {
   ).toEqual(O.some(['apps/**']));
 });
 
-it('returns none when lerna.json cannot be read', () => {
-  expect(runScenario(createScenario({}))).toEqual(O.none());
+it('returns none when lerna.json cannot be read', async () => {
+  expect(await runScenario(createScenario({}))).toEqual(O.none());
 });
 
-it('returns none when lerna.json is not valid JSON', () => {
+it('returns none when lerna.json is not valid JSON', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'lerna.json': 'NOT-JSON',
       }),
@@ -34,9 +34,9 @@ it('returns none when lerna.json is not valid JSON', () => {
   ).toEqual(O.none());
 });
 
-it('returns none when data is valid JSON but the wrong shape', () => {
+it('returns none when data is valid JSON but the wrong shape', async () => {
   expect(
-    runScenario(
+    await runScenario(
       createScenario({
         'lerna.json': {
           wrong: 'shape',

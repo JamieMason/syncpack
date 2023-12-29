@@ -51,7 +51,7 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-Effect.runSync<never, unknown>(
+Effect.runPromise<never, unknown>(
   format({
     io,
     cli: {
