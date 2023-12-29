@@ -33,66 +33,66 @@ export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
 
         if (localInstance) {
           const localVersion = localInstance?.rawSpecifier;
-          return localVersion === 'PACKAGE_JSON_HAS_NO_VERSION'
-            ? Effect.succeed({
-                name,
-                reports: instances.map(
-                  (instance) =>
-                    // ! dependency is a package developed in this repo
-                    // ✘ local package is missing a .version property
-                    // ✘ is a mismatch we can't auto-fix
-                    new Report.MissingLocalVersion(instance, localInstance),
-                ),
-              })
-            : pipe(
-                Effect.succeed(Specifier.create(localInstance, localVersion)),
-                Effect.flatMap((local) =>
-                  Effect.all(
-                    local._tag !== 'VersionSpecifier'
-                      ? instances.map((instance) =>
-                          // ! dependency is a package developed in this repo
-                          // ✘ local package has an invalid .version property
-                          // ✘ is a mismatch we can't auto-fix
-                          Effect.succeed(new Report.MissingLocalVersion(instance, localInstance)),
-                        )
-                      : instances.flatMap((instance) =>
-                          pipe(
-                            Effect.succeed(Specifier.create(instance, instance.rawSpecifier)),
-                            Effect.flatMap((specifier) =>
-                              specifier.instance === localInstance
-                                ? // ✓ this is the local package which the others should match
-                                  // ! its version must always remain as exact semver
-                                  // ! other instances need to be adjusted for their semver groups
-                                  Effect.succeed(new Report.Valid(specifier))
-                                : pipe(
-                                    specifier.replaceWith(local),
-                                    specifier.instance.semverGroup.getFixed,
-                                    Effect.match({
-                                      onFailure: /* istanbul ignore next */ () =>
-                                        // ! is not the local package instance
-                                        // ✘ local version is not fixable by this semver group
-                                        // ✘ is a mismatch we can't auto-fix
-                                        // ✘ this should be impossible - we already proved the local version is exact semver
-                                        new Report.UnsupportedMismatch(specifier.instance),
-                                      onSuccess: (valid) =>
-                                        specifier.instance.rawSpecifier === valid.raw
-                                          ? // ! is not the local package instance
-                                            // ✓ local version matches this semver group
-                                            // ✓ current version matches local
-                                            new Report.Valid(specifier)
-                                          : // ! is not the local package instance
-                                            // ✓ local version matches this semver group
-                                            // ✘ current version mismatches local
-                                            new Report.LocalPackageMismatch(valid, localInstance),
-                                    }),
-                                  ),
-                            ),
-                          ),
+          return pipe(
+            Effect.succeed(Specifier.create(localInstance, localVersion)),
+            Effect.flatMap((local) =>
+              Effect.all(
+                local._tag !== 'VersionSpecifier' && instances.length > 1
+                  ? instances.map((instance) =>
+                      // ! dependency is a package developed in this repo
+                      // ✘ local package has an invalid .version property
+                      // ✘ is a mismatch we can't auto-fix
+                      Effect.succeed(new Report.MissingLocalVersion(instance, localInstance)),
+                    )
+                  : instances.flatMap((instance) =>
+                      // instances.flatMap((instance) =>
+                      pipe(
+                        Effect.succeed(Specifier.create(instance, instance.rawSpecifier)),
+                        Effect.flatMap((specifier) =>
+                          specifier.instance === localInstance
+                            ? // ✓ this is the local package which the others should match
+                              // ! its version must always remain as exact semver
+                              // ! other instances need to be adjusted for their semver groups
+                              Effect.succeed(new Report.Valid(specifier))
+                            : pipe(
+                                specifier.replaceWith(local),
+                                specifier.instance.semverGroup.getFixed,
+                                Effect.match({
+                                  onFailure: /* istanbul ignore next */ () =>
+                                    // ! is not the local package instance
+                                    // ✘ local version is not fixable by this semver group
+                                    // ✘ is a mismatch we can't auto-fix
+                                    // ✘ this should be impossible - we already proved the local version is exact semver
+                                    new Report.UnsupportedMismatch(specifier.instance),
+                                  onSuccess: (valid) =>
+                                    specifier.instance.rawSpecifier === valid.raw
+                                      ? // ! is not the local package instance
+                                        // ✓ local version matches this semver group
+                                        // ✓ current version matches local
+                                        new Report.Valid(specifier)
+                                      : localVersion === 'PACKAGE_JSON_HAS_NO_VERSION'
+                                        ? // ! is not the local package instance
+                                          // ✘ local package has a version defined
+                                          // ✓ local version matches this semver group
+                                          // ✘ current version mismatches local
+                                          new Report.MissingLocalVersion(
+                                            specifier.instance,
+                                            localInstance,
+                                          )
+                                        : // ! is not the local package instance
+                                          // ✓ local package has a version defined
+                                          // ✓ local version matches this semver group
+                                          // ✘ current version mismatches local
+                                          new Report.LocalPackageMismatch(valid, localInstance),
+                                }),
+                              ),
                         ),
-                  ),
-                ),
-                Effect.map((reports) => ({ name, reports })),
-              );
+                      ),
+                    ),
+              ),
+            ),
+            Effect.map((reports) => ({ name, reports })),
+          );
         }
 
         const PreferredMismatch =

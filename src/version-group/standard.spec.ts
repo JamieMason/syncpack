@@ -9,67 +9,133 @@ import { list } from '../bin-list/list';
 
 describe('the "local" dependency type', () => {
   describe('when local package is missing a version property', () => {
-    const getScenario = createScenario({
-      '.syncpackrc': {
-        dependencyTypes: ['local', 'prod'],
-      },
-      'package.json': {
-        name: 'foo',
-      },
-      'packages/a/package.json': {
-        name: 'a',
-        dependencies: {
-          foo: '0.2.0',
+    describe('when local package IS depended on', () => {
+      const getScenario = createScenario({
+        '.syncpackrc': {
+          dependencyTypes: ['local', 'prod'],
         },
-      },
-    });
+        'package.json': {
+          name: 'foo',
+        },
+        'packages/a/package.json': {
+          name: 'a',
+          dependencies: {
+            foo: '0.2.0',
+          },
+        },
+      });
 
-    describe('version report', () => {
-      it('is broken and unfixable', () => {
-        const reports = getScenario().getVersionReports();
-        expect(reports).toHaveLength(2);
-        expect(reports).toHaveProperty('1.name', 'foo');
-        expect(reports).toHaveProperty('0.reports.0._tag', 'MissingLocalVersion');
+      describe('version report', () => {
+        it('is broken and unfixable', () => {
+          const reports = getScenario().getVersionReports();
+          expect(reports).toHaveLength(2);
+          expect(reports).toHaveProperty('1.name', 'foo');
+          expect(reports).toHaveProperty('1.reports.0._tag', 'MissingLocalVersion');
+          expect(reports).toHaveProperty('1.reports.1._tag', 'MissingLocalVersion');
+        });
+      });
+
+      describe('lint', () => {
+        it('exits 1', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(lint(scenario));
+          expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+        });
+      });
+
+      describe('lintSemverRanges', () => {
+        it('exits 0', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(lintSemverRanges(scenario));
+          expect(scenario.io.process.exit).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('list', () => {
+        it('exits 1', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(list(scenario));
+          expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+        });
+      });
+
+      describe('list-mismatches', () => {
+        it('exits 1', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(listMismatches(scenario));
+          expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+        });
+      });
+
+      describe('fix-mismatches', () => {
+        it('exits 1', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(fixMismatches(scenario));
+          expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+        });
       });
     });
 
-    describe('lint', () => {
-      it('exits 1', () => {
-        const scenario = getScenario();
-        Effect.runSyncExit(lint(scenario));
-        expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+    describe('when local package is NOT depended on', () => {
+      const getScenario = createScenario({
+        '.syncpackrc': {
+          dependencyTypes: ['local', 'prod'],
+        },
+        'package.json': {
+          name: 'foo',
+        },
+        'packages/a/package.json': {
+          name: 'a',
+        },
       });
-    });
 
-    describe('lintSemverRanges', () => {
-      it('exits 0', () => {
-        const scenario = getScenario();
-        Effect.runSyncExit(lintSemverRanges(scenario));
-        expect(scenario.io.process.exit).not.toHaveBeenCalled();
+      describe('version report', () => {
+        it('is valid', () => {
+          const reports = getScenario().getVersionReports();
+          expect(reports).toHaveLength(2);
+          expect(reports).toHaveProperty('1.name', 'foo');
+          expect(reports).toHaveProperty('1.reports.0._tag', 'Valid');
+        });
       });
-    });
 
-    describe('list', () => {
-      it('exits 1', () => {
-        const scenario = getScenario();
-        Effect.runSyncExit(list(scenario));
-        expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+      describe('lint', () => {
+        it('exits 0', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(lint(scenario));
+          expect(scenario.io.process.exit).not.toHaveBeenCalled();
+        });
       });
-    });
 
-    describe('list-mismatches', () => {
-      it('exits 1', () => {
-        const scenario = getScenario();
-        Effect.runSyncExit(listMismatches(scenario));
-        expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+      describe('lintSemverRanges', () => {
+        it('exits 0', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(lintSemverRanges(scenario));
+          expect(scenario.io.process.exit).not.toHaveBeenCalled();
+        });
       });
-    });
 
-    describe('fix-mismatches', () => {
-      it('exits 1', () => {
-        const scenario = getScenario();
-        Effect.runSyncExit(fixMismatches(scenario));
-        expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
+      describe('list', () => {
+        it('exits 0', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(list(scenario));
+          expect(scenario.io.process.exit).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('list-mismatches', () => {
+        it('exits 0', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(listMismatches(scenario));
+          expect(scenario.io.process.exit).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('fix-mismatches', () => {
+        it('exits 0', () => {
+          const scenario = getScenario();
+          Effect.runSyncExit(fixMismatches(scenario));
+          expect(scenario.io.process.exit).not.toHaveBeenCalled();
+        });
       });
     });
   });
@@ -98,6 +164,8 @@ describe('the "local" dependency type', () => {
         expect(reports).toHaveProperty('1.name', 'foo');
         expect(reports).toHaveProperty('1.reports.0._tag', 'MissingLocalVersion');
         expect(reports).toHaveProperty('1.reports.0.unfixable.rawSpecifier', '~0.2.0');
+        expect(reports).toHaveProperty('1.reports.1._tag', 'MissingLocalVersion');
+        expect(reports).toHaveProperty('1.reports.1.unfixable.rawSpecifier', '~0.2.0');
       });
     });
 
