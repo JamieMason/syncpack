@@ -1,3 +1,5 @@
+import type { DEFAULT_CONFIG } from '../constants';
+
 /**
  * Aliases for semver range formats supported by syncpack
  *
@@ -19,9 +21,38 @@
  */
 export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~' | 'workspace:';
 
+type DefaultDependencyType = keyof typeof DEFAULT_CONFIG.customTypes;
+
+export type DependencyType =
+  | 'dev'
+  | 'local'
+  | 'overrides'
+  | 'peer'
+  | 'pnpmOverrides'
+  | 'prod'
+  | 'resolutions'
+  | DefaultDependencyType
+  | `!${DefaultDependencyType}`
+  // This is done to allow any other `string` while also offering intellisense
+  // for the internal dependency types above. `(string & {})` is needed to
+  // prevent typescript from ignoring these specific strings and merging them
+  // all into `string`, where we'd lose any editor autocomplete for the other
+  // more specific fields, using (string & {}) stops that from happening.
+  //
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  | (string & {});
+  // This is done to allow any other `string` while also offering intellisense
+  // for the internal dependency types above. `(string & {})` is needed to
+  // prevent typescript from ignoring these specific strings and merging them
+  // all into `string`, where we'd lose any editor autocomplete for the other
+  // more specific fields, using (string & {}) stops that from happening.
+  //
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  | (string & {});
+
 export interface GroupConfig {
   dependencies?: string[];
-  dependencyTypes?: string[];
+  dependencyTypes?: DependencyType[];
   label?: string;
   packages?: string[];
 }
