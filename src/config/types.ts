@@ -155,6 +155,12 @@ export interface RcConfig {
   formatRepository: boolean;
   /** @see https://jamiemason.github.io/syncpack/config/indent */
   indent: string;
+  /** @see https://jamiemason.github.io/syncpack/config/lint-formatting */
+  lintFormatting: boolean;
+  /** @see https://jamiemason.github.io/syncpack/config/lint-semver-ranges */
+  lintSemverRanges: boolean;
+  /** @see https://jamiemason.github.io/syncpack/config/lint-versions */
+  lintVersions: boolean;
   /** @see https://jamiemason.github.io/syncpack/config/semver-groups */
   semverGroups: SemverGroupConfig.Any[];
   /** @see https://jamiemason.github.io/syncpack/config/sort-az */

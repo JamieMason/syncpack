@@ -16,7 +16,7 @@ import type {
   PackageJsonFile,
 } from '../../src/get-package-json-files/package-json-file';
 import type { Io } from '../../src/io';
-import { newlines } from '../../src/io/write-if-changed';
+import { newlines } from '../../src/io/to-json';
 import type { Report } from '../../src/report';
 
 type NodeFs = typeof fs;

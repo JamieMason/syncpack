@@ -1,6 +1,6 @@
 import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
-import type { Ctx } from '../get-context';
 import { DEFAULT_CONFIG } from '../constants';
+import type { Ctx } from '../get-context';
 
 export function getIndent({ cli, rcFile }: Ctx['config']): string {
   return isNonEmptyString(cli.indent)

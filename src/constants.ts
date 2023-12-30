@@ -77,6 +77,9 @@ export const DEFAULT_CONFIG = {
   formatBugs: true,
   formatRepository: true,
   indent: '  ',
+  lintFormatting: true,
+  lintSemverRanges: true,
+  lintVersions: true,
   semverGroups: [],
   sortAz: [
     'bin',
