@@ -25,15 +25,45 @@ Your config file only needs to define values for those you want to change from t
 
 /** @type {import("syncpack").RcFile} */
 const config = {
-  customTypes: [],
-  dependencyTypes: ['dev', 'local', 'overrides', 'peer', 'pnpmOverrides', 'prod', 'resolutions'],
+  customTypes: {
+    dev: {
+      strategy: 'versionsByName',
+      path: 'devDependencies',
+    },
+    local: {
+      strategy: 'name~version',
+      namePath: 'name',
+      path: 'version',
+    },
+    overrides: {
+      strategy: 'versionsByName',
+      path: 'overrides',
+    },
+    peer: {
+      strategy: 'versionsByName',
+      path: 'peerDependencies',
+    },
+    pnpmOverrides: {
+      strategy: 'versionsByName',
+      path: 'pnpm.overrides',
+    },
+    prod: {
+      strategy: 'versionsByName',
+      path: 'dependencies',
+    },
+    resolutions: {
+      strategy: 'versionsByName',
+      path: 'resolutions',
+    },
+  },
+  dependencyTypes: ['**'],
   filter: '.',
   indent: '  ',
   semverGroups: [],
-  semverRange: '',
   sortAz: ['contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'resolutions', 'scripts'],
   sortFirst: ['name', 'description', 'version', 'author'],
   source: ['package.json', 'packages/*/package.json'],
+  specifierTypes: ['**'],
   versionGroups: [],
 };
 

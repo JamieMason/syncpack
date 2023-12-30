@@ -1,0 +1,12 @@
+import OptionalPill from '@site/components/pill/optional.astro';
+import SpecifierTypes from '@site/partials/_specifier-types.mdx';
+
+<OptionalPill />
+
+- When set, only dependencies whose version specifier matches the named formats will be assigned to this group.
+- If omitted, the default behaviour is to match all dependencies.
+- Negated types are also supported, so a value of `["!latest", "!file"]` would assign everything **except** specifiers of the format `*` and `file:path/to/package.tgz` to this group.
+
+#### Available values
+
+<SpecifierTypes />

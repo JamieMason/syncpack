@@ -6,3 +6,10 @@ const { title } = Astro.props;
   <summary>{title}</summary>
   <slot />
 </details>
+
+<style>
+  summary {
+    font-weight: bold;
+    cursor: pointer;
+  }
+</style>
