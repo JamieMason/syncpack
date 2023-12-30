@@ -4,7 +4,7 @@
     "commitMessage": "chore(release): ${version}",
     "push": false,
     "requireBranch": "main",
-    "tag": false
+    "tag": true
   },
   "github": {
     "release": true,
