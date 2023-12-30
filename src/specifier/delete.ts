@@ -4,7 +4,10 @@ import { BaseSpecifier } from './base';
 
 /** A instance which should be deleted */
 export class DeleteSpecifier {
-  _tag = 'Delete' as const;
+  _tag = 'Delete';
+
+  /** The public name referenced in config */
+  name = 'delete' as const;
 
   raw: Delete;
   instance: Instance;

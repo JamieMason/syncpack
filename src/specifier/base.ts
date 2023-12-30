@@ -8,8 +8,13 @@ import { parseSpecifier } from './lib/parse-specifier';
 export class BaseSpecifier<T extends NpmPackageArgResult | unknown> {
   /** should be overridden by sub classes */
   _tag = 'Base';
+
+  /** should be overridden by sub classes */
+  name = 'base';
+
   /** The raw semver/workspace:/git etc version value */
   raw: string;
+
   /**
    * A `Specifier` describes the version specifier (eg "^1.4.4") of a given
    * instance.

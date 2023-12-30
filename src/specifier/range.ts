@@ -10,7 +10,10 @@ type T = SpecificRegistryResult<'range'>;
  * @example "^1.2.3"
  */
 export class RangeSpecifier extends BaseSpecifier<T> {
-  _tag = 'Range' as const;
+  _tag = 'Range';
+
+  /** The public name referenced in config */
+  name = 'range' as const;
 
   /** Return the semver version including the range */
   getSemver(): Effect.Effect<never, NonSemverError, string> {

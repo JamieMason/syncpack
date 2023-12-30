@@ -49,7 +49,7 @@ function matchesDependencyTypes(dependencyTypes: unknown, instance: Instance): b
 }
 
 function matchesSpecifierTypes(specifierTypes: unknown, instance: Instance): boolean {
-  return matchesKnownList(specifierTypes, instance.rawSpecifier._tag);
+  return matchesKnownList(specifierTypes, instance.rawSpecifier.name);
 }
 
 function matchesKnownList(values: unknown, value: string): boolean {

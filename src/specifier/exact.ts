@@ -11,7 +11,10 @@ type T = SpecificRegistryResult<'version'>;
  * @example "1.4.4"
  */
 export class ExactSpecifier extends BaseSpecifier<T> {
-  _tag = 'Exact' as const;
+  _tag = 'Exact';
+
+  /** The public name referenced in config */
+  name = 'exact' as const;
 
   /** Return the semver version */
   getSemver(): Effect.Effect<never, NonSemverError, string> {

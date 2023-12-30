@@ -3,7 +3,10 @@ import { BaseSpecifier } from './base';
 
 /** @example "http://x.com/foo.tgz" */
 export class UrlSpecifier extends BaseSpecifier<URLResult> {
-  _tag = 'Url' as const;
+  _tag = 'Url';
+
+  /** The public name referenced in config */
+  name = 'url' as const;
 
   // @TODO: If file name is semver, return that in getSemver()
 }

@@ -37,8 +37,8 @@ export type DependencyType =
   | (string & {});
 
 export type SpecifierType =
-  | Specifier.Any['_tag']
-  | `!${Specifier.Any['_tag']}`
+  | Specifier.Any['name']
+  | `!${Specifier.Any['name']}`
   // This is done to allow any other `string` while also offering intellisense
   // for the internal dependency types above. `(string & {})` is needed to
   // prevent typescript from ignoring these specific strings and merging them

@@ -8,7 +8,10 @@ type T = AliasResult;
 
 /** @example "npm:imageoptim-cli@3.1.7" */
 export class AliasSpecifier extends BaseSpecifier<T> {
-  _tag = 'Alias' as const;
+  _tag = 'Alias';
+
+  /** The public name referenced in config */
+  name = 'alias' as const;
 
   /** Return the version portion if it is valid semver */
   getSemver(): Effect.Effect<never, NonSemverError, string> {

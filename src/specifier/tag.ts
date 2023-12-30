@@ -6,5 +6,8 @@ import type { SpecificRegistryResult } from './lib/specific-registry-result';
  * @example "made-up-by-some-dev"
  */
 export class TagSpecifier extends BaseSpecifier<SpecificRegistryResult<'tag'>> {
-  _tag = 'Tag' as const;
+  _tag = 'Tag';
+
+  /** The public name referenced in config */
+  name = 'tag' as const;
 }
