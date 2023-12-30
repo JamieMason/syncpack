@@ -1,16 +1,16 @@
 # syncpack
 
-> Consistent dependency versions in large JavaScript Monorepos.
+<center>
+  <img src="https://jamiemason.github.io/syncpack/logo.svg" width="200" height="179" alt="" />
+  <div>Consistent dependency versions in large JavaScript Monorepos.</div>
+  <div><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a></div>
+</center>
 
 ## Installation
 
 ```bash
 npm install --save-dev syncpack
 ```
-
-## Documentation
-
-Full information can be found in the documentation at https://jamiemason.github.io/syncpack/.
 
 ## Commands
 
