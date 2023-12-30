@@ -1,6 +1,6 @@
 import OptionalPill from '@site/components/pill/optional.astro';
 
-<OptionalPill />
+<OptionalPill>{props.children}</OptionalPill>
 
 - An array of strings which should match the `name` properties of your package.json files.
 - If omitted, the default behaviour is to match every package.

@@ -23,9 +23,10 @@ Pin the version of all dependencies in this group to follow the versions used by
 
 ## Configuration
 
-### snapTo
-
-<RequiredPill />
+<RequiredPill>
+  {/**/}
+  ### snapTo
+</RequiredPill>
 
 - The values refer to the `name` property of the package.json files developed in your monorepo.
 - Multiple values can be added to provide fallback packages to try in the event that the dependency is not present in the earlier packages in the array.
@@ -41,22 +42,27 @@ Pin the version of all dependencies in this group to follow the versions used by
 }
 ```
 
-### dependencies
+<Dependencies>
+  {/**/}
+  ### dependencies
+</Dependencies>
 
-<Dependencies />
+<DependencyTypes>
+  {/**/}
+  ### dependencyTypes
+</DependencyTypes>
 
-### dependencyTypes
+<SpecifierTypes>
+  {/**/}
+  ### specifierTypes
+</SpecifierTypes>
 
-<DependencyTypes />
+<Label>
+  {/**/}
+  ### label
+</Label>
 
-### specifierTypes
-
-<SpecifierTypes />
-
-### label
-
-<Label />
-
-### packages
-
-<Packages />
+<Packages>
+  {/**/}
+  ### packages
+</Packages>

@@ -1,7 +1,7 @@
 import OptionalPill from '@site/components/pill/optional.astro';
 import SpecifierTypes from '@site/partials/_specifier-types.mdx';
 
-<OptionalPill />
+<OptionalPill>{props.children}</OptionalPill>
 
 - When set, only dependencies whose version specifier matches the named formats will be assigned to this group.
 - If omitted, the default behaviour is to match all dependencies.

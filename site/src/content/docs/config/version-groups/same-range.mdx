@@ -23,9 +23,10 @@ Relax syncpack to ensure that all versions have semver ranges which all satisfy 
 
 ## Configuration
 
-### policy
-
-<RequiredPill />
+<RequiredPill>
+  {/**/}
+  ### policy
+</RequiredPill>
 
 Currently the only custom policy in syncpack is "sameRange", which is what causes this behaviour to be applied to a Version Group.
 
@@ -40,22 +41,27 @@ Currently the only custom policy in syncpack is "sameRange", which is what cause
 }
 ```
 
-### dependencies
+<Dependencies>
+  {/**/}
+  ### dependencies
+</Dependencies>
 
-<Dependencies />
+<DependencyTypes>
+  {/**/}
+  ### dependencyTypes
+</DependencyTypes>
 
-### dependencyTypes
+<SpecifierTypes>
+  {/**/}
+  ### specifierTypes
+</SpecifierTypes>
 
-<DependencyTypes />
+<Label>
+  {/**/}
+  ### label
+</Label>
 
-### specifierTypes
-
-<SpecifierTypes />
-
-### label
-
-<Label />
-
-### packages
-
-<Packages />
+<Packages>
+  {/**/}
+  ### packages
+</Packages>

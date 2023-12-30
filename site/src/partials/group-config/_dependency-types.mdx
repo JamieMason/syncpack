@@ -2,7 +2,7 @@ import OptionalPill from '@site/components/pill/optional.astro';
 import DefaultDependencyTypes from '@site/partials/_default-dependency-types.mdx';
 import CustomTypesTip from '@site/partials/tips/_custom-types.mdx';
 
-<OptionalPill />
+<OptionalPill>{props.children}</OptionalPill>
 <CustomTypesTip />
 
 - When set, only dependencies present in the named locations will be assigned to this group.

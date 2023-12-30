@@ -1,6 +1,6 @@
 import OptionalPill from '@site/components/pill/optional.astro';
 
-<OptionalPill />
+<OptionalPill>{props.children}</OptionalPill>
 
 - An array of names of dependencies you've installed or otherwise reference in your package.json files.
 - If omitted, the default behaviour is to match every dependency.
