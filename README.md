@@ -1,10 +1,10 @@
 # syncpack
 
-<center>
-  <img src="https://jamiemason.github.io/syncpack/logo.svg" width="200" height="179" alt="" />
-  <div>Consistent dependency versions in large JavaScript Monorepos.</div>
-  <div><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a></div>
-</center>
+<p align="center">
+  <img src="https://jamiemason.github.io/syncpack/logo.svg" width="200" height="179" alt="">
+  <br>Consistent dependency versions in large JavaScript Monorepos.
+  <br><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a>
+</p>
 
 ## Installation
 
