@@ -1,17 +1,10 @@
 import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
 import type { Ctx } from '../get-context';
+import { isEmptyArray } from 'tightrope/guard/is-empty-array';
+import { DEFAULT_CONFIG } from '../constants';
 
 export function getSortAz({ rcFile }: Ctx['config']): string[] {
-  return isArrayOfStrings(rcFile.sortAz)
+  return isArrayOfStrings(rcFile.sortAz) || isEmptyArray(rcFile.sortAz)
     ? rcFile.sortAz
-    : [
-        'bin',
-        'contributors',
-        'dependencies',
-        'devDependencies',
-        'keywords',
-        'peerDependencies',
-        'resolutions',
-        'scripts',
-      ];
+    : DEFAULT_CONFIG.sortAz;
 }

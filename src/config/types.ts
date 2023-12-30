@@ -142,10 +142,6 @@ export interface CliConfig {
   readonly types: string;
 }
 
-// @TODO formatBugs: boolean // whether to format "bugs" prop (default: true)
-// @TODO formatRepository: boolean // whether to format "repository" prop (default: true)
-// @TODO sortPackages: boolean // whether to sort root props (default: true)
-
 export interface RcConfig {
   /** @see https://jamiemason.github.io/syncpack/config/custom-types */
   customTypes: Record<string, CustomTypeConfig.Any>;
@@ -153,14 +149,22 @@ export interface RcConfig {
   dependencyTypes: DependencyType[];
   /** @see https://jamiemason.github.io/syncpack/config/filter */
   filter: string;
+  /** @see https://jamiemason.github.io/syncpack/config/format-bugs */
+  formatBugs: boolean;
+  /** @see https://jamiemason.github.io/syncpack/config/format-repository */
+  formatRepository: boolean;
   /** @see https://jamiemason.github.io/syncpack/config/indent */
   indent: string;
   /** @see https://jamiemason.github.io/syncpack/config/semver-groups */
   semverGroups: SemverGroupConfig.Any[];
   /** @see https://jamiemason.github.io/syncpack/config/sort-az */
   sortAz: string[];
+  /** @see https://jamiemason.github.io/syncpack/config/sort-exports */
+  sortExports: string[];
   /** @see https://jamiemason.github.io/syncpack/config/sort-first */
   sortFirst: string[];
+  /** @see https://jamiemason.github.io/syncpack/config/sort-packages */
+  sortPackages: boolean;
   /** @see https://jamiemason.github.io/syncpack/config/source */
   source: string[];
   /** @see https://jamiemason.github.io/syncpack/config/specifier-types */
