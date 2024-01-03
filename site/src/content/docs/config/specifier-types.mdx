@@ -13,7 +13,7 @@ Dependencies can be toggled on and off by the type of version specifier they hav
 
 ```json title=".syncpackrc"
 {
-  "dependencyTypes": ["latest", "workspace-protocol"]
+  "specifierTypes": ["latest", "workspace-protocol"]
 }
 ```
 
@@ -25,7 +25,7 @@ Everything **except** specifiers of the format `file:path/to/package.tgz` will b
 
 ```json title=".syncpackrc"
 {
-  "dependencyTypes": ["!file"]
+  "specifierTypes": ["!file"]
 }
 ```
 
