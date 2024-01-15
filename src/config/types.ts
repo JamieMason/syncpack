@@ -93,10 +93,6 @@ export namespace VersionGroupConfig {
     policy: 'sameRange';
   }
 
-  export interface SnappedTo extends GroupConfig {
-    snapTo: string[];
-  }
-
   export interface Standard extends GroupConfig {
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
