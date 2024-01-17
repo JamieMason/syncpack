@@ -27,28 +27,25 @@ export function update(
     Effect.Do,
     Effect.bind('ctx', () => getContext({ io, cli, errorHandlers })),
     Effect.bind('instances', ({ ctx }) => getInstances(ctx, io, errorHandlers)),
-    Effect.bind('update', ({ instances }) =>
+    Effect.bind('updateable', ({ instances }) => {
+      const isVisitedByName: Record<string, boolean> = {};
+      const updateable: Instance[] = [];
+      instances.all.forEach((instance) => {
+        const _tag = instance.versionGroup._tag;
+        if (!isVisitedByName[instance.name] && (_tag === 'SameRange' || _tag === 'Standard')) {
+          const specifier = Specifier.create(instance, instance.rawSpecifier.raw);
+          if (specifier._tag === 'Range' || specifier._tag === 'Exact') {
+            isVisitedByName[instance.name] = true;
+            updateable.push(instance);
+          }
+        }
+      });
+      return Effect.succeed(updateable);
+    }),
+    Effect.bind('update', ({ updateable }) =>
       pipe(
-        Effect.succeed(instances.all),
-        Effect.map((instances) => {
-          const isVisitedByName: Record<string, boolean> = {};
-          const updateable: Instance[] = [];
-          instances.forEach((instance) => {
-            if (
-              !isVisitedByName[instance.name] &&
-              (instance.versionGroup._tag === 'SameRange' ||
-                instance.versionGroup._tag === 'Standard')
-            ) {
-              const specifier = Specifier.create(instance, instance.rawSpecifier.raw);
-              if (specifier._tag === 'Range' || specifier._tag === 'Exact') {
-                isVisitedByName[instance.name] = true;
-                updateable.push(instance);
-              }
-            }
-          });
-          return updateable;
-        }),
-        Effect.tap(updateEffects.onFetchAllStart),
+        Effect.succeed(updateable),
+        Effect.tap(effects.onFetchAllStart),
         Effect.flatMap((instances) =>
           pipe(
             instances,
@@ -56,21 +53,21 @@ export function update(
               (instance) =>
                 pipe(
                   Effect.succeed(instance),
-                  Effect.tap(() => updateEffects.onFetchStart(instance, instances.length)),
+                  Effect.tap(() => effects.onFetchStart(instance, instances.length)),
                   Effect.flatMap(effects.fetchLatestVersions),
                   Effect.tapBoth({
-                    onFailure: () => updateEffects.onFetchEnd(instance),
-                    onSuccess: ({ versions }) => updateEffects.onFetchEnd(instance, versions),
+                    onFailure: () => effects.onFetchEnd(instance),
+                    onSuccess: ({ versions }) => effects.onFetchEnd(instance, versions),
                   }),
                   // move up to date dependencies to error channel
                   Effect.flatMap((updateable) =>
                     gtr(updateable.versions.latest, String(instance.rawSpecifier.raw))
                       ? pipe(
-                          updateEffects.onOutdated(instance, updateable.versions.latest),
+                          effects.onOutdated(instance, updateable.versions.latest),
                           Effect.map(() => updateable),
                         )
                       : pipe(
-                          updateEffects.onUpToDate(instance),
+                          effects.onUpToDate(instance),
                           Effect.flatMap(() => Effect.fail(updateable)),
                         ),
                   ),
@@ -91,11 +88,11 @@ export function update(
         ),
         // always remove the spinner when we're done
         Effect.tapBoth({
-          onFailure: updateEffects.onFetchAllEnd,
-          onSuccess: updateEffects.onFetchAllEnd,
+          onFailure: effects.onFetchAllEnd,
+          onSuccess: effects.onFetchAllEnd,
         }),
         // ask the user which updates they want
-        Effect.flatMap(updateEffects.promptForUpdates),
+        Effect.flatMap(effects.promptForUpdates),
         // if we think the user cancelled, say so
         Effect.catchTag('PromptCancelled', () =>
           Effect.logInfo(

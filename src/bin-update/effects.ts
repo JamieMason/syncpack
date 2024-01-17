@@ -228,11 +228,18 @@ export const updateEffects = {
             ...doState.majorAnswers,
             ...doState.prereleaseAnswers,
           ],
-          Effect.forEach(({ instance, versions }) =>
+          Effect.forEach((release) =>
             pipe(
-              instance.semverGroup.getFixed(Specifier.create(instance, versions.latest)),
-              Effect.flatMap((latestWithRange) => instance.write(latestWithRange.raw)),
-              Effect.catchTag('NonSemverError', Effect.logError),
+              release.instance.versionGroup.instances,
+              Effect.forEach((instance) =>
+                pipe(
+                  instance.semverGroup.getFixed(
+                    Specifier.create(instance, release.versions.latest),
+                  ),
+                  Effect.flatMap((latestWithRange) => instance.write(latestWithRange.raw)),
+                  Effect.catchTag('NonSemverError', Effect.logError),
+                ),
+              ),
             ),
           ),
           Effect.flatMap(() => Effect.unit),
