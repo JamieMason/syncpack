@@ -1,6 +1,6 @@
 import { Data, Effect, pipe } from 'effect';
-import type { Io } from '.';
-import { IoTag } from '.';
+import type { Io } from './index.js';
+import { IoTag } from './index.js';
 
 export class WriteFileError extends Data.TaggedClass('WriteFileError')<{
   readonly filePath: string;

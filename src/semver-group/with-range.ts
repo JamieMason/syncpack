@@ -1,10 +1,10 @@
 import { Data, Effect, pipe } from 'effect';
-import type { SemverGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { setSemverRange } from '../lib/set-semver-range';
-import { Report } from '../report';
-import { Specifier } from '../specifier';
-import type { NonSemverError } from '../specifier/lib/non-semver-error';
+import type { SemverGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { setSemverRange } from '../lib/set-semver-range.js';
+import { Report } from '../report.js';
+import { Specifier } from '../specifier/index.js';
+import type { NonSemverError } from '../specifier/lib/non-semver-error.js';
 
 export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
   config: SemverGroupConfig.WithRange;

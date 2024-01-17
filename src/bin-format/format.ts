@@ -1,21 +1,21 @@
 import { Context, Effect, flow, pipe } from 'effect';
-import { isArray } from 'tightrope/guard/is-array';
-import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
-import { isObject } from 'tightrope/guard/is-object';
-import { getSortAz } from '../config/get-sort-az';
-import { getSortExports } from '../config/get-sort-exports';
-import { getSortFirst } from '../config/get-sort-first';
-import { CliConfigTag } from '../config/tag';
-import { type CliConfig } from '../config/types';
-import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
-import type { Ctx } from '../get-context';
-import { getContext } from '../get-context';
-import type { Io } from '../io';
-import { IoTag } from '../io';
-import { exitIfInvalid } from '../io/exit-if-invalid';
-import { writeIfChanged } from '../io/write-if-changed';
-import { withLogger } from '../lib/with-logger';
+import { isArray } from 'tightrope/guard/is-array.js';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string.js';
+import { isObject } from 'tightrope/guard/is-object.js';
+import { getSortAz } from '../config/get-sort-az.js';
+import { getSortExports } from '../config/get-sort-exports.js';
+import { getSortFirst } from '../config/get-sort-first.js';
+import { CliConfigTag } from '../config/tag.js';
+import { type CliConfig } from '../config/types.js';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import type { Ctx } from '../get-context/index.js';
+import { getContext } from '../get-context/index.js';
+import { exitIfInvalid } from '../io/exit-if-invalid.js';
+import type { Io } from '../io/index.js';
+import { IoTag } from '../io/index.js';
+import { writeIfChanged } from '../io/write-if-changed.js';
+import { withLogger } from '../lib/with-logger.js';
 
 interface Input {
   io: Io;

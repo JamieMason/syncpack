@@ -1,15 +1,18 @@
 import chalk from 'chalk';
 import { Effect } from 'effect';
 import { EOL } from 'os';
-import type { InvalidCustomTypeError } from '../config/get-custom-types';
-import type { DeprecatedTypesError, RenamedWorkspaceTypeError } from '../config/get-enabled-types';
-import type { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
-import type { GlobError } from '../io/glob-sync';
-import type { ReadFileError } from '../io/read-file-sync';
-import type { JsonParseError } from '../io/read-json-file-sync';
-import type { WriteFileError } from '../io/write-file-sync';
-import type { SemverGroup } from '../semver-group';
-import type { VersionGroup } from '../version-group';
+import type { InvalidCustomTypeError } from '../config/get-custom-types.js';
+import type {
+  DeprecatedTypesError,
+  RenamedWorkspaceTypeError,
+} from '../config/get-enabled-types.js';
+import type { NoSourcesFoundError } from '../get-package-json-files/get-file-paths.js';
+import type { GlobError } from '../io/glob-sync.js';
+import type { ReadFileError } from '../io/read-file-sync.js';
+import type { JsonParseError } from '../io/read-json-file-sync.js';
+import type { WriteFileError } from '../io/write-file-sync.js';
+import type { SemverGroup } from '../semver-group/index.js';
+import type { VersionGroup } from '../version-group/index.js';
 
 type R = Effect.Effect<never, never, void>;
 

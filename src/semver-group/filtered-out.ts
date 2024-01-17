@@ -1,11 +1,11 @@
 import { Data, Effect } from 'effect';
-import { getFilter } from '../config/get-filter';
-import type { GroupConfig } from '../config/types';
-import type { Ctx } from '../get-context';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import type { Specifier } from '../specifier';
-import type { NonSemverError } from '../specifier/lib/non-semver-error';
+import { getFilter } from '../config/get-filter.js';
+import type { GroupConfig } from '../config/types.js';
+import type { Ctx } from '../get-context/index.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import type { Specifier } from '../specifier/index.js';
+import type { NonSemverError } from '../specifier/lib/non-semver-error.js';
 
 /**
  * Instances which do not match a given `--filter` option are assigned to this

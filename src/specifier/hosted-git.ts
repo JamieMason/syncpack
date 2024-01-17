@@ -1,9 +1,9 @@
 import { Effect, pipe } from 'effect';
 import type { HostedGitResult } from 'npm-package-arg';
-import { Specifier } from '.';
-import { isSemver } from '../guards/is-semver';
-import { BaseSpecifier } from './base';
-import { NonSemverError } from './lib/non-semver-error';
+import { isSemver } from '../guards/is-semver.js';
+import { BaseSpecifier } from './base.js';
+import { Specifier } from './index.js';
+import { NonSemverError } from './lib/non-semver-error.js';
 
 /** @example "git+https://github.com/user/foo" */
 export class HostedGitSpecifier extends BaseSpecifier<HostedGitResult> {

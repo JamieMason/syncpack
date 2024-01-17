@@ -1,5 +1,5 @@
 import { Data, Effect } from 'effect';
-import type { Specifier } from '..';
+import type { Specifier } from '../index.js';
 
 export class NonSemverError extends Data.TaggedClass('NonSemverError')<{
   specifier: Specifier.Any;

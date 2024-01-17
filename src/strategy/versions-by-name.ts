@@ -1,9 +1,9 @@
 import { Effect, Option, pipe } from 'effect';
-import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
-import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import { get } from '../lib/get';
-import type { Delete } from '../version-group/lib/delete';
-import { DELETE } from '../version-group/lib/delete';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object.js';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
+import { get } from '../lib/get.js';
+import type { Delete } from '../version-group/lib/delete.js';
+import { DELETE } from '../version-group/lib/delete.js';
 
 const getOptionOfNonEmptyObject = Option.liftPredicate(isNonEmptyObject<any>);
 

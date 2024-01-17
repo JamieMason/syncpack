@@ -1,11 +1,11 @@
 import { Data, Effect, pipe } from 'effect';
-import { uniq } from 'tightrope/array/uniq';
-import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import { Specifier } from '../specifier';
-import { getPreferredVersion } from './lib/get-preferred-version';
-import { groupBy } from './lib/group-by';
+import { uniq } from 'tightrope/array/uniq.js';
+import type { VersionGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import { Specifier } from '../specifier/index.js';
+import { getPreferredVersion } from './lib/get-preferred-version.js';
+import { groupBy } from './lib/group-by.js';
 
 export class StandardVersionGroup extends Data.TaggedClass('Standard')<{
   config: VersionGroupConfig.Standard;

@@ -1,5 +1,5 @@
-import chalk from 'chalk';
-import { DEFAULT_CONFIG } from './constants';
+import chalk from 'chalk-template'
+import { DEFAULT_CONFIG } from './constants.js';
 
 export const option = {
   config: ['-c, --config <path>', 'path to a syncpack config file'],

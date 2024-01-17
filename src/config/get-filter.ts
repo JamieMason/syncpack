@@ -1,6 +1,6 @@
-import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
-import { DEFAULT_CONFIG } from '../constants';
-import type { Ctx } from '../get-context';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string.js';
+import { DEFAULT_CONFIG } from '../constants.js';
+import type { Ctx } from '../get-context/index.js';
 
 export function getFilter({ cli, rcFile }: Ctx['config']): string {
   // @TODO Deprecate `filter` in .syncpackrc

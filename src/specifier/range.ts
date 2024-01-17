@@ -1,8 +1,8 @@
 import { Effect, pipe } from 'effect';
-import { Specifier } from '.';
-import { BaseSpecifier } from './base';
-import { NonSemverError } from './lib/non-semver-error';
-import type { SpecificRegistryResult } from './lib/specific-registry-result';
+import { BaseSpecifier } from './base.js';
+import { Specifier } from './index.js';
+import { NonSemverError } from './lib/non-semver-error.js';
+import type { SpecificRegistryResult } from './lib/specific-registry-result.js';
 
 type T = SpecificRegistryResult<'range'>;
 

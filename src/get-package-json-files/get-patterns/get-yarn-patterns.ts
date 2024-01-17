@@ -1,10 +1,10 @@
 import { Effect, Option as O, pipe } from 'effect';
 import { join } from 'path';
-import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
-import type { Io } from '../../io';
-import { readJsonFileSync } from '../../io/read-json-file-sync';
-import type { PackageJson } from '../package-json-file';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings.js';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object.js';
+import type { Io } from '../../io/index.js';
+import { readJsonFileSync } from '../../io/read-json-file-sync.js';
+import type { PackageJson } from '../package-json-file.js';
 
 export function getYarnPatterns(io: Io): Effect.Effect<never, never, O.Option<string[]>> {
   return pipe(

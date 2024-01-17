@@ -1,4 +1,4 @@
-import { RANGE } from '../../constants';
+import { RANGE } from '../../constants.js';
 
 const scoresByRange: Record<string, number | undefined> = {
   [RANGE.ANY]: 9,

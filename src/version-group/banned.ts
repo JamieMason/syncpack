@@ -1,10 +1,10 @@
 import { Data, Effect } from 'effect';
-import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import { Specifier } from '../specifier';
-import { DELETE } from './lib/delete';
-import { groupBy } from './lib/group-by';
+import type { VersionGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import { Specifier } from '../specifier/index.js';
+import { DELETE } from './lib/delete.js';
+import { groupBy } from './lib/group-by.js';
 
 export class BannedVersionGroup extends Data.TaggedClass('Banned')<{
   config: VersionGroupConfig.Banned;

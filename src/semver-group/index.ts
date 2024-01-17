@@ -1,8 +1,8 @@
 import { Data } from 'effect';
-import type { DisabledSemverGroup } from './disabled';
-import type { FilteredOutSemverGroup } from './filtered-out';
-import type { IgnoredSemverGroup } from './ignored';
-import type { WithRangeSemverGroup } from './with-range';
+import type { DisabledSemverGroup } from './disabled.js';
+import type { FilteredOutSemverGroup } from './filtered-out.js';
+import type { IgnoredSemverGroup } from './ignored.js';
+import type { WithRangeSemverGroup } from './with-range.js';
 
 export namespace SemverGroup {
   export type Disabled = DisabledSemverGroup;

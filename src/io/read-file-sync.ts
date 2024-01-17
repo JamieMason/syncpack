@@ -1,5 +1,5 @@
 import { Data, Effect } from 'effect';
-import type { Io } from '.';
+import type { Io } from './index.js';
 
 export class ReadFileError extends Data.TaggedClass('ReadFileError')<{
   readonly filePath: string;

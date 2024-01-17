@@ -1,7 +1,7 @@
 import { Either } from 'effect';
-import { isFunction } from 'tightrope/guard/is-function';
-import { isPrimitive } from 'tightrope/guard/is-primitive';
-import { isReadable } from 'tightrope/guard/is-readable';
+import { isFunction } from 'tightrope/guard/is-function.js';
+import { isPrimitive } from 'tightrope/guard/is-primitive.js';
+import { isReadable } from 'tightrope/guard/is-readable.js';
 
 // prettier-ignore
 export function get<

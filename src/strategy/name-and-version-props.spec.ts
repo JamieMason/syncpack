@@ -1,8 +1,8 @@
 import { Effect } from 'effect';
 import { describe, expect, it } from 'vitest';
-import type { TestScenario } from '../../test/lib/create-scenario';
-import { createScenario } from '../../test/lib/create-scenario';
-import { NameAndVersionPropsStrategy } from './name-and-version-props';
+import type { TestScenario } from '../../test/lib/create-scenario.js';
+import { createScenario } from '../../test/lib/create-scenario.js';
+import { NameAndVersionPropsStrategy } from './name-and-version-props.js';
 
 function getRootPackage(filesByName: TestScenario['filesByName']) {
   return createScenario(filesByName)().getRootPackage();

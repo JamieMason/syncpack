@@ -1,4 +1,4 @@
-import { isString } from 'tightrope/guard/is-string';
+import { isString } from 'tightrope/guard/is-string.js';
 
 /** @deprecated migrate to make better use of npm-package-arg */
 export function isSemver(version: unknown): boolean {

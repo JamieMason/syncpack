@@ -1,15 +1,15 @@
 import { Effect, flow, pipe } from 'effect';
-import { getEnabledTypes } from '../config/get-enabled-types';
-import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import type { Ctx } from '../get-context';
-import { canAddToGroup } from '../guards/can-add-to-group';
-import type { Io } from '../io';
-import { sortByName } from '../lib/sort-by-name';
-import type { SemverGroup } from '../semver-group';
-import { createSemverGroups } from '../semver-group/create-semver-groups';
-import type { VersionGroup } from '../version-group';
-import { createVersionGroups } from '../version-group/create-version-groups';
-import type { Instance } from './instance';
+import { getEnabledTypes } from '../config/get-enabled-types.js';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import type { Ctx } from '../get-context/index.js';
+import { canAddToGroup } from '../guards/can-add-to-group.js';
+import type { Io } from '../io/index.js';
+import { sortByName } from '../lib/sort-by-name.js';
+import { createSemverGroups } from '../semver-group/create-semver-groups.js';
+import type { SemverGroup } from '../semver-group/index.js';
+import { createVersionGroups } from '../version-group/create-version-groups.js';
+import type { VersionGroup } from '../version-group/index.js';
+import type { Instance } from './instance.js';
 
 interface Instances {
   all: Instance[];

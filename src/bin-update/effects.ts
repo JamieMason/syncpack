@@ -1,21 +1,21 @@
 import * as Schema from '@effect/schema/Schema';
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { Data, Effect, identity, pipe } from 'effect';
 import https from 'https';
-import ora from 'ora';
+import ora, { type Ora } from 'ora';
 import { EOL } from 'os';
 import prompts from 'prompts';
 import type { ReleaseType } from 'semver';
 import { diff } from 'semver';
-import gtr from 'semver/ranges/gtr';
-import { isArray } from 'tightrope/guard/is-array';
-import { isEmptyObject } from 'tightrope/guard/is-empty-object';
-import { ICON } from '../constants';
-import type { Instance } from '../get-instances/instance';
-import { formatRepositoryUrl } from '../lib/format-repository-url';
-import { RingBuffer } from '../lib/ring-buffer';
-import { setSemverRange } from '../lib/set-semver-range';
-import { Specifier } from '../specifier';
+import gtr from 'semver/ranges/gtr.js';
+import { isArray } from 'tightrope/guard/is-array.js';
+import { isEmptyObject } from 'tightrope/guard/is-empty-object.js';
+import { ICON } from '../constants.js';
+import type { Instance } from '../get-instances/instance.js';
+import { formatRepositoryUrl } from '../lib/format-repository-url.js';
+import { RingBuffer } from '../lib/ring-buffer.js';
+import { setSemverRange } from '../lib/set-semver-range.js';
+import { Specifier } from '../specifier/index.js';
 
 type ReleasesByType = Record<ReleaseType, Releases[]>;
 
@@ -43,7 +43,7 @@ class NpmRegistryError extends Data.TaggedClass('NpmRegistryError')<{
 }> {}
 
 /** the API client for the terminal spinner */
-let spinner: ora.Ora | null = null;
+let spinner: Ora | null = null;
 
 /** how many HTTP requests have been sent */
 let fetchedCount = 0;

@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { Effect, Logger, LogLevel } from 'effect';
 
 export function withLogger(program: Effect.Effect<never, never, unknown>) {

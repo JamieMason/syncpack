@@ -1,15 +1,15 @@
 import { Effect } from 'effect';
-import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
-import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
-import { isObject } from 'tightrope/guard/is-object';
-import { SemverGroup } from '.';
-import type { Ctx } from '../get-context';
-import { isValidSemverRange } from '../guards/is-valid-semver-range';
-import { DisabledSemverGroup } from './disabled';
-import { FilteredOutSemverGroup } from './filtered-out';
-import { IgnoredSemverGroup } from './ignored';
-import { WithRangeSemverGroup } from './with-range';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings.js';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array.js';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string.js';
+import { isObject } from 'tightrope/guard/is-object.js';
+import type { Ctx } from '../get-context/index.js';
+import { isValidSemverRange } from '../guards/is-valid-semver-range.js';
+import { DisabledSemverGroup } from './disabled.js';
+import { FilteredOutSemverGroup } from './filtered-out.js';
+import { IgnoredSemverGroup } from './ignored.js';
+import { SemverGroup } from './index.js';
+import { WithRangeSemverGroup } from './with-range.js';
 
 export function createSemverGroups(
   ctx: Ctx,

@@ -4,7 +4,7 @@
     "declaration": true,
     "downlevelIteration": true,
     "noUncheckedIndexedAccess": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
   },
-  "include": ["./package.json", "./src/**/*.ts", "./test/**/*.ts"]
+  "include": ["./package.json", "./src/**/*.ts", "./test/**/*.ts"],
 }

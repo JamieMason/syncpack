@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 program
-  .version(require('../package.json').version)
+  .version(JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, 'utf8')).version)
   .command('fix-mismatches', 'set dependencies used with different versions to the same version', {
     executableFile: './bin-fix-mismatches/index.js',
   })

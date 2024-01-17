@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import type { Command } from 'commander';
 
 export function showHelpOnError(program: Command) {

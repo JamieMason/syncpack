@@ -1,13 +1,13 @@
 import { Data, Effect, pipe } from 'effect';
-import intersects from 'semver/ranges/intersects';
-import { uniq } from 'tightrope/array/uniq';
-import type { VersionGroupConfig } from '../config/types';
-import type { Ctx } from '../get-context';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import { Specifier } from '../specifier';
-import type { WorkspaceProtocolSpecifier } from '../specifier/workspace-protocol';
-import { groupBy } from './lib/group-by';
+import intersects from 'semver/ranges/intersects.js';
+import { uniq } from 'tightrope/array/uniq.js';
+import type { VersionGroupConfig } from '../config/types.js';
+import type { Ctx } from '../get-context/index.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import { Specifier } from '../specifier/index.js';
+import type { WorkspaceProtocolSpecifier } from '../specifier/workspace-protocol.js';
+import { groupBy } from './lib/group-by.js';
 
 export class SameRangeVersionGroup extends Data.TaggedClass('SameRange')<{
   ctx: Ctx;

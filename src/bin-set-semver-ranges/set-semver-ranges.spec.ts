@@ -1,7 +1,7 @@
 import { Effect } from 'effect';
 import { describe, expect, it } from 'vitest';
-import { createScenario } from '../../test/lib/create-scenario';
-import { setSemverRanges } from './set-semver-ranges';
+import { createScenario } from '../../test/lib/create-scenario.js';
+import { setSemverRanges } from './set-semver-ranges.js';
 
 describe('when a semver group contains mismatches', () => {
   describe('when "*" should be used"', () => {

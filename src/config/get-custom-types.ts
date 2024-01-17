@@ -1,13 +1,13 @@
 import { Data, Effect } from 'effect';
-import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
-import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
-import { isObject } from 'tightrope/guard/is-object';
-import { DEFAULT_CONFIG } from '../constants';
-import type { Ctx } from '../get-context';
-import { NameAndVersionPropsStrategy } from '../strategy/name-and-version-props';
-import { NamedVersionStringStrategy } from '../strategy/named-version-string';
-import { UnnamedVersionStringStrategy } from '../strategy/unnamed-version-string';
-import { VersionsByNameStrategy } from '../strategy/versions-by-name';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object.js';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string.js';
+import { isObject } from 'tightrope/guard/is-object.js';
+import { DEFAULT_CONFIG } from '../constants.js';
+import type { Ctx } from '../get-context/index.js';
+import { NameAndVersionPropsStrategy } from '../strategy/name-and-version-props.js';
+import { NamedVersionStringStrategy } from '../strategy/named-version-string.js';
+import { UnnamedVersionStringStrategy } from '../strategy/unnamed-version-string.js';
+import { VersionsByNameStrategy } from '../strategy/versions-by-name.js';
 
 export namespace Strategy {
   export type Any =

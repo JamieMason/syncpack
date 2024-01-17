@@ -1,18 +1,18 @@
-import type { CosmiconfigResult } from 'cosmiconfig/dist/types';
+import type { CosmiconfigResult } from 'cosmiconfig';
 import { Effect, Option, pipe } from 'effect';
 import { join } from 'path';
-import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object.js';
 import type { O } from 'ts-toolbelt';
-import type { Io } from '.';
-import type { RcConfig } from '../config/types';
-import type { PackageJson } from '../get-package-json-files/package-json-file';
-import { readJsonFileSync } from './read-json-file-sync';
+import type { RcConfig } from '../config/types.js';
+import type { PackageJson } from '../get-package-json-files/package-json-file.js';
+import type { Io } from './index.js';
+import { readJsonFileSync } from './read-json-file-sync.js';
 
 const getOptionOfNonEmptyObject = Option.liftPredicate(isNonEmptyObject<any>);
 
 type UnverifiedRcConfig = O.Partial<RcConfig, 'deep'>;
 
-export function readConfigFileSync(
+export function readConfigFile(
   io: Io,
   configPath?: string,
 ): Effect.Effect<never, never, UnverifiedRcConfig> {

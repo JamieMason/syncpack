@@ -1,5 +1,5 @@
 import type { FileResult } from 'npm-package-arg';
-import { BaseSpecifier } from './base';
+import { BaseSpecifier } from './base.js';
 
 /** @example */
 export class FileSpecifier extends BaseSpecifier<FileResult> {

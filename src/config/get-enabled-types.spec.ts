@@ -1,7 +1,7 @@
 import { Effect, pipe } from 'effect';
 import { expect, it } from 'vitest';
-import { InvalidCustomTypeError } from './get-custom-types';
-import { DeprecatedTypesError, getEnabledTypes, RenamedWorkspaceTypeError } from './get-enabled-types';
+import { InvalidCustomTypeError } from './get-custom-types.js';
+import { DeprecatedTypesError, getEnabledTypes, RenamedWorkspaceTypeError } from './get-enabled-types.js';
 
 const prod = expect.objectContaining({
   path: 'dependencies',

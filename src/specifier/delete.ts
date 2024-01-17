@@ -1,6 +1,6 @@
-import type { Instance } from '../get-instances/instance';
-import type { Delete } from '../version-group/lib/delete';
-import { BaseSpecifier } from './base';
+import type { Instance } from '../get-instances/instance.js';
+import type { Delete } from '../version-group/lib/delete.js';
+import { BaseSpecifier } from './base.js';
 
 /** A instance which should be deleted */
 export class DeleteSpecifier {

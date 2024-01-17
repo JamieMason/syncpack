@@ -1,10 +1,10 @@
 import { Data, Effect } from 'effect';
-import { getFilter } from '../config/get-filter';
-import type { GroupConfig } from '../config/types';
-import type { Ctx } from '../get-context';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import { groupBy } from './lib/group-by';
+import { getFilter } from '../config/get-filter.js';
+import type { GroupConfig } from '../config/types.js';
+import type { Ctx } from '../get-context/index.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import { groupBy } from './lib/group-by.js';
 
 export class FilteredOutVersionGroup extends Data.TaggedClass('FilteredOut')<{
   config: GroupConfig;

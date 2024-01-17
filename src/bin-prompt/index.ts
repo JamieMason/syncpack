@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { program } from 'commander';
 import { Effect } from 'effect';
-import { io } from '../io';
-import { showHelpOnError } from '../lib/show-help-on-error';
-import { option } from '../option';
-import { prompt } from './prompt';
+import { io } from '../io/index.js';
+import { showHelpOnError } from '../lib/show-help-on-error.js';
+import { option } from '../option.js';
+import { prompt } from './prompt.js';
 
 program.description(
   '  displays a series of prompts to fix mismatches which syncpack cannot fix automatically',

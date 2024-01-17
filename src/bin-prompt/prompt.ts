@@ -1,24 +1,24 @@
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { Context, Effect, flow, pipe } from 'effect';
-import { uniq } from 'tightrope/array/uniq';
-import { isString } from 'tightrope/guard/is-string';
-import { logOtherCommands } from '../bin-list/list';
-import { CliConfigTag } from '../config/tag';
-import { type CliConfig } from '../config/types';
-import { ICON } from '../constants';
-import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
-import { getContext } from '../get-context';
-import { getInstances } from '../get-instances';
-import type { Io } from '../io';
-import { IoTag } from '../io';
-import { askForChoice } from '../io/ask-for-choice';
-import { askForInput } from '../io/ask-for-input';
-import { exitIfInvalid } from '../io/exit-if-invalid';
-import { writeIfChanged } from '../io/write-if-changed';
-import { getVersionGroupHeader } from '../lib/get-group-header';
-import { withLogger } from '../lib/with-logger';
-import type { Report } from '../report';
+import { uniq } from 'tightrope/array/uniq.js';
+import { isString } from 'tightrope/guard/is-string.js';
+import { logOtherCommands } from '../bin-list/list.js';
+import { CliConfigTag } from '../config/tag.js';
+import { type CliConfig } from '../config/types.js';
+import { ICON } from '../constants.js';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { getContext } from '../get-context/index.js';
+import { getInstances } from '../get-instances/index.js';
+import { askForChoice } from '../io/ask-for-choice.js';
+import { askForInput } from '../io/ask-for-input.js';
+import { exitIfInvalid } from '../io/exit-if-invalid.js';
+import type { Io } from '../io/index.js';
+import { IoTag } from '../io/index.js';
+import { writeIfChanged } from '../io/write-if-changed.js';
+import { getVersionGroupHeader } from '../lib/get-group-header.js';
+import { withLogger } from '../lib/with-logger.js';
+import type { Report } from '../report.js';
 
 interface Input {
   io: Io;
@@ -106,9 +106,9 @@ function askForNextVersion(
         ),
       ).filter(isString);
 
-      const OTHER = chalk.dim('Other');
-      const SKIP = chalk.dim('Skip');
-      const QUIT = chalk.dim('Quit');
+      const OTHER = chalk`{dim Other}`;
+      const SKIP = chalk`{dim Skip}`;
+      const QUIT = chalk`{dim Quit}`;
 
       // Ask user to choose a version to align on
       const choice = yield* $(

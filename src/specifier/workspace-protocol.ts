@@ -1,8 +1,8 @@
 import { Effect } from 'effect';
-import { Specifier } from '.';
-import type { Ctx } from '../get-context';
-import { BaseSpecifier } from './base';
-import type { WorkspaceProtocolResult } from './lib/parse-specifier';
+import type { Ctx } from '../get-context/index.js';
+import { BaseSpecifier } from './base.js';
+import { Specifier } from './index.js';
+import type { WorkspaceProtocolResult } from './lib/parse-specifier.js';
 
 /** Represents "workspace:*" and "workspace:~" */
 export class WorkspaceProtocolSpecifier extends BaseSpecifier<WorkspaceProtocolResult> {

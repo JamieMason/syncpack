@@ -1,9 +1,9 @@
 import { Effect, pipe } from 'effect';
-import { Specifier } from '.';
-import type { Instance } from '../get-instances/instance';
-import { NonSemverError } from './lib/non-semver-error';
-import type { NpmPackageArgResult } from './lib/parse-specifier';
-import { parseSpecifier } from './lib/parse-specifier';
+import type { Instance } from '../get-instances/instance.js';
+import { Specifier } from './index.js';
+import { NonSemverError } from './lib/non-semver-error.js';
+import type { NpmPackageArgResult } from './lib/parse-specifier.js';
+import { parseSpecifier } from './lib/parse-specifier.js';
 
 export class BaseSpecifier<T extends NpmPackageArgResult | unknown> {
   /** should be overridden by sub classes */

@@ -1,4 +1,4 @@
-import type { RcConfig, SemverRange } from './config/types';
+import type { RcConfig, SemverRange } from './config/types.js';
 
 /** Single source of truth, intended to aid testing or to override */
 export const CWD = process.env.MOCK_CWD || process.cwd();

@@ -33,38 +33,39 @@
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
   "dependencies": {
-    "@effect/schema": "0.56.1",
-    "chalk": "4.1.2",
+    "@effect/schema": "0.60.3",
+    "chalk": "5.3.0",
+    "chalk-template": "1.1.0",
     "commander": "11.1.0",
     "cosmiconfig": "9.0.0",
-    "effect": "2.0.0-next.62",
+    "effect": "2.1.0",
     "enquirer": "2.4.1",
     "fast-check": "3.15.0",
-    "globby": "11.1.0",
+    "globby": "14.0.0",
     "minimatch": "9.0.3",
     "npm-package-arg": "11.0.1",
-    "ora": "5.4.1",
+    "ora": "8.0.1",
     "prompts": "2.4.2",
     "read-yaml-file": "2.1.0",
     "semver": "7.5.4",
-    "tightrope": "0.1.0",
+    "tightrope": "0.2.0",
     "ts-toolbelt": "9.6.0"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "8.0.1",
     "@tsconfig/node18": "18.2.2",
-    "@types/node": "20.10.6",
+    "@types/node": "20.11.5",
     "@types/npm-package-arg": "6.1.4",
     "@types/prompts": "2.4.9",
     "@types/semver": "7.5.6",
-    "@typescript-eslint/eslint-plugin": "6.16.0",
-    "@typescript-eslint/parser": "6.16.0",
-    "@vitest/coverage-v8": "1.1.0",
+    "@typescript-eslint/eslint-plugin": "6.19.0",
+    "@typescript-eslint/parser": "6.19.0",
+    "@vitest/coverage-v8": "1.2.0",
     "auto-changelog": "2.4.0",
     "eslint": "8.56.0",
     "eslint-plugin-import": "2.29.1",
     "memfs": "4.6.0",
-    "prettier": "3.1.1",
+    "prettier": "3.2.3",
     "prettier-plugin-astro": "0.12.3",
     "quill-delta": "5.1.0",
     "release-it": "17.0.1",
@@ -73,11 +74,12 @@
     "tslib": "2.6.2",
     "typescript": "5.3.3",
     "typescript-json-schema": "0.62.0",
-    "vitest": "1.1.0"
+    "vitest": "1.2.0"
   },
   "engines": {
     "node": ">=16"
   },
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],
@@ -103,16 +105,6 @@
     "yarn"
   ],
   "license": "MIT",
-  "main": "dist/index.js",
-  "pnpm": {
-    "overrides": {
-      "chalk": "4.1.2",
-      "effect": "2.0.0-next.62",
-      "string-width": "<5.0.0",
-      "strip-ansi": "<7.0.0",
-      "wrap-ansi": "<8.0.0"
-    }
-  },
   "repository": "JamieMason/syncpack",
   "scripts": {
     "build": "pnpm run clean && pnpm run build:source && pnpm run build:json-schema",
@@ -128,5 +120,6 @@
     "prepack": "pnpm run build",
     "release": "release-it",
     "test": "vitest run --config vitest.config.ts"
-  }
+  },
+  "type": "module"
 }

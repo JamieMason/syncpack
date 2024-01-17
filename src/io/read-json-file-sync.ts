@@ -1,8 +1,8 @@
 import { Data, Effect, pipe } from 'effect';
 import { dirname, relative } from 'path';
-import type { Io } from '.';
-import type { ReadFileError } from './read-file-sync';
-import { readFileSync } from './read-file-sync';
+import type { Io } from './index.js';
+import type { ReadFileError } from './read-file-sync.js';
+import { readFileSync } from './read-file-sync.js';
 
 export class JsonParseError extends Data.TaggedClass('JsonParseError')<{
   readonly error: unknown;

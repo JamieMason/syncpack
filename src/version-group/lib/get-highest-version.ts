@@ -1,5 +1,5 @@
-import type { Specifier } from '../../specifier';
-import { getPreferredVersion } from './get-preferred-version';
+import type { Specifier } from '../../specifier/index.js';
+import { getPreferredVersion } from './get-preferred-version.js';
 
 /**
  * From an array of instances where every instance contains a valid semver

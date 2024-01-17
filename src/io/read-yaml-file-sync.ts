@@ -1,5 +1,5 @@
 import { Data, Effect } from 'effect';
-import type { Io } from '.';
+import type { Io } from './index.js';
 
 class ReadYamlFileError extends Data.TaggedClass('ReadYamlFileError')<{
   readonly filePath: string;

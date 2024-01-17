@@ -1,5 +1,5 @@
-import type { Instance } from './get-instances/instance';
-import type { Specifier } from './specifier';
+import type { Instance } from './get-instances/instance.js';
+import type { Specifier } from './specifier/index.js';
 
 export namespace Report {
   export type Any = Semver.Any | Version.Any;

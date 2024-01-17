@@ -1,11 +1,11 @@
 import { Data, Effect, pipe } from 'effect';
-import { uniq } from 'tightrope/array/uniq';
-import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
-import type { Ctx } from '../get-context';
-import type { Io } from '../io';
-import type { GlobError } from '../io/glob-sync';
-import { globSync } from '../io/glob-sync';
-import { getPatterns } from './get-patterns';
+import { uniq } from 'tightrope/array/uniq.js';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array.js';
+import type { Ctx } from '../get-context/index.js';
+import type { GlobError } from '../io/glob-sync.js';
+import { globSync } from '../io/glob-sync.js';
+import type { Io } from '../io/index.js';
+import { getPatterns } from './get-patterns/index.js';
 
 export class NoSourcesFoundError extends Data.TaggedClass('NoSourcesFoundError')<{
   readonly CWD: string;

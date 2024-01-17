@@ -1,5 +1,5 @@
-import type { CUSTOM_TYPES } from '../constants';
-import type { Specifier } from '../specifier';
+import type { CUSTOM_TYPES } from '../constants.js';
+import type { Specifier } from '../specifier/index.js';
 
 /**
  * Aliases for semver range formats supported by syncpack

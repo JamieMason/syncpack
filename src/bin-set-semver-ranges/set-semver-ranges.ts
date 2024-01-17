@@ -1,24 +1,24 @@
 import { Context, Effect, flow, pipe } from 'effect';
-import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array.js';
 import {
   fixMismatch,
   logAlreadyValidSize,
   logFixedSize,
   logUnfixableSize,
-} from '../bin-fix-mismatches/fix-mismatches';
-import { logSemverGroupsDisabledWarning } from '../bin-lint-semver-ranges/lint-semver-ranges';
-import { logUnsupportedMismatch } from '../bin-list-mismatches/list-mismatches';
-import { CliConfigTag } from '../config/tag';
-import { type CliConfig } from '../config/types';
-import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
-import { getContext } from '../get-context';
-import { getInstances } from '../get-instances';
-import type { Io } from '../io';
-import { IoTag } from '../io';
-import { exitIfInvalid } from '../io/exit-if-invalid';
-import { writeIfChanged } from '../io/write-if-changed';
-import { withLogger } from '../lib/with-logger';
+} from '../bin-fix-mismatches/fix-mismatches.js';
+import { logSemverGroupsDisabledWarning } from '../bin-lint-semver-ranges/lint-semver-ranges.js';
+import { logUnsupportedMismatch } from '../bin-list-mismatches/list-mismatches.js';
+import { CliConfigTag } from '../config/tag.js';
+import { type CliConfig } from '../config/types.js';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { getContext } from '../get-context/index.js';
+import { getInstances } from '../get-instances/index.js';
+import { exitIfInvalid } from '../io/exit-if-invalid.js';
+import type { Io } from '../io/index.js';
+import { IoTag } from '../io/index.js';
+import { writeIfChanged } from '../io/write-if-changed.js';
+import { withLogger } from '../lib/with-logger.js';
 
 interface Input {
   io: Io;

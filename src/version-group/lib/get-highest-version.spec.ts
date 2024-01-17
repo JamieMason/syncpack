@@ -1,8 +1,8 @@
 import { Effect } from 'effect';
 import { describe, expect, it } from 'vitest';
-import { shuffle } from '../../../test/lib/shuffle';
-import type { Specifier } from '../../specifier';
-import { getHighestVersion } from './get-highest-version';
+import { shuffle } from '../../../test/lib/shuffle.js';
+import type { Specifier } from '../../specifier/index.js';
+import { getHighestVersion } from './get-highest-version.js';
 
 describe('getHighestVersion', () => {
   const a = ['workspace:*'];

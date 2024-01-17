@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { program } from 'commander';
 import { Effect } from 'effect';
-import { io } from '../io';
-import { showHelpOnError } from '../lib/show-help-on-error';
-import { option } from '../option';
-import { lintSemverRanges } from './lint-semver-ranges';
+import { io } from '../io/index.js';
+import { showHelpOnError } from '../lib/show-help-on-error.js';
+import { option } from '../option.js';
+import { lintSemverRanges } from './lint-semver-ranges.js';
 
 program.description(
   chalk`

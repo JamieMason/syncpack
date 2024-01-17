@@ -1,12 +1,12 @@
 import { Effect, Option as O, pipe } from 'effect';
-import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import { getSource } from '../../config/get-source';
-import { DEFAULT_CONFIG } from '../../constants';
-import type { Ctx } from '../../get-context';
-import type { Io } from '../../io';
-import { getLernaPatterns } from './get-lerna-patterns';
-import { getPnpmPatterns } from './get-pnpm-patterns';
-import { getYarnPatterns } from './get-yarn-patterns';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings.js';
+import { getSource } from '../../config/get-source.js';
+import { DEFAULT_CONFIG } from '../../constants.js';
+import type { Ctx } from '../../get-context/index.js';
+import type { Io } from '../../io/index.js';
+import { getLernaPatterns } from './get-lerna-patterns.js';
+import { getPnpmPatterns } from './get-pnpm-patterns.js';
+import { getYarnPatterns } from './get-yarn-patterns.js';
 
 /**
  * Find every glob pattern which should be used to find package.json files for

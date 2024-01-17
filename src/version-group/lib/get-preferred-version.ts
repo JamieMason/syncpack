@@ -1,11 +1,11 @@
 import { Effect, pipe } from 'effect';
-import gt from 'semver/functions/gt';
-import lt from 'semver/functions/lt';
-import type { VersionGroupConfig } from '../../config/types';
-import type { Specifier } from '../../specifier';
-import type { NonSemverError } from '../../specifier/lib/non-semver-error';
-import { clean } from './clean';
-import { getRangeScore } from './get-range-score';
+import gt from 'semver/functions/gt.js';
+import lt from 'semver/functions/lt.js';
+import type { VersionGroupConfig } from '../../config/types.js';
+import type { Specifier } from '../../specifier/index.js';
+import type { NonSemverError } from '../../specifier/lib/non-semver-error.js';
+import { clean } from './clean.js';
+import { getRangeScore } from './get-range-score.js';
 
 export function getPreferredVersion(
   preferVersion: VersionGroupConfig.Standard['preferVersion'],

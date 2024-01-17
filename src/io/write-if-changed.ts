@@ -1,12 +1,12 @@
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { Effect, pipe } from 'effect';
-import type { Io } from '.';
-import { ICON } from '../constants';
-import type { Ctx } from '../get-context';
-import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import { toJson } from './to-json';
-import type { WriteFileError } from './write-file-sync';
-import { writeFileSync } from './write-file-sync';
+import { ICON } from '../constants.js';
+import type { Ctx } from '../get-context/index.js';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
+import type { Io } from './index.js';
+import { toJson } from './to-json.js';
+import type { WriteFileError } from './write-file-sync.js';
+import { writeFileSync } from './write-file-sync.js';
 
 export function writeIfChanged(ctx: Ctx): Effect.Effect<Io, WriteFileError, Ctx> {
   return pipe(

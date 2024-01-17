@@ -1,9 +1,9 @@
 import { Data, Effect } from 'effect';
-import type { SemverGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import type { Specifier } from '../specifier';
-import type { NonSemverError } from '../specifier/lib/non-semver-error';
+import type { SemverGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import type { Specifier } from '../specifier/index.js';
+import type { NonSemverError } from '../specifier/lib/non-semver-error.js';
 
 /**
  * Semver groups are disabled by default and, when that's the case, every

@@ -1,9 +1,9 @@
 import { Effect } from 'effect';
 import { describe, expect, it, vi } from 'vitest';
-import { createScenario } from '../../test/lib/create-scenario';
-import { fixMismatches } from '../bin-fix-mismatches/fix-mismatches';
-import { listMismatches } from '../bin-list-mismatches/list-mismatches';
-import { list } from '../bin-list/list';
+import { createScenario } from '../../test/lib/create-scenario.js';
+import { fixMismatches } from '../bin-fix-mismatches/fix-mismatches.js';
+import { listMismatches } from '../bin-list-mismatches/list-mismatches.js';
+import { list } from '../bin-list/list.js';
 
 describe('Disk Errors', () => {
   describe('when a file cannot be read', () => {

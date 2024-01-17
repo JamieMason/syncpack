@@ -1,8 +1,8 @@
-import { isString } from 'tightrope/guard/is-string';
-import type { SemverRange } from '../config/types';
-import { RANGE } from '../constants';
-import { isSemver } from '../guards/is-semver';
-import { isValidSemverRange } from '../guards/is-valid-semver-range';
+import { isString } from 'tightrope/guard/is-string.js';
+import type { SemverRange } from '../config/types.js';
+import { RANGE } from '../constants.js';
+import { isSemver } from '../guards/is-semver.js';
+import { isValidSemverRange } from '../guards/is-valid-semver-range.js';
 
 /** @deprecated migrate to make better use of npm-package-arg */
 export function setSemverRange(semverRange: SemverRange, version: string): string {

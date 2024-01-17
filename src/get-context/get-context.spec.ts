@@ -1,12 +1,12 @@
 import { Effect, pipe } from 'effect';
 import { normalize } from 'path';
 import { describe, expect, it, test, vi } from 'vitest';
-import { getContext } from '.';
-import { createScenario } from '../../test/lib/create-scenario';
-import { shape } from '../../test/lib/matchers';
-import { DEFAULT_CONFIG } from '../constants';
-import { NoSourcesFoundError } from '../get-package-json-files/get-file-paths';
-import { JsonParseError } from '../io/read-json-file-sync';
+import { createScenario } from '../../test/lib/create-scenario.js';
+import { shape } from '../../test/lib/matchers.js';
+import { DEFAULT_CONFIG } from '../constants.js';
+import { NoSourcesFoundError } from '../get-package-json-files/get-file-paths.js';
+import { JsonParseError } from '../io/read-json-file-sync.js';
+import { getContext } from './index.js';
 
 it('errors when no package.json is found', async () => {
   const scenario = createScenario({})();

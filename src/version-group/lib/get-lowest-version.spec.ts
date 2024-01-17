@@ -1,8 +1,8 @@
 import { Effect } from 'effect';
 import { describe, expect, it } from 'vitest';
-import { shuffle } from '../../../test/lib/shuffle';
-import type { Specifier } from '../../specifier';
-import { getLowestVersion } from './get-lowest-version';
+import { shuffle } from '../../../test/lib/shuffle.js';
+import type { Specifier } from '../../specifier/index.js';
+import { getLowestVersion } from './get-lowest-version.js';
 
 describe('getLowestVersion', () => {
   const a = ['*'];

@@ -1,8 +1,8 @@
 import { Effect, pipe } from 'effect';
 import type { AliasResult } from 'npm-package-arg';
-import { Specifier } from '.';
-import { BaseSpecifier } from './base';
-import { NonSemverError } from './lib/non-semver-error';
+import { BaseSpecifier } from './base.js';
+import { Specifier } from './index.js';
+import { NonSemverError } from './lib/non-semver-error.js';
 
 type T = AliasResult;
 

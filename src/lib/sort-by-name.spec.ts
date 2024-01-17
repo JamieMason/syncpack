@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sortByName } from './sort-by-name';
+import { sortByName } from './sort-by-name.js';
 
 describe('sortByName', () => {
   it('orders installed packages by name', async () => {

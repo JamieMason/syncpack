@@ -1,15 +1,15 @@
 import { Data, Effect, pipe } from 'effect';
-import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings';
-import { isBoolean } from 'tightrope/guard/is-boolean';
-import { isEmptyArray } from 'tightrope/guard/is-empty-array';
-import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
-import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string';
-import { INTERNAL_TYPES } from '../constants';
-import type { Ctx } from '../get-context';
-import { NameAndVersionPropsStrategy } from '../strategy/name-and-version-props';
-import { VersionsByNameStrategy } from '../strategy/versions-by-name';
-import type { InvalidCustomTypeError, Strategy } from './get-custom-types';
-import { getCustomTypes } from './get-custom-types';
+import { isArrayOfStrings } from 'tightrope/guard/is-array-of-strings.js';
+import { isBoolean } from 'tightrope/guard/is-boolean.js';
+import { isEmptyArray } from 'tightrope/guard/is-empty-array.js';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array.js';
+import { isNonEmptyString } from 'tightrope/guard/is-non-empty-string.js';
+import { INTERNAL_TYPES } from '../constants.js';
+import type { Ctx } from '../get-context/index.js';
+import { NameAndVersionPropsStrategy } from '../strategy/name-and-version-props.js';
+import { VersionsByNameStrategy } from '../strategy/versions-by-name.js';
+import type { InvalidCustomTypeError, Strategy } from './get-custom-types.js';
+import { getCustomTypes } from './get-custom-types.js';
 
 export class DeprecatedTypesError extends Data.TaggedClass('DeprecatedTypesError')<{
   readonly types: string[];

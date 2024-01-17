@@ -1,8 +1,8 @@
 import { Effect, Option as O, pipe } from 'effect';
 import { describe, expect, it } from 'vitest';
-import type { TestScenario } from '../../../test/lib/create-scenario';
-import { createScenario } from '../../../test/lib/create-scenario';
-import { getYarnPatterns } from './get-yarn-patterns';
+import type { TestScenario } from '../../../test/lib/create-scenario.js';
+import { createScenario } from '../../../test/lib/create-scenario.js';
+import { getYarnPatterns } from './get-yarn-patterns.js';
 
 async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();

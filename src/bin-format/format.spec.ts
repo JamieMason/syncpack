@@ -1,8 +1,8 @@
 import { Effect } from 'effect';
 import { describe, expect, it } from 'vitest';
-import { createScenario } from '../../test/lib/create-scenario';
-import { DEFAULT_CONFIG } from '../constants';
-import { format } from './format';
+import { createScenario } from '../../test/lib/create-scenario.js';
+import { DEFAULT_CONFIG } from '../constants.js';
+import { format } from './format.js';
 
 describe('formatBugs', () => {
   it('uses github shorthand format', async () => {
