@@ -24,29 +24,33 @@ export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~' 
 
 type DefaultDependencyType = keyof typeof CUSTOM_TYPES;
 
+class CustomString extends String {}
+
+type UnknownString = CustomString & string;
+
 export type DependencyType =
   | DefaultDependencyType
   | `!${DefaultDependencyType}`
   // This is done to allow any other `string` while also offering intellisense
-  // for the internal dependency types above. `(string & {})` is needed to
+  // for the internal dependency types above. `UnknownString` is needed to
   // prevent typescript from ignoring these specific strings and merging them
   // all into `string`, where we'd lose any editor autocomplete for the other
-  // more specific fields, using (string & {}) stops that from happening.
+  // more specific fields, using UnknownString stops that from happening.
   //
   // eslint-disable-next-line @typescript-eslint/ban-types
-  | (string & {});
+  | UnknownString;
 
 export type SpecifierType =
   | Specifier.Any['name']
   | `!${Specifier.Any['name']}`
   // This is done to allow any other `string` while also offering intellisense
-  // for the internal dependency types above. `(string & {})` is needed to
+  // for the internal dependency types above. `UnknownString` is needed to
   // prevent typescript from ignoring these specific strings and merging them
   // all into `string`, where we'd lose any editor autocomplete for the other
-  // more specific fields, using (string & {}) stops that from happening.
+  // more specific fields, using UnknownString stops that from happening.
   //
   // eslint-disable-next-line @typescript-eslint/ban-types
-  | (string & {});
+  | UnknownString;
 
 export interface GroupConfig {
   dependencies?: string[];
@@ -177,4 +181,8 @@ export interface RcConfig {
   specifierTypes: SpecifierType[];
   /** @see https://jamiemason.github.io/syncpack/config/version-groups */
   versionGroups: VersionGroupConfig.Any[];
+}
+
+export interface JsonSchema extends RcConfig {
+  $schema?: string;
 }
