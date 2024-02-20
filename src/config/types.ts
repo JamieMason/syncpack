@@ -24,7 +24,7 @@ export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~' 
 
 type DefaultDependencyType = keyof typeof CUSTOM_TYPES;
 
-class CustomString extends String {}
+class CustomString extends String { }
 
 type UnknownString = CustomString & string;
 
@@ -148,7 +148,9 @@ export interface CliConfig {
 
 export interface RcConfig {
   /** @see https://jamiemason.github.io/syncpack/config/custom-types */
-  customTypes: Record<string, CustomTypeConfig.Any>;
+  customTypes: {
+    [name: string]: CustomTypeConfig.Any;
+  };
   /** @see https://jamiemason.github.io/syncpack/config/dependency-types */
   dependencyTypes: DependencyType[];
   /** @see https://jamiemason.github.io/syncpack/config/filter */
