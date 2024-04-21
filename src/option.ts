@@ -15,7 +15,7 @@ export const option = {
     [] as string[],
   ],
   specs: [
-    '-s, --specs <names>',
+    '-S, --specs <names>',
     chalk`only include dependencies whose version specifier match these types (eg. {yellow specs=latest,range,workspace-protocol})`,
   ],
   types: [
