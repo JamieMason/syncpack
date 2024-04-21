@@ -8,7 +8,7 @@ class AskForInputError extends Data.TaggedClass('AskForInputError')<{
 
 export function askForInput(opts: {
   message: string;
-}): Effect.Effect<Io, AskForInputError, string> {
+}): Effect.Effect<string, AskForInputError, Io> {
   return pipe(
     IoTag,
     Effect.flatMap((io) =>

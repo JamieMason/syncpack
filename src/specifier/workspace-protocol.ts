@@ -16,7 +16,7 @@ export class WorkspaceProtocolSpecifier extends BaseSpecifier<WorkspaceProtocolR
    * with tools which expect values which conform to the spec. This value is
    * used only when sorting versions.
    */
-  getSemverEquivalent(ctx: Ctx): Effect.Effect<never, never, string> {
+  getSemverEquivalent(ctx: Ctx): Effect.Effect<string> {
     if (this.raw === 'workspace:*') {
       return Effect.succeed('*');
     }
@@ -30,11 +30,11 @@ export class WorkspaceProtocolSpecifier extends BaseSpecifier<WorkspaceProtocolR
   }
 
   // @TODO: this name is inaccurate, check how it is used and change logic or rename
-  getSemver(): Effect.Effect<never, never, string> {
+  getSemver(): Effect.Effect<string> {
     return Effect.succeed(this.raw);
   }
 
-  setSemver(version: string): Effect.Effect<never, never, Specifier.Any> {
+  setSemver(version: string): Effect.Effect<Specifier.Any> {
     return Effect.succeed(Specifier.create(this.instance, version));
   }
 }

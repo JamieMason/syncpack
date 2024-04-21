@@ -10,7 +10,7 @@ export class WriteFileError extends Data.TaggedClass('WriteFileError')<{
 export function writeFileSync(
   filePath: string,
   contents: string,
-): Effect.Effect<Io, WriteFileError, void> {
+): Effect.Effect<void, WriteFileError, Io> {
   return pipe(
     IoTag,
     Effect.flatMap((io) =>

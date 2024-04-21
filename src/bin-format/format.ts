@@ -47,7 +47,7 @@ export function format({ io, cli, errorHandlers = defaultErrorHandlers }: Input)
   );
 }
 
-export function pipeline(ctx: Ctx): Effect.Effect<never, never, Ctx> {
+export function pipeline(ctx: Ctx): Effect.Effect<Ctx> {
   const { config, packageJsonFiles } = ctx;
   const sortAz = getSortAz(config);
   const sortExports = getSortExports(config);

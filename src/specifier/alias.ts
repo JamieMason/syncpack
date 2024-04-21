@@ -14,7 +14,7 @@ export class AliasSpecifier extends BaseSpecifier<T> {
   name = 'alias' as const;
 
   /** Return the version portion if it is valid semver */
-  getSemver(): Effect.Effect<never, NonSemverError, string> {
+  getSemver(): Effect.Effect<string, NonSemverError> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),
@@ -28,7 +28,7 @@ export class AliasSpecifier extends BaseSpecifier<T> {
   }
 
   /** Get a new `Specifier` from the given semver version applied to this one */
-  setSemver(version: string): Effect.Effect<never, NonSemverError, Specifier.Any> {
+  setSemver(version: string): Effect.Effect<Specifier.Any, NonSemverError> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),

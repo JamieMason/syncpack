@@ -20,7 +20,7 @@ export class NamedVersionStringStrategy {
     this.path = path;
   }
 
-  read(file: PackageJsonFile): Effect.Effect<never, never, [string, string][]> {
+  read(file: PackageJsonFile): Effect.Effect<[string, string][]> {
     const path = this.path;
     return pipe(
       // get version prop
@@ -46,7 +46,7 @@ export class NamedVersionStringStrategy {
   write(
     file: PackageJsonFile,
     [name, version]: [string, string | Delete],
-  ): Effect.Effect<never, never, PackageJsonFile> {
+  ): Effect.Effect<PackageJsonFile> {
     const { contents } = file.jsonFile;
     const isNestedPath = this.path.includes('.');
     const nextValue = version === DELETE ? undefined : `${name}@${version}`;

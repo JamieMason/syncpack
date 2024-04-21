@@ -35,11 +35,7 @@ export function lintSemverRanges({ io, cli, errorHandlers = defaultErrorHandlers
 }
 
 /** Exported to be reused by `syncpack lint` */
-export function pipeline(
-  ctx: Ctx,
-  io: Io,
-  errorHandlers: ErrorHandlers,
-): Effect.Effect<never, never, Ctx> {
+export function pipeline(ctx: Ctx, io: Io, errorHandlers: ErrorHandlers): Effect.Effect<Ctx> {
   return Effect.gen(function* ($) {
     // no semver groups have been configured, they are disabled by default
     if (!isNonEmptyArray(ctx.config.rcFile.semverGroups)) {

@@ -24,7 +24,7 @@ export class InvalidCustomTypeError extends Data.TaggedClass('InvalidCustomTypeE
 
 export function getCustomTypes({
   rcFile,
-}: Ctx['config']): Effect.Effect<never, InvalidCustomTypeError, Strategy.Any[]> {
+}: Ctx['config']): Effect.Effect<Strategy.Any[], InvalidCustomTypeError> {
   if (!isNonEmptyObject(rcFile.customTypes)) return Effect.succeed([]);
 
   return Effect.all(

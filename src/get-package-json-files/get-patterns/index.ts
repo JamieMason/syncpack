@@ -12,7 +12,7 @@ import { getYarnPatterns } from './get-yarn-patterns.js';
  * Find every glob pattern which should be used to find package.json files for
  * this monorepo.
  */
-export function getPatterns(io: Io, config: Ctx['config']): Effect.Effect<never, never, string[]> {
+export function getPatterns(io: Io, config: Ctx['config']): Effect.Effect<string[]> {
   return pipe(
     getCliPatterns(),
     Effect.flatMap((opt) => (O.isSome(opt) ? Effect.succeed(opt) : getWorkspacePatterns())),
@@ -20,11 +20,11 @@ export function getPatterns(io: Io, config: Ctx['config']): Effect.Effect<never,
     Effect.map(O.getOrElse(() => [...DEFAULT_CONFIG.source])),
   );
 
-  function getCliPatterns(): Effect.Effect<never, never, O.Option<string[]>> {
+  function getCliPatterns(): Effect.Effect<O.Option<string[]>> {
     return pipe(O.some(getSource(config)), O.filter(isArrayOfStrings), Effect.succeed);
   }
 
-  function getWorkspacePatterns(): Effect.Effect<never, never, O.Option<string[]>> {
+  function getWorkspacePatterns(): Effect.Effect<O.Option<string[]>> {
     return pipe(
       getYarnPatterns(io),
       Effect.flatMap((opt) => (O.isSome(opt) ? Effect.succeed(opt) : getPnpmPatterns(io))),

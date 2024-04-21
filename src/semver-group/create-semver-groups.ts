@@ -13,9 +13,9 @@ import { WithRangeSemverGroup } from './with-range.js';
 
 export function createSemverGroups(
   ctx: Ctx,
-): Effect.Effect<never, SemverGroup.ConfigError, SemverGroup.Any[]> {
+): Effect.Effect<SemverGroup.Any[], SemverGroup.ConfigError> {
   const { rcFile } = ctx.config;
-  const semverGroups: Effect.Effect<never, SemverGroup.ConfigError, SemverGroup.Any>[] = [
+  const semverGroups: Effect.Effect<SemverGroup.Any, SemverGroup.ConfigError>[] = [
     Effect.succeed(new FilteredOutSemverGroup(ctx)),
     Effect.succeed(
       new WithRangeSemverGroup(false, {

@@ -23,9 +23,8 @@ export function getEnabledTypes({
   cli,
   rcFile,
 }: Ctx['config']): Effect.Effect<
-  never,
-  DeprecatedTypesError | InvalidCustomTypeError | RenamedWorkspaceTypeError,
-  Strategy.Any[]
+  Strategy.Any[],
+  DeprecatedTypesError | InvalidCustomTypeError | RenamedWorkspaceTypeError
 > {
   return pipe(
     // Look for dependency types defined using the old `{ prod: true }` syntax
@@ -37,7 +36,7 @@ export function getEnabledTypes({
     Effect.flatMap((deprecatedTypeProps) =>
       deprecatedTypeProps.length > 0
         ? Effect.fail(new DeprecatedTypesError({ types: deprecatedTypeProps }))
-        : Effect.unit,
+        : Effect.void,
     ),
     Effect.flatMap(() =>
       pipe(

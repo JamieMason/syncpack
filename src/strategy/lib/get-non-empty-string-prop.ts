@@ -8,7 +8,7 @@ const getOptionOfNonEmptyString = Option.liftPredicate(isNonEmptyString);
 export function getNonEmptyStringProp(
   propPath: string,
   file: PackageJsonFile,
-): Effect.Effect<never, unknown, string> {
+): Effect.Effect<string, unknown> {
   return pipe(
     get(file.jsonFile.contents, ...propPath.split('.')),
     Effect.flatMap((value) => getOptionOfNonEmptyString(value)),

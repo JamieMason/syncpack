@@ -10,7 +10,7 @@ import { getRangeScore } from './get-range-score.js';
 export function getPreferredVersion(
   preferVersion: VersionGroupConfig.Standard['preferVersion'],
   specifiers: Specifier.Any[],
-): Effect.Effect<never, NonSemverError, Specifier.Any> {
+): Effect.Effect<Specifier.Any, NonSemverError> {
   return pipe(
     // every instance must have a semver version
     Effect.all(

@@ -25,7 +25,7 @@ interface Input {
   errorHandlers: ErrorHandlers;
 }
 
-export function getContext({ io, cli, errorHandlers }: Input): Effect.Effect<never, never, Ctx> {
+export function getContext({ io, cli, errorHandlers }: Input): Effect.Effect<Ctx> {
   const exitOnError = Effect.flatMap(() => Effect.failSync(() => io.process.exit(1)));
   return pipe(
     Effect.Do,

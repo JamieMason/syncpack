@@ -23,7 +23,7 @@ export class BannedVersionGroup extends Data.TaggedClass('Banned')<{
     return true;
   }
 
-  inspectAll(): Effect.Effect<never, never, Report.Version.Group[]> {
+  inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.succeed(
       Object.entries(groupBy('name', this.instances)).map(([name, instances]) => ({
         name,

@@ -15,9 +15,8 @@ export function getPackageJsonFiles(
   io: Io,
   config: Ctx['config'],
 ): Effect.Effect<
-  never,
-  NoSourcesFoundError | GlobError | ReadFileError | JsonParseError,
-  PackageJsonFile[]
+  PackageJsonFile[],
+  NoSourcesFoundError | GlobError | ReadFileError | JsonParseError
 > {
   return pipe(
     getFilePaths(io, config),

@@ -9,7 +9,7 @@ class ReadYamlFileError extends Data.TaggedClass('ReadYamlFileError')<{
 export function readYamlFileSync<T = unknown>(
   io: Io,
   filePath: string,
-): Effect.Effect<never, ReadYamlFileError, T> {
+): Effect.Effect<T, ReadYamlFileError> {
   return Effect.try({
     try: () => io.readYamlFile.sync(filePath),
     catch: (err) => new ReadYamlFileError({ filePath, error: String(err) }),

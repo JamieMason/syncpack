@@ -50,7 +50,7 @@ export class PackageJsonFile {
     this.name = jsonFile.contents.name;
   }
 
-  getInstances(enabledTypes: Strategy.Any[]): Effect.Effect<never, never, Instance[]> {
+  getInstances(enabledTypes: Strategy.Any[]): Effect.Effect<Instance[]> {
     if (!this._instances) {
       return pipe(
         Effect.all(

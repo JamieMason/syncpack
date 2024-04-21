@@ -22,7 +22,7 @@ export class NoSourcesFoundError extends Data.TaggedClass('NoSourcesFoundError')
 export function getFilePaths(
   io: Io,
   config: Ctx['config'],
-): Effect.Effect<never, GlobError | NoSourcesFoundError, string[]> {
+): Effect.Effect<string[], GlobError | NoSourcesFoundError> {
   return pipe(
     Effect.Do,
     Effect.bind('patterns', () => getPatterns(io, config)),

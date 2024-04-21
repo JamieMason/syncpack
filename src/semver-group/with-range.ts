@@ -26,7 +26,7 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
     return true;
   }
 
-  getFixed(specifier: Specifier.Any): Effect.Effect<never, NonSemverError, Specifier.Any> {
+  getFixed(specifier: Specifier.Any): Effect.Effect<Specifier.Any, NonSemverError> {
     return pipe(
       specifier.getSemver(),
       Effect.map((semver) => setSemverRange(this.config.range, semver)),
@@ -40,11 +40,7 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
 
   inspect(
     instance: Instance,
-  ): Effect.Effect<
-    never,
-    never,
-    Report.UnsupportedMismatch | Report.SemverRangeMismatch | Report.Valid
-  > {
+  ): Effect.Effect<Report.UnsupportedMismatch | Report.SemverRangeMismatch | Report.Valid> {
     const current = Specifier.create(instance, instance.rawSpecifier.raw);
     return pipe(
       this.getFixed(current),

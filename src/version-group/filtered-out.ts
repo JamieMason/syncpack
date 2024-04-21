@@ -30,7 +30,7 @@ export class FilteredOutVersionGroup extends Data.TaggedClass('FilteredOut')<{
     return instance.name.search(new RegExp(this.filter)) === -1;
   }
 
-  inspectAll(): Effect.Effect<never, never, Report.Version.Group[]> {
+  inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.succeed(
       Object.entries(groupBy('name', this.instances)).map(([name, instances]) => ({
         name,

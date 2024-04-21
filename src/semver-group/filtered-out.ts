@@ -35,7 +35,7 @@ export class FilteredOutSemverGroup extends Data.TaggedClass('FilteredOut')<{
     return instance.name.search(new RegExp(this.filter)) === -1;
   }
 
-  getFixed(specifier: Specifier.Any): Effect.Effect<never, NonSemverError, Specifier.Any> {
+  getFixed(specifier: Specifier.Any): Effect.Effect<Specifier.Any, NonSemverError> {
     return Effect.succeed(specifier);
   }
 
@@ -43,7 +43,7 @@ export class FilteredOutSemverGroup extends Data.TaggedClass('FilteredOut')<{
     return Effect.all(this.instances.map((instance) => this.inspect(instance)));
   }
 
-  inspect(instance: Instance): Effect.Effect<never, never, Report.FilteredOut> {
+  inspect(instance: Instance): Effect.Effect<Report.FilteredOut> {
     return Effect.succeed(new Report.FilteredOut(instance));
   }
 }

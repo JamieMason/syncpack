@@ -8,7 +8,7 @@ interface LernaJson {
   packages?: string[];
 }
 
-export function getLernaPatterns(io: Io): Effect.Effect<never, never, O.Option<string[]>> {
+export function getLernaPatterns(io: Io): Effect.Effect<O.Option<string[]>> {
   return pipe(
     readJsonFileSync<LernaJson>(io, join(io.process.cwd(), 'lerna.json')),
     Effect.map((file) =>

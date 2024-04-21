@@ -1,7 +1,7 @@
 import chalk from 'chalk-template';
 import { Effect, Logger, LogLevel } from 'effect';
 
-export function withLogger(program: Effect.Effect<never, never, unknown>) {
+export function withLogger(program: Effect.Effect<unknown>) {
   const logger = Logger.make(({ logLevel, message }) => {
     if (logLevel === LogLevel.Info) {
       globalThis.console.info(message);

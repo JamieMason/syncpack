@@ -8,7 +8,7 @@ interface PnpmWorkspace {
   packages?: string[];
 }
 
-export function getPnpmPatterns(io: Io): Effect.Effect<never, never, O.Option<string[]>> {
+export function getPnpmPatterns(io: Io): Effect.Effect<O.Option<string[]>> {
   return pipe(
     // packages:
     //   - "packages/**"

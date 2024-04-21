@@ -9,7 +9,7 @@ class AskForChoiceError extends Data.TaggedClass('AskForChoiceError')<{
 export function askForChoice(opts: {
   message: string;
   choices: string[];
-}): Effect.Effect<Io, AskForChoiceError, string> {
+}): Effect.Effect<string, AskForChoiceError, Io> {
   return pipe(
     IoTag,
     Effect.flatMap((io) =>

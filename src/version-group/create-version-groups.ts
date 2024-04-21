@@ -15,9 +15,9 @@ import { StandardVersionGroup } from './standard.js';
 
 export function createVersionGroups(
   ctx: Ctx,
-): Effect.Effect<never, VersionGroup.ConfigError, VersionGroup.Any[]> {
+): Effect.Effect<VersionGroup.Any[], VersionGroup.ConfigError> {
   const { rcFile } = ctx.config;
-  const versionGroups: Effect.Effect<never, VersionGroup.ConfigError, VersionGroup.Any>[] = [
+  const versionGroups: Effect.Effect<VersionGroup.Any, VersionGroup.ConfigError>[] = [
     Effect.succeed(new FilteredOutVersionGroup(ctx)),
   ];
 

@@ -38,7 +38,7 @@ export class Instance {
   }
 
   /** Mutate the package.json file in memory with the latest version specifier */
-  write(rawSpecifier: string | Delete): Effect.Effect<never, never, PackageJsonFile> {
+  write(rawSpecifier: string | Delete): Effect.Effect<PackageJsonFile> {
     this.rawSpecifier = Specifier.create(this, rawSpecifier);
     return this.strategy.write(this.packageJsonFile, [this.name, this.rawSpecifier.raw]);
   }

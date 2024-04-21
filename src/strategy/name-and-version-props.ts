@@ -20,7 +20,7 @@ export class NameAndVersionPropsStrategy {
     this.namePath = namePath;
   }
 
-  read(file: PackageJsonFile): Effect.Effect<never, never, [string, string][]> {
+  read(file: PackageJsonFile): Effect.Effect<[string, string][]> {
     return pipe(
       Effect.Do,
       // get the name prop
@@ -59,7 +59,7 @@ export class NameAndVersionPropsStrategy {
   write(
     file: PackageJsonFile,
     [, version]: [string, string | Delete],
-  ): Effect.Effect<never, never, PackageJsonFile> {
+  ): Effect.Effect<PackageJsonFile> {
     const path = this.path;
     const { contents } = file.jsonFile;
     const isNestedPath = path.includes('.');

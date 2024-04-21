@@ -21,7 +21,7 @@ export function getInstances(
   ctx: Ctx,
   io: Io,
   errorHandlers: ErrorHandlers,
-): Effect.Effect<never, never, Instances> {
+): Effect.Effect<Instances> {
   const exitOnError = Effect.flatMap(() => Effect.failSync(() => io.process.exit(1)));
   return pipe(
     Effect.Do,

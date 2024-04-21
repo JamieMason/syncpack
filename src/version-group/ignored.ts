@@ -21,7 +21,7 @@ export class IgnoredVersionGroup extends Data.TaggedClass('Ignored')<{
     return true;
   }
 
-  inspectAll(): Effect.Effect<never, never, Report.Version.Group[]> {
+  inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.succeed(
       Object.entries(groupBy('name', this.instances)).map(([name, instances]) => ({
         name,

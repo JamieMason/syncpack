@@ -18,7 +18,7 @@ export class UnnamedVersionStringStrategy {
     this.path = path;
   }
 
-  read(file: PackageJsonFile): Effect.Effect<never, never, [string, string][]> {
+  read(file: PackageJsonFile): Effect.Effect<[string, string][]> {
     return pipe(
       // get version prop
       getNonEmptyStringProp(this.path, file),
@@ -40,7 +40,7 @@ export class UnnamedVersionStringStrategy {
   write(
     file: PackageJsonFile,
     [, version]: [string, string | Delete],
-  ): Effect.Effect<never, never, PackageJsonFile> {
+  ): Effect.Effect<PackageJsonFile> {
     const { contents } = file.jsonFile;
     const isNestedPath = this.path.includes('.');
     const nextValue = version === DELETE ? undefined : version;

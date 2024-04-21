@@ -6,7 +6,7 @@ import type { Io } from '../../io/index.js';
 import { readJsonFileSync } from '../../io/read-json-file-sync.js';
 import type { PackageJson } from '../package-json-file.js';
 
-export function getYarnPatterns(io: Io): Effect.Effect<never, never, O.Option<string[]>> {
+export function getYarnPatterns(io: Io): Effect.Effect<O.Option<string[]>> {
   return pipe(
     readJsonFileSync<PackageJson>(io, join(io.process.cwd(), 'package.json')),
     Effect.map((file) =>

@@ -22,7 +22,7 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
     return true;
   }
 
-  inspectAll(): Effect.Effect<never, never, Report.Version.Group[]> {
+  inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.all(
       Object.entries(groupBy('name', this.instances)).flatMap(([name, instances]) =>
         pipe(
@@ -118,7 +118,7 @@ function findSnappedToInstance(
   name: string,
   snapTo: string[],
   instances: Instance[],
-): Effect.Effect<never, string, Instance> {
+): Effect.Effect<Instance, string> {
   for (const instance of instances) {
     if (snapTo.includes(instance.pkgName) && instance.rawSpecifier.raw) {
       return pipe(

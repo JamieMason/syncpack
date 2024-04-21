@@ -10,7 +10,7 @@ export function get<
 >(
   obj: T,
   prop1: P1
-): Either.Either<Error, NonNullable<T>[P1]>;
+): Either.Either<NonNullable<T>[P1], Error>;
 
 // prettier-ignore
 export function get<
@@ -21,7 +21,7 @@ export function get<
   obj: T,
   prop1: P1,
   prop2: P2
-): Either.Either<Error, NonNullable<NonNullable<T>[P1]>[P2]>;
+): Either.Either<NonNullable<NonNullable<T>[P1]>[P2], Error>;
 
 // prettier-ignore
 export function get<
@@ -34,7 +34,7 @@ export function get<
   prop1: P1,
   prop2: P2,
   prop3: P3
-): Either.Either<Error, NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>;
+): Either.Either<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3], Error>;
 
 // prettier-ignore
 export function get<
@@ -49,7 +49,7 @@ export function get<
   prop2: P2,
   prop3: P3,
   prop4: P4
-): Either.Either<Error, NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>;
+): Either.Either<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4], Error>;
 
 // prettier-ignore
 export function get<
@@ -66,7 +66,7 @@ export function get<
   prop3: P3,
   prop4: P4,
   prop5: P5
-): Either.Either<Error, NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>;
+): Either.Either<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5], Error>;
 
 // prettier-ignore
 export function get<
@@ -85,7 +85,7 @@ export function get<
   prop4: P4,
   prop5: P5,
   prop6: P6
-): Either.Either<Error, NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6]>;
+): Either.Either<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6], Error>;
 
 // prettier-ignore
 export function get<
@@ -106,7 +106,7 @@ export function get<
   prop5: P5,
   prop6: P6,
   prop7: P7
-): Either.Either<Error, NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6]>[P7]>;
+): Either.Either<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6]>[P7], Error>;
 
 // prettier-ignore
 export function get<
@@ -129,7 +129,7 @@ export function get<
   prop6: P6,
   prop7: P7,
   prop8: P8
-): Either.Either<Error, NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6]>[P7]>[P8]>;
+): Either.Either<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6]>[P7]>[P8], Error>;
 
 // prettier-ignore
 export function get<
@@ -154,16 +154,16 @@ export function get<
   prop7: P7,
   prop8: P8,
   prop9: P9
-): Either.Either<Error, NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6]>[P7]>[P8]>[P9]>;
+): Either.Either<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<NonNullable<T>[P1]>[P2]>[P3]>[P4]>[P5]>[P6]>[P7]>[P8]>[P9], Error>;
 
-export function get<T>(obj: T, ...props: any[]): Either.Either<Error, unknown>;
+export function get<T>(obj: T, ...props: any[]): Either.Either<unknown, Error>;
 
-export function get(origin: any, ...props: any[]): Either.Either<Error, unknown> {
+export function get(origin: any, ...props: any[]): Either.Either<unknown, Error> {
   return isReadable(origin) ? props.reduce(getChild, origin) : ERR_UNREADABLE_ORIGIN(props, origin);
 }
 
 /** Used internally by get to retrieve a single child property from a parent object. */
-function getChild(parent: unknown, prop: string): unknown | Either.Either<Error, never> {
+function getChild(parent: unknown, prop: string): unknown | Either.Either<never, Error> {
   // quit if any ancestor was already not found
   if (Either.isEither(parent) && Either.isLeft(parent)) return parent;
   // ensure we have a plain value and not an Ok

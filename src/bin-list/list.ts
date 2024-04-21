@@ -34,11 +34,7 @@ export function list({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
   );
 }
 
-export function pipeline(
-  ctx: Ctx,
-  io: Io,
-  errorHandlers: ErrorHandlers,
-): Effect.Effect<never, never, Ctx> {
+export function pipeline(ctx: Ctx, io: Io, errorHandlers: ErrorHandlers): Effect.Effect<Ctx> {
   return Effect.gen(function* ($) {
     const { versionGroups } = yield* $(getInstances(ctx, io, errorHandlers));
     let index = 0;
@@ -92,10 +88,7 @@ export function pipeline(
   });
 }
 
-const onGroupTag: Record<
-  VersionGroup.Any['_tag'],
-  (group: any) => Effect.Effect<never, never, void>
-> = {
+const onGroupTag: Record<VersionGroup.Any['_tag'], (group: any) => Effect.Effect<void>> = {
   Banned(group: VersionGroup.Banned) {
     return Effect.gen(function* ($) {
       for (const groupReport of yield* $(group.inspectAll())) {
@@ -130,16 +123,16 @@ const onGroupTag: Record<
     });
   },
   Pinned(_group: VersionGroup.Pinned) {
-    return Effect.unit;
+    return Effect.void;
   },
   SameRange(_group: VersionGroup.SameRange) {
-    return Effect.unit;
+    return Effect.void;
   },
   SnappedTo(_group: VersionGroup.SnappedTo) {
-    return Effect.unit;
+    return Effect.void;
   },
   Standard(_group: VersionGroup.Standard) {
-    return Effect.unit;
+    return Effect.void;
   },
 };
 

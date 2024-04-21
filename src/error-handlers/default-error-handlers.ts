@@ -14,7 +14,7 @@ import type { WriteFileError } from '../io/write-file-sync.js';
 import type { SemverGroup } from '../semver-group/index.js';
 import type { VersionGroup } from '../version-group/index.js';
 
-type R = Effect.Effect<never, never, void>;
+type R = Effect.Effect<void>;
 
 export interface ErrorHandlers {
   // getInstances

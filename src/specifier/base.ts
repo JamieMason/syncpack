@@ -41,7 +41,7 @@ export class BaseSpecifier<T extends NpmPackageArgResult | unknown> {
    * Parse the raw version specifier using
    * https://github.com/npm/npm-package-arg
    */
-  protected parse(): Effect.Effect<never, unknown, T> {
+  protected parse(): Effect.Effect<T, unknown> {
     const name = this.instance.name;
     const raw = this.raw;
     const packageJsonFile = this.instance.packageJsonFile;
@@ -56,15 +56,12 @@ export class BaseSpecifier<T extends NpmPackageArgResult | unknown> {
   }
 
   /** Return the version portion if it is valid semver */
-  getSemver(this: Specifier.Any): Effect.Effect<never, NonSemverError, string> {
+  getSemver(this: Specifier.Any): Effect.Effect<string, NonSemverError> {
     return NonSemverError.asEffect(this);
   }
 
   /** Get a new `Specifier` from the given semver version applied to this one */
-  setSemver(
-    this: Specifier.Any,
-    _version: string,
-  ): Effect.Effect<never, NonSemverError, Specifier.Any> {
+  setSemver(this: Specifier.Any, _version: string): Effect.Effect<Specifier.Any, NonSemverError> {
     return NonSemverError.asEffect(this);
   }
 

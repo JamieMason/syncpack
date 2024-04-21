@@ -26,7 +26,7 @@ export class JsonFile<T> extends Data.TaggedClass('JsonFile')<{
 export function readJsonFileSync<T>(
   io: Io,
   filePath: string,
-): Effect.Effect<never, ReadFileError | JsonParseError, JsonFile<T>> {
+): Effect.Effect<JsonFile<T>, ReadFileError | JsonParseError> {
   return pipe(
     Effect.Do,
     Effect.bind('json', () => readFileSync(io, filePath)),

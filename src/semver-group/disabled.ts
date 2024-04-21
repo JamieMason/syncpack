@@ -28,7 +28,7 @@ export class DisabledSemverGroup extends Data.TaggedClass('Disabled')<{
     return true;
   }
 
-  getFixed(specifier: Specifier.Any): Effect.Effect<never, NonSemverError, Specifier.Any> {
+  getFixed(specifier: Specifier.Any): Effect.Effect<Specifier.Any, NonSemverError> {
     return Effect.succeed(specifier);
   }
 
@@ -36,7 +36,7 @@ export class DisabledSemverGroup extends Data.TaggedClass('Disabled')<{
     return Effect.all(this.instances.map((instance) => this.inspect(instance)));
   }
 
-  inspect(instance: Instance): Effect.Effect<never, never, Report.Disabled> {
+  inspect(instance: Instance): Effect.Effect<Report.Disabled> {
     return Effect.succeed(new Report.Disabled(instance));
   }
 }

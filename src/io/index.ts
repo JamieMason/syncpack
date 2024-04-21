@@ -25,7 +25,7 @@ export interface Io {
   };
 }
 
-export const IoTag = Context.Tag<Io>();
+export const IoTag = Context.GenericTag<Io>('@services/IoTag');
 
 export const io: Io = {
   cosmiconfig: {
