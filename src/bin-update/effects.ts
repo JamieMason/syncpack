@@ -133,7 +133,7 @@ export const updateEffects = {
       fetchJson(`https://registry.npmjs.org/${instance.name}`),
       // parse and validate the specific data we expect
       Effect.flatMap(
-        Schema.parse(
+        Schema.decodeUnknownEither(
           Schema.Struct({
             'dist-tags': Schema.Struct({ latest: Schema.String }),
             'time': Schema.Record(Schema.String, Schema.String),

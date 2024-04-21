@@ -67,7 +67,7 @@ program
   .option(...option.indent)
   .parse(process.argv);
 
-Effect.runPromise<never, unknown>(
+Effect.runPromise(
   setSemverRanges({
     io,
     cli: {

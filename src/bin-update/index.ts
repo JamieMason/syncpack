@@ -51,7 +51,7 @@ program
   .option(...option.types)
   .parse(process.argv);
 
-Effect.runPromise<never, unknown>(
+Effect.runPromise(
   update(io, {
     configPath: program.opts().config,
     filter: program.opts().filter,

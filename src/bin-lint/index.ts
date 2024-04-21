@@ -36,7 +36,7 @@ showHelpOnError(program);
 
 program.option(...option.config).parse(process.argv);
 
-Effect.runPromise<never, unknown>(
+Effect.runPromise(
   lint({
     io,
     cli: {
