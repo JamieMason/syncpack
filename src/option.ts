@@ -1,4 +1,4 @@
-import chalk from 'chalk-template'
+import chalk from 'chalk-template';
 import { DEFAULT_CONFIG } from './constants.js';
 
 export const option = {
