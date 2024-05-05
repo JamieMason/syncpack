@@ -1,8 +1,8 @@
 import { Data, Effect } from 'effect';
-import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import { groupBy } from './lib/group-by';
+import type { VersionGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import { groupBy } from './lib/group-by.js';
 
 export class IgnoredVersionGroup extends Data.TaggedClass('Ignored')<{
   config: VersionGroupConfig.Ignored;
@@ -21,7 +21,7 @@ export class IgnoredVersionGroup extends Data.TaggedClass('Ignored')<{
     return true;
   }
 
-  inspectAll(): Effect.Effect<never, never, Report.Version.Group[]> {
+  inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.succeed(
       Object.entries(groupBy('name', this.instances)).map(([name, instances]) => ({
         name,

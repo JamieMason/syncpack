@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import type { SemverGroup } from '../semver-group';
-import type { VersionGroup } from '../version-group';
+import type { SemverGroup } from '../semver-group/index.js';
+import type { VersionGroup } from '../version-group/index.js';
 
 export function getSemverGroupHeader(input: { group: SemverGroup.Any; index: number }) {
   return getGroupHeader(input.group.config.label || `Semver Group ${input.index + 1}`);

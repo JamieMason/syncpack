@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { formatRepositoryUrl } from './format-repository-url';
+import { formatRepositoryUrl } from './format-repository-url.js';
 
 describe('formatRepositoryUrl', () => {
   test.each([

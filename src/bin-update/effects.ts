@@ -1,21 +1,21 @@
 import * as Schema from '@effect/schema/Schema';
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { Data, Effect, identity, pipe } from 'effect';
 import https from 'https';
-import ora from 'ora';
+import ora, { type Ora } from 'ora';
 import { EOL } from 'os';
 import prompts from 'prompts';
 import type { ReleaseType } from 'semver';
 import { diff } from 'semver';
-import gtr from 'semver/ranges/gtr';
-import { isArray } from 'tightrope/guard/is-array';
-import { isEmptyObject } from 'tightrope/guard/is-empty-object';
-import { ICON } from '../constants';
-import type { Instance } from '../get-instances/instance';
-import { formatRepositoryUrl } from '../lib/format-repository-url';
-import { RingBuffer } from '../lib/ring-buffer';
-import { setSemverRange } from '../lib/set-semver-range';
-import { Specifier } from '../specifier';
+import gtr from 'semver/ranges/gtr.js';
+import { isArray } from 'tightrope/guard/is-array.js';
+import { isEmptyObject } from 'tightrope/guard/is-empty-object.js';
+import { ICON } from '../constants.js';
+import type { Instance } from '../get-instances/instance.js';
+import { formatRepositoryUrl } from '../lib/format-repository-url.js';
+import { RingBuffer } from '../lib/ring-buffer.js';
+import { setSemverRange } from '../lib/set-semver-range.js';
+import { Specifier } from '../specifier/index.js';
 
 type ReleasesByType = Record<ReleaseType, Releases[]>;
 
@@ -43,7 +43,7 @@ class NpmRegistryError extends Data.TaggedClass('NpmRegistryError')<{
 }> {}
 
 /** the API client for the terminal spinner */
-let spinner: ora.Ora | null = null;
+let spinner: Ora | null = null;
 
 /** how many HTTP requests have been sent */
 let fetchedCount = 0;
@@ -76,7 +76,7 @@ export const updateEffects = {
   onFetchAllStart() {
     if (!spinner) spinner = ora().start();
     fetchedCount = 0;
-    return Effect.unit;
+    return Effect.void;
   },
   onFetchStart(instance: Instance, totalCount: number) {
     inFlight.add(format(instance));
@@ -90,7 +90,7 @@ export const updateEffects = {
       const suffixText = sortedProgress.join(indent);
       spinner.text = chalk`${outdatedCount} updates found in ${fetchedCount}/${totalCount} dependencies${indent}${suffixText}`;
     }
-    return Effect.unit;
+    return Effect.void;
   },
   onFetchEnd(instance: Instance, versions?: Releases['versions']) {
     inFlight.delete(format(instance));
@@ -105,12 +105,12 @@ export const updateEffects = {
         mostRecent.push(chalk`{green ${instance.name}}`);
       }
     }
-    return Effect.unit;
+    return Effect.void;
   },
   /** After checking the registry, store this instance known to be up to date */
   onUpToDate(instance: Instance) {
     mostRecent.push(chalk`{green ${instance.name}}`);
-    return Effect.unit;
+    return Effect.void;
   },
   /** After checking the registry, store this instance known to have newer versions available */
   onOutdated(instance: Instance, latest: string) {
@@ -118,30 +118,28 @@ export const updateEffects = {
     mostRecent.push(
       chalk`${instance.name} {gray {red ${instance.rawSpecifier.raw}} ${ICON.rightArrow}} {green ${latest}}`,
     );
-    return Effect.unit;
+    return Effect.void;
   },
   /** As the last request completes, remove the progress information */
   onFetchAllEnd() {
     if (spinner) spinner.stop();
     spinner = null;
     fetchedCount = 0;
-    return Effect.unit;
+    return Effect.void;
   },
   /** Fetch available versions for a given package from the npm registry */
-  fetchLatestVersions(
-    instance: Instance,
-  ): Effect.Effect<never, HttpError | NpmRegistryError, Releases> {
+  fetchLatestVersions(instance: Instance): Effect.Effect<Releases, HttpError | NpmRegistryError> {
     return pipe(
       fetchJson(`https://registry.npmjs.org/${instance.name}`),
       // parse and validate the specific data we expect
       Effect.flatMap(
-        Schema.parse(
-          Schema.struct({
-            'dist-tags': Schema.struct({ latest: Schema.string }),
-            'time': Schema.record(Schema.string, Schema.string),
-            'homepage': Schema.optional(Schema.string),
+        Schema.decodeUnknownEither(
+          Schema.Struct({
+            'dist-tags': Schema.Struct({ latest: Schema.String }),
+            'time': Schema.Record(Schema.String, Schema.String),
+            'homepage': Schema.optional(Schema.String),
             'repository': Schema.optional(
-              Schema.union(Schema.string, Schema.struct({ url: Schema.optional(Schema.string) })),
+              Schema.Union(Schema.String, Schema.Struct({ url: Schema.optional(Schema.String) })),
             ),
           }),
         ),
@@ -168,7 +166,7 @@ export const updateEffects = {
     );
   },
   /** Given responses from npm, ask the user which they want */
-  promptForUpdates(outdated: Releases[]): Effect.Effect<never, PromptCancelled, void> {
+  promptForUpdates(outdated: Releases[]): Effect.Effect<void, PromptCancelled> {
     return pipe(
       Effect.Do,
       Effect.bind('releasesByType', () => groupByReleaseType(outdated)),
@@ -235,7 +233,7 @@ export const updateEffects = {
               Effect.catchTag('NonSemverError', Effect.logError),
             ),
           ),
-          Effect.flatMap(() => Effect.unit),
+          Effect.flatMap(() => Effect.void),
         ),
       ),
     );
@@ -245,7 +243,7 @@ export const updateEffects = {
 function promptForReleaseType(
   releaseType: ReleaseType,
   doState: { releasesByType: ReleasesByType; releaseTypeAnswers: string[] },
-): Effect.Effect<never, PromptCancelled, Releases[]> {
+): Effect.Effect<Releases[], PromptCancelled> {
   const { releasesByType, releaseTypeAnswers } = doState;
   const prop = `${releaseType}Answers`;
   const releases = releasesByType[releaseType];
@@ -300,7 +298,7 @@ function promptForReleaseType(
     : Effect.succeed([]);
 }
 
-function groupByReleaseType(releases: Releases[]): Effect.Effect<never, never, ReleasesByType> {
+function groupByReleaseType(releases: Releases[]): Effect.Effect<ReleasesByType> {
   return Effect.succeed(
     releases.reduce(
       (releasesByType: ReleasesByType, release) => {
@@ -330,9 +328,9 @@ function groupByReleaseType(releases: Releases[]): Effect.Effect<never, never, R
 }
 
 // @TODO: add a cache with a short TTL on disk in $TMPDIR
-function fetchJson(url: string): Effect.Effect<never, HttpError | NpmRegistryError, unknown> {
+function fetchJson(url: string): Effect.Effect<unknown, HttpError | NpmRegistryError> {
   return pipe(
-    Effect.async<never, HttpError, string>((resume) => {
+    Effect.async<string, HttpError>((resume) => {
       // setTimeout(
       //   () => {
       //     resume(

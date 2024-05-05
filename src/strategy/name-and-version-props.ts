@@ -1,10 +1,10 @@
 import { Effect, identity, Option, pipe } from 'effect';
-import { isObject } from 'tightrope/guard/is-object';
-import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import { get } from '../lib/get';
-import type { Delete } from '../version-group/lib/delete';
-import { DELETE } from '../version-group/lib/delete';
-import { getNonEmptyStringProp } from './lib/get-non-empty-string-prop';
+import { isObject } from 'tightrope/guard/is-object.js';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
+import { get } from '../lib/get.js';
+import type { Delete } from '../version-group/lib/delete.js';
+import { DELETE } from '../version-group/lib/delete.js';
+import { getNonEmptyStringProp } from './lib/get-non-empty-string-prop.js';
 
 const getOptionOfObject = Option.liftPredicate(isObject<any>);
 
@@ -20,7 +20,7 @@ export class NameAndVersionPropsStrategy {
     this.namePath = namePath;
   }
 
-  read(file: PackageJsonFile): Effect.Effect<never, never, [string, string][]> {
+  read(file: PackageJsonFile): Effect.Effect<[string, string][]> {
     return pipe(
       Effect.Do,
       // get the name prop
@@ -59,7 +59,7 @@ export class NameAndVersionPropsStrategy {
   write(
     file: PackageJsonFile,
     [, version]: [string, string | Delete],
-  ): Effect.Effect<never, never, PackageJsonFile> {
+  ): Effect.Effect<PackageJsonFile> {
     const path = this.path;
     const { contents } = file.jsonFile;
     const isNestedPath = path.includes('.');

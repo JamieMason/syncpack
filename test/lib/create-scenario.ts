@@ -1,23 +1,23 @@
 import { Effect } from 'effect';
 import type * as fs from 'fs';
-import * as globby from 'globby';
+import { globbySync } from 'globby';
 import { createFsFromVolume, Volume } from 'memfs';
 import { EOL } from 'os';
 import type { Mock } from 'vitest';
 import { vi } from 'vitest';
-import type { CliConfig } from '../../src/config/types';
-import type { ErrorHandlers } from '../../src/error-handlers/default-error-handlers';
-import { defaultErrorHandlers } from '../../src/error-handlers/default-error-handlers';
-import { getContext } from '../../src/get-context';
-import { getInstances } from '../../src/get-instances';
-import { getPackageJsonFiles } from '../../src/get-package-json-files';
+import type { CliConfig } from '../../src/config/types.js';
+import type { ErrorHandlers } from '../../src/error-handlers/default-error-handlers.js';
+import { defaultErrorHandlers } from '../../src/error-handlers/default-error-handlers.js';
+import { getContext } from '../../src/get-context/index.js';
+import { getInstances } from '../../src/get-instances/index.js';
+import { getPackageJsonFiles } from '../../src/get-package-json-files/index.js';
 import type {
   PackageJson,
   PackageJsonFile,
-} from '../../src/get-package-json-files/package-json-file';
-import type { Io } from '../../src/io';
-import { newlines } from '../../src/io/to-json';
-import type { Report } from '../../src/report';
+} from '../../src/get-package-json-files/package-json-file.js';
+import type { Io } from '../../src/io/index.js';
+import { newlines } from '../../src/io/to-json.js';
+import type { Report } from '../../src/report.js';
 
 type NodeFs = typeof fs;
 
@@ -176,7 +176,7 @@ const mock = {
       },
       fs: fs,
       globby: {
-        sync: vi.fn(globby.sync).mockName('globby.sync') as any,
+        sync: vi.fn(globbySync).mockName('globby.sync') as any,
       },
       process: {
         cwd: () => cwd,

@@ -1,5 +1,5 @@
-import type { CUSTOM_TYPES } from '../constants';
-import type { Specifier } from '../specifier';
+import type { CUSTOM_TYPES } from '../constants.js';
+import type { Specifier } from '../specifier/index.js';
 
 /**
  * Aliases for semver range formats supported by syncpack
@@ -95,10 +95,6 @@ export namespace VersionGroupConfig {
 
   export interface SameRange extends GroupConfig {
     policy: 'sameRange';
-  }
-
-  export interface SnappedTo extends GroupConfig {
-    snapTo: string[];
   }
 
   export interface Standard extends GroupConfig {

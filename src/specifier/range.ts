@@ -1,8 +1,8 @@
 import { Effect, pipe } from 'effect';
-import { Specifier } from '.';
-import { BaseSpecifier } from './base';
-import { NonSemverError } from './lib/non-semver-error';
-import type { SpecificRegistryResult } from './lib/specific-registry-result';
+import { BaseSpecifier } from './base.js';
+import { Specifier } from './index.js';
+import { NonSemverError } from './lib/non-semver-error.js';
+import type { SpecificRegistryResult } from './lib/specific-registry-result.js';
 
 type T = SpecificRegistryResult<'range'>;
 
@@ -16,7 +16,7 @@ export class RangeSpecifier extends BaseSpecifier<T> {
   name = 'range' as const;
 
   /** Return the semver version including the range */
-  getSemver(): Effect.Effect<never, NonSemverError, string> {
+  getSemver(): Effect.Effect<string, NonSemverError> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),
@@ -25,7 +25,7 @@ export class RangeSpecifier extends BaseSpecifier<T> {
   }
 
   /** Get a new `Specifier` from the given semver version applied to this one */
-  setSemver(version: string): Effect.Effect<never, never, Specifier.Any> {
+  setSemver(version: string): Effect.Effect<Specifier.Any> {
     return Effect.succeed(Specifier.create(this.instance, version));
   }
 }

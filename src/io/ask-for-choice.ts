@@ -1,6 +1,6 @@
 import { Data, Effect, pipe } from 'effect';
-import type { Io } from '.';
-import { IoTag } from '.';
+import type { Io } from './index.js';
+import { IoTag } from './index.js';
 
 class AskForChoiceError extends Data.TaggedClass('AskForChoiceError')<{
   readonly error: string;
@@ -9,7 +9,7 @@ class AskForChoiceError extends Data.TaggedClass('AskForChoiceError')<{
 export function askForChoice(opts: {
   message: string;
   choices: string[];
-}): Effect.Effect<Io, AskForChoiceError, string> {
+}): Effect.Effect<string, AskForChoiceError, Io> {
   return pipe(
     IoTag,
     Effect.flatMap((io) =>

@@ -1,8 +1,8 @@
 import { Effect, pipe } from 'effect';
-import { IoTag, type Io } from '.';
-import type { Ctx } from '../get-context';
+import type { Ctx } from '../get-context/index.js';
+import { IoTag, type Io } from './index.js';
 
-export function exitIfInvalid(ctx: Ctx): Effect.Effect<Io, never, Ctx> {
+export function exitIfInvalid(ctx: Ctx): Effect.Effect<Ctx, never, Io> {
   return pipe(
     IoTag,
     Effect.tap((io) =>

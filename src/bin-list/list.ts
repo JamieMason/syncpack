@@ -1,22 +1,22 @@
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { Context, Effect, pipe } from 'effect';
 import { EOL } from 'os';
-import { CliConfigTag } from '../config/tag';
-import { type CliConfig } from '../config/types';
-import { ICON } from '../constants';
-import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
-import type { Ctx } from '../get-context';
-import { getContext } from '../get-context';
-import { getInstances } from '../get-instances';
-import type { Io } from '../io';
-import { IoTag } from '../io';
-import { exitIfInvalid } from '../io/exit-if-invalid';
-import { getVersionGroupHeader } from '../lib/get-group-header';
-import { padStart } from '../lib/pad-start';
-import { withLogger } from '../lib/with-logger';
-import type { Report } from '../report';
-import type { VersionGroup } from '../version-group';
+import { CliConfigTag } from '../config/tag.js';
+import { type CliConfig } from '../config/types.js';
+import { ICON } from '../constants.js';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import type { Ctx } from '../get-context/index.js';
+import { getContext } from '../get-context/index.js';
+import { getInstances } from '../get-instances/index.js';
+import { exitIfInvalid } from '../io/exit-if-invalid.js';
+import type { Io } from '../io/index.js';
+import { IoTag } from '../io/index.js';
+import { getVersionGroupHeader } from '../lib/get-group-header.js';
+import { padStart } from '../lib/pad-start.js';
+import { withLogger } from '../lib/with-logger.js';
+import type { Report } from '../report.js';
+import type { VersionGroup } from '../version-group/index.js';
 
 interface Input {
   io: Io;
@@ -34,11 +34,7 @@ export function list({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
   );
 }
 
-export function pipeline(
-  ctx: Ctx,
-  io: Io,
-  errorHandlers: ErrorHandlers,
-): Effect.Effect<never, never, Ctx> {
+export function pipeline(ctx: Ctx, io: Io, errorHandlers: ErrorHandlers): Effect.Effect<Ctx> {
   return Effect.gen(function* ($) {
     const { versionGroups } = yield* $(getInstances(ctx, io, errorHandlers));
     let index = 0;
@@ -92,10 +88,7 @@ export function pipeline(
   });
 }
 
-const onGroupTag: Record<
-  VersionGroup.Any['_tag'],
-  (group: any) => Effect.Effect<never, never, void>
-> = {
+const onGroupTag: Record<VersionGroup.Any['_tag'], (group: any) => Effect.Effect<void>> = {
   Banned(group: VersionGroup.Banned) {
     return Effect.gen(function* ($) {
       for (const groupReport of yield* $(group.inspectAll())) {
@@ -130,16 +123,16 @@ const onGroupTag: Record<
     });
   },
   Pinned(_group: VersionGroup.Pinned) {
-    return Effect.unit;
+    return Effect.void;
   },
   SameRange(_group: VersionGroup.SameRange) {
-    return Effect.unit;
+    return Effect.void;
   },
   SnappedTo(_group: VersionGroup.SnappedTo) {
-    return Effect.unit;
+    return Effect.void;
   },
   Standard(_group: VersionGroup.Standard) {
-    return Effect.unit;
+    return Effect.void;
   },
 };
 

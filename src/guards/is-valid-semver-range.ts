@@ -1,5 +1,5 @@
-import type { SemverRange } from '../config/types';
-import { RANGE } from '../constants';
+import type { SemverRange } from '../config/types.js';
+import { RANGE } from '../constants.js';
 
 /** @deprecated migrate to make better use of npm-package-arg */
 export function isValidSemverRange(value: unknown): value is SemverRange {

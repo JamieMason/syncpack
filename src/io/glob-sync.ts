@@ -1,11 +1,11 @@
 import { Data, Effect } from 'effect';
-import type { Io } from '.';
+import type { Io } from './index.js';
 
 export class GlobError extends Data.TaggedClass('GlobError')<{
   readonly error: string;
 }> {}
 
-export function globSync(io: Io, patterns: string[]): Effect.Effect<never, GlobError, string[]> {
+export function globSync(io: Io, patterns: string[]): Effect.Effect<string[], GlobError> {
   return Effect.try({
     try: () =>
       io.globby.sync(patterns, {

@@ -1,11 +1,11 @@
 import { Data } from 'effect';
-import type { BannedVersionGroup } from './banned';
-import type { FilteredOutVersionGroup } from './filtered-out';
-import type { IgnoredVersionGroup } from './ignored';
-import type { PinnedVersionGroup } from './pinned';
-import type { SameRangeVersionGroup } from './same-range';
-import type { SnappedToVersionGroup } from './snapped-to';
-import type { StandardVersionGroup } from './standard';
+import type { BannedVersionGroup } from './banned.js';
+import type { FilteredOutVersionGroup } from './filtered-out.js';
+import type { IgnoredVersionGroup } from './ignored.js';
+import type { PinnedVersionGroup } from './pinned.js';
+import type { SameRangeVersionGroup } from './same-range.js';
+import type { SnappedToVersionGroup } from './snapped-to.js';
+import type { StandardVersionGroup } from './standard.js';
 
 export namespace VersionGroup {
   export type Banned = BannedVersionGroup;

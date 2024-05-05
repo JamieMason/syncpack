@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { createScenario } from '../../test/lib/create-scenario';
+import { createScenario } from '../../test/lib/create-scenario.js';
 
 describe('supported version formats', () => {
   test.each([

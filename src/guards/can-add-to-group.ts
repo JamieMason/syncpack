@@ -1,9 +1,9 @@
 import { minimatch } from 'minimatch';
-import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array';
-import type { Ctx } from '../get-context';
-import type { Instance } from '../get-instances/instance';
-import type { SemverGroup } from '../semver-group';
-import type { VersionGroup } from '../version-group';
+import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array.js';
+import type { Ctx } from '../get-context/index.js';
+import type { Instance } from '../get-instances/instance.js';
+import type { SemverGroup } from '../semver-group/index.js';
+import type { VersionGroup } from '../version-group/index.js';
 
 export function canAddToGroup(
   packageJsonFilesByName: Ctx['packageJsonFilesByName'],

@@ -1,7 +1,7 @@
 import { Effect, Option as O, pipe } from 'effect';
 import { expect, it } from 'vitest';
-import { createScenario, type TestScenario } from '../../../test/lib/create-scenario';
-import { getPnpmPatterns } from './get-pnpm-patterns';
+import { createScenario, type TestScenario } from '../../../test/lib/create-scenario.js';
+import { getPnpmPatterns } from './get-pnpm-patterns.js';
 
 async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();

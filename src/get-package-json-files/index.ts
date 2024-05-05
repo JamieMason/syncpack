@@ -1,23 +1,22 @@
 import { Effect, pipe } from 'effect';
-import type { Ctx } from '../get-context';
-import type { Io } from '../io';
-import type { GlobError } from '../io/glob-sync';
-import type { ReadFileError } from '../io/read-file-sync';
-import type { JsonParseError } from '../io/read-json-file-sync';
-import { readJsonFileSync } from '../io/read-json-file-sync';
-import type { NoSourcesFoundError } from './get-file-paths';
-import { getFilePaths } from './get-file-paths';
-import type { PackageJson } from './package-json-file';
-import { PackageJsonFile } from './package-json-file';
+import type { Ctx } from '../get-context/index.js';
+import type { GlobError } from '../io/glob-sync.js';
+import type { Io } from '../io/index.js';
+import type { ReadFileError } from '../io/read-file-sync.js';
+import type { JsonParseError } from '../io/read-json-file-sync.js';
+import { readJsonFileSync } from '../io/read-json-file-sync.js';
+import type { NoSourcesFoundError } from './get-file-paths.js';
+import { getFilePaths } from './get-file-paths.js';
+import type { PackageJson } from './package-json-file.js';
+import { PackageJsonFile } from './package-json-file.js';
 
 /** Create an API for every package.json file needed. */
 export function getPackageJsonFiles(
   io: Io,
   config: Ctx['config'],
 ): Effect.Effect<
-  never,
-  NoSourcesFoundError | GlobError | ReadFileError | JsonParseError,
-  PackageJsonFile[]
+  PackageJsonFile[],
+  NoSourcesFoundError | GlobError | ReadFileError | JsonParseError
 > {
   return pipe(
     getFilePaths(io, config),

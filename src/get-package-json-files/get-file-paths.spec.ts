@@ -1,9 +1,9 @@
 import { Effect, pipe } from 'effect';
 import { expect, it } from 'vitest';
-import type { TestScenario } from '../../test/lib/create-scenario';
-import { createScenario } from '../../test/lib/create-scenario';
-import { CWD } from '../constants';
-import { getFilePaths, NoSourcesFoundError } from './get-file-paths';
+import type { TestScenario } from '../../test/lib/create-scenario.js';
+import { createScenario } from '../../test/lib/create-scenario.js';
+import { CWD } from '../constants.js';
+import { getFilePaths, NoSourcesFoundError } from './get-file-paths.js';
 
 async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();

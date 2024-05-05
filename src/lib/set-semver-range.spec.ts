@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { SemverRange } from '../config/types';
-import { setSemverRange } from './set-semver-range';
+import type { SemverRange } from '../config/types.js';
+import { setSemverRange } from './set-semver-range.js';
 
 describe('setSemverRange', () => {
   describe('when the current value is Semver', () => {

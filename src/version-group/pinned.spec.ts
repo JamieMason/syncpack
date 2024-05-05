@@ -1,11 +1,11 @@
 import { Effect } from 'effect';
 import { describe, expect, it } from 'vitest';
-import { createScenario } from '../../test/lib/create-scenario';
-import { fixMismatches } from '../bin-fix-mismatches/fix-mismatches';
-import { lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges';
-import { lint } from '../bin-lint/lint';
-import { listMismatches } from '../bin-list-mismatches/list-mismatches';
-import { list } from '../bin-list/list';
+import { createScenario } from '../../test/lib/create-scenario.js';
+import { fixMismatches } from '../bin-fix-mismatches/fix-mismatches.js';
+import { lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges.js';
+import { lint } from '../bin-lint/lint.js';
+import { listMismatches } from '../bin-list-mismatches/list-mismatches.js';
+import { list } from '../bin-list/list.js';
 
 describe('matches', () => {
   describe('when pure semver', () => {

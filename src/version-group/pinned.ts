@@ -1,9 +1,9 @@
 import { Data, Effect, pipe } from 'effect';
-import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import { Specifier } from '../specifier';
-import { groupBy } from './lib/group-by';
+import type { VersionGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import { Specifier } from '../specifier/index.js';
+import { groupBy } from './lib/group-by.js';
 
 export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
   config: VersionGroupConfig.Pinned;
@@ -22,7 +22,7 @@ export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
     return true;
   }
 
-  inspectAll(): Effect.Effect<never, never, Report.Version.Group[]> {
+  inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.all(
       Object.entries(groupBy('name', this.instances)).map(([name, instances]) =>
         pipe(

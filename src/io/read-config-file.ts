@@ -1,21 +1,18 @@
-import type { CosmiconfigResult } from 'cosmiconfig/dist/types';
+import type { CosmiconfigResult } from 'cosmiconfig';
 import { Effect, Option, pipe } from 'effect';
 import { join } from 'path';
-import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object.js';
 import type { O } from 'ts-toolbelt';
-import type { Io } from '.';
-import type { RcConfig } from '../config/types';
-import type { PackageJson } from '../get-package-json-files/package-json-file';
-import { readJsonFileSync } from './read-json-file-sync';
+import type { RcConfig } from '../config/types.js';
+import type { PackageJson } from '../get-package-json-files/package-json-file.js';
+import type { Io } from './index.js';
+import { readJsonFileSync } from './read-json-file-sync.js';
 
 const getOptionOfNonEmptyObject = Option.liftPredicate(isNonEmptyObject<any>);
 
 type UnverifiedRcConfig = O.Partial<RcConfig, 'deep'>;
 
-export function readConfigFileSync(
-  io: Io,
-  configPath?: string,
-): Effect.Effect<never, never, UnverifiedRcConfig> {
+export function readConfigFile(io: Io, configPath?: string): Effect.Effect<UnverifiedRcConfig> {
   return pipe(
     Effect.try(() => io.cosmiconfig.cosmiconfig('syncpack')),
     Effect.flatMap((client) =>
@@ -34,7 +31,7 @@ export function readConfigFileSync(
  * Look for a .config.syncpack property in the root package.json.
  * @see https://github.com/JamieMason/syncpack/issues/86
  */
-function findConfigInPackageJson(io: Io): Effect.Effect<never, unknown, UnverifiedRcConfig> {
+function findConfigInPackageJson(io: Io): Effect.Effect<UnverifiedRcConfig, unknown> {
   return pipe(
     Effect.Do,
     Effect.bind('rcPath', () => Effect.succeed(join(io.process.cwd(), 'package.json'))),
@@ -53,7 +50,7 @@ function findConfigInPackageJson(io: Io): Effect.Effect<never, unknown, Unverifi
 /** Extract the value from a successful search by cosmiconfig */
 function getValueFromCosmiconfig(
   result: Exclude<CosmiconfigResult, null>,
-): Effect.Effect<never, unknown, UnverifiedRcConfig> {
+): Effect.Effect<UnverifiedRcConfig, unknown> {
   return pipe(
     Effect.succeed(result),
     Effect.tap((result) => Effect.logDebug(`cosmiconfig found ${result.filepath}`)),

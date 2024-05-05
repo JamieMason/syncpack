@@ -1,5 +1,5 @@
-import chalk from 'chalk';
-import { DEFAULT_CONFIG } from './constants';
+import chalk from 'chalk-template';
+import { DEFAULT_CONFIG } from './constants.js';
 
 export const option = {
   config: ['-c, --config <path>', 'path to a syncpack config file'],
@@ -15,7 +15,7 @@ export const option = {
     [] as string[],
   ],
   specs: [
-    '-s, --specs <names>',
+    '-S, --specs <names>',
     chalk`only include dependencies whose version specifier match these types (eg. {yellow specs=latest,range,workspace-protocol})`,
   ],
   types: [

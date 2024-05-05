@@ -1,5 +1,5 @@
-import { BaseSpecifier } from './base';
-import type { SpecificRegistryResult } from './lib/specific-registry-result';
+import { BaseSpecifier } from './base.js';
+import type { SpecificRegistryResult } from './lib/specific-registry-result.js';
 
 /**
  * @example "latest"

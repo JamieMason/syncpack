@@ -1,9 +1,9 @@
 import { Data, Effect, pipe } from 'effect';
-import type { VersionGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { Report } from '../report';
-import { Specifier } from '../specifier';
-import { groupBy } from './lib/group-by';
+import type { VersionGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { Report } from '../report.js';
+import { Specifier } from '../specifier/index.js';
+import { groupBy } from './lib/group-by.js';
 
 export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
   config: VersionGroupConfig.SnappedTo;
@@ -22,7 +22,7 @@ export class SnappedToVersionGroup extends Data.TaggedClass('SnappedTo')<{
     return true;
   }
 
-  inspectAll(): Effect.Effect<never, never, Report.Version.Group[]> {
+  inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.all(
       Object.entries(groupBy('name', this.instances)).flatMap(([name, instances]) =>
         pipe(
@@ -118,7 +118,7 @@ function findSnappedToInstance(
   name: string,
   snapTo: string[],
   instances: Instance[],
-): Effect.Effect<never, string, Instance> {
+): Effect.Effect<Instance, string> {
   for (const instance of instances) {
     if (snapTo.includes(instance.pkgName) && instance.rawSpecifier.raw) {
       return pipe(

@@ -1,9 +1,9 @@
 import { Effect, Option, pipe } from 'effect';
-import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object';
-import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import { get } from '../lib/get';
-import type { Delete } from '../version-group/lib/delete';
-import { DELETE } from '../version-group/lib/delete';
+import { isNonEmptyObject } from 'tightrope/guard/is-non-empty-object.js';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
+import { get } from '../lib/get.js';
+import type { Delete } from '../version-group/lib/delete.js';
+import { DELETE } from '../version-group/lib/delete.js';
 
 const getOptionOfNonEmptyObject = Option.liftPredicate(isNonEmptyObject<any>);
 
@@ -17,7 +17,7 @@ export class VersionsByNameStrategy {
     this.path = path;
   }
 
-  read(file: PackageJsonFile): Effect.Effect<never, never, [string, string][]> {
+  read(file: PackageJsonFile): Effect.Effect<[string, string][]> {
     return pipe(
       get(file.jsonFile.contents, ...this.path.split('.')),
       Effect.flatMap((value) => getOptionOfNonEmptyObject(value)),
@@ -35,7 +35,7 @@ export class VersionsByNameStrategy {
   write(
     file: PackageJsonFile,
     [name, version]: [string, string | Delete],
-  ): Effect.Effect<never, never, PackageJsonFile> {
+  ): Effect.Effect<PackageJsonFile> {
     const nextValue = version === DELETE ? undefined : version;
     return pipe(
       get(file.jsonFile.contents, ...this.path.split('.')),

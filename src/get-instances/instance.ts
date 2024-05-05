@@ -1,10 +1,10 @@
 import type { Effect } from 'effect';
-import type { Strategy } from '../config/get-custom-types';
-import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
-import type { SemverGroup } from '../semver-group';
-import { Specifier } from '../specifier';
-import type { VersionGroup } from '../version-group';
-import type { Delete } from '../version-group/lib/delete';
+import type { Strategy } from '../config/get-custom-types.js';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
+import type { SemverGroup } from '../semver-group/index.js';
+import { Specifier } from '../specifier/index.js';
+import type { VersionGroup } from '../version-group/index.js';
+import type { Delete } from '../version-group/lib/delete.js';
 
 export class Instance {
   /** The name of this dependency */
@@ -38,7 +38,7 @@ export class Instance {
   }
 
   /** Mutate the package.json file in memory with the latest version specifier */
-  write(rawSpecifier: string | Delete): Effect.Effect<never, never, PackageJsonFile> {
+  write(rawSpecifier: string | Delete): Effect.Effect<PackageJsonFile> {
     this.rawSpecifier = Specifier.create(this, rawSpecifier);
     return this.strategy.write(this.packageJsonFile, [this.name, this.rawSpecifier.raw]);
   }

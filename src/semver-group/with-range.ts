@@ -1,10 +1,10 @@
 import { Data, Effect, pipe } from 'effect';
-import type { SemverGroupConfig } from '../config/types';
-import type { Instance } from '../get-instances/instance';
-import { setSemverRange } from '../lib/set-semver-range';
-import { Report } from '../report';
-import { Specifier } from '../specifier';
-import type { NonSemverError } from '../specifier/lib/non-semver-error';
+import type { SemverGroupConfig } from '../config/types.js';
+import type { Instance } from '../get-instances/instance.js';
+import { setSemverRange } from '../lib/set-semver-range.js';
+import { Report } from '../report.js';
+import { Specifier } from '../specifier/index.js';
+import type { NonSemverError } from '../specifier/lib/non-semver-error.js';
 
 export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
   config: SemverGroupConfig.WithRange;
@@ -26,7 +26,7 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
     return true;
   }
 
-  getFixed(specifier: Specifier.Any): Effect.Effect<never, NonSemverError, Specifier.Any> {
+  getFixed(specifier: Specifier.Any): Effect.Effect<Specifier.Any, NonSemverError> {
     return pipe(
       specifier.getSemver(),
       Effect.map((semver) => setSemverRange(this.config.range, semver)),
@@ -40,11 +40,7 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
 
   inspect(
     instance: Instance,
-  ): Effect.Effect<
-    never,
-    never,
-    Report.UnsupportedMismatch | Report.SemverRangeMismatch | Report.Valid
-  > {
+  ): Effect.Effect<Report.UnsupportedMismatch | Report.SemverRangeMismatch | Report.Valid> {
     const current = Specifier.create(instance, instance.rawSpecifier.raw);
     return pipe(
       this.getFixed(current),

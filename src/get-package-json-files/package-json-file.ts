@@ -1,9 +1,9 @@
 import { Effect, pipe } from 'effect';
-import type { RcFile } from '..';
-import type { Strategy } from '../config/get-custom-types';
-import type { Ctx } from '../get-context';
-import { Instance } from '../get-instances/instance';
-import type { JsonFile } from '../io/read-json-file-sync';
+import type { Strategy } from '../config/get-custom-types.js';
+import type { Ctx } from '../get-context/index.js';
+import { Instance } from '../get-instances/instance.js';
+import type { RcFile } from '../index.js';
+import type { JsonFile } from '../io/read-json-file-sync.js';
 
 export type PackageJson = {
   bugs?: { url: string } | string;
@@ -50,7 +50,7 @@ export class PackageJsonFile {
     this.name = jsonFile.contents.name;
   }
 
-  getInstances(enabledTypes: Strategy.Any[]): Effect.Effect<never, never, Instance[]> {
+  getInstances(enabledTypes: Strategy.Any[]): Effect.Effect<Instance[]> {
     if (!this._instances) {
       return pipe(
         Effect.all(

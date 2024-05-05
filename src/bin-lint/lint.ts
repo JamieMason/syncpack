@@ -1,19 +1,19 @@
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { Context, Effect, pipe } from 'effect';
-import { pipeline as format } from '../bin-format/format';
-import { pipeline as lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges';
-import { pipeline as listMismatches } from '../bin-list-mismatches/list-mismatches';
-import { CliConfigTag } from '../config/tag';
-import { type CliConfig } from '../config/types';
-import { ICON } from '../constants';
-import type { ErrorHandlers } from '../error-handlers/default-error-handlers';
-import { defaultErrorHandlers } from '../error-handlers/default-error-handlers';
-import { getContext } from '../get-context';
-import type { Io } from '../io';
-import { IoTag } from '../io';
-import { exitIfInvalid } from '../io/exit-if-invalid';
-import { toJson } from '../io/to-json';
-import { withLogger } from '../lib/with-logger';
+import { pipeline as format } from '../bin-format/format.js';
+import { pipeline as lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges.js';
+import { pipeline as listMismatches } from '../bin-list-mismatches/list-mismatches.js';
+import { CliConfigTag } from '../config/tag.js';
+import { type CliConfig } from '../config/types.js';
+import { ICON } from '../constants.js';
+import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
+import { getContext } from '../get-context/index.js';
+import { exitIfInvalid } from '../io/exit-if-invalid.js';
+import type { Io } from '../io/index.js';
+import { IoTag } from '../io/index.js';
+import { toJson } from '../io/to-json.js';
+import { withLogger } from '../lib/with-logger.js';
 
 interface Input {
   io: Io;

@@ -1,5 +1,5 @@
 import type { URLResult } from 'npm-package-arg';
-import { BaseSpecifier } from './base';
+import { BaseSpecifier } from './base.js';
 
 /** @example "http://x.com/foo.tgz" */
 export class UrlSpecifier extends BaseSpecifier<URLResult> {

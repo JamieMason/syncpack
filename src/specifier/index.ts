@@ -1,17 +1,17 @@
-import type { Instance } from '../get-instances/instance';
-import { DELETE, type Delete } from '../version-group/lib/delete';
-import { AliasSpecifier } from './alias';
-import { DeleteSpecifier } from './delete';
-import { ExactSpecifier } from './exact';
-import { FileSpecifier } from './file';
-import { HostedGitSpecifier } from './hosted-git';
-import { LatestSpecifier } from './latest';
-import { parseSpecifier } from './lib/parse-specifier';
-import { RangeSpecifier } from './range';
-import { TagSpecifier } from './tag';
-import { UnsupportedSpecifier } from './unsupported';
-import { UrlSpecifier } from './url';
-import { WorkspaceProtocolSpecifier } from './workspace-protocol';
+import type { Instance } from '../get-instances/instance.js';
+import { DELETE, type Delete } from '../version-group/lib/delete.js';
+import { AliasSpecifier } from './alias.js';
+import { DeleteSpecifier } from './delete.js';
+import { ExactSpecifier } from './exact.js';
+import { FileSpecifier } from './file.js';
+import { HostedGitSpecifier } from './hosted-git.js';
+import { LatestSpecifier } from './latest.js';
+import { parseSpecifier } from './lib/parse-specifier.js';
+import { RangeSpecifier } from './range.js';
+import { TagSpecifier } from './tag.js';
+import { UnsupportedSpecifier } from './unsupported.js';
+import { UrlSpecifier } from './url.js';
+import { WorkspaceProtocolSpecifier } from './workspace-protocol.js';
 
 export namespace Specifier {
   export const Alias = AliasSpecifier;

@@ -1,7 +1,7 @@
 import { EOL } from 'os';
-import { getIndent } from '../config/get-indent';
-import type { Ctx } from '../get-context';
-import type { PackageJsonFile } from '../get-package-json-files/package-json-file';
+import { getIndent } from '../config/get-indent.js';
+import type { Ctx } from '../get-context/index.js';
+import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
 
 type Ending = '\n' | '\r' | '\r\n' | string;
 
