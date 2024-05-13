@@ -16,6 +16,7 @@ import type { Io } from '../io/index.js';
 import { IoTag } from '../io/index.js';
 import { writeIfChanged } from '../io/write-if-changed.js';
 import { withLogger } from '../lib/with-logger.js';
+import type { PackageJson } from '../get-package-json-files/package-json-file.js';
 
 interface Input {
   io: Io;
@@ -117,10 +118,11 @@ function sortObject(sortedKeys: string[] | Set<string>, obj: Record<string, unkn
   });
 }
 
-function sortAlphabetically(value: unknown): void {
+function sortAlphabetically(value: PackageJson[keyof PackageJson]): void {
+  const localeComparison = (a: string, b: string) => a.localeCompare(b);
   if (isArray(value)) {
-    value.sort();
+    value.sort(localeComparison);
   } else if (isObject(value)) {
-    sortObject(Object.keys(value).sort(), value);
+    sortObject(Object.keys(value).sort(localeComparison), value);
   }
 }
