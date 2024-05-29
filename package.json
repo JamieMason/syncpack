@@ -121,5 +121,6 @@
     "release": "release-it",
     "test": "vitest run --config vitest.config.ts"
   },
-  "type": "module"
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }
