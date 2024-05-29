@@ -80,6 +80,7 @@
     "node": ">=16"
   },
   "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
