@@ -128,13 +128,17 @@ describe('sortAz', () => {
   it('sorts object properties alphabetically by key', async () => {
     const scenario = createScenario({
       '.syncpackrc': {
-        sortAz: ['scripts'],
+        sortAz: ['dependencies'],
       },
       'package.json': {
         name: 'a',
-        scripts: {
-          B: '',
-          A: '',
+        dependencies: {
+          'B': '',
+          '@B': '',
+          '1B': '',
+          'A': '',
+          '@A': '',
+          '1A': ''
         },
       },
     })();
@@ -142,7 +146,7 @@ describe('sortAz', () => {
     await Effect.runPromiseExit(format(scenario));
 
     const packages: any = scenario.readPackages();
-    expect(Object.keys(packages.a.scripts)).toEqual(['A', 'B']);
+    expect(Object.keys(packages.a.dependencies)).toEqual(['@A', '@B', '1A', '1B', 'A', 'B']);
     expect(scenario.io.process.exit).not.toHaveBeenCalled();
   });
 
@@ -153,7 +157,7 @@ describe('sortAz', () => {
       },
       'package.json': {
         name: 'a',
-        keywords: ['B', 'A'],
+        keywords: ['B', '@B', '1B', 'A', '@A', '1A'],
       },
     })();
 
@@ -161,7 +165,7 @@ describe('sortAz', () => {
 
     expect(scenario.readPackages()).toHaveProperty('a', {
       name: 'a',
-      keywords: ['A', 'B'],
+      keywords: ['@A', '@B', '1A', '1B', 'A', 'B'],
     });
     expect(scenario.io.process.exit).not.toHaveBeenCalled();
   });
