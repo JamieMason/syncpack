@@ -39,9 +39,7 @@ function matchesDependencies(
 }
 
 function matchesPackages(packages: unknown, instance: Instance) {
-  // matches if not defined
-  if (!isNonEmptyArray(packages)) return true;
-  return packages.some((pattern) => minimatch(instance.pkgName, pattern));
+  return matchesKnownList(packages, instance.pkgName);
 }
 
 function matchesDependencyTypes(dependencyTypes: unknown, instance: Instance): boolean {
