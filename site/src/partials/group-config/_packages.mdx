@@ -4,6 +4,7 @@ import OptionalPill from '@site/components/pill/optional.astro';
 
 - An array of strings which should match the `name` properties of your package.json files.
 - If omitted, the default behaviour is to match every package.
+- Negated types are also supported, so a value of `["!my-client", "!my-server"]` would assign everything **except** the packages `my-client` and `my-server` to this group.
 - The strings can be any combination of exact matches or [minimatch](https://github.com/isaacs/minimatch) glob patterns:
 
 ```json title="Examples of valid values"
@@ -15,6 +16,12 @@ packages: ["@my-repo/**"]
 
 // ✅ match specific packages by name
 packages: ["my-server", "my-client"]
+
+// ✅ match all packages except negated ones
+packages: ["!my-server", "!@my-repo/**]
+
+// ❌ no mixing of specific and negated packages
+packages: ["my-client", "!@my-repo/**"]
 
 // ❌ not file system paths, name properties of package.json files
 packages: ["packages/my-client"]
