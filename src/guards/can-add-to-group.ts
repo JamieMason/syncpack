@@ -63,6 +63,10 @@ function matchesKnownList(values: unknown, value: string): boolean {
       positive.push(name);
     }
   });
-  if (isNonEmptyArray(negative) && !negative.includes(value)) return true;
-  return isNonEmptyArray(positive) && positive.includes(value);
+  if (isNonEmptyArray(negative) && !someMinimatch(value, negative)) return true;
+  return isNonEmptyArray(positive) && someMinimatch(value, positive);
+}
+
+function someMinimatch(value: string, patterns: string[]): boolean {
+  return patterns.some((pattern) => minimatch(value, pattern))
 }
