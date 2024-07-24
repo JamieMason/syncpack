@@ -99,7 +99,7 @@ export const updateEffects = {
       if (gtr(latest, String(instance.rawSpecifier.raw), true)) {
         outdatedCount++;
         mostRecent.push(
-          chalk`${instance.name} {gray {red ${instance.rawSpecifier.raw}} ${ICON.rightArrow}} {green ${latest}}`,
+          chalk`${instance.name} {gray {red ${String(instance.rawSpecifier.raw)}} ${ICON.rightArrow}} {green ${latest}}`,
         );
       } else {
         mostRecent.push(chalk`{green ${instance.name}}`);
@@ -116,7 +116,7 @@ export const updateEffects = {
   onOutdated(instance: Instance, latest: string) {
     outdatedCount++;
     mostRecent.push(
-      chalk`${instance.name} {gray {red ${instance.rawSpecifier.raw}} ${ICON.rightArrow}} {green ${latest}}`,
+      chalk`${instance.name} {gray {red ${String(instance.rawSpecifier.raw)}} ${ICON.rightArrow}} {green ${latest}}`,
     );
     return Effect.void;
   },
@@ -136,7 +136,7 @@ export const updateEffects = {
         Schema.decodeUnknownEither(
           Schema.Struct({
             'dist-tags': Schema.Struct({ latest: Schema.String }),
-            'time': Schema.Record(Schema.String, Schema.String),
+            'time': Schema.Record({ key: Schema.String, value: Schema.String }),
             'homepage': Schema.optional(Schema.String),
             'repository': Schema.optional(
               Schema.Union(Schema.String, Schema.Struct({ url: Schema.optional(Schema.String) })),
@@ -271,7 +271,7 @@ function promptForReleaseType(
                   : '';
 
                 return {
-                  title: chalk`${updateable.instance.name} {gray ${updateable.instance.rawSpecifier.raw} ${ICON.rightArrow}} {green ${updateable.versions.latest}} ${repoUrl}`,
+                  title: chalk`${updateable.instance.name} {gray ${String(updateable.instance.rawSpecifier.raw)} ${ICON.rightArrow}} {green ${updateable.versions.latest}} ${repoUrl}`,
                   selected: true,
                   value: updateable,
                 };

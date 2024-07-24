@@ -21,8 +21,6 @@ import type { Report } from '../../src/report.js';
 
 type NodeFs = typeof fs;
 
-type MockFn<F extends (...args: any) => any> = Mock<Parameters<F>, ReturnType<F>>;
-
 export interface TestScenario {
   cli: Partial<CliConfig>;
   errorHandlers: ErrorHandlers;
@@ -35,18 +33,18 @@ export interface TestScenario {
   mockIo: {
     cosmiconfig: Io['cosmiconfig'];
     enquirer: {
-      prompt: MockFn<Io['enquirer']['prompt']>;
+      prompt: Mock<Io['enquirer']['prompt']>;
     };
     fs: NodeFs;
     globby: {
-      sync: MockFn<Io['globby']['sync']>;
+      sync: Mock<Io['globby']['sync']>;
     };
     process: {
       cwd: Io['process']['cwd'];
-      exit: MockFn<Io['process']['exit']>;
+      exit: Mock<Io['process']['exit']>;
     };
     readYamlFile: {
-      sync: MockFn<Io['readYamlFile']['sync']>;
+      sync: Mock<Io['readYamlFile']['sync']>;
     };
   };
   readPackages(): Record<string, PackageJson>;
