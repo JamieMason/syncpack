@@ -35,8 +35,7 @@ syncpack fix-mismatches --types nodeEngine
 
 <Hx level={props.level}>3. Track them in future</Hx>
 
-Add your new custom type to your `dependencyTypes` at the root level.
-It is included in the list of all possible dependency types.
+Add your new custom type to your `dependencyTypes` at the root level. It is included in the list of all possible dependency types.
 
 ```json title=".syncpackrc"
 {
@@ -64,12 +63,9 @@ syncpack list
 
 <Hx level={props.level}>4. Relax the rules (optional)</Hx>
 
-If you don't want the Node.js version to be identical in every package but do 
-want them all to be compatible with each other, you can use a 
-[Same Range](/syncpack/config/version-groups/same-range) Version Group.
+If you don't want the Node.js version to be identical in every package but do want them all to be compatible with each other, you can use a [Same Range](/syncpack/config/version-groups/same-range) Version Group.
 
-Note that you do have to list your customType in `dependencyTypes` for it to
-work within `versionGroups#dependencyTypes` or `semverGroups#dependencyTypes`.
+Note that you do have to list your customType in `dependencyTypes` for it to work within `versionGroups#dependencyTypes` or `semverGroups#dependencyTypes`.
 
 ```json title=".syncpackrc"
 {
@@ -79,7 +75,7 @@ work within `versionGroups#dependencyTypes` or `semverGroups#dependencyTypes`.
       "strategy": "version"
     }
   },
-  
+
   "dependencyTypes": [
     "dev"
     "nodeEngine"

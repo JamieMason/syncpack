@@ -68,5 +68,5 @@ function matchesKnownList(values: unknown, value: string): boolean {
 }
 
 function someMinimatch(value: string, patterns: string[]): boolean {
-  return patterns.some((pattern) => minimatch(value, pattern))
+  return patterns.some((pattern) => minimatch(value, pattern));
 }
