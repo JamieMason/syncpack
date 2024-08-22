@@ -1,8 +1,8 @@
-From syncpack 11.2.1 and up, a JSON Schema file is available. Ironically, you will need to manually ensure that the version number in the URL you reference matches the version of syncpack you have installed, at least for the time being.
+From syncpack 11.2.1 and up, a JSON Schema file is available.
 
 ```json title=".syncpackrc"
 {
-  "$schema": "https://unpkg.com/syncpack@11.2.1/dist/schema.json",
+  "$schema": "./node_modules/syncpack/dist/schema.json",
   "versionGroups": [
     {
       "dependencies": ["@types/node"],
