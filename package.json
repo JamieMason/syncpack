@@ -54,7 +54,7 @@
     "fast-check": "3.21.0",
     "globby": "14.0.2",
     "jsonc-parser": "3.3.1",
-    "minimatch": "10.0.1",
+    "minimatch": "9.0.5",
     "npm-package-arg": "11.0.3",
     "ora": "8.0.1",
     "prompts": "2.4.2",
@@ -83,7 +83,7 @@
     "vitest": "2.0.5"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18.18.0"
   },
   "exports": "./dist/index.js",
   "files": [
@@ -120,7 +120,9 @@
     "format": "pnpm run format:source && pnpm run format:astro",
     "format:astro": "prettier --write site/src",
     "format:source": "biome check --write --unsafe",
-    "lint": "biome check && tsc --noEmit",
+    "lint": "npm run lint:source && npm run lint:engines",
+    "lint:engines": "node scripts/check-engines.mjs",
+    "lint:source": "biome check && tsc --noEmit",
     "prepack": "pnpm run build",
     "release": "release-it",
     "test": "vitest run --coverage src",
