@@ -63,6 +63,7 @@ export class NamedVersionStringStrategy {
         Effect.flatMap(parent =>
           Effect.try(() => {
             parent[key] = nextValue;
+            file.applyEdit(fullPath, nextValue);
           }),
         ),
         Effect.tapError(() =>
@@ -79,6 +80,7 @@ export class NamedVersionStringStrategy {
       Effect.flatMap(parent =>
         Effect.try(() => {
           parent[this.path] = nextValue;
+          file.applyEdit([this.path], nextValue);
         }),
       ),
       Effect.tapError(() =>

@@ -37,12 +37,14 @@ export class VersionsByNameStrategy {
     [name, version]: [string, string | Delete],
   ): Effect.Effect<PackageJsonFile> {
     const nextValue = version === DELETE ? undefined : version;
+    const fullPath = this.path.split('.');
     return pipe(
-      get(file.jsonFile.contents, ...this.path.split('.')),
+      get(file.jsonFile.contents, ...fullPath),
       Effect.flatMap(getOptionOfNonEmptyObject),
       Effect.flatMap(parent =>
         Effect.try(() => {
           parent[name] = nextValue;
+          file.applyEdit(fullPath.concat(name), nextValue);
         }),
       ),
       Effect.tapError(() =>

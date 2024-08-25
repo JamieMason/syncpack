@@ -1,4 +1,5 @@
 import { Effect, pipe } from 'effect';
+import { applyEdits, modify } from 'jsonc-parser';
 import type { Strategy } from '../config/get-custom-types.js';
 import type { Ctx } from '../get-context/index.js';
 import { Instance } from '../get-instances/instance.js';
@@ -43,11 +44,15 @@ export class PackageJsonFile {
   /** the .name property from the package.json file */
   name: string | undefined;
 
+  /** the next package.json file contents after modification, with formatting preserved */
+  nextJson: string;
+
   constructor(jsonFile: JsonFile<PackageJson>, config: Ctx['config']) {
     this._instances = null;
     this.config = config;
     this.jsonFile = jsonFile;
     this.name = jsonFile.contents.name;
+    this.nextJson = jsonFile.json;
   }
 
   getInstances(enabledTypes: Strategy.Any[]): Effect.Effect<Instance[]> {
@@ -87,4 +92,22 @@ export class PackageJsonFile {
     }
     return Effect.succeed(this._instances);
   }
+
+  /**
+   * Apply an edit to the raw JSON string which will be written to disk. This string preserves the
+   * original formatting of the file.
+   */
+  applyEdit(fullPath: string[], value: string | undefined): void {
+    const edits = modify(
+      this.nextJson,
+      fullPath.map(parseNumericStrings),
+      value,
+      {},
+    );
+    this.nextJson = applyEdits(this.nextJson, edits);
+  }
+}
+
+function parseNumericStrings(key: string): string | number {
+  return /[^0-9]/.test(key) ? key : Number(key);
 }

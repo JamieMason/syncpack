@@ -53,6 +53,7 @@
     "enquirer": "2.4.1",
     "fast-check": "3.21.0",
     "globby": "14.0.2",
+    "jsonc-parser": "3.3.1",
     "minimatch": "10.0.1",
     "npm-package-arg": "11.0.3",
     "ora": "8.0.1",

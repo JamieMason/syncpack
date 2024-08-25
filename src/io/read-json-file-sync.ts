@@ -1,11 +1,12 @@
 import { dirname, relative } from 'node:path';
 import { Data, Effect, pipe } from 'effect';
+import { type ParseError, parse } from 'jsonc-parser';
 import type { Io } from './index.js';
 import type { ReadFileError } from './read-file-sync.js';
 import { readFileSync } from './read-file-sync.js';
 
 export class JsonParseError extends Data.TaggedClass('JsonParseError')<{
-  readonly error: unknown;
+  readonly errors: ParseError[];
   readonly filePath: string;
   readonly json: string;
 }> {}
@@ -30,12 +31,13 @@ export function readJsonFileSync<T>(
   return pipe(
     Effect.Do,
     Effect.bind('json', () => readFileSync(io, filePath)),
-    Effect.bind('contents', ({ json }) =>
-      Effect.try({
-        try: () => JSON.parse(json),
-        catch: error => new JsonParseError({ error, filePath, json }),
-      }),
-    ),
+    Effect.bind('contents', ({ json }) => {
+      const errors: ParseError[] = [];
+      const data = parse(json, errors);
+      return errors.length === 0
+        ? Effect.succeed(data)
+        : Effect.fail(new JsonParseError({ errors, filePath, json }));
+    }),
     Effect.map(
       ({ contents, json }) =>
         new JsonFile<T>({

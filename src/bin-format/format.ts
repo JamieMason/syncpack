@@ -15,6 +15,7 @@ import type { PackageJson } from '../get-package-json-files/package-json-file.js
 import { exitIfInvalid } from '../io/exit-if-invalid.js';
 import type { Io } from '../io/index.js';
 import { IoTag } from '../io/index.js';
+import { toFormattedJson } from '../io/to-formatted-json.js';
 import { writeIfChanged } from '../io/write-if-changed.js';
 import { withLogger } from '../lib/with-logger.js';
 
@@ -106,6 +107,8 @@ export function pipeline(ctx: Ctx): Effect.Effect<Ctx> {
       const sortedKeys = new Set([...sortFirst, ...otherKeys]);
       sortObject(sortedKeys, contents);
     }
+
+    file.nextJson = toFormattedJson(ctx, file);
   });
 
   return Effect.succeed(ctx);

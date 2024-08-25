@@ -27,9 +27,16 @@ it('errors when package.json is invalid', async () => {
     },
   })();
   await Effect.runPromiseExit(pipe(getContext(scenario), Effect.merge));
+
   expect(scenario.errorHandlers.JsonParseError).toHaveBeenCalledWith(
     new JsonParseError({
-      error: expect.any(SyntaxError),
+      errors: expect.arrayContaining([
+        {
+          error: expect.any(Number),
+          length: expect.any(Number),
+          offset: expect.any(Number),
+        },
+      ]),
       filePath: expect.stringContaining('/package.json') as unknown as string,
       json: 'THIS-IS-NOT-VALID-JSON',
     }),

@@ -108,7 +108,13 @@ describe('Broken Projects', () => {
         await Effect.runPromiseExit(fixMismatches(scenario));
         expect(scenario.errorHandlers.JsonParseError).toHaveBeenCalledWith({
           _tag: 'JsonParseError',
-          error: expect.any(SyntaxError),
+          errors: expect.arrayContaining([
+            {
+              error: expect.any(Number),
+              length: expect.any(Number),
+              offset: expect.any(Number),
+            },
+          ]),
           filePath: expect.stringContaining('/package.json'),
           json: '}INVALID{',
         });

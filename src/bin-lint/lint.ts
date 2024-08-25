@@ -12,7 +12,7 @@ import { getContext } from '../get-context/index.js';
 import { exitIfInvalid } from '../io/exit-if-invalid.js';
 import type { Io } from '../io/index.js';
 import { IoTag } from '../io/index.js';
-import { toJson } from '../io/to-json.js';
+import { toFormattedJson } from '../io/to-formatted-json.js';
 import { withLogger } from '../lib/with-logger.js';
 
 interface Input {
@@ -24,6 +24,29 @@ interface Input {
 export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
   return pipe(
     getContext({ io, cli, errorHandlers }),
+    // Formatting
+    Effect.flatMap(ctx =>
+      Effect.gen(function* ($) {
+        if (ctx.config.rcFile.lintFormatting !== false) {
+          yield* $(Effect.logInfo(chalk`{yellow Formatting}`));
+          yield* $(format(ctx));
+          for (const file of ctx.packageJsonFiles) {
+            const shortPath = file.jsonFile.shortPath;
+            const formattedJson = toFormattedJson(ctx, file);
+            const isFormatted = file.jsonFile.json === formattedJson;
+            if (isFormatted) {
+              yield* $(
+                Effect.logInfo(chalk`{green ${ICON.tick}} ${shortPath}`),
+              );
+            } else {
+              ctx.isInvalid = true;
+              yield* $(Effect.logInfo(chalk`{red ${ICON.cross}} ${shortPath}`));
+            }
+          }
+        }
+        return ctx;
+      }),
+    ),
     // Versions
     Effect.flatMap(ctx =>
       Effect.gen(function* ($) {
@@ -40,29 +63,6 @@ export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
         if (ctx.config.rcFile.lintSemverRanges !== false) {
           yield* $(Effect.logInfo(chalk`{yellow Semver Ranges}`));
           yield* $(lintSemverRanges(ctx, io, errorHandlers));
-        }
-        return ctx;
-      }),
-    ),
-    // Formatting
-    Effect.flatMap(ctx =>
-      Effect.gen(function* ($) {
-        if (ctx.config.rcFile.lintFormatting !== false) {
-          yield* $(Effect.logInfo(chalk`{yellow Formatting}`));
-          yield* $(format(ctx));
-          for (const file of ctx.packageJsonFiles) {
-            const nextJson = toJson(ctx, file);
-            const hasChanged = file.jsonFile.json !== nextJson;
-            const shortPath = file.jsonFile.shortPath;
-            if (hasChanged) {
-              ctx.isInvalid = true;
-              yield* $(Effect.logInfo(chalk`{red ${ICON.cross}} ${shortPath}`));
-            } else {
-              yield* $(
-                Effect.logInfo(chalk`{green ${ICON.tick}} ${shortPath}`),
-              );
-            }
-          }
         }
         return ctx;
       }),

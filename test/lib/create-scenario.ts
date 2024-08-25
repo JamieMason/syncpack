@@ -16,7 +16,7 @@ import type {
   PackageJsonFile,
 } from '../../src/get-package-json-files/package-json-file.js';
 import type { Io } from '../../src/io/index.js';
-import { newlines } from '../../src/io/to-json.js';
+import { newlines } from '../../src/io/to-formatted-json.js';
 import type { Report } from '../../src/report.js';
 
 type NodeFs = typeof fs;

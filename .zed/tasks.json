@@ -1,14 +1,5 @@
 [
   {
-    "label": "Add test for current file",
-    "command": "$ZED_WORKTREE_ROOT/node_modules/.bin/tsx",
-    "args": ["$ZED_WORKTREE_ROOT/scripts/add-test.ts", "$ZED_RELATIVE_FILE"],
-    "shell": "system",
-    "reveal": "never",
-    "use_new_terminal": true,
-    "hide": "always"
-  },
-  {
     "label": "Vitest run",
     "command": "$ZED_WORKTREE_ROOT/node_modules/.bin/vitest",
     "args": ["run"],

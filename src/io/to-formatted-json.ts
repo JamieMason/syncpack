@@ -30,7 +30,7 @@ export const newlines = {
   },
 };
 
-export function toJson(ctx: Ctx, file: PackageJsonFile): string {
+export function toFormattedJson(ctx: Ctx, file: PackageJsonFile): string {
   const contents = file.jsonFile.contents;
   const indent = getIndent(ctx.config);
   const eol = newlines.detect(file.jsonFile.json);

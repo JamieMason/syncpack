@@ -47,7 +47,7 @@ export const defaultErrorHandlers: ErrorHandlers = {
       [
         chalk.red('An error was found when parsing a JSON file'),
         chalk.red('  File:', err.filePath),
-        chalk.red('  Error:', err.error),
+        chalk.red('  Error:', err.errors),
       ].join(EOL),
     );
   },
