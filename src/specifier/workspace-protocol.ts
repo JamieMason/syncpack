@@ -24,7 +24,9 @@ export class WorkspaceProtocolSpecifier extends BaseSpecifier<WorkspaceProtocolR
       const range = this.raw.replace('workspace:', '');
       const local = ctx.packageJsonFilesByName[this.instance.name];
       const version = local?.jsonFile?.contents?.version;
-      if (version) return Effect.succeed(`${range}${version}`);
+      if (version) {
+        return Effect.succeed(`${range}${version}`);
+      }
     }
     return Effect.succeed('0.0.0');
   }

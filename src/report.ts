@@ -8,7 +8,11 @@ export namespace Report {
     export type Any = Report.Semver.Invalid.Any | Report.Semver.Valid.Any;
 
     export namespace Valid {
-      export type Any = Report.Disabled | Report.FilteredOut | Report.Ignored | Report.Valid;
+      export type Any =
+        | Report.Disabled
+        | Report.FilteredOut
+        | Report.Ignored
+        | Report.Valid;
     }
 
     export namespace Invalid {
@@ -33,11 +37,17 @@ export namespace Report {
     export type Any = Report.Version.Invalid.Any | Report.Version.Valid.Any;
 
     export namespace Valid {
-      export type Any = Report.Disabled | Report.FilteredOut | Report.Ignored | Report.Valid;
+      export type Any =
+        | Report.Disabled
+        | Report.FilteredOut
+        | Report.Ignored
+        | Report.Valid;
     }
 
     export namespace Invalid {
-      export type Any = Report.Version.Fixable.Any | Report.Version.Unfixable.Any;
+      export type Any =
+        | Report.Version.Fixable.Any
+        | Report.Version.Unfixable.Any;
     }
 
     export namespace Fixable {

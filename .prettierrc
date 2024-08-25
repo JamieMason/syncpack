@@ -6,12 +6,6 @@
   "trailingComma": "all",
   "overrides": [
     {
-      "files": ["**/*.spec.*"],
-      "options": {
-        "printWidth": 120
-      }
-    },
-    {
       "files": ["**/*.md", "**/*.mdx"],
       "options": {
         "printWidth": 500,

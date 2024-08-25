@@ -11,7 +11,7 @@ export function askForInput(opts: {
 }): Effect.Effect<string, AskForInputError, Io> {
   return pipe(
     IoTag,
-    Effect.flatMap((io) =>
+    Effect.flatMap(io =>
       Effect.tryPromise({
         try: () =>
           io.enquirer.prompt({
@@ -19,7 +19,7 @@ export function askForInput(opts: {
             type: 'input',
             message: opts.message,
           }),
-        catch: (err) => new AskForInputError({ error: String(err) }),
+        catch: err => new AskForInputError({ error: String(err) }),
       }),
     ),
   );

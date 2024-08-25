@@ -8,7 +8,9 @@ import { toJson } from './to-json.js';
 import type { WriteFileError } from './write-file-sync.js';
 import { writeFileSync } from './write-file-sync.js';
 
-export function writeIfChanged(ctx: Ctx): Effect.Effect<Ctx, WriteFileError, Io> {
+export function writeIfChanged(
+  ctx: Ctx,
+): Effect.Effect<Ctx, WriteFileError, Io> {
   return pipe(
     Effect.all(
       ctx.packageJsonFiles.map((file: PackageJsonFile) =>
@@ -23,10 +25,14 @@ export function writeIfChanged(ctx: Ctx): Effect.Effect<Ctx, WriteFileError, Io>
               ? pipe(
                   writeFileSync(file.jsonFile.filePath, nextJson),
                   Effect.flatMap(() =>
-                    Effect.logInfo(chalk`{green ${ICON.tick}} ${file.jsonFile.shortPath}`),
+                    Effect.logInfo(
+                      chalk`{green ${ICON.tick}} ${file.jsonFile.shortPath}`,
+                    ),
                   ),
                 )
-              : Effect.logInfo(chalk`{dim ${ICON.skip} ${file.jsonFile.shortPath}}`),
+              : Effect.logInfo(
+                  chalk`{dim ${ICON.skip} ${file.jsonFile.shortPath}}`,
+                ),
           ),
         ),
       ),

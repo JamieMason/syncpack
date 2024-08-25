@@ -1,5 +1,5 @@
+import { dirname, relative } from 'node:path';
 import { Data, Effect, pipe } from 'effect';
-import { dirname, relative } from 'path';
 import type { Io } from './index.js';
 import type { ReadFileError } from './read-file-sync.js';
 import { readFileSync } from './read-file-sync.js';
@@ -33,7 +33,7 @@ export function readJsonFileSync<T>(
     Effect.bind('contents', ({ json }) =>
       Effect.try({
         try: () => JSON.parse(json),
-        catch: (error) => new JsonParseError({ error, filePath, json }),
+        catch: error => new JsonParseError({ error, filePath, json }),
       }),
     ),
     Effect.map(

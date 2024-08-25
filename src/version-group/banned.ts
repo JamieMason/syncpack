@@ -25,15 +25,17 @@ export class BannedVersionGroup extends Data.TaggedClass('Banned')<{
 
   inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.succeed(
-      Object.entries(groupBy('name', this.instances)).map(([name, instances]) => ({
-        name,
-        reports: instances.map(
-          (instance) =>
-            // ✘ package should not be used
-            // ✓ is a mismatch we can auto-fix
-            new Report.Banned(Specifier.create(instance, DELETE)),
-        ),
-      })),
+      Object.entries(groupBy('name', this.instances)).map(
+        ([name, instances]) => ({
+          name,
+          reports: instances.map(
+            instance =>
+              // ✘ package should not be used
+              // ✓ is a mismatch we can auto-fix
+              new Report.Banned(Specifier.create(instance, DELETE)),
+          ),
+        }),
+      ),
     );
   }
 }

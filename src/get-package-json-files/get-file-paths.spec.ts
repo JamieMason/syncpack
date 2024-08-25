@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 import type { TestScenario } from '../../test/lib/create-scenario.js';
 import { createScenario } from '../../test/lib/create-scenario.js';
 import { CWD } from '../constants.js';
-import { getFilePaths, NoSourcesFoundError } from './get-file-paths.js';
+import { NoSourcesFoundError, getFilePaths } from './get-file-paths.js';
 
 async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();
@@ -65,7 +65,10 @@ it('adds root package.json when using yarn workspaces', async () => {
         },
       }),
     ),
-  ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
+  ).toEqual([
+    expect.stringContaining('/package.json'),
+    expect.stringContaining('/apps/bar/package.json'),
+  ]);
 });
 
 it('adds root package.json when using lerna', async () => {
@@ -83,7 +86,10 @@ it('adds root package.json when using lerna', async () => {
         },
       }),
     ),
-  ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
+  ).toEqual([
+    expect.stringContaining('/package.json'),
+    expect.stringContaining('/apps/bar/package.json'),
+  ]);
 });
 
 it('adds root package.json when using pnpm workspaces', async () => {
@@ -101,5 +107,8 @@ it('adds root package.json when using pnpm workspaces', async () => {
         },
       }),
     ),
-  ).toEqual([expect.stringContaining('/package.json'), expect.stringContaining('/apps/bar/package.json')]);
+  ).toEqual([
+    expect.stringContaining('/package.json'),
+    expect.stringContaining('/apps/bar/package.json'),
+  ]);
 });

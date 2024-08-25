@@ -17,9 +17,10 @@ export function createVersionGroups(
   ctx: Ctx,
 ): Effect.Effect<VersionGroup.Any[], VersionGroup.ConfigError> {
   const { rcFile } = ctx.config;
-  const versionGroups: Effect.Effect<VersionGroup.Any, VersionGroup.ConfigError>[] = [
-    Effect.succeed(new FilteredOutVersionGroup(ctx)),
-  ];
+  const versionGroups: Effect.Effect<
+    VersionGroup.Any,
+    VersionGroup.ConfigError
+  >[] = [Effect.succeed(new FilteredOutVersionGroup(ctx))];
 
   if (isNonEmptyArray(rcFile.versionGroups)) {
     rcFile.versionGroups.forEach((config: unknown) => {
@@ -36,7 +37,7 @@ export function createVersionGroups(
 
       const mutuallyExclusiveProps = (
         ['isBanned', 'isIgnored', 'pinVersion', 'snapTo', 'policy'] as const
-      ).filter((prop) => Boolean(config[prop]));
+      ).filter(prop => Boolean(config[prop]));
 
       if (mutuallyExclusiveProps.length > 1) {
         return versionGroups.push(
@@ -55,8 +56,12 @@ export function createVersionGroups(
       const dependencyTypes = isArrayOfStrings(config.dependencyTypes)
         ? config.dependencyTypes
         : ['**'];
-      const dependencies = isArrayOfStrings(config.dependencies) ? config.dependencies : ['**'];
-      const packages = isArrayOfStrings(config.packages) ? config.packages : ['**'];
+      const dependencies = isArrayOfStrings(config.dependencies)
+        ? config.dependencies
+        : ['**'];
+      const packages = isArrayOfStrings(config.packages)
+        ? config.packages
+        : ['**'];
       const specifierTypes = isArrayOfStrings(config.specifierTypes)
         ? config.specifierTypes
         : ['**'];
@@ -136,7 +141,9 @@ export function createVersionGroups(
               label,
               packages,
               preferVersion:
-                config.preferVersion === 'lowestSemver' ? 'lowestSemver' : 'highestSemver',
+                config.preferVersion === 'lowestSemver'
+                  ? 'lowestSemver'
+                  : 'highestSemver',
             }),
           ),
         );

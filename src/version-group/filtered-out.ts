@@ -32,14 +32,16 @@ export class FilteredOutVersionGroup extends Data.TaggedClass('FilteredOut')<{
 
   inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.succeed(
-      Object.entries(groupBy('name', this.instances)).map(([name, instances]) => ({
-        name,
-        reports: instances.map(
-          (instance) =>
-            // ✓ is ignored and dismissed as valid
-            new Report.FilteredOut(instance),
-        ),
-      })),
+      Object.entries(groupBy('name', this.instances)).map(
+        ([name, instances]) => ({
+          name,
+          reports: instances.map(
+            instance =>
+              // ✓ is ignored and dismissed as valid
+              new Report.FilteredOut(instance),
+          ),
+        }),
+      ),
     );
   }
 }

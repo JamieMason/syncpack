@@ -27,10 +27,12 @@ export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
       Object.entries(groupBy('name', this.instances)).map(([name, instances]) =>
         pipe(
           instances,
-          Effect.forEach((instance) =>
+          Effect.forEach(instance =>
             pipe(
-              Effect.succeed(Specifier.create(instance, this.config.pinVersion)),
-              Effect.map((expected) =>
+              Effect.succeed(
+                Specifier.create(instance, this.config.pinVersion),
+              ),
+              Effect.map(expected =>
                 instance.rawSpecifier.raw === expected.raw
                   ? // ✓ pinned takes precedence over any semver group
                     // ✓ current version matches expected
@@ -42,7 +44,7 @@ export class PinnedVersionGroup extends Data.TaggedClass('Pinned')<{
               ),
             ),
           ),
-          Effect.map((reports) => ({ name, reports })),
+          Effect.map(reports => ({ name, reports })),
         ),
       ),
     );

@@ -1,0 +1,10 @@
+{
+  "ensure_final_newline_on_save": true,
+  "formatter": {
+    "external": {
+      "command": "./node_modules/.bin/biome",
+      "arguments": ["check", "--stdin-file-path", "{buffer_path}", "--apply"]
+    }
+  },
+  "remove_trailing_whitespace_on_save": true
+}

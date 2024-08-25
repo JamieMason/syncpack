@@ -61,7 +61,10 @@ export class BaseSpecifier<T extends NpmPackageArgResult | unknown> {
   }
 
   /** Get a new `Specifier` from the given semver version applied to this one */
-  setSemver(this: Specifier.Any, _version: string): Effect.Effect<Specifier.Any, NonSemverError> {
+  setSemver(
+    this: Specifier.Any,
+    _version: string,
+  ): Effect.Effect<Specifier.Any, NonSemverError> {
     return NonSemverError.asEffect(this);
   }
 

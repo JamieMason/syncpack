@@ -20,10 +20,14 @@ export function getPackageJsonFiles(
 > {
   return pipe(
     getFilePaths(io, config),
-    Effect.flatMap((filePaths) =>
-      Effect.all(filePaths.map((filePath) => readJsonFileSync<PackageJson>(io, filePath))),
+    Effect.flatMap(filePaths =>
+      Effect.all(
+        filePaths.map(filePath => readJsonFileSync<PackageJson>(io, filePath)),
+      ),
     ),
-    Effect.map((files) => files.map((file) => new PackageJsonFile(file, config))),
-    Effect.tap((files) => Effect.logDebug(`${files.length} package.json files found`)),
+    Effect.map(files => files.map(file => new PackageJsonFile(file, config))),
+    Effect.tap(files =>
+      Effect.logDebug(`${files.length} package.json files found`),
+    ),
   );
 }

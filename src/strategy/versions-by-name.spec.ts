@@ -27,9 +27,15 @@ it('gets and sets names and versions in an object', async () => {
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 it('gets and sets a name and version from a single string nested location', async () => {
@@ -53,9 +59,15 @@ it('gets and sets a name and version from a single string nested location', asyn
     ['bar', '2.0.0'],
     ['baz', '4.4.4'],
   ];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 it('returns empty array when path is not found', async () => {
@@ -65,5 +77,7 @@ it('returns empty array when path is not found', async () => {
       name: 'foo',
     },
   });
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed([]));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed([]),
+  );
 });

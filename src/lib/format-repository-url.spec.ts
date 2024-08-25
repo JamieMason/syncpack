@@ -28,7 +28,10 @@ describe('formatRepositoryUrl', () => {
       actual: 'git+https://github.com/dubzzz/pure-rand.git',
       expected: 'https://github.com/dubzzz/pure-rand',
     },
-  ])('formats "$actual" as "$expected" url correctly', ({ actual, expected }) => {
-    expect(formatRepositoryUrl(actual)).toEqual(expected);
-  });
+  ])(
+    'formats "$actual" as "$expected" url correctly',
+    ({ actual, expected }) => {
+      expect(formatRepositoryUrl(actual)).toEqual(expected);
+    },
+  );
 });

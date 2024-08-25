@@ -12,7 +12,7 @@ export function askForChoice(opts: {
 }): Effect.Effect<string, AskForChoiceError, Io> {
   return pipe(
     IoTag,
-    Effect.flatMap((io) =>
+    Effect.flatMap(io =>
       Effect.tryPromise({
         try: () =>
           io.enquirer
@@ -22,8 +22,8 @@ export function askForChoice(opts: {
               message: opts.message,
               choices: opts.choices,
             })
-            .then((res) => res.choice),
-        catch: (err) => new AskForChoiceError({ error: String(err) }),
+            .then(res => res.choice),
+        catch: err => new AskForChoiceError({ error: String(err) }),
       }),
     ),
   );

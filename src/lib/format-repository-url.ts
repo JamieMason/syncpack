@@ -1,5 +1,9 @@
-export function formatRepositoryUrl(input: string | undefined): string | undefined {
-  if (!input) return undefined;
+export function formatRepositoryUrl(
+  input: string | undefined,
+): string | undefined {
+  if (!input) {
+    return undefined;
+  }
 
   const extractedUrl = input.match(/https?:\/\/[^\s]+/)?.[0];
   if (extractedUrl) {
@@ -8,19 +12,23 @@ export function formatRepositoryUrl(input: string | undefined): string | undefin
     return withoutSuffix;
   }
 
-  const isSSHProtocol = input.startsWith('git@');
-  if (isSSHProtocol) {
+  const isSshProtocol = input.startsWith('git@');
+  if (isSshProtocol) {
     const withoutAffix = removeSuffix(removePrefix(input, 'git@'));
 
     const [origin, path] = withoutAffix.split(':');
 
-    if (!origin || !path) return undefined;
+    if (!(origin && path)) {
+      return undefined;
+    }
 
     return `https://${origin}/${path}`;
   }
 
   const isShortcut = input.split('/').length === 2;
-  if (isShortcut) return `https://github.com/${input}`;
+  if (isShortcut) {
+    return `https://github.com/${input}`;
+  }
 
   const isGitProtocol = input.startsWith('git://');
   if (isGitProtocol) {

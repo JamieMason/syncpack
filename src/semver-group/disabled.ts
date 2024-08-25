@@ -28,12 +28,14 @@ export class DisabledSemverGroup extends Data.TaggedClass('Disabled')<{
     return true;
   }
 
-  getFixed(specifier: Specifier.Any): Effect.Effect<Specifier.Any, NonSemverError> {
+  getFixed(
+    specifier: Specifier.Any,
+  ): Effect.Effect<Specifier.Any, NonSemverError> {
     return Effect.succeed(specifier);
   }
 
   inspectAll() {
-    return Effect.all(this.instances.map((instance) => this.inspect(instance)));
+    return Effect.all(this.instances.map(instance => this.inspect(instance)));
   }
 
   inspect(instance: Instance): Effect.Effect<Report.Disabled> {

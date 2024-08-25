@@ -10,7 +10,7 @@ import {
   logUnsupportedMismatch,
 } from '../bin-list-mismatches/list-mismatches.js';
 import { CliConfigTag } from '../config/tag.js';
-import { type CliConfig } from '../config/types.js';
+import type { CliConfig } from '../config/types.js';
 import { ICON } from '../constants.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
@@ -33,13 +33,19 @@ interface Input {
   errorHandlers?: ErrorHandlers;
 }
 
-export function fixMismatches({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
+export function fixMismatches({
+  io,
+  cli,
+  errorHandlers = defaultErrorHandlers,
+}: Input) {
   return pipe(
     getContext({ io, cli, errorHandlers }),
-    Effect.flatMap((ctx) =>
+    Effect.flatMap(ctx =>
       pipe(
         Effect.gen(function* ($) {
-          const { versionGroups } = yield* $(getInstances(ctx, io, errorHandlers));
+          const { versionGroups } = yield* $(
+            getInstances(ctx, io, errorHandlers),
+          );
           let index = 0;
           for (const group of versionGroups) {
             const groupSize = group.instances.length;
@@ -84,9 +90,15 @@ export function fixMismatches({ io, cli, errorHandlers = defaultErrorHandlers }:
               }
             }
 
-            if (validCount) yield* $(logAlreadyValidSize(validCount));
-            if (fixedCount) yield* $(logFixedSize(fixedCount));
-            if (unfixableCount) yield* $(logUnfixableSize(unfixableCount));
+            if (validCount) {
+              yield* $(logAlreadyValidSize(validCount));
+            }
+            if (fixedCount) {
+              yield* $(logFixedSize(fixedCount));
+            }
+            if (unfixableCount) {
+              yield* $(logUnfixableSize(unfixableCount));
+            }
 
             index++;
           }
@@ -108,23 +120,35 @@ export function fixMismatches({ io, cli, errorHandlers = defaultErrorHandlers }:
         Effect.flatMap(exitIfInvalid),
       ),
     ),
-    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    Effect.provide(
+      pipe(
+        Context.empty(),
+        Context.add(CliConfigTag, cli),
+        Context.add(IoTag, io),
+      ),
+    ),
     withLogger,
   );
 }
 
 export function fixMismatch(report: Report.Version.Fixable.Any) {
-  return report.fixable.instance.write(report._tag === 'Banned' ? DELETE : report.fixable.raw);
+  return report.fixable.instance.write(
+    report._tag === 'Banned' ? DELETE : report.fixable.raw,
+  );
 }
 
 /** Remove empty objects such as `{"dependencies": {}}` left after deleting */
 function removeEmptyObjects(ctx: Ctx) {
   return Effect.sync(() => {
-    ctx.packageJsonFiles.forEach((file) => {
+    ctx.packageJsonFiles.forEach(file => {
       const contents = file.jsonFile.contents;
-      Object.keys(contents).forEach((key) => {
+      Object.keys(contents).forEach(key => {
         const value = contents[key];
-        if (isObject(value) && value && Object.values(value).every(isUndefined)) {
+        if (
+          isObject(value) &&
+          value &&
+          Object.values(value).every(isUndefined)
+        ) {
           delete contents[key];
         }
       });

@@ -18,13 +18,22 @@ it('gets and sets a name and version from a single string', async () => {
   });
   const initial = [['yarn', '1.2.3']];
   const updated = [['yarn', '2.0.0']];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['yarn', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['yarn', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 it('gets and sets a name and version from a single string nested location', async () => {
-  const strategy = new NamedVersionStringStrategy('custom', 'deeper.versionNumber');
+  const strategy = new NamedVersionStringStrategy(
+    'custom',
+    'deeper.versionNumber',
+  );
   const file = await getRootPackage({
     'package.json': {
       name: 'foo',
@@ -35,9 +44,15 @@ it('gets and sets a name and version from a single string nested location', asyn
   });
   const initial = [['bar', '1.2.3']];
   const updated = [['bar', '2.0.0']];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['bar', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 it('returns empty array when path is not found', async () => {
@@ -47,5 +62,7 @@ it('returns empty array when path is not found', async () => {
       name: 'foo',
     },
   });
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed([]));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed([]),
+  );
 });

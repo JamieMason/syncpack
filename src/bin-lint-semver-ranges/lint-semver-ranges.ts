@@ -1,9 +1,9 @@
+import { EOL } from 'node:os';
 import chalk from 'chalk-template';
 import { Context, Effect, pipe } from 'effect';
-import { EOL } from 'os';
 import { isNonEmptyArray } from 'tightrope/guard/is-non-empty-array.js';
 import { CliConfigTag } from '../config/tag.js';
-import { type CliConfig } from '../config/types.js';
+import type { CliConfig } from '../config/types.js';
 import { ICON } from '../constants.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
@@ -24,18 +24,32 @@ interface Input {
   errorHandlers?: ErrorHandlers;
 }
 
-export function lintSemverRanges({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
+export function lintSemverRanges({
+  io,
+  cli,
+  errorHandlers = defaultErrorHandlers,
+}: Input) {
   return pipe(
     getContext({ io, cli, errorHandlers }),
-    Effect.flatMap((ctx) => pipeline(ctx, io, errorHandlers)),
+    Effect.flatMap(ctx => pipeline(ctx, io, errorHandlers)),
     Effect.flatMap(exitIfInvalid),
-    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    Effect.provide(
+      pipe(
+        Context.empty(),
+        Context.add(CliConfigTag, cli),
+        Context.add(IoTag, io),
+      ),
+    ),
     withLogger,
   );
 }
 
 /** Exported to be reused by `syncpack lint` */
-export function pipeline(ctx: Ctx, io: Io, errorHandlers: ErrorHandlers): Effect.Effect<Ctx> {
+export function pipeline(
+  ctx: Ctx,
+  io: Io,
+  errorHandlers: ErrorHandlers,
+): Effect.Effect<Ctx> {
   return Effect.gen(function* ($) {
     // no semver groups have been configured, they are disabled by default
     if (!isNonEmptyArray(ctx.config.rcFile.semverGroups)) {
@@ -69,7 +83,9 @@ export function pipeline(ctx: Ctx, io: Io, errorHandlers: ErrorHandlers): Effect
           }
         }
       }
-      if (validCount > 0) yield* $(logValidSize(validCount));
+      if (validCount > 0) {
+        yield* $(logValidSize(validCount));
+      }
       index++;
     }
 

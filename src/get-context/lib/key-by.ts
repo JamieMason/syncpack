@@ -4,7 +4,10 @@
  * value for the given key.
  */
 
-export function keyBy<A extends any[]>(key: string, array: A): Record<string, A[number]> {
+export function keyBy<A extends any[]>(
+  key: string,
+  array: A,
+): Record<string, A[number]> {
   return array.reduce((objectsByKeyValue, obj) => {
     const value = obj[key];
     objectsByKeyValue[value] = obj;

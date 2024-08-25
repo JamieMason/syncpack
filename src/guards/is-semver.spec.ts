@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { isSemver } from './is-semver.js';
 
 describe('isSemver', () => {
-  it('returns whether a value is Semver', async () => {
+  it('returns whether a value is Semver', () => {
     expect(isSemver('<1.2.3')).toEqual(true);
     expect(isSemver('<=1.2.3')).toEqual(true);
     expect(isSemver('1.2.3')).toEqual(true);

@@ -11,9 +11,11 @@ export function getNonEmptyStringProp(
 ): Effect.Effect<string, unknown> {
   return pipe(
     get(file.jsonFile.contents, ...propPath.split('.')),
-    Effect.flatMap((value) => getOptionOfNonEmptyString(value)),
+    Effect.flatMap(value => getOptionOfNonEmptyString(value)),
     Effect.tapError(() =>
-      Effect.logDebug(`<${file.jsonFile.shortPath}>.${propPath} is not a non-empty string`),
+      Effect.logDebug(
+        `<${file.jsonFile.shortPath}>.${propPath} is not a non-empty string`,
+      ),
     ),
   );
 }

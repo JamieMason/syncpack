@@ -128,11 +128,13 @@ describe('Broken Projects', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.NoSourcesFoundError).toHaveBeenCalledWith({
-          _tag: 'NoSourcesFoundError',
-          CWD: '/fake/dir',
-          patterns: ['/does/not/exist/package.json'],
-        });
+        expect(scenario.errorHandlers.NoSourcesFoundError).toHaveBeenCalledWith(
+          {
+            _tag: 'NoSourcesFoundError',
+            CWD: '/fake/dir',
+            patterns: ['/does/not/exist/package.json'],
+          },
+        );
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
     });
@@ -155,7 +157,9 @@ describe('Config Errors', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.RenamedWorkspaceTypeError).toHaveBeenCalledWith({
+        expect(
+          scenario.errorHandlers.RenamedWorkspaceTypeError,
+        ).toHaveBeenCalledWith({
           _tag: 'RenamedWorkspaceTypeError',
         });
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
@@ -178,7 +182,9 @@ describe('Config Errors', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.SemverGroupConfigError).toHaveBeenCalledWith({
+        expect(
+          scenario.errorHandlers.SemverGroupConfigError,
+        ).toHaveBeenCalledWith({
           _tag: 'SemverGroupConfigError',
           config: 'wrong',
           error: 'config is not an object',
@@ -208,13 +214,16 @@ describe('Config Errors', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.SemverGroupConfigError).toHaveBeenCalledWith({
+        expect(
+          scenario.errorHandlers.SemverGroupConfigError,
+        ).toHaveBeenCalledWith({
           _tag: 'SemverGroupConfigError',
           config: {
             isIgnored: true,
             range: '^',
           },
-          error: "it's unclear what kind of semver group you want, as it contains both isIgnored and range",
+          error:
+            "it's unclear what kind of semver group you want, as it contains both isIgnored and range",
         });
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
@@ -236,7 +245,9 @@ describe('Config Errors', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.VersionGroupConfigError).toHaveBeenCalledWith({
+        expect(
+          scenario.errorHandlers.VersionGroupConfigError,
+        ).toHaveBeenCalledWith({
           _tag: 'VersionGroupConfigError',
           config: 'wrong',
           error: 'config is not an object',
@@ -266,13 +277,16 @@ describe('Config Errors', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.VersionGroupConfigError).toHaveBeenCalledWith({
+        expect(
+          scenario.errorHandlers.VersionGroupConfigError,
+        ).toHaveBeenCalledWith({
           _tag: 'VersionGroupConfigError',
           config: {
             isIgnored: true,
             isBanned: true,
           },
-          error: "it's unclear what kind of version group you want, as it contains both isBanned and isIgnored",
+          error:
+            "it's unclear what kind of version group you want, as it contains both isBanned and isIgnored",
         });
         expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
       });
@@ -294,7 +308,9 @@ describe('Config Errors', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.DeprecatedTypesError).toHaveBeenCalledWith({
+        expect(
+          scenario.errorHandlers.DeprecatedTypesError,
+        ).toHaveBeenCalledWith({
           _tag: 'DeprecatedTypesError',
           types: ['dev'],
         });
@@ -350,7 +366,9 @@ describe('Config Errors', () => {
       it('exits 1', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.errorHandlers.InvalidCustomTypeError).toHaveBeenCalledWith({
+        expect(
+          scenario.errorHandlers.InvalidCustomTypeError,
+        ).toHaveBeenCalledWith({
           _tag: 'InvalidCustomTypeError',
           config: 'wrong',
           reason: 'Invalid customType',

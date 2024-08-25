@@ -29,7 +29,8 @@ export class Instance {
     strategy: Strategy.Any,
   ) {
     this.name = name;
-    this.pkgName = packageJsonFile.jsonFile.contents.name || 'PACKAGE_JSON_HAS_NO_NAME';
+    this.pkgName =
+      packageJsonFile.jsonFile.contents.name || 'PACKAGE_JSON_HAS_NO_NAME';
     this.packageJsonFile = packageJsonFile;
     this.strategy = strategy;
     this.semverGroup = null as unknown as SemverGroup.Any;
@@ -40,6 +41,9 @@ export class Instance {
   /** Mutate the package.json file in memory with the latest version specifier */
   write(rawSpecifier: string | Delete): Effect.Effect<PackageJsonFile> {
     this.rawSpecifier = Specifier.create(this, rawSpecifier);
-    return this.strategy.write(this.packageJsonFile, [this.name, this.rawSpecifier.raw]);
+    return this.strategy.write(this.packageJsonFile, [
+      this.name,
+      this.rawSpecifier.raw,
+    ]);
   }
 }

@@ -23,14 +23,16 @@ export class IgnoredVersionGroup extends Data.TaggedClass('Ignored')<{
 
   inspectAll(): Effect.Effect<Report.Version.Group[]> {
     return Effect.succeed(
-      Object.entries(groupBy('name', this.instances)).map(([name, instances]) => ({
-        name,
-        reports: instances.map(
-          (instance) =>
-            // ✓ is ignored and dismissed as valid
-            new Report.Ignored(instance),
-        ),
-      })),
+      Object.entries(groupBy('name', this.instances)).map(
+        ([name, instances]) => ({
+          name,
+          reports: instances.map(
+            instance =>
+              // ✓ is ignored and dismissed as valid
+              new Report.Ignored(instance),
+          ),
+        }),
+      ),
     );
   }
 }

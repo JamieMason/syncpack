@@ -16,7 +16,14 @@ export namespace VersionGroup {
   export type SnappedTo = SnappedToVersionGroup;
   export type Standard = StandardVersionGroup;
 
-  export type Any = Banned | FilteredOut | Ignored | Pinned | SameRange | SnappedTo | Standard;
+  export type Any =
+    | Banned
+    | FilteredOut
+    | Ignored
+    | Pinned
+    | SameRange
+    | SnappedTo
+    | Standard;
 
   export class ConfigError extends Data.TaggedClass('VersionGroupConfigError')<{
     readonly config: unknown;

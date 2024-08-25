@@ -1,8 +1,8 @@
+import type * as fs from 'node:fs';
+import { EOL } from 'node:os';
 import { Effect } from 'effect';
-import type * as fs from 'fs';
 import { globbySync } from 'globby';
-import { createFsFromVolume, Volume } from 'memfs';
-import { EOL } from 'os';
+import { Volume, createFsFromVolume } from 'memfs';
 import type { Mock } from 'vitest';
 import { vi } from 'vitest';
 import type { CliConfig } from '../../src/config/types.js';
@@ -56,7 +56,10 @@ export interface TestScenario {
  * little as I can think of which is solely dependencies which perform IO at the
  * very edges of the application.
  */
-export function createScenario(filesByName: Record<string, any>, cli: Partial<CliConfig> = {}) {
+export function createScenario(
+  filesByName: Record<string, any>,
+  cli: Partial<CliConfig> = {},
+) {
   return function getScenario(): TestScenario {
     const mockErrorHandlers = mock.errorHandlers();
     const mockFs = mock.fs(filesByName);
@@ -70,16 +73,24 @@ export function createScenario(filesByName: Record<string, any>, cli: Partial<Cl
       async getRootPackage(): Promise<PackageJsonFile> {
         const scenario = createScenario(filesByName)();
         const config = { cli: scenario.cli, rcFile: {} };
-        const [file] = await Effect.runPromise(getPackageJsonFiles(scenario.io, config));
-        if (!file) throw new Error('Invalid Test Scenario');
+        const [file] = await Effect.runPromise(
+          getPackageJsonFiles(scenario.io, config),
+        );
+        if (!file) {
+          throw new Error('Invalid Test Scenario');
+        }
         return file;
       },
       async getSemverReports() {
         return await Effect.runPromise(
           Effect.gen(function* ($) {
-            const ctx = yield* $(getContext({ io, cli, errorHandlers: mockErrorHandlers as any }));
-            const { semverGroups } = yield* $(getInstances(ctx, io, mockErrorHandlers));
-            const reportEffects = semverGroups.map((group) => group.inspectAll());
+            const ctx = yield* $(
+              getContext({ io, cli, errorHandlers: mockErrorHandlers as any }),
+            );
+            const { semverGroups } = yield* $(
+              getInstances(ctx, io, mockErrorHandlers),
+            );
+            const reportEffects = semverGroups.map(group => group.inspectAll());
             const reports = yield* $(Effect.all(reportEffects));
             return reports.flat();
           }),
@@ -88,11 +99,17 @@ export function createScenario(filesByName: Record<string, any>, cli: Partial<Cl
       async getVersionReports() {
         return await Effect.runPromise(
           Effect.gen(function* ($) {
-            const ctx = yield* $(getContext({ io, cli, errorHandlers: mockErrorHandlers as any }));
-            const { versionGroups } = yield* $(getInstances(ctx, io, mockErrorHandlers));
-            const reportEffects = versionGroups.map((group) => group.inspectAll());
+            const ctx = yield* $(
+              getContext({ io, cli, errorHandlers: mockErrorHandlers as any }),
+            );
+            const { versionGroups } = yield* $(
+              getInstances(ctx, io, mockErrorHandlers),
+            );
+            const reportEffects = versionGroups.map(group =>
+              group.inspectAll(),
+            );
             const reports = yield* $(Effect.all(reportEffects));
-            return reports.flat().filter((report) => report.reports.length > 0);
+            return reports.flat().filter(report => report.reports.length > 0);
           }),
         );
       },
@@ -131,7 +148,9 @@ const mock = {
     };
 
     function mockErrorHandler(name: string) {
-      return vi.fn((defaultErrorHandlers as any)[name]).mockName(`defaultErrorHandlers.${name}`);
+      return vi
+        .fn((defaultErrorHandlers as any)[name])
+        .mockName(`defaultErrorHandlers.${name}`);
     }
   },
   fs(filesByName: Record<string, any>): NodeFs {
@@ -153,15 +172,15 @@ const mock = {
       cosmiconfig: {
         cosmiconfig() {
           return {
-            async load(configPath: string) {
+            load(configPath: string) {
               const config = filesByName[configPath];
               const filepath = `/fake/dir/${configPath}`;
-              return config ? { config, filepath } : null;
+              return Promise.resolve(config ? { config, filepath } : null);
             },
-            async search() {
+            search() {
               const config = filesByName['.syncpackrc'];
               const filepath = '/fake/dir/.syncpackrc';
-              return config ? { config, filepath } : null;
+              return Promise.resolve(config ? { config, filepath } : null);
             },
             clearLoadCache() {},
             clearSearchCache() {},

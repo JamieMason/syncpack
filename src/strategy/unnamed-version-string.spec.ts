@@ -18,9 +18,15 @@ it('gets and sets an anonymous version from a single string', async () => {
   });
   const initial = [['someVersion', '1.2.3']];
   const updated = [['someVersion', '2.0.0']];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['someVersion', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['someVersion', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 it('gets and sets an anonymous version from a single string in a nested location', async () => {
@@ -35,9 +41,15 @@ it('gets and sets an anonymous version from a single string in a nested location
   });
   const initial = [['node', '1.2.3']];
   const updated = [['node', '2.0.0']];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['node', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['node', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 it('returns empty array when path is not found', async () => {
@@ -47,5 +59,7 @@ it('returns empty array when path is not found', async () => {
       name: 'foo',
     },
   });
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed([]));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed([]),
+  );
 });

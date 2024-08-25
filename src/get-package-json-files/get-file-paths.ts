@@ -7,7 +7,9 @@ import { globSync } from '../io/glob-sync.js';
 import type { Io } from '../io/index.js';
 import { getPatterns } from './get-patterns/index.js';
 
-export class NoSourcesFoundError extends Data.TaggedClass('NoSourcesFoundError')<{
+export class NoSourcesFoundError extends Data.TaggedClass(
+  'NoSourcesFoundError',
+)<{
   readonly CWD: string;
   readonly patterns: string[];
 }> {}
@@ -27,7 +29,9 @@ export function getFilePaths(
     Effect.Do,
     Effect.bind('patterns', () => getPatterns(io, config)),
     Effect.bind('filePaths', ({ patterns }) => globSync(io, patterns)),
-    Effect.bind('flatFilePaths', ({ filePaths }) => Effect.sync(() => uniq(filePaths.flat()))),
+    Effect.bind('flatFilePaths', ({ filePaths }) =>
+      Effect.sync(() => uniq(filePaths.flat())),
+    ),
     Effect.flatMap(({ flatFilePaths, patterns }) =>
       isNonEmptyArray(flatFilePaths)
         ? Effect.succeed(flatFilePaths)

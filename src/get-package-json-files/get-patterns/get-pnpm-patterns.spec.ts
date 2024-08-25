@@ -1,11 +1,16 @@
 import { Effect, Option as O, pipe } from 'effect';
 import { expect, it } from 'vitest';
-import { createScenario, type TestScenario } from '../../../test/lib/create-scenario.js';
+import {
+  type TestScenario,
+  createScenario,
+} from '../../../test/lib/create-scenario.js';
 import { getPnpmPatterns } from './get-pnpm-patterns.js';
 
 async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();
-  return await Effect.runPromise(pipe(getPnpmPatterns(scenario.io), Effect.merge));
+  return await Effect.runPromise(
+    pipe(getPnpmPatterns(scenario.io), Effect.merge),
+  );
 }
 
 it('returns strings when found', async () => {
@@ -46,5 +51,7 @@ it('returns none when pnpm-workspace.yaml is invalid', async () => {
   scenario.mockIo.readYamlFile.sync.mockImplementation(() => {
     throw new Error('wat?');
   });
-  expect(await Effect.runPromise(pipe(getPnpmPatterns(scenario.io), Effect.merge))).toEqual(O.none());
+  expect(
+    await Effect.runPromise(pipe(getPnpmPatterns(scenario.io), Effect.merge)),
+  ).toEqual(O.none());
 });

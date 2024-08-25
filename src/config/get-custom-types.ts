@@ -17,7 +17,9 @@ export namespace Strategy {
     | VersionsByNameStrategy;
 }
 
-export class InvalidCustomTypeError extends Data.TaggedClass('InvalidCustomTypeError')<{
+export class InvalidCustomTypeError extends Data.TaggedClass(
+  'InvalidCustomTypeError',
+)<{
   readonly config: unknown;
   readonly reason: string;
 }> {}
@@ -25,43 +27,54 @@ export class InvalidCustomTypeError extends Data.TaggedClass('InvalidCustomTypeE
 export function getCustomTypes({
   rcFile,
 }: Ctx['config']): Effect.Effect<Strategy.Any[], InvalidCustomTypeError> {
-  if (!isNonEmptyObject(rcFile.customTypes)) return Effect.succeed([]);
+  if (!isNonEmptyObject(rcFile.customTypes)) {
+    return Effect.succeed([]);
+  }
 
   return Effect.all(
-    [...Object.entries(rcFile.customTypes), ...Object.entries(DEFAULT_CONFIG.customTypes)].map(
-      ([name, config]) => {
-        const ERR_OBJ = 'Invalid customType';
-        const ERR_PATH = 'Invalid customType.path';
-        const ERR_NAME_PATH = 'Invalid customType.namePath';
-        const ERR_STRATEGY = 'Invalid customType.strategy';
+    [
+      ...Object.entries(rcFile.customTypes),
+      ...Object.entries(DEFAULT_CONFIG.customTypes),
+    ].map(([name, config]) => {
+      const errObj = 'Invalid customType';
+      const errPath = 'Invalid customType.path';
+      const errNamePath = 'Invalid customType.namePath';
+      const errStrategy = 'Invalid customType.strategy';
 
-        if (!isObject(config)) return createError(config, ERR_OBJ);
-        if (!isNonEmptyString(config.path)) return createError(config, ERR_PATH);
+      if (!isObject(config)) {
+        return createError(config, errObj);
+      }
+      if (!isNonEmptyString(config.path)) {
+        return createError(config, errPath);
+      }
 
-        const path = config.path;
-        const strategy = config.strategy;
+      const path = config.path;
+      const strategy = config.strategy;
 
-        switch (strategy) {
-          case 'name~version': {
-            const namePath = config.namePath;
-            if (!isNonEmptyString(namePath)) return createError(config, ERR_NAME_PATH);
-            return Effect.succeed(new NameAndVersionPropsStrategy(name, path, namePath));
+      switch (strategy) {
+        case 'name~version': {
+          const namePath = config.namePath;
+          if (!isNonEmptyString(namePath)) {
+            return createError(config, errNamePath);
           }
-          case 'name@version': {
-            return Effect.succeed(new NamedVersionStringStrategy(name, path));
-          }
-          case 'version': {
-            return Effect.succeed(new UnnamedVersionStringStrategy(name, path));
-          }
-          case 'versionsByName': {
-            return Effect.succeed(new VersionsByNameStrategy(name, path));
-          }
-          default: {
-            return createError(config, ERR_STRATEGY);
-          }
+          return Effect.succeed(
+            new NameAndVersionPropsStrategy(name, path, namePath),
+          );
         }
-      },
-    ),
+        case 'name@version': {
+          return Effect.succeed(new NamedVersionStringStrategy(name, path));
+        }
+        case 'version': {
+          return Effect.succeed(new UnnamedVersionStringStrategy(name, path));
+        }
+        case 'versionsByName': {
+          return Effect.succeed(new VersionsByNameStrategy(name, path));
+        }
+        default: {
+          return createError(config, errStrategy);
+        }
+      }
+    }),
   );
 }
 

@@ -6,17 +6,17 @@ import { getSortAz } from '../config/get-sort-az.js';
 import { getSortExports } from '../config/get-sort-exports.js';
 import { getSortFirst } from '../config/get-sort-first.js';
 import { CliConfigTag } from '../config/tag.js';
-import { type CliConfig } from '../config/types.js';
+import type { CliConfig } from '../config/types.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import type { Ctx } from '../get-context/index.js';
 import { getContext } from '../get-context/index.js';
+import type { PackageJson } from '../get-package-json-files/package-json-file.js';
 import { exitIfInvalid } from '../io/exit-if-invalid.js';
 import type { Io } from '../io/index.js';
 import { IoTag } from '../io/index.js';
 import { writeIfChanged } from '../io/write-if-changed.js';
 import { withLogger } from '../lib/with-logger.js';
-import type { PackageJson } from '../get-package-json-files/package-json-file.js';
 
 interface Input {
   io: Io;
@@ -24,11 +24,15 @@ interface Input {
   errorHandlers?: ErrorHandlers;
 }
 
-export function format({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
+export function format({
+  io,
+  cli,
+  errorHandlers = defaultErrorHandlers,
+}: Input) {
   return pipe(
     getContext({ io, cli, errorHandlers }),
     Effect.flatMap(pipeline),
-    Effect.flatMap((ctx) =>
+    Effect.flatMap(ctx =>
       pipe(
         writeIfChanged(ctx),
         Effect.catchTags({
@@ -43,7 +47,13 @@ export function format({ io, cli, errorHandlers = defaultErrorHandlers }: Input)
       ),
     ),
     Effect.flatMap(exitIfInvalid),
-    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    Effect.provide(
+      pipe(
+        Context.empty(),
+        Context.add(CliConfigTag, cli),
+        Context.add(IoTag, io),
+      ),
+    ),
     withLogger,
   );
 }
@@ -57,7 +67,7 @@ export function pipeline(ctx: Ctx): Effect.Effect<Ctx> {
   const formatBugs = config.rcFile.formatBugs !== false;
   const formatRepository = config.rcFile.formatRepository !== false;
 
-  packageJsonFiles.forEach((file) => {
+  packageJsonFiles.forEach(file => {
     const { contents } = file.jsonFile;
     const chain: any = contents;
 
@@ -83,7 +93,7 @@ export function pipeline(ctx: Ctx): Effect.Effect<Ctx> {
     }
 
     if (sortAz.length > 0) {
-      sortAz.forEach((key) => sortAlphabetically(contents[key]));
+      sortAz.forEach(key => sortAlphabetically(contents[key]));
     }
 
     if (sortPackages) {
@@ -106,11 +116,16 @@ function visitExports(sortExports: string[], value: unknown): void {
     const otherKeys = Object.keys(value);
     const sortedKeys = new Set([...sortExports, ...otherKeys]);
     sortObject(sortedKeys, value);
-    Object.values(value).forEach((nextValue) => visitExports(sortExports, nextValue));
+    Object.values(value).forEach(nextValue =>
+      visitExports(sortExports, nextValue),
+    );
   }
 }
 
-function sortObject(sortedKeys: string[] | Set<string>, obj: Record<string, unknown>): void {
+function sortObject(
+  sortedKeys: string[] | Set<string>,
+  obj: Record<string, unknown>,
+): void {
   sortedKeys.forEach((key: string) => {
     const value = obj[key];
     delete obj[key];

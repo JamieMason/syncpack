@@ -18,9 +18,10 @@ export class AliasSpecifier extends BaseSpecifier<T> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),
-      Effect.map((parsed) => parsed.subSpec),
-      Effect.flatMap((subSpec) =>
-        ['range', 'version'].includes(subSpec.type) && subSpec.fetchSpec !== null
+      Effect.map(parsed => parsed.subSpec),
+      Effect.flatMap(subSpec =>
+        ['range', 'version'].includes(subSpec.type) &&
+        subSpec.fetchSpec !== null
           ? Effect.succeed(subSpec.fetchSpec)
           : NonSemverError.asEffect(this),
       ),
@@ -32,10 +33,10 @@ export class AliasSpecifier extends BaseSpecifier<T> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),
-      Effect.map((parsed) => parsed.subSpec),
-      Effect.map((subSpec) => subSpec.name || ''),
-      Effect.map((name) => `npm:${name}@${version}`),
-      Effect.map((raw) => Specifier.create(this.instance, raw)),
+      Effect.map(parsed => parsed.subSpec),
+      Effect.map(subSpec => subSpec.name || ''),
+      Effect.map(name => `npm:${name}@${version}`),
+      Effect.map(raw => Specifier.create(this.instance, raw)),
     );
   }
 }

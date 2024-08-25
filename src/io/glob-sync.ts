@@ -5,7 +5,10 @@ export class GlobError extends Data.TaggedClass('GlobError')<{
   readonly error: string;
 }> {}
 
-export function globSync(io: Io, patterns: string[]): Effect.Effect<string[], GlobError> {
+export function globSync(
+  io: Io,
+  patterns: string[],
+): Effect.Effect<string[], GlobError> {
   return Effect.try({
     try: () =>
       io.globby.sync(patterns, {
@@ -14,6 +17,6 @@ export function globSync(io: Io, patterns: string[]): Effect.Effect<string[], Gl
         fs: io.fs,
         ignore: ['**/node_modules/**'],
       }),
-    catch: (err) => new GlobError({ error: String(err) }),
+    catch: err => new GlobError({ error: String(err) }),
   });
 }

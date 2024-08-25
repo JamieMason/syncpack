@@ -194,7 +194,10 @@ describe('mismatches', () => {
               const reports = await getScenario().getVersionReports();
               expect(reports).toHaveLength(2);
               expect(reports).toHaveProperty('0.name', 'foo');
-              expect(reports).toHaveProperty('0.reports.0._tag', 'PinnedMismatch');
+              expect(reports).toHaveProperty(
+                '0.reports.0._tag',
+                'PinnedMismatch',
+              );
             });
           });
 
@@ -235,7 +238,10 @@ describe('mismatches', () => {
               const scenario = getScenario();
               await Effect.runPromiseExit(fixMismatches(scenario));
               const filesByName = scenario.readPackages();
-              expect(filesByName).toHaveProperty('a.dependencies.foo', '~0.1.0');
+              expect(filesByName).toHaveProperty(
+                'a.dependencies.foo',
+                '~0.1.0',
+              );
               expect(scenario.io.process.exit).not.toHaveBeenCalled();
             });
           });
@@ -273,7 +279,10 @@ describe('mismatches', () => {
               const reports = await getScenario().getVersionReports();
               expect(reports).toHaveLength(2);
               expect(reports).toHaveProperty('1.name', 'foo');
-              expect(reports).toHaveProperty('1.reports.0._tag', 'PinnedMismatch');
+              expect(reports).toHaveProperty(
+                '1.reports.0._tag',
+                'PinnedMismatch',
+              );
             });
           });
 
@@ -314,7 +323,10 @@ describe('mismatches', () => {
               const scenario = getScenario();
               await Effect.runPromiseExit(fixMismatches(scenario));
               const filesByName = scenario.readPackages();
-              expect(filesByName).toHaveProperty('a.dependencies.foo', '~0.1.0');
+              expect(filesByName).toHaveProperty(
+                'a.dependencies.foo',
+                '~0.1.0',
+              );
               expect(scenario.io.process.exit).not.toHaveBeenCalled();
             });
           });
@@ -348,7 +360,10 @@ describe('mismatches', () => {
             const reports = await getScenario().getVersionReports();
             expect(reports).toHaveLength(2);
             expect(reports).toHaveProperty('1.name', 'foo');
-            expect(reports).toHaveProperty('1.reports.0._tag', 'PinnedMismatch');
+            expect(reports).toHaveProperty(
+              '1.reports.0._tag',
+              'PinnedMismatch',
+            );
           });
         });
 

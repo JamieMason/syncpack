@@ -55,7 +55,10 @@ describe('matches', () => {
       it('does not remove others', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.readPackages()).toHaveProperty('a.dependencies.bar', '0.1.0');
+        expect(scenario.readPackages()).toHaveProperty(
+          'a.dependencies.bar',
+          '0.1.0',
+        );
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
@@ -118,7 +121,9 @@ describe('mismatches', () => {
       it('removes them', async () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
-        expect(scenario.readPackages()).not.toHaveProperty('a.dependencies.foo');
+        expect(scenario.readPackages()).not.toHaveProperty(
+          'a.dependencies.foo',
+        );
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });

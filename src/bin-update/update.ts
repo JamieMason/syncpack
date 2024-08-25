@@ -2,7 +2,7 @@ import chalk from 'chalk-template';
 import { Context, Effect, flow, pipe } from 'effect';
 import { gtr } from 'semver';
 import { CliConfigTag } from '../config/tag.js';
-import { type CliConfig } from '../config/types.js';
+import type { CliConfig } from '../config/types.js';
 import { ICON } from '../constants.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
@@ -30,16 +30,19 @@ export function update(
     Effect.bind('update', ({ instances }) =>
       pipe(
         Effect.succeed(instances.all),
-        Effect.map((instances) => {
+        Effect.map(instances => {
           const isVisitedByName: Record<string, boolean> = {};
           const updateable: Instance[] = [];
-          instances.forEach((instance) => {
+          instances.forEach(instance => {
             if (
               !isVisitedByName[instance.name] &&
               (instance.versionGroup._tag === 'SameRange' ||
                 instance.versionGroup._tag === 'Standard')
             ) {
-              const specifier = Specifier.create(instance, instance.rawSpecifier.raw);
+              const specifier = Specifier.create(
+                instance,
+                instance.rawSpecifier.raw,
+              );
               if (specifier._tag === 'Range' || specifier._tag === 'Exact') {
                 isVisitedByName[instance.name] = true;
                 updateable.push(instance);
@@ -49,24 +52,33 @@ export function update(
           return updateable;
         }),
         Effect.tap(updateEffects.onFetchAllStart),
-        Effect.flatMap((instances) =>
+        Effect.flatMap(instances =>
           pipe(
             instances,
             Effect.partition(
-              (instance) =>
+              instance =>
                 pipe(
                   Effect.succeed(instance),
-                  Effect.tap(() => updateEffects.onFetchStart(instance, instances.length)),
+                  Effect.tap(() =>
+                    updateEffects.onFetchStart(instance, instances.length),
+                  ),
                   Effect.flatMap(effects.fetchLatestVersions),
                   Effect.tapBoth({
                     onFailure: () => updateEffects.onFetchEnd(instance),
-                    onSuccess: ({ versions }) => updateEffects.onFetchEnd(instance, versions),
+                    onSuccess: ({ versions }) =>
+                      updateEffects.onFetchEnd(instance, versions),
                   }),
                   // move up to date dependencies to error channel
-                  Effect.flatMap((updateable) =>
-                    gtr(updateable.versions.latest, String(instance.rawSpecifier.raw))
+                  Effect.flatMap(updateable =>
+                    gtr(
+                      updateable.versions.latest,
+                      String(instance.rawSpecifier.raw),
+                    )
                       ? pipe(
-                          updateEffects.onOutdated(instance, updateable.versions.latest),
+                          updateEffects.onOutdated(
+                            instance,
+                            updateable.versions.latest,
+                          ),
                           Effect.map(() => updateable),
                         )
                       : pipe(
@@ -120,7 +132,13 @@ export function update(
     ),
     Effect.flatMap(exitIfInvalid),
     Effect.withConcurrency(10),
-    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    Effect.provide(
+      pipe(
+        Context.empty(),
+        Context.add(CliConfigTag, cli),
+        Context.add(IoTag, io),
+      ),
+    ),
     withLogger,
   );
 }

@@ -1,4 +1,4 @@
-import { EOL } from 'os';
+import { EOL } from 'node:os';
 import { getIndent } from '../config/get-indent.js';
 import type { Ctx } from '../get-context/index.js';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
@@ -14,9 +14,15 @@ export const newlines = {
     const cr = source.split(CR).length;
     const lf = source.split(LF).length;
     const crlf = source.split(CRLF).length;
-    if (cr + lf === 0) return EOL;
-    if (crlf === cr && crlf === lf) return CRLF;
-    if (cr > lf) return CR;
+    if (cr + lf === 0) {
+      return EOL;
+    }
+    if (crlf === cr && crlf === lf) {
+      return CRLF;
+    }
+    if (cr > lf) {
+      return CR;
+    }
     return LF;
   },
   fix(source: string, lineEnding: Ending): string {
@@ -27,7 +33,7 @@ export const newlines = {
 export function toJson(ctx: Ctx, file: PackageJsonFile): string {
   const contents = file.jsonFile.contents;
   const indent = getIndent(ctx.config);
-  const EOL = newlines.detect(file.jsonFile.json);
-  const source = `${JSON.stringify(contents, null, indent)}${EOL}`;
-  return newlines.fix(source, EOL);
+  const eol = newlines.detect(file.jsonFile.json);
+  const source = `${JSON.stringify(contents, null, indent)}${eol}`;
+  return newlines.fix(source, eol);
 }

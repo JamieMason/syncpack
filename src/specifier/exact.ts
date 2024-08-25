@@ -21,7 +21,7 @@ export class ExactSpecifier extends BaseSpecifier<T> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),
-      Effect.map((parsed) => parsed.fetchSpec),
+      Effect.map(parsed => parsed.fetchSpec),
     );
   }
 

@@ -1,5 +1,5 @@
+import { normalize } from 'node:path';
 import { Effect, pipe } from 'effect';
-import { normalize } from 'path';
 import { describe, expect, it, test, vi } from 'vitest';
 import { createScenario } from '../../test/lib/create-scenario.js';
 import { shape } from '../../test/lib/matchers.js';
@@ -78,7 +78,9 @@ describe('finds package.json files', () => {
         name: 'foo',
       },
     })();
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -113,7 +115,9 @@ describe('finds package.json files', () => {
         source: ['apps/baz/package.json'],
       },
     )();
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -140,7 +144,9 @@ describe('finds package.json files', () => {
         name: 'bar',
       },
     })();
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -167,7 +173,9 @@ describe('finds package.json files', () => {
       },
     })();
 
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -196,7 +204,9 @@ describe('finds package.json files', () => {
       },
     })();
 
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -235,7 +245,9 @@ describe('finds package.json files', () => {
       throw new Error('some error');
     });
 
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -262,7 +274,9 @@ describe('finds package.json files', () => {
       'lerna.json': 'NOT-VALID-JSON',
     })();
 
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -291,7 +305,9 @@ describe('finds package.json files', () => {
       },
     })();
 
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {},
@@ -319,7 +335,9 @@ describe('finds syncpack config file', () => {
       },
     })();
 
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -351,7 +369,9 @@ describe('finds syncpack config file', () => {
         configPath: '.foorc',
       },
     )();
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {
@@ -378,7 +398,9 @@ describe('finds syncpack config file', () => {
       },
     })();
 
-    const ctx = await Effect.runPromise(pipe(getContext(scenario), Effect.merge));
+    const ctx = await Effect.runPromise(
+      pipe(getContext(scenario), Effect.merge),
+    );
     expect(ctx).toHaveProperty('config', {
       cli: scenario.cli,
       rcFile: {

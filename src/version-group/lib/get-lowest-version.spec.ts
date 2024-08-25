@@ -32,7 +32,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '*',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns ">1.0.0" when added', async () => {
@@ -40,7 +42,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '>1.0.0',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns ">=1.0.0" when added', async () => {
@@ -48,7 +52,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '>=1.0.0',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "^1.0.0" when added', async () => {
@@ -56,7 +62,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '^1.0.0',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "1.x.x" when added', async () => {
@@ -64,7 +72,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '1.x.x',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "~1.0.0" when added', async () => {
@@ -72,7 +82,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '~1.0.0',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "1.0.0" when added', async () => {
@@ -80,7 +92,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '1.0.0',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "1" when added', async () => {
@@ -88,7 +102,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: eitherFormat,
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "<=1.0.0" when added', async () => {
@@ -96,7 +112,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '<=1.0.0',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "<1.0.0" when added', async () => {
@@ -104,7 +122,9 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: '<1.0.0',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 
   it('returns "workspace:*" when added', async () => {
@@ -112,6 +132,8 @@ describe('getLowestVersion', () => {
     const expected = expect.objectContaining({
       raw: 'workspace:*',
     });
-    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(expected);
+    expect(await Effect.runPromise(getLowestVersion(specifiers))).toEqual(
+      expected,
+    );
   });
 });

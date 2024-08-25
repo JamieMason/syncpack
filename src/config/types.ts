@@ -20,7 +20,17 @@ import type { Specifier } from '../specifier/index.js';
  *
  * @default ""
  */
-export type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~' | 'workspace:';
+export type SemverRange =
+  | ''
+  | '*'
+  | '>'
+  | '>='
+  | '.x'
+  | '<'
+  | '<='
+  | '^'
+  | '~'
+  | 'workspace:';
 
 type DefaultDependencyType = keyof typeof CUSTOM_TYPES;
 
@@ -97,7 +107,13 @@ export namespace VersionGroupConfig {
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
 
-  export type Any = Banned | Ignored | Pinned | SameRange | SnappedTo | Standard;
+  export type Any =
+    | Banned
+    | Ignored
+    | Pinned
+    | SameRange
+    | SnappedTo
+    | Standard;
 }
 
 namespace CustomTypeConfig {

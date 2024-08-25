@@ -18,13 +18,23 @@ it('gets and sets a name and version from 2 seperate locations', async () => {
   const strategy = new NameAndVersionPropsStrategy('local', 'version', 'name');
   const initial = [['foo', '1.2.3']];
   const updated = [['foo', '2.0.0']];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['foo', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['foo', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 it('gets and sets a name and version from 2 seperate nested locations', async () => {
-  const strategy = new NameAndVersionPropsStrategy('custom', 'deeper.versionNumber', 'sibling.id');
+  const strategy = new NameAndVersionPropsStrategy(
+    'custom',
+    'deeper.versionNumber',
+    'sibling.id',
+  );
   const file = await getRootPackage({
     'package.json': {
       name: 'foo',
@@ -38,24 +48,40 @@ it('gets and sets a name and version from 2 seperate nested locations', async ()
   });
   const initial = [['some-name', '1.2.3']];
   const updated = [['some-name', '2.0.0']];
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(initial));
-  expect(await Effect.runPromiseExit(strategy.write(file, ['some-name', '2.0.0']))).toEqual(Effect.succeed(file));
-  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed(updated));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(initial),
+  );
+  expect(
+    await Effect.runPromiseExit(strategy.write(file, ['some-name', '2.0.0'])),
+  ).toEqual(Effect.succeed(file));
+  expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+    Effect.succeed(updated),
+  );
 });
 
 describe('when name is "local" used internally for local packages', () => {
   it('returns empty array when namePath is not found', async () => {
-    const strategy = new NameAndVersionPropsStrategy('local', 'version', 'never.gonna');
+    const strategy = new NameAndVersionPropsStrategy(
+      'local',
+      'version',
+      'never.gonna',
+    );
     const file = await getRootPackage({
       'package.json': {
         version: '0.0.0',
       },
     });
-    expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed([]));
+    expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+      Effect.succeed([]),
+    );
   });
 
   it('returns an entry marked as missing when version (path) is not found', async () => {
-    const strategy = new NameAndVersionPropsStrategy('local', 'never.gonna', 'name');
+    const strategy = new NameAndVersionPropsStrategy(
+      'local',
+      'never.gonna',
+      'name',
+    );
     const file = await getRootPackage({
       'package.json': {
         name: 'foo',
@@ -70,23 +96,35 @@ describe('when name is "local" used internally for local packages', () => {
 
 describe('when name is not "local"', () => {
   it('returns empty array when namePath is not found', async () => {
-    const strategy = new NameAndVersionPropsStrategy('someName', 'version', 'never.gonna');
+    const strategy = new NameAndVersionPropsStrategy(
+      'someName',
+      'version',
+      'never.gonna',
+    );
     const file = await getRootPackage({
       'package.json': {
         version: '0.0.0',
       },
     });
-    expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed([]));
+    expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+      Effect.succeed([]),
+    );
   });
 
   it('returns empty array when version (path) is not found', async () => {
-    const strategy = new NameAndVersionPropsStrategy('someName', 'never.gonna', 'name');
+    const strategy = new NameAndVersionPropsStrategy(
+      'someName',
+      'never.gonna',
+      'name',
+    );
     const file = await getRootPackage({
       'package.json': {
         name: 'foo',
         version: '0.0.0',
       },
     });
-    expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(Effect.succeed([]));
+    expect(await Effect.runPromiseExit(strategy.read(file))).toEqual(
+      Effect.succeed([]),
+    );
   });
 });

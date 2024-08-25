@@ -1,9 +1,9 @@
+import https from 'node:https';
+import { EOL } from 'node:os';
 import * as Schema from '@effect/schema/Schema';
 import chalk from 'chalk-template';
 import { Data, Effect, identity, pipe } from 'effect';
-import https from 'https';
 import ora, { type Ora } from 'ora';
-import { EOL } from 'os';
 import prompts from 'prompts';
 import type { ReleaseType } from 'semver';
 import { diff } from 'semver';
@@ -68,13 +68,16 @@ function format(instance: Instance) {
 /** we need to remove colours when sorting loading status output */
 function stripAnsi(str: string) {
   // eslint-disable-next-line no-control-regex
-  const ansiChars = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+  const ansiChars =
+    /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
   return str.replace(ansiChars, '');
 }
 
 export const updateEffects = {
   onFetchAllStart() {
-    if (!spinner) spinner = ora().start();
+    if (!spinner) {
+      spinner = ora().start();
+    }
     fetchedCount = 0;
     return Effect.void;
   },
@@ -83,7 +86,10 @@ export const updateEffects = {
     fetchedCount++;
     if (spinner) {
       const indent = `${EOL}  `;
-      const progress = new Set([...mostRecent.filter(Boolean), ...inFlight.values()]);
+      const progress = new Set([
+        ...mostRecent.filter(Boolean),
+        ...inFlight.values(),
+      ]);
       const sortedProgress = Array.from(progress).sort((a, b) =>
         stripAnsi(a).localeCompare(stripAnsi(b)),
       );
@@ -122,13 +128,17 @@ export const updateEffects = {
   },
   /** As the last request completes, remove the progress information */
   onFetchAllEnd() {
-    if (spinner) spinner.stop();
+    if (spinner) {
+      spinner.stop();
+    }
     spinner = null;
     fetchedCount = 0;
     return Effect.void;
   },
   /** Fetch available versions for a given package from the npm registry */
-  fetchLatestVersions(instance: Instance): Effect.Effect<Releases, HttpError | NpmRegistryError> {
+  fetchLatestVersions(
+    instance: Instance,
+  ): Effect.Effect<Releases, HttpError | NpmRegistryError> {
     return pipe(
       fetchJson(`https://registry.npmjs.org/${instance.name}`),
       // parse and validate the specific data we expect
@@ -136,23 +146,30 @@ export const updateEffects = {
         Schema.decodeUnknownEither(
           Schema.Struct({
             'dist-tags': Schema.Struct({ latest: Schema.String }),
-            'time': Schema.Record({ key: Schema.String, value: Schema.String }),
-            'homepage': Schema.optional(Schema.String),
-            'repository': Schema.optional(
-              Schema.Union(Schema.String, Schema.Struct({ url: Schema.optional(Schema.String) })),
+            time: Schema.Record({ key: Schema.String, value: Schema.String }),
+            homepage: Schema.optional(Schema.String),
+            repository: Schema.optional(
+              Schema.Union(
+                Schema.String,
+                Schema.Struct({ url: Schema.optional(Schema.String) }),
+              ),
             ),
           }),
         ),
       ),
       // transform it into something more appropriate
-      Effect.map((struct) => {
+      Effect.map(struct => {
         const rawRepoUrl =
-          typeof struct.repository === 'object' ? struct.repository.url : struct.repository;
+          typeof struct.repository === 'object'
+            ? struct.repository.url
+            : struct.repository;
 
         return new Releases({
           instance,
           versions: {
-            all: Object.keys(struct.time).filter((key) => key !== 'modified' && key !== 'created'),
+            all: Object.keys(struct.time).filter(
+              key => key !== 'modified' && key !== 'created',
+            ),
             latest: struct['dist-tags'].latest,
           },
           repoUrl: formatRepositoryUrl(rawRepoUrl),
@@ -161,7 +178,11 @@ export const updateEffects = {
       // hide ParseErrors and just treat them as another kind of NpmRegistryError
       Effect.catchTags({
         ParseError: () =>
-          Effect.fail(new NpmRegistryError({ error: `Invalid response for ${instance.name}` })),
+          Effect.fail(
+            new NpmRegistryError({
+              error: `Invalid response for ${instance.name}`,
+            }),
+          ),
       }),
     );
   },
@@ -174,8 +195,8 @@ export const updateEffects = {
       Effect.bind('releaseTypeQuestions', ({ releasesByType }) =>
         Effect.succeed(
           Object.keys(releasesByType)
-            .filter((type) => releasesByType[type as ReleaseType].length > 0)
-            .map((type) => ({
+            .filter(type => releasesByType[type as ReleaseType].length > 0)
+            .map(type => ({
               title: chalk`${releasesByType[type as ReleaseType].length} ${type}`,
               selected: true,
               value: type,
@@ -194,12 +215,14 @@ export const updateEffects = {
                     instructions: true,
                     message: `${outdated.length} updates are available`,
                     choices: releaseTypeQuestions,
-                  }).then((res) => res?.releaseTypeAnswers || []),
+                  }).then(res => res?.releaseTypeAnswers || []),
                 catch: identity,
               }),
               Effect.catchAll(() =>
                 pipe(
-                  Effect.logError('Error when prompting for releaseTypeAnswers'),
+                  Effect.logError(
+                    'Error when prompting for releaseTypeAnswers',
+                  ),
                   Effect.map(() => []),
                 ),
               ),
@@ -207,15 +230,29 @@ export const updateEffects = {
           : Effect.succeed([]),
       ),
       // For each chosen release type, list the available updates to choose from
-      Effect.bind('prepatchAnswers', (doState) => promptForReleaseType('prepatch', doState)),
-      Effect.bind('patchAnswers', (doState) => promptForReleaseType('patch', doState)),
-      Effect.bind('preminorAnswers', (doState) => promptForReleaseType('preminor', doState)),
-      Effect.bind('minorAnswers', (doState) => promptForReleaseType('minor', doState)),
-      Effect.bind('premajorAnswers', (doState) => promptForReleaseType('premajor', doState)),
-      Effect.bind('majorAnswers', (doState) => promptForReleaseType('major', doState)),
-      Effect.bind('prereleaseAnswers', (doState) => promptForReleaseType('prerelease', doState)),
+      Effect.bind('prepatchAnswers', doState =>
+        promptForReleaseType('prepatch', doState),
+      ),
+      Effect.bind('patchAnswers', doState =>
+        promptForReleaseType('patch', doState),
+      ),
+      Effect.bind('preminorAnswers', doState =>
+        promptForReleaseType('preminor', doState),
+      ),
+      Effect.bind('minorAnswers', doState =>
+        promptForReleaseType('minor', doState),
+      ),
+      Effect.bind('premajorAnswers', doState =>
+        promptForReleaseType('premajor', doState),
+      ),
+      Effect.bind('majorAnswers', doState =>
+        promptForReleaseType('major', doState),
+      ),
+      Effect.bind('prereleaseAnswers', doState =>
+        promptForReleaseType('prerelease', doState),
+      ),
       /** Apply every update to the package.json files */
-      Effect.flatMap((doState) =>
+      Effect.flatMap(doState =>
         pipe(
           [
             ...doState.prepatchAnswers,
@@ -228,8 +265,12 @@ export const updateEffects = {
           ],
           Effect.forEach(({ instance, versions }) =>
             pipe(
-              instance.semverGroup.getFixed(Specifier.create(instance, versions.latest)),
-              Effect.flatMap((latestWithRange) => instance.write(latestWithRange.raw)),
+              instance.semverGroup.getFixed(
+                Specifier.create(instance, versions.latest),
+              ),
+              Effect.flatMap(latestWithRange =>
+                instance.write(latestWithRange.raw),
+              ),
               Effect.catchTag('NonSemverError', Effect.logError),
             ),
           ),
@@ -258,13 +299,15 @@ function promptForReleaseType(
               // @ts-expect-error optionsPerPage *does* exist https://github.com/terkelg/prompts#options-7
               optionsPerPage,
               message: `${releases.length} ${releaseType} updates`,
-              choices: releases.map((updateable) => {
+              choices: releases.map(updateable => {
                 const spacingValue =
                   50 -
                   updateable.instance.name.length -
                   String(updateable.instance.rawSpecifier).length -
                   updateable.versions.latest.length;
-                const spacing = Array.from({ length: spacingValue }).fill(' ').join('');
+                const spacing = Array.from({ length: spacingValue })
+                  .fill(' ')
+                  .join('');
 
                 const repoUrl = updateable.repoUrl
                   ? chalk`${spacing} {white - ${updateable.repoUrl}}`
@@ -282,14 +325,16 @@ function promptForReleaseType(
         // Paper over errors in terkelg/prompts for now
         Effect.catchAll(() =>
           pipe(
-            Effect.logError(`terkelg/prompts errored while prompting for ${prop}`),
+            Effect.logError(
+              `terkelg/prompts errored while prompting for ${prop}`,
+            ),
             Effect.map(() => ({ [prop]: [] })),
           ),
         ),
         // In terkelg/prompts, an empty object means that the user cancelled via
         // ctrl+c or the escape key etc. Handle this case so we can skip any
         // remaining steps.
-        Effect.flatMap((res) =>
+        Effect.flatMap(res =>
           isEmptyObject(res)
             ? Effect.fail(new PromptCancelled({ name: releaseType }))
             : Effect.succeed(isArray(res?.[prop]) ? res?.[prop] : []),
@@ -298,11 +343,16 @@ function promptForReleaseType(
     : Effect.succeed([]);
 }
 
-function groupByReleaseType(releases: Releases[]): Effect.Effect<ReleasesByType> {
+function groupByReleaseType(
+  releases: Releases[],
+): Effect.Effect<ReleasesByType> {
   return Effect.succeed(
     releases.reduce(
       (releasesByType: ReleasesByType, release) => {
-        const previous = setSemverRange('', String(release.instance.rawSpecifier.raw));
+        const previous = setSemverRange(
+          '',
+          String(release.instance.rawSpecifier.raw),
+        );
         const latest = release.versions.latest;
         try {
           const type = diff(previous, latest);
@@ -328,9 +378,11 @@ function groupByReleaseType(releases: Releases[]): Effect.Effect<ReleasesByType>
 }
 
 // @TODO: add a cache with a short TTL on disk in $TMPDIR
-function fetchJson(url: string): Effect.Effect<unknown, HttpError | NpmRegistryError> {
+function fetchJson(
+  url: string,
+): Effect.Effect<unknown, HttpError | NpmRegistryError> {
   return pipe(
-    Effect.async<string, HttpError>((resume) => {
+    Effect.async<string, HttpError>(resume => {
       // setTimeout(
       //   () => {
       //     resume(
@@ -347,26 +399,33 @@ function fetchJson(url: string): Effect.Effect<unknown, HttpError | NpmRegistryE
       //   Math.floor(Math.random() * 500) + 1,
       // );
       https
-        .get(url, (res) => {
+        .get(url, res => {
           let body = '';
           res.setEncoding('utf8');
-          res.on('data', (chunk) => {
+          res.on('data', chunk => {
             body = `${body}${chunk}`;
           });
           res.on('end', () => {
             resume(Effect.succeed(body));
           });
         })
-        .on('error', (err) => {
+        .on('error', err => {
           resume(
-            Effect.fail(new HttpError({ error: `Node https threw on ${url}: ${String(err)}` })),
+            Effect.fail(
+              new HttpError({
+                error: `Node https threw on ${url}: ${String(err)}`,
+              }),
+            ),
           );
         });
     }),
-    Effect.flatMap((body) =>
+    Effect.flatMap(body =>
       Effect.try({
         try: () => JSON.parse(body),
-        catch: () => new NpmRegistryError({ error: `JSON.parse threw on response from ${url}` }),
+        catch: () =>
+          new NpmRegistryError({
+            error: `JSON.parse threw on response from ${url}`,
+          }),
       }),
     ),
   );

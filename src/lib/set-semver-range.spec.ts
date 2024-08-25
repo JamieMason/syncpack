@@ -4,7 +4,7 @@ import { setSemverRange } from './set-semver-range.js';
 
 describe('setSemverRange', () => {
   describe('when the current value is Semver', () => {
-    it('sets its semver range to the given range', async () => {
+    it('sets its semver range to the given range', () => {
       const cases: [SemverRange, string][] = [
         ['*', '*'],
         ['', '1.2.3'],
@@ -25,13 +25,15 @@ describe('setSemverRange', () => {
         expect(setSemverRange(semverRange, '>=1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '>1.2.3')).toEqual(expected);
         expect(setSemverRange(semverRange, '*')).toEqual('*');
-        expect(setSemverRange(semverRange, 'https://github.com/npm/npm.git')).toEqual('https://github.com/npm/npm.git');
+        expect(
+          setSemverRange(semverRange, 'https://github.com/npm/npm.git'),
+        ).toEqual('https://github.com/npm/npm.git');
       });
     });
   });
 
   describe('when the current value contains a wildcard patch', () => {
-    it('sets its semver range to the given range', async () => {
+    it('sets its semver range to the given range', () => {
       const current = '1.2.x';
       expect(setSemverRange('', current)).toEqual('1.2.0');
       expect(setSemverRange('>', current)).toEqual('>1.2.0');
@@ -45,7 +47,7 @@ describe('setSemverRange', () => {
   });
 
   describe('when the current value contains a wildcard minor and patch', () => {
-    it('sets its semver range to the given range', async () => {
+    it('sets its semver range to the given range', () => {
       const current = '1.x.x';
       expect(setSemverRange('', current)).toEqual('1.0.0');
       expect(setSemverRange('>', current)).toEqual('>1.0.0');
@@ -59,7 +61,7 @@ describe('setSemverRange', () => {
   });
 
   describe('when the current value contains multiple versions', () => {
-    it('leaves the version unchanged', async () => {
+    it('leaves the version unchanged', () => {
       const current = '>=16.8.0 <17.0.0';
       expect(setSemverRange('', current)).toEqual(current);
       expect(setSemverRange('>', current)).toEqual(current);

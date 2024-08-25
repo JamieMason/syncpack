@@ -39,23 +39,54 @@ export namespace Specifier {
     | UrlSpecifier
     | WorkspaceProtocolSpecifier;
 
-  export function create(instance: Instance, raw: string | Delete): Specifier.Any {
-    if (raw === DELETE) return new Specifier.Delete({ instance, raw });
-    if (!raw) return new Specifier.Unsupported({ instance, raw });
+  export function create(
+    instance: Instance,
+    raw: string | Delete,
+  ): Specifier.Any {
+    if (raw === DELETE) {
+      return new Specifier.Delete({ instance, raw });
+    }
+    if (!raw) {
+      return new Specifier.Unsupported({ instance, raw });
+    }
     try {
-      if (raw === 'latest') raw = '*';
-      const parsed = parseSpecifier(instance.name, raw, instance.packageJsonFile);
+      const data = {
+        instance,
+        raw: raw === 'latest' ? '*' : raw,
+      };
+      const parsed = parseSpecifier(
+        instance.name,
+        data.raw,
+        instance.packageJsonFile,
+      );
       const type = parsed.type;
-      const data = { instance, raw };
-      if (raw === '*') return new Specifier.Latest(data);
-      if (type === 'version') return new Specifier.Exact(data);
-      if (type === 'range') return new Specifier.Range(data);
-      if (type === 'workspaceProtocol') return new Specifier.WorkspaceProtocol(data);
-      if (type === 'alias') return new Specifier.Alias(data);
-      if (type === 'file' || type === 'directory') return new Specifier.File(data);
-      if (type === 'remote') return new Specifier.Url(data);
-      if (type === 'git') return new Specifier.HostedGit(data);
-      if (type === 'tag') return new Specifier.Tag(data);
+      if (data.raw === '*') {
+        return new Specifier.Latest(data);
+      }
+      if (type === 'version') {
+        return new Specifier.Exact(data);
+      }
+      if (type === 'range') {
+        return new Specifier.Range(data);
+      }
+      if (type === 'workspaceProtocol') {
+        return new Specifier.WorkspaceProtocol(data);
+      }
+      if (type === 'alias') {
+        return new Specifier.Alias(data);
+      }
+      if (type === 'file' || type === 'directory') {
+        return new Specifier.File(data);
+      }
+      if (type === 'remote') {
+        return new Specifier.Url(data);
+      }
+      if (type === 'git') {
+        return new Specifier.HostedGit(data);
+      }
+      if (type === 'tag') {
+        return new Specifier.Tag(data);
+      }
       return new Specifier.Unsupported(data);
     } catch {
       return new Specifier.Unsupported({ instance, raw });

@@ -5,9 +5,7 @@ import type { RegistryResult } from 'npm-package-arg';
  * `RegistryResult` types from npm/npm-package-arg. Instead of grouping them
  * together we are being more specific
  */
-export type SpecificRegistryResult<T extends RegistryResult['type'] | 'local'> = Omit<
-  RegistryResult,
-  'type'
-> & {
-  type: T;
-};
+export type SpecificRegistryResult<T extends RegistryResult['type'] | 'local'> =
+  Omit<RegistryResult, 'type'> & {
+    type: T;
+  };

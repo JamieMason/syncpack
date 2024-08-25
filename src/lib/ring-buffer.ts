@@ -13,7 +13,7 @@ export class RingBuffer<T> extends Array {
   }
 
   push(...values: T[]) {
-    values.forEach((value) => {
+    values.forEach(value => {
       this[this.cursor++] = value;
       this.cursor %= this.length;
     });

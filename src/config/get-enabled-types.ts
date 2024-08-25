@@ -11,13 +11,15 @@ import { VersionsByNameStrategy } from '../strategy/versions-by-name.js';
 import type { InvalidCustomTypeError, Strategy } from './get-custom-types.js';
 import { getCustomTypes } from './get-custom-types.js';
 
-export class DeprecatedTypesError extends Data.TaggedClass('DeprecatedTypesError')<{
+export class DeprecatedTypesError extends Data.TaggedClass(
+  'DeprecatedTypesError',
+)<{
   readonly types: string[];
 }> {}
 
-export class RenamedWorkspaceTypeError extends Data.TaggedClass('RenamedWorkspaceTypeError')<
-  Record<string, never>
-> {}
+export class RenamedWorkspaceTypeError extends Data.TaggedClass(
+  'RenamedWorkspaceTypeError',
+)<Record<string, never>> {}
 
 export function getEnabledTypes({
   cli,
@@ -30,10 +32,12 @@ export function getEnabledTypes({
     // Look for dependency types defined using the old `{ prod: true }` syntax
     // deprecated in syncpack@9.0.0
     Effect.succeed(
-      INTERNAL_TYPES.filter((key) => isBoolean((rcFile as Record<string, boolean>)[key])),
+      INTERNAL_TYPES.filter(key =>
+        isBoolean((rcFile as Record<string, boolean>)[key]),
+      ),
     ),
     // Short-circuit and quit if deprecated config is used
-    Effect.flatMap((deprecatedTypeProps) =>
+    Effect.flatMap(deprecatedTypeProps =>
       deprecatedTypeProps.length > 0
         ? Effect.fail(new DeprecatedTypesError({ types: deprecatedTypeProps }))
         : Effect.void,
@@ -53,13 +57,31 @@ export function getEnabledTypes({
               (customTypes): Record<string, Strategy.Any> =>
                 Object.fromEntries([
                   ['dev', new VersionsByNameStrategy('dev', 'devDependencies')],
-                  ['local', new NameAndVersionPropsStrategy('local', 'version', 'name')],
-                  ['overrides', new VersionsByNameStrategy('overrides', 'overrides')],
-                  ['peer', new VersionsByNameStrategy('peer', 'peerDependencies')],
-                  ['pnpmOverrides', new VersionsByNameStrategy('pnpmOverrides', 'pnpm.overrides')],
+                  [
+                    'local',
+                    new NameAndVersionPropsStrategy('local', 'version', 'name'),
+                  ],
+                  [
+                    'overrides',
+                    new VersionsByNameStrategy('overrides', 'overrides'),
+                  ],
+                  [
+                    'peer',
+                    new VersionsByNameStrategy('peer', 'peerDependencies'),
+                  ],
+                  [
+                    'pnpmOverrides',
+                    new VersionsByNameStrategy(
+                      'pnpmOverrides',
+                      'pnpm.overrides',
+                    ),
+                  ],
                   ['prod', new VersionsByNameStrategy('prod', 'dependencies')],
-                  ['resolutions', new VersionsByNameStrategy('resolutions', 'resolutions')],
-                  ...customTypes.map((type) => [type.name, type]),
+                  [
+                    'resolutions',
+                    new VersionsByNameStrategy('resolutions', 'resolutions'),
+                  ],
+                  ...customTypes.map(type => [type.name, type]),
                 ]),
             ),
           ),
@@ -70,7 +92,9 @@ export function getEnabledTypes({
         ),
         // Create groupings to assign each provided dependencyType to
         Effect.bind('strategyNamesByStatus', () =>
-          Effect.succeed<Record<'provided' | 'enabled' | 'positive' | 'negative', string[]>>({
+          Effect.succeed<
+            Record<'provided' | 'enabled' | 'positive' | 'negative', string[]>
+          >({
             provided: (isNonEmptyString(cli.types)
               ? cli.types.split(',')
               : isArrayOfStrings(rcFile.dependencyTypes)
@@ -94,50 +118,56 @@ export function getEnabledTypes({
     // * which were listed to be enabled
     // * which were listed but !negated
     // * etc.
-    Effect.flatMap(({ allStrategiesByName, allStrategyNames, strategyNamesByStatus }) => {
-      if (
-        isEmptyArray(strategyNamesByStatus.provided) ||
-        strategyNamesByStatus.provided.join('') === '**'
-      ) {
-        return Effect.succeed(allStrategyNames.map(getStrategyByName));
-      }
-
-      strategyNamesByStatus.provided.forEach((name) => {
-        if (name.startsWith('!')) {
-          strategyNamesByStatus.negative.push(name.replace('!', ''));
-        } else {
-          strategyNamesByStatus.positive.push(name);
+    Effect.flatMap(
+      ({ allStrategiesByName, allStrategyNames, strategyNamesByStatus }) => {
+        if (
+          isEmptyArray(strategyNamesByStatus.provided) ||
+          strategyNamesByStatus.provided.join('') === '**'
+        ) {
+          return Effect.succeed(allStrategyNames.map(getStrategyByName));
         }
-      });
 
-      if (isNonEmptyArray(strategyNamesByStatus.negative)) {
-        allStrategyNames.forEach((name) => {
-          if (!strategyNamesByStatus.negative.includes(name)) {
-            strategyNamesByStatus.enabled.push(name);
+        strategyNamesByStatus.provided.forEach(name => {
+          if (name.startsWith('!')) {
+            strategyNamesByStatus.negative.push(name.replace('!', ''));
+          } else {
+            strategyNamesByStatus.positive.push(name);
           }
         });
-      }
 
-      if (isNonEmptyArray(strategyNamesByStatus.positive)) {
-        strategyNamesByStatus.positive.forEach((name) => {
-          if (!strategyNamesByStatus.enabled.includes(name)) {
-            strategyNamesByStatus.enabled.push(name);
-          }
-        });
-      }
+        if (isNonEmptyArray(strategyNamesByStatus.negative)) {
+          allStrategyNames.forEach(name => {
+            if (!strategyNamesByStatus.negative.includes(name)) {
+              strategyNamesByStatus.enabled.push(name);
+            }
+          });
+        }
 
-      if (strategyNamesByStatus.enabled.includes('workspace')) {
-        return Effect.fail(new RenamedWorkspaceTypeError({}));
-      }
+        if (isNonEmptyArray(strategyNamesByStatus.positive)) {
+          strategyNamesByStatus.positive.forEach(name => {
+            if (!strategyNamesByStatus.enabled.includes(name)) {
+              strategyNamesByStatus.enabled.push(name);
+            }
+          });
+        }
 
-      return Effect.succeed(strategyNamesByStatus.enabled.map(getStrategyByName));
+        if (strategyNamesByStatus.enabled.includes('workspace')) {
+          return Effect.fail(new RenamedWorkspaceTypeError({}));
+        }
 
-      function getStrategyByName(type: string): Strategy.Any {
-        return allStrategiesByName[type] as Strategy.Any;
-      }
-    }),
-    Effect.tap((enabledTypes) =>
-      Effect.logDebug(`enabled dependency types determined to be: ${JSON.stringify(enabledTypes)}`),
+        return Effect.succeed(
+          strategyNamesByStatus.enabled.map(getStrategyByName),
+        );
+
+        function getStrategyByName(type: string): Strategy.Any {
+          return allStrategiesByName[type] as Strategy.Any;
+        }
+      },
+    ),
+    Effect.tap(enabledTypes =>
+      Effect.logDebug(
+        `enabled dependency types determined to be: ${JSON.stringify(enabledTypes)}`,
+      ),
     ),
   );
 }

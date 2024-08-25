@@ -13,14 +13,20 @@ export interface WorkspaceProtocolResult {
   saveSpec: string;
 }
 
-export type NpmPackageArgResult = ReturnType<typeof npa.resolve> | WorkspaceProtocolResult;
+export type NpmPackageArgResult =
+  | ReturnType<typeof npa.resolve>
+  | WorkspaceProtocolResult;
 
 export function parseSpecifier(
   name: string,
   specifier: string,
   packageJsonFile: PackageJsonFile,
 ): NpmPackageArgResult {
-  if (specifier === 'workspace:*' || specifier === 'workspace:~' || specifier === 'workspace:^') {
+  if (
+    specifier === 'workspace:*' ||
+    specifier === 'workspace:~' ||
+    specifier === 'workspace:^'
+  ) {
     const parsed = npa.resolve(
       name,
       packageJsonFile.jsonFile.dirPath,

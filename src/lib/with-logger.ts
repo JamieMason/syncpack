@@ -1,5 +1,5 @@
 import chalk from 'chalk-template';
-import { Effect, Logger, LogLevel } from 'effect';
+import { Effect, LogLevel, Logger } from 'effect';
 
 export function withLogger(program: Effect.Effect<unknown>) {
   const logger = Logger.make(({ logLevel, message }) => {
@@ -13,7 +13,6 @@ export function withLogger(program: Effect.Effect<unknown>) {
     } else if (logLevel === LogLevel.Warning) {
       globalThis.console.warn(chalk`{yellow ! %s}`, ...args);
     } else {
-      globalThis.console.log(chalk`{cyan [%s] %s}`, logLevel, ...args);
     }
   });
   const layer = Logger.replace(Logger.defaultLogger, logger);

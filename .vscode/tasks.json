@@ -2,7 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "args": ["${workspaceFolder}/${relativeFileDirname}/${fileBasenameNoExtension}.spec.ts"],
+      "args": [
+        "${workspaceFolder}/${relativeFileDirname}/${fileBasenameNoExtension}.spec.ts"
+      ],
       "command": "scripts/upsert-test.sh",
       "group": "test",
       "label": "Upsert test for current file",

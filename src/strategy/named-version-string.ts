@@ -26,10 +26,13 @@ export class NamedVersionStringStrategy {
       // get version prop
       getNonEmptyStringProp(path, file),
       // if it is a non empty string, we can read it
-      Effect.map((value) => value.split(/@(.*)/)),
+      Effect.map(value => value.split(/@(.*)/)),
       // check the string was properly formed
       Effect.flatMap(([name, version]) =>
-        Effect.all([getOptionOfNonEmptyString(name), getOptionOfNonEmptyString(version)]),
+        Effect.all([
+          getOptionOfNonEmptyString(name),
+          getOptionOfNonEmptyString(version),
+        ]),
       ),
       // return an array of one entry if valid
       Effect.map(([name, version]): [string, string][] => [[name, version]]),
@@ -57,7 +60,7 @@ export class NamedVersionStringStrategy {
       return pipe(
         get(contents, ...pathToParent.split('.')),
         Effect.flatMap(getOptionOfNonEmptyObject),
-        Effect.flatMap((parent) =>
+        Effect.flatMap(parent =>
           Effect.try(() => {
             parent[key] = nextValue;
           }),
@@ -70,22 +73,21 @@ export class NamedVersionStringStrategy {
         Effect.catchAll(() => Effect.succeed(file)),
         Effect.map(() => file),
       );
-    } else {
-      return pipe(
-        getOptionOfNonEmptyObject(contents),
-        Effect.flatMap((parent) =>
-          Effect.try(() => {
-            parent[this.path] = nextValue;
-          }),
-        ),
-        Effect.tapError(() =>
-          Effect.logDebug(
-            `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
-          ),
-        ),
-        Effect.catchAll(() => Effect.succeed(file)),
-        Effect.map(() => file),
-      );
     }
+    return pipe(
+      getOptionOfNonEmptyObject(contents),
+      Effect.flatMap(parent =>
+        Effect.try(() => {
+          parent[this.path] = nextValue;
+        }),
+      ),
+      Effect.tapError(() =>
+        Effect.logDebug(
+          `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
+        ),
+      ),
+      Effect.catchAll(() => Effect.succeed(file)),
+      Effect.map(() => file),
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { Effect, identity, Option, pipe } from 'effect';
+import { Effect, Option, identity, pipe } from 'effect';
 import { isObject } from 'tightrope/guard/is-object.js';
 import type { PackageJsonFile } from '../get-package-json-files/package-json-file.js';
 import { get } from '../lib/get.js';
@@ -40,7 +40,9 @@ export class NameAndVersionPropsStrategy {
            * themselves.
            */
           this.name === 'local'
-            ? Effect.catchAll(() => Effect.succeed('PACKAGE_JSON_HAS_NO_VERSION'))
+            ? Effect.catchAll(() =>
+                Effect.succeed('PACKAGE_JSON_HAS_NO_VERSION'),
+              )
             : Effect.map(identity),
         ),
       ),
@@ -72,7 +74,7 @@ export class NameAndVersionPropsStrategy {
       return pipe(
         get(contents, ...pathToParent.split('.')),
         Effect.flatMap(getOptionOfObject),
-        Effect.flatMap((parent) =>
+        Effect.flatMap(parent =>
           Effect.try(() => {
             parent[key] = nextValue;
           }),
@@ -85,22 +87,21 @@ export class NameAndVersionPropsStrategy {
         Effect.catchAll(() => Effect.succeed(file)),
         Effect.map(() => file),
       );
-    } else {
-      return pipe(
-        getOptionOfObject(contents),
-        Effect.flatMap((parent) =>
-          Effect.try(() => {
-            parent[this.path] = nextValue;
-          }),
-        ),
-        Effect.tapError(() =>
-          Effect.logDebug(
-            `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
-          ),
-        ),
-        Effect.catchAll(() => Effect.succeed(file)),
-        Effect.map(() => file),
-      );
     }
+    return pipe(
+      getOptionOfObject(contents),
+      Effect.flatMap(parent =>
+        Effect.try(() => {
+          parent[this.path] = nextValue;
+        }),
+      ),
+      Effect.tapError(() =>
+        Effect.logDebug(
+          `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
+        ),
+      ),
+      Effect.catchAll(() => Effect.succeed(file)),
+      Effect.map(() => file),
+    );
   }
 }

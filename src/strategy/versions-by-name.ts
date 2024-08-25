@@ -20,8 +20,8 @@ export class VersionsByNameStrategy {
   read(file: PackageJsonFile): Effect.Effect<[string, string][]> {
     return pipe(
       get(file.jsonFile.contents, ...this.path.split('.')),
-      Effect.flatMap((value) => getOptionOfNonEmptyObject(value)),
-      Effect.map((obj) => Object.entries<string>(obj)),
+      Effect.flatMap(value => getOptionOfNonEmptyObject(value)),
+      Effect.map(obj => Object.entries<string>(obj)),
       Effect.tapError(() =>
         Effect.logDebug(
           `VersionsByNameStrategy#${this.name} found nothing at <${file.jsonFile.shortPath}>.${this.path}`,
@@ -40,7 +40,7 @@ export class VersionsByNameStrategy {
     return pipe(
       get(file.jsonFile.contents, ...this.path.split('.')),
       Effect.flatMap(getOptionOfNonEmptyObject),
-      Effect.flatMap((parent) =>
+      Effect.flatMap(parent =>
         Effect.try(() => {
           parent[name] = nextValue;
         }),

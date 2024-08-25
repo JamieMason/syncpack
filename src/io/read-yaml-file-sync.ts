@@ -12,6 +12,6 @@ export function readYamlFileSync<T = unknown>(
 ): Effect.Effect<T, ReadYamlFileError> {
   return Effect.try({
     try: () => io.readYamlFile.sync(filePath),
-    catch: (err) => new ReadYamlFileError({ filePath, error: String(err) }),
+    catch: err => new ReadYamlFileError({ filePath, error: String(err) }),
   });
 }

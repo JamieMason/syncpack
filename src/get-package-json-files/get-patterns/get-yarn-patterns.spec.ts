@@ -6,7 +6,9 @@ import { getYarnPatterns } from './get-yarn-patterns.js';
 
 async function runScenario(getScenario: () => TestScenario) {
   const scenario = getScenario();
-  return await Effect.runPromise(pipe(getYarnPatterns(scenario.io), Effect.merge));
+  return await Effect.runPromise(
+    pipe(getYarnPatterns(scenario.io), Effect.merge),
+  );
 }
 
 describe('when Yarn config is at .workspaces[]', () => {

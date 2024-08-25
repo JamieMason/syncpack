@@ -15,13 +15,17 @@ export function createSemverGroups(
   ctx: Ctx,
 ): Effect.Effect<SemverGroup.Any[], SemverGroup.ConfigError> {
   const { rcFile } = ctx.config;
-  const semverGroups: Effect.Effect<SemverGroup.Any, SemverGroup.ConfigError>[] = [
+  const semverGroups: Effect.Effect<
+    SemverGroup.Any,
+    SemverGroup.ConfigError
+  >[] = [
     Effect.succeed(new FilteredOutSemverGroup(ctx)),
     Effect.succeed(
       new WithRangeSemverGroup(false, {
         dependencies: ['**'],
         dependencyTypes: ['local'],
-        label: 'the version property of package.json files must always be exact',
+        label:
+          'the version property of package.json files must always be exact',
         packages: ['**'],
         range: '',
       }),
@@ -41,8 +45,8 @@ export function createSemverGroups(
         );
       }
 
-      const mutuallyExclusiveProps = (['isIgnored', 'range'] as const).filter((prop) =>
-        Boolean(config[prop]),
+      const mutuallyExclusiveProps = (['isIgnored', 'range'] as const).filter(
+        prop => Boolean(config[prop]),
       );
 
       if (mutuallyExclusiveProps.length > 1) {
@@ -62,8 +66,12 @@ export function createSemverGroups(
       const dependencyTypes = isArrayOfStrings(config.dependencyTypes)
         ? config.dependencyTypes
         : ['**'];
-      const dependencies = isArrayOfStrings(config.dependencies) ? config.dependencies : ['**'];
-      const packages = isArrayOfStrings(config.packages) ? config.packages : ['**'];
+      const dependencies = isArrayOfStrings(config.dependencies)
+        ? config.dependencies
+        : ['**'];
+      const packages = isArrayOfStrings(config.packages)
+        ? config.packages
+        : ['**'];
       const specifierTypes = isArrayOfStrings(config.specifierTypes)
         ? config.specifierTypes
         : ['**'];

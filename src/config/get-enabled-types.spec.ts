@@ -1,7 +1,11 @@
 import { Effect, pipe } from 'effect';
 import { expect, it } from 'vitest';
 import { InvalidCustomTypeError } from './get-custom-types.js';
-import { DeprecatedTypesError, getEnabledTypes, RenamedWorkspaceTypeError } from './get-enabled-types.js';
+import {
+  DeprecatedTypesError,
+  RenamedWorkspaceTypeError,
+  getEnabledTypes,
+} from './get-enabled-types.js';
 
 const prod = expect.objectContaining({
   path: 'dependencies',
@@ -50,7 +54,15 @@ it('defaults to all when nothing is provided', async () => {
         Effect.merge,
       ),
     ),
-  ).toEqual([dev, local, overrides, peerDependencies, pnpmOverrides, prod, resolutions]);
+  ).toEqual([
+    dev,
+    local,
+    overrides,
+    peerDependencies,
+    pnpmOverrides,
+    prod,
+    resolutions,
+  ]);
 });
 
 it('uses every type except a negated type such as "!prod"', async () => {
@@ -66,7 +78,14 @@ it('uses every type except a negated type such as "!prod"', async () => {
         Effect.merge,
       ),
     ),
-  ).toEqual([dev, local, overrides, peerDependencies, pnpmOverrides, resolutions]);
+  ).toEqual([
+    dev,
+    local,
+    overrides,
+    peerDependencies,
+    pnpmOverrides,
+    resolutions,
+  ]);
 });
 
 it('handles multiple negated types', async () => {
@@ -155,7 +174,15 @@ it('includes custom types when others are negated', async () => {
         Effect.merge,
       ),
     ),
-  ).toEqual([local, overrides, peerDependencies, pnpmOverrides, prod, resolutions, engines]);
+  ).toEqual([
+    local,
+    overrides,
+    peerDependencies,
+    pnpmOverrides,
+    prod,
+    resolutions,
+    engines,
+  ]);
 });
 
 it('includes custom types when named', async () => {
@@ -200,7 +227,16 @@ it('includes every type when "**" is provided', async () => {
         Effect.merge,
       ),
     ),
-  ).toEqual([dev, local, overrides, peerDependencies, pnpmOverrides, prod, resolutions, engines]);
+  ).toEqual([
+    dev,
+    local,
+    overrides,
+    peerDependencies,
+    pnpmOverrides,
+    prod,
+    resolutions,
+    engines,
+  ]);
 });
 
 it('includes every kind of custom type when named', async () => {
@@ -210,7 +246,13 @@ it('includes every kind of custom type when named', async () => {
         getEnabledTypes({
           cli: {},
           rcFile: {
-            dependencyTypes: ['dev', 'engines', 'packageManager', 'specificEngine', 'nameAndVersion'],
+            dependencyTypes: [
+              'dev',
+              'engines',
+              'packageManager',
+              'specificEngine',
+              'nameAndVersion',
+            ],
             customTypes: {
               engines: {
                 path: 'engines',

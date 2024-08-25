@@ -6,9 +6,12 @@ export class ReadFileError extends Data.TaggedClass('ReadFileError')<{
   readonly error: string;
 }> {}
 
-export function readFileSync(io: Io, filePath: string): Effect.Effect<string, ReadFileError> {
+export function readFileSync(
+  io: Io,
+  filePath: string,
+): Effect.Effect<string, ReadFileError> {
   return Effect.try({
     try: () => io.fs.readFileSync(filePath, { encoding: 'utf8' }),
-    catch: (err) => new ReadFileError({ filePath, error: String(err) }),
+    catch: err => new ReadFileError({ filePath, error: String(err) }),
   });
 }

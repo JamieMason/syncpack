@@ -51,7 +51,7 @@ export class UnnamedVersionStringStrategy {
       return pipe(
         get(contents, ...pathToParent.split('.')),
         Effect.flatMap(getOptionOfNonEmptyObject),
-        Effect.flatMap((parent) =>
+        Effect.flatMap(parent =>
           Effect.try(() => {
             parent[key] = nextValue;
           }),
@@ -64,22 +64,21 @@ export class UnnamedVersionStringStrategy {
         Effect.catchAll(() => Effect.succeed(file)),
         Effect.map(() => file),
       );
-    } else {
-      return pipe(
-        getOptionOfNonEmptyObject(contents),
-        Effect.flatMap((parent) =>
-          Effect.try(() => {
-            parent[this.path] = nextValue;
-          }),
-        ),
-        Effect.tapError(() =>
-          Effect.logDebug(
-            `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
-          ),
-        ),
-        Effect.catchAll(() => Effect.succeed(file)),
-        Effect.map(() => file),
-      );
     }
+    return pipe(
+      getOptionOfNonEmptyObject(contents),
+      Effect.flatMap(parent =>
+        Effect.try(() => {
+          parent[this.path] = nextValue;
+        }),
+      ),
+      Effect.tapError(() =>
+        Effect.logDebug(
+          `strategy ${this._tag} with name ${this.name} failed to write to <${file.jsonFile.shortPath}>.${this.path}`,
+        ),
+      ),
+      Effect.catchAll(() => Effect.succeed(file)),
+      Effect.map(() => file),
+    );
   }
 }

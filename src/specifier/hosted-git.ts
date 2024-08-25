@@ -17,9 +17,11 @@ export class HostedGitSpecifier extends BaseSpecifier<HostedGitResult> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),
-      Effect.map((parsed) => parsed.gitCommittish || ''),
-      Effect.flatMap((gitCommittish) =>
-        isSemver(gitCommittish) ? Effect.succeed(gitCommittish) : NonSemverError.asEffect(this),
+      Effect.map(parsed => parsed.gitCommittish || ''),
+      Effect.flatMap(gitCommittish =>
+        isSemver(gitCommittish)
+          ? Effect.succeed(gitCommittish)
+          : NonSemverError.asEffect(this),
       ),
     );
   }
@@ -29,12 +31,14 @@ export class HostedGitSpecifier extends BaseSpecifier<HostedGitResult> {
     return pipe(
       this.parse(),
       Effect.mapError(() => new NonSemverError({ specifier: this })),
-      Effect.map((parsed) => ({
+      Effect.map(parsed => ({
         gitCommittish: parsed.gitCommittish || '',
         rawSpec: parsed.rawSpec || '',
       })),
-      Effect.map(({ gitCommittish, rawSpec }) => rawSpec.replace(gitCommittish, version)),
-      Effect.map((raw) => Specifier.create(this.instance, raw)),
+      Effect.map(({ gitCommittish, rawSpec }) =>
+        rawSpec.replace(gitCommittish, version),
+      ),
+      Effect.map(raw => Specifier.create(this.instance, raw)),
     );
   }
 }

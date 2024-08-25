@@ -9,7 +9,7 @@ import {
 import { logSemverGroupsDisabledWarning } from '../bin-lint-semver-ranges/lint-semver-ranges.js';
 import { logUnsupportedMismatch } from '../bin-list-mismatches/list-mismatches.js';
 import { CliConfigTag } from '../config/tag.js';
-import { type CliConfig } from '../config/types.js';
+import type { CliConfig } from '../config/types.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { getContext } from '../get-context/index.js';
@@ -26,10 +26,14 @@ interface Input {
   errorHandlers?: ErrorHandlers;
 }
 
-export function setSemverRanges({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
+export function setSemverRanges({
+  io,
+  cli,
+  errorHandlers = defaultErrorHandlers,
+}: Input) {
   return pipe(
     getContext({ io, cli, errorHandlers }),
-    Effect.flatMap((ctx) =>
+    Effect.flatMap(ctx =>
       pipe(
         Effect.gen(function* ($) {
           // no semver groups have been configured, they are disabled by default
@@ -39,7 +43,9 @@ export function setSemverRanges({ io, cli, errorHandlers = defaultErrorHandlers 
             return ctx;
           }
 
-          const { semverGroups } = yield* $(getInstances(ctx, io, errorHandlers));
+          const { semverGroups } = yield* $(
+            getInstances(ctx, io, errorHandlers),
+          );
           let fixedCount = 0;
           let unfixableCount = 0;
           let validCount = 0;
@@ -62,9 +68,15 @@ export function setSemverRanges({ io, cli, errorHandlers = defaultErrorHandlers 
             }
           }
 
-          if (validCount) yield* $(logAlreadyValidSize(validCount));
-          if (fixedCount) yield* $(logFixedSize(fixedCount));
-          if (unfixableCount) yield* $(logUnfixableSize(unfixableCount));
+          if (validCount) {
+            yield* $(logAlreadyValidSize(validCount));
+          }
+          if (fixedCount) {
+            yield* $(logFixedSize(fixedCount));
+          }
+          if (unfixableCount) {
+            yield* $(logUnfixableSize(unfixableCount));
+          }
 
           return ctx;
         }),
@@ -81,7 +93,13 @@ export function setSemverRanges({ io, cli, errorHandlers = defaultErrorHandlers 
         Effect.flatMap(exitIfInvalid),
       ),
     ),
-    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    Effect.provide(
+      pipe(
+        Context.empty(),
+        Context.add(CliConfigTag, cli),
+        Context.add(IoTag, io),
+      ),
+    ),
     withLogger,
   );
 }

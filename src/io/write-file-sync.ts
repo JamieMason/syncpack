@@ -13,10 +13,10 @@ export function writeFileSync(
 ): Effect.Effect<void, WriteFileError, Io> {
   return pipe(
     IoTag,
-    Effect.flatMap((io) =>
+    Effect.flatMap(io =>
       Effect.try({
         try: () => io.fs.writeFileSync(filePath, contents),
-        catch: (err) => new WriteFileError({ filePath, error: String(err) }),
+        catch: err => new WriteFileError({ filePath, error: String(err) }),
       }),
     ),
   );

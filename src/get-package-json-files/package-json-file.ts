@@ -54,26 +54,31 @@ export class PackageJsonFile {
     if (!this._instances) {
       return pipe(
         Effect.all(
-          enabledTypes.map((strategy) =>
+          enabledTypes.map(strategy =>
             pipe(
               strategy.read(this),
-              Effect.map((entries) =>
+              Effect.map(entries =>
                 entries.map(
-                  ([name, rawSpecifier]) => new Instance(name, rawSpecifier, this, strategy),
+                  ([name, rawSpecifier]) =>
+                    new Instance(name, rawSpecifier, this, strategy),
                 ),
               ),
             ),
           ),
         ),
-        Effect.map((array) => array.flat()),
+        Effect.map(array => array.flat()),
         Effect.tapBoth({
-          onSuccess: (instances) =>
-            Effect.logDebug(`found ${instances.length} instances in <${this.jsonFile.shortPath}>`),
+          onSuccess: instances =>
+            Effect.logDebug(
+              `found ${instances.length} instances in <${this.jsonFile.shortPath}>`,
+            ),
           onFailure: () =>
-            Effect.logError(`failed to get instances from <${this.jsonFile.shortPath}>`),
+            Effect.logError(
+              `failed to get instances from <${this.jsonFile.shortPath}>`,
+            ),
         }),
         Effect.catchAll(() => Effect.succeed([])),
-        Effect.tap((instances) =>
+        Effect.tap(instances =>
           Effect.sync(() => {
             this._instances = instances;
           }),

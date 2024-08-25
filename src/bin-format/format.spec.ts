@@ -16,7 +16,10 @@ describe('formatBugs', () => {
     })();
 
     await Effect.runPromiseExit(format(scenario));
-    expect(scenario.readPackages()).toHaveProperty('a.bugs', 'https://github.com/User/repo/issues');
+    expect(scenario.readPackages()).toHaveProperty(
+      'a.bugs',
+      'https://github.com/User/repo/issues',
+    );
     expect(scenario.io.process.exit).not.toHaveBeenCalled();
   });
 });
@@ -34,7 +37,10 @@ describe('formatRepository', () => {
     })();
 
     await Effect.runPromiseExit(format(scenario));
-    expect(scenario.readPackages()).toHaveProperty('a.repository', 'git://gitlab.com/User/repo');
+    expect(scenario.readPackages()).toHaveProperty(
+      'a.repository',
+      'git://gitlab.com/User/repo',
+    );
     expect(scenario.io.process.exit).not.toHaveBeenCalled();
   });
 
@@ -119,7 +125,10 @@ describe('sortExports', () => {
     await Effect.runPromiseExit(format(scenario));
 
     const packages: any = scenario.readPackages();
-    expect(Object.keys(packages.a.exports['./feature.js'])).toEqual(['node', 'default']);
+    expect(Object.keys(packages.a.exports['./feature.js'])).toEqual([
+      'node',
+      'default',
+    ]);
     expect(scenario.io.process.exit).not.toHaveBeenCalled();
   });
 });
@@ -133,10 +142,10 @@ describe('sortAz', () => {
       'package.json': {
         name: 'a',
         dependencies: {
-          'B': '',
+          B: '',
           '@B': '',
           '1B': '',
-          'A': '',
+          A: '',
           '@A': '',
           '1A': '',
         },
@@ -146,7 +155,14 @@ describe('sortAz', () => {
     await Effect.runPromiseExit(format(scenario));
 
     const packages: any = scenario.readPackages();
-    expect(Object.keys(packages.a.dependencies)).toEqual(['@A', '@B', '1A', '1B', 'A', 'B']);
+    expect(Object.keys(packages.a.dependencies)).toEqual([
+      '@A',
+      '@B',
+      '1A',
+      '1B',
+      'A',
+      'B',
+    ]);
     expect(scenario.io.process.exit).not.toHaveBeenCalled();
   });
 

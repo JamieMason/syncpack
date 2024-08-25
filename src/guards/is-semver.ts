@@ -11,6 +11,8 @@ export function isSemver(version: unknown): boolean {
   const patch = new RegExp(`^${range}${ints}${dot}${intsOrX}${dot}${intsOrX}$`);
   return (
     isString(version) &&
-    (version.search(major) !== -1 || version.search(minor) !== -1 || version.search(patch) !== -1)
+    (version.search(major) !== -1 ||
+      version.search(minor) !== -1 ||
+      version.search(patch) !== -1)
   );
 }

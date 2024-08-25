@@ -30,8 +30,14 @@ describe('the "local" dependency type', () => {
           const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(2);
           expect(reports).toHaveProperty('1.name', 'foo');
-          expect(reports).toHaveProperty('1.reports.0._tag', 'MissingLocalVersion');
-          expect(reports).toHaveProperty('1.reports.1._tag', 'MissingLocalVersion');
+          expect(reports).toHaveProperty(
+            '1.reports.0._tag',
+            'MissingLocalVersion',
+          );
+          expect(reports).toHaveProperty(
+            '1.reports.1._tag',
+            'MissingLocalVersion',
+          );
         });
       });
 
@@ -162,10 +168,22 @@ describe('the "local" dependency type', () => {
         const reports = await getScenario().getVersionReports();
         expect(reports).toHaveLength(2);
         expect(reports).toHaveProperty('1.name', 'foo');
-        expect(reports).toHaveProperty('1.reports.0._tag', 'MissingLocalVersion');
-        expect(reports).toHaveProperty('1.reports.0.unfixable.rawSpecifier.raw', '~0.2.0');
-        expect(reports).toHaveProperty('1.reports.1._tag', 'MissingLocalVersion');
-        expect(reports).toHaveProperty('1.reports.1.unfixable.rawSpecifier.raw', '~0.2.0');
+        expect(reports).toHaveProperty(
+          '1.reports.0._tag',
+          'MissingLocalVersion',
+        );
+        expect(reports).toHaveProperty(
+          '1.reports.0.unfixable.rawSpecifier.raw',
+          '~0.2.0',
+        );
+        expect(reports).toHaveProperty(
+          '1.reports.1._tag',
+          'MissingLocalVersion',
+        );
+        expect(reports).toHaveProperty(
+          '1.reports.1.unfixable.rawSpecifier.raw',
+          '~0.2.0',
+        );
       });
     });
 
@@ -234,7 +252,10 @@ describe('the "local" dependency type', () => {
         expect(reports).toHaveLength(2);
         expect(reports).toHaveProperty('1.name', 'foo');
         expect(reports).toHaveProperty('1.reports.0._tag', 'Valid');
-        expect(reports).toHaveProperty('1.reports.1._tag', 'LocalPackageMismatch');
+        expect(reports).toHaveProperty(
+          '1.reports.1._tag',
+          'LocalPackageMismatch',
+        );
       });
     });
 
@@ -307,7 +328,10 @@ describe('the "local" dependency type', () => {
           expect(reports).toHaveLength(2);
           expect(reports).toHaveProperty('1.name', 'foo');
           expect(reports).toHaveProperty('1.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('1.reports.1._tag', 'LocalPackageMismatch');
+          expect(reports).toHaveProperty(
+            '1.reports.1._tag',
+            'LocalPackageMismatch',
+          );
         });
       });
 
@@ -387,7 +411,10 @@ describe('the "local" dependency type', () => {
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.0.specifier.raw', 'workspace:*');
+          expect(reports).toHaveProperty(
+            '0.reports.0.specifier.raw',
+            'workspace:*',
+          );
           expect(reports).toHaveProperty('2.name', 'foo');
           expect(reports).toHaveProperty('2.reports.0._tag', 'Valid');
           expect(reports).toHaveProperty('2.reports.0.specifier.raw', '0.1.0');
@@ -432,7 +459,10 @@ describe('the "local" dependency type', () => {
           await Effect.runPromiseExit(fixMismatches(scenario));
           const filesByName = scenario.readPackages();
           expect(filesByName).toHaveProperty('foo.version', '0.1.0');
-          expect(filesByName).toHaveProperty('a.devDependencies.foo', 'workspace:*');
+          expect(filesByName).toHaveProperty(
+            'a.devDependencies.foo',
+            'workspace:*',
+          );
           expect(scenario.io.process.exit).not.toHaveBeenCalled();
         });
       });
@@ -464,7 +494,10 @@ describe('the "local" dependency type', () => {
           expect(reports).toHaveLength(2);
           expect(reports).toHaveProperty('1.name', 'foo');
           expect(reports).toHaveProperty('1.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('1.reports.1._tag', 'LocalPackageMismatch');
+          expect(reports).toHaveProperty(
+            '1.reports.1._tag',
+            'LocalPackageMismatch',
+          );
         });
       });
 
@@ -513,7 +546,7 @@ describe('the "local" dependency type', () => {
     });
 
     describe('when the version used has a semver group it conforms to', () => {
-      describe.each(['^', '~'])('when the range is "%s"', (range) => {
+      describe.each(['^', '~'])('when the range is "%s"', range => {
         const getScenario = createScenario({
           '.syncpackrc': {
             dependencyTypes: ['local', 'dev'],
@@ -587,7 +620,10 @@ describe('the "local" dependency type', () => {
             await Effect.runPromiseExit(fixMismatches(scenario));
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('foo.version', '0.1.0');
-            expect(filesByName).toHaveProperty('a.devDependencies.foo', `${range}0.1.0`);
+            expect(filesByName).toHaveProperty(
+              'a.devDependencies.foo',
+              `${range}0.1.0`,
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });
@@ -632,8 +668,14 @@ describe('mismatches', () => {
             const reports = await getScenario().getVersionReports();
             expect(reports).toHaveLength(3);
             expect(reports).toHaveProperty('2.name', 'foo');
-            expect(reports).toHaveProperty('2.reports.0._tag', 'SemverRangeMismatch');
-            expect(reports).toHaveProperty('2.reports.1._tag', 'SemverRangeMismatch');
+            expect(reports).toHaveProperty(
+              '2.reports.0._tag',
+              'SemverRangeMismatch',
+            );
+            expect(reports).toHaveProperty(
+              '2.reports.1._tag',
+              'SemverRangeMismatch',
+            );
           });
         });
 
@@ -688,7 +730,10 @@ describe('mismatches', () => {
             await Effect.runPromiseExit(fixMismatches(scenario));
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('a.dependencies.foo', '3.5.2');
-            expect(filesByName).toHaveProperty('b.devDependencies.foo', '3.5.2');
+            expect(filesByName).toHaveProperty(
+              'b.devDependencies.foo',
+              '3.5.2',
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });
@@ -727,8 +772,14 @@ describe('mismatches', () => {
           const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('2.name', 'foo');
-          expect(reports).toHaveProperty('2.reports.0._tag', 'UnsupportedMismatch');
-          expect(reports).toHaveProperty('2.reports.1._tag', 'UnsupportedMismatch');
+          expect(reports).toHaveProperty(
+            '2.reports.0._tag',
+            'UnsupportedMismatch',
+          );
+          expect(reports).toHaveProperty(
+            '2.reports.1._tag',
+            'UnsupportedMismatch',
+          );
         });
       });
 
@@ -830,9 +881,18 @@ describe('mismatches', () => {
               const reports = await getScenario().getVersionReports();
               expect(reports).toHaveLength(4);
               expect(reports).toHaveProperty('3.name', 'foo');
-              expect(reports).toHaveProperty('3.reports.0._tag', 'UnsupportedMismatch');
-              expect(reports).toHaveProperty('3.reports.1._tag', 'UnsupportedMismatch');
-              expect(reports).toHaveProperty('3.reports.2._tag', 'UnsupportedMismatch');
+              expect(reports).toHaveProperty(
+                '3.reports.0._tag',
+                'UnsupportedMismatch',
+              );
+              expect(reports).toHaveProperty(
+                '3.reports.1._tag',
+                'UnsupportedMismatch',
+              );
+              expect(reports).toHaveProperty(
+                '3.reports.2._tag',
+                'UnsupportedMismatch',
+              );
             });
           });
 
@@ -1072,7 +1132,10 @@ describe('matches', () => {
             await Effect.runPromiseExit(fixMismatches(scenario));
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('a.dependencies.foo', '~3.5.2');
-            expect(filesByName).toHaveProperty('b.devDependencies.foo', '~3.5.2');
+            expect(filesByName).toHaveProperty(
+              'b.devDependencies.foo',
+              '~3.5.2',
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });
@@ -1171,8 +1234,14 @@ describe('matches', () => {
             await Effect.runPromiseExit(fixMismatches(scenario));
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('a.dependencies.foo', '>2.0.0');
-            expect(filesByName).toHaveProperty('b.devDependencies.foo', '~3.0.0');
-            expect(filesByName).toHaveProperty('c.peerDependencies.foo', '^3.0.0');
+            expect(filesByName).toHaveProperty(
+              'b.devDependencies.foo',
+              '~3.0.0',
+            );
+            expect(filesByName).toHaveProperty(
+              'c.peerDependencies.foo',
+              '^3.0.0',
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });
@@ -1359,8 +1428,14 @@ describe('matches', () => {
             await Effect.runPromiseExit(fixMismatches(scenario));
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('a.dependencies.foo', version);
-            expect(filesByName).toHaveProperty('b.devDependencies.foo', version);
-            expect(filesByName).toHaveProperty('c.peerDependencies.foo', version);
+            expect(filesByName).toHaveProperty(
+              'b.devDependencies.foo',
+              version,
+            );
+            expect(filesByName).toHaveProperty(
+              'c.peerDependencies.foo',
+              version,
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });
@@ -1413,9 +1488,15 @@ describe('when versions are pure semver', () => {
             const reports = await getScenario().getVersionReports();
             expect(reports).toHaveLength(4);
             expect(reports).toHaveProperty('3.name', 'foo');
-            expect(reports).toHaveProperty('3.reports.0._tag', 'HighestSemverMismatch');
+            expect(reports).toHaveProperty(
+              '3.reports.0._tag',
+              'HighestSemverMismatch',
+            );
             expect(reports).toHaveProperty('3.reports.1._tag', 'Valid');
-            expect(reports).toHaveProperty('3.reports.2._tag', 'HighestSemverMismatch');
+            expect(reports).toHaveProperty(
+              '3.reports.2._tag',
+              'HighestSemverMismatch',
+            );
           });
         });
 
@@ -1458,7 +1539,10 @@ describe('when versions are pure semver', () => {
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('a.dependencies.foo', higher);
             expect(filesByName).toHaveProperty('b.devDependencies.foo', higher);
-            expect(filesByName).toHaveProperty('c.peerDependencies.foo', higher);
+            expect(filesByName).toHaveProperty(
+              'c.peerDependencies.foo',
+              higher,
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });
@@ -1505,9 +1589,15 @@ describe('when versions are pure semver', () => {
               const reports = await getScenario().getVersionReports();
               expect(reports).toHaveLength(4);
               expect(reports).toHaveProperty('3.name', 'foo');
-              expect(reports).toHaveProperty('3.reports.0._tag', 'HighestSemverMismatch');
+              expect(reports).toHaveProperty(
+                '3.reports.0._tag',
+                'HighestSemverMismatch',
+              );
               expect(reports).toHaveProperty('3.reports.1._tag', 'Valid');
-              expect(reports).toHaveProperty('3.reports.2._tag', 'HighestSemverMismatch');
+              expect(reports).toHaveProperty(
+                '3.reports.2._tag',
+                'HighestSemverMismatch',
+              );
             });
           });
 
@@ -1548,9 +1638,18 @@ describe('when versions are pure semver', () => {
               const scenario = getScenario();
               await Effect.runPromiseExit(fixMismatches(scenario));
               const filesByName = scenario.readPackages();
-              expect(filesByName).toHaveProperty('a.dependencies.foo', '>=0.1.0');
-              expect(filesByName).toHaveProperty('b.devDependencies.foo', '>=0.1.0');
-              expect(filesByName).toHaveProperty('c.peerDependencies.foo', '>=0.1.0');
+              expect(filesByName).toHaveProperty(
+                'a.dependencies.foo',
+                '>=0.1.0',
+              );
+              expect(filesByName).toHaveProperty(
+                'b.devDependencies.foo',
+                '>=0.1.0',
+              );
+              expect(filesByName).toHaveProperty(
+                'c.peerDependencies.foo',
+                '>=0.1.0',
+              );
               expect(scenario.io.process.exit).not.toHaveBeenCalled();
             });
           });
@@ -1601,7 +1700,10 @@ describe('when versions are pure semver', () => {
           expect(reports).toHaveLength(4);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'LowestSemverMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'LowestSemverMismatch',
+          );
           expect(reports).toHaveProperty('0.reports.2._tag', 'Valid');
         });
       });
@@ -1690,9 +1792,15 @@ describe('when versions are pure semver', () => {
           const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(4);
           expect(reports).toHaveProperty('0.name', 'foo');
-          expect(reports).toHaveProperty('0.reports.0._tag', 'SnappedToMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.0._tag',
+            'SnappedToMismatch',
+          );
           expect(reports).toHaveProperty('0.reports.1._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.2._tag', 'SnappedToMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.2._tag',
+            'SnappedToMismatch',
+          );
         });
       });
 
@@ -1780,9 +1888,18 @@ describe('when versions are pure semver', () => {
           const reports = await getScenario().getVersionReports();
           expect(reports).toHaveLength(4);
           expect(reports).toHaveProperty('0.name', 'foo');
-          expect(reports).toHaveProperty('0.reports.0._tag', 'SameRangeMismatch');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'SameRangeMismatch');
-          expect(reports).toHaveProperty('0.reports.2._tag', 'SameRangeMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.0._tag',
+            'SameRangeMismatch',
+          );
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'SameRangeMismatch',
+          );
+          expect(reports).toHaveProperty(
+            '0.reports.2._tag',
+            'SameRangeMismatch',
+          );
         });
       });
 
@@ -1825,7 +1942,10 @@ describe('when versions are pure semver', () => {
           const filesByName = scenario.readPackages();
           expect(filesByName).toHaveProperty('a.dependencies.foo', '<3.0.0');
           expect(filesByName).toHaveProperty('b.devDependencies.foo', '~3.0.0');
-          expect(filesByName).toHaveProperty('c.peerDependencies.foo', '^3.0.0');
+          expect(filesByName).toHaveProperty(
+            'c.peerDependencies.foo',
+            '^3.0.0',
+          );
           expect(scenario.io.process.exit).toHaveBeenCalledWith(1);
         });
       });
@@ -1879,9 +1999,18 @@ describe('when versions are pure semver', () => {
               const reports = await getScenario().getVersionReports();
               expect(reports).toHaveLength(4);
               expect(reports).toHaveProperty('3.name', 'foo');
-              expect(reports).toHaveProperty('3.reports.0._tag', 'HighestSemverMismatch');
-              expect(reports).toHaveProperty('3.reports.1._tag', 'SemverRangeMismatch');
-              expect(reports).toHaveProperty('3.reports.2._tag', 'HighestSemverMismatch');
+              expect(reports).toHaveProperty(
+                '3.reports.0._tag',
+                'HighestSemverMismatch',
+              );
+              expect(reports).toHaveProperty(
+                '3.reports.1._tag',
+                'SemverRangeMismatch',
+              );
+              expect(reports).toHaveProperty(
+                '3.reports.2._tag',
+                'HighestSemverMismatch',
+              );
             });
           });
 
@@ -1938,9 +2067,18 @@ describe('when versions are pure semver', () => {
               const scenario = getScenario();
               await Effect.runPromiseExit(fixMismatches(scenario));
               const filesByName = scenario.readPackages();
-              expect(filesByName).toHaveProperty('a.dependencies.foo', '^0.3.0');
-              expect(filesByName).toHaveProperty('b.devDependencies.foo', '~0.3.0');
-              expect(filesByName).toHaveProperty('c.devDependencies.foo', '^0.3.0');
+              expect(filesByName).toHaveProperty(
+                'a.dependencies.foo',
+                '^0.3.0',
+              );
+              expect(filesByName).toHaveProperty(
+                'b.devDependencies.foo',
+                '~0.3.0',
+              );
+              expect(filesByName).toHaveProperty(
+                'c.devDependencies.foo',
+                '^0.3.0',
+              );
               expect(scenario.io.process.exit).not.toHaveBeenCalled();
             });
           });
@@ -1960,7 +2098,8 @@ describe('when versions are not semver but contain semver', () => {
           higher: 'npm:foo@0.3.0',
         },
         {
-          scenario: 'when highest version is of the format "git://github.com/user/project.git#0.3.0"',
+          scenario:
+            'when highest version is of the format "git://github.com/user/project.git#0.3.0"',
           lower: 'git://github.com/user/project.git#0.1.0',
           higher: 'git://github.com/user/project.git#0.3.0',
         },
@@ -1994,9 +2133,15 @@ describe('when versions are not semver but contain semver', () => {
             const reports = await getScenario().getVersionReports();
             expect(reports).toHaveLength(4);
             expect(reports).toHaveProperty('3.name', 'foo');
-            expect(reports).toHaveProperty('3.reports.0._tag', 'HighestSemverMismatch');
+            expect(reports).toHaveProperty(
+              '3.reports.0._tag',
+              'HighestSemverMismatch',
+            );
             expect(reports).toHaveProperty('3.reports.1._tag', 'Valid');
-            expect(reports).toHaveProperty('3.reports.2._tag', 'HighestSemverMismatch');
+            expect(reports).toHaveProperty(
+              '3.reports.2._tag',
+              'HighestSemverMismatch',
+            );
           });
         });
 
@@ -2039,7 +2184,10 @@ describe('when versions are not semver but contain semver', () => {
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('a.dependencies.foo', higher);
             expect(filesByName).toHaveProperty('b.devDependencies.foo', higher);
-            expect(filesByName).toHaveProperty('c.peerDependencies.foo', higher);
+            expect(filesByName).toHaveProperty(
+              'c.peerDependencies.foo',
+              higher,
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });
@@ -2053,7 +2201,11 @@ describe('when a local package is depended on', () => {
     describe('when packages are nested within other packages on the file system', () => {
       const getScenario = createScenario({
         '.syncpackrc': {
-          source: ['package.json', 'packages/*/package.json', 'packages/*/apps/*/package.json'],
+          source: [
+            'package.json',
+            'packages/*/package.json',
+            'packages/*/apps/*/package.json',
+          ],
         },
         'package.json': {
           name: 'a',
@@ -2081,8 +2233,14 @@ describe('when a local package is depended on', () => {
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'a');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'LocalPackageMismatch');
-          expect(reports).toHaveProperty('0.reports.2._tag', 'LocalPackageMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'LocalPackageMismatch',
+          );
+          expect(reports).toHaveProperty(
+            '0.reports.2._tag',
+            'LocalPackageMismatch',
+          );
         });
       });
 
@@ -2159,8 +2317,14 @@ describe('when a local package is depended on', () => {
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'a');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'LocalPackageMismatch');
-          expect(reports).toHaveProperty('0.reports.2._tag', 'LocalPackageMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'LocalPackageMismatch',
+          );
+          expect(reports).toHaveProperty(
+            '0.reports.2._tag',
+            'LocalPackageMismatch',
+          );
         });
       });
 
@@ -2238,8 +2402,14 @@ describe('when a local package is depended on', () => {
             expect(reports).toHaveLength(3);
             expect(reports).toHaveProperty('0.name', 'a');
             expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-            expect(reports).toHaveProperty('0.reports.1._tag', 'LocalPackageMismatch');
-            expect(reports).toHaveProperty('0.reports.2._tag', 'LocalPackageMismatch');
+            expect(reports).toHaveProperty(
+              '0.reports.1._tag',
+              'LocalPackageMismatch',
+            );
+            expect(reports).toHaveProperty(
+              '0.reports.2._tag',
+              'LocalPackageMismatch',
+            );
           });
         });
 
@@ -2369,8 +2539,14 @@ describe('when a local package is depended on', () => {
             await Effect.runPromiseExit(fixMismatches(scenario));
             const filesByName = scenario.readPackages();
             expect(filesByName).toHaveProperty('a.version', '1.1.1');
-            expect(filesByName).toHaveProperty('b.dependencies.a', 'workspace:*');
-            expect(filesByName).toHaveProperty('c.dependencies.a', 'workspace:*');
+            expect(filesByName).toHaveProperty(
+              'b.dependencies.a',
+              'workspace:*',
+            );
+            expect(filesByName).toHaveProperty(
+              'c.dependencies.a',
+              'workspace:*',
+            );
             expect(scenario.io.process.exit).not.toHaveBeenCalled();
           });
         });

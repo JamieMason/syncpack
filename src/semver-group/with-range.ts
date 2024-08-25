@@ -26,27 +26,31 @@ export class WithRangeSemverGroup extends Data.TaggedClass('WithRange')<{
     return true;
   }
 
-  getFixed(specifier: Specifier.Any): Effect.Effect<Specifier.Any, NonSemverError> {
+  getFixed(
+    specifier: Specifier.Any,
+  ): Effect.Effect<Specifier.Any, NonSemverError> {
     return pipe(
       specifier.getSemver(),
-      Effect.map((semver) => setSemverRange(this.config.range, semver)),
-      Effect.flatMap((nextSemver) => specifier.setSemver(nextSemver)),
+      Effect.map(semver => setSemverRange(this.config.range, semver)),
+      Effect.flatMap(nextSemver => specifier.setSemver(nextSemver)),
     );
   }
 
   inspectAll() {
-    return Effect.all(this.instances.map((instance) => this.inspect(instance)));
+    return Effect.all(this.instances.map(instance => this.inspect(instance)));
   }
 
   inspect(
     instance: Instance,
-  ): Effect.Effect<Report.UnsupportedMismatch | Report.SemverRangeMismatch | Report.Valid> {
+  ): Effect.Effect<
+    Report.UnsupportedMismatch | Report.SemverRangeMismatch | Report.Valid
+  > {
     const current = Specifier.create(instance, instance.rawSpecifier.raw);
     return pipe(
       this.getFixed(current),
       Effect.match({
         // if range is fixable
-        onSuccess: (valid) =>
+        onSuccess: valid =>
           // if it is pinned and matches its pin
           instance.versionGroup._tag === 'Pinned' &&
           instance.rawSpecifier.raw === instance.versionGroup.config.pinVersion

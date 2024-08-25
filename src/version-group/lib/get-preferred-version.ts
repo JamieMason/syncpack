@@ -14,19 +14,24 @@ export function getPreferredVersion(
   return pipe(
     // every instance must have a semver version
     Effect.all(
-      specifiers.map((specifier) =>
+      specifiers.map(specifier =>
         pipe(
           specifier.getSemver(),
-          Effect.map((semver) => ({ semver, specifier })),
+          Effect.map(semver => ({ semver, specifier })),
         ),
       ),
     ),
     // comparing semver can error on some loose ranges, all must succeed
-    Effect.map((semvers) => semvers.sort((a, b) => compareSemver(a.semver, b.semver))),
+    Effect.map(semvers =>
+      semvers.sort((a, b) => compareSemver(a.semver, b.semver)),
+    ),
     // get the preferred value from the list
-    Effect.map((sorted) => sorted[preferVersion === 'lowestSemver' ? 0 : sorted.length - 1]),
+    Effect.map(
+      sorted =>
+        sorted[preferVersion === 'lowestSemver' ? 0 : sorted.length - 1],
+    ),
     // return just the specifier
-    Effect.map((preferred) => preferred?.specifier as Specifier.Any),
+    Effect.map(preferred => preferred?.specifier as Specifier.Any),
   );
 }
 
@@ -35,18 +40,36 @@ const LT = -1;
 const GT = 1;
 
 function compareSemver(a: string, b: string): -1 | 0 | 1 {
-  if (a.startsWith('workspace:')) return LT;
-  if (b.startsWith('workspace:')) return GT;
-  if (a === b) return EQ;
-  if (a === '*') return GT;
-  if (b === '*') return LT;
+  if (a.startsWith('workspace:')) {
+    return LT;
+  }
+  if (b.startsWith('workspace:')) {
+    return GT;
+  }
+  if (a === b) {
+    return EQ;
+  }
+  if (a === '*') {
+    return GT;
+  }
+  if (b === '*') {
+    return LT;
+  }
   const cleanA = clean(a);
   const cleanB = clean(b);
-  if (gt(cleanA, cleanB)) return GT;
-  if (lt(cleanA, cleanB)) return LT;
+  if (gt(cleanA, cleanB)) {
+    return GT;
+  }
+  if (lt(cleanA, cleanB)) {
+    return LT;
+  }
   const scoreA = getRangeScore(a);
   const scoreB = getRangeScore(b);
-  if (scoreA < scoreB) return LT;
-  if (scoreA > scoreB) return GT;
+  if (scoreA < scoreB) {
+    return LT;
+  }
+  if (scoreA > scoreB) {
+    return GT;
+  }
   return EQ;
 }

@@ -4,7 +4,7 @@ import { pipeline as format } from '../bin-format/format.js';
 import { pipeline as lintSemverRanges } from '../bin-lint-semver-ranges/lint-semver-ranges.js';
 import { pipeline as listMismatches } from '../bin-list-mismatches/list-mismatches.js';
 import { CliConfigTag } from '../config/tag.js';
-import { type CliConfig } from '../config/types.js';
+import type { CliConfig } from '../config/types.js';
 import { ICON } from '../constants.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
@@ -25,7 +25,7 @@ export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
   return pipe(
     getContext({ io, cli, errorHandlers }),
     // Versions
-    Effect.flatMap((ctx) =>
+    Effect.flatMap(ctx =>
       Effect.gen(function* ($) {
         if (ctx.config.rcFile.lintVersions !== false) {
           yield* $(Effect.logInfo(chalk`{yellow Versions}`));
@@ -35,7 +35,7 @@ export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
       }),
     ),
     // Semver Ranges
-    Effect.flatMap((ctx) =>
+    Effect.flatMap(ctx =>
       Effect.gen(function* ($) {
         if (ctx.config.rcFile.lintSemverRanges !== false) {
           yield* $(Effect.logInfo(chalk`{yellow Semver Ranges}`));
@@ -45,7 +45,7 @@ export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
       }),
     ),
     // Formatting
-    Effect.flatMap((ctx) =>
+    Effect.flatMap(ctx =>
       Effect.gen(function* ($) {
         if (ctx.config.rcFile.lintFormatting !== false) {
           yield* $(Effect.logInfo(chalk`{yellow Formatting}`));
@@ -58,7 +58,9 @@ export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
               ctx.isInvalid = true;
               yield* $(Effect.logInfo(chalk`{red ${ICON.cross}} ${shortPath}`));
             } else {
-              yield* $(Effect.logInfo(chalk`{green ${ICON.tick}} ${shortPath}`));
+              yield* $(
+                Effect.logInfo(chalk`{green ${ICON.tick}} ${shortPath}`),
+              );
             }
           }
         }
@@ -66,7 +68,13 @@ export function lint({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
       }),
     ),
     Effect.flatMap(exitIfInvalid),
-    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    Effect.provide(
+      pipe(
+        Context.empty(),
+        Context.add(CliConfigTag, cli),
+        Context.add(IoTag, io),
+      ),
+    ),
     withLogger,
   );
 }

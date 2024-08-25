@@ -280,7 +280,10 @@ describe('mismatches', () => {
         const reports = await getScenario().getVersionReports();
         expect(reports).toHaveLength(2);
         expect(reports).toHaveProperty('0.name', 'foo');
-        expect(reports).toHaveProperty('0.reports.0._tag', 'MissingSnappedToMismatch');
+        expect(reports).toHaveProperty(
+          '0.reports.0._tag',
+          'MissingSnappedToMismatch',
+        );
       });
     });
 
@@ -358,7 +361,10 @@ describe('mismatches', () => {
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'SnappedToMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'SnappedToMismatch',
+          );
         });
       });
 
@@ -398,8 +404,14 @@ describe('mismatches', () => {
         const scenario = getScenario();
         await Effect.runPromiseExit(fixMismatches(scenario));
         const filesByName = scenario.readPackages();
-        expect(filesByName).toHaveProperty('a.dependencies.foo', 'git://github.com/user/project.git#commit1');
-        expect(filesByName).toHaveProperty('b.dependencies.foo', 'git://github.com/user/project.git#commit1');
+        expect(filesByName).toHaveProperty(
+          'a.dependencies.foo',
+          'git://github.com/user/project.git#commit1',
+        );
+        expect(filesByName).toHaveProperty(
+          'b.dependencies.foo',
+          'git://github.com/user/project.git#commit1',
+        );
         expect(scenario.io.process.exit).not.toHaveBeenCalled();
       });
     });
@@ -442,7 +454,10 @@ describe('mismatches', () => {
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'UnsupportedMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'UnsupportedMismatch',
+          );
         });
       });
 
@@ -531,7 +546,10 @@ describe('mismatches', () => {
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'SnappedToMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'SnappedToMismatch',
+          );
         });
       });
 
@@ -615,7 +633,10 @@ describe('mismatches', () => {
           expect(reports).toHaveLength(3);
           expect(reports).toHaveProperty('0.name', 'foo');
           expect(reports).toHaveProperty('0.reports.0._tag', 'Valid');
-          expect(reports).toHaveProperty('0.reports.1._tag', 'SnappedToMismatch');
+          expect(reports).toHaveProperty(
+            '0.reports.1._tag',
+            'SnappedToMismatch',
+          );
         });
       });
 
@@ -625,7 +646,10 @@ describe('mismatches', () => {
           expect(reports).toHaveLength(4);
           expect(reports).toHaveProperty('2.unfixable.name', 'foo');
           expect(reports).toHaveProperty('2._tag', 'UnsupportedMismatch');
-          expect(reports).toHaveProperty('2.unfixable.rawSpecifier.raw', 'git://github.com/user/project.git#commit1');
+          expect(reports).toHaveProperty(
+            '2.unfixable.rawSpecifier.raw',
+            'git://github.com/user/project.git#commit1',
+          );
         });
       });
 

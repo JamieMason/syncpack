@@ -4,7 +4,7 @@ import { uniq } from 'tightrope/array/uniq.js';
 import { isString } from 'tightrope/guard/is-string.js';
 import { logOtherCommands } from '../bin-list/list.js';
 import { CliConfigTag } from '../config/tag.js';
-import { type CliConfig } from '../config/types.js';
+import type { CliConfig } from '../config/types.js';
 import { ICON } from '../constants.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
@@ -26,13 +26,19 @@ interface Input {
   errorHandlers?: ErrorHandlers;
 }
 
-export function prompt({ io, cli, errorHandlers = defaultErrorHandlers }: Input) {
+export function prompt({
+  io,
+  cli,
+  errorHandlers = defaultErrorHandlers,
+}: Input) {
   return pipe(
     getContext({ io, cli, errorHandlers }),
-    Effect.flatMap((ctx) =>
+    Effect.flatMap(ctx =>
       pipe(
         Effect.gen(function* ($) {
-          const { versionGroups } = yield* $(getInstances(ctx, io, errorHandlers));
+          const { versionGroups } = yield* $(
+            getInstances(ctx, io, errorHandlers),
+          );
           let unfixableCount = 0;
           let index = 0;
           for (const group of versionGroups) {
@@ -74,12 +80,20 @@ export function prompt({ io, cli, errorHandlers = defaultErrorHandlers }: Input)
         Effect.flatMap(exitIfInvalid),
       ),
     ),
-    Effect.provide(pipe(Context.empty(), Context.add(CliConfigTag, cli), Context.add(IoTag, io))),
+    Effect.provide(
+      pipe(
+        Context.empty(),
+        Context.add(CliConfigTag, cli),
+        Context.add(IoTag, io),
+      ),
+    ),
     withLogger,
   );
 }
 
-function isUnfixable(report: Report.Version.Any): report is Report.Version.Unfixable.Any {
+function isUnfixable(
+  report: Report.Version.Any,
+): report is Report.Version.Unfixable.Any {
   return (
     report._tag === 'MissingLocalVersion' ||
     report._tag === 'MissingSnappedToMismatch' ||
@@ -95,7 +109,7 @@ function askForNextVersion(
   return pipe(
     Effect.gen(function* ($) {
       const choices = uniq(
-        groupReport.reports.map((report) =>
+        groupReport.reports.map(report =>
           report._tagGroup === 'Fixable'
             ? report.fixable.raw
             : report._tagGroup === 'Unfixable'
@@ -106,25 +120,29 @@ function askForNextVersion(
         ),
       ).filter(isString);
 
-      const OTHER = chalk`{dim Other}`;
-      const SKIP = chalk`{dim Skip}`;
-      const QUIT = chalk`{dim Quit}`;
+      const other = chalk`{dim Other}`;
+      const skip = chalk`{dim Skip}`;
+      const quit = chalk`{dim Quit}`;
 
       // Ask user to choose a version to align on
       const choice = yield* $(
         askForChoice({
           message: groupReport.name,
-          choices: [...choices, OTHER, SKIP, QUIT],
+          choices: [...choices, other, skip, quit],
         }),
       );
 
-      if (choice === SKIP) return;
+      if (choice === skip) {
+        return;
+      }
 
       // @TODO: Learn https://www.effect.website/docs/data-types/exit
-      if (choice === QUIT) return process.exit(0);
+      if (choice === quit) {
+        return process.exit(0);
+      }
 
       const nextVersion =
-        choice === OTHER
+        choice === other
           ? yield* $(
               askForInput({
                 message: chalk`${groupReport.name} {dim Enter a replacement version}`,
@@ -135,7 +153,7 @@ function askForNextVersion(
       yield* $(
         pipe(
           unfixable,
-          Effect.forEach((report) => report.unfixable.write(nextVersion)),
+          Effect.forEach(report => report.unfixable.write(nextVersion)),
         ),
       );
     }),

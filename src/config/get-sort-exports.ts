@@ -4,7 +4,8 @@ import { DEFAULT_CONFIG } from '../constants.js';
 import type { Ctx } from '../get-context/index.js';
 
 export function getSortExports({ rcFile }: Ctx['config']): string[] {
-  return isArrayOfStrings(rcFile.sortExports) || isEmptyArray(rcFile.sortExports)
+  return isArrayOfStrings(rcFile.sortExports) ||
+    isEmptyArray(rcFile.sortExports)
     ? rcFile.sortExports
     : DEFAULT_CONFIG.sortExports;
 }

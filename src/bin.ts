@@ -1,18 +1,24 @@
 #!/usr/bin/env node
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { program } from 'commander';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 program
-  .version(JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, 'utf8')).version)
-  .command('fix-mismatches', 'set dependencies used with different versions to the same version', {
-    executableFile: './bin-fix-mismatches/index.js',
-  })
+  .version(
+    JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, 'utf8')).version,
+  )
+  .command(
+    'fix-mismatches',
+    'set dependencies used with different versions to the same version',
+    {
+      executableFile: './bin-fix-mismatches/index.js',
+    },
+  )
   .command('format', 'sort and shorten properties according to a convention', {
     executableFile: './bin-format/index.js',
   })
