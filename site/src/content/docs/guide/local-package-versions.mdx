@@ -83,7 +83,7 @@ Let's look at `workspace:*` under `devDependencies` first and decide on a rule f
 
 </Details>
 
-The fix for the Peer Dependency of `^1.0.0` can also be used to fix the use of `workspace:\*</code>. Since the current version of `1.2.1` of the Client is satisfied by both of these ranges, a [Same Range Version Group](/syncpack/config/version-groups/same-range) can be used.
+The fix for the Peer Dependency of `^1.0.0` can also be used to fix the use of `workspace:*`. Since the current version of `1.2.1` of the Client is satisfied by both of these ranges, a [Same Range Version Group](/syncpack/config/version-groups/same-range) can be used.
 
 The versions will be considered a match unless eg. `2.0.0` of the Client is released, or one of its dependents uses a range which does not include its current version.
 
