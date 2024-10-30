@@ -1,0 +1,38 @@
+[
+  {
+    "NAME": "linux-x64-glibc",
+    "OS": "ubuntu-22.04",
+    "RUN_LOCALLY": true,
+    "TARGET": "x86_64-unknown-linux-gnu"
+  },
+  {
+    "NAME": "linux-arm64-glibc",
+    "OS": "ubuntu-22.04",
+    "RUN_LOCALLY": false,
+    "TARGET": "aarch64-unknown-linux-gnu"
+  },
+  {
+    "NAME": "win32-x64-msvc",
+    "OS": "windows-2022",
+    "RUN_LOCALLY": false,
+    "TARGET": "x86_64-pc-windows-msvc"
+  },
+  {
+    "NAME": "win32-arm64-msvc",
+    "OS": "windows-2022",
+    "RUN_LOCALLY": false,
+    "TARGET": "aarch64-pc-windows-msvc"
+  },
+  {
+    "NAME": "darwin-x64",
+    "OS": "macos-13",
+    "RUN_LOCALLY": false,
+    "TARGET": "x86_64-apple-darwin"
+  },
+  {
+    "NAME": "darwin-arm64",
+    "OS": "macos-13",
+    "RUN_LOCALLY": false,
+    "TARGET": "aarch64-apple-darwin"
+  }
+]

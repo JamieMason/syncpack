@@ -1,0 +1,43 @@
+[package]
+name = "syncpack"
+version = "14.0.0-alpha.0"
+authors = ["Jamie Mason <jamie@foldleft.io>"]
+edition = "2021"
+homepage = "https://jamiemason.github.io/syncpack"
+repository = "https://github.com/JamieMason/syncpack/tree/rust/main"
+description = "Consistent dependency versions in large JavaScript Monorepos"
+license = "MIT"
+keywords = [
+    "npm",
+    "yarn",
+    "linter",
+    "monorepo",
+    "semver",
+    "version-manager",
+    "pnpm",
+    "nx",
+    "version-management",
+    "turborepo",
+]
+readme = "./README.md"
+publish = false
+
+[dependencies]
+atty = "0.2.14"
+clap = { version = "4.5.20", features = ["cargo"] }
+color-print = "0.3.6"
+colored = "2.1.0"
+ctor = "0.2.8"
+env_logger = "0.11.5"
+glob = "0.3.1"
+globset = "0.4.15"
+icu = "1.5.0"
+itertools = "0.13.0"
+lazy_static = "1.5.0"
+log = "0.4.22"
+node-semver = "2.1.0"
+regex = "1.11.1"
+serde = { version = "1.0.213", features = ["derive"] }
+serde_json = { version = "1.0.132", features = ["preserve_order"] }
+serde_yaml = "0.9"
+version-compare = "0.2.0"

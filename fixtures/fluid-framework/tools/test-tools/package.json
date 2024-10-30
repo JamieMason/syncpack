@@ -1,0 +1,50 @@
+{
+	"name": "@fluidframework/test-tools",
+	"version": "2.0.0",
+	"description": "Fluid test tools",
+	"homepage": "https://fluidframework.com",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/microsoft/FluidFramework.git",
+		"directory": "tools/test-tools"
+	},
+	"license": "MIT",
+	"author": "Microsoft and contributors",
+	"main": "dist/getTestPort.js",
+	"types": "dist/getTestPort.d.ts",
+	"bin": {
+		"assign-test-ports": "bin/assign-test-ports"
+	},
+	"scripts": {
+		"build": "fluid-build --task build",
+		"build:compile": "fluid-build --task compile",
+		"build:test": "tsc --project ./src/test/tsconfig.json",
+		"clean": "rimraf --glob dist \"**/*.tsbuildinfo\" \"**/*.build.log\" nyc",
+		"eslint": "eslint src",
+		"eslint:fix": "eslint src --fix",
+		"format": "npm run prettier:fix",
+		"lint": "fluid-build --task lint",
+		"lint:fix": "npm run prettier:fix && npm run eslint:fix",
+		"prettier": "prettier --check . --cache --ignore-path ../../.prettierignore",
+		"prettier:fix": "prettier --write . --cache --ignore-path ../../.prettierignore",
+		"test": "mocha",
+		"tsc": "tsc"
+	},
+	"devDependencies": {
+		"@fluidframework/build-common": "^2.0.3",
+		"@fluidframework/build-tools": "^0.44.0",
+		"@fluidframework/eslint-config-fluid": "^5.1.0",
+		"@types/mocha": "^10.0.0",
+		"@types/node": "^18.19.0",
+		"eslint": "~8.55.0",
+		"eslint-config-prettier": "~9.0.0",
+		"mocha": "^10.2.0",
+
+		"mocha-multi-reporters": "^1.5.1",
+		"moment": "^2.21.0",
+		"prettier": "~3.0.3",
+		"rimraf": "^5.0.0",
+		"typescript": "~5.1.6"
+	},
+	"packageManager": "pnpm@8.15.8+sha512.d1a029e1a447ad90bc96cd58b0fad486d2993d531856396f7babf2d83eb1823bb83c5a3d0fc18f675b2d10321d49eb161fece36fe8134aa5823ecd215feed392"
+}

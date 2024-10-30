@@ -1,51 +1,38 @@
-name: verify
+name: Verify v14-alpha
 
 on:
   pull_request:
+    branches:
+      - v14-alpha
   push:
+    branches:
+      - v14-alpha
 
 jobs:
-  all:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: [18.18.0, 20.x, 22.x]
-
+  lint-and-test:
+    name: Lint and test
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          version: 8
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - name: Set up cargo cache
+        uses: Swatinem/rust-cache@v2
+      - name: Install just
+        uses: extractions/setup-just@v1
         with:
-          cache: 'pnpm'
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install
-        run: pnpm install
-
-      - name: Build
-        run: pnpm run build
-        env:
-          FORCE_COLOR: 3
-          TERM: xterm-256color
-
-      - name: E2E Smoke Test
-        if: matrix.os == 'ubuntu-latest'
-        run: ./test/smoke.sh
-
-      - name: Lint
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
-        run: pnpm run lint
-        env:
-          FORCE_COLOR: 3
-          TERM: xterm-256color
-
-      - name: Test
-        run: pnpm run test
-        env:
-          FORCE_COLOR: 3
-          TERM: xterm-256color
+          just-version: 1.35.0
+      - name: Check cargo
+        run: just check-cargo
+      - name: Lint formatting
+        run: just check-formatting
+      - name: Lint clippy
+        run: just check-clippy
+      - name: Cargo test
+        run: just test

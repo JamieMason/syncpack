@@ -1,0 +1,43 @@
+{
+	"name": "@fluid-internal/getkeys",
+	"version": "1.0.0",
+	"private": true,
+	"description": "",
+	"homepage": "https://fluidframework.com",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/microsoft/FluidFramework.git",
+		"directory": "tools/getkeys"
+	},
+	"license": "MIT",
+	"author": "Microsoft and contributors",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"eslint": "eslint ./index.js",
+		"eslint:fix": "eslint ./index.js --fix",
+		"format": "npm run prettier:fix",
+		"preinstall": "node ../../scripts/only-pnpm.cjs",
+		"lint": "npm run prettier && npm run eslint",
+		"lint:fix": "npm run prettier:fix && npm run eslint:fix",
+		"prettier": "prettier --check . --cache --ignore-path ../../.prettierignore",
+		"prettier:fix": "prettier --write . --cache --ignore-path ../../.prettierignore",
+		"start": "node ./index.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+		"@fluidframework/tool-utils": "^0.35.0"
+	},
+	"devDependencies": {
+		"@fluidframework/eslint-config-fluid": "^5.2.0",
+		"eslint": "~8.55.0",
+		"prettier": "~3.0.3",
+		"typescript": "~4.5.5"
+	},
+	"packageManager": "pnpm@8.15.8+sha512.d1a029e1a447ad90bc96cd58b0fad486d2993d531856396f7babf2d83eb1823bb83c5a3d0fc18f675b2d10321d49eb161fece36fe8134aa5823ecd215feed392",
+	"pnpm": {
+		"overrides": {
+			"qs": "^6.11.0"
+		}
+	}
+}

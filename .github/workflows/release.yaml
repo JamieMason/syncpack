@@ -1,0 +1,111 @@
+name: Release v14-alpha
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-matrix:
+    name: Build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows/matrix.json
+          sparse-checkout-cone-mode: false
+      - id: set-matrix
+        shell: bash
+        run: |
+          if [ "$ACT" == true ]; then
+            echo "build_matrix=$( cat .github/workflows/matrix.json | jq --monochrome-output --compact-output '[.[] | select(.RUN_LOCALLY)]' )" >> $GITHUB_OUTPUT
+          else
+            echo "build_matrix=$( cat .github/workflows/matrix.json | jq --monochrome-output --compact-output )" >> $GITHUB_OUTPUT
+          fi
+
+  publish-npm-binaries:
+    name: Publish npm binaries
+    needs: build-matrix
+    runs-on: ${{ matrix.build.OS }}
+    strategy:
+      fail-fast: true
+      matrix:
+        build: ${{ fromJson(needs.build-matrix.outputs.build_matrix) }}
+    steps:
+      - name: Debug workflow values
+        shell: bash
+        run: |
+          echo "env.ACT                  : ${{ env.ACT }}"
+          echo "matrix.build.NAME        : ${{ matrix.build.NAME }}"
+          echo "matrix.build.OS          : ${{ matrix.build.OS }}"
+          echo "matrix.build.RUN_LOCALLY : ${{ matrix.build.RUN_LOCALLY }}"
+          echo "matrix.build.TARGET      : ${{ matrix.build.TARGET }}"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: ${{ matrix.build.TARGET }}
+          override: true
+          components: rustfmt, clippy
+      - name: Set up cargo cache
+        uses: Swatinem/rust-cache@v2
+      - name: Install just
+        uses: extractions/setup-just@v1
+        with:
+          just-version: 1.35.0
+      - name: Build rust binary
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --locked --target ${{ matrix.build.TARGET }}
+          use-cross: ${{ !env.ACT && matrix.build.OS == 'ubuntu-22.04' }}
+      - name: Publish rust binary package to npm
+        shell: bash
+        run: |
+          just --dotenv-filename .env.${{ matrix.build.NAME }} create-npm-binary-package
+          just --dotenv-filename .env.${{ matrix.build.NAME }} publish-npm-binary-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: syncpack-${{ matrix.build.TARGET }}
+          path: target/${{ matrix.build.TARGET }}/release/syncpack
+
+  publish-npm-base:
+    name: Publish npm package
+    needs: publish-npm-binaries
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+      - name: Install just
+        uses: extractions/setup-just@v1
+        with:
+          just-version: 1.35.0
+      - name: Publish the package
+        shell: bash
+        run: |
+          just --dotenv-filename .env.linux-x64-glibc create-npm-root-package
+          just --dotenv-filename .env.linux-x64-glibc publish-npm-root-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
