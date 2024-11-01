@@ -6,6 +6,9 @@
   <br><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a>
 </p>
 
+> [!TIP]
+> 🦀 A Rust rewrite is available to try at [`npm install -g syncpack@14.0.0-alpha.1`](https://github.com/JamieMason/syncpack/releases/tag/14.0.0-alpha.1)
+
 ## Installation
 
 ```bash
