@@ -105,6 +105,7 @@ jobs:
       - name: Publish the package
         shell: bash
         run: |
+          npm install
           just --dotenv-filename .env.linux-x64-glibc create-npm-root-package
           just --dotenv-filename .env.linux-x64-glibc publish-npm-root-package
         env:
