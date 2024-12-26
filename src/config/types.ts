@@ -158,7 +158,9 @@ export interface RcConfig {
   /** @see https://jamiemason.github.io/syncpack/integrations/json-schema */
   $schema?: string;
   /** @see https://jamiemason.github.io/syncpack/config/custom-types */
-  customTypes: Record<string, CustomTypeConfig.Any>;
+  customTypes: {
+    [name: string]: CustomTypeConfig.Any;
+  };
   /** @see https://jamiemason.github.io/syncpack/config/dependency-types */
   dependencyTypes: DependencyType[];
   /** @see https://jamiemason.github.io/syncpack/config/filter */
