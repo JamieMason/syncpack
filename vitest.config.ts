@@ -5,6 +5,7 @@ export default defineConfig({
     coverage: {
       all: true,
       enabled: true,
+      include: ['src/**/*.ts'],
       exclude: ['src/bin.ts', 'src/bin-*/index.ts', 'site', 'test'],
       extension: ['.ts'],
       provider: 'v8',
