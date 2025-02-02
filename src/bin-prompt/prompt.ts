@@ -49,7 +49,7 @@ export function prompt({
                   unfixable.push(report);
                 }
               }
-              if (unfixable.length) {
+              if (unfixable.length > 0) {
                 unfixableCount += unfixable.length;
                 Effect.logInfo(getVersionGroupHeader({ group, index }));
                 yield* $(askForNextVersion(groupReport, unfixable));

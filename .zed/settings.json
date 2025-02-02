@@ -1,9 +1,20 @@
 {
+  "code_actions_on_format": {
+    "source.fixAll.biome": true,
+    "source.organizeImports.biome": true
+  },
   "ensure_final_newline_on_save": true,
   "formatter": {
-    "external": {
-      "command": "./node_modules/.bin/biome",
-      "arguments": ["check", "--stdin-file-path", "{buffer_path}", "--apply"]
+    "language_server": {
+      "name": "biome"
+    }
+  },
+  "lsp": {
+    "biome": {
+      "settings": {
+        "config_path": "../biome.json",
+        "require_config_file": true
+      }
     }
   },
   "remove_trailing_whitespace_on_save": true

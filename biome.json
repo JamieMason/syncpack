@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
     "ignore": ["**/*.astro", "**/coverage", "**/dist", "package.json"]
   },
@@ -35,10 +35,16 @@
         "useNamingConvention": "off"
       },
       "suspicious": {
+        "noConsole": "off",
         "noControlCharactersInRegex": "off",
         "noEmptyBlockStatements": "off",
         "noExplicitAny": "off"
       }
+    }
+  },
+  "css": {
+    "formatter": {
+      "quoteStyle": "single"
     }
   },
   "javascript": {
@@ -71,6 +77,26 @@
         "rules": {
           "suspicious": {
             "noEmptyBlockStatements": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["**/*.spec.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "useTopLevelRegex": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["site/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUndeclaredDependencies": "off"
           }
         }
       }
