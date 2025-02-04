@@ -2,6 +2,7 @@ use {
   crate::{
     cli::Cli,
     dependency_type::DependencyType,
+    group_selector::GroupSelector,
     packages::Packages,
     semver_group::{AnySemverGroup, SemverGroup},
     version_group::{AnyVersionGroup, VersionGroup},
@@ -79,9 +80,26 @@ pub struct CustomType {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DependencyGroup {
+  #[serde(default)]
+  pub alias_name: String,
+  #[serde(default)]
+  pub dependencies: Vec<String>,
+  #[serde(default)]
+  pub dependency_types: Vec<String>,
+  #[serde(default)]
+  pub packages: Vec<String>,
+  #[serde(default)]
+  pub specifier_types: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Rcfile {
   #[serde(default = "empty_custom_types")]
   pub custom_types: HashMap<String, CustomType>,
+  #[serde(default)]
+  pub dependency_groups: Vec<DependencyGroup>,
   #[serde(default = "default_true")]
   pub format_bugs: bool,
   #[serde(default = "default_true")]
@@ -109,6 +127,7 @@ impl Rcfile {
   pub fn new() -> Rcfile {
     Rcfile {
       custom_types: empty_custom_types(),
+      dependency_groups: vec![],
       format_bugs: default_true(),
       format_repository: default_true(),
       indent: default_indent(),
@@ -178,12 +197,35 @@ impl Rcfile {
     }
   }
 
+  /// Create every alias defined in the rcfile.
+  pub fn get_dependency_groups(&self, packages: &Packages) -> Vec<GroupSelector> {
+    self
+      .dependency_groups
+      .iter()
+      .map(|dependency_group_config| {
+        if dependency_group_config.alias_name.is_empty() {
+          error!("A unique aliasName is required for each dependency group");
+          error!("{:?}", dependency_group_config);
+          exit(1);
+        }
+        GroupSelector::new(
+          /* all_packages: */ packages,
+          /* include_dependencies: */ dependency_group_config.dependencies.clone(),
+          /* include_dependency_types: */ dependency_group_config.dependency_types.clone(),
+          /* alias_name: */ dependency_group_config.alias_name.clone(),
+          /* include_packages: */ dependency_group_config.packages.clone(),
+          /* include_specifier_types: */ dependency_group_config.specifier_types.clone(),
+        )
+      })
+      .collect()
+  }
+
   /// Create every semver group defined in the rcfile.
-  pub fn get_semver_groups(&self) -> Vec<SemverGroup> {
+  pub fn get_semver_groups(&self, packages: &Packages) -> Vec<SemverGroup> {
     let mut all_groups: Vec<SemverGroup> = vec![];
     all_groups.push(SemverGroup::get_exact_local_specifiers());
     self.semver_groups.iter().for_each(|group_config| {
-      all_groups.push(SemverGroup::from_config(group_config));
+      all_groups.push(SemverGroup::from_config(group_config, packages));
     });
     all_groups.push(SemverGroup::get_catch_all());
     all_groups

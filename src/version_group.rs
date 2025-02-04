@@ -46,6 +46,7 @@ impl VersionGroup {
       matches_cli_filter: RefCell::new(false),
       pin_version: None,
       selector: GroupSelector::new(
+        /* all_packages: */ &Packages::new(),
         /* include_dependencies: */ vec![],
         /* include_dependency_types: */ vec![],
         /* label: */ "Default Version Group".to_string(),
@@ -59,9 +60,9 @@ impl VersionGroup {
 
   pub fn add_instance(&self, instance: Rc<Instance>, cli_filter: &Option<GroupSelector>) {
     let mut dependencies = self.dependencies.borrow_mut();
-    let dependency = dependencies.entry(instance.name.clone()).or_insert_with(|| {
+    let dependency = dependencies.entry(instance.name_internal.borrow().clone()).or_insert_with(|| {
       Dependency::new(
-        /* name: */ instance.name.clone(),
+        /* name_internal: */ instance.name_internal.borrow().clone(),
         /* variant: */ self.variant.clone(),
         /* pin_version: */ self.pin_version.clone(),
         /* snap_to: */ self.snap_to.clone(),
@@ -81,8 +82,8 @@ impl VersionGroup {
   /// Create a single version group from a config item from the rcfile.
   pub fn from_config(group: &AnyVersionGroup, packages: &Packages) -> VersionGroup {
     let selector = GroupSelector::new(
-      /* include_dependencies: */
-      with_resolved_keywords(&group.dependencies, packages),
+      /* all_packages: */ packages,
+      /* include_dependencies: */ group.dependencies.clone(),
       /* include_dependency_types: */ group.dependency_types.clone(),
       /* label: */ group.label.clone(),
       /* include_packages: */ group.packages.clone(),
@@ -227,29 +228,4 @@ pub struct AnyVersionGroup {
   pub policy: Option<String>,
   pub snap_to: Option<Vec<String>>,
   pub prefer_version: Option<String>,
-}
-
-/// Resolve keywords such as `$LOCAL` and `!$LOCAL` to their actual values.
-fn with_resolved_keywords(dependency_names: &[String], packages: &Packages) -> Vec<String> {
-  let mut resolved_dependencies: Vec<String> = vec![];
-  for dependency_name in dependency_names.iter() {
-    match dependency_name.as_str() {
-      "$LOCAL" => {
-        for package in packages.all.iter() {
-          let package_name = package.borrow().get_name_unsafe();
-          resolved_dependencies.push(package_name);
-        }
-      }
-      "!$LOCAL" => {
-        for package in packages.all.iter() {
-          let package_name = package.borrow().get_name_unsafe();
-          resolved_dependencies.push(format!("!{}", package_name));
-        }
-      }
-      _ => {
-        resolved_dependencies.push(dependency_name.clone());
-      }
-    }
-  }
-  resolved_dependencies
 }

@@ -28,7 +28,7 @@ pub struct Dependency {
   /// Does every instance match the filter options provided via the CLI?
   pub matches_cli_filter: RefCell<bool>,
   /// The name of the dependency
-  pub name: String,
+  pub name_internal: String,
   /// The version to pin all instances to when variant is `Pinned`
   pub pinned_specifier: Option<Specifier>,
   /// package.json files developed in the monorepo when variant is `SnappedTo`
@@ -39,7 +39,7 @@ pub struct Dependency {
 
 impl Dependency {
   pub fn new(
-    name: String,
+    name_internal: String,
     variant: VersionGroupVariant,
     pinned_specifier: Option<Specifier>,
     snapped_to_packages: Option<Vec<Rc<RefCell<PackageJson>>>>,
@@ -49,7 +49,7 @@ impl Dependency {
       instances: RefCell::new(vec![]),
       local_instance: RefCell::new(None),
       matches_cli_filter: RefCell::new(false),
-      name,
+      name_internal,
       pinned_specifier,
       snapped_to_packages,
       variant,
@@ -175,7 +175,7 @@ impl Dependency {
   pub fn get_snapped_to_specifier(&self, every_instance_in_the_project: &[Rc<Instance>]) -> Option<Specifier> {
     if let Some(snapped_to_packages) = &self.snapped_to_packages {
       for instance in every_instance_in_the_project {
-        if instance.name == *self.name {
+        if *instance.name_internal.borrow() == *self.name_internal {
           for snapped_to_package in snapped_to_packages {
             if instance.package.borrow().get_name_unsafe() == snapped_to_package.borrow().get_name_unsafe() {
               return Some(instance.actual_specifier.clone());

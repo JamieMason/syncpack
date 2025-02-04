@@ -4,6 +4,12 @@
     "engines": { "path": "engines", "strategy": "versionsByName" },
     "packageManager": { "path": "packageManager", "strategy": "name@version" }
   },
+  "dependencyGroups": [
+    {
+      "label": "prosemirror-*",
+      "dependencies": ["prosemirror-*"]
+    }
+  ],
   "semverGroups": [
     {
       "label": "Version compatibility workarounds should be used, or removed from syncpack.config.cjs if no longer needed.",

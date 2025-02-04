@@ -1,5 +1,5 @@
 use {
-  crate::{group_selector::GroupSelector, specifier::semver_range::SemverRange},
+  crate::{group_selector::GroupSelector, packages::Packages, specifier::semver_range::SemverRange},
   serde::Deserialize,
 };
 
@@ -26,6 +26,7 @@ impl SemverGroup {
     SemverGroup {
       variant: SemverGroupVariant::WithRange,
       selector: GroupSelector::new(
+        /* all_packages: */ &Packages::new(),
         /* include_dependencies: */ vec![],
         /* include_dependency_types: */ vec!["local".to_string()],
         /* label: */ "Local package versions must be exact".to_string(),
@@ -41,6 +42,7 @@ impl SemverGroup {
     SemverGroup {
       variant: SemverGroupVariant::Disabled,
       selector: GroupSelector::new(
+        /* all_packages: */ &Packages::new(),
         /* include_dependencies: */ vec![],
         /* include_dependency_types: */ vec![],
         /* label: */ "Default Semver Group".to_string(),
@@ -52,8 +54,9 @@ impl SemverGroup {
   }
 
   /// Create a single version group from a config item from the rcfile.
-  pub fn from_config(group: &AnySemverGroup) -> SemverGroup {
+  pub fn from_config(group: &AnySemverGroup, packages: &Packages) -> SemverGroup {
     let selector = GroupSelector::new(
+      /* all_packages: */ packages,
       /* include_dependencies: */ group.dependencies.clone(),
       /* include_dependency_types: */ group.dependency_types.clone(),
       /* label: */ group.label.clone(),

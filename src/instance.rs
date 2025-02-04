@@ -36,6 +36,13 @@ pub struct Instance {
   pub matches_cli_filter: RefCell<bool>,
   /// The dependency name eg. "react", "react-dom"
   pub name: String,
+  /// When a dependency group is used, its alias_name is used here in place of
+  /// the actual dependency name (eg. "@aws-sdk/**" instead of "@aws-sdk/core"
+  /// and "@aws-sdk/middleware-logger" etc.), otherwise the actual name is used.
+  ///
+  /// This aliased name is only used when allocating an `Instance` to a
+  /// `Dependency`, the original name is otherwise preserved
+  pub name_internal: RefCell<String>,
   /// The `.name` of the package.json this file is in
   pub package: Rc<RefCell<PackageJson>>,
   /// If this instance belongs to a `WithRange` semver group, this is the range.
@@ -65,7 +72,8 @@ impl Instance {
       id: format!("{} in {} of {}", name, &dependency_type.path, package_name),
       is_local: dependency_type.path == "/version",
       matches_cli_filter: RefCell::new(false),
-      name,
+      name: name.clone(),
+      name_internal: RefCell::new(name.clone()),
       package: Rc::clone(&package),
       preferred_semver_range: RefCell::new(None),
       state: RefCell::new(InstanceState::Unknown),
@@ -107,6 +115,11 @@ impl Instance {
   /// input
   pub fn mark_unfixable(&self, state: UnfixableInstance) -> &Self {
     self.set_state(InstanceState::Invalid(InvalidInstance::Unfixable(state)), &self.actual_specifier)
+  }
+
+  /// If this instance should use an alias, store it
+  pub fn set_internal_name(&self, dependency_group_alias_name: &str) {
+    *self.name_internal.borrow_mut() = dependency_group_alias_name.to_string();
   }
 
   /// If this instance should use a preferred semver range, store it

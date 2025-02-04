@@ -68,7 +68,7 @@ impl Ui<'_> {
     };
     let instances_len = dependency.instances.borrow().len();
     let count = self.count_column(instances_len);
-    let name = &dependency.name;
+    let name = &dependency.name_internal;
     let name = if self.ctx.config.cli.show_hints && dependency.local_instance.borrow().is_some() {
       let local_hint = "(local)".blue();
       format!("{name} {local_hint}").normal()

@@ -24,7 +24,7 @@ pub fn run(ctx: Context) -> Context {
     let mut suspect = 0;
 
     ctx.instances.iter().for_each(|instance| {
-      let name = &instance.name;
+      let name_internal = &instance.name_internal.borrow();
 
       if has_cli_filter && !*instance.matches_cli_filter.borrow() {
         return;
@@ -50,14 +50,14 @@ pub fn run(ctx: Context) -> Context {
                 let actual = instance.actual_specifier.unwrap().red();
                 let arrow = ui.dim_right_arrow();
                 let expected = instance.expected_specifier.borrow().as_ref().unwrap().unwrap().green();
-                info!("{name} {actual} {arrow} {expected} {location} {state_link}");
+                info!("{name_internal} {actual} {arrow} {expected} {location} {state_link}");
                 instance.package.borrow().copy_expected_specifier(instance);
               }
             }
           }
           InvalidInstance::Conflict(_) | InvalidInstance::Unfixable(_) => {
             unfixable += 1;
-            warn!("Unfixable: {name} {location} {state_link}");
+            warn!("Unfixable: {name_internal} {location} {state_link}");
           }
         },
         InstanceState::Suspect(variant) => match variant {
@@ -66,7 +66,7 @@ pub fn run(ctx: Context) -> Context {
           | SuspectInstance::RefuseToSnapLocal
           | SuspectInstance::InvalidLocalVersion => {
             suspect += 1;
-            warn!("Suspect: {name} {location} {state_link}");
+            warn!("Suspect: {name_internal} {location} {state_link}");
           }
         },
       }

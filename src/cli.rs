@@ -1,5 +1,5 @@
 use {
-  crate::group_selector::GroupSelector,
+  crate::{group_selector::GroupSelector, packages::Packages},
   clap::{builder::ValueParser, crate_description, crate_name, crate_version, Arg, ArgMatches, Command},
   color_print::cformat,
   itertools::Itertools,
@@ -305,12 +305,20 @@ fn get_filters(matches: &ArgMatches) -> Option<GroupSelector> {
   let dependencies = get_patterns(matches, "dependencies");
   let dependency_types = get_patterns(matches, "dependency-types");
   let label = "CLI filters".to_string();
+  let all_packages = &Packages::new();
   let packages = get_patterns(matches, "packages");
   let specifier_types = get_patterns(matches, "specifier-types");
   if dependencies.is_empty() && dependency_types.is_empty() && packages.is_empty() && specifier_types.is_empty() {
     None
   } else {
-    Some(GroupSelector::new(dependencies, dependency_types, label, packages, specifier_types))
+    Some(GroupSelector::new(
+      all_packages,
+      dependencies,
+      dependency_types,
+      label,
+      packages,
+      specifier_types,
+    ))
   }
 }
 

@@ -28,12 +28,16 @@ pub struct Context {
 impl Context {
   pub fn create(config: Config, packages: Packages) -> Self {
     let mut instances = vec![];
-    let semver_groups = config.rcfile.get_semver_groups();
+    let dependency_groups = config.rcfile.get_dependency_groups(&packages);
+    let semver_groups = config.rcfile.get_semver_groups(&packages);
     let version_groups = config.rcfile.get_version_groups(&packages);
 
     packages.get_all_instances(&config, |instance| {
       let instance = Rc::new(instance);
       instances.push(Rc::clone(&instance));
+      if let Some(dependency_group) = dependency_groups.iter().find(|alias| alias.can_add(&instance)) {
+        instance.set_internal_name(&dependency_group.label);
+      }
       if let Some(semver_group) = semver_groups.iter().find(|semver_group| semver_group.selector.can_add(&instance)) {
         instance.set_semver_group(semver_group);
       }

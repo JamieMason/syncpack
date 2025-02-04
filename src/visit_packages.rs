@@ -42,7 +42,7 @@ pub fn visit_packages(ctx: Context) -> Context {
         group.for_each_dependency(&SortBy::Name, |dependency| match dependency.variant {
           VersionGroupVariant::Banned => {
             debug!("visit banned version group");
-            debug!("  visit dependency '{}'", dependency.name);
+            debug!("  visit dependency '{}'", dependency.name_internal);
             dependency.instances.borrow().iter().for_each(|instance| {
               let actual_specifier = &instance.actual_specifier;
               debug!("    visit instance '{}' ({actual_specifier:?})", instance.id);
@@ -60,7 +60,7 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::HighestSemver | VersionGroupVariant::LowestSemver => {
             debug!("visit standard version group");
-            debug!("  visit dependency '{}'", dependency.name);
+            debug!("  visit dependency '{}'", dependency.name_internal);
             if dependency.has_local_instance_with_invalid_specifier() {
               debug!("    it has an invalid local instance");
               dependency.instances.borrow().iter().for_each(|instance| {
@@ -215,7 +215,7 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::Ignored => {
             debug!("visit ignored version group");
-            debug!("  visit dependency '{}'", dependency.name);
+            debug!("  visit dependency '{}'", dependency.name_internal);
             dependency.instances.borrow().iter().for_each(|instance| {
               let actual_specifier = &instance.actual_specifier;
               debug!("    visit instance '{}' ({actual_specifier:?})", instance.id);
@@ -224,7 +224,7 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::Pinned => {
             debug!("visit pinned version group");
-            debug!("  visit dependency '{}'", dependency.name);
+            debug!("  visit dependency '{}'", dependency.name_internal);
             let pinned_specifier = dependency.pinned_specifier.clone().unwrap();
             dependency.set_expected_specifier(&pinned_specifier);
             dependency.instances.borrow().iter().for_each(|instance| {
@@ -276,7 +276,7 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::SameRange => {
             debug!("visit same range version group");
-            debug!("  visit dependency '{}'", dependency.name);
+            debug!("  visit dependency '{}'", dependency.name_internal);
             dependency.instances.borrow().iter().for_each(|instance| {
               let actual_specifier = &instance.actual_specifier;
               debug!("    visit instance '{}' ({actual_specifier:?})", instance.id);
@@ -303,7 +303,7 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::SnappedTo => {
             debug!("visit snapped to version group");
-            debug!("  visit dependency '{}'", dependency.name);
+            debug!("  visit dependency '{}'", dependency.name_internal);
             if let Some(snapped_to_specifier) = dependency.get_snapped_to_specifier(&ctx.instances) {
               debug!("    a target version was found ({snapped_to_specifier:?})");
               dependency.set_expected_specifier(&snapped_to_specifier);

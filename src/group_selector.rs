@@ -1,5 +1,5 @@
 use {
-  crate::instance::Instance,
+  crate::{instance::Instance, packages::Packages},
   globset::{Glob, GlobMatcher},
 };
 
@@ -49,12 +49,14 @@ pub struct GroupSelector {
 
 impl GroupSelector {
   pub fn new(
+    all_packages: &Packages,
     dependencies: Vec<String>,
     dependency_types: Vec<String>,
     label: String,
     packages: Vec<String>,
     specifier_types: Vec<String>,
   ) -> GroupSelector {
+    let dependencies = with_resolved_keywords(&dependencies, all_packages);
     GroupSelector {
       include_dependencies: create_globs(true, &dependencies),
       exclude_dependencies: create_globs(false, &dependencies),
@@ -92,7 +94,11 @@ impl GroupSelector {
   }
 
   pub fn matches_dependencies(&self, instance: &Instance) -> bool {
-    matches_globs(&instance.name, &self.include_dependencies, &self.exclude_dependencies)
+    matches_globs(
+      &instance.name_internal.borrow(),
+      &self.include_dependencies,
+      &self.exclude_dependencies,
+    )
   }
 
   pub fn matches_specifier_types(&self, instance: &Instance) -> bool {
@@ -143,4 +149,29 @@ fn matches_identifiers(name: &str, includes: &[String], excludes: &[String]) -> 
 
 fn matches_any_identifier(value: &str, identifiers: &[String]) -> bool {
   identifiers.contains(&value.to_string())
+}
+
+/// Resolve keywords such as `$LOCAL` and `!$LOCAL` to their actual values.
+fn with_resolved_keywords(dependency_names: &[String], packages: &Packages) -> Vec<String> {
+  let mut resolved_dependencies: Vec<String> = vec![];
+  for dependency_name in dependency_names.iter() {
+    match dependency_name.as_str() {
+      "$LOCAL" => {
+        for package in packages.all.iter() {
+          let package_name = package.borrow().get_name_unsafe();
+          resolved_dependencies.push(package_name);
+        }
+      }
+      "!$LOCAL" => {
+        for package in packages.all.iter() {
+          let package_name = package.borrow().get_name_unsafe();
+          resolved_dependencies.push(format!("!{}", package_name));
+        }
+      }
+      _ => {
+        resolved_dependencies.push(dependency_name.clone());
+      }
+    }
+  }
+  resolved_dependencies
 }
