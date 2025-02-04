@@ -20,7 +20,7 @@ pub struct Ui<'a> {
   pub ctx: &'a Context,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
   pub fn print_command_header(&self, msg: &str) {
     info!("{}", format!(" {msg} ").on_blue().black());
   }

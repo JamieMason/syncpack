@@ -139,9 +139,9 @@ impl Instance {
   /// Does this instance belong to a `WithRange` semver group and which prefers
   /// a semver range other than that used by the given specifier?
   pub fn must_match_preferred_semver_range_which_differs_to(&self, other_specifier: &Specifier) -> bool {
-    other_specifier.get_semver_range().map_or(false, |range_of_other_specifier| {
-      self.must_match_preferred_semver_range_which_is_not(&range_of_other_specifier)
-    })
+    other_specifier
+      .get_semver_range()
+      .is_some_and(|range_of_other_specifier| self.must_match_preferred_semver_range_which_is_not(&range_of_other_specifier))
   }
 
   /// Is the given semver range the preferred semver range for this instance?
