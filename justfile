@@ -260,6 +260,13 @@ create-npm-root-package-json:
 # Publish
 # ==============================================================================
 
+# Create tagged, versioned commit
+create-release-commit:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    npm exec release-it
+
 # Publish the npm package for a specific target
 publish-npm-binary-package:
     #!/usr/bin/env bash
