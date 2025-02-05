@@ -1,14 +1,18 @@
 use {
   crate::{
+    cli::Cli,
     dependency_type::DependencyType,
     packages::Packages,
     semver_group::{AnySemverGroup, SemverGroup},
     version_group::{AnyVersionGroup, VersionGroup},
   },
-  atty::Stream,
-  log::debug,
+  log::error,
   serde::Deserialize,
-  std::{collections::HashMap, io},
+  std::{
+    collections::HashMap,
+    env, io,
+    process::{exit, Command},
+  },
 };
 
 fn empty_custom_types() -> HashMap<String, CustomType> {
@@ -118,25 +122,60 @@ impl Rcfile {
     }
   }
 
-  /// Create a new rcfile from a single line of JSON piped into stdin
-  pub fn from_stdin() -> Rcfile {
-    if atty::is(Stream::Stdin) {
-      debug!("No Rcfile piped into stdin, reverting to defaults");
-      return Rcfile::new();
+  /// Until we can port cosmiconfig to Rust, call out to Node.js to get the
+  /// rcfile from the filesystem
+  pub fn from_cosmiconfig(cli: &Cli) -> Rcfile {
+    let require_path = env::var("COSMICONFIG_REQUIRE_PATH").unwrap_or_else(|_| "cosmiconfig".to_string());
+    let nodejs_script = format!(
+      r#"
+        require('{}')
+          .cosmiconfig('syncpack')
+          .search('{}')
+          .then(res => (res.config ? JSON.stringify(res.config) : '{{}}'))
+          .catch(() => '{{}}')
+          .then(console.log);
+        "#,
+      require_path,
+      &cli.cwd.to_str().unwrap()
+    );
+
+    let output = Command::new("node")
+      .arg("-e")
+      .arg(nodejs_script)
+      .current_dir(&cli.cwd)
+      .output()
+      .and_then(|output| {
+        if output.status.success() {
+          String::from_utf8(output.stdout).map_err(|err| io::Error::new(io::ErrorKind::Other, err))
+        } else {
+          Err(io::Error::new(
+            io::ErrorKind::Other,
+            String::from_utf8(output.stderr).expect("Failed to run cosmiconfig"),
+          ))
+        }
+      })
+      .map(Rcfile::from_json);
+
+    match output {
+      Ok(rcfile) => rcfile,
+      Err(err) => {
+        error!("There was an error when attempting to locate your syncpack rcfile");
+        error!("Please raise an issue at https://github.com/JamieMason/syncpack/issues/new?template=bug_report.yaml");
+        error!("{err}");
+        exit(1);
+      }
     }
-    let mut buffer = String::new();
-    let json = io::stdin().read_line(&mut buffer).map_or_else(|_| "{}".to_string(), |_| buffer);
-    if json == "{}" {
-      debug!("Empty Rcfile piped into stdin, reverting to defaults");
-      return Rcfile::new();
-    }
-    debug!("A non-empty Rcfile was piped into stdin");
-    Rcfile::from_json(json)
   }
 
   /// Create a new rcfile from a JSON string or revert to defaults
   pub fn from_json(json: String) -> Rcfile {
-    serde_json::from_str(&json).unwrap_or_else(|_| Rcfile::new())
+    match serde_json::from_str(&json) {
+      Ok(rcfile) => rcfile,
+      Err(err) => {
+        error!("Your syncpack config file failed validation\n  {err}");
+        exit(1);
+      }
+    }
   }
 
   /// Create every semver group defined in the rcfile.

@@ -110,7 +110,7 @@ run-fluid:
     set -euxo pipefail
 
     cd fixtures/fluid-framework
-    RUST_BACKTRACE=1 cat .syncpackrc.json | jq -cM | cargo run -- lint
+    RUST_BACKTRACE=1 cargo run -- lint
 
 # Run the release rust binary against a clone of microsoft/FluidFramework
 run-fluid-prod:
@@ -216,7 +216,7 @@ create-npm-root-package:
     rm -rf "$NODE_ROOT_PKG_DIR_PATH"
     mkdir -p "$NODE_ROOT_PKG_DIR_PATH"
     cp README.md "$NODE_ROOT_PKG_DIR_PATH/README.md"
-    cp npm/index.js "$NODE_ROOT_PKG_DIR_PATH/index.js"
+    cp npm/index.cjs "$NODE_ROOT_PKG_DIR_PATH/index.cjs"
     just build-npm-types
     just create-npm-root-package-json
 
@@ -240,7 +240,7 @@ create-npm-root-package-json:
         ...pkg,
         devDependencies: undefined,
         bin: {
-          syncpack: "./index.js",
+          syncpack: "./index.cjs",
         },
         optionalDependencies: {
           "syncpack-linux-x64": pkg.version,
