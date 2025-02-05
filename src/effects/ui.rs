@@ -168,9 +168,6 @@ impl Ui<'_> {
               UnfixableInstance::SameRangeMismatch => {
                 info!("{count} {icon} {name} {state_links}");
               }
-              UnfixableInstance::DependsOnMissingSnapTarget => {
-                info!("{count} {icon} {name} {state_links}");
-              }
             }
           }
           InvalidInstance::Conflict(variant) => {
@@ -201,6 +198,9 @@ impl Ui<'_> {
       InstanceState::Suspect(variant) => {
         let icon = self.warn_icon();
         match variant {
+          SuspectInstance::DependsOnMissingSnapTarget => {
+            info!("{count} {icon} {name} {state_links}");
+          }
           SuspectInstance::RefuseToBanLocal => {
             info!("{count} {icon} {name} {state_links}");
           }
@@ -332,9 +332,6 @@ impl Ui<'_> {
             UnfixableInstance::SameRangeMismatch => {
               info!("          {icon} {actual} {location} {state_link}");
             }
-            UnfixableInstance::DependsOnMissingSnapTarget => {
-              info!("          {icon} {actual} {location} {state_link}");
-            }
           },
           InvalidInstance::Conflict(variant) => match variant {
             SemverGroupAndVersionConflict::MatchConflictsWithHighestOrLowestSemver => {
@@ -361,6 +358,9 @@ impl Ui<'_> {
       InstanceState::Suspect(variant) => {
         let icon = self.warn_icon();
         match variant {
+          SuspectInstance::DependsOnMissingSnapTarget => {
+            info!("          {icon} {actual} {location} {state_link}");
+          }
           SuspectInstance::RefuseToBanLocal => {
             info!("          {icon} {actual} {location} {state_link}");
           }

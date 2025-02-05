@@ -169,11 +169,6 @@ pub enum UnfixableInstance {
   /// - ? Instance has no semver group
   /// - ? We can't know what range the user wants and have to ask them
   SameRangeMismatch,
-  /// - ✓ Instance is in a snapped to version group
-  /// - ✘ An instance of the same dependency was not found in any of the snapped
-  ///   to packages
-  /// - ✘ This is a misconfiguration resulting in this instance being orphaned
-  DependsOnMissingSnapTarget,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -238,4 +233,9 @@ pub enum SuspectInstance {
   /// - ! Local Instance has no version property
   /// - ! Not an error on its own unless an instance of it mismatches
   InvalidLocalVersion,
+  /// - ✓ Instance is in a snapped to version group
+  /// - ✘ An instance of the same dependency was not found in any of the snapped
+  ///   to packages
+  /// - ! This is a misconfiguration resulting in this instance being orphaned
+  DependsOnMissingSnapTarget,
 }

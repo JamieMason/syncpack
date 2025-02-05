@@ -88,6 +88,13 @@ impl Context {
       for instance in self.instances.iter() {
         match *instance.state.borrow() {
           InstanceState::Valid(_) => continue,
+          InstanceState::Suspect(_) => {
+            if self.config.rcfile.strict {
+              std::process::exit(1);
+            } else {
+              continue;
+            }
+          }
           _ => std::process::exit(1),
         }
       }

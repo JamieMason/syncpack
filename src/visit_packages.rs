@@ -381,7 +381,7 @@ pub fn visit_packages(ctx: Context) -> Context {
             } else {
               debug!("    no target version was found");
               dependency.instances.borrow().iter().for_each(|instance| {
-                instance.mark_unfixable(DependsOnMissingSnapTarget);
+                instance.mark_suspect(DependsOnMissingSnapTarget);
               });
             }
           }

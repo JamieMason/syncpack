@@ -2495,7 +2495,7 @@ fn instance_cannot_find_a_snapped_to_version() {
       overridden: None,
     },
     ExpectedInstance {
-      state: InstanceState::unfixable(DependsOnMissingSnapTarget),
+      state: InstanceState::suspect(DependsOnMissingSnapTarget),
       dependency_name: "foo",
       id: "foo in /dependencies of follower",
       actual: "1.0.0",

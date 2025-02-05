@@ -62,6 +62,7 @@ pub fn run(ctx: Context) -> Context {
         },
         InstanceState::Suspect(variant) => match variant {
           SuspectInstance::RefuseToBanLocal
+          | SuspectInstance::DependsOnMissingSnapTarget
           | SuspectInstance::RefuseToPinLocal
           | SuspectInstance::RefuseToSnapLocal
           | SuspectInstance::InvalidLocalVersion => {
