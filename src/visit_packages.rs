@@ -9,7 +9,7 @@ use {
     format,
     instance_state::{FixableInstance::*, SemverGroupAndVersionConflict::*, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*},
     package_json::{FormatMismatch, FormatMismatchVariant::*, PackageJson},
-    specifier::{semver_range::SemverRange, Specifier},
+    specifier::{non_semver::NonSemver, semver_range::SemverRange, Specifier},
     version_group::VersionGroupVariant,
   },
   itertools::Itertools,
@@ -89,6 +89,18 @@ pub fn visit_packages(ctx: Context) -> Context {
                   return;
                 }
                 debug!("        it depends on the local instance");
+                if matches!(instance.actual_specifier, Specifier::NonSemver(NonSemver::WorkspaceProtocol(_))) {
+                  debug!("          it is using the workspace protocol");
+                  if !ctx.config.rcfile.strict {
+                    debug!("            strict mode is off");
+                    debug!("              mark as satisfying local");
+                    instance.mark_valid(SatisfiesLocal, &instance.actual_specifier);
+                    return;
+                  }
+                  debug!("            strict mode is on");
+                } else {
+                  debug!("          it is not using the workspace protocol");
+                }
                 debug!("          its version number (without a range):");
                 if !instance.actual_specifier.has_same_version_number_as(&local_specifier) {
                   debug!("            differs to the local instance");

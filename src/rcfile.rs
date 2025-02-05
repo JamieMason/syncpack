@@ -24,6 +24,10 @@ fn default_true() -> bool {
   true
 }
 
+fn default_false() -> bool {
+  false
+}
+
 fn default_indent() -> String {
   "  ".to_string()
 }
@@ -118,6 +122,8 @@ pub struct Rcfile {
   pub sort_packages: bool,
   #[serde(default = "default_source")]
   pub source: Vec<String>,
+  #[serde(default = "default_false")]
+  pub strict: bool,
   #[serde(default)]
   pub version_groups: Vec<AnyVersionGroup>,
 }
@@ -137,6 +143,7 @@ impl Rcfile {
       sort_first: sort_first(),
       sort_packages: default_true(),
       source: default_source(),
+      strict: default_false(),
       version_groups: vec![],
     }
   }

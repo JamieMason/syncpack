@@ -1292,6 +1292,72 @@ fn no_instances_are_semver_and_they_differ() {
   ]);
 }
 
+#[test]
+fn workspace_protocol_version_differs_to_local_version_is_invalid_in_strict_mode() {
+  let config = test::mock::config_from_mock(json!({
+    "strict": true
+  }));
+  let packages = test::mock::packages_from_mocks(vec![json!({
+    "name": "package-a",
+    "version": "1.0.0",
+    "devDependencies": {
+      "package-a": "workspace:*"
+    }
+  })]);
+  let ctx = Context::create(config, packages);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToLocal),
+      dependency_name: "package-a",
+      id: "package-a in /devDependencies of package-a",
+      actual: "workspace:*",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+  ]);
+}
+
+#[test]
+fn workspace_protocol_version_differs_to_local_version_is_valid_by_default() {
+  let config = test::mock::config_from_mock(json!({}));
+  let packages = test::mock::packages_from_mocks(vec![json!({
+    "name": "package-a",
+    "version": "1.0.0",
+    "devDependencies": {
+      "package-a": "workspace:*"
+    }
+  })]);
+  let ctx = Context::create(config, packages);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesLocal),
+      dependency_name: "package-a",
+      id: "package-a in /devDependencies of package-a",
+      actual: "workspace:*",
+      expected: Some("workspace:*"),
+      overridden: None,
+    },
+  ]);
+}
+
 // = Ignored Version Group =====================================================
 
 #[test]
