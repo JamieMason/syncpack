@@ -7,7 +7,7 @@
 </p>
 
 > [!TIP]
-> 🦀 A Rust rewrite is available to try at [`npm install -g syncpack@14.0.0-alpha.1`](https://github.com/JamieMason/syncpack/releases/tag/14.0.0-alpha.1)
+> 🦀 A Rust rewrite is available to try at [`npm install -g syncpack@alpha`](https://github.com/JamieMason/syncpack/releases?q=14.0.0)
 
 ## Installation
 
