@@ -12,7 +12,7 @@
     "releaseName": "${version}"
   },
   "hooks": {
-    "after:bump": "npm exec auto-changelog -- -p --breaking-pattern 'BREAKING CHANGE:' && git add CHANGELOG.md"
+    "after:bump": "cargo set-version '${version}' && npm exec auto-changelog -- -p --breaking-pattern 'BREAKING CHANGE:' && git add Cargo.* CHANGELOG.md"
   },
   "npm": {
     "publish": false
