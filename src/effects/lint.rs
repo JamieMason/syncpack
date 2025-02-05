@@ -1,4 +1,4 @@
-use crate::{context::Context, effects::ui::Ui, version_group::VersionGroupVariant};
+use crate::{context::Context, effects::ui::Ui, instance_state::InstanceState, version_group::VersionGroupVariant};
 
 /// Run the lint command side effects
 pub fn run(ctx: Context) -> Context {
@@ -30,7 +30,7 @@ pub fn run(ctx: Context) -> Context {
         }
         ui.print_dependency(dependency, &group.variant);
         dependency.for_each_instance(|instance| {
-          if ctx.config.cli.show_instances {
+          if !matches!(*instance.state.borrow(), InstanceState::Valid(_)) || ctx.config.cli.show_instances {
             if has_cli_filter && !*instance.matches_cli_filter.borrow() {
               return;
             }
