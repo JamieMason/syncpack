@@ -2,7 +2,9 @@ export interface RcFile {
   /** @see https://jamiemason.github.io/syncpack/integrations/json-schema */
   $schema?: string;
   /** @see https://jamiemason.github.io/syncpack/config/custom-types */
-  customTypes?: Record<string, CustomType.Any>;
+  customTypes?: {
+    [name: string]: CustomType.Any;
+  };
   /** @see https://jamiemason.github.io/syncpack/config/dependency-groups */
   dependencyGroups?: DependencyGroup[];
   /** @see https://jamiemason.github.io/syncpack/config/format-bugs */
