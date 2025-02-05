@@ -1590,6 +1590,44 @@ fn an_already_pinned_version_is_valid() {
   ]);
 }
 
+#[test]
+fn an_already_pinned_workspace_protocol_version_is_valid() {
+  let config = test::mock::config_from_mock(json!({
+    "versionGroups": [{
+      "dependencies": ["package-a"],
+      "dependencyTypes": ["dev"],
+      "pinVersion": "workspace:*"
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![json!({
+    "name": "package-a",
+    "version": "1.0.0",
+    "devDependencies": {
+      "package-a": "workspace:*"
+    }
+  })]);
+  let ctx = Context::create(config, packages);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToPin),
+      dependency_name: "package-a",
+      id: "package-a in /devDependencies of package-a",
+      actual: "workspace:*",
+      expected: Some("workspace:*"),
+      overridden: None,
+    },
+  ]);
+}
+
 // = Banned Version Group ======================================================
 
 #[test]

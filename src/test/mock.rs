@@ -6,6 +6,7 @@ use {
     packages::Packages,
     rcfile::Rcfile,
   },
+  log::LevelFilter,
   serde_json::Value,
   std::{cell::RefCell, env, path::PathBuf},
 };
@@ -18,7 +19,7 @@ pub fn cli() -> Cli {
     disable_ansi: true,
     inspect_formatting: false,
     inspect_mismatches: true,
-    log_levels: vec![],
+    log_levels: vec![LevelFilter::Error],
     show_ignored: false,
     show_instances: false,
     show_hints: false,
