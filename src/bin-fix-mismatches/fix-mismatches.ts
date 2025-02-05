@@ -1,7 +1,5 @@
 import chalk from 'chalk-template';
 import { Context, Effect, flow, pipe } from 'effect';
-import { isObject } from 'tightrope/guard/is-object.js';
-import { isUndefined } from 'tightrope/guard/is-undefined.js';
 import { logIgnoredSize } from '../bin-lint-semver-ranges/lint-semver-ranges.js';
 import {
   logMissingLocalVersion,
@@ -14,7 +12,6 @@ import type { CliConfig } from '../config/types.js';
 import { ICON } from '../constants.js';
 import type { ErrorHandlers } from '../error-handlers/default-error-handlers.js';
 import { defaultErrorHandlers } from '../error-handlers/default-error-handlers.js';
-import type { Ctx } from '../get-context/index.js';
 import { getContext } from '../get-context/index.js';
 import { getInstances } from '../get-instances/index.js';
 import { exitIfInvalid } from '../io/exit-if-invalid.js';
@@ -103,8 +100,6 @@ export function fixMismatches({
             index++;
           }
 
-          yield* $(removeEmptyObjects(ctx));
-
           return ctx;
         }),
         Effect.flatMap(writeIfChanged),
@@ -135,25 +130,6 @@ export function fixMismatch(report: Report.Version.Fixable.Any) {
   return report.fixable.instance.write(
     report._tag === 'Banned' ? DELETE : report.fixable.raw,
   );
-}
-
-/** Remove empty objects such as `{"dependencies": {}}` left after deleting */
-function removeEmptyObjects(ctx: Ctx) {
-  return Effect.sync(() => {
-    ctx.packageJsonFiles.forEach(file => {
-      const contents = file.jsonFile.contents;
-      Object.keys(contents).forEach(key => {
-        const value = contents[key];
-        if (
-          isObject(value) &&
-          value &&
-          Object.values(value).every(isUndefined)
-        ) {
-          delete contents[key];
-        }
-      });
-    });
-  });
 }
 
 export function logAlreadyValidSize(amount: number) {
