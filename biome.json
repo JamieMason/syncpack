@@ -1,7 +1,14 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "ignore": ["**/*.astro", "**/coverage", "**/dist", "package.json"]
+    "ignore": [
+      "**/*.astro",
+      "**/coverage",
+      "**/dist",
+      "package.json",
+      "npm",
+      "target"
+    ]
   },
   "formatter": {
     "enabled": true,
