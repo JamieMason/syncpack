@@ -237,6 +237,12 @@ pub fn visit_packages(ctx: Context) -> Context {
                 instance.mark_suspect(RefuseToPinLocal);
                 return;
               }
+              if instance.already_equals(&pinned_specifier) {
+                debug!("      it is identical to the pinned version");
+                debug!("        mark as valid");
+                instance.mark_valid(IsIdenticalToPin, &pinned_specifier);
+                return;
+              }
               debug!("      it depends on the local instance");
               debug!("        its version number (without a range):");
               if !instance.actual_specifier.has_same_version_number_as(&pinned_specifier) {
@@ -263,15 +269,9 @@ pub fn visit_packages(ctx: Context) -> Context {
                 return;
               }
               debug!("            it is not in a semver group which prefers a different semver range to the pinned version");
-              if instance.already_equals(&pinned_specifier) {
-                debug!("              it is identical to the pinned version");
-                debug!("                mark as valid");
-                instance.mark_valid(IsIdenticalToPin, &pinned_specifier);
-              } else {
-                debug!("              it differs to the pinned version");
-                debug!("                mark as error");
-                instance.mark_fixable(DiffersToPin, &pinned_specifier);
-              }
+              debug!("              it differs to the pinned version");
+              debug!("                mark as error");
+              instance.mark_fixable(DiffersToPin, &pinned_specifier);
             });
           }
           VersionGroupVariant::SameRange => {
