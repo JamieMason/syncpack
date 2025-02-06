@@ -1,13 +1,20 @@
-use {
-  crate::cli::Cli,
-  colored::Colorize,
-  env_logger::Builder,
-  log::{Level, LevelFilter},
-  std::io::Write,
-};
+use crate::cli::Cli;
+
+#[cfg(test)]
+pub fn init(_: &Cli) {
+  use {env_logger::Builder, log::LevelFilter};
+  Builder::new().filter_level(LevelFilter::Error).init();
+}
 
 /// Initialize the logger with the given log level
+#[cfg(not(test))]
 pub fn init(cli: &Cli) {
+  use {
+    colored::Colorize,
+    env_logger::Builder,
+    log::{Level, LevelFilter},
+    std::io::Write,
+  };
   if cli.disable_ansi {
     colored::control::set_override(false);
   }

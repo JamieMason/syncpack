@@ -9,7 +9,7 @@ use {
     format,
     instance_state::{FixableInstance::*, SemverGroupAndVersionConflict::*, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*},
     package_json::{FormatMismatch, FormatMismatchVariant::*, PackageJson},
-    specifier::{non_semver::NonSemver, semver_range::SemverRange, Specifier},
+    specifier::{semver_range::SemverRange, Specifier},
     version_group::VersionGroupVariant,
   },
   itertools::Itertools,
@@ -42,9 +42,9 @@ pub fn visit_packages(ctx: Context) -> Context {
         group.for_each_dependency(&SortBy::Name, |dependency| match dependency.variant {
           VersionGroupVariant::Banned => {
             debug!("visit banned version group");
-            debug!("  visit dependency '{}'", dependency.name_internal);
+            debug!("  visit dependency '{}'", dependency.internal_name);
             dependency.instances.borrow().iter().for_each(|instance| {
-              let actual_specifier = &instance.actual_specifier;
+              let actual_specifier = &instance.descriptor.specifier;
               debug!("    visit instance '{}' ({actual_specifier:?})", instance.id);
               if instance.is_local {
                 debug!("      it is the local instance of a package developed locally in this monorepo");
@@ -60,11 +60,11 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::HighestSemver | VersionGroupVariant::LowestSemver => {
             debug!("visit standard version group");
-            debug!("  visit dependency '{}'", dependency.name_internal);
+            debug!("  visit dependency '{}'", dependency.internal_name);
             if dependency.has_local_instance_with_invalid_specifier() {
               debug!("    it has an invalid local instance");
               dependency.instances.borrow().iter().for_each(|instance| {
-                let actual_specifier = &instance.actual_specifier;
+                let actual_specifier = &instance.descriptor.specifier;
                 debug!("      visit instance '{}' ({actual_specifier:?})", instance.id);
                 if instance.is_local {
                   debug!("        it is the invalid local instance");
@@ -81,7 +81,7 @@ pub fn visit_packages(ctx: Context) -> Context {
               let local_specifier = dependency.get_local_specifier().unwrap();
               dependency.set_expected_specifier(&local_specifier);
               dependency.instances.borrow().iter().for_each(|instance| {
-                let actual_specifier = &instance.actual_specifier;
+                let actual_specifier = &instance.descriptor.specifier;
                 debug!("      visit instance '{}' ({actual_specifier:?})", instance.id);
                 if instance.is_local {
                   debug!("        it is the valid local instance");
@@ -89,12 +89,12 @@ pub fn visit_packages(ctx: Context) -> Context {
                   return;
                 }
                 debug!("        it depends on the local instance");
-                if matches!(instance.actual_specifier, Specifier::NonSemver(NonSemver::WorkspaceProtocol(_))) {
+                if instance.descriptor.specifier.is_workspace_protocol() {
                   debug!("          it is using the workspace protocol");
                   if !ctx.config.rcfile.strict {
                     debug!("            strict mode is off");
                     debug!("              mark as satisfying local");
-                    instance.mark_valid(SatisfiesLocal, &instance.actual_specifier);
+                    instance.mark_valid(SatisfiesLocal, &instance.descriptor.specifier);
                     return;
                   }
                   debug!("            strict mode is on");
@@ -102,7 +102,7 @@ pub fn visit_packages(ctx: Context) -> Context {
                   debug!("          it is not using the workspace protocol");
                 }
                 debug!("          its version number (without a range):");
-                if !instance.actual_specifier.has_same_version_number_as(&local_specifier) {
+                if !instance.descriptor.specifier.has_same_version_number_as(&local_specifier) {
                   debug!("            differs to the local instance");
                   debug!("              mark as error");
                   instance.mark_fixable(DiffersToLocal, &local_specifier);
@@ -152,18 +152,18 @@ pub fn visit_packages(ctx: Context) -> Context {
               debug!("    a highest semver version was found ({highest_specifier:?})");
               dependency.set_expected_specifier(&highest_specifier);
               dependency.instances.borrow().iter().for_each(|instance| {
-                let actual_specifier = &instance.actual_specifier;
+                let actual_specifier = &instance.descriptor.specifier;
                 debug!("      visit instance '{}' ({actual_specifier:?})", instance.id);
                 debug!("        its version number (without a range):");
-                if !instance.actual_specifier.has_same_version_number_as(&highest_specifier) {
+                if !instance.descriptor.specifier.has_same_version_number_as(&highest_specifier) {
                   debug!("          differs to the highest semver version");
                   debug!("            mark as error");
                   instance.mark_fixable(DiffersToHighestOrLowestSemver, &highest_specifier);
                   return;
                 }
                 debug!("          is the same as the highest semver version");
-                let range_of_highest_specifier = highest_specifier.get_simple_semver().unwrap().get_range();
-                if instance.must_match_preferred_semver_range_which_is_not(&range_of_highest_specifier) {
+                let range_of_highest_specifier = highest_specifier.get_semver_range().unwrap();
+                if instance.must_match_preferred_semver_range_which_is_not(range_of_highest_specifier) {
                   let preferred_semver_range = &instance.preferred_semver_range.borrow().clone().unwrap();
                   debug!("            it is in a semver group which prefers a different semver range to the highest semver version ({preferred_semver_range:?})");
                   if instance.matches_preferred_semver_range() {
@@ -171,7 +171,7 @@ pub fn visit_packages(ctx: Context) -> Context {
                     if instance.specifier_with_preferred_semver_range_will_satisfy(&highest_specifier) {
                       debug!("                the semver range satisfies the highest semver version");
                       debug!("                  mark as suspect (the config is asking for an inexact match)");
-                      instance.mark_valid(SatisfiesHighestOrLowestSemver, &instance.actual_specifier);
+                      instance.mark_valid(SatisfiesHighestOrLowestSemver, &instance.descriptor.specifier);
                     } else {
                       debug!("                the preferred semver range will not satisfy the highest semver version");
                       debug!("                  mark as unfixable error");
@@ -207,16 +207,16 @@ pub fn visit_packages(ctx: Context) -> Context {
               if dependency.every_specifier_is_already_identical() {
                 debug!("      but all are identical");
                 dependency.instances.borrow().iter().for_each(|instance| {
-                  let actual_specifier = &instance.actual_specifier;
+                  let actual_specifier = &instance.descriptor.specifier;
                   debug!("        visit instance '{}' ({actual_specifier:?})", instance.id);
                   debug!("          it is identical to every other instance");
                   debug!("            mark as valid");
-                  instance.mark_valid(IsNonSemverButIdentical, &instance.actual_specifier);
+                  instance.mark_valid(IsNonSemverButIdentical, &instance.descriptor.specifier);
                 });
               } else {
                 debug!("      and they differ");
                 dependency.instances.borrow().iter().for_each(|instance| {
-                  let actual_specifier = &instance.actual_specifier;
+                  let actual_specifier = &instance.descriptor.specifier;
                   debug!("        visit instance '{}' ({actual_specifier:?})", instance.id);
                   debug!("          it depends on a currently unknowable correct version from a set of unsupported version specifiers");
                   debug!("            mark as error");
@@ -227,20 +227,20 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::Ignored => {
             debug!("visit ignored version group");
-            debug!("  visit dependency '{}'", dependency.name_internal);
+            debug!("  visit dependency '{}'", dependency.internal_name);
             dependency.instances.borrow().iter().for_each(|instance| {
-              let actual_specifier = &instance.actual_specifier;
+              let actual_specifier = &instance.descriptor.specifier;
               debug!("    visit instance '{}' ({actual_specifier:?})", instance.id);
-              instance.mark_valid(IsIgnored, &instance.actual_specifier);
+              instance.mark_valid(IsIgnored, &instance.descriptor.specifier);
             });
           }
           VersionGroupVariant::Pinned => {
             debug!("visit pinned version group");
-            debug!("  visit dependency '{}'", dependency.name_internal);
+            debug!("  visit dependency '{}'", dependency.internal_name);
             let pinned_specifier = dependency.pinned_specifier.clone().unwrap();
             dependency.set_expected_specifier(&pinned_specifier);
             dependency.instances.borrow().iter().for_each(|instance| {
-              let actual_specifier = &instance.actual_specifier;
+              let actual_specifier = &instance.descriptor.specifier;
               debug!("    visit instance '{}' ({actual_specifier:?})", instance.id);
               if instance.is_local {
                 debug!("      it is the local instance of a package developed locally in this monorepo");
@@ -257,7 +257,7 @@ pub fn visit_packages(ctx: Context) -> Context {
               }
               debug!("      it depends on the local instance");
               debug!("        its version number (without a range):");
-              if !instance.actual_specifier.has_same_version_number_as(&pinned_specifier) {
+              if !instance.descriptor.specifier.has_same_version_number_as(&pinned_specifier) {
                 debug!("          differs to the pinned version");
                 debug!("            mark as error");
                 instance.mark_fixable(DiffersToPin, &pinned_specifier);
@@ -288,9 +288,9 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::SameRange => {
             debug!("visit same range version group");
-            debug!("  visit dependency '{}'", dependency.name_internal);
+            debug!("  visit dependency '{}'", dependency.internal_name);
             dependency.instances.borrow().iter().for_each(|instance| {
-              let actual_specifier = &instance.actual_specifier;
+              let actual_specifier = &instance.descriptor.specifier;
               debug!("    visit instance '{}' ({actual_specifier:?})", instance.id);
               if instance.already_satisfies_all(&dependency.instances.borrow()) {
                 debug!("      its specifier satisfies all other instances in the group");
@@ -315,12 +315,12 @@ pub fn visit_packages(ctx: Context) -> Context {
           }
           VersionGroupVariant::SnappedTo => {
             debug!("visit snapped to version group");
-            debug!("  visit dependency '{}'", dependency.name_internal);
+            debug!("  visit dependency '{}'", dependency.internal_name);
             if let Some(snapped_to_specifier) = dependency.get_snapped_to_specifier(&ctx.instances) {
               debug!("    a target version was found ({snapped_to_specifier:?})");
               dependency.set_expected_specifier(&snapped_to_specifier);
               dependency.instances.borrow().iter().for_each(|instance| {
-                let actual_specifier = &instance.actual_specifier;
+                let actual_specifier = &instance.descriptor.specifier;
                 debug!("      visit instance '{}' ({actual_specifier:?})", instance.id);
                 if instance.is_local && !instance.already_equals(&snapped_to_specifier) {
                   debug!("        it is the local instance of a package developed locally in this monorepo");
@@ -331,15 +331,15 @@ pub fn visit_packages(ctx: Context) -> Context {
                 }
                 debug!("        it is not a local instance of a package developed locally in this monorepo");
                 debug!("          its version number (without a range):");
-                if !instance.actual_specifier.has_same_version_number_as(&snapped_to_specifier) {
+                if !instance.descriptor.specifier.has_same_version_number_as(&snapped_to_specifier) {
                   debug!("            differs to the target version");
                   debug!("              mark as error");
                   instance.mark_fixable(DiffersToSnapTarget, &snapped_to_specifier);
                   return;
                 }
                 debug!("            is the same as the target version");
-                let range_of_snapped_to_specifier = snapped_to_specifier.get_simple_semver().unwrap().get_range();
-                if instance.must_match_preferred_semver_range_which_is_not(&range_of_snapped_to_specifier) {
+                let range_of_snapped_to_specifier = snapped_to_specifier.get_semver_range().unwrap();
+                if instance.must_match_preferred_semver_range_which_is_not(range_of_snapped_to_specifier) {
                   let preferred_semver_range = &instance.preferred_semver_range.borrow().clone().unwrap();
                   debug!("              it is in a semver group which prefers a different semver range to the target version ({preferred_semver_range:?})");
                   if instance.matches_preferred_semver_range() {
@@ -347,7 +347,7 @@ pub fn visit_packages(ctx: Context) -> Context {
                     if instance.specifier_with_preferred_semver_range_will_satisfy(&snapped_to_specifier) {
                       debug!("                  the semver range satisfies the target version");
                       debug!("                    mark as suspect (the config is asking for an inexact match)");
-                      instance.mark_valid(SatisfiesSnapTarget, &instance.actual_specifier);
+                      instance.mark_valid(SatisfiesSnapTarget, &instance.descriptor.specifier);
                     } else {
                       debug!("                  the preferred semver range will not satisfy the target version");
                       debug!("                    mark as unfixable error");

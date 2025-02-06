@@ -11,7 +11,6 @@ use {
 /// Run the fix command side effects
 pub fn run(ctx: Context) -> Context {
   let ui = Ui { ctx: &ctx };
-  let has_cli_filter = ctx.config.cli.filter.is_some();
   let running_multiple_commands = ctx.config.cli.inspect_mismatches && ctx.config.cli.inspect_formatting;
 
   if ctx.config.cli.inspect_mismatches {
@@ -24,9 +23,9 @@ pub fn run(ctx: Context) -> Context {
     let mut suspect = 0;
 
     ctx.instances.iter().for_each(|instance| {
-      let name_internal = &instance.name_internal.borrow();
+      let internal_name = &instance.internal_name;
 
-      if has_cli_filter && !*instance.matches_cli_filter.borrow() {
+      if !instance.matches_cli_filter {
         return;
       }
 
@@ -47,17 +46,17 @@ pub fn run(ctx: Context) -> Context {
             match variant {
               FixableInstance::IsBanned => instance.remove(),
               _ => {
-                let actual = instance.actual_specifier.unwrap().red();
+                let actual = instance.descriptor.specifier.get_raw().red();
                 let arrow = ui.dim_right_arrow();
-                let expected = instance.expected_specifier.borrow().as_ref().unwrap().unwrap().green();
-                info!("{name_internal} {actual} {arrow} {expected} {location} {state_link}");
+                let expected = instance.expected_specifier.borrow().as_ref().unwrap().get_raw().green();
+                info!("{internal_name} {actual} {arrow} {expected} {location} {state_link}");
                 instance.package.borrow().copy_expected_specifier(instance);
               }
             }
           }
           InvalidInstance::Conflict(_) | InvalidInstance::Unfixable(_) => {
             unfixable += 1;
-            warn!("Unfixable: {name_internal} {location} {state_link}");
+            warn!("Unfixable: {internal_name} {location} {state_link}");
           }
         },
         InstanceState::Suspect(variant) => match variant {
@@ -67,7 +66,7 @@ pub fn run(ctx: Context) -> Context {
           | SuspectInstance::RefuseToSnapLocal
           | SuspectInstance::InvalidLocalVersion => {
             suspect += 1;
-            warn!("Suspect: {name_internal} {location} {state_link}");
+            warn!("Suspect: {internal_name} {location} {state_link}");
           }
         },
       }

@@ -60,19 +60,25 @@ lazy_static! {
   /// "1.2"
   pub static ref MINOR: Regex = Regex::new(r"^(\d+\.\d+)$").unwrap();
   /// "npm:"
-  pub static ref ALIAS: Regex = Regex::new(r"^npm:").unwrap();
+  pub static ref ALIAS: Regex = Regex::new(r"^npm:@?.+@.+").unwrap();
   /// "file:"
   pub static ref FILE: Regex = Regex::new(r"^file:").unwrap();
   /// "workspace:"
   pub static ref WORKSPACE_PROTOCOL: Regex = Regex::new(r"^workspace:").unwrap();
   /// "https://"
   pub static ref URL: Regex = Regex::new(r"^https?://").unwrap();
-  /// "git://"
-  pub static ref GIT: Regex = Regex::new(r"^git(\+(ssh|https?))?://").unwrap();
+  /// "git+ssh://git@github.com/npm/cli"
+  /// "git@github.com:npm/cli.git"
+  /// "github:uNetworking/uWebSockets.js"
+  /// "git://github.com/user/foo"
+  pub static ref GIT: Regex = Regex::new(r"^git(://|hub:|@|\+(https|ssh)://)").unwrap();
   /// "alpha"
-  pub static ref TAG: Regex = Regex::new(r"^[a-zA-Z0-9-]+$").unwrap();
-  /// a logical OR in a semver range
-  pub static ref OR_OPERATOR:Regex = Regex::new(r" ?\|\| ?").unwrap();
+  pub static ref TAG: Regex = Regex::new(r"^[a-zA-Z]+$").unwrap();
+  /// infix operators in complex semver ranges
+  /// "1.0.0 || 2.0.0"
+  /// "1.0.0 - 2.0.0"
+  /// "<1.0.0 >2.0.0"
+  pub static ref INFIX_OPERATORS:Regex = Regex::new(r" ?(-|\|\|) ?| ").unwrap();
 }
 
 /// Check if a string matches any of the regexes

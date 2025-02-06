@@ -1,5 +1,5 @@
 use {
-  crate::{instance::Instance, packages::Packages},
+  crate::{instance::InstanceDescriptor, packages::Packages},
   globset::{Glob, GlobMatcher},
 };
 
@@ -70,37 +70,33 @@ impl GroupSelector {
     }
   }
 
-  pub fn can_add(&self, instance: &Instance) -> bool {
-    self.matches_dependency_types(instance)
-      && self.matches_packages(instance)
-      && self.matches_dependencies(instance)
-      && self.matches_specifier_types(instance)
+  pub fn can_add(&self, descriptor: &InstanceDescriptor) -> bool {
+    self.matches_dependency_types(descriptor)
+      && self.matches_packages(descriptor)
+      && self.matches_dependencies(descriptor)
+      && self.matches_specifier_types(descriptor)
   }
 
-  pub fn matches_dependency_types(&self, instance: &Instance) -> bool {
+  pub fn matches_dependency_types(&self, descriptor: &InstanceDescriptor) -> bool {
     matches_identifiers(
-      &instance.dependency_type.name,
+      &descriptor.dependency_type.name,
       &self.include_dependency_types,
       &self.exclude_dependency_types,
     )
   }
 
-  pub fn matches_packages(&self, instance: &Instance) -> bool {
-    matches_globs(&instance.package.borrow().name, &self.include_packages, &self.exclude_packages)
+  pub fn matches_packages(&self, descriptor: &InstanceDescriptor) -> bool {
+    matches_globs(&descriptor.package.borrow().name, &self.include_packages, &self.exclude_packages)
   }
 
-  pub fn matches_dependencies(&self, instance: &Instance) -> bool {
-    matches_globs(
-      &instance.name_internal.borrow(),
-      &self.include_dependencies,
-      &self.exclude_dependencies,
-    )
+  pub fn matches_dependencies(&self, descriptor: &InstanceDescriptor) -> bool {
+    matches_globs(&descriptor.internal_name, &self.include_dependencies, &self.exclude_dependencies)
   }
 
-  pub fn matches_specifier_types(&self, instance: &Instance) -> bool {
+  pub fn matches_specifier_types(&self, descriptor: &InstanceDescriptor) -> bool {
     self.include_specifier_types.is_empty()
       || matches_identifiers(
-        &instance.actual_specifier.get_config_identifier(),
+        &descriptor.specifier.get_config_identifier(),
         &self.include_specifier_types,
         &self.exclude_specifier_types,
       )

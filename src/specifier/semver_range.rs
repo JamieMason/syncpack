@@ -1,6 +1,7 @@
 #[cfg(test)]
 #[path = "semver_range_test.rs"]
 mod semver_range_test;
+
 use std::{
   cmp::Ordering,
   hash::{Hash, Hasher},

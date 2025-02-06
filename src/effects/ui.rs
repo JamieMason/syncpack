@@ -68,7 +68,7 @@ impl Ui<'_> {
     };
     let instances_len = dependency.instances.borrow().len();
     let count = self.count_column(instances_len);
-    let name = &dependency.name_internal;
+    let name = &dependency.internal_name;
     let name = if self.ctx.config.cli.show_hints && dependency.local_instance.borrow().is_some() {
       let local_hint = "(local)".blue();
       format!("{name} {local_hint}").normal()
@@ -79,7 +79,7 @@ impl Ui<'_> {
       .expected
       .borrow()
       .clone()
-      .map(|expected| expected.unwrap())
+      .map(|expected| expected.get_raw())
       .unwrap_or("".to_string())
       .dimmed();
 
@@ -241,7 +241,12 @@ impl Ui<'_> {
     } else {
       state_link
     };
-    let actual = instance.actual_specifier.unwrap();
+    let actual = instance.descriptor.specifier.get_raw();
+    let actual = if actual.is_empty() {
+      "VERSION_IS_MISSING".yellow()
+    } else {
+      actual.normal()
+    };
     let location = self.instance_location(instance).dimmed();
     match &state {
       InstanceState::Valid(variant) => {
@@ -311,7 +316,7 @@ impl Ui<'_> {
             FixableInstance::SemverRangeMismatch => {
               let arrow = self.dim_right_arrow();
               let expected = instance.get_specifier_with_preferred_semver_range();
-              let expected = expected.unwrap().unwrap();
+              let expected = expected.unwrap().get_raw();
               let expected = expected.green();
               info!("          {icon} {actual} {arrow} {expected} {location} {state_link}");
             }

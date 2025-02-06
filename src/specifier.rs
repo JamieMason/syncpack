@@ -3,179 +3,390 @@
 mod specifier_test;
 
 use {
-  crate::specifier::{
-    non_semver::NonSemver,
-    orderable::{IsOrderable, Orderable},
-    semver::Semver,
-    simple_semver::SimpleSemver,
-  },
+  alias::Alias,
+  basic_semver::{BasicSemver, BasicSemverVariant},
+  complex_semver::ComplexSemver,
+  git::Git,
+  node_semver::{Range, Version},
+  raw::Raw,
   semver_range::SemverRange,
+  std::cmp::Ordering,
+  workspace_protocol::WorkspaceProtocol,
 };
 
-pub mod non_semver;
-pub mod orderable;
+mod alias;
+pub mod basic_semver;
+mod complex_semver;
+mod git;
 pub mod parser;
+mod raw;
 pub mod regexes;
-pub mod semver;
 pub mod semver_range;
-pub mod simple_semver;
+mod workspace_protocol;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+fn get_raw_without_range(value: &str) -> String {
+  regexes::RANGE_CHARS.replace(value, "").into_owned()
+}
+
+fn get_huge() -> u64 {
+  999999
+}
+
+/// For a variant known to have a semver range, determine the type of range
+fn determine_semver_range(value: &str) -> Option<SemverRange> {
+  Some(if value.starts_with("*") {
+    SemverRange::Any
+  } else if value.starts_with("^") {
+    SemverRange::Minor
+  } else if value.starts_with("~") {
+    SemverRange::Patch
+  } else if value.starts_with(">=") {
+    SemverRange::Gte
+  } else if value.starts_with("<=") {
+    SemverRange::Lte
+  } else if value.starts_with(">") {
+    SemverRange::Gt
+  } else if value.starts_with("<") {
+    SemverRange::Lt
+  } else {
+    panic!("determine_semver_range called on value that has no semver range");
+  })
+}
+
+/// Normalise values which are needlessly different
+fn sanitise_value(value: &str) -> String {
+  if value == "latest" || value == "x" {
+    "*".to_string()
+  } else {
+    let value = value.replace(".x", "").replace(".*", "");
+    if value.starts_with("v") {
+      value.chars().skip(1).collect()
+    } else {
+      value
+    }
+  }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Specifier {
+  Alias(Alias),
+  BasicSemver(BasicSemver),
+  ComplexSemver(ComplexSemver),
+  File(Raw),
+  Git(Git),
   None,
-  Semver(Semver),
-  NonSemver(NonSemver),
+  Tag(Raw),
+  Unsupported(Raw),
+  Url(Raw),
+  WorkspaceProtocol(WorkspaceProtocol),
 }
 
 impl Specifier {
-  pub fn new(specifier: &str) -> Self {
-    let str = parser::sanitise(specifier);
-    if specifier.is_empty() {
-      Self::None
-    } else if let Ok(semver) = Semver::new(str) {
-      Self::Semver(semver)
+  /// Create a new instance
+  pub fn new(value: &str, local_version: Option<&BasicSemver>) -> Self {
+    let raw = value.to_string();
+
+    if parser::is_workspace_protocol(value) {
+      return Self::from_workspace_protocol(value, local_version, raw);
+    } else if parser::is_alias(value) {
+      return Self::from_alias(value, raw);
+    } else if parser::is_git(value) {
+      return Self::from_git(value, raw);
+    } else if parser::is_file(value) {
+      return Self::File(raw::Raw { raw });
+    } else if parser::is_url(value) {
+      return Self::Url(raw::Raw { raw });
+    }
+
+    let sanitised = sanitise_value(value);
+    let value = sanitised.as_str();
+
+    if parser::is_tag(value) {
+      return Self::Tag(raw::Raw { raw });
+    }
+
+    match Range::parse(value) {
+      Ok(node_range) => {
+        if parser::is_complex_range(value) {
+          Self::ComplexSemver(ComplexSemver { raw, node_range })
+        } else {
+          match BasicSemver::new(value) {
+            Some(semver) => Self::BasicSemver(semver),
+            None => Self::Unsupported(raw::Raw { raw }),
+          }
+        }
+      }
+      Err(_) => Self::Unsupported(raw::Raw { raw }),
+    }
+  }
+
+  /// Create a new instance from a specifier containing "workspace:"
+  fn from_workspace_protocol(value: &str, local_version: Option<&BasicSemver>, raw: String) -> Self {
+    local_version
+      .and_then(|local| {
+        let without_protocol = value.replace("workspace:", "");
+        let sanitised = sanitise_value(&without_protocol);
+        if parser::is_simple_semver(&sanitised) {
+          Some(Self::WorkspaceProtocol(WorkspaceProtocol {
+            raw: format!("workspace:{sanitised}"),
+            local_version: local.clone(),
+            semver: BasicSemver::new(&sanitised).unwrap(),
+          }))
+        } else if sanitised == "~" || sanitised == "^" {
+          Some(Self::WorkspaceProtocol(WorkspaceProtocol {
+            raw: format!("workspace:{sanitised}"),
+            local_version: local.clone(),
+            semver: BasicSemver::new(&format!("{}{}", sanitised, local.raw)).unwrap(),
+          }))
+        } else {
+          None
+        }
+      })
+      .unwrap_or_else(|| Self::Unsupported(raw::Raw { raw: raw.clone() }))
+  }
+
+  /// Create a new instance from an npm alias specifier
+  fn from_alias(value: &str, raw: String) -> Self {
+    let aliased_version = {
+      let start = value.rfind('@').unwrap() + 1;
+      value[start..].to_string()
+    };
+    let aliased_name = {
+      let start = value.find(':').unwrap() + 1;
+      let end = value.rfind('@').unwrap();
+      value[start..end].to_string()
+    };
+    if aliased_name.is_empty() {
+      Self::Unsupported(raw::Raw { raw })
+    } else if aliased_version.is_empty() {
+      Self::Alias(alias::Alias {
+        raw,
+        name: aliased_name,
+        semver: None,
+      })
+    } else if let Self::BasicSemver(inner) = Self::new(&aliased_version, None) {
+      Self::Alias(alias::Alias {
+        raw,
+        name: aliased_name,
+        semver: Some(inner),
+      })
     } else {
-      Self::NonSemver(NonSemver::new(str))
+      Self::Unsupported(raw::Raw { raw })
+    }
+  }
+
+  /// Create a new instance from a git specifier, this can be a git url or some
+  /// kind of github shorthand
+  fn from_git(value: &str, raw: String) -> Self {
+    let parts = value.split('#').collect::<Vec<&str>>();
+    let git_tag = parts.get(1).map(|tag| tag.to_string()).unwrap_or_default();
+    let git_tag = sanitise_value(&git_tag);
+    let origin = parts.first().map(|origin| origin.to_string()).unwrap_or_default();
+    if origin.is_empty() {
+      Self::Unsupported(raw::Raw { raw })
+    } else if git_tag.is_empty() {
+      Self::Git(git::Git { raw, origin, semver: None })
+    } else if let Some(inner) = BasicSemver::new(&git_tag) {
+      Self::Git(git::Git {
+        raw,
+        origin,
+        semver: Some(inner),
+      })
+    } else {
+      Self::Git(git::Git { raw, origin, semver: None })
+    }
+  }
+
+  /// Replace a new instance with the given semver range applied to it when it
+  /// is possible to do so, otherwise the same instance is returned
+  pub fn with_range(self, range: &SemverRange) -> Self {
+    match self {
+      Self::Alias(inner) => Self::Alias(inner.with_range(range)),
+      Self::BasicSemver(inner) => Self::BasicSemver(inner.with_range(range)),
+      Self::ComplexSemver(inner) => Self::ComplexSemver(inner.with_range(range)),
+      Self::File(inner) => Self::File(inner.with_range(range)),
+      Self::Git(inner) => Self::Git(inner.with_range(range)),
+      Self::None => Self::None,
+      Self::Tag(inner) => Self::Tag(inner.with_range(range)),
+      Self::Unsupported(inner) => Self::Unsupported(inner.with_range(range)),
+      Self::Url(inner) => Self::Url(inner.with_range(range)),
+      Self::WorkspaceProtocol(inner) => Self::WorkspaceProtocol(inner.with_range(range)),
+    }
+  }
+
+  pub fn get_raw(&self) -> String {
+    match self {
+      Self::Alias(inner) => inner.raw.clone(),
+      Self::BasicSemver(inner) => inner.raw.clone(),
+      Self::ComplexSemver(inner) => inner.raw.clone(),
+      Self::File(inner) => inner.raw.clone(),
+      Self::Git(inner) => inner.raw.clone(),
+      Self::None => "".to_string(),
+      Self::Tag(inner) => inner.raw.clone(),
+      Self::Unsupported(inner) => inner.raw.clone(),
+      Self::Url(inner) => inner.raw.clone(),
+      Self::WorkspaceProtocol(inner) => inner.raw.clone(),
+    }
+  }
+
+  pub fn get_semver(&self) -> Option<&BasicSemver> {
+    match self {
+      Self::Alias(inner) => inner.semver.as_ref(),
+      Self::BasicSemver(inner) => Some(inner),
+      Self::Git(inner) => inner.semver.as_ref(),
+      Self::WorkspaceProtocol(inner) => Some(&inner.semver),
+      _ => None,
+    }
+  }
+
+  /// Get the semver range for this specifier, if it has one
+  pub fn get_semver_range(&self) -> Option<&SemverRange> {
+    self.get_semver().map(|semver| &semver.range_variant)
+  }
+
+  pub fn get_node_range(&self) -> Option<&Range> {
+    match self {
+      Self::Alias(inner) => inner.semver.as_ref().map(|semver| &semver.node_range),
+      Self::BasicSemver(inner) => Some(&inner.node_range),
+      Self::ComplexSemver(inner) => Some(&inner.node_range),
+      Self::Git(inner) => inner.semver.as_ref().map(|semver| &semver.node_range),
+      Self::WorkspaceProtocol(inner) => Some(&inner.semver.node_range),
+      _ => None,
+    }
+  }
+
+  pub fn get_node_version(&self) -> Option<&Version> {
+    match self {
+      Self::Alias(inner) => inner.semver.as_ref().map(|semver| &semver.node_version),
+      Self::BasicSemver(inner) => Some(&inner.node_version),
+      Self::Git(inner) => inner.semver.as_ref().map(|semver| &semver.node_version),
+      Self::WorkspaceProtocol(inner) => Some(&inner.semver.node_version),
+      _ => None,
     }
   }
 
   /// Get the `specifier_type` name as used in config files.
   pub fn get_config_identifier(&self) -> String {
     match self {
-      Self::Semver(simple_semver) => match simple_semver {
-        Semver::Simple(variant) => match variant {
-          SimpleSemver::Exact(_) => "exact",
-          SimpleSemver::Latest(_) => "latest",
-          SimpleSemver::Major(_) => "major",
-          SimpleSemver::Minor(_) => "minor",
-          SimpleSemver::Range(_) => "range",
-          SimpleSemver::RangeMajor(_) => "range-major",
-          SimpleSemver::RangeMinor(_) => "range-minor",
+      Self::Alias(_) => "alias",
+      Self::BasicSemver(semver) => match semver.variant {
+        BasicSemverVariant::Latest => "latest",
+        BasicSemverVariant::Major => match semver.range_variant {
+          SemverRange::Exact => "major",
+          _ => "range-major",
         },
-        Semver::Complex(_) => "range-complex",
+        BasicSemverVariant::Minor => match semver.range_variant {
+          SemverRange::Exact => "minor",
+          _ => "range-minor",
+        },
+        BasicSemverVariant::Patch => match semver.range_variant {
+          SemverRange::Any => "latest",
+          SemverRange::Exact => "exact",
+          _ => "range",
+        },
       },
-      Self::NonSemver(non_semver) => match non_semver {
-        NonSemver::Alias(_) => "alias",
-        NonSemver::File(_) => "file",
-        NonSemver::Git(_) => "git",
-        NonSemver::Tag(_) => "tag",
-        NonSemver::Url(_) => "url",
-        NonSemver::WorkspaceProtocol(_) => "workspace-protocol",
-        NonSemver::Unsupported(_) => "unsupported",
-      },
+      Self::ComplexSemver(_) => "range-complex",
+      Self::File(_) => "file",
+      Self::Git(_) => "git",
       Self::None => "missing",
+      Self::Tag(_) => "tag",
+      Self::Unsupported(_) => "unsupported",
+      Self::Url(_) => "url",
+      Self::WorkspaceProtocol(_) => "workspace-protocol",
     }
     .to_string()
   }
 
-  /// Try to parse this specifier into one from the `node_semver` crate
-  pub fn parse_with_node_semver(&self) -> Result<node_semver::Range, node_semver::SemverError> {
-    self.unwrap().parse::<node_semver::Range>()
-  }
-
-  /// Get the raw string value of the specifier, eg "^1.4.1"
-  pub fn unwrap(&self) -> String {
-    match self {
-      Self::Semver(simple_semver) => match simple_semver {
-        Semver::Simple(variant) => match variant {
-          SimpleSemver::Exact(string) => string.clone(),
-          SimpleSemver::Latest(string) => string.clone(),
-          SimpleSemver::Major(string) => string.clone(),
-          SimpleSemver::Minor(string) => string.clone(),
-          SimpleSemver::Range(string) => string.clone(),
-          SimpleSemver::RangeMajor(string) => string.clone(),
-          SimpleSemver::RangeMinor(string) => string.clone(),
-        },
-        Semver::Complex(string) => string.clone(),
-      },
-      Self::NonSemver(non_semver) => match non_semver {
-        NonSemver::Alias(string) => string.clone(),
-        NonSemver::File(string) => string.clone(),
-        NonSemver::Git(string) => string.clone(),
-        NonSemver::Tag(string) => string.clone(),
-        NonSemver::Url(string) => string.clone(),
-        NonSemver::WorkspaceProtocol(string) => string.clone(),
-        NonSemver::Unsupported(string) => string.clone(),
-      },
-      Self::None => "VERSION_IS_MISSING".to_string(),
-    }
-  }
-
-  /// Is this specifier semver, without &&s or ||s?
-  pub fn is_simple_semver(&self) -> bool {
-    matches!(self, Specifier::Semver(Semver::Simple(_)))
-  }
-
-  /// If this specifier is a simple semver, return it
-  pub fn get_simple_semver(&self) -> Option<SimpleSemver> {
-    if let Specifier::Semver(Semver::Simple(simple_semver)) = self {
-      Some(simple_semver.clone())
-    } else {
-      None
-    }
-  }
-
-  /// Get the semver range for this specifier, if it has one
-  pub fn get_semver_range(&self) -> Option<SemverRange> {
-    if let Specifier::Semver(Semver::Simple(simple_semver)) = self {
-      Some(simple_semver.get_range())
-    } else {
-      None
-    }
-  }
-
   /// Does this specifier have the given semver range?
   pub fn has_semver_range_of(&self, range: &SemverRange) -> bool {
-    match self {
-      Self::Semver(Semver::Simple(simple_semver)) => simple_semver.has_semver_range_of(range),
-      _ => false,
-    }
+    self.get_semver_range().is_some_and(|a| a == range)
   }
 
   /// Regardless of the range, does this specifier and the other both have eg.
   /// "1.4.1" as their version?
   pub fn has_same_version_number_as(&self, other: &Self) -> bool {
-    match (self, other) {
-      (Self::Semver(Semver::Simple(simple_semver)), Self::Semver(Semver::Simple(other_simple_semver))) => {
-        simple_semver.has_same_version_number_as(other_simple_semver)
-      }
+    match (self.get_node_version(), other.get_node_version()) {
+      (Some(left), Some(right)) => left == right,
       _ => false,
     }
   }
 
   /// Does this specifier match every one of the given specifiers?
   pub fn satisfies_all(&self, others: Vec<&Self>) -> bool {
-    if !matches!(self, Specifier::None) {
-      if let Ok(node_range) = self.parse_with_node_semver() {
-        return others
-          .iter()
-          .flat_map(|other| other.parse_with_node_semver())
-          .all(|other_range| node_range.allows_any(&other_range));
-      }
-    }
-    false
+    others.iter().all(|other| self.satisfies(other))
   }
 
   /// Does this specifier match the given specifier?
   pub fn satisfies(&self, other: &Self) -> bool {
-    if !matches!(self, Specifier::None) {
-      if let Ok(node_range) = self.parse_with_node_semver() {
-        if let Ok(other_node_range) = other.parse_with_node_semver() {
-          return node_range.allows_any(&other_node_range);
-        }
-      }
-    }
-    false
+    self
+      .get_node_range()
+      .is_some_and(|a| other.get_node_range().is_some_and(|b| a.allows_any(b)))
+  }
+
+  pub fn is_alias(&self) -> bool {
+    matches!(self, Self::Alias(_))
+  }
+
+  pub fn is_basic_semver(&self) -> bool {
+    matches!(self, Self::BasicSemver(_))
+  }
+
+  pub fn is_complex_semver(&self) -> bool {
+    matches!(self, Self::ComplexSemver(_))
+  }
+
+  pub fn is_file(&self) -> bool {
+    matches!(self, Self::File(_))
+  }
+
+  pub fn is_git(&self) -> bool {
+    matches!(self, Self::Git(_))
+  }
+
+  pub fn is_none(&self) -> bool {
+    matches!(self, Self::None)
+  }
+
+  pub fn is_tag(&self) -> bool {
+    matches!(self, Self::Tag(_))
+  }
+
+  pub fn is_unsupported(&self) -> bool {
+    matches!(self, Self::Unsupported(_))
+  }
+
+  pub fn is_url(&self) -> bool {
+    matches!(self, Self::Url(_))
+  }
+
+  pub fn is_workspace_protocol(&self) -> bool {
+    matches!(self, Self::WorkspaceProtocol(_))
   }
 }
 
-impl IsOrderable for Specifier {
-  /// Return a struct which can be used to check equality or sort specifiers
-  fn get_orderable(&self) -> Orderable {
-    match self {
-      Self::Semver(semver) => semver.get_orderable(),
-      Self::NonSemver(non_semver) => non_semver.get_orderable(),
-      Self::None => Orderable::new(),
+impl Ord for Specifier {
+  fn cmp(&self, other: &Self) -> Ordering {
+    match (self.get_node_version(), other.get_node_version()) {
+      (Some(left), Some(right)) => match left.cmp(right) {
+        Ordering::Equal => match (self.get_semver_range(), other.get_semver_range()) {
+          (Some(left), Some(right)) => left.cmp(right),
+          (None, Some(_)) => Ordering::Less,
+          (Some(_), None) => Ordering::Greater,
+          (None, None) => Ordering::Equal,
+        },
+        ordering => ordering,
+      },
+      (None, Some(_)) => Ordering::Less,
+      (Some(_), None) => Ordering::Greater,
+      (None, None) => Ordering::Equal,
     }
   }
 }
+
+impl PartialOrd for Specifier {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+impl Eq for Specifier {}

@@ -26,7 +26,7 @@ pub struct VersionGroup {
   /// Group instances of each dependency together for comparison.
   pub dependencies: RefCell<BTreeMap<String, Dependency>>,
   /// Does every instance match the filter options provided via the CLI?
-  pub matches_cli_filter: RefCell<bool>,
+  pub matches_cli_filter: bool,
   /// The version to pin all instances to when variant is `Pinned`
   pub pin_version: Option<Specifier>,
   /// Data to determine which instances should be added to this group
@@ -43,7 +43,7 @@ impl VersionGroup {
   pub fn get_catch_all() -> VersionGroup {
     VersionGroup {
       dependencies: RefCell::new(BTreeMap::new()),
-      matches_cli_filter: RefCell::new(false),
+      matches_cli_filter: true,
       pin_version: None,
       selector: GroupSelector::new(
         /* all_packages: */ &Packages::new(),
@@ -58,22 +58,19 @@ impl VersionGroup {
     }
   }
 
-  pub fn add_instance(&self, instance: Rc<Instance>, cli_filter: &Option<GroupSelector>) {
+  pub fn add_instance(&mut self, instance: Rc<Instance>) {
     let mut dependencies = self.dependencies.borrow_mut();
-    let dependency = dependencies.entry(instance.name_internal.borrow().clone()).or_insert_with(|| {
+    let dependency = dependencies.entry(instance.internal_name.clone()).or_insert_with(|| {
       Dependency::new(
-        /* name_internal: */ instance.name_internal.borrow().clone(),
+        /* internal_name: */ instance.internal_name.clone(),
         /* variant: */ self.variant.clone(),
         /* pin_version: */ self.pin_version.clone(),
         /* snap_to: */ self.snap_to.clone(),
       )
     });
-    if let Some(cli_group) = cli_filter {
-      if cli_group.can_add(&instance) {
-        *self.matches_cli_filter.borrow_mut() = true;
-        *dependency.matches_cli_filter.borrow_mut() = true;
-        *instance.matches_cli_filter.borrow_mut() = true;
-      }
+    if !instance.matches_cli_filter {
+      self.matches_cli_filter = false;
+      dependency.matches_cli_filter = false;
     }
     dependency.add_instance(Rc::clone(&instance));
     std::mem::drop(dependencies);
@@ -93,7 +90,7 @@ impl VersionGroup {
     if let Some(true) = group.is_banned {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: RefCell::new(false),
+        matches_cli_filter: true,
         pin_version: None,
         selector,
         snap_to: None,
@@ -103,7 +100,7 @@ impl VersionGroup {
     if let Some(true) = group.is_ignored {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: RefCell::new(false),
+        matches_cli_filter: true,
         pin_version: None,
         selector,
         snap_to: None,
@@ -113,8 +110,8 @@ impl VersionGroup {
     if let Some(pin_version) = &group.pin_version {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: RefCell::new(false),
-        pin_version: Some(Specifier::new(pin_version)),
+        matches_cli_filter: true,
+        pin_version: Some(Specifier::new(pin_version, None)),
         selector,
         snap_to: None,
         variant: VersionGroupVariant::Pinned,
@@ -124,7 +121,7 @@ impl VersionGroup {
       if policy == "sameRange" {
         return VersionGroup {
           dependencies: RefCell::new(BTreeMap::new()),
-          matches_cli_filter: RefCell::new(false),
+          matches_cli_filter: true,
           pin_version: None,
           selector,
           snap_to: None,
@@ -138,7 +135,7 @@ impl VersionGroup {
     if let Some(snap_to) = &group.snap_to {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: RefCell::new(false),
+        matches_cli_filter: true,
         pin_version: None,
         selector,
         snap_to: Some(
@@ -159,7 +156,7 @@ impl VersionGroup {
     if let Some(prefer_version) = &group.prefer_version {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: RefCell::new(false),
+        matches_cli_filter: true,
         pin_version: None,
         selector,
         snap_to: None,
@@ -172,7 +169,7 @@ impl VersionGroup {
     }
     VersionGroup {
       dependencies: RefCell::new(BTreeMap::new()),
-      matches_cli_filter: RefCell::new(false),
+      matches_cli_filter: true,
       pin_version: None,
       selector,
       snap_to: None,

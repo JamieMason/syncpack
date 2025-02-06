@@ -38,14 +38,14 @@ pub struct ActualInstance {
 impl ActualInstance {
   pub fn new(instance: &Instance) -> Self {
     Self {
-      actual: instance.actual_specifier.unwrap(),
-      dependency_name: instance.name_internal.borrow().clone(),
-      expected: instance.expected_specifier.borrow().clone().map(|expected| expected.unwrap()),
+      actual: instance.descriptor.specifier.get_raw(),
+      dependency_name: instance.internal_name.clone(),
+      expected: instance.expected_specifier.borrow().clone().map(|expected| expected.get_raw()),
       id: instance.id.clone(),
       overridden: instance
         .get_specifier_with_preferred_semver_range()
         .clone()
-        .map(|expected| expected.unwrap()),
+        .map(|expected| expected.get_raw()),
       state: instance.state.borrow().clone(),
     }
   }

@@ -3,7 +3,7 @@ use {
     instance::Instance,
     instance_state::InstanceState,
     package_json::PackageJson,
-    specifier::{orderable::IsOrderable, semver::Semver, simple_semver::SimpleSemver, Specifier},
+    specifier::{semver_range::SemverRange, Specifier},
     version_group::VersionGroupVariant,
   },
   itertools::Itertools,
@@ -26,9 +26,9 @@ pub struct Dependency {
   /// If this dependency is a local package, this is the local instance.
   pub local_instance: RefCell<Option<Rc<Instance>>>,
   /// Does every instance match the filter options provided via the CLI?
-  pub matches_cli_filter: RefCell<bool>,
+  pub matches_cli_filter: bool,
   /// The name of the dependency
-  pub name_internal: String,
+  pub internal_name: String,
   /// The version to pin all instances to when variant is `Pinned`
   pub pinned_specifier: Option<Specifier>,
   /// package.json files developed in the monorepo when variant is `SnappedTo`
@@ -39,7 +39,7 @@ pub struct Dependency {
 
 impl Dependency {
   pub fn new(
-    name_internal: String,
+    internal_name: String,
     variant: VersionGroupVariant,
     pinned_specifier: Option<Specifier>,
     snapped_to_packages: Option<Vec<Rc<RefCell<PackageJson>>>>,
@@ -48,8 +48,8 @@ impl Dependency {
       expected: RefCell::new(None),
       instances: RefCell::new(vec![]),
       local_instance: RefCell::new(None),
-      matches_cli_filter: RefCell::new(false),
-      name_internal,
+      matches_cli_filter: true,
+      internal_name,
       pinned_specifier,
       snapped_to_packages,
       variant,
@@ -68,7 +68,7 @@ impl Dependency {
       .instances
       .borrow()
       .iter()
-      .map(|instance| instance.actual_specifier.clone())
+      .map(|instance| instance.descriptor.specifier.clone())
       .collect();
     set.into_iter().collect()
   }
@@ -95,8 +95,8 @@ impl Dependency {
   pub fn get_instances_by_specifier(&self) -> BTreeMap<String, Vec<Rc<Instance>>> {
     let mut map = BTreeMap::new();
     for instance in self.instances.borrow().iter() {
-      let specifier = instance.actual_specifier.unwrap();
-      map.entry(specifier).or_insert_with(Vec::new).push(Rc::clone(instance));
+      let raw = instance.descriptor.specifier.get_raw();
+      map.entry(raw).or_insert_with(Vec::new).push(Rc::clone(instance));
     }
     map
   }
@@ -111,7 +111,7 @@ impl Dependency {
       .local_instance
       .borrow()
       .as_ref()
-      .map(|instance| instance.actual_specifier.clone())
+      .map(|instance| instance.descriptor.specifier.clone())
   }
 
   pub fn has_local_instance(&self) -> bool {
@@ -119,22 +119,24 @@ impl Dependency {
   }
 
   pub fn has_local_instance_with_invalid_specifier(&self) -> bool {
-    self.has_local_instance()
-      && !matches!(
-        self.get_local_specifier().unwrap(),
-        Specifier::Semver(Semver::Simple(SimpleSemver::Exact(_)))
-      )
+    self.get_local_specifier().is_some_and(|local| {
+      if let Specifier::BasicSemver(semver) = local {
+        !matches!(semver.range_variant, SemverRange::Exact)
+      } else {
+        true
+      }
+    })
   }
 
   /// Does every instance in this group have a specifier which is exactly the
   /// same?
   pub fn every_specifier_is_already_identical(&self) -> bool {
-    if let Some(first_actual) = self.instances.borrow().first().map(|instance| &instance.actual_specifier) {
+    if let Some(first_actual) = self.instances.borrow().first().map(|instance| &instance.descriptor.specifier) {
       self
         .instances
         .borrow()
         .iter()
-        .all(|instance| instance.actual_specifier == *first_actual)
+        .all(|instance| instance.descriptor.specifier == *first_actual)
     } else {
       false
     }
@@ -148,15 +150,13 @@ impl Dependency {
       .instances
       .borrow()
       .iter()
-      .filter(|instance| instance.actual_specifier.is_simple_semver())
-      .map(|instance| instance.actual_specifier.clone())
+      .filter(|instance| instance.descriptor.specifier.is_basic_semver())
+      .map(|instance| instance.descriptor.specifier.clone())
       .fold(None, |preferred, specifier| match preferred {
         None => Some(specifier),
         Some(preferred) => {
-          let a = specifier.get_orderable();
-          let b = preferred.get_orderable();
-          if a.cmp(&b) == preferred_order {
-            Some(specifier.clone())
+          if specifier.cmp(&preferred) == preferred_order {
+            Some(specifier)
           } else {
             Some(preferred)
           }
@@ -175,10 +175,10 @@ impl Dependency {
   pub fn get_snapped_to_specifier(&self, every_instance_in_the_project: &[Rc<Instance>]) -> Option<Specifier> {
     if let Some(snapped_to_packages) = &self.snapped_to_packages {
       for instance in every_instance_in_the_project {
-        if *instance.name_internal.borrow() == *self.name_internal {
+        if *instance.internal_name == *self.internal_name {
           for snapped_to_package in snapped_to_packages {
             if instance.package.borrow().name == snapped_to_package.borrow().name {
-              return Some(instance.actual_specifier.clone());
+              return Some(instance.descriptor.specifier.clone());
             }
           }
         }
@@ -203,13 +203,13 @@ impl Dependency {
         if matches!(*b.state.borrow(), InstanceState::Valid(_)) && !matches!(*a.state.borrow(), InstanceState::Valid(_)) {
           return Ordering::Greater;
         }
-        if matches!(&a.actual_specifier, Specifier::None) {
+        if matches!(&a.descriptor.specifier, Specifier::None) {
           return Ordering::Greater;
         }
-        if matches!(&b.actual_specifier, Specifier::None) {
+        if matches!(&b.descriptor.specifier, Specifier::None) {
           return Ordering::Less;
         }
-        let specifier_order = b.actual_specifier.unwrap().cmp(&a.actual_specifier.unwrap());
+        let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
         if matches!(specifier_order, Ordering::Equal) {
           a.package.borrow().name.cmp(&b.package.borrow().name)
         } else {

@@ -6,7 +6,7 @@ use {
     },
     package_json::PackageJson,
     semver_group::SemverGroup,
-    specifier::{semver::Semver, semver_range::SemverRange, Specifier},
+    specifier::{semver_range::SemverRange, Specifier},
   },
   log::debug,
   serde_json::Value,
@@ -16,12 +16,44 @@ use {
 pub type InstanceId = String;
 
 #[derive(Debug)]
-pub struct Instance {
-  /// The original version specifier, which should never be mutated.
-  /// eg. `Specifier::Exact("16.8.0")`, `Specifier::Range("^16.8.0")`
-  pub actual_specifier: Specifier,
+pub struct InstanceDescriptor {
   /// The dependency type to use to read/write this instance
   pub dependency_type: DependencyType,
+  /// When a dependency group is used, its alias_name is used here in place of
+  /// the actual dependency name (eg. "@aws-sdk/**" instead of "@aws-sdk/core"
+  /// and "@aws-sdk/middleware-logger" etc.), otherwise the actual name is used.
+  ///
+  /// This aliased name is only used when allocating an `Instance` to a
+  /// `Dependency`, the original name is otherwise preserved
+  pub internal_name: String,
+  /// Does this instance match the filter options provided via the CLI?
+  pub matches_cli_filter: bool,
+  /// The dependency name eg. "react", "react-dom"
+  pub name: String,
+  /// The package.json this instance belongs to
+  pub package: Rc<RefCell<PackageJson>>,
+  /// The original version specifier, which should never be mutated.
+  /// eg. `Specifier::Exact("16.8.0")`, `Specifier::Range("^16.8.0")`
+  pub specifier: Specifier,
+}
+
+#[derive(Debug)]
+pub struct Instance {
+  /// #[deprecated(note="use descriptor.specifier")]
+  pub actual_specifier: Specifier,
+  /// #[deprecated(note="use descriptor.dependency_type")]
+  pub dependency_type: DependencyType,
+  /// #[deprecated(note="use descriptor.internal_name")]
+  pub internal_name: String,
+  /// #[deprecated(note="use descriptor.matches_cli_filter")]
+  pub matches_cli_filter: bool,
+  /// #[deprecated(note="use descriptor.name")]
+  pub name: String,
+  /// #[deprecated(note="use descriptor.package")]
+  pub package: Rc<RefCell<PackageJson>>,
+
+  /// The original data this Instance is derived from
+  pub descriptor: InstanceDescriptor,
   /// The version specifier which syncpack has determined this instance should
   /// be set to, if it was not possible to determine without user intervention,
   /// this will be a `None`.
@@ -32,19 +64,6 @@ pub struct Instance {
   pub id: InstanceId,
   /// Whether this is a package developed in this repo
   pub is_local: bool,
-  /// Does this instance match the filter options provided via the CLI?
-  pub matches_cli_filter: RefCell<bool>,
-  /// The dependency name eg. "react", "react-dom"
-  pub name: String,
-  /// When a dependency group is used, its alias_name is used here in place of
-  /// the actual dependency name (eg. "@aws-sdk/**" instead of "@aws-sdk/core"
-  /// and "@aws-sdk/middleware-logger" etc.), otherwise the actual name is used.
-  ///
-  /// This aliased name is only used when allocating an `Instance` to a
-  /// `Dependency`, the original name is otherwise preserved
-  pub name_internal: RefCell<String>,
-  /// The `.name` of the package.json this file is in
-  pub package: Rc<RefCell<PackageJson>>,
   /// If this instance belongs to a `WithRange` semver group, this is the range.
   /// This is used by Version Groups while determining the preferred version,
   /// to try to also satisfy any applicable semver group ranges
@@ -55,26 +74,26 @@ pub struct Instance {
 }
 
 impl Instance {
-  pub fn new(
-    name: String,
-    // The initial, unwrapped specifier (eg. "1.1.0") from the package.json file
-    raw_specifier: String,
-    dependency_type: &DependencyType,
-    package: Rc<RefCell<PackageJson>>,
-  ) -> Instance {
-    let package_name = package.borrow().name.clone();
-    let specifier = Specifier::new(&raw_specifier);
+  pub fn new(descriptor: InstanceDescriptor) -> Instance {
+    let dependency_type_name = &descriptor.dependency_type.path;
+    let package_name = descriptor.package.borrow().name.clone();
+    let id = format!("{} in {} of {}", &descriptor.name, dependency_type_name, package_name);
+    let is_local = dependency_type_name == "/version";
+    let file_path = descriptor.package.borrow().file_path.clone();
     Instance {
-      actual_specifier: specifier.clone(),
-      dependency_type: dependency_type.clone(),
+      // deprecated
+      actual_specifier: descriptor.specifier.clone(),
+      dependency_type: descriptor.dependency_type.clone(),
+      internal_name: descriptor.name.clone(),
+      matches_cli_filter: descriptor.matches_cli_filter,
+      name: descriptor.name.clone(),
+      package: Rc::clone(&descriptor.package),
+
+      descriptor,
       expected_specifier: RefCell::new(None),
-      file_path: package.borrow().file_path.clone(),
-      id: format!("{} in {} of {}", name, &dependency_type.path, package_name),
-      is_local: dependency_type.path == "/version",
-      matches_cli_filter: RefCell::new(false),
-      name: name.clone(),
-      name_internal: RefCell::new(name.clone()),
-      package: Rc::clone(&package),
+      file_path,
+      id,
+      is_local,
       preferred_semver_range: RefCell::new(None),
       state: RefCell::new(InstanceState::Unknown),
     }
@@ -96,7 +115,7 @@ impl Instance {
   /// Mark this instance as having something which doesn't look quite right, but
   /// for the moment is not yet resulting in an issue
   pub fn mark_suspect(&self, state: SuspectInstance) -> &Self {
-    self.set_state(InstanceState::Suspect(state), &self.actual_specifier)
+    self.set_state(InstanceState::Suspect(state), &self.descriptor.specifier)
   }
 
   /// Mark this instance as having a mismatch which can be auto-fixed
@@ -108,18 +127,16 @@ impl Instance {
   /// group and version group config are in conflict with one another, asking
   /// for mutually exclusive versions
   pub fn mark_conflict(&self, state: SemverGroupAndVersionConflict) -> &Self {
-    self.set_state(InstanceState::Invalid(InvalidInstance::Conflict(state)), &self.actual_specifier)
+    self.set_state(InstanceState::Invalid(InvalidInstance::Conflict(state)), &self.descriptor.specifier)
   }
 
   /// Mark this instance as a mismatch which can't be auto-fixed without user
   /// input
   pub fn mark_unfixable(&self, state: UnfixableInstance) -> &Self {
-    self.set_state(InstanceState::Invalid(InvalidInstance::Unfixable(state)), &self.actual_specifier)
-  }
-
-  /// If this instance should use an alias, store it
-  pub fn set_internal_name(&self, dependency_group_alias_name: &str) {
-    *self.name_internal.borrow_mut() = dependency_group_alias_name.to_string();
+    self.set_state(
+      InstanceState::Invalid(InvalidInstance::Unfixable(state)),
+      &self.descriptor.specifier,
+    )
   }
 
   /// If this instance should use a preferred semver range, store it
@@ -131,7 +148,7 @@ impl Instance {
 
   /// Does this instance's actual specifier match the expected specifier?
   pub fn already_equals(&self, expected: &Specifier) -> bool {
-    self.actual_specifier == *expected
+    self.descriptor.specifier.get_raw() == *expected.get_raw()
   }
 
   /// Does this instance belong to a `WithRange` semver group?
@@ -154,7 +171,7 @@ impl Instance {
   pub fn must_match_preferred_semver_range_which_differs_to(&self, other_specifier: &Specifier) -> bool {
     other_specifier
       .get_semver_range()
-      .is_some_and(|range_of_other_specifier| self.must_match_preferred_semver_range_which_is_not(&range_of_other_specifier))
+      .is_some_and(|range_of_other_specifier| self.must_match_preferred_semver_range_which_is_not(range_of_other_specifier))
   }
 
   /// Is the given semver range the preferred semver range for this instance?
@@ -169,28 +186,28 @@ impl Instance {
       .preferred_semver_range
       .borrow()
       .as_ref()
-      .map(|preferred_semver_range| self.actual_specifier.has_semver_range_of(preferred_semver_range))
+      .map(|preferred_semver_range| self.descriptor.specifier.has_semver_range_of(preferred_semver_range))
       .unwrap_or(false)
   }
 
   /// Get the expected version specifier for this instance with the semver
   /// group's preferred range applied
   pub fn get_specifier_with_preferred_semver_range(&self) -> Option<Specifier> {
-    self.preferred_semver_range.borrow().as_ref().and_then(|preferred_semver_range| {
-      self
-        .actual_specifier
-        .get_simple_semver()
-        .map(|actual| Specifier::Semver(Semver::Simple(actual.with_range(preferred_semver_range))))
-    })
+    self
+      .preferred_semver_range
+      .borrow()
+      .as_ref()
+      .map(|preferred_semver_range| self.descriptor.specifier.clone().with_range(preferred_semver_range))
   }
 
   /// Does this instance's specifier match the specifier of every one of the
   /// given instances?
   pub fn already_satisfies_all(&self, instances: &[Rc<Instance>]) -> bool {
-    !matches!(self.actual_specifier, Specifier::None)
+    !matches!(self.descriptor.specifier, Specifier::None)
       && self
-        .actual_specifier
-        .satisfies_all(instances.iter().map(|i| &i.actual_specifier).collect())
+        .descriptor
+        .specifier
+        .satisfies_all(instances.iter().map(|i| &i.descriptor.specifier).collect())
   }
 
   /// Will this instance's specifier, once fixed to match its semver group,
