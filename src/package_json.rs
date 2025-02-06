@@ -8,6 +8,8 @@ use {
 
 #[derive(Debug)]
 pub struct PackageJson {
+  /// The name property of the package.json
+  pub name: String,
   /// The path to the package.json file
   pub file_path: PathBuf,
   /// Syncpack formatting mismatches found in the file
@@ -63,6 +65,11 @@ impl PackageJson {
             error!("Invalid JSON: {}", &file_path.to_str().unwrap());
           })
           .map(|contents: Value| Self {
+            name: contents
+              .pointer("/name")
+              .and_then(|name| name.as_str())
+              .unwrap_or("NAME_IS_MISSING")
+              .to_string(),
             file_path: file_path.clone(),
             formatting_mismatches: RefCell::new(vec![]),
             json: RefCell::new(contents.to_string()),
@@ -84,11 +91,6 @@ impl PackageJson {
     } else {
       None
     }
-  }
-
-  /// Convenience method to get the name of the package
-  pub fn get_name_unsafe(&self) -> String {
-    self.get_string("/name").expect("package.json file has no name property")
   }
 
   /// Deeply get a property in the parsed package.json

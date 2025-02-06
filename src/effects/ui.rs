@@ -459,7 +459,7 @@ impl Ui<'_> {
       if self.ctx.config.cli.show_packages {
         packages
           .iter()
-          .sorted_by_key(|package| package.borrow().get_name_unsafe())
+          .sorted_by_key(|package| package.borrow().name.clone())
           .for_each(|package| {
             self.print_formatted_package(&package.borrow());
           });
@@ -486,7 +486,7 @@ impl Ui<'_> {
     if self.ctx.config.cli.show_packages {
       mismatches
         .iter()
-        .sorted_by_key(|mismatch| mismatch.package.borrow().get_name_unsafe())
+        .sorted_by_key(|mismatch| mismatch.package.borrow().name.clone())
         .for_each(|mismatch| {
           let icon = "-".dimmed();
           let package = mismatch.package.borrow();
@@ -500,9 +500,8 @@ impl Ui<'_> {
 
   /// Render a clickable link to a package.json file
   fn package_json_link(&self, package: &PackageJson) -> ColoredString {
-    let name = package.get_name_unsafe();
     let file_path = package.file_path.to_str().unwrap();
-    let plain_link = self.link(format!("file:{file_path}"), name);
+    let plain_link = self.link(format!("file:{file_path}"), package.name.clone());
     format!("{plain_link}").normal()
   }
 

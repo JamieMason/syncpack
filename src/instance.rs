@@ -62,7 +62,7 @@ impl Instance {
     dependency_type: &DependencyType,
     package: Rc<RefCell<PackageJson>>,
   ) -> Instance {
-    let package_name = package.borrow().get_name_unsafe();
+    let package_name = package.borrow().name.clone();
     let specifier = Specifier::new(&raw_specifier);
     Instance {
       actual_specifier: specifier.clone(),

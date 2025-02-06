@@ -61,6 +61,11 @@ pub fn rcfile_from_mock(value: serde_json::Value) -> Rcfile {
 /// Parse a package.json string
 pub fn package_json_from_value(contents: Value) -> PackageJson {
   PackageJson {
+    name: contents
+      .pointer("/name")
+      .and_then(|name| name.as_str())
+      .unwrap_or("NAME_IS_MISSING")
+      .to_string(),
     file_path: PathBuf::new(),
     formatting_mismatches: RefCell::new(vec![]),
     json: RefCell::new(contents.to_string()),

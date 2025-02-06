@@ -86,11 +86,7 @@ impl GroupSelector {
   }
 
   pub fn matches_packages(&self, instance: &Instance) -> bool {
-    matches_globs(
-      &instance.package.borrow().get_name_unsafe(),
-      &self.include_packages,
-      &self.exclude_packages,
-    )
+    matches_globs(&instance.package.borrow().name, &self.include_packages, &self.exclude_packages)
   }
 
   pub fn matches_dependencies(&self, instance: &Instance) -> bool {
@@ -158,13 +154,13 @@ fn with_resolved_keywords(dependency_names: &[String], packages: &Packages) -> V
     match dependency_name.as_str() {
       "$LOCAL" => {
         for package in packages.all.iter() {
-          let package_name = package.borrow().get_name_unsafe();
+          let package_name = package.borrow().name.clone();
           resolved_dependencies.push(package_name);
         }
       }
       "!$LOCAL" => {
         for package in packages.all.iter() {
-          let package_name = package.borrow().get_name_unsafe();
+          let package_name = package.borrow().name.clone();
           resolved_dependencies.push(format!("!{}", package_name));
         }
       }

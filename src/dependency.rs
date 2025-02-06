@@ -177,7 +177,7 @@ impl Dependency {
       for instance in every_instance_in_the_project {
         if *instance.name_internal.borrow() == *self.name_internal {
           for snapped_to_package in snapped_to_packages {
-            if instance.package.borrow().get_name_unsafe() == snapped_to_package.borrow().get_name_unsafe() {
+            if instance.package.borrow().name == snapped_to_package.borrow().name {
               return Some(instance.actual_specifier.clone());
             }
           }
@@ -211,7 +211,7 @@ impl Dependency {
         }
         let specifier_order = b.actual_specifier.unwrap().cmp(&a.actual_specifier.unwrap());
         if matches!(specifier_order, Ordering::Equal) {
-          a.package.borrow().get_name_unsafe().cmp(&b.package.borrow().get_name_unsafe())
+          a.package.borrow().name.cmp(&b.package.borrow().name)
         } else {
           specifier_order
         }

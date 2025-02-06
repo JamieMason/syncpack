@@ -61,11 +61,7 @@ impl Packages {
 
   /// Get a package.json file by its name
   pub fn get_by_name(&self, name: &str) -> Option<Rc<RefCell<PackageJson>>> {
-    self
-      .all
-      .iter()
-      .find(|package| package.borrow().get_name_unsafe() == name)
-      .map(Rc::clone)
+    self.all.iter().find(|package| package.borrow().name == name).map(Rc::clone)
   }
 
   /// Get every instance of a dependency from every package.json file
