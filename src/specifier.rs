@@ -197,6 +197,42 @@ impl Specifier {
     }
   }
 
+  fn get_semver(&self) -> Option<&BasicSemver> {
+    match self {
+      Self::Alias(inner) => inner.semver.as_ref(),
+      Self::BasicSemver(inner) => Some(inner),
+      Self::Git(inner) => inner.semver.as_ref(),
+      Self::WorkspaceProtocol(inner) => Some(&inner.semver),
+      _ => None,
+    }
+  }
+
+  fn get_node_range(&self) -> Option<&Range> {
+    match self {
+      Self::Alias(inner) => inner.semver.as_ref().map(|semver| &semver.node_range),
+      Self::BasicSemver(inner) => Some(&inner.node_range),
+      Self::ComplexSemver(inner) => Some(&inner.node_range),
+      Self::Git(inner) => inner.semver.as_ref().map(|semver| &semver.node_range),
+      Self::WorkspaceProtocol(inner) => Some(&inner.semver.node_range),
+      _ => None,
+    }
+  }
+
+  fn get_node_version(&self) -> Option<&Version> {
+    match self {
+      Self::Alias(inner) => inner.semver.as_ref().map(|semver| &semver.node_version),
+      Self::BasicSemver(inner) => Some(&inner.node_version),
+      Self::Git(inner) => inner.semver.as_ref().map(|semver| &semver.node_version),
+      Self::WorkspaceProtocol(inner) => Some(&inner.semver.node_version),
+      _ => None,
+    }
+  }
+
+  /// Get the semver range for this specifier, if it has one
+  pub fn get_semver_range(&self) -> Option<&SemverRange> {
+    self.get_semver().map(|semver| &semver.range_variant)
+  }
+
   /// Replace a new instance with the given semver range applied to it when it
   /// is possible to do so, otherwise the same instance is returned
   pub fn with_range(self, range: &SemverRange) -> Self {
@@ -226,42 +262,6 @@ impl Specifier {
       Self::Unsupported(inner) => inner.raw.clone(),
       Self::Url(inner) => inner.raw.clone(),
       Self::WorkspaceProtocol(inner) => inner.raw.clone(),
-    }
-  }
-
-  pub fn get_semver(&self) -> Option<&BasicSemver> {
-    match self {
-      Self::Alias(inner) => inner.semver.as_ref(),
-      Self::BasicSemver(inner) => Some(inner),
-      Self::Git(inner) => inner.semver.as_ref(),
-      Self::WorkspaceProtocol(inner) => Some(&inner.semver),
-      _ => None,
-    }
-  }
-
-  /// Get the semver range for this specifier, if it has one
-  pub fn get_semver_range(&self) -> Option<&SemverRange> {
-    self.get_semver().map(|semver| &semver.range_variant)
-  }
-
-  pub fn get_node_range(&self) -> Option<&Range> {
-    match self {
-      Self::Alias(inner) => inner.semver.as_ref().map(|semver| &semver.node_range),
-      Self::BasicSemver(inner) => Some(&inner.node_range),
-      Self::ComplexSemver(inner) => Some(&inner.node_range),
-      Self::Git(inner) => inner.semver.as_ref().map(|semver| &semver.node_range),
-      Self::WorkspaceProtocol(inner) => Some(&inner.semver.node_range),
-      _ => None,
-    }
-  }
-
-  pub fn get_node_version(&self) -> Option<&Version> {
-    match self {
-      Self::Alias(inner) => inner.semver.as_ref().map(|semver| &semver.node_version),
-      Self::BasicSemver(inner) => Some(&inner.node_version),
-      Self::Git(inner) => inner.semver.as_ref().map(|semver| &semver.node_version),
-      Self::WorkspaceProtocol(inner) => Some(&inner.semver.node_version),
-      _ => None,
     }
   }
 
