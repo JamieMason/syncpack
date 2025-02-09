@@ -1,6 +1,6 @@
 [package]
 name = "syncpack"
-version = "14.0.0-alpha.5"
+version = "14.0.0-alpha.6"
 authors = ["Jamie Mason <jamie@foldleft.io>"]
 edition = "2021"
 homepage = "https://jamiemason.github.io/syncpack"
