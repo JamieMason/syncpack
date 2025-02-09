@@ -15,6 +15,7 @@ pub fn cli() -> Cli {
   Cli {
     check: true,
     cwd: env::current_dir().unwrap(),
+    dry_run: true,
     filter: None,
     disable_ansi: true,
     inspect_formatting: false,

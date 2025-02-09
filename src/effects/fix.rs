@@ -97,9 +97,11 @@ pub fn run(ctx: Context) -> Context {
     ui.print_formatted_packages(&ctx.packages.all);
   }
 
-  ctx.packages.all.iter().for_each(|package| {
-    package.borrow().write_to_disk(&ctx.config);
-  });
+  if !ctx.config.cli.dry_run {
+    ctx.packages.all.iter().for_each(|package| {
+      package.borrow().write_to_disk(&ctx.config);
+    });
+  }
 
   ctx
 }

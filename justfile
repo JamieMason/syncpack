@@ -105,12 +105,20 @@ run-misc:
     RUST_BACKTRACE=1 cargo run -- lint --source 'package.json'
 
 # Run the dev rust binary against a clone of microsoft/FluidFramework
-run-fluid:
+run-fluid-lint:
     #!/usr/bin/env bash
     set -euxo pipefail
 
     cd fixtures/fluid-framework
     RUST_BACKTRACE=1 cargo run -- lint
+
+# Run the dev rust binary against a clone of microsoft/FluidFramework
+run-fluid-fix:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    cd fixtures/fluid-framework
+    RUST_BACKTRACE=1 cargo run -- fix --dry-run
 
 # Run the release rust binary against a clone of microsoft/FluidFramework
 run-fluid-prod:
