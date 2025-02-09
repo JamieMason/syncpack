@@ -2,7 +2,7 @@ use {
   crate::{
     cli::Cli,
     config::Config,
-    dependency_type::Strategy,
+    dependency_type::{DependencyType, Strategy},
     instance::InstanceDescriptor,
     package_json::PackageJson,
     rcfile::Rcfile,
@@ -73,13 +73,13 @@ impl Packages {
   }
 
   /// Get every instance of a dependency from every package.json file
-  pub fn get_all_instances<F>(&self, config: &Config, mut on_instance: F)
+  pub fn get_all_instances<F>(&self, all_dependency_types: &Vec<DependencyType>, mut on_instance: F)
   where
     F: FnMut(InstanceDescriptor),
   {
     let local_versions = self.get_local_versions();
     for package in self.all.iter() {
-      for dependency_type in &config.rcfile.get_all_dependency_types() {
+      for dependency_type in all_dependency_types {
         match dependency_type.strategy {
           Strategy::NameAndVersionProps => {
             if let (Some(Value::String(name)), Some(Value::String(raw_specifier))) = (

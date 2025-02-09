@@ -31,13 +31,16 @@ pub struct Context {
 impl Context {
   pub fn create(config: Config, packages: Packages) -> Self {
     let mut instances = vec![];
+    let all_dependency_types = config.rcfile.get_all_dependency_types();
     let dependency_groups = config.rcfile.get_dependency_groups(&packages);
     let semver_groups = config.rcfile.get_semver_groups(&packages);
     let mut version_groups = config.rcfile.get_version_groups(&packages);
     let local_versions = packages.get_local_versions();
 
-    packages.get_all_instances(&config, |mut descriptor| {
-      let dependency_group = dependency_groups.iter().find(|alias| alias.can_add(&descriptor));
+    packages.get_all_instances(&all_dependency_types, |mut descriptor| {
+      let dependency_group = dependency_groups
+        .iter()
+        .find(|alias| alias.can_add(&all_dependency_types, &descriptor));
 
       if let Some(group) = dependency_group {
         descriptor.internal_name = group.label.clone();
@@ -45,13 +48,17 @@ impl Context {
 
       match &config.cli.filter {
         Some(cli_group) => {
-          descriptor.matches_cli_filter = cli_group.can_add(&descriptor);
+          descriptor.matches_cli_filter = cli_group.can_add(&all_dependency_types, &descriptor);
         }
         None => descriptor.matches_cli_filter = true,
       }
 
-      let semver_group = semver_groups.iter().find(|group| group.selector.can_add(&descriptor));
-      let version_group = version_groups.iter_mut().find(|group| group.selector.can_add(&descriptor));
+      let semver_group = semver_groups
+        .iter()
+        .find(|group| group.selector.can_add(&all_dependency_types, &descriptor));
+      let version_group = version_groups
+        .iter_mut()
+        .find(|group| group.selector.can_add(&all_dependency_types, &descriptor));
       let instance = Rc::new(Instance::new(descriptor));
 
       instances.push(Rc::clone(&instance));

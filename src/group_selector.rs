@@ -1,6 +1,8 @@
 use {
-  crate::{instance::InstanceDescriptor, packages::Packages},
+  crate::{dependency_type::DependencyType, instance::InstanceDescriptor, packages::Packages},
   globset::{Glob, GlobMatcher},
+  log::error,
+  std::process,
 };
 
 #[derive(Clone, Debug)]
@@ -70,14 +72,30 @@ impl GroupSelector {
     }
   }
 
-  pub fn can_add(&self, descriptor: &InstanceDescriptor) -> bool {
-    self.matches_dependency_types(descriptor)
+  pub fn can_add(&self, all_dependency_types: &[DependencyType], descriptor: &InstanceDescriptor) -> bool {
+    self.has_valid_dependency_types(all_dependency_types)
+      && self.matches_dependency_types(descriptor)
       && self.matches_packages(descriptor)
       && self.matches_dependencies(descriptor)
       && self.matches_specifier_types(descriptor)
   }
 
-  pub fn matches_dependency_types(&self, descriptor: &InstanceDescriptor) -> bool {
+  fn has_valid_dependency_types(&self, all_dependency_types: &[DependencyType]) -> bool {
+    self
+      .include_dependency_types
+      .iter()
+      .chain(self.exclude_dependency_types.iter())
+      .for_each(|expected| {
+        if !all_dependency_types.iter().any(|actual| actual.name == *expected) {
+          error!("dependencyType '{expected}' does not match any of syncpack or your customTypes");
+          error!("check your syncpack config file");
+          process::exit(1);
+        }
+      });
+    true
+  }
+
+  fn matches_dependency_types(&self, descriptor: &InstanceDescriptor) -> bool {
     matches_identifiers(
       &descriptor.dependency_type.name,
       &self.include_dependency_types,
@@ -85,15 +103,15 @@ impl GroupSelector {
     )
   }
 
-  pub fn matches_packages(&self, descriptor: &InstanceDescriptor) -> bool {
+  fn matches_packages(&self, descriptor: &InstanceDescriptor) -> bool {
     matches_globs(&descriptor.package.borrow().name, &self.include_packages, &self.exclude_packages)
   }
 
-  pub fn matches_dependencies(&self, descriptor: &InstanceDescriptor) -> bool {
+  fn matches_dependencies(&self, descriptor: &InstanceDescriptor) -> bool {
     matches_globs(&descriptor.internal_name, &self.include_dependencies, &self.exclude_dependencies)
   }
 
-  pub fn matches_specifier_types(&self, descriptor: &InstanceDescriptor) -> bool {
+  fn matches_specifier_types(&self, descriptor: &InstanceDescriptor) -> bool {
     self.include_specifier_types.is_empty()
       || matches_identifiers(
         &descriptor.specifier.get_config_identifier(),
