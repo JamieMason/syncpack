@@ -716,6 +716,12 @@ fn comparison() {
     ("workspace:<=0.0.0", "<0.0.0", Ordering::Greater),
     ("workspace:0.0.0", "0.0.0", Ordering::Equal),
     ("workspace:~", "~1.2.3", Ordering::Equal),
+    /* git with a semver tag is ignored and the semver is used */
+    ("github:org/repo#v0.0.0", "github:org/repo#v0.0.0", Ordering::Equal),
+    ("github:org/repo#v0.0.0", "github:org/repo#0.0.0", Ordering::Equal),
+    ("github:org/repo#v0.0.0", "0.0.0", Ordering::Equal),
+    ("github:org/repo#v0.0.1", "0.0.0", Ordering::Greater),
+    ("github:org/repo#0.0.1", "0.0.0", Ordering::Greater),
   ];
   for (str_a, str_b, expected) in cases {
     let local_version = BasicSemver::new("1.2.3");
@@ -763,5 +769,40 @@ fn satisfies_all() {
       expected,
       "'{value}'.satisfies_all({others:?}) should be {expected}"
     );
+  }
+}
+
+#[test]
+fn issue_213_git_tags_starting_with_v() {
+  for git_url in git_urls() {
+    let value = "github:uNetworking/uWebSockets.js#v20.43.0";
+    match Specifier::new(value, None) {
+      Specifier::Git(actual) => {
+        assert_eq!(actual.raw, value);
+        assert_eq!(actual.origin, "github:uNetworking/uWebSockets.js");
+        let semver = actual.semver.as_ref().unwrap();
+        assert_eq!(semver.raw, "20.43.0");
+        assert_eq!(semver.variant, BasicSemverVariant::Patch);
+        assert_eq!(semver.range_variant, SemverRange::Exact);
+        assert_eq!(semver.node_version.major, 20);
+        assert_eq!(semver.node_version.minor, 43);
+        assert_eq!(semver.node_version.patch, 0);
+        assert!(semver.node_version.pre_release.is_empty());
+
+        let next_semver = BasicSemver::new("1.2.3").unwrap();
+        let edited = actual.with_semver(&next_semver);
+        assert_eq!(edited.raw, "github:uNetworking/uWebSockets.js#v1.2.3");
+        assert_eq!(edited.origin, "github:uNetworking/uWebSockets.js");
+        let semver = edited.semver.unwrap();
+        assert_eq!(semver.raw, "1.2.3");
+        assert_eq!(semver.variant, BasicSemverVariant::Patch);
+        assert_eq!(semver.range_variant, SemverRange::Exact);
+        assert_eq!(semver.node_version.major, 1);
+        assert_eq!(semver.node_version.minor, 2);
+        assert_eq!(semver.node_version.patch, 3);
+        assert!(semver.node_version.pre_release.is_empty());
+      }
+      _ => panic!("Expected Git"),
+    };
   }
 }

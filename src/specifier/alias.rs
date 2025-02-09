@@ -35,4 +35,12 @@ impl Alias {
       self
     }
   }
+
+  pub fn with_semver(self, semver: &BasicSemver) -> Self {
+    Self {
+      raw: format!("npm:{}@{}", self.name, semver.raw),
+      name: self.name,
+      semver: Some(semver.clone()),
+    }
+  }
 }

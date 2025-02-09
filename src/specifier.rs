@@ -218,7 +218,7 @@ impl Specifier {
     }
   }
 
-  fn get_node_version(&self) -> Option<&Version> {
+  pub fn get_node_version(&self) -> Option<&Version> {
     match self {
       Self::Alias(inner) => inner.semver.as_ref().map(|semver| &semver.node_version),
       Self::BasicSemver(inner) => Some(&inner.node_version),
@@ -233,20 +233,38 @@ impl Specifier {
     self.get_semver().map(|semver| &semver.range_variant)
   }
 
-  /// Replace a new instance with the given semver range applied to it when it
-  /// is possible to do so, otherwise the same instance is returned
+  /// Return a new `Specifier` with the given semver range applied to it when it
+  /// is possible to do so, otherwise the same `Specifier` is returned
   pub fn with_range(self, range: &SemverRange) -> Self {
     match self {
-      Self::Alias(inner) => Self::Alias(inner.with_range(range)),
-      Self::BasicSemver(inner) => Self::BasicSemver(inner.with_range(range)),
-      Self::ComplexSemver(inner) => Self::ComplexSemver(inner.with_range(range)),
-      Self::File(inner) => Self::File(inner.with_range(range)),
-      Self::Git(inner) => Self::Git(inner.with_range(range)),
+      Self::Alias(s) => Self::Alias(s.with_range(range)),
+      Self::BasicSemver(s) => Self::BasicSemver(s.with_range(range)),
+      Self::ComplexSemver(s) => Self::ComplexSemver(s.with_range(range)),
+      Self::File(s) => Self::File(s.with_range(range)),
+      Self::Git(s) => Self::Git(s.with_range(range)),
       Self::None => Self::None,
-      Self::Tag(inner) => Self::Tag(inner.with_range(range)),
-      Self::Unsupported(inner) => Self::Unsupported(inner.with_range(range)),
-      Self::Url(inner) => Self::Url(inner.with_range(range)),
-      Self::WorkspaceProtocol(inner) => Self::WorkspaceProtocol(inner.with_range(range)),
+      Self::Tag(s) => Self::Tag(s.with_range(range)),
+      Self::Unsupported(s) => Self::Unsupported(s.with_range(range)),
+      Self::Url(s) => Self::Url(s.with_range(range)),
+      Self::WorkspaceProtocol(s) => Self::WorkspaceProtocol(s.with_range(range)),
+    }
+  }
+
+  /// Return a new `Specifier` with the given semver version number applied to
+  /// it when it is possible to do so, otherwise the same `Specifier` is
+  /// returned. The range is also changed.
+  pub fn with_semver(self, semver: &BasicSemver) -> Self {
+    match self {
+      Self::Alias(s) => Self::Alias(s.with_semver(semver)),
+      Self::BasicSemver(s) => Self::BasicSemver(s.with_semver(semver)),
+      Self::ComplexSemver(s) => Self::ComplexSemver(s.with_semver(semver)),
+      Self::File(s) => Self::File(s.with_semver(semver)),
+      Self::Git(s) => Self::Git(s.with_semver(semver)),
+      Self::None => Self::None,
+      Self::Tag(s) => Self::Tag(s.with_semver(semver)),
+      Self::Unsupported(s) => Self::Unsupported(s.with_semver(semver)),
+      Self::Url(s) => Self::Url(s.with_semver(semver)),
+      Self::WorkspaceProtocol(s) => Self::WorkspaceProtocol(s.with_semver(semver)),
     }
   }
 

@@ -29,4 +29,12 @@ impl WorkspaceProtocol {
       semver,
     }
   }
+
+  pub fn with_semver(self, semver: &BasicSemver) -> Self {
+    Self {
+      raw: format!("workspace:{}", semver.raw),
+      local_version: self.local_version,
+      semver: semver.clone(),
+    }
+  }
 }

@@ -125,12 +125,12 @@ impl Dependency {
       .instances
       .borrow()
       .iter()
-      .filter(|instance| instance.descriptor.specifier.is_basic_semver())
+      .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
       .map(|instance| instance.descriptor.specifier.clone())
       .fold(None, |preferred, specifier| match preferred {
         None => Some(specifier),
         Some(preferred) => {
-          if specifier.cmp(&preferred) == preferred_order {
+          if specifier.get_node_version().cmp(&preferred.get_node_version()) == preferred_order {
             Some(specifier)
           } else {
             Some(preferred)

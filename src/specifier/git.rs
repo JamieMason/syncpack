@@ -51,4 +51,20 @@ impl Git {
       self
     }
   }
+
+  pub fn with_semver(self, semver: &BasicSemver) -> Self {
+    if let Some(current_semver) = self.semver {
+      Self {
+        raw: self.raw.replace(&current_semver.node_version.to_string(), &semver.raw),
+        origin: self.origin,
+        semver: Some(semver.clone()),
+      }
+    } else {
+      Self {
+        raw: format!("{}#{}", self.origin, semver.raw),
+        origin: self.origin,
+        semver: Some(semver.clone()),
+      }
+    }
+  }
 }

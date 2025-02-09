@@ -148,4 +148,8 @@ impl BasicSemver {
       }
     }
   }
+
+  pub fn with_semver(self, semver: &BasicSemver) -> Self {
+    semver.clone()
+  }
 }
