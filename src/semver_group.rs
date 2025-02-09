@@ -4,16 +4,7 @@ use {
 };
 
 #[derive(Debug)]
-pub enum SemverGroupVariant {
-  Disabled,
-  Ignored,
-  WithRange,
-}
-
-#[derive(Debug)]
 pub struct SemverGroup {
-  /// What behaviour has this group been configured to exhibit?
-  pub variant: SemverGroupVariant,
   /// Data to determine which instances should be added to this group
   pub selector: GroupSelector,
   /// The Semver Range which all instances in this group should use
@@ -24,7 +15,6 @@ impl SemverGroup {
   /// Create a default group which ensures local packages are an exact version
   pub fn get_exact_local_specifiers() -> SemverGroup {
     SemverGroup {
-      variant: SemverGroupVariant::WithRange,
       selector: GroupSelector::new(
         /* all_packages: */ &Packages::new(),
         /* include_dependencies: */ vec![],
@@ -40,7 +30,6 @@ impl SemverGroup {
   /// Create a default/catch-all group which would apply to any instance
   pub fn get_catch_all() -> SemverGroup {
     SemverGroup {
-      variant: SemverGroupVariant::Disabled,
       selector: GroupSelector::new(
         /* all_packages: */ &Packages::new(),
         /* include_dependencies: */ vec![],
@@ -65,20 +54,11 @@ impl SemverGroup {
     );
 
     if let Some(true) = group.is_disabled {
-      SemverGroup {
-        variant: SemverGroupVariant::Disabled,
-        selector,
-        range: None,
-      }
+      SemverGroup { selector, range: None }
     } else if let Some(true) = group.is_ignored {
-      SemverGroup {
-        variant: SemverGroupVariant::Ignored,
-        selector,
-        range: None,
-      }
+      SemverGroup { selector, range: None }
     } else if let Some(range) = &group.range {
       SemverGroup {
-        variant: SemverGroupVariant::WithRange,
         selector,
         range: SemverRange::new(range),
       }

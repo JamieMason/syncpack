@@ -80,8 +80,3 @@ lazy_static! {
   /// "<1.0.0 >2.0.0"
   pub static ref INFIX_OPERATORS:Regex = Regex::new(r" ?(-|\|\|) ?| ").unwrap();
 }
-
-/// Check if a string matches any of the regexes
-pub fn matches_any(regexes: Vec<&Regex>, string: &str) -> bool {
-  regexes.iter().any(|re| re.is_match(string))
-}

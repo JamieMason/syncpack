@@ -15,7 +15,6 @@ pub fn run(ctx: Context) -> Context {
       }
       ui.print_group_header(group);
       if group.dependencies.borrow().len() == 0 {
-        let label = &group.selector.label;
         ui.print_empty_group();
         return;
       }

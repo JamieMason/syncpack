@@ -10,7 +10,7 @@ use {
   },
   log::debug,
   serde_json::Value,
-  std::{cell::RefCell, path::PathBuf, rc::Rc},
+  std::{cell::RefCell, rc::Rc},
 };
 
 pub type InstanceId = String;
@@ -58,8 +58,6 @@ pub struct Instance {
   /// be set to, if it was not possible to determine without user intervention,
   /// this will be a `None`.
   pub expected_specifier: RefCell<Option<Specifier>>,
-  /// The file path of the package.json file this instance belongs to
-  pub file_path: PathBuf,
   /// A unique identifier for this instance
   pub id: InstanceId,
   /// Whether this is a package developed in this repo
@@ -79,7 +77,6 @@ impl Instance {
     let package_name = descriptor.package.borrow().name.clone();
     let id = format!("{} in {} of {}", &descriptor.name, dependency_type_name, package_name);
     let is_local = dependency_type_name == "/version";
-    let file_path = descriptor.package.borrow().file_path.clone();
     Instance {
       // deprecated
       actual_specifier: descriptor.specifier.clone(),
@@ -91,7 +88,6 @@ impl Instance {
 
       descriptor,
       expected_specifier: RefCell::new(None),
-      file_path,
       id,
       is_local,
       preferred_semver_range: RefCell::new(None),

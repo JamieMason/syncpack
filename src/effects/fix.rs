@@ -37,7 +37,7 @@ pub fn run(ctx: Context) -> Context {
 
       match state {
         InstanceState::Unknown => {}
-        InstanceState::Valid(variant) => {
+        InstanceState::Valid(_) => {
           valid += 1;
         }
         InstanceState::Invalid(variant) => match variant {

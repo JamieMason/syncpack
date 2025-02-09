@@ -198,13 +198,6 @@ impl VersionGroup {
   }
 }
 
-struct SnapToMismatches {
-  pub instance_ids: Vec<String>,
-  pub actual_specifier: Specifier,
-  pub expected_specifier: Specifier,
-  pub snap_to_instance_id: String,
-}
-
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AnyVersionGroup {

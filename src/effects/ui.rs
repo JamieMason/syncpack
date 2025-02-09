@@ -419,21 +419,6 @@ impl Ui<'_> {
     format!("in {file_link} at {path_to_prop}").normal()
   }
 
-  /// Issues related to whether a specifier is the highest or lowest semver are
-  /// all the same logic internally, so we have combined enum branches for them.
-  ///
-  /// From an end user point of view though it is clearer to have a specific
-  /// status code related to what has happened.
-  fn to_public_status_code(group_variant: &VersionGroupVariant, code: &str) -> ColoredString {
-    if matches!(group_variant, VersionGroupVariant::HighestSemver) {
-      code.replace("HighestOrLowestSemver", "HighestSemver").normal()
-    } else if matches!(group_variant, VersionGroupVariant::LowestSemver) {
-      code.replace("HighestOrLowestSemver", "LowestSemver").normal()
-    } else {
-      code.normal()
-    }
-  }
-
   pub fn print_empty_group(&self) {
     warn!("Version Group is empty");
   }

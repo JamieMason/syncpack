@@ -129,25 +129,6 @@ pub struct Rcfile {
 }
 
 impl Rcfile {
-  /// Create a new rcfile containing only default values.
-  pub fn new() -> Rcfile {
-    Rcfile {
-      custom_types: empty_custom_types(),
-      dependency_groups: vec![],
-      format_bugs: default_true(),
-      format_repository: default_true(),
-      indent: default_indent(),
-      semver_groups: vec![],
-      sort_az: default_sort_az(),
-      sort_exports: default_sort_exports(),
-      sort_first: sort_first(),
-      sort_packages: default_true(),
-      source: default_source(),
-      strict: default_false(),
-      version_groups: vec![],
-    }
-  }
-
   /// Until we can port cosmiconfig to Rust, call out to Node.js to get the
   /// rcfile from the filesystem
   pub fn from_cosmiconfig(cli: &Cli) -> Rcfile {

@@ -9,18 +9,15 @@ use {
     specifier::{basic_semver::BasicSemver, Specifier},
   },
   glob::glob,
-  itertools::Itertools,
   log::debug,
   serde::Deserialize,
   serde_json::Value,
   std::{
     cell::RefCell,
-    cmp::Ordering,
     collections::HashMap,
     fs,
     path::{Path, PathBuf},
     rc::Rc,
-    vec::IntoIter,
   },
 };
 
@@ -51,21 +48,6 @@ impl Packages {
   pub fn add_package(&mut self, package_json: PackageJson) -> &mut Self {
     self.all.push(Rc::new(RefCell::new(package_json)));
     self
-  }
-
-  /// Get all packages sorted by their file path
-  pub fn sorted_by_path(&self, cwd: &PathBuf) -> IntoIter<&Rc<RefCell<PackageJson>>> {
-    self.all.iter().sorted_by(|a, b| {
-      let a = a.borrow().get_relative_file_path(cwd);
-      let b = b.borrow().get_relative_file_path(cwd);
-      if a == "package.json" {
-        return Ordering::Less;
-      }
-      if b == "package.json" {
-        return Ordering::Greater;
-      }
-      Ord::cmp(&a, &b)
-    })
   }
 
   /// Get a package.json file by its name

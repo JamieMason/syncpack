@@ -7,13 +7,7 @@ use {
     version_group::VersionGroupVariant,
   },
   itertools::Itertools,
-  std::{
-    cell::RefCell,
-    cmp::Ordering,
-    collections::{BTreeMap, HashSet},
-    rc::Rc,
-    vec,
-  },
+  std::{cell::RefCell, cmp::Ordering, rc::Rc, vec},
 };
 
 #[derive(Debug)]
@@ -63,16 +57,6 @@ impl Dependency {
     }
   }
 
-  pub fn get_unique_specifiers(&self) -> Vec<Specifier> {
-    let set: HashSet<Specifier> = self
-      .instances
-      .borrow()
-      .iter()
-      .map(|instance| instance.descriptor.specifier.clone())
-      .collect();
-    set.into_iter().collect()
-  }
-
   /// Return the most severe state of all instances in this group
   pub fn get_state(&self) -> InstanceState {
     self
@@ -90,15 +74,6 @@ impl Dependency {
       .iter()
       .map(|instance| instance.state.borrow().clone())
       .collect::<Vec<_>>()
-  }
-
-  pub fn get_instances_by_specifier(&self) -> BTreeMap<String, Vec<Rc<Instance>>> {
-    let mut map = BTreeMap::new();
-    for instance in self.instances.borrow().iter() {
-      let raw = instance.descriptor.specifier.get_raw();
-      map.entry(raw).or_insert_with(Vec::new).push(Rc::clone(instance));
-    }
-    map
   }
 
   pub fn set_expected_specifier(&self, specifier: &Specifier) -> &Self {
