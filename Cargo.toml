@@ -34,7 +34,7 @@ icu = "1.5.0"
 itertools = "0.14.0"
 lazy_static = "1.5.0"
 log = "0.4.25"
-node-semver = "2.1.0"
+node-semver = "2.2.0"
 regex = "1.11.1"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = { version = "1.0.138", features = ["preserve_order"] }
