@@ -97,7 +97,7 @@ impl Packages {
               on_instance(InstanceDescriptor {
                 dependency_type: dependency_type.clone(),
                 internal_name: name.to_string(),
-                matches_cli_filter: true,
+                matches_cli_filter: false,
                 name: name.to_string(),
                 package: Rc::clone(package),
                 specifier: Specifier::new(&raw_specifier, local_versions.get(&name)),
@@ -110,7 +110,7 @@ impl Packages {
                 on_instance(InstanceDescriptor {
                   dependency_type: dependency_type.clone(),
                   internal_name: name.to_string(),
-                  matches_cli_filter: true,
+                  matches_cli_filter: false,
                   name: name.to_string(),
                   package: Rc::clone(package),
                   specifier: Specifier::new(raw_specifier, local_versions.get(name)),
@@ -123,7 +123,7 @@ impl Packages {
               on_instance(InstanceDescriptor {
                 dependency_type: dependency_type.clone(),
                 internal_name: dependency_type.name.clone(),
-                matches_cli_filter: true,
+                matches_cli_filter: false,
                 name: dependency_type.name.clone(),
                 package: Rc::clone(package),
                 specifier: Specifier::new(&raw_specifier, local_versions.get(&dependency_type.name)),
@@ -137,7 +137,7 @@ impl Packages {
                   on_instance(InstanceDescriptor {
                     dependency_type: dependency_type.clone(),
                     internal_name: name.to_string(),
-                    matches_cli_filter: true,
+                    matches_cli_filter: false,
                     name: name.to_string(),
                     package: Rc::clone(package),
                     specifier: Specifier::new(&raw_specifier, local_versions.get(&name)),

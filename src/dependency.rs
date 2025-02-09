@@ -42,7 +42,7 @@ impl Dependency {
       expected: RefCell::new(None),
       instances: RefCell::new(vec![]),
       local_instance: RefCell::new(None),
-      matches_cli_filter: true,
+      matches_cli_filter: false,
       internal_name,
       pinned_specifier,
       snapped_to_packages,

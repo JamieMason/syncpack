@@ -79,7 +79,6 @@ impl Cli {
     Self {
       check: matches!(&subcommand, Subcommand::Lint) || matches!(&subcommand, Subcommand::Format) && matches.get_flag("check"),
       cwd: env::current_dir().unwrap(),
-      // @TODO
       filter: get_filters(matches),
       disable_ansi: matches.get_flag("no-ansi"),
       inspect_formatting: matches!(&subcommand, Subcommand::Format),

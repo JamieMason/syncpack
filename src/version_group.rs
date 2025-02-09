@@ -43,7 +43,7 @@ impl VersionGroup {
   pub fn get_catch_all() -> VersionGroup {
     VersionGroup {
       dependencies: RefCell::new(BTreeMap::new()),
-      matches_cli_filter: true,
+      matches_cli_filter: false,
       pin_version: None,
       selector: GroupSelector::new(
         /* all_packages: */ &Packages::new(),
@@ -68,9 +68,9 @@ impl VersionGroup {
         /* snap_to: */ self.snap_to.clone(),
       )
     });
-    if !instance.matches_cli_filter {
-      self.matches_cli_filter = false;
-      dependency.matches_cli_filter = false;
+    if instance.matches_cli_filter {
+      self.matches_cli_filter = true;
+      dependency.matches_cli_filter = true;
     }
     dependency.add_instance(Rc::clone(&instance));
     std::mem::drop(dependencies);
@@ -90,7 +90,7 @@ impl VersionGroup {
     if let Some(true) = group.is_banned {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: true,
+        matches_cli_filter: false,
         pin_version: None,
         selector,
         snap_to: None,
@@ -100,7 +100,7 @@ impl VersionGroup {
     if let Some(true) = group.is_ignored {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: true,
+        matches_cli_filter: false,
         pin_version: None,
         selector,
         snap_to: None,
@@ -110,7 +110,7 @@ impl VersionGroup {
     if let Some(pin_version) = &group.pin_version {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: true,
+        matches_cli_filter: false,
         pin_version: Some(Specifier::new(pin_version, None)),
         selector,
         snap_to: None,
@@ -121,7 +121,7 @@ impl VersionGroup {
       if policy == "sameRange" {
         return VersionGroup {
           dependencies: RefCell::new(BTreeMap::new()),
-          matches_cli_filter: true,
+          matches_cli_filter: false,
           pin_version: None,
           selector,
           snap_to: None,
@@ -135,7 +135,7 @@ impl VersionGroup {
     if let Some(snap_to) = &group.snap_to {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: true,
+        matches_cli_filter: false,
         pin_version: None,
         selector,
         snap_to: Some(
@@ -156,7 +156,7 @@ impl VersionGroup {
     if let Some(prefer_version) = &group.prefer_version {
       return VersionGroup {
         dependencies: RefCell::new(BTreeMap::new()),
-        matches_cli_filter: true,
+        matches_cli_filter: false,
         pin_version: None,
         selector,
         snap_to: None,
@@ -169,7 +169,7 @@ impl VersionGroup {
     }
     VersionGroup {
       dependencies: RefCell::new(BTreeMap::new()),
-      matches_cli_filter: true,
+      matches_cli_filter: false,
       pin_version: None,
       selector,
       snap_to: None,

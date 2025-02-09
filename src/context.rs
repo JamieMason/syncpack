@@ -43,8 +43,11 @@ impl Context {
         descriptor.internal_name = group.label.clone();
       }
 
-      if let Some(cli_group) = &config.cli.filter {
-        descriptor.matches_cli_filter = cli_group.can_add(&descriptor);
+      match &config.cli.filter {
+        Some(cli_group) => {
+          descriptor.matches_cli_filter = cli_group.can_add(&descriptor);
+        }
+        None => descriptor.matches_cli_filter = true,
       }
 
       let semver_group = semver_groups.iter().find(|group| group.selector.can_add(&descriptor));
