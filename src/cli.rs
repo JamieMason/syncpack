@@ -83,7 +83,7 @@ impl Cli {
       cwd: env::current_dir().unwrap(),
       filter: get_filters(matches),
       disable_ansi: matches.get_flag("no-ansi"),
-      dry_run: matches!(&subcommand, Subcommand::Fix) || matches!(&subcommand, Subcommand::Format) && matches.get_flag("dry-run"),
+      dry_run: (matches!(&subcommand, Subcommand::Fix) || matches!(&subcommand, Subcommand::Format)) && matches.get_flag("dry-run"),
       inspect_formatting: matches!(&subcommand, Subcommand::Format),
       inspect_mismatches: matches!(&subcommand, Subcommand::Lint) || matches!(&subcommand, Subcommand::Fix),
       log_levels: get_log_levels(matches),
