@@ -42,6 +42,10 @@ pub fn get_sorted_exports(rcfile: &Rcfile, package: &PackageJson) -> Option<Valu
   fn sort_nested_objects(sort_exports: &Vec<String>, value: &mut Value) {
     if let Value::Object(obj) = value {
       sort_keys_with_priority(sort_exports, false, obj);
+      // Ensure that the key "default", if present, is always last.
+      if let Some(default) = obj.remove("default") {
+        obj.insert("default".to_string(), default);
+      }
       for next_value in obj.values_mut() {
         sort_nested_objects(sort_exports, next_value);
       }

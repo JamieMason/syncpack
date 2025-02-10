@@ -68,6 +68,8 @@ fn sorts_conditional_exports() {
       &mock::package_json_from_value(json!({
         "name": "a",
         "exports": {
+            "default": "./default.cjs",
+            "svelte": "./index.svelte",
             "require": "./index-require.cjs",
             "import": "./index-module.js",
         },
@@ -76,6 +78,8 @@ fn sorts_conditional_exports() {
     Some(json!({
       "import": "./index-module.js",
       "require": "./index-require.cjs",
+      "svelte": "./index.svelte",
+      "default": "./default.cjs",
     })),
   )
 }

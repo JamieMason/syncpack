@@ -54,6 +54,7 @@ fn default_sort_exports() -> Vec<String> {
     "module".to_string(),
     "import".to_string(),
     "require".to_string(),
+    "svelte".to_string(),
     "development".to_string(),
     "production".to_string(),
     "script".to_string(),
