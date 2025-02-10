@@ -2614,3 +2614,103 @@ fn refuses_to_snap_local_version_to_another_target() {
     },
   ]);
 }
+
+#[test]
+fn dependency_group_of_dependency_and_its_types_that_can_be_relied_on_to_be_same_version() {
+  let config = test::mock::config_from_mock(json!({
+    "dependencyGroups": [{
+      "aliasName": "foo-group",
+      "dependencies": ["@types/foo", "foo"]
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![json!({
+    "name": "package-a",
+    "version": "0.1.0",
+    "dependencies": {
+      "foo": "4.1.0"
+    },
+    "devDependencies": {
+      "@types/foo": "4.0.5"
+    }
+  })]);
+  let ctx = Context::create(config, packages);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "0.1.0",
+      expected: Some("0.1.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+      dependency_name: "foo-group",
+      id: "@types/foo in /devDependencies of package-a",
+      actual: "4.0.5",
+      expected: Some("4.1.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsHighestOrLowestSemver),
+      dependency_name: "foo-group",
+      id: "foo in /dependencies of package-a",
+      actual: "4.1.0",
+      expected: Some("4.1.0"),
+      overridden: None,
+    },
+  ]);
+}
+
+#[test]
+fn dependency_group_of_dependency_and_its_types_that_track_the_same_major_version() {
+  let config = test::mock::config_from_mock(json!({
+    "dependencyGroups": [{
+      "aliasName": "foo-group",
+      "dependencies": ["@types/foo", "foo"]
+    }],
+    "versionGroups": [{
+      "dependencies": ["foo-group"],
+      "policy": "sameRange"
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![json!({
+    "name": "package-a",
+    "version": "0.1.0",
+    "dependencies": {
+      "foo": "4.1.0"
+    },
+    "devDependencies": {
+      "@types/foo": "^4.0.5"
+    }
+  })]);
+  let ctx = Context::create(config, packages);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "0.1.0",
+      expected: Some("0.1.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "foo-group",
+      id: "@types/foo in /devDependencies of package-a",
+      actual: "^4.0.5",
+      expected: Some("^4.0.5"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "foo-group",
+      id: "foo in /dependencies of package-a",
+      actual: "4.1.0",
+      expected: Some("4.1.0"),
+      overridden: None,
+    },
+  ]);
+}

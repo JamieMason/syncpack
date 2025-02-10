@@ -81,7 +81,7 @@ impl Instance {
       // deprecated
       actual_specifier: descriptor.specifier.clone(),
       dependency_type: descriptor.dependency_type.clone(),
-      internal_name: descriptor.name.clone(),
+      internal_name: descriptor.internal_name.clone(),
       matches_cli_filter: descriptor.matches_cli_filter,
       name: descriptor.name.clone(),
       package: Rc::clone(&descriptor.package),
