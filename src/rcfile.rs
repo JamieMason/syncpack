@@ -7,7 +7,7 @@ use {
     semver_group::{AnySemverGroup, SemverGroup},
     version_group::{AnyVersionGroup, VersionGroup},
   },
-  log::error,
+  log::{debug, error},
   serde::Deserialize,
   std::{
     collections::HashMap,
@@ -133,18 +133,22 @@ impl Rcfile {
   /// Until we can port cosmiconfig to Rust, call out to Node.js to get the
   /// rcfile from the filesystem
   pub fn from_cosmiconfig(cli: &Cli) -> Rcfile {
-    let require_path = env::var("COSMICONFIG_REQUIRE_PATH").unwrap_or_else(|_| "cosmiconfig".to_string());
+    let require_path = match env::var("COSMICONFIG_REQUIRE_PATH") {
+      Ok(v) => serde_json::to_string(&v).unwrap(),
+      Err(_) => "'cosmiconfig'".to_string(),
+    };
+
     let nodejs_script = format!(
       r#"
-        require('{}')
+        require({})
           .cosmiconfig('syncpack')
-          .search('{}')
+          .search({})
           .then(res => (res.config ? JSON.stringify(res.config) : '{{}}'))
           .catch(() => '{{}}')
           .then(console.log);
         "#,
       require_path,
-      &cli.cwd.to_str().unwrap()
+      serde_json::to_string(&cli.cwd).unwrap()
     );
 
     let output = Command::new("node")
@@ -162,6 +166,7 @@ impl Rcfile {
           ))
         }
       })
+      .inspect(|json| debug!("raw rcfile contents: '{}'", json.trim()))
       .map(Rcfile::from_json);
 
     match output {
