@@ -34,14 +34,14 @@
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
   "dependencies": {
-    "cosmiconfig": "9.0.0",
-    "typescript": "5.7.3"
+    "cosmiconfig": "^9.0.0",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "10.0.0",
-    "auto-changelog": "2.5.0",
-    "release-it": "18.1.2",
-    "ts-json-schema-generator": "2.3.0"
+    "@release-it/conventional-changelog": "^10.0.0",
+    "auto-changelog": "^2.5.0",
+    "release-it": "^18.1.2",
+    "ts-json-schema-generator": "^2.3.0"
   },
   "engines": {
     "node": ">=14.17.0"
