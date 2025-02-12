@@ -59,3 +59,11 @@ Interactively update packages to the latest versions from the npm registry, wher
 - [![NPM version](http://img.shields.io/npm/v/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
 - [![NPM downloads](http://img.shields.io/npm/dm/syncpack.svg?style=flat-square)](https://www.npmjs.com/package/syncpack)
 - [![Build Status](https://img.shields.io/github/actions/workflow/status/JamieMason/syncpack/ci.yaml?branch=main)](https://github.com/JamieMason/syncpack/actions)
+
+## Usage Trend
+
+[Usage Trend of syncpack](https://npm-compare.com/syncpack#timeRange=THREE_YEARS)
+  
+<a href="https://npm-compare.com/syncpack#timeRange=THREE_YEARS" target="_blank">
+  <img src="https://npm-compare.com/img/npm-trend/THREE_YEARS/syncpack.png" width="100%" alt="npm Usage Trend of syncpack" />
+</a>
