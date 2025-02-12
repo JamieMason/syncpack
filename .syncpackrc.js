@@ -4,7 +4,8 @@
 const config = {
   semverGroups: [
     {
-      range: '',
+      dependencyTypes: ['prod', 'dev'],
+      range: '^',
     },
   ],
   versionGroups: [
