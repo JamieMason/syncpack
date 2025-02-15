@@ -23,8 +23,6 @@ readme = "./README.md"
 publish = false
 
 [dependencies]
-reqwest = { version = "0.12", features = ["json"] }
-tokio = { version = "1", features = ["full"] }
 clap = { version = "4.5.29", features = ["cargo"] }
 color-print = "0.3.7"
 colored = "3.0.0"
@@ -38,7 +36,9 @@ lazy_static = "1.5.0"
 log = "0.4.25"
 node-semver = "2.2.0"
 regex = "1.11.1"
-serde = { version = "1.0.217", features = ["derive"] }
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1.0.217", features = ["derive", "rc"] }
 serde_json = { version = "1.0.138", features = ["preserve_order"] }
 serde_yaml = "0.9"
+tokio = { version = "1", features = ["full"] }
 version-compare = "0.2.0"

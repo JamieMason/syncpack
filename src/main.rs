@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
       ctx.exit_program();
     }
     Subcommand::Update => {
-      let ctx = update::run(ctx).await?;
+      let ctx = update::run(ctx).await;
       ctx.exit_program();
     }
   };
