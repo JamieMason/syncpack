@@ -1,25 +1,74 @@
 use {
   crate::{context::Context, effects::ui::Ui},
-  log::error,
+  log::{debug, error},
   reqwest::{header::ACCEPT, Client, StatusCode},
   serde::{Deserialize, Serialize},
-  std::{collections::BTreeMap, rc::Rc},
+  std::{collections::BTreeMap, sync::Arc},
+  tokio::{
+    sync::Semaphore,
+    task::{spawn, JoinHandle},
+  },
 };
 
 #[derive(Serialize, Deserialize, Debug)]
 struct PackageMeta {
-  name: Rc<str>,
+  name: Arc<str>,
   #[serde(rename = "dist-tags")]
-  dist_tags: BTreeMap<Rc<str>, Rc<str>>,
-  time: BTreeMap<Rc<str>, Rc<str>>,
+  dist_tags: BTreeMap<Arc<str>, Arc<str>>,
+  time: BTreeMap<Arc<str>, Arc<str>>,
 }
 
 /// Run the update command side effects
 pub async fn run(ctx: Context) -> Context {
   let ui = Ui { ctx: &ctx };
   let client = Client::new();
+  let max_concurrent_requests = 2;
+  let semaphore = Arc::new(Semaphore::new(max_concurrent_requests));
 
-  get_package_meta(&client, "lodash").await.inspect(|x| println!("{x:#?}"));
+  let package_names = vec![
+    "lodash",
+    "react",
+    "react-dom",
+    "react-router",
+    "react-router-dom",
+    "react-scripts",
+    "typescript",
+    "webpack",
+    "webpack-cli",
+    "webpack-dev-server",
+    "webpack-merge",
+    "webpack-node-externals",
+    "webpackbar",
+    "workbox-webpack-plugin",
+    "write-file-webpack-plugin",
+    "yargs",
+    "yargs-parser",
+    "yup",
+    "zone.js",
+  ];
+
+  let mut handles: Vec<JoinHandle<Option<PackageMeta>>> = vec![];
+
+  for name in package_names {
+    let permit = Arc::clone(&semaphore).acquire_owned().await;
+    let client = client.clone();
+    println!("BEFORE SPAWN: {}", name);
+    let handle = spawn(async move {
+      println!("INSIDE SPAWN: {}", name);
+      let _permit = permit;
+      get_package_meta(&client, name).await
+      println!("AFTER AWAIT: {}", name);
+    });
+    println!("AFTER SPAWN: {}", name);
+    handles.push(handle);
+  }
+
+  for handle in handles {
+    println!("BEFORE HANDLE: {}", name);
+    if let Some(package_meta) = handle.await.unwrap() {
+      println!("DONE: {}", package_meta.name);
+    }
+  }
 
   ctx
 }
@@ -27,6 +76,8 @@ pub async fn run(ctx: Context) -> Context {
 async fn get_package_meta(client: &Client, name: &str) -> Option<PackageMeta> {
   let url = format!("https://registry.npmjs.org/{}", name);
   let req = client.get(&url).header(ACCEPT, "application/json");
+
+  debug!("GET {url}");
 
   match req.send().await {
     Ok(res) => match res.status() {
