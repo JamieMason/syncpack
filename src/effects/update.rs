@@ -1,6 +1,7 @@
 use {
   crate::{context::Context, effects::ui::Ui},
-  reqwest::{header::ACCEPT, Client},
+  log::error,
+  reqwest::{header::ACCEPT, Client, StatusCode},
   serde::{Deserialize, Serialize},
   std::{collections::BTreeMap, rc::Rc},
 };
@@ -17,29 +18,33 @@ struct PackageMeta {
 pub async fn run(ctx: Context) -> Context {
   let ui = Ui { ctx: &ctx };
   let client = Client::new();
-  let url = format!("https://registry.npmjs.org/{}", "lodash");
-  let req = client.get(url).header(ACCEPT, "application/json");
 
-  match req.send().await {
-    Ok(res) => {
-      match res.status() {
-        reqwest::StatusCode::OK => match res.json::<PackageMeta>().await {
-          Ok(json) => {
-            println!("Response JSON: {:#?}", json);
-          }
-          Err(err) => {
-            println!("Failed to parse JSON: {}", err);
-          }
-        },
-        status => {
-          println!("Request failed with status: {}", status);
-        }
-      };
-    }
-    Err(err) => {
-      println!("Request failed with error: {}", err);
-    }
-  };
+  get_package_meta(&client, "lodash").await.inspect(|x| println!("{x:#?}"));
 
   ctx
+}
+
+async fn get_package_meta(client: &Client, name: &str) -> Option<PackageMeta> {
+  let url = format!("https://registry.npmjs.org/{}", name);
+  let req = client.get(&url).header(ACCEPT, "application/json");
+
+  match req.send().await {
+    Ok(res) => match res.status() {
+      StatusCode::OK => match res.json::<PackageMeta>().await {
+        Ok(package_meta) => Some(package_meta),
+        Err(err) => {
+          error!("{err}: {url}");
+          None
+        }
+      },
+      status => {
+        error!("{status}: {url}");
+        None
+      }
+    },
+    Err(err) => {
+      error!("{err}: {url}");
+      None
+    }
+  }
 }
