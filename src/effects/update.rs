@@ -60,14 +60,14 @@ pub async fn run(ctx: Context) -> Context {
 
   for handle in handles {
     if let Some(package_meta) = handle.await.unwrap() {
-      println!("DONE: {}", package_meta.name);
+      println!("DONE: {:?}", package_meta);
     }
   }
 
   ctx
 }
 
-async fn get_package_meta(client: &Client, name: &str) -> Option<PackageMeta> {
+async fn actual_get_package_meta(client: &Client, name: &str) -> Option<PackageMeta> {
   let url = format!("https://registry.npmjs.org/{}", name);
   let req = client.get(&url).header(ACCEPT, "application/json");
   debug!("GET {url}");
@@ -90,4 +90,27 @@ async fn get_package_meta(client: &Client, name: &str) -> Option<PackageMeta> {
       None
     }
   }
+}
+
+async fn get_package_meta(client: &Client, name: &str) -> Option<PackageMeta> {
+  let url = format!("https://registry.npmjs.org/{}", name);
+  debug!("GET {url}");
+
+  // simulate network delay
+  tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+  // return a mock PackageMeta from json!() macro of fake data
+  serde_json::from_str::<PackageMeta>(&format!(
+    r#"{{
+      "name": "{}",
+      "dist-tags": {{
+        "latest": "98.7.65"
+      }},
+      "time": {{
+        "modified": "2021-07-07T17:00:00.000Z",
+        "created": "2021-07-07T17:00:00.000Z"
+      }}
+    }}"#,
+    name
+  ))
+  .ok()
 }
