@@ -6,6 +6,8 @@ pub mod fix;
 pub mod lint;
 /// A shared module with methods for printing messages to the console
 pub mod ui;
+/// Runs side-effects to find and apply updates from the npm registry
+pub mod update;
 
 /// Side effects in Syncpack commands are handled by structs which implement
 /// this trait. Multiple commands such as `lint`, `fix`, and `json` all depend

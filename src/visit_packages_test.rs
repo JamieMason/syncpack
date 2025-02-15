@@ -1,7 +1,9 @@
 use {
   super::*,
   crate::{
-    instance_state::InstanceState,
+    instance_state::{
+      FixableInstance::*, InstanceState, SemverGroupAndVersionConflict::*, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*,
+    },
     test::{
       self,
       expect::{expect, ExpectedInstance},

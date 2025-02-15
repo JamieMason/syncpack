@@ -5,7 +5,6 @@ use {
       FixableInstance, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance,
     },
     package_json::PackageJson,
-    semver_group::SemverGroup,
     specifier::{semver_range::SemverRange, Specifier},
   },
   log::debug,
@@ -52,14 +51,14 @@ pub struct Instance {
   /// If this instance belongs to a `WithRange` semver group, this is the range.
   /// This is used by Version Groups while determining the preferred version,
   /// to try to also satisfy any applicable semver group ranges
-  pub preferred_semver_range: RefCell<Option<SemverRange>>,
+  pub preferred_semver_range: Option<SemverRange>,
   /// The state of whether this instance has not been processed yet
   /// (InstanceState::Unknown) or when it has, what it was found to be
   pub state: RefCell<InstanceState>,
 }
 
 impl Instance {
-  pub fn new(descriptor: InstanceDescriptor) -> Instance {
+  pub fn new(descriptor: InstanceDescriptor, preferred_semver_range: Option<SemverRange>) -> Instance {
     let dependency_type_name = &descriptor.dependency_type.path;
     let package_name = descriptor.package.borrow().name.clone();
     let id = format!("{} in {} of {}", &descriptor.name, dependency_type_name, package_name);
@@ -69,7 +68,7 @@ impl Instance {
       expected_specifier: RefCell::new(None),
       id,
       is_local,
-      preferred_semver_range: RefCell::new(None),
+      preferred_semver_range,
       state: RefCell::new(InstanceState::Unknown),
     }
   }
@@ -114,13 +113,6 @@ impl Instance {
     )
   }
 
-  /// If this instance should use a preferred semver range, store it
-  pub fn set_semver_group(&self, group: &SemverGroup) {
-    if let Some(range) = &group.range {
-      *self.preferred_semver_range.borrow_mut() = Some(range.clone());
-    }
-  }
-
   /// Does this instance's actual specifier match the expected specifier?
   pub fn already_equals(&self, expected: &Specifier) -> bool {
     self.descriptor.specifier.get_raw() == *expected.get_raw()
@@ -128,7 +120,7 @@ impl Instance {
 
   /// Does this instance belong to a `WithRange` semver group?
   pub fn must_match_preferred_semver_range(&self) -> bool {
-    self.preferred_semver_range.borrow().is_some()
+    self.preferred_semver_range.is_some()
   }
 
   /// Does this instance belong to a `WithRange` semver group and which prefers
@@ -151,7 +143,7 @@ impl Instance {
 
   /// Is the given semver range the preferred semver range for this instance?
   pub fn preferred_semver_range_is(&self, range: &SemverRange) -> bool {
-    self.preferred_semver_range.borrow().as_ref().map(|r| r == range).unwrap_or(false)
+    self.preferred_semver_range.as_ref().map(|r| r == range).unwrap_or(false)
   }
 
   /// Does this instance belong to a `WithRange` semver group and also have a
@@ -159,7 +151,6 @@ impl Instance {
   pub fn matches_preferred_semver_range(&self) -> bool {
     self
       .preferred_semver_range
-      .borrow()
       .as_ref()
       .map(|preferred_semver_range| self.descriptor.specifier.has_semver_range_of(preferred_semver_range))
       .unwrap_or(false)
@@ -170,7 +161,6 @@ impl Instance {
   pub fn get_specifier_with_preferred_semver_range(&self) -> Option<Specifier> {
     self
       .preferred_semver_range
-      .borrow()
       .as_ref()
       .map(|preferred_semver_range| self.descriptor.specifier.clone().with_range(preferred_semver_range))
   }
