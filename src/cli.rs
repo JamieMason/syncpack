@@ -71,6 +71,7 @@ impl Cli {
       Some(("lint", matches)) => Cli::from_arg_matches(Subcommand::Lint, matches),
       Some(("fix", matches)) => Cli::from_arg_matches(Subcommand::Fix, matches),
       Some(("format", matches)) => Cli::from_arg_matches(Subcommand::Format, matches),
+      Some(("update", matches)) => Cli::from_arg_matches(Subcommand::Update, matches),
       _ => {
         std::process::exit(1);
       }
@@ -132,7 +133,8 @@ fn create() -> Command {
 <dim>$</dim> <blue><bold>syncpack lint</bold> --dependencies '{has_braces}'</>
 <dim>Substring match for "react" or "webpack"  (2 approaches)</>
 <dim>$</dim> <blue><bold>syncpack lint</bold> --dependencies '**react**' --dependencies '**webpack**'</>
-<dim>$</dim> <blue><bold>syncpack lint</bold> --dependencies '**{has_braces}**'</>"#, has_braces="{react,webpack}"
+<dim>$</dim> <blue><bold>syncpack lint</bold> --dependencies '**{has_braces}**'</>"#,
+              has_braces = "{react,webpack}"
             ))
             .action(clap::ArgAction::Append),
         )
@@ -269,7 +271,7 @@ still inspect and exit 1/0 based on every dependency in your project.
     )
     .subcommand(
       Command::new("fix")
-        .about("Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg. `react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`")
+        .about("Ensure that multiple packages requiring the same dependency use the same version")
         .after_long_help(additional_help())
         .arg(dry_run_option("fix"))
         .arg(log_levels_option("fix"))
@@ -278,9 +280,14 @@ still inspect and exit 1/0 based on every dependency in your project.
     )
     .subcommand(
       Command::new("format")
-        .about("Ensure that package.json files follow a conventional format, where fields appear in a predictable order and nested fields are ordered alphabetically. Shorthand properties are used where available")
+        .about("Sort package.json fields into a predictable order and nested fields alphabetically")
         .after_long_help(additional_help())
-        .arg(Arg::new("check").long("check").long_help(cformat!(r#"Lint formatting instead of fixing it"#)).action(clap::ArgAction::SetTrue))
+        .arg(
+          Arg::new("check")
+            .long("check")
+            .long_help(cformat!(r#"Lint formatting instead of fixing it"#))
+            .action(clap::ArgAction::SetTrue),
+        )
         .arg(dry_run_option("format"))
         .arg(log_levels_option("format"))
         .arg(no_ansi_option("format"))
@@ -298,11 +305,18 @@ still inspect and exit 1/0 based on every dependency in your project.
 <dim>$</dim> <blue><bold>syncpack format</bold> --show packages</>"#
             ))
             .value_delimiter(',')
-            .value_parser([
-              "packages",
-            ])
+            .value_parser(["packages"]),
         )
         .arg(source_option("format")),
+    )
+    .subcommand(
+      Command::new("update")
+        .about("Update to the latest versions on the npm registry")
+        .after_long_help(additional_help())
+        .arg(dry_run_option("update"))
+        .arg(log_levels_option("update"))
+        .arg(no_ansi_option("update"))
+        .arg(source_option("update")),
     )
 }
 
