@@ -6,12 +6,14 @@ use {
   crate::{
     cli::{Cli, Subcommand},
     config::Config,
-    effects::{fix, lint},
+    effects::{fix, format, lint, update},
     packages::Packages,
-    visit_packages::visit_packages,
   },
   context::Context,
   log::{debug, error},
+  std::error::Error,
+  visit_formatting::visit_formatting,
+  visit_packages::visit_packages,
 };
 
 #[cfg(test)]
@@ -24,7 +26,6 @@ mod context;
 mod dependency;
 mod dependency_type;
 mod effects;
-mod format;
 mod group_selector;
 mod instance;
 mod instance_state;
@@ -32,12 +33,15 @@ mod logger;
 mod package_json;
 mod packages;
 mod rcfile;
+mod registry_client;
 mod semver_group;
 mod specifier;
 mod version_group;
+mod visit_formatting;
 mod visit_packages;
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
   let cli = Cli::parse();
 
   logger::init(&cli);
@@ -58,21 +62,28 @@ fn main() {
     len => debug!("Found {len} package.json files"),
   }
 
-  let ctx = Context::create(config, packages);
-  let ctx = visit_packages(ctx);
+  let ctx = Context::create(config, packages, None);
 
   match ctx.config.cli.subcommand {
     Subcommand::Fix => {
-      let ctx = fix::run(ctx);
-      ctx.exit_program();
+      let ctx = visit_packages(ctx);
+      fix::run(ctx);
     }
     Subcommand::Format => {
-      let ctx = if ctx.config.cli.check { lint::run(ctx) } else { fix::run(ctx) };
-      ctx.exit_program();
+      let ctx = visit_formatting(ctx);
+      format::run(ctx);
     }
     Subcommand::Lint => {
-      let ctx = lint::run(ctx);
-      ctx.exit_program();
+      let ctx = visit_packages(ctx);
+      lint::run(ctx);
+    }
+    Subcommand::Update => {
+      let mut ctx = ctx;
+      ctx.fetch_all_updates().await;
+      let ctx = visit_packages(ctx);
+      update::run(ctx);
     }
   };
+
+  Ok(())
 }

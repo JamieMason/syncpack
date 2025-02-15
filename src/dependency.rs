@@ -1,5 +1,6 @@
 use {
   crate::{
+    context::Context,
     instance::Instance,
     instance_state::InstanceState,
     package_json::PackageJson,
@@ -7,16 +8,22 @@ use {
     version_group::VersionGroupVariant,
   },
   itertools::Itertools,
-  std::{cell::RefCell, cmp::Ordering, rc::Rc, vec},
+  std::{cell::RefCell, cmp::Ordering, collections::HashMap, rc::Rc, vec},
 };
+
+#[cfg(test)]
+#[path = "dependency_test.rs"]
+mod dependency_test;
 
 #[derive(Debug)]
 pub struct Dependency {
   /// The expected version specifier which all instances of this dependency
   /// should be set to, in the event that they should all use the same version.
   pub expected: RefCell<Option<Specifier>>,
+  /// Whether the internal name for this dependency is an alias.
+  pub has_alias: bool,
   /// Every instance of this dependency in this version group.
-  pub instances: RefCell<Vec<Rc<Instance>>>,
+  pub instances: Vec<Rc<Instance>>,
   /// If this dependency is a local package, this is the local instance.
   pub local_instance: RefCell<Option<Rc<Instance>>>,
   /// Does every instance match the filter options provided via the CLI?
@@ -40,7 +47,8 @@ impl Dependency {
   ) -> Dependency {
     Dependency {
       expected: RefCell::new(None),
-      instances: RefCell::new(vec![]),
+      has_alias: false,
+      instances: vec![],
       local_instance: RefCell::new(None),
       matches_cli_filter: false,
       internal_name,
@@ -50,8 +58,12 @@ impl Dependency {
     }
   }
 
-  pub fn add_instance(&self, instance: Rc<Instance>) {
-    self.instances.borrow_mut().push(Rc::clone(&instance));
+  pub fn is_updateable(&self) -> bool {
+    self.matches_cli_filter && self.internal_name_is_supported() && !self.has_local_instance() && !self.contains_alias_specifier()
+  }
+
+  pub fn add_instance(&mut self, instance: Rc<Instance>) {
+    self.instances.push(Rc::clone(&instance));
     if instance.is_local {
       *self.local_instance.borrow_mut() = Some(Rc::clone(&instance));
     }
@@ -61,7 +73,6 @@ impl Dependency {
   pub fn get_state(&self) -> InstanceState {
     self
       .instances
-      .borrow()
       .iter()
       .fold(InstanceState::Unknown, |acc, instance| acc.max(instance.state.borrow().clone()))
   }
@@ -70,17 +81,18 @@ impl Dependency {
   pub fn get_states(&self) -> Vec<InstanceState> {
     self
       .instances
-      .borrow()
       .iter()
       .map(|instance| instance.state.borrow().clone())
       .collect::<Vec<_>>()
   }
 
+  /// Set the expected version specifier to the given value
   pub fn set_expected_specifier(&self, specifier: &Specifier) -> &Self {
     *self.expected.borrow_mut() = Some(specifier.clone());
     self
   }
 
+  /// Return the local instance's version specifier, if it exists
   pub fn get_local_specifier(&self) -> Option<Specifier> {
     self
       .local_instance
@@ -89,10 +101,29 @@ impl Dependency {
       .map(|instance| instance.descriptor.specifier.clone())
   }
 
+  /// Whether the dependency name is a valid npm package name, is invalid, or
+  /// contains [pnpm overrides](https://pnpm.io/settings#overrides) syntax
+  /// syncpack does not support yet.
+  fn internal_name_is_supported(&self) -> bool {
+    // Package name is supported if it doesn't contain:
+    // 1. a '>' character (which would indicate pnpm overrides syntax)
+    // 2. a '@' character which is not at index 0
+    !self.internal_name.contains('>') && self.internal_name.rfind('@').unwrap_or(0) == 0
+  }
+
+  /// Do any of the instances in this group have an npm alias specifier? which
+  /// are not yet fully supported by syncpack
+  fn contains_alias_specifier(&self) -> bool {
+    self.instances.iter().any(|instance| instance.descriptor.specifier.is_alias())
+  }
+
+  /// Is this dependency a package developed in this repository?
   pub fn has_local_instance(&self) -> bool {
     self.local_instance.borrow().is_some()
   }
 
+  /// Is this dependency a package developed in this repository, which has a
+  /// missing or invalid .version property?
   pub fn has_local_instance_with_invalid_specifier(&self) -> bool {
     self.get_local_specifier().is_some_and(|local| {
       if let Specifier::BasicSemver(semver) = local {
@@ -106,15 +137,21 @@ impl Dependency {
   /// Does every instance in this group have a specifier which is exactly the
   /// same?
   pub fn every_specifier_is_already_identical(&self) -> bool {
-    if let Some(first_actual) = self.instances.borrow().first().map(|instance| &instance.descriptor.specifier) {
-      self
-        .instances
-        .borrow()
-        .iter()
-        .all(|instance| instance.descriptor.specifier == *first_actual)
+    if let Some(first_actual) = self.instances.first().map(|instance| &instance.descriptor.specifier) {
+      self.instances.iter().all(|instance| instance.descriptor.specifier == *first_actual)
     } else {
       false
     }
+  }
+
+  pub fn get_unique_specifiers(&self) -> Vec<Specifier> {
+    let mut unique_specifiers = Vec::new();
+    for instance in self.instances.iter() {
+      if !unique_specifiers.contains(&instance.descriptor.specifier) {
+        unique_specifiers.push(instance.descriptor.specifier.clone());
+      }
+    }
+    unique_specifiers
   }
 
   /// Get the highest (or lowest) semver specifier in this group.
@@ -122,9 +159,7 @@ impl Dependency {
     let prefer_highest = matches!(self.variant, VersionGroupVariant::HighestSemver);
     let preferred_order = if prefer_highest { Ordering::Greater } else { Ordering::Less };
     self
-      .instances
-      .borrow()
-      .iter()
+      .get_instances()
       .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
       .map(|instance| instance.descriptor.specifier.clone())
       .fold(None, |preferred, specifier| match preferred {
@@ -137,6 +172,42 @@ impl Dependency {
           }
         }
       })
+  }
+
+  /// Given a list of every available update, returns a map of each chosen
+  /// update and the current specifiers which are affected by that update.
+  ///
+  /// When updating to the latest version, all of the current specifiers will be
+  /// assigned to the same/latest version.
+  ///
+  /// When only applying eg. patch updates, some specifiers will be assigned to
+  /// different updates if they are not on the same minor version.
+  pub fn get_eligible_registry_updates(&self, ctx: &Context) -> Option<HashMap<Specifier, Vec<Specifier>>> {
+    ctx.updates_by_internal_name.get(&self.internal_name).map(|updates| {
+      let mut specifiers_by_eligible_update: HashMap<Specifier, Vec<Specifier>> = HashMap::new();
+      self.get_unique_specifiers().iter().for_each(|installed| {
+        updates
+          .iter()
+          .filter(|update| update.is_eligible_update_for(installed, &ctx.config.cli.target))
+          // @TODO: make whether to do this configurable
+          .filter(|update| installed.has_same_release_channel_as(update))
+          .fold(None, |preferred, specifier| match preferred {
+            None => Some(specifier),
+            Some(preferred) => {
+              if specifier.get_node_version().cmp(&preferred.get_node_version()) == Ordering::Greater {
+                Some(specifier)
+              } else {
+                Some(preferred)
+              }
+            }
+          })
+          .inspect(|highest_update| {
+            let affected = specifiers_by_eligible_update.entry((*highest_update).clone()).or_default();
+            affected.push(installed.clone());
+          });
+      });
+      specifiers_by_eligible_update
+    })
   }
 
   /// Return the first instance from the packages which should be snapped to for
@@ -162,35 +233,35 @@ impl Dependency {
     None
   }
 
-  /// Iterate over every instance in this group, sorted by:
+  /// Returns an iterator of each included instance
+  pub fn get_instances(&self) -> impl Iterator<Item = &Rc<Instance>> {
+    self.instances.iter().filter(|instance| instance.descriptor.matches_cli_filter)
+  }
+
+  /// Returns an iterator of each included instance, sorted by:
   /// - Valid instances first
   /// - Highest version first
   /// - Package name A-Z when version is equal
-  pub fn for_each_instance(&self, f: impl Fn(&Rc<Instance>)) {
-    self
-      .instances
-      .borrow()
-      .iter()
-      .sorted_by(|a, b| {
-        if matches!(*a.state.borrow(), InstanceState::Valid(_)) && !matches!(*b.state.borrow(), InstanceState::Valid(_)) {
-          return Ordering::Less;
-        }
-        if matches!(*b.state.borrow(), InstanceState::Valid(_)) && !matches!(*a.state.borrow(), InstanceState::Valid(_)) {
-          return Ordering::Greater;
-        }
-        if matches!(&a.descriptor.specifier, Specifier::None) {
-          return Ordering::Greater;
-        }
-        if matches!(&b.descriptor.specifier, Specifier::None) {
-          return Ordering::Less;
-        }
-        let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
-        if matches!(specifier_order, Ordering::Equal) {
-          a.descriptor.package.borrow().name.cmp(&b.descriptor.package.borrow().name)
-        } else {
-          specifier_order
-        }
-      })
-      .for_each(f);
+  pub fn get_sorted_instances(&self) -> impl Iterator<Item = &Rc<Instance>> {
+    self.get_instances().sorted_by(|a, b| {
+      if a.is_valid() && !b.is_valid() {
+        return Ordering::Less;
+      }
+      if b.is_valid() && !a.is_valid() {
+        return Ordering::Greater;
+      }
+      if a.has_missing_specifier() {
+        return Ordering::Greater;
+      }
+      if b.has_missing_specifier() {
+        return Ordering::Less;
+      }
+      let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
+      if matches!(specifier_order, Ordering::Equal) {
+        a.descriptor.package.borrow().name.cmp(&b.descriptor.package.borrow().name)
+      } else {
+        specifier_order
+      }
+    })
   }
 }

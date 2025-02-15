@@ -20,6 +20,10 @@ fn empty_custom_types() -> HashMap<String, CustomType> {
   HashMap::new()
 }
 
+fn default_max_concurrent_requests() -> usize {
+  12
+}
+
 fn default_true() -> bool {
   true
 }
@@ -111,6 +115,8 @@ pub struct Rcfile {
   pub format_repository: bool,
   #[serde(default = "default_indent")]
   pub indent: String,
+  #[serde(default = "default_max_concurrent_requests")]
+  pub max_concurrent_requests: usize,
   #[serde(default)]
   pub semver_groups: Vec<AnySemverGroup>,
   #[serde(default = "default_sort_az")]

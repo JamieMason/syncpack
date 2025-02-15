@@ -3,6 +3,7 @@
 mod specifier_test;
 
 use {
+  crate::cli::UpdateTarget,
   alias::Alias,
   basic_semver::{BasicSemver, BasicSemverVariant},
   complex_semver::ComplexSemver,
@@ -197,7 +198,7 @@ impl Specifier {
     }
   }
 
-  fn get_semver(&self) -> Option<&BasicSemver> {
+  pub fn get_semver(&self) -> Option<&BasicSemver> {
     match self {
       Self::Alias(inner) => inner.semver.as_ref(),
       Self::BasicSemver(inner) => Some(inner),
@@ -379,6 +380,52 @@ impl Specifier {
 
   pub fn is_workspace_protocol(&self) -> bool {
     matches!(self, Self::WorkspaceProtocol(_))
+  }
+
+  /// Are both specifiers on eg. "-alpha", or neither have a release channel?
+  pub fn has_same_release_channel_as(&self, other: &Specifier) -> bool {
+    if let (Specifier::BasicSemver(a), Specifier::BasicSemver(b)) = (self, other) {
+      a.node_version.pre_release.first() == b.node_version.pre_release.first()
+    } else {
+      false
+    }
+  }
+
+  /// Is this specifier eligible to update the given specifier based on the
+  /// given target constraint?
+  pub fn is_eligible_update_for(&self, other: &Specifier, target: &UpdateTarget) -> bool {
+    match target {
+      UpdateTarget::Latest => other.is_older_than(self),
+      UpdateTarget::Minor => other.is_older_than_by_minor(self),
+      UpdateTarget::Patch => other.is_older_than_by_patch(self),
+    }
+  }
+
+  pub fn is_older_than(&self, other: &Specifier) -> bool {
+    if let (Specifier::BasicSemver(_), Specifier::BasicSemver(_)) = (self, other) {
+      other > self
+    } else {
+      false
+    }
+  }
+
+  /// Is this specifier on the same major version, but otherwise older?
+  pub fn is_older_than_by_minor(&self, other: &Specifier) -> bool {
+    if let (Specifier::BasicSemver(a), Specifier::BasicSemver(b)) = (self, other) {
+      b.node_version.major == a.node_version.major && other > self
+    } else {
+      false
+    }
+  }
+
+  /// Is this specifier on the same major and minor version, but otherwise
+  /// older?
+  pub fn is_older_than_by_patch(&self, other: &Specifier) -> bool {
+    if let (Specifier::BasicSemver(a), Specifier::BasicSemver(b)) = (self, other) {
+      b.node_version.major == a.node_version.major && b.node_version.minor == a.node_version.minor && other > self
+    } else {
+      false
+    }
   }
 }
 

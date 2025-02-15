@@ -6,7 +6,7 @@ use {
   itertools::Itertools,
   log::warn,
   serde::Deserialize,
-  std::{cell::RefCell, collections::BTreeMap, rc::Rc, vec},
+  std::{cell::RefCell, cmp::Ordering, collections::BTreeMap, rc::Rc, vec},
 };
 
 /// What behaviour has this group been configured to exhibit?
@@ -24,7 +24,7 @@ pub enum VersionGroupVariant {
 #[derive(Debug)]
 pub struct VersionGroup {
   /// Group instances of each dependency together for comparison.
-  pub dependencies: RefCell<BTreeMap<String, Dependency>>,
+  pub dependencies: BTreeMap<String, Dependency>,
   /// Does every instance match the filter options provided via the CLI?
   pub matches_cli_filter: bool,
   /// The version to pin all instances to when variant is `Pinned`
@@ -42,7 +42,7 @@ impl VersionGroup {
   /// Create a default/catch-all group which would apply to any instance
   pub fn get_catch_all() -> VersionGroup {
     VersionGroup {
-      dependencies: RefCell::new(BTreeMap::new()),
+      dependencies: BTreeMap::new(),
       matches_cli_filter: false,
       pin_version: None,
       selector: GroupSelector::new(
@@ -59,21 +59,25 @@ impl VersionGroup {
   }
 
   pub fn add_instance(&mut self, instance: Rc<Instance>) {
-    let mut dependencies = self.dependencies.borrow_mut();
-    let dependency = dependencies.entry(instance.descriptor.internal_name.clone()).or_insert_with(|| {
-      Dependency::new(
-        /* internal_name: */ instance.descriptor.internal_name.clone(),
-        /* variant: */ self.variant.clone(),
-        /* pin_version: */ self.pin_version.clone(),
-        /* snap_to: */ self.snap_to.clone(),
-      )
-    });
+    let dependency = self
+      .dependencies
+      .entry(instance.descriptor.internal_name.clone())
+      .or_insert_with(|| {
+        Dependency::new(
+          /* internal_name: */ instance.descriptor.internal_name.clone(),
+          /* variant: */ self.variant.clone(),
+          /* pin_version: */ self.pin_version.clone(),
+          /* snap_to: */ self.snap_to.clone(),
+        )
+      });
+    if instance.descriptor.name != dependency.internal_name {
+      dependency.has_alias = true;
+    }
     if instance.descriptor.matches_cli_filter {
       self.matches_cli_filter = true;
       dependency.matches_cli_filter = true;
     }
     dependency.add_instance(Rc::clone(&instance));
-    std::mem::drop(dependencies);
   }
 
   /// Create a single version group from a config item from the rcfile.
@@ -89,7 +93,7 @@ impl VersionGroup {
 
     if let Some(true) = group.is_banned {
       return VersionGroup {
-        dependencies: RefCell::new(BTreeMap::new()),
+        dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
         selector,
@@ -99,7 +103,7 @@ impl VersionGroup {
     }
     if let Some(true) = group.is_ignored {
       return VersionGroup {
-        dependencies: RefCell::new(BTreeMap::new()),
+        dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
         selector,
@@ -109,7 +113,7 @@ impl VersionGroup {
     }
     if let Some(pin_version) = &group.pin_version {
       return VersionGroup {
-        dependencies: RefCell::new(BTreeMap::new()),
+        dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: Some(Specifier::new(pin_version, None)),
         selector,
@@ -120,7 +124,7 @@ impl VersionGroup {
     if let Some(policy) = &group.policy {
       if policy == "sameRange" {
         return VersionGroup {
-          dependencies: RefCell::new(BTreeMap::new()),
+          dependencies: BTreeMap::new(),
           matches_cli_filter: false,
           pin_version: None,
           selector,
@@ -134,7 +138,7 @@ impl VersionGroup {
     }
     if let Some(snap_to) = &group.snap_to {
       return VersionGroup {
-        dependencies: RefCell::new(BTreeMap::new()),
+        dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
         selector,
@@ -155,7 +159,7 @@ impl VersionGroup {
     }
     if let Some(prefer_version) = &group.prefer_version {
       return VersionGroup {
-        dependencies: RefCell::new(BTreeMap::new()),
+        dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
         selector,
@@ -168,7 +172,7 @@ impl VersionGroup {
       };
     }
     VersionGroup {
-      dependencies: RefCell::new(BTreeMap::new()),
+      dependencies: BTreeMap::new(),
       matches_cli_filter: false,
       pin_version: None,
       selector,
@@ -177,24 +181,62 @@ impl VersionGroup {
     }
   }
 
-  /// Iterate over each dependency in the provided order
-  pub fn for_each_dependency<F>(&self, sort: &SortBy, f: F)
-  where
-    F: Fn(&Dependency),
-  {
-    match sort {
-      SortBy::Count => {
+  /// Returns a sorted iterator of each included dependency
+  pub fn get_sorted_dependencies(&self, sort: &SortBy) -> impl Iterator<Item = &Dependency> {
+    self
+      .dependencies
+      .values()
+      .filter(|dependency| dependency.matches_cli_filter)
+      .sorted_by(|a, b| match sort {
+        SortBy::Count => b.instances.len().cmp(&a.instances.len()),
+        SortBy::Name => Ordering::Equal,
+      })
+  }
+
+  /// Get the names for every dependency that we're able to update from the npm
+  /// registry. Examples of dependencies we can't update are those inside banned
+  /// or ignored version groups, ones that are pinned to a specific version.
+  pub fn get_internal_names_of_updateable_dependencies(&self) -> Option<Vec<String>> {
+    match self.variant {
+      VersionGroupVariant::HighestSemver => Some(
         self
           .dependencies
-          .borrow()
           .values()
-          .sorted_by(|a, b| b.instances.borrow().len().cmp(&a.instances.borrow().len()))
-          .for_each(f);
-      }
-      SortBy::Name => {
-        self.dependencies.borrow().values().for_each(f);
-      }
+          .filter(|dep| dep.is_updateable())
+          .map(|dep| dep.internal_name.clone())
+          .collect(),
+      )
+      .filter(|names: &Vec<String>| !names.is_empty()),
+      _ => None,
     }
+  }
+
+  pub fn has_banned_variant(&self) -> bool {
+    matches!(self.variant, VersionGroupVariant::Banned)
+  }
+
+  pub fn has_highest_semver_variant(&self) -> bool {
+    matches!(self.variant, VersionGroupVariant::HighestSemver)
+  }
+
+  pub fn has_ignored_variant(&self) -> bool {
+    matches!(self.variant, VersionGroupVariant::Ignored)
+  }
+
+  pub fn has_lowest_semver_variant(&self) -> bool {
+    matches!(self.variant, VersionGroupVariant::LowestSemver)
+  }
+
+  pub fn has_pinned_variant(&self) -> bool {
+    matches!(self.variant, VersionGroupVariant::Pinned)
+  }
+
+  pub fn has_same_range_variant(&self) -> bool {
+    matches!(self.variant, VersionGroupVariant::SameRange)
+  }
+
+  pub fn has_snapped_to_variant(&self) -> bool {
+    matches!(self.variant, VersionGroupVariant::SnappedTo)
   }
 }
 

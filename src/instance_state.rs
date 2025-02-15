@@ -41,6 +41,43 @@ impl InstanceState {
       InstanceState::Suspect(variant) => format!("{:?}", variant),
     }
   }
+
+  pub fn get_severity(&self) -> u8 {
+    match self {
+      InstanceState::Unknown => 0,
+      InstanceState::Valid(_) => 1,
+      InstanceState::Invalid(_) => 2,
+      InstanceState::Suspect(_) => 3,
+    }
+  }
+
+  pub fn is_valid(&self) -> bool {
+    matches!(self, InstanceState::Valid(_))
+  }
+
+  pub fn is_invalid(&self) -> bool {
+    matches!(self, InstanceState::Invalid(_))
+  }
+
+  pub fn is_suspect(&self) -> bool {
+    matches!(self, InstanceState::Suspect(_))
+  }
+
+  pub fn is_fixable(&self) -> bool {
+    matches!(self, InstanceState::Invalid(InvalidInstance::Fixable(_)))
+  }
+
+  pub fn is_banned(&self) -> bool {
+    matches!(self, InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::IsBanned)))
+  }
+
+  pub fn is_conflict(&self) -> bool {
+    matches!(self, InstanceState::Invalid(InvalidInstance::Conflict(_)))
+  }
+
+  pub fn is_unfixable(&self) -> bool {
+    matches!(self, InstanceState::Invalid(InvalidInstance::Unfixable(_)))
+  }
 }
 
 impl PartialEq for InstanceState {
@@ -58,22 +95,8 @@ impl PartialOrd for InstanceState {
 }
 
 impl Ord for InstanceState {
-  /// The order of severity is:
-  /// 1. Unknown
-  /// 2. Valid
-  /// 3. Suspect
-  /// 4. Invalid
   fn cmp(&self, other: &Self) -> Ordering {
-    use InstanceState::*;
-    match (self, other) {
-      (Unknown, Unknown) | (Valid(_), Valid(_)) | (Suspect(_), Suspect(_)) | (Invalid(_), Invalid(_)) => Ordering::Equal,
-      (Unknown, _) => Ordering::Less,
-      (Valid(_), _) => Ordering::Less,
-      (_, Valid(_)) => Ordering::Greater,
-      (_, Unknown) => Ordering::Greater,
-      (Suspect(_), _) => Ordering::Less,
-      (_, Suspect(_)) => Ordering::Greater,
-    }
+    self.get_severity().cmp(&other.get_severity())
   }
 }
 
@@ -132,6 +155,8 @@ pub enum FixableInstance {
   DiffersToLocal,
   /// - ✘ Instance mismatches highest/lowest semver in its group
   DiffersToHighestOrLowestSemver,
+  /// - ✘ Instance is older than highest semver published to the registry
+  DiffersToNpmRegistry,
   /// - ✘ Instance mismatches the matching snapTo instance
   DiffersToSnapTarget,
   /// - ✘ Instance mismatches its pinned version group

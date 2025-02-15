@@ -1,14 +1,17 @@
 use {
+  super::registry_client::MockRegistryClient,
   crate::{
-    cli::{Cli, SortBy, Subcommand},
+    cli::{Cli, SortBy, Subcommand, UpdateTarget},
     config::Config,
+    context::Context,
     package_json::PackageJson,
     packages::Packages,
     rcfile::Rcfile,
+    registry_client::RegistryClient,
   },
   log::LevelFilter,
   serde_json::Value,
-  std::{cell::RefCell, env, path::PathBuf},
+  std::{cell::RefCell, env, path::PathBuf, sync::Arc},
 };
 
 pub fn cli() -> Cli {
@@ -18,8 +21,6 @@ pub fn cli() -> Cli {
     dry_run: true,
     filter: None,
     disable_ansi: true,
-    inspect_formatting: false,
-    inspect_mismatches: true,
     log_levels: vec![LevelFilter::Error],
     show_ignored: false,
     show_instances: false,
@@ -29,6 +30,7 @@ pub fn cli() -> Cli {
     source_patterns: vec![],
     sort: SortBy::Name,
     subcommand: Subcommand::Lint,
+    target: UpdateTarget::Latest,
   }
 }
 
@@ -81,4 +83,17 @@ pub fn packages_from_mocks(values: Vec<serde_json::Value>) -> Packages {
     packages.add_package(package_json_from_value(value));
   }
   packages
+}
+
+/// Create a MockRegistryClient from mocked package data
+fn registry_client_from_mocks(mock_updates: serde_json::Value) -> Option<Arc<dyn RegistryClient>> {
+  Some(Arc::new(MockRegistryClient::from_json(mock_updates)))
+}
+
+/// Create a Context struct with mocked npm registry updates applied to it
+pub async fn context_with_registry_updates(config: Config, packages: Packages, mock_updates: serde_json::Value) -> Context {
+  let registry_client = registry_client_from_mocks(mock_updates);
+  let mut ctx = Context::create(config, packages, registry_client);
+  ctx.fetch_all_updates().await;
+  ctx
 }
