@@ -6,12 +6,13 @@ use {
   crate::{
     cli::{Cli, Subcommand},
     config::Config,
-    effects::{fix, lint},
+    effects::{fix, lint, update},
     packages::Packages,
     visit_packages::visit_packages,
   },
   context::Context,
   log::{debug, error},
+  std::error::Error,
 };
 
 #[cfg(test)]
@@ -37,7 +38,8 @@ mod specifier;
 mod version_group;
 mod visit_packages;
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
   let cli = Cli::parse();
 
   logger::init(&cli);
@@ -72,6 +74,10 @@ fn main() {
     }
     Subcommand::Lint => {
       let ctx = lint::run(ctx);
+      ctx.exit_program();
+    }
+    Subcommand::Update => {
+      let ctx = update::run(ctx).await?;
       ctx.exit_program();
     }
   };

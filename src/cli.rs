@@ -12,6 +12,7 @@ pub enum Subcommand {
   Lint,
   Fix,
   Format,
+  Update,
 }
 
 #[derive(Debug)]
