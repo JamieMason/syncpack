@@ -12,21 +12,11 @@ use {
 mod banned;
 mod formatting;
 mod ignored;
+mod indent;
 mod pinned;
 mod preferred_semver;
 mod same_range;
 mod snapped_to;
-
-pub const L1: &str = "  ";
-pub const L2: &str = "    ";
-pub const L3: &str = "      ";
-pub const L4: &str = "        ";
-pub const L5: &str = "          ";
-pub const L6: &str = "            ";
-pub const L7: &str = "              ";
-pub const L8: &str = "                ";
-pub const L9: &str = "                  ";
-pub const L10: &str = "                    ";
 
 pub fn visit_packages(ctx: Context) -> Context {
   if ctx.config.cli.inspect_mismatches {
