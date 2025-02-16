@@ -4,7 +4,7 @@ use {
   log::debug,
 };
 
-pub fn visit_preferred_semver(dependency: &crate::dependency::Dependency, ctx: &Context) {
+pub fn visit(dependency: &crate::dependency::Dependency, ctx: &Context) {
   debug!("visit standard version group");
   debug!("{L1}visit dependency '{}'", dependency.internal_name);
   if dependency.has_local_instance_with_invalid_specifier() {

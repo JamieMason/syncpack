@@ -7,7 +7,7 @@ use {
   std::{cell::RefCell, rc::Rc},
 };
 
-pub fn inspect_formatting(ctx: &Context) {
+pub fn visit(ctx: &Context) {
   let add_mismatch = |package: &Rc<RefCell<PackageJson>>, mismatch: FormatMismatch| {
     let mismatch = Rc::new(mismatch);
     package.borrow().formatting_mismatches.borrow_mut().push(Rc::clone(&mismatch));

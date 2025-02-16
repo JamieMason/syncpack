@@ -4,7 +4,7 @@ use {
   log::debug,
 };
 
-pub fn visit_banned(dependency: &crate::dependency::Dependency) {
+pub fn visit(dependency: &crate::dependency::Dependency) {
   debug!("visit banned version group");
   debug!("{L1}visit dependency '{}'", dependency.internal_name);
   dependency.instances.borrow().iter().for_each(|instance| {

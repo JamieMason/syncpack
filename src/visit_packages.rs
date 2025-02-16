@@ -51,20 +51,18 @@ pub fn visit_packages(ctx: Context) -> Context {
       })
       .for_each(|group| {
         group.for_each_dependency(&SortBy::Name, |dependency| match dependency.variant {
-          VersionGroupVariant::Banned => banned::visit_banned(dependency),
-          VersionGroupVariant::HighestSemver | VersionGroupVariant::LowestSemver => {
-            preferred_semver::visit_preferred_semver(dependency, &ctx)
-          }
-          VersionGroupVariant::Ignored => ignored::visit_ignored(dependency),
-          VersionGroupVariant::Pinned => pinned::visit_pinned(dependency),
-          VersionGroupVariant::SameRange => same_range::visit_same_range(dependency),
-          VersionGroupVariant::SnappedTo => snapped_to::visit_snapped_to(dependency, &ctx),
+          VersionGroupVariant::Banned => banned::visit(dependency),
+          VersionGroupVariant::HighestSemver | VersionGroupVariant::LowestSemver => preferred_semver::visit(dependency, &ctx),
+          VersionGroupVariant::Ignored => ignored::visit(dependency),
+          VersionGroupVariant::Pinned => pinned::visit(dependency),
+          VersionGroupVariant::SameRange => same_range::visit(dependency),
+          VersionGroupVariant::SnappedTo => snapped_to::visit(dependency, &ctx),
         });
       });
   }
 
   if ctx.config.cli.inspect_formatting {
-    formatting::inspect_formatting(&ctx);
+    formatting::visit(&ctx);
   }
 
   ctx

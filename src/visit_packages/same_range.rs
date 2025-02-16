@@ -3,7 +3,7 @@ use {
   log::debug,
 };
 
-pub fn visit_same_range(dependency: &crate::dependency::Dependency) {
+pub fn visit(dependency: &crate::dependency::Dependency) {
   debug!("visit same range version group");
   debug!("{L1}visit dependency '{}'", dependency.internal_name);
   dependency.instances.borrow().iter().for_each(|instance| {

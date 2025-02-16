@@ -4,7 +4,7 @@ use {
   log::debug,
 };
 
-pub fn visit_snapped_to(dependency: &crate::dependency::Dependency, ctx: &Context) {
+pub fn visit(dependency: &crate::dependency::Dependency, ctx: &Context) {
   debug!("visit snapped to version group");
   debug!("{L1}visit dependency '{}'", dependency.internal_name);
   if let Some(snapped_to_specifier) = dependency.get_snapped_to_specifier(&ctx.instances) {

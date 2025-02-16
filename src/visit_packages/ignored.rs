@@ -3,7 +3,7 @@ use {
   log::debug,
 };
 
-pub fn visit_ignored(dependency: &crate::dependency::Dependency) {
+pub fn visit(dependency: &crate::dependency::Dependency) {
   debug!("visit ignored version group");
   debug!("{L1}visit dependency '{}'", dependency.internal_name);
   dependency.instances.borrow().iter().for_each(|instance| {

@@ -3,7 +3,7 @@ use {
   log::debug,
 };
 
-pub fn visit_pinned(dependency: &crate::dependency::Dependency) {
+pub fn visit(dependency: &crate::dependency::Dependency) {
   debug!("visit pinned version group");
   debug!("{L1}visit dependency '{}'", dependency.internal_name);
   let pinned_specifier = dependency.pinned_specifier.clone().unwrap();
