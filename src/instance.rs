@@ -39,19 +39,6 @@ pub struct InstanceDescriptor {
 
 #[derive(Debug)]
 pub struct Instance {
-  /// #[deprecated(note="use descriptor.specifier")]
-  pub actual_specifier: Specifier,
-  /// #[deprecated(note="use descriptor.dependency_type")]
-  pub dependency_type: DependencyType,
-  /// #[deprecated(note="use descriptor.internal_name")]
-  pub internal_name: String,
-  /// #[deprecated(note="use descriptor.matches_cli_filter")]
-  pub matches_cli_filter: bool,
-  /// #[deprecated(note="use descriptor.name")]
-  pub name: String,
-  /// #[deprecated(note="use descriptor.package")]
-  pub package: Rc<RefCell<PackageJson>>,
-
   /// The original data this Instance is derived from
   pub descriptor: InstanceDescriptor,
   /// The version specifier which syncpack has determined this instance should
@@ -78,14 +65,6 @@ impl Instance {
     let id = format!("{} in {} of {}", &descriptor.name, dependency_type_name, package_name);
     let is_local = dependency_type_name == "/version";
     Instance {
-      // deprecated
-      actual_specifier: descriptor.specifier.clone(),
-      dependency_type: descriptor.dependency_type.clone(),
-      internal_name: descriptor.internal_name.clone(),
-      matches_cli_filter: descriptor.matches_cli_filter,
-      name: descriptor.name.clone(),
-      package: Rc::clone(&descriptor.package),
-
       descriptor,
       expected_specifier: RefCell::new(None),
       id,
@@ -217,7 +196,7 @@ impl Instance {
 
   /// Delete from the package.json
   pub fn remove(&self) {
-    match self.dependency_type.strategy {
+    match self.descriptor.dependency_type.strategy {
       Strategy::NameAndVersionProps => {
         debug!("@TODO: remove instance for NameAndVersionProps");
       }
@@ -228,9 +207,9 @@ impl Instance {
         debug!("@TODO: remove instance for UnnamedVersionString");
       }
       Strategy::VersionsByName => {
-        let path_to_obj = &self.dependency_type.path;
-        let name = &self.name;
-        if let Some(Value::Object(obj)) = self.package.borrow_mut().contents.borrow_mut().pointer_mut(path_to_obj) {
+        let path_to_obj = &self.descriptor.dependency_type.path;
+        let name = &self.descriptor.name;
+        if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(path_to_obj) {
           obj.remove(name);
         }
       }

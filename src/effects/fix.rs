@@ -23,9 +23,9 @@ pub fn run(ctx: Context) -> Context {
     let mut suspect = 0;
 
     ctx.instances.iter().for_each(|instance| {
-      let internal_name = &instance.internal_name;
+      let internal_name = &instance.descriptor.internal_name;
 
-      if !instance.matches_cli_filter {
+      if !instance.descriptor.matches_cli_filter {
         return;
       }
 
@@ -50,7 +50,7 @@ pub fn run(ctx: Context) -> Context {
                 let arrow = ui.dim_right_arrow();
                 let expected = instance.expected_specifier.borrow().as_ref().unwrap().get_raw().green();
                 info!("{internal_name} {actual} {arrow} {expected} {location} {state_link}");
-                instance.package.borrow().copy_expected_specifier(instance);
+                instance.descriptor.package.borrow().copy_expected_specifier(instance);
               }
             }
           }

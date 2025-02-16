@@ -60,15 +60,15 @@ impl VersionGroup {
 
   pub fn add_instance(&mut self, instance: Rc<Instance>) {
     let mut dependencies = self.dependencies.borrow_mut();
-    let dependency = dependencies.entry(instance.internal_name.clone()).or_insert_with(|| {
+    let dependency = dependencies.entry(instance.descriptor.internal_name.clone()).or_insert_with(|| {
       Dependency::new(
-        /* internal_name: */ instance.internal_name.clone(),
+        /* internal_name: */ instance.descriptor.internal_name.clone(),
         /* variant: */ self.variant.clone(),
         /* pin_version: */ self.pin_version.clone(),
         /* snap_to: */ self.snap_to.clone(),
       )
     });
-    if instance.matches_cli_filter {
+    if instance.descriptor.matches_cli_filter {
       self.matches_cli_filter = true;
       dependency.matches_cli_filter = true;
     }

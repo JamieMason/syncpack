@@ -39,7 +39,7 @@ impl ActualInstance {
   pub fn new(instance: &Instance) -> Self {
     Self {
       actual: instance.descriptor.specifier.get_raw(),
-      dependency_name: instance.internal_name.clone(),
+      dependency_name: instance.descriptor.internal_name.clone(),
       expected: instance.expected_specifier.borrow().clone().map(|expected| expected.get_raw()),
       id: instance.id.clone(),
       overridden: instance

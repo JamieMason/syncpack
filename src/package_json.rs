@@ -115,14 +115,14 @@ impl PackageJson {
 
   /// Update this package in-memory with the given instance's specifier
   pub fn copy_expected_specifier(&self, instance: &Instance) {
-    let path_to_prop_str = &instance.dependency_type.path.as_str();
+    let path_to_prop_str = &instance.descriptor.dependency_type.path.as_str();
     let raw_specifier = instance.expected_specifier.borrow().as_ref().unwrap().get_raw().clone();
-    match instance.dependency_type.strategy {
+    match instance.descriptor.dependency_type.strategy {
       Strategy::NameAndVersionProps => {
         self.set_prop(path_to_prop_str, Value::String(raw_specifier));
       }
       Strategy::NamedVersionString => {
-        let full_value = format!("{}@{}", instance.name, raw_specifier);
+        let full_value = format!("{}@{}", instance.descriptor.name, raw_specifier);
         self.set_prop(path_to_prop_str, Value::String(full_value));
       }
       Strategy::UnnamedVersionString => {
@@ -131,7 +131,7 @@ impl PackageJson {
       Strategy::VersionsByName => {
         let mut contents = self.contents.borrow_mut();
         let versions_by_name = contents.pointer_mut(path_to_prop_str).unwrap().as_object_mut().unwrap();
-        let old_specifier = versions_by_name.get_mut(&instance.name).unwrap();
+        let old_specifier = versions_by_name.get_mut(&instance.descriptor.name).unwrap();
         *old_specifier = Value::String(raw_specifier);
         std::mem::drop(contents);
       }

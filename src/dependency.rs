@@ -150,9 +150,9 @@ impl Dependency {
   pub fn get_snapped_to_specifier(&self, every_instance_in_the_project: &[Rc<Instance>]) -> Option<Specifier> {
     if let Some(snapped_to_packages) = &self.snapped_to_packages {
       for instance in every_instance_in_the_project {
-        if *instance.internal_name == *self.internal_name {
+        if *instance.descriptor.internal_name == *self.internal_name {
           for snapped_to_package in snapped_to_packages {
-            if instance.package.borrow().name == snapped_to_package.borrow().name {
+            if instance.descriptor.package.borrow().name == snapped_to_package.borrow().name {
               return Some(instance.descriptor.specifier.clone());
             }
           }
@@ -186,7 +186,7 @@ impl Dependency {
         }
         let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
         if matches!(specifier_order, Ordering::Equal) {
-          a.package.borrow().name.cmp(&b.package.borrow().name)
+          a.descriptor.package.borrow().name.cmp(&b.descriptor.package.borrow().name)
         } else {
           specifier_order
         }

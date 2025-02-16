@@ -413,8 +413,8 @@ impl Ui<'_> {
 
   /// Return a location hint for an instance
   pub fn instance_location(&self, instance: &Instance) -> ColoredString {
-    let path_to_prop = instance.dependency_type.path.replace("/", ".");
-    let file_link = self.package_json_link(&instance.package.borrow());
+    let path_to_prop = instance.descriptor.dependency_type.path.replace("/", ".");
+    let file_link = self.package_json_link(&instance.descriptor.package.borrow());
     format!("in {file_link} at {path_to_prop}").normal()
   }
 

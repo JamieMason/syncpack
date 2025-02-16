@@ -29,7 +29,7 @@ pub fn run(ctx: Context) -> Context {
         ui.print_dependency(dependency, &group.variant);
         dependency.for_each_instance(|instance| {
           if !matches!(*instance.state.borrow(), InstanceState::Valid(_)) || ctx.config.cli.show_instances {
-            if !instance.matches_cli_filter {
+            if !instance.descriptor.matches_cli_filter {
               return;
             }
             ui.print_instance(instance, &group.variant);
