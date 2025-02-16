@@ -1,5 +1,5 @@
 use {
-  super::{indent::L1, indent::L2},
+  super::indent::{L1, L2},
   log::debug,
 };
 
