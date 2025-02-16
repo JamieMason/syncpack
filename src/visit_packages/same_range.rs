@@ -1,16 +1,6 @@
 use {
-  super::{L1, L2, L3, L4, L5, L6, L7, L8},
-  crate::{
-    cli::SortBy,
-    context::Context,
-    format,
-    package_json::{FormatMismatch, FormatMismatchVariant::*, PackageJson},
-    specifier::semver_range::SemverRange,
-    version_group::VersionGroupVariant,
-  },
-  itertools::Itertools,
+  super::{L1, L2, L3, L4, L5},
   log::debug,
-  std::{cell::RefCell, cmp::Ordering, rc::Rc},
 };
 
 pub fn visit_same_range(dependency: &crate::dependency::Dependency) {
