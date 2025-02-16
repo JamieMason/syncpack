@@ -22,32 +22,10 @@ struct PackageMeta {
 pub async fn run(ctx: Context) -> Context {
   let ui = Ui { ctx: &ctx };
   let client = Arc::new(Client::new());
-  let max_concurrent_requests = 2;
-  let semaphore = Arc::new(Semaphore::new(max_concurrent_requests));
-
-  let package_names = vec![
-    "lodash",
-    "react",
-    "react-dom",
-    "react-router",
-    "react-router-dom",
-    "react-scripts",
-    "typescript",
-    "webpack",
-    "webpack-cli",
-    "webpack-dev-server",
-    "webpack-merge",
-    "webpack-node-externals",
-    "webpackbar",
-    "workbox-webpack-plugin",
-    "write-file-webpack-plugin",
-    "yargs",
-    "yargs-parser",
-    "yup",
-    "zone.js",
-  ];
-
+  let semaphore = Arc::new(Semaphore::new(ctx.config.rcfile.max_concurrent_requests));
   let mut handles: Vec<JoinHandle<Option<PackageMeta>>> = vec![];
+
+  let package_names = vec!["lodash", "react", "typescript", "yup"];
 
   for name in package_names {
     let permit = Arc::clone(&semaphore).acquire_owned().await;

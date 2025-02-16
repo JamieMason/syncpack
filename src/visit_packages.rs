@@ -110,7 +110,7 @@ pub fn visit_packages(ctx: Context) -> Context {
                 }
                 debug!("            is the same as the local instance");
                 if instance.must_match_preferred_semver_range_which_is_not(&SemverRange::Exact) {
-                  let preferred_semver_range = &instance.preferred_semver_range.borrow().clone().unwrap();
+                  let preferred_semver_range = &instance.preferred_semver_range.clone().unwrap();
                   debug!("              it is in a semver group which prefers a different semver range to the local instance ({preferred_semver_range:?})");
                   if instance.matches_preferred_semver_range() {
                     debug!("                its semver range matches its semver group");
@@ -164,7 +164,7 @@ pub fn visit_packages(ctx: Context) -> Context {
                 debug!("          is the same as the highest semver version");
                 let range_of_highest_specifier = highest_specifier.get_semver_range().unwrap();
                 if instance.must_match_preferred_semver_range_which_is_not(range_of_highest_specifier) {
-                  let preferred_semver_range = &instance.preferred_semver_range.borrow().clone().unwrap();
+                  let preferred_semver_range = &instance.preferred_semver_range.clone().unwrap();
                   debug!("            it is in a semver group which prefers a different semver range to the highest semver version ({preferred_semver_range:?})");
                   if instance.matches_preferred_semver_range() {
                     debug!("              its semver range matches its semver group");
@@ -265,7 +265,7 @@ pub fn visit_packages(ctx: Context) -> Context {
               }
               debug!("          is the same as the pinned version");
               if instance.must_match_preferred_semver_range_which_differs_to(&pinned_specifier) {
-                let preferred_semver_range = &instance.preferred_semver_range.borrow().clone().unwrap();
+                let preferred_semver_range = &instance.preferred_semver_range.clone().unwrap();
                 debug!("            it is in a semver group which prefers a different semver range to the pinned version ({preferred_semver_range:?})");
                 if instance.matches_preferred_semver_range() {
                   debug!("              its semver range matches its semver group");
@@ -340,7 +340,7 @@ pub fn visit_packages(ctx: Context) -> Context {
                 debug!("            is the same as the target version");
                 let range_of_snapped_to_specifier = snapped_to_specifier.get_semver_range().unwrap();
                 if instance.must_match_preferred_semver_range_which_is_not(range_of_snapped_to_specifier) {
-                  let preferred_semver_range = &instance.preferred_semver_range.borrow().clone().unwrap();
+                  let preferred_semver_range = &instance.preferred_semver_range.clone().unwrap();
                   debug!("              it is in a semver group which prefers a different semver range to the target version ({preferred_semver_range:?})");
                   if instance.matches_preferred_semver_range() {
                     debug!("                its semver range matches its semver group");

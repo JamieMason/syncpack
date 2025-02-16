@@ -53,19 +53,18 @@ impl Context {
         None => descriptor.matches_cli_filter = true,
       }
 
-      let semver_group = semver_groups
+      let preferred_semver_range = semver_groups
         .iter()
-        .find(|group| group.selector.can_add(&all_dependency_types, &descriptor));
+        .find(|group| group.selector.can_add(&all_dependency_types, &descriptor))
+        .and_then(|group| group.range.clone());
+
       let version_group = version_groups
         .iter_mut()
         .find(|group| group.selector.can_add(&all_dependency_types, &descriptor));
-      let instance = Rc::new(Instance::new(descriptor));
+
+      let instance = Rc::new(Instance::new(descriptor, preferred_semver_range));
 
       instances.push(Rc::clone(&instance));
-
-      if let Some(group) = semver_group {
-        instance.set_semver_group(group);
-      }
 
       if let Some(group) = version_group {
         group.add_instance(instance);
