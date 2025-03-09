@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { globbySync } from 'globby';
-import { satisfies } from 'semver';
+import intersects from 'semver/ranges/intersects.js';
 
 const rootPath = new URL('../package.json', import.meta.url).pathname;
 const root = JSON.parse(readFileSync(rootPath, 'utf8'));
-const syncpackEngine = root.engines.node.replace('>=', '');
+const syncpackEngine = root.engines.node;
 
 const unsatisfiedDependencies = globbySync('node_modules/**/package.json')
   .map(filePath => readFileSync(filePath, 'utf8'))
@@ -14,7 +14,7 @@ const unsatisfiedDependencies = globbySync('node_modules/**/package.json')
   .map(file => {
     const name = file.name;
     const dependencyEngine = file.engines.node;
-    const isSatisfied = satisfies(syncpackEngine, dependencyEngine);
+    const isSatisfied = intersects(syncpackEngine, dependencyEngine);
     return {
       name,
       expected: syncpackEngine,
