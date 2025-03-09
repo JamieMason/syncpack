@@ -24,6 +24,11 @@ const config = {
       dependencies: ['release-it'],
       pinVersion: '17.11.0',
     },
+    {
+      label: '0.3.0 has issues',
+      dependencies: ['tightrope'],
+      pinVersion: '0.2.0',
+    },
   ],
 };
 
