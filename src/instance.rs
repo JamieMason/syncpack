@@ -145,6 +145,10 @@ impl Instance {
     self.state.borrow().is_unfixable()
   }
 
+  pub fn is_outdated(&self) -> bool {
+    self.state.borrow().is_outdated()
+  }
+
   pub fn has_missing_specifier(&self) -> bool {
     matches!(self.descriptor.specifier, Specifier::None)
   }

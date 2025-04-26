@@ -78,6 +78,13 @@ impl InstanceState {
   pub fn is_unfixable(&self) -> bool {
     matches!(self, InstanceState::Invalid(InvalidInstance::Unfixable(_)))
   }
+
+  pub fn is_outdated(&self) -> bool {
+    matches!(
+      self,
+      InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToNpmRegistry))
+    )
+  }
 }
 
 impl PartialEq for InstanceState {

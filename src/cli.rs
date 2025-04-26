@@ -56,9 +56,6 @@ pub struct Cli {
   /// Whether to list every affected instance of a dependency when listing
   /// version or semver range mismatches
   pub show_instances: bool,
-  /// Whether to list every affected package.json file when listing formatting
-  /// mismatches
-  pub show_packages: bool,
   /// Whether to show the name of the status code for each dependency and
   /// instance, such as `HighestSemverMismatch`
   pub show_status_codes: bool,
@@ -99,7 +96,6 @@ impl Cli {
       show_ignored: should_show(matches, "ignored"),
       show_hints: should_show(matches, "hints"),
       show_instances: should_show(matches, "instances"),
-      show_packages: should_show(matches, "packages"),
       show_status_codes: should_show(matches, "statuses"),
       source_patterns: get_patterns(matches, "source"),
       subcommand,
@@ -143,14 +139,15 @@ fn create() -> Command {
       Command::new("fix")
         .about("Ensure that multiple packages requiring the same dependency use the same version")
         .after_long_help(additional_help())
+        .arg(dependencies_option("fix"))
+        .arg(dependency_types_option("fix"))
         .arg(dry_run_option("fix"))
-        .arg(source_option("fix"))
-        // @TODO: check before enabling .arg(dependencies_option("fix"))
-        // @TODO: check before enabling .arg(dependency_types_option("fix"))
-        // @TODO: check before enabling .arg(specifier_types_option("fix"))
         .arg(log_levels_option("fix"))
         .arg(no_ansi_option("fix"))
-        .arg(show_option_versions("fix")), // @TODO: check before enabling .arg(sort_option("fix")),
+        .arg(show_option_versions("fix"))
+        .arg(sort_option("fix"))
+        .arg(source_option("fix"))
+        .arg(specifier_types_option("fix")),
     )
     .subcommand(
       Command::new("format")
@@ -165,7 +162,6 @@ fn create() -> Command {
         .arg(dry_run_option("format"))
         .arg(log_levels_option("format"))
         .arg(no_ansi_option("format"))
-        .arg(show_option_formatting("format"))
         .arg(source_option("format")),
     )
     .subcommand(
@@ -219,25 +215,6 @@ interpret it.
     .action(clap::ArgAction::Append)
 }
 
-fn show_option_formatting(command: &str) -> Arg {
-  let short_help = "Control what information is displayed in terminal output";
-  Arg::new("show")
-    .long("show")
-    .help(short_help)
-    .long_help(cformat!(
-      r#"{short_help}
-
-<bold><underline>Values:</underline></bold>
-<blue>packages</>   Show formatting status of each package.json file
-
-<bold><underline>Examples:</underline></bold>
-<dim>Show highest level of detail</dim>
-<dim>$</dim> <blue><bold>syncpack format</bold> --show packages</>"#
-    ))
-    .value_delimiter(',')
-    .value_parser(["packages"])
-}
-
 fn show_option_versions(command: &str) -> Arg {
   let short_help = "Control what information is displayed in terminal output";
   Arg::new("show")
@@ -262,8 +239,8 @@ fn show_option_versions(command: &str) -> Arg {
 <dim>$</dim> <blue><bold>syncpack {command}</bold> --show all</>"#
     ))
     .value_delimiter(',')
-    .value_parser(["ignored", "instances", "hints", "statuses", "all"])
-    .default_value("hints,statuses")
+    .value_parser(["hints", "ignored", "instances", "statuses", "all"])
+    .default_value("hints,instances,statuses")
 }
 
 fn sort_option(command: &str) -> Arg {

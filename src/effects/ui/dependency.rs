@@ -11,43 +11,13 @@ use {
 };
 
 pub fn print(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let instances_len = dependency.instances.len();
-  let count = ui::util::count_column(instances_len);
-  let name = &dependency.internal_name;
-  let local_hint = get_local_hint(ctx, dependency);
-
   match &dependency.get_state() {
-    InstanceState::Valid(variant) => match variant {
-      ValidInstance::IsIgnored => {
-        print_ignored(ctx, dependency, group_variant);
-      }
-      ValidInstance::IsHighestOrLowestSemver
-      | ValidInstance::IsIdenticalToLocal
-      | ValidInstance::IsIdenticalToPin
-      | ValidInstance::IsIdenticalToSnapTarget
-      | ValidInstance::IsLocalAndValid
-      | ValidInstance::IsNonSemverButIdentical
-      | ValidInstance::SatisfiesHighestOrLowestSemver
-      | ValidInstance::SatisfiesLocal
-      | ValidInstance::SatisfiesSnapTarget => {
-        print_valid(ctx, dependency, group_variant);
-      }
-      ValidInstance::SatisfiesSameRangeGroup => {
-        let line = ui::util::join_line(vec![&count, name, &local_hint]);
-        info!("{line}");
-      }
-    },
-    InstanceState::Invalid(variant) => {
-      let name = name.red().to_string();
-      let line = ui::util::join_line(vec![&count, &name, &local_hint]);
-      info!("{line}");
-    }
-    InstanceState::Suspect(variant) => {
-      let name = name.yellow().to_string();
-      let line = ui::util::join_line(vec![&count, &name, &local_hint]);
-      info!("{line}");
-    }
+    InstanceState::Valid(ValidInstance::IsIgnored) => print_ignored(ctx, dependency, group_variant),
+    InstanceState::Valid(_) => print_valid(ctx, dependency, group_variant),
+    InstanceState::Invalid(_) => print_invalid(ctx, dependency, group_variant),
+    InstanceState::Suspect(_) => print_suspect(ctx, dependency, group_variant),
     InstanceState::Unknown => {
+      let name = &dependency.internal_name;
       error!("Dependency '{name}' has an unknown state, this is a bug in syncpack");
       panic!("Unknown Dependency State");
     }
@@ -55,28 +25,89 @@ pub fn print(ctx: &Context, dependency: &Dependency, group_variant: &VersionGrou
 }
 
 pub fn print_ignored(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let instances_len = dependency.instances.len();
-  let count = ui::util::count_column(instances_len);
-  let name = &dependency.internal_name.dimmed().to_string();
-  let local_hint = get_local_hint(ctx, dependency);
-  let line = ui::util::join_line(vec![&count, &name]);
+  let (count_column, name, local_hint, alias_hint, _) = get_common_parts(ctx, dependency, group_variant);
+  let name = name.dimmed().to_string();
+  let line = ui::util::join_line(vec![&count_column, &name, &local_hint, &alias_hint]);
   info!("{line}");
 }
 
 pub fn print_valid(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let instances_len = dependency.instances.len();
-  let count = ui::util::count_column(instances_len);
-  let name = &dependency.internal_name;
-  let local_hint = get_local_hint(ctx, dependency);
-  let expected = get_raw_expected_specifier(dependency);
-  let expected = expected.dimmed().to_string();
-  let line = ui::util::join_line(vec![&count, name, &expected, &local_hint]);
+  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
+  let expected_specifier = if !expected_specifier.is_empty() {
+    expected_specifier.dimmed().to_string()
+  } else {
+    expected_specifier
+  };
+  let line = ui::util::join_line(vec![&count_column, &name, &expected_specifier, &local_hint, &alias_hint]);
   info!("{line}");
+}
+
+pub fn print_invalid(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
+  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
+  // let name = name.red().to_string();
+  let expected_specifier = if !expected_specifier.is_empty() {
+    expected_specifier.red().to_string()
+  } else {
+    expected_specifier
+  };
+  let line = ui::util::join_line(vec![&count_column, &name, &expected_specifier, &local_hint, &alias_hint]);
+  info!("{line}");
+}
+
+pub fn print_outdated(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
+  print_valid(ctx, dependency, group_variant);
+}
+
+pub fn print_suspect(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
+  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
+  // let name = name.yellow().to_string();
+  let expected_specifier = if !expected_specifier.is_empty() {
+    expected_specifier.yellow().to_string()
+  } else {
+    expected_specifier
+  };
+  let line = ui::util::join_line(vec![&count_column, &name, &expected_specifier, &local_hint, &alias_hint]);
+  info!("{line}");
+}
+
+pub fn print_fixed(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
+  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
+  let icon = if ctx.config.cli.show_instances {
+    "".to_string()
+  } else {
+    ui::icon::ok()
+  };
+  let expected_specifier = if !expected_specifier.is_empty() {
+    expected_specifier.dimmed().to_string()
+  } else {
+    expected_specifier
+  };
+  let line = ui::util::join_line(vec![&count_column, &icon, &name, &expected_specifier, &local_hint, &alias_hint]);
+  info!("{line}");
+}
+
+fn get_common_parts(
+  ctx: &Context,
+  dependency: &Dependency,
+  group_variant: &VersionGroupVariant,
+) -> (String, String, String, String, String) {
+  let instances_len = dependency.instances.len();
+  let count_column = ui::util::count_column(instances_len);
+  let name = dependency.internal_name.to_string();
+  let local_hint = get_local_hint(ctx, dependency);
+  let alias_hint = get_alias_hint(dependency);
+  let expected_specifier = if ctx.config.cli.show_instances {
+    // don't repeat expected specifier when we are listing every instance
+    "".to_string()
+  } else {
+    get_raw_expected_specifier(dependency)
+  };
+  (count_column, name, local_hint, alias_hint, expected_specifier)
 }
 
 pub fn get_alias_hint(dependency: &Dependency) -> String {
   if dependency.has_alias {
-    "[alias]".magenta().to_string()
+    "(aliased)".purple().to_string()
   } else {
     "".to_string()
   }
@@ -84,7 +115,7 @@ pub fn get_alias_hint(dependency: &Dependency) -> String {
 
 fn get_local_hint(ctx: &Context, dependency: &Dependency) -> String {
   if ctx.config.cli.show_hints && dependency.local_instance.borrow().is_some() {
-    "[local]".blue().to_string()
+    "(local)".purple().to_string()
   } else {
     "".to_string()
   }

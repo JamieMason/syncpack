@@ -2,65 +2,49 @@ use {
   crate::{
     context::Context,
     effects::ui,
-    package_json::{FormatMismatch, FormatMismatchVariant, PackageJson},
+    package_json::{FormatMismatch, PackageJson},
   },
   colored::*,
-  itertools::Itertools,
   log::info,
-  std::{cell::RefCell, rc::Rc},
+  std::rc::Rc,
 };
 
-/// Packages which are correctly formatted
-pub fn print_formatted(ctx: &Context, packages: &[Rc<RefCell<PackageJson>>]) {
-  if !packages.is_empty() {
-    let icon = ui::icon::ok();
-    let count = ui::util::count_column(packages.len());
-    let status = "Valid".green();
-    info!("{count} {icon} {status}");
-    if ctx.config.cli.show_packages {
-      packages
-        .iter()
-        .sorted_by_key(|package| package.borrow().name.clone())
-        .for_each(|package| {
-          print_formatted_package(ctx, &package.borrow());
-        });
-    }
-  }
+pub fn print_invalid_package(ctx: &Context, package: &PackageJson) {
+  let count = package.formatting_mismatches.borrow().len();
+  let count_column = ui::util::count_column(count);
+  let name = &package.name;
+  let file_link = get_package_json_link(ctx, package);
+  let location = format!("at {file_link}").dimmed();
+  info!("{count_column} {name} {location}");
 }
 
-/// Print a package.json which is correctly formatted
-fn print_formatted_package(ctx: &Context, package: &PackageJson) {
-  if package.formatting_mismatches.borrow().is_empty() {
-    let icon = "-".dimmed();
-    let file_link = package_json_link(ctx, package).dimmed();
-    info!("          {icon} {file_link}");
-  }
+pub fn print_fixed_package(ctx: &Context, package: &PackageJson) {
+  print_invalid_package(ctx, package);
 }
 
-/// Print every package.json which has the given formatting mismatch
-pub fn print_formatting_mismatches(ctx: &Context, variant: &FormatMismatchVariant, mismatches: &[Rc<FormatMismatch>]) {
-  let count = ui::util::count_column(mismatches.len());
+pub fn print_invalid(ctx: &Context, mismatch: &Rc<FormatMismatch>) {
+  let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::err();
-  let status_code = format!("{:?}", variant);
-  let link = ui::util::status_code_link(ctx, &status_code).red();
-  info!("{count} {icon} {link}");
-  if ctx.config.cli.show_packages {
-    mismatches
-      .iter()
-      .sorted_by_key(|mismatch| mismatch.package.borrow().name.clone())
-      .for_each(|mismatch| {
-        let icon = "-".dimmed();
-        let package = mismatch.package.borrow();
-        let property_path = ui::util::format_path(&mismatch.property_path);
-        let file_link = package_json_link(ctx, &package);
-        let msg = format!("          {icon} {property_path} of {file_link}").red();
-        info!("{msg}");
-      });
-  }
+  let status_code = format!("{:?}", mismatch.variant);
+  let status_code_link = ui::util::get_status_code_link(ctx, &status_code).red();
+  let property_path = ui::util::get_formatted_path(&mismatch.property_path);
+  let location = format!("at {property_path}").dimmed();
+  info!("{indent} {icon} {status_code_link} {location}");
+}
+
+pub fn print_fixed(ctx: &Context, mismatch: &Rc<FormatMismatch>) {
+  let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
+  let icon = ui::icon::ok();
+  let status_code = format!("{:?}", mismatch.variant);
+  let status_code_link = ui::util::get_status_code_link(ctx, &status_code).dimmed();
+  let property_path = ui::util::get_formatted_path(&mismatch.property_path);
+  let location = format!("at {property_path}").dimmed();
+  info!("{indent} {icon} {status_code_link} {location}");
 }
 
 /// Render a clickable link to a package.json file
-pub fn package_json_link(ctx: &Context, package: &PackageJson) -> String {
+pub fn get_package_json_link(ctx: &Context, package: &PackageJson) -> String {
   let file_path = package.file_path.to_str().unwrap();
-  ui::util::link(ctx, format!("file:{file_path}"), package.name.clone())
+  let relative_file_path = package.get_relative_file_path(&ctx.config.cli.cwd);
+  ui::util::get_link(ctx, format!("file:{file_path}"), relative_file_path)
 }

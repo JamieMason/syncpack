@@ -5,27 +5,32 @@ pub fn run(ctx: Context) -> ! {
   let mut is_invalid = false;
 
   ctx.get_version_groups().for_each(|group| {
-    ui::group::print_header(&ctx, group);
-    if group.dependencies.is_empty() {
-      ui::group::print_empty();
-      return;
-    }
-    if !ctx.config.cli.show_ignored && group.has_ignored_variant() {
-      ui::group::print_ignored(group);
-      return;
-    }
+    let mut has_printed_group = false;
     group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
-      ui::dependency::print(&ctx, dependency, &group.variant);
-      dependency.get_sorted_instances().for_each(|instance| {
-        if !instance.is_valid() || ctx.config.cli.show_instances {
-          ui::instance::print(&ctx, instance, &group.variant);
-        }
-        if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {
+      let mut has_printed_dependency = false;
+      dependency
+        .get_sorted_instances()
+        .filter(|instance| instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict))
+        .for_each(|instance| {
+          if !has_printed_group {
+            ui::group::print_header(&ctx, group);
+            has_printed_group = true;
+          }
+          if !has_printed_dependency {
+            ui::dependency::print(&ctx, dependency, &group.variant);
+            has_printed_dependency = true;
+          }
+          if ctx.config.cli.show_instances {
+            ui::instance::print(&ctx, instance, &group.variant);
+          }
           is_invalid = true;
-        }
-      });
+        });
     });
   });
+
+  if !is_invalid {
+    ui::util::print_no_issues_found();
+  }
 
   std::process::exit(if is_invalid { 1 } else { 0 });
 }

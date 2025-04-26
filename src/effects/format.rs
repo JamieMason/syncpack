@@ -10,42 +10,52 @@ pub fn run(ctx: Context) -> ! {
 }
 
 fn check_formatting(ctx: Context) -> ! {
-  ui::package::print_formatted(&ctx, &ctx.get_formatted_packages());
-
-  ctx.get_formatting_mismatches_by_variant().iter().for_each(|(variant, mismatches)| {
-    ui::package::print_formatting_mismatches(&ctx, variant, mismatches);
-  });
-
-  for package in ctx.packages.all.iter() {
-    if !package.borrow().formatting_mismatches.borrow().is_empty() {
-      std::process::exit(1);
-    }
+  let mut is_invalid = false;
+  ctx
+    .packages
+    .all
+    .iter()
+    .filter(|package| package.borrow().has_formatting_mismatches())
+    .for_each(|package| {
+      is_invalid = true;
+      ui::package::print_invalid_package(&ctx, &package.borrow());
+      package.borrow().formatting_mismatches.borrow().iter().for_each(|mismatch| {
+        ui::package::print_invalid(&ctx, mismatch);
+      });
+    });
+  if !is_invalid {
+    ui::util::print_no_issues_found();
   }
-
-  std::process::exit(0);
+  std::process::exit(if is_invalid { 1 } else { 0 });
 }
 
 fn fix_formatting(ctx: Context) -> ! {
-  ctx.packages.all.iter().for_each(|package| {
-    let package = package.borrow();
-    let mut formatting_mismatches = package.formatting_mismatches.borrow_mut();
-    formatting_mismatches.iter().for_each(|mismatch| {
-      if mismatch.property_path == "/" {
-        *package.contents.borrow_mut() = mismatch.expected.clone();
-      } else if let Some(value) = package.contents.borrow_mut().pointer_mut(&mismatch.property_path) {
-        *value = mismatch.expected.clone();
-      }
+  let mut was_invalid = false;
+  ctx
+    .packages
+    .all
+    .iter()
+    .filter(|package| package.borrow().has_formatting_mismatches())
+    .for_each(|package| {
+      was_invalid = true;
+      let package = package.borrow();
+      ui::package::print_fixed_package(&ctx, &package);
+      package.formatting_mismatches.borrow().iter().for_each(|mismatch| {
+        ui::package::print_fixed(&ctx, mismatch);
+        if mismatch.property_path == "/" {
+          *package.contents.borrow_mut() = mismatch.expected.clone();
+        } else if let Some(value) = package.contents.borrow_mut().pointer_mut(&mismatch.property_path) {
+          *value = mismatch.expected.clone();
+        }
+      });
     });
-    *formatting_mismatches = vec![];
-  });
-
-  ui::package::print_formatted(&ctx, &ctx.packages.all);
-
   if !ctx.config.cli.dry_run {
     ctx.packages.all.iter().for_each(|package| {
       package.borrow().write_to_disk(&ctx.config);
     });
   }
-
+  if !was_invalid {
+    ui::util::print_no_issues_found();
+  }
   std::process::exit(0);
 }

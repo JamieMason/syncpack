@@ -25,7 +25,6 @@ pub fn cli() -> Cli {
     show_ignored: false,
     show_instances: false,
     show_hints: false,
-    show_packages: false,
     show_status_codes: false,
     source_patterns: vec![],
     sort: SortBy::Name,

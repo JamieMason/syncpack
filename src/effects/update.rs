@@ -1,8 +1,7 @@
 use {
   crate::{
     context::Context,
-    effects::ui,
-    instance_state::{FixableInstance, InstanceState, InvalidInstance},
+    effects::{ui, ui::LINE_ENDING},
     version_group::VersionGroupVariant,
   },
   log::{error, warn},
@@ -10,30 +9,40 @@ use {
 
 /// Run the update command side effects
 pub fn run(ctx: Context) -> ! {
-  let mut is_invalid = false;
+  let mut was_outdated = false;
 
   ctx
     .version_groups
     .iter()
     .filter(|group| group.matches_cli_filter && matches!(group.variant, VersionGroupVariant::HighestSemver))
     .for_each(|group| {
-      ui::group::print_header(&ctx, group);
-      group.dependencies.values().for_each(|dependency| {
-        let mut has_printed_header = false;
-        dependency.instances.iter().for_each(|instance| {
-          let state = instance.state.borrow().clone();
-          if let InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToNpmRegistry)) = state {
-            is_invalid = true;
-            if !has_printed_header {
-              has_printed_header = true;
-              ui::dependency::print_valid(&ctx, dependency, &group.variant);
+      let mut has_printed_group = false;
+      group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
+        let mut has_printed_dependency = false;
+        dependency
+          .get_sorted_instances()
+          .filter(|instance| instance.is_outdated())
+          .for_each(|instance| {
+            was_outdated = true;
+            if !has_printed_group {
+              ui::group::print_header(&ctx, group);
+              has_printed_group = true;
             }
-            ui::instance::print_fixable(&ctx, instance, &group.variant);
-            if !ctx.config.cli.check {
+            if ctx.config.cli.check {
+              if !has_printed_dependency {
+                ui::dependency::print_outdated(&ctx, dependency, &group.variant);
+                has_printed_dependency = true;
+              }
+              ui::instance::print_outdated(&ctx, instance, &group.variant);
+            } else {
+              if !has_printed_dependency {
+                ui::dependency::print_fixed(&ctx, dependency, &group.variant);
+                has_printed_dependency = true;
+              }
+              ui::instance::print_fixed(&ctx, instance, &group.variant);
               instance.descriptor.package.borrow().copy_expected_specifier(instance);
             }
-          }
-        });
+          });
       })
     });
 
@@ -43,12 +52,14 @@ pub fn run(ctx: Context) -> ! {
       error!("Failed to fetch {name}");
     });
     warn!(
-      "Note: syncpack update does not yet support custom npm registries\n  Subscribe to https://github.com/JamieMason/syncpack/issues/220"
+      "Syncpack does not yet support custom npm registries{LINE_ENDING}  Subscribe to https://github.com/JamieMason/syncpack/issues/220"
     );
+  } else if !was_outdated {
+    ui::util::print_no_issues_found();
   }
 
   if ctx.config.cli.check {
-    std::process::exit(if is_invalid { 1 } else { 0 });
+    std::process::exit(if was_outdated { 1 } else { 0 });
   }
 
   if !ctx.config.cli.dry_run {
@@ -56,5 +67,6 @@ pub fn run(ctx: Context) -> ! {
       package.borrow().write_to_disk(&ctx.config);
     });
   }
+
   std::process::exit(0);
 }

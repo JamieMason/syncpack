@@ -110,15 +110,7 @@ run-fluid-lint:
     set -euxo pipefail
 
     cd fixtures/fluid-framework
-    RUST_BACKTRACE=1 cargo run -- lint
-
-# Run the dev rust binary against a clone of microsoft/FluidFramework
-run-fluid-update:
-    #!/usr/bin/env bash
-    set -euxo pipefail
-
-    cd fixtures/fluid-framework
-    RUST_BACKTRACE=1 cargo run -- update --check
+    RUST_BACKTRACE=1 cargo run -- lint --show all
 
 # Run the dev rust binary against a clone of microsoft/FluidFramework
 run-fluid-fix:
@@ -126,7 +118,23 @@ run-fluid-fix:
     set -euxo pipefail
 
     cd fixtures/fluid-framework
-    RUST_BACKTRACE=1 cargo run -- fix --dry-run
+    RUST_BACKTRACE=1 cargo run -- fix --dry-run --show all
+
+# Run the dev rust binary against a clone of microsoft/FluidFramework
+run-fluid-update-check:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    cd fixtures/fluid-framework
+    RUST_BACKTRACE=1 cargo run -- update --check
+
+# Run the dev rust binary against a clone of microsoft/FluidFramework
+run-fluid-update-fix:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    cd fixtures/fluid-framework
+    RUST_BACKTRACE=1 cargo run -- update --dry-run
 
 # Run the release rust binary against a clone of microsoft/FluidFramework
 run-fluid-prod:

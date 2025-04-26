@@ -2,7 +2,6 @@ use {
   crate::{
     config::Config,
     instance::Instance,
-    package_json::{FormatMismatch, FormatMismatchVariant, PackageJson},
     packages::Packages,
     registry_client::{LiveRegistryClient, PackageMeta, RegistryClient, RegistryError},
     semver_group::SemverGroup,
@@ -12,7 +11,6 @@ use {
   indicatif::{MultiProgress, ProgressBar, ProgressStyle},
   log::debug,
   std::{
-    cell::RefCell,
     collections::{HashMap, HashSet},
     rc::Rc,
     sync::Arc,
@@ -108,30 +106,6 @@ impl Context {
 
   pub fn get_version_groups(&self) -> impl Iterator<Item = &VersionGroup> {
     self.version_groups.iter().filter(|group| group.matches_cli_filter)
-  }
-
-  /// Get all packages with valid formatting
-  pub fn get_formatted_packages(&self) -> Vec<Rc<RefCell<PackageJson>>> {
-    self
-      .packages
-      .all
-      .iter()
-      .filter(|package| package.borrow().formatting_mismatches.borrow().is_empty())
-      .map(Rc::clone)
-      .collect()
-  }
-
-  /// Get all formatting issues in package.json files, grouped by issue type
-  pub fn get_formatting_mismatches_by_variant(&self) -> HashMap<FormatMismatchVariant, Vec<Rc<FormatMismatch>>> {
-    let mut mismatches_by_variant = HashMap::new();
-    self.packages.all.iter().for_each(|package| {
-      package.borrow().formatting_mismatches.borrow().iter().for_each(|mismatch| {
-        let variant = mismatch.variant.clone();
-        let mismatches = mismatches_by_variant.entry(variant).or_insert_with(Vec::new);
-        mismatches.push(Rc::clone(mismatch));
-      });
-    });
-    mismatches_by_variant
   }
 
   /// Fetch every version specifier ever published for all updateable

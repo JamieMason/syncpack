@@ -2,6 +2,7 @@ use {
   crate::{
     cli::Cli,
     dependency_type::DependencyType,
+    effects::ui::LINE_ENDING,
     group_selector::GroupSelector,
     packages::Packages,
     semver_group::{AnySemverGroup, SemverGroup},
@@ -191,7 +192,7 @@ impl Rcfile {
     match serde_json::from_str(&json) {
       Ok(rcfile) => rcfile,
       Err(err) => {
-        error!("Your syncpack config file failed validation\n  {err}");
+        error!("Your syncpack config file failed validation{LINE_ENDING}  {err}");
         exit(1);
       }
     }

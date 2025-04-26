@@ -84,6 +84,10 @@ impl PackageJson {
     self.contents.borrow().pointer(pointer).is_some()
   }
 
+  pub fn has_formatting_mismatches(&self) -> bool {
+    !self.formatting_mismatches.borrow().is_empty()
+  }
+
   /// Convenience method to get a string property from the parsed package.json
   pub fn get_string(&self, pointer: &str) -> Option<String> {
     if let Some(Value::String(name)) = self.get_prop(pointer) {
@@ -105,12 +109,6 @@ impl PackageJson {
     } else if let Some(value) = self.contents.borrow_mut().pointer_mut(pointer) {
       *value = next_value;
     }
-  }
-
-  /// Report whether the package in memory has changed from what's on disk
-  pub fn has_changed(&self, indent: &str) -> bool {
-    // @FIXME: this is not being used
-    *self.json.borrow() != self.to_pretty_json(self.serialize(indent))
   }
 
   /// Update this package in-memory with the given instance's specifier
@@ -162,11 +160,16 @@ impl PackageJson {
     from_utf8.expect("Failed to convert JSON buffer to string")
   }
 
-  /// Write the package.json to disk
-  pub fn write_to_disk(&self, config: &Config) {
+  /// Write the package.json to disk, returns whether the file has changed
+  pub fn write_to_disk(&self, config: &Config) -> bool {
     let vec = self.serialize(&config.rcfile.indent);
     std::fs::write(&self.file_path, &vec).expect("Failed to write package.json to disk");
-    *self.json.borrow_mut() = self.to_pretty_json(vec);
+    let next_json = self.to_pretty_json(vec);
+    let has_changed = next_json != *self.json.borrow();
+    if has_changed {
+      *self.json.borrow_mut() = next_json;
+    }
+    has_changed
   }
 
   /// Return a short path for logging to the terminal

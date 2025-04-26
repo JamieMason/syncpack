@@ -2,6 +2,7 @@ use {
   crate::{context::Context, effects::ui},
   colored::*,
   itertools::Itertools,
+  log::info,
 };
 
 /// Join lines that are not empty with a space separator
@@ -27,14 +28,14 @@ pub fn count_column(count: usize) -> String {
 }
 
 /// Render the reason code as a clickable link
-pub fn status_code_link(ctx: &Context, pascal_case: &str) -> String {
+pub fn get_status_code_link(ctx: &Context, pascal_case: &str) -> String {
   let base_url = "https://jamiemason.github.io/syncpack/guide/status-codes/";
   let lower_case = pascal_case.to_lowercase();
-  link(ctx, format!("{base_url}#{lower_case}"), pascal_case)
+  get_link(ctx, format!("{base_url}#{lower_case}"), pascal_case)
 }
 
 /// Render a clickable link
-pub fn link(ctx: &Context, url: impl Into<String>, text: impl Into<ColoredString>) -> String {
+pub fn get_link(ctx: &Context, url: impl Into<String>, text: impl Into<ColoredString>) -> String {
   if ctx.config.cli.disable_ansi {
     text.into().to_string()
   } else {
@@ -43,10 +44,15 @@ pub fn link(ctx: &Context, url: impl Into<String>, text: impl Into<ColoredString
 }
 
 /// Convert eg. "/dependencies/react" to ".dependencies.react"
-pub fn format_path(path: &str) -> String {
+pub fn get_formatted_path(path: &str) -> String {
   if path == "/" {
     "root".to_string()
   } else {
     path.replace("/", ".")
   }
+}
+
+pub fn print_no_issues_found() {
+  let icon = ui::icon::ok();
+  info!("{icon} No issues found");
 }
