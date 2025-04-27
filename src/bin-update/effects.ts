@@ -1,8 +1,7 @@
 import https from 'node:https';
 import { EOL } from 'node:os';
-import * as Schema from '@effect/schema/Schema';
 import chalk from 'chalk-template';
-import { Data, Effect, identity, pipe } from 'effect';
+import { Data, Effect, Schema, identity, pipe } from 'effect';
 import ora, { type Ora } from 'ora';
 import prompts from 'prompts';
 import type { ReleaseType } from 'semver';
