@@ -1,18 +1,18 @@
 # syncpack
 
 <p align="center">
-  <img src="https://jamiemason.github.io/syncpack/logo.svg" width="200" height="179" alt="">
+  <img src="https://jamiemason.github.io/syncpack/logo.svg" width="134" height="120" alt="">
   <br>Consistent dependency versions in large JavaScript Monorepos.
   <br><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a>
 </p>
 
-> [!TIP]
-> 🦀 A Rust rewrite is available to try at [`npm install -g syncpack@alpha`](https://github.com/JamieMason/syncpack/releases?q=14.0.0)
+> [!NOTE]
+> This is the README for v13, it will be replaced by a Rust rewrite which is available to try at [`npm install -g syncpack@alpha`](https://github.com/JamieMason/syncpack/tree/14.0.0-alpha.11?tab=readme-ov-file#syncpack)
 
 ## Installation
 
 ```bash
-npm install --save-dev syncpack
+npm install --save-dev syncpack@13
 ```
 
 ## Commands

@@ -8,7 +8,7 @@ defaults:
 on:
   push:
     branches:
-      - main
+      - 13.x.x
 
 jobs:
   test-deploy:
