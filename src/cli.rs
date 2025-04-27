@@ -224,23 +224,25 @@ fn show_option_versions(command: &str) -> Arg {
       r#"{short_help}
 
 <bold><underline>Values:</underline></bold>
-<blue>ignored</>    Show instances and dependencies which syncpack is ignoring
 <blue>instances</>  Show every instance of every dependency
 <blue>hints</>      Show a hint alongside dependencies developed in this repo
 <blue>statuses</>   Show specifically how/why a dependency or instance is valid or invalid
 <blue>all</>        Shorthand to enable all of the above
+<blue>none</>       Shorthand to disable all of the above
 
 <bold><underline>Examples:</underline></bold>
 <dim>Only opt into showing status codes</dim>
 <dim>$</dim> <blue><bold>syncpack {command}</bold> --show statuses</>
-<dim>Show all instances, including ignored</dim>
-<dim>$</dim> <blue><bold>syncpack {command}</bold> --show ignored,instances</>
+<dim>Show all instances, not just their names</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show instances</>
 <dim>Show highest level of detail</dim>
-<dim>$</dim> <blue><bold>syncpack {command}</bold> --show all</>"#
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show all</>
+<dim>Show lowest level of detail</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show none</>"#
     ))
     .value_delimiter(',')
-    .value_parser(["hints", "ignored", "instances", "statuses", "all"])
-    .default_value("hints,instances,statuses")
+    .value_parser(["hints", "instances", "statuses", "all", "none"])
+    .default_value("all")
 }
 
 fn sort_option(command: &str) -> Arg {
@@ -490,10 +492,14 @@ fn should_show(matches: &ArgMatches, name: &str) -> bool {
     .ok()
     .flatten()
     .map(|show| {
-      show
-        .collect_vec()
-        .iter()
-        .any(|value| value == &&"all".to_string() || value == &&name.to_string())
+      let names = show.collect_vec();
+      if names.contains(&&"all".to_string()) {
+        true
+      } else if names.contains(&&"none".to_string()) {
+        false
+      } else {
+        names.contains(&&name.to_string())
+      }
     })
     .unwrap_or(false)
 }
