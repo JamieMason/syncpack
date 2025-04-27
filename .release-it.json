@@ -4,7 +4,7 @@
     "changelog": "npm exec auto-changelog -- --stdout --commit-limit false --unreleased --breaking-pattern 'BREAKING CHANGE:' --template https://raw.githubusercontent.com/release-it/release-it/main/templates/changelog-compact.hbs",
     "commitMessage": "chore(release): ${version}",
     "push": false,
-    "requireBranch": "v14-alpha",
+    "requireBranch": "main",
     "tag": true
   },
   "github": {

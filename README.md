@@ -6,6 +6,9 @@
   <br><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a>
 </p>
 
+> [!NOTE]
+> This is the README for v14-alpha, a Rust rewrite which is due to replace [`v13.x.x`](https://github.com/JamieMason/syncpack/tree/13.x.x?tab=readme-ov-file#syncpack)
+
 ## Installation
 
 ```bash
