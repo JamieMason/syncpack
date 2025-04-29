@@ -19,34 +19,49 @@ npm install --save-dev syncpack@alpha
 
 > All command line options can be combined to target packages and dependencies in multiple ways.
 
-### [lint](https://jamiemason.github.io/syncpack/command/lint) and [fix](https://jamiemason.github.io/syncpack/command/fix)
+### [lint](https://jamiemason.github.io/syncpack/command/lint)
 
-Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg. `react@16.4.2`, instead of a combination of `react@16.4.2`, `react@0.15.9`, and `react@16.0.0`.
+Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg. `react@17.0.2`, instead of a combination of `react@17.0.2`, `react@16.8.3`, and `react@16.14.0`.
 
 #### Examples
 
 ```bash
-# Find every issue in "dependencies" or "devDependencies"
+# Find all issues in "dependencies" or "devDependencies"
 syncpack lint --dependency-types prod,dev
+# Only lint issues in "react" specifically
+syncpack lint --dependencies react
 # Look for issues in dependencies containing "react" in the name
 syncpack lint --dependencies '**react**'
-# Autofix the above issues
-syncpack fix --dependencies '**react**'
+# Find issues in scoped packages only
+syncpack lint --dependencies '@types/**'
 # Find issues everywhere except "peerDependencies"
 syncpack lint --dependency-types '!peer'
-# Only look for issues where an exact version is used
-syncpack lint --specifier-types exact
-# Only look for issues where an exact version is specified
+# Only look for issues where an exact version is used (eg "1.2.3")
 syncpack lint --specifier-types exact
 # Sort dependencies by how many times they are used
 syncpack lint --sort count
-# Show a lot more detail about the issues
-syncpack lint --show hints,ignored,instances,statuses
 # See more examples
 syncpack lint --help
-syncpack fix --help
 # See a short summary of options
 syncpack lint -h
+```
+
+### [fix](https://jamiemason.github.io/syncpack/command/fix)
+
+Fix every autofixable issue found by `syncpack lint`.
+
+#### Examples
+
+```bash
+# Only fix issues in dependencies and devDependencies
+syncpack fix --dependency-types prod,dev
+# Only fix inconsistencies with exact versions (eg "1.2.3")
+syncpack fix --specifier-types exact
+# Only fix issues in "react" specifically
+syncpack fix --dependencies react
+# See more examples
+syncpack fix --help
+# See a short summary of options
 syncpack fix -h
 ```
 
