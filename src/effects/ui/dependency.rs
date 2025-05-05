@@ -7,6 +7,7 @@ use {
     version_group::VersionGroupVariant,
   },
   colored::*,
+  itertools::Itertools,
   log::{error, info},
 };
 
@@ -25,14 +26,14 @@ pub fn print(ctx: &Context, dependency: &Dependency, group_variant: &VersionGrou
 }
 
 pub fn print_ignored(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let (count_column, name, local_hint, alias_hint, _) = get_common_parts(ctx, dependency, group_variant);
+  let (count_column, name, local_hint, alias_hint, _, _) = get_common_parts(ctx, dependency, group_variant);
   let name = name.dimmed().to_string();
   let line = ui::util::join_line(vec![&count_column, &name, &local_hint, &alias_hint]);
   info!("{line}");
 }
 
 pub fn print_valid(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
+  let (count_column, name, local_hint, alias_hint, expected_specifier, _) = get_common_parts(ctx, dependency, group_variant);
   let expected_specifier = if !expected_specifier.is_empty() {
     expected_specifier.dimmed().to_string()
   } else {
@@ -43,14 +44,25 @@ pub fn print_valid(ctx: &Context, dependency: &Dependency, group_variant: &Versi
 }
 
 pub fn print_invalid(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
-  // let name = name.red().to_string();
+  let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) = get_common_parts(ctx, dependency, group_variant);
   let expected_specifier = if !expected_specifier.is_empty() {
     expected_specifier.red().to_string()
   } else {
     expected_specifier
   };
-  let line = ui::util::join_line(vec![&count_column, &name, &expected_specifier, &local_hint, &alias_hint]);
+  let status_codes = if !status_codes.is_empty() {
+    status_codes.dimmed().to_string()
+  } else {
+    status_codes
+  };
+  let line = ui::util::join_line(vec![
+    &count_column,
+    &name,
+    &expected_specifier,
+    &local_hint,
+    &alias_hint,
+    &status_codes,
+  ]);
   info!("{line}");
 }
 
@@ -59,19 +71,31 @@ pub fn print_outdated(ctx: &Context, dependency: &Dependency, group_variant: &Ve
 }
 
 pub fn print_suspect(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
+  let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) = get_common_parts(ctx, dependency, group_variant);
   // let name = name.yellow().to_string();
   let expected_specifier = if !expected_specifier.is_empty() {
     expected_specifier.yellow().to_string()
   } else {
     expected_specifier
   };
-  let line = ui::util::join_line(vec![&count_column, &name, &expected_specifier, &local_hint, &alias_hint]);
+  let status_codes = if !status_codes.is_empty() {
+    status_codes.dimmed().to_string()
+  } else {
+    status_codes
+  };
+  let line = ui::util::join_line(vec![
+    &count_column,
+    &name,
+    &expected_specifier,
+    &local_hint,
+    &alias_hint,
+    &status_codes,
+  ]);
   info!("{line}");
 }
 
 pub fn print_fixed(ctx: &Context, dependency: &Dependency, group_variant: &VersionGroupVariant) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier) = get_common_parts(ctx, dependency, group_variant);
+  let (count_column, name, local_hint, alias_hint, expected_specifier, _) = get_common_parts(ctx, dependency, group_variant);
   let icon = if ctx.config.cli.show_instances {
     "".to_string()
   } else {
@@ -86,11 +110,32 @@ pub fn print_fixed(ctx: &Context, dependency: &Dependency, group_variant: &Versi
   info!("{line}");
 }
 
+fn get_invalid_status_codes_in_brackets(ctx: &Context, dependency: &Dependency) -> String {
+  if !ctx.config.cli.show_status_codes {
+    return "".to_string();
+  }
+  let links = dependency
+    .get_states()
+    .iter()
+    .filter(|state| matches!(state, InstanceState::Invalid(_) | InstanceState::Suspect(_)))
+    .map(|state| state.get_name())
+    .unique()
+    .map(|state_name| ui::util::get_status_code_link(ctx, &state_name))
+    .sorted()
+    .collect::<Vec<String>>();
+  if links.is_empty() {
+    "".to_string()
+  } else {
+    let links = links.join(", ");
+    format!("({links})")
+  }
+}
+
 fn get_common_parts(
   ctx: &Context,
   dependency: &Dependency,
   group_variant: &VersionGroupVariant,
-) -> (String, String, String, String, String) {
+) -> (String, String, String, String, String, String) {
   let instances_len = dependency.instances.len();
   let count_column = ui::util::count_column(instances_len);
   let name = dependency.internal_name.to_string();
@@ -102,7 +147,13 @@ fn get_common_parts(
   } else {
     get_raw_expected_specifier(dependency)
   };
-  (count_column, name, local_hint, alias_hint, expected_specifier)
+  let status_codes = if ctx.config.cli.show_instances {
+    // don't list statuses when we are listing every instance
+    "".to_string()
+  } else {
+    get_invalid_status_codes_in_brackets(ctx, dependency)
+  };
+  (count_column, name, local_hint, alias_hint, expected_specifier, status_codes)
 }
 
 pub fn get_alias_hint(dependency: &Dependency) -> String {

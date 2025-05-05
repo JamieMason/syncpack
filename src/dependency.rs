@@ -77,13 +77,13 @@ impl Dependency {
       .fold(InstanceState::Unknown, |acc, instance| acc.max(instance.state.borrow().clone()))
   }
 
-  /// Return every unique instance state which applies to this group
+  /// Return every instance state which applies to this group
   pub fn get_states(&self) -> Vec<InstanceState> {
     self
       .instances
       .iter()
       .map(|instance| instance.state.borrow().clone())
-      .collect::<Vec<_>>()
+      .collect::<Vec<InstanceState>>()
   }
 
   /// Set the expected version specifier to the given value
