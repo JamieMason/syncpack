@@ -3,7 +3,6 @@ use {
   log::warn,
 };
 
-/// Run the fix command side effects
 pub fn run(ctx: Context) -> ! {
   let mut contains_unfixable_issues = false;
   let mut was_invalid = false;

@@ -1,14 +1,16 @@
 use crate::context::Context;
 
-/// Runs side-effects to write fixes to disk
+/// Write fixes to disk
 pub mod fix;
-/// Runs side-effects to lint and fix package.json formatting
+/// Lint and fix package.json formatting
 pub mod format;
-/// Runs side-effects to write lint messages to the UI
+/// Write lint messages to the UI
 pub mod lint;
+/// Query and list all instances in the project
+pub mod list;
 /// A shared module with methods for printing messages to the console
 pub mod ui;
-/// Runs side-effects to find and apply updates from the npm registry
+/// Find and apply updates from the npm registry
 pub mod update;
 
 /// Side effects in Syncpack commands are handled by structs which implement

@@ -1,6 +1,5 @@
 use crate::{context::Context, effects::ui};
 
-/// Run the fix command side effects
 pub fn run(ctx: Context) -> ! {
   if ctx.config.cli.check {
     check_formatting(ctx)

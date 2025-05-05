@@ -113,6 +113,14 @@ run-fluid-lint:
     RUST_BACKTRACE=1 cargo run -- lint --show all
 
 # Run the dev rust binary against a clone of microsoft/FluidFramework
+run-fluid-list:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    cd fixtures/fluid-framework
+    RUST_BACKTRACE=1 cargo run -- list
+
+# Run the dev rust binary against a clone of microsoft/FluidFramework
 run-fluid-fix:
     #!/usr/bin/env bash
     set -euxo pipefail

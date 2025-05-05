@@ -115,6 +115,35 @@ syncpack format --help
 syncpack format -h
 ```
 
+### [list](https://jamiemason.github.io/syncpack/command/list)
+
+Query and inspect all dependencies in your project, both valid and invalid.
+
+#### Examples
+
+```bash
+# Sort dependencies by how many times they are used
+syncpack list --sort count
+# Show every instance of each dependency, not just their names
+syncpack list --show instances
+# Show dependencies ignored in your syncpack config
+syncpack list --show ignored
+# Show highest level of detail
+syncpack list --show all
+# Choose only some values
+syncpack list --show hints,statuses
+# List all "peerDependencies"
+syncpack list --dependency-types peer
+# List all types packages
+syncpack list --dependencies '@types/**'
+# List instances of an exact version being used as a peer dependency
+syncpack list --specifier-types exact --show instances --dependency-types peer
+# See more examples
+syncpack list --help
+# See a short summary of options
+syncpack list -h
+```
+
 ## Badges
 
 - [![support on ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C4PY4P)

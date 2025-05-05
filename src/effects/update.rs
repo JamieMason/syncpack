@@ -7,7 +7,6 @@ use {
   log::{error, warn},
 };
 
-/// Run the update command side effects
 pub fn run(ctx: Context) -> ! {
   let mut was_outdated = false;
 

@@ -13,6 +13,7 @@ pub enum Subcommand {
   Fix,
   Format,
   Update,
+  List,
 }
 
 #[derive(Debug)]
@@ -77,6 +78,7 @@ impl Cli {
       Some(("fix", matches)) => Cli::from_arg_matches(Subcommand::Fix, matches),
       Some(("format", matches)) => Cli::from_arg_matches(Subcommand::Format, matches),
       Some(("update", matches)) => Cli::from_arg_matches(Subcommand::Update, matches),
+      Some(("list", matches)) => Cli::from_arg_matches(Subcommand::List, matches),
       _ => {
         std::process::exit(1);
       }
@@ -183,6 +185,19 @@ fn create() -> Command {
         .arg(specifier_types_option("update"))
         .arg(target_option("update")),
     )
+    .subcommand(
+      Command::new("list")
+        .about("Query and inspect all dependencies in your project, both valid and invalid")
+        .after_long_help(additional_help())
+        .arg(dependencies_option("list"))
+        .arg(dependency_types_option("list"))
+        .arg(log_levels_option("list"))
+        .arg(no_ansi_option("list"))
+        .arg(show_option_list("list"))
+        .arg(sort_option("list"))
+        .arg(source_option("list"))
+        .arg(specifier_types_option("list")),
+    )
 }
 
 fn dependencies_option(command: &str) -> Arg {
@@ -243,6 +258,40 @@ fn show_option_versions(command: &str) -> Arg {
     .value_delimiter(',')
     .value_parser(["hints", "instances", "statuses", "all", "none"])
     .default_value("all")
+}
+
+fn show_option_list(command: &str) -> Arg {
+  let short_help = "Control what information is displayed in terminal output";
+  Arg::new("show")
+    .long("show")
+    .help(short_help)
+    .long_help(cformat!(
+      r#"{short_help}
+
+<bold><underline>Values:</underline></bold>
+<blue>instances</>  Show every instance of every dependency
+<blue>hints</>      Show a hint alongside dependencies developed in this repo
+<blue>statuses</>   Show specifically how/why a dependency or instance is valid or invalid
+<blue>all</>        Shorthand to enable all of the above
+<blue>none</>       Shorthand to disable all of the above
+
+<bold><underline>Examples:</underline></bold>
+<dim>Only opt into showing status codes</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show statuses</>
+<dim>Show all instances, not just their names</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show instances</>
+<dim>Show ignored dependencies and instances</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show ignored</>
+<dim>Show highest level of detail</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show all</>
+<dim>Choose only some values</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show hints,statuses</>
+<dim>Show lowest level of detail</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --show none</>"#
+    ))
+    .value_delimiter(',')
+    .value_parser(["hints", "ignored", "instances", "statuses", "all", "none"])
+    .default_value("hints,statuses")
 }
 
 fn sort_option(command: &str) -> Arg {

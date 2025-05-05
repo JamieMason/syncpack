@@ -10,6 +10,7 @@ use {
     packages::Packages,
   },
   context::Context,
+  effects::list,
   log::{debug, error},
   std::error::Error,
   visit_formatting::visit_formatting,
@@ -82,6 +83,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
       ctx.fetch_all_updates().await;
       let ctx = visit_packages(ctx);
       update::run(ctx);
+    }
+    Subcommand::List => {
+      let ctx = visit_packages(ctx);
+      list::run(ctx);
     }
   };
 
