@@ -20,6 +20,7 @@ export default defineConfig({
       '/syncpack/version-groups/snapped-to/',
     '/config/version-groups/standard/':
       '/syncpack/version-groups/highest-semver/',
+    '/guide/status-codes/': '/syncpack/status/',
     // Deprecated: Removed
     '/config/dependency-types/': '/syncpack/guide/upgrading/',
     '/config/lint-formatting/': '/syncpack/guide/upgrading/',
@@ -70,7 +71,14 @@ export default defineConfig({
         },
         {
           label: 'Guides',
-          autogenerate: { directory: 'guide' },
+          items: [
+            { slug: 'guide/getting-started' },
+            { slug: 'guide/local-package-versions' },
+            { slug: 'guide/semver-groups' },
+            { slug: 'status', label: 'Status Codes' },
+            { slug: 'guide/upgrading' },
+            { slug: 'guide/version-groups' },
+          ],
         },
         {
           label: 'Commands',
@@ -85,7 +93,7 @@ export default defineConfig({
           autogenerate: { directory: 'semver-groups' },
         },
         {
-          label: 'Config',
+          label: 'Configuration File',
           autogenerate: { directory: 'config' },
         },
         {

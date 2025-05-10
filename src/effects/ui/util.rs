@@ -29,9 +29,21 @@ pub fn count_column(count: usize) -> String {
 
 /// Render the reason code as a clickable link
 pub fn get_status_code_link(ctx: &Context, pascal_case: &str) -> String {
-  let base_url = "https://jamiemason.github.io/syncpack/guide/status-codes/";
-  let lower_case = pascal_case.to_lowercase();
-  get_link(ctx, format!("{base_url}#{lower_case}"), pascal_case)
+  let base_url = "https://jamiemason.github.io/syncpack/status";
+  let kebab_case = pascal_case
+    .chars()
+    .enumerate()
+    .map(|(i, c)| {
+      if i == 0 {
+        c.to_lowercase().to_string()
+      } else if c.is_uppercase() {
+        format!("-{}", c.to_lowercase())
+      } else {
+        c.to_string()
+      }
+    })
+    .collect::<String>();
+  get_link(ctx, format!("{base_url}/{kebab_case}"), pascal_case)
 }
 
 /// Render a clickable link
