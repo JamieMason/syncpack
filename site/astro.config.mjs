@@ -26,7 +26,7 @@ export default defineConfig({
         },
       ],
       editLink: {
-        baseUrl: 'https://github.com/JamieMason/syncpack/edit/starlight/site/',
+        baseUrl: 'https://github.com/JamieMason/syncpack/edit/main/site/',
       },
       favicon: '/favicon.ico',
       logo: {
