@@ -8,10 +8,23 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Syncpack',
-      social: {
-        github: 'https://github.com/JamieMason/syncpack',
-        twitter: 'https://twitter.com/fold_left',
-      },
+      social: [
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/JamieMason/syncpack',
+        },
+        {
+          icon: 'blueSky',
+          label: 'Bluesky',
+          href: 'https://bsky.app/profile/foldleft.bsky.social',
+        },
+        {
+          icon: 'x.com',
+          label: 'X',
+          href: 'https://x.com/fold_left',
+        },
+      ],
       editLink: {
         baseUrl: 'https://github.com/JamieMason/syncpack/edit/starlight/site/',
       },
@@ -23,13 +36,6 @@ export default defineConfig({
         Sidebar: './src/components/Sidebar.astro',
       },
       customCss: ['./src/styles/custom.css'],
-      defaultLocale: 'en',
-      locales: {
-        en: {
-          label: 'English',
-          lang: 'en-GB',
-        },
-      },
       sidebar: [
         {
           label: 'Github',
