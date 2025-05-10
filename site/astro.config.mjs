@@ -6,6 +6,7 @@ export default defineConfig({
   site: 'https://jamiemason.github.io/syncpack',
   base: '/syncpack',
   redirects: {
+    // Hoisted
     '/config/semver-groups/ignored/': '/syncpack/semver-groups/ignored/',
     '/config/semver-groups/with-range/': '/syncpack/semver-groups/with-range/',
     '/config/version-groups/banned/': '/syncpack/version-groups/banned/',
@@ -19,6 +20,17 @@ export default defineConfig({
       '/syncpack/version-groups/snapped-to/',
     '/config/version-groups/standard/':
       '/syncpack/version-groups/highest-semver/',
+    // Deprecated: Removed
+    '/config/dependency-types/': '/syncpack/guide/upgrading/',
+    '/config/lint-formatting/': '/syncpack/guide/upgrading/',
+    '/config/lint-semver-ranges/': '/syncpack/guide/upgrading/',
+    '/config/lint-versions/': '/syncpack/guide/upgrading/',
+    '/config/specifier-types/': '/syncpack/guide/upgrading/',
+    // Deprecated: Moved
+    '/command/fix-mismatches/': '/command/fix',
+    '/command/set-semver-ranges/': '/command/fix',
+    '/command/lint-semver-ranges/': '/command/lint',
+    '/command/list-mismatches/': '/command/lint',
   },
   integrations: [
     starlight({
