@@ -5,6 +5,21 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://jamiemason.github.io/syncpack',
   base: '/syncpack',
+  redirects: {
+    '/config/semver-groups/ignored/': '/syncpack/semver-groups/ignored/',
+    '/config/semver-groups/with-range/': '/syncpack/semver-groups/with-range/',
+    '/config/version-groups/banned/': '/syncpack/version-groups/banned/',
+    '/config/version-groups/ignored/': '/syncpack/version-groups/ignored/',
+    '/config/version-groups/lowest-version/':
+      '/syncpack/version-groups/lowest-semver/',
+    '/config/version-groups/pinned/': '/syncpack/version-groups/pinned/',
+    '/config/version-groups/same-range/':
+      '/syncpack/version-groups/same-range/',
+    '/config/version-groups/snapped-to/':
+      '/syncpack/version-groups/snapped-to/',
+    '/config/version-groups/standard/':
+      '/syncpack/version-groups/highest-semver/',
+  },
   integrations: [
     starlight({
       title: 'Syncpack',
@@ -48,6 +63,14 @@ export default defineConfig({
         {
           label: 'Commands',
           autogenerate: { directory: 'command' },
+        },
+        {
+          label: 'Version Groups',
+          autogenerate: { directory: 'version-groups' },
+        },
+        {
+          label: 'Semver Groups',
+          autogenerate: { directory: 'semver-groups' },
         },
         {
           label: 'Config',
