@@ -1,0 +1,5 @@
+import { Code } from "astro:components";
+
+Cause syncpack to behave identically as when applying fixes, but never writing to disk.
+
+<Code code={`syncpack ${props.command} --dry-run`} lang="bash" />

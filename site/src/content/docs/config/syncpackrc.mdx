@@ -4,7 +4,7 @@ title: .syncpackrc
 
 ## Configuration File
 
-Syncpack uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) to search the current and ancestor directories for a:
+Syncpack uses [cosmiconfig](HREF_COSMICONFIG) to search the current and ancestor directories for a:
 
 - `.syncpackrc` file in JSON or YAML format.
 - `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`, `.syncpackrc.cjs`, `syncpack.config.js`, `syncpack.config.cjs` file.
@@ -27,47 +27,66 @@ Your config file only needs to define values for those you want to change from t
 const config = {
   customTypes: {
     dev: {
-      strategy: 'versionsByName',
-      path: 'devDependencies',
+      strategy: "versionsByName",
+      path: "devDependencies",
     },
     local: {
-      strategy: 'name~version',
-      namePath: 'name',
-      path: 'version',
+      strategy: "name~version",
+      namePath: "name",
+      path: "version",
     },
     overrides: {
-      strategy: 'versionsByName',
-      path: 'overrides',
+      strategy: "versionsByName",
+      path: "overrides",
     },
     peer: {
-      strategy: 'versionsByName',
-      path: 'peerDependencies',
+      strategy: "versionsByName",
+      path: "peerDependencies",
     },
     pnpmOverrides: {
-      strategy: 'versionsByName',
-      path: 'pnpm.overrides',
+      strategy: "versionsByName",
+      path: "pnpm.overrides",
     },
     prod: {
-      strategy: 'versionsByName',
-      path: 'dependencies',
+      strategy: "versionsByName",
+      path: "dependencies",
     },
     resolutions: {
-      strategy: 'versionsByName',
-      path: 'resolutions',
+      strategy: "versionsByName",
+      path: "resolutions",
     },
   },
-  dependencyTypes: ['**'],
-  filter: '.',
+  dependencyTypes: ["**"],
+  filter: ".",
   formatBugs: true,
   formatRepository: true,
-  indent: '  ',
+  indent: "  ",
   semverGroups: [],
-  sortAz: ['bin', 'contributors', 'dependencies', 'devDependencies', 'keywords', 'peerDependencies', 'resolutions', 'scripts'],
-  sortExports: ['types', 'node-addons', 'node', 'browser', 'import', 'require', 'development', 'production', 'default'],
-  sortFirst: ['name', 'description', 'version', 'author'],
+  sortAz: [
+    "bin",
+    "contributors",
+    "dependencies",
+    "devDependencies",
+    "keywords",
+    "peerDependencies",
+    "resolutions",
+    "scripts",
+  ],
+  sortExports: [
+    "types",
+    "node-addons",
+    "node",
+    "browser",
+    "import",
+    "require",
+    "development",
+    "production",
+    "default",
+  ],
+  sortFirst: ["name", "description", "version", "author"],
   sortPackages: true,
-  source: ['package.json', 'packages/*/package.json'],
-  specifierTypes: ['**'],
+  source: ["package.json", "packages/*/package.json"],
+  specifierTypes: ["**"],
   versionGroups: [],
 };
 

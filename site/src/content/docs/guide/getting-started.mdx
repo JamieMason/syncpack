@@ -2,9 +2,9 @@
 title: Getting Started
 ---
 
-import SupportedRanges from '@partials/supported-ranges.mdx';
-import VersionGroupList from '@partials/version-group-list.mdx';
-import Details from '@site/components/details.astro';
+import SupportedRanges from "@partials/supported-ranges.mdx";
+import VersionGroupList from "@partials/version-group-list.mdx";
+import Details from "@site/components/details.astro";
 
 Syncpack is a command-line tool to manage multiple package.json files.
 
@@ -19,7 +19,7 @@ Syncpack is a command-line tool to manage multiple package.json files.
 
 ## Quick run
 
-The quickest way to run syncpack to try it is via [npx](https://docs.npmjs.com/cli/v7/commands/npx).
+The quickest way to run syncpack to try it is via [npx](HREF_NPX).
 
 ```bash
 npx syncpack list
@@ -33,7 +33,7 @@ It's best to install syncpack as a dev dependency, so that everyone working on y
 npm install syncpack --save-dev
 ```
 
-Anyone on the team can now use [npm exec](https://docs.npmjs.com/cli/v10/commands/npm-exec) to access their local installation of syncpack:
+Anyone on the team can now use [npm exec](HREF_NPM_EXEC) to access their local installation of syncpack:
 
 ```bash
 npm exec syncpack -- list
@@ -91,7 +91,7 @@ Here are two common examples where a single version policy is unsuitable.
 
 1. ### `workspace:*`
 
-   Projects using the [pnpm workspace protocol](https://pnpm.io/workspaces#workspace-protocol-workspace) may use `workspace:*` when referencing a local package in `devDependencies`, but the latest semver version in `dependencies` so it is understood by other package managers.
+   Projects using the [pnpm workspace protocol](HREF_WORKSPACE_PROTOCOL) may use `workspace:*` when referencing a local package in `devDependencies`, but the latest semver version in `dependencies` so it is understood by other package managers.
 
    Again, this is a mismatch but a deliberate one which syncpack needs to be informed of.
 

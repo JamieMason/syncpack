@@ -53,12 +53,12 @@ The Developers of this project:
 
 1. Provide a Web Service which their customers interact with via their Node.js Client and various Plugins.
 1. The Plugins are developed to be compatible with any version of the Node.js Client in the entire 1.x range, as defined in their `peerDependencies`. Companies around the world depend on this Client and Plugin and there is no reason to impose that all of them must use the same exact version of the Client.
-1. Use the [pnpm `workspace:*`]({import.meta.env.HREF_WORKSPACE_PROTOCOL}) protocol to ensure that the local workspace package of the Client is resolved when working locally on the Plugin.
+1. Use the [pnpm `workspace:*`](HREF_WORKSPACE_PROTOCOL) protocol to ensure that the local workspace package of the Client is resolved when working locally on the Plugin.
 1. Want exact versions of the Client and its Retry Plugin when running their Dashboard UI in production.
 
 ## The `local` dependency type
 
-The "local" [`dependencyType`](/syncpack/config/dependency-types) relates to the [`version`]({import.meta.env.HREF_VERSION}) properties of the package.json files from your own packages being developed in your monorepo.
+The "local" [`dependencyType`](/syncpack/config/dependency-types) relates to the [`version`](HREF_VERSION) properties of the package.json files from your own packages being developed in your monorepo.
 
 When `local` is enabled, syncpack can see that:
 

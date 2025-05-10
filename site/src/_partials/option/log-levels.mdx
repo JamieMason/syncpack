@@ -1,0 +1,22 @@
+import { Code } from "astro:components";
+
+Control how detailed the log output should be
+
+| Level | What is written to this channel                                          |
+| ----- | ------------------------------------------------------------------------ |
+| info  | The standard output which forms syncpack\'s UI, including lint issues    |
+| warn  | Possible mistakes in your setup, or highlights of known gaps in syncpack |
+| error | Fatal exceptions or errors outside the normal running of syncpack        |
+| debug | Extremely verbose detail on why syncpack assigns each status code        |
+
+<Code
+  code={`
+# Turn off logging completely
+syncpack ${props.command} --log-levels off
+# Only show verbose debugging logs
+syncpack ${props.command} --log-levels debug
+# Show everything
+syncpack ${props.command} --log-levels error,warn,info,debug
+`.trim()}
+  lang="bash"
+/>

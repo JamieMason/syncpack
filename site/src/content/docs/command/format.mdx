@@ -2,32 +2,49 @@
 title: format
 ---
 
-import ConfigOption from '@partials/option/config.mdx';
-import HelpOption from '@partials/option/help.mdx';
-import IndentOption from '@partials/option/indent.mdx';
-import SourceOption from '@partials/option/source.mdx';
-import LogLevelOption from '@partials/option/log-level.mdx';
+import { Badge } from "@astrojs/starlight/components";
+import CheckOption from "@partials/option/check.mdx";
+import ConfigOption from "@partials/option/config.mdx";
+import DryRunOption from "@partials/option/dry-run.mdx";
+import HelpOption from "@partials/option/help.mdx";
+import LogLevelsOption from "@partials/option/log-levels.mdx";
+import NoAnsiOption from "@partials/option/no-ansi.mdx";
+import QuoteFilters from "@partials/tips/quote-filters.mdx";
+import SourceOption from "@partials/option/source.mdx";
 
-Organise package.json files according to a conventional format, where fields appear in a predictable order and nested fields are ordered alphabetically. Shorthand properties are used where available, such as the `"repository"` and `"bugs"` fields.
+Sort package.json fields into a predictable order and nested fields alphabetically.
 
-## CLI Options
+## Options
 
-### source
+<QuoteFilters />
 
-<SourceOption command="format" />
+### --check
 
-### config
+<CheckOption
+  command="format"
+  summary="Lint formatting instead of fixing it and exit with a status code of 1 if issues are found."
+/>
+
+### --config <Badge text="<file-path>" />
 
 <ConfigOption command="format" />
 
-### indent
+### --dry-run
 
-<IndentOption command="format" />
+<DryRunOption command="format" />
 
-### help
+### --log-levels <Badge text="<comma-separated-log-level-names>" />
+
+<LogLevelsOption command="format" />
+
+### --no-ansi
+
+<NoAnsiOption command="format" />
+
+### --source <Badge text="<file-pattern>" />
+
+<SourceOption command="format" />
+
+### --help
 
 <HelpOption command="format" />
-
-## Troubleshooting
-
-<LogLevelOption command="format" />

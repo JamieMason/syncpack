@@ -1,0 +1,25 @@
+import { Code } from "astro:components";
+
+Control what information is displayed in terminal output
+
+| Name      | Description                                                            |
+| --------- | ---------------------------------------------------------------------- |
+| instances | Show every instance of every dependency                                |
+| hints     | Show a hint alongside dependencies developed in this repo              |
+| statuses  | Show specifically how/why a dependency or instance is valid or invalid |
+| all       | Shorthand to enable all of the above                                   |
+| none      | Shorthand to disable all of the above                                  |
+
+<Code
+  code={`
+# Only opt into showing status codes
+syncpack ${props.command} --show statuses
+# Show all instances, not just their names
+syncpack ${props.command} --show instances
+# Show highest level of detail
+syncpack ${props.command} --show all
+# Show lowest level of detail
+syncpack ${props.command} --show none
+`.trim()}
+  lang="bash"
+/>

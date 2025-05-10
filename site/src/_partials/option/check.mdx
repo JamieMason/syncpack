@@ -1,0 +1,8 @@
+import { Code } from "astro:components";
+
+<p>{props.summary}</p>
+
+<Code
+  code={`syncpack ${props.command} --check`}
+  lang="bash"
+/>

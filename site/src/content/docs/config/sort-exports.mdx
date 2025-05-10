@@ -4,13 +4,23 @@ title: sortExports
 
 When using the `format` command, enables sorting the `exports` property of `package.json` files.
 
-By default, Syncpack will order properties according to the Node.js documentation for [conditional exports](https://nodejs.org/api/packages.html#conditional-exports).
+By default, Syncpack will order properties according to the Node.js documentation for [conditional exports](HREF_CONDITIONAL_EXPORTS).
 
 ## Default Value
 
 ```json title=".syncpackrc"
 {
-  "sortExports": ["types", "node-addons", "node", "browser", "import", "require", "development", "production", "default"]
+  "sortExports": [
+    "types",
+    "node-addons",
+    "node",
+    "browser",
+    "import",
+    "require",
+    "development",
+    "production",
+    "default"
+  ]
 }
 ```
 

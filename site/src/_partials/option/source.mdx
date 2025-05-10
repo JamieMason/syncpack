@@ -1,7 +1,9 @@
-import { Code } from 'astro:components';
-export const issueHref = 'https://github.com/JamieMason/syncpack/issues/66#issuecomment-1146011769';
+import { Code } from "astro:components";
+import ResolvingPackages from "@partials/resolving-packages.mdx";
 
-Override your [source](/syncpack/config/source) configuration to run <code>{`syncpack ${props.command}`}</code> on only some package.json files.
+Only run <code>{`syncpack ${props.command}`}</code> on package.json files matching the provided pattern(s).
+
+<ResolvingPackages />
 
 <Code
   code={`# only the root package
@@ -12,9 +14,3 @@ syncpack ${props.command} --source 'packages/beta-*'
 syncpack ${props.command} --source 'package.json' --source 'packages/beta-*'`}
   lang="bash"
 />
-
-:::tip
-
-Add quotes around your `--source` patterns so your shell does not interpret them before they're received by syncpack.
-
-:::

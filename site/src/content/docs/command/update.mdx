@@ -2,42 +2,71 @@
 title: update
 ---
 
-import ConfigOption from '@partials/option/config.mdx';
-import FilterOption from '@partials/option/filter.mdx';
-import HelpOption from '@partials/option/help.mdx';
-import SourceOption from '@partials/option/source.mdx';
-import SpecsOption from '@partials/option/specs.mdx';
-import TypesOption from '@partials/option/types.mdx';
-import LogLevelOption from '@partials/option/log-level.mdx';
+import { Badge } from "@astrojs/starlight/components";
+import CheckOption from "@partials/option/check.mdx";
+import ConfigOption from "@partials/option/config.mdx";
+import DependenciesOption from "@partials/option/dependencies.mdx";
+import DependencyTypesOption from "@partials/option/dependency-types.mdx";
+import DryRunOption from "@partials/option/dry-run.mdx";
+import HelpOption from "@partials/option/help.mdx";
+import LogLevelsOption from "@partials/option/log-levels.mdx";
+import NoAnsiOption from "@partials/option/no-ansi.mdx";
+import QuoteFilters from "@partials/tips/quote-filters.mdx";
+import ShowOption from "@partials/option/show-list.mdx";
+import SortOption from "@partials/option/sort.mdx";
+import SourceOption from "@partials/option/source.mdx";
+import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
+import TargetOption from "@partials/option/target.mdx";
 
-Interactively update packages to the latest versions from the npm registry.
+Update to the latest versions on the npm registry.
 
-## CLI Options
+## Options
 
-### source
+<QuoteFilters />
 
-<SourceOption command="update" />
+### --check
 
-### filter
+<CheckOption
+  command="update"
+  summary="List outdated dependencies instead of updating them and exit with a status code of 1 if updates are found."
+/>
 
-<FilterOption command="update" />
-
-### config
+### --config <Badge text="<file-path>" />
 
 <ConfigOption command="update" />
 
-### specs
+### --dependencies <Badge text="<dependency-name-pattern>" />
 
-<SpecsOption command="update" />
+<DependenciesOption command="update" />
 
-### types
+### --dependency-types <Badge text="<comma-separated-dependency-type-names>" />
 
-<TypesOption command="update" />
+<DependencyTypesOption command="update" />
 
-### help
+### --dry-run
+
+<DryRunOption command="update" />
+
+### --log-levels <Badge text="<comma-separated-log-level-names>" />
+
+<LogLevelsOption command="update" />
+
+### --no-ansi
+
+<NoAnsiOption command="update" />
+
+### --source <Badge text="<file-pattern>" />
+
+<SourceOption command="update" />
+
+### --specifier-types <Badge text="<comma-separated-specifier-type-names>" />
+
+<SpecifierTypesOption command="update" />
+
+### --target <Badge text="<greediness>" />
+
+<TargetOption command="update" />
+
+### --help
 
 <HelpOption command="update" />
-
-## Troubleshooting
-
-<LogLevelOption command="update" />

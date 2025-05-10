@@ -1,0 +1,23 @@
+import { Code } from "astro:components";
+
+Include dependencies whose name matches the given glob pattern.
+
+To exclude, put a `!` at the start of your query.
+
+<Code
+  code={`
+# Exact match for "react"
+syncpack ${props.command} --dependencies 'react'
+# Substring match for "react"
+syncpack ${props.command} --dependencies '**react**'
+# All dependencies under the AWS SDK scope
+syncpack ${props.command} --dependencies '@aws-sdk/**'
+# Exact match for "react" or "webpack" (2 approaches)
+syncpack ${props.command} --dependencies 'react' --dependencies 'webpack'
+syncpack ${props.command} --dependencies '{react,webpack}'
+# Substring match for "react" or "webpack"  (2 approaches)
+syncpack ${props.command} --dependencies '**react**' --dependencies '**webpack**'
+syncpack ${props.command} --dependencies '**{react,webpack}**'
+`.trim()}
+  lang="bash"
+/>

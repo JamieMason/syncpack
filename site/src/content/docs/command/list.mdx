@@ -2,42 +2,61 @@
 title: list
 ---
 
-import ConfigOption from '@partials/option/config.mdx';
-import FilterOption from '@partials/option/filter.mdx';
-import HelpOption from '@partials/option/help.mdx';
-import SourceOption from '@partials/option/source.mdx';
-import SpecsOption from '@partials/option/specs.mdx';
-import TypesOption from '@partials/option/types.mdx';
-import LogLevelOption from '@partials/option/log-level.mdx';
+import { Badge } from "@astrojs/starlight/components";
+import ConfigOption from "@partials/option/config.mdx";
+import DependenciesOption from "@partials/option/dependencies.mdx";
+import DependencyTypesOption from "@partials/option/dependency-types.mdx";
+import HelpOption from "@partials/option/help.mdx";
+import LogLevelsOption from "@partials/option/log-levels.mdx";
+import NoAnsiOption from "@partials/option/no-ansi.mdx";
+import QuoteFilters from "@partials/tips/quote-filters.mdx";
+import ShowOption from "@partials/option/show-list.mdx";
+import SortOption from "@partials/option/sort.mdx";
+import SourceOption from "@partials/option/source.mdx";
+import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
-List all dependencies required by your packages.
+Query and inspect all dependencies in your project, both valid and invalid.
 
-## CLI Options
+## Options
 
-### source
+<QuoteFilters />
 
-<SourceOption command="list" />
-
-### filter
-
-<FilterOption command="list" />
-
-### config
+### --config <Badge text="<file-path>" />
 
 <ConfigOption command="list" />
 
-### specs
+### --dependencies <Badge text="<dependency-name-pattern>" />
 
-<SpecsOption command="list" />
+<DependenciesOption command="list" />
 
-### types
+### --dependency-types <Badge text="<comma-separated-dependency-type-names>" />
 
-<TypesOption command="list" />
+<DependencyTypesOption command="list" />
 
-### help
+### --log-levels <Badge text="<comma-separated-log-level-names>" />
+
+<LogLevelsOption command="list" />
+
+### --no-ansi
+
+<NoAnsiOption command="list" />
+
+### --show <Badge text="<comma-separated-detail-names>" />
+
+<ShowOption command="list" />
+
+### --sort <Badge text="<choice>" />
+
+<SortOption command="list" />
+
+### --source <Badge text="<file-pattern>" />
+
+<SourceOption command="list" />
+
+### --specifier-types <Badge text="<comma-separated-specifier-type-names>" />
+
+<SpecifierTypesOption command="list" />
+
+### --help
 
 <HelpOption command="list" />
-
-## Troubleshooting
-
-<LogLevelOption command="list" />

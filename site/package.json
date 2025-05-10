@@ -8,6 +8,9 @@
     "sharp": "^0.34.1",
     "typescript": "^5.8.3"
   },
+  "devDependencies": {
+    "unist-util-visit": "^5.0.0"
+  },
   "private": true,
   "scripts": {
     "astro": "astro",

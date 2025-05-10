@@ -1,12 +1,18 @@
-| Value                | Example                                                                             |
-| :------------------- | :---------------------------------------------------------------------------------- |
-| `alias`              | `npm:foo@1.2.3`                                                                     |
-| `exact`              | `8.1.2`                                                                             |
-| `file`               | `file:path/to/foo.tgz`, `file:path/to/directory`                                    |
-| `hosted-git`         | `git+https://github.com/user/foo`, `git+ssh://git@notgithub.com/user/foo#1.2.3` etc |
-| `latest`             | `*` or `latest`                                                                     |
-| `range`              | `^4.1.1`, `>=5.0.0`, `~1.2.1` etc                                                   |
-| `tag`                | `alpha`, `canary`                                                                   |
-| `unsupported`        | `$typescript`, `1.typo.wat`                                                         |
-| `url`                | `https://server.com/foo.tgz`                                                        |
-| `workspace-protocol` | `workspace:*`, `workspace:~`, `workspace:^`                                         |
+| Value              | Examples                                      |
+| :----------------- | :-------------------------------------------- |
+| alias              | `npm:@preact/compat`                          |
+| exact              | `1.2.3,` `1.2.3-alpha, 1.2.3-rc.1`            |
+| file               | `file:./path/to/package`                      |
+| git                | `git+https://github.com/user/repo.git`        |
+| latest             | `latest`, `\*`                                |
+| major              | `1`                                           |
+| minor              | `1.2`                                         |
+| missing            | A local package.json with a missing `version` |
+| range              | `^1.2.3`, `^1.2.3-alpha`, `^1.2.3-rc.1        |
+| range-complex      | `^1.2.3-alpha \|\| ~1.2.3-rc.1`               |
+| range-major        | `^1`                                          |
+| range-minor        | `^1.2`                                        |
+| tag                | `alpha`                                       |
+| unsupported        | `wtf\|#\|broken`                              |
+| url                | `https://example.com/package`                 |
+| workspace-protocol | `workspace:\*`                                |

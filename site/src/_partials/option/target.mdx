@@ -1,0 +1,15 @@
+import { Code } from "astro:components";
+
+Limit updates to only those within the given semver portion.
+
+<Code
+  code={`
+# Accept any update in latest (x.x.x)
+syncpack ${props.command} --target latest
+# Only update minor versions (1.x.x)
+syncpack ${props.command} --target minor
+# Only update patch versions (1.2.x)
+syncpack ${props.command} --target patch
+`.trim()}
+  lang="bash"
+/>

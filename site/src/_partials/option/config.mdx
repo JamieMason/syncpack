@@ -1,5 +1,10 @@
-import { Code } from 'astro:components';
+import { Code } from "astro:components";
 
-Syncpack uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) to discover your config file, but a custom location can be provided instead.
+`syncpack` searches the monorepo root directory for a config file which follows its naming convention, but this can be overridden by providing a path to a specific configuration file instead.
 
-<Code code={`syncpack ${props.command} --config ./config/.syncpackrc`} lang="bash" />
+The only requirement is that the file must have a file extension and that it is one of `.cjs`, `.cts`, `.js`, `.json`, `.mjs`, `.mts`, `.ts`, `.yaml`, or `.yml`.
+
+<Code
+  code={`syncpack ${props.command} --config ./config/syncpack.json`}
+  lang="bash"
+/>

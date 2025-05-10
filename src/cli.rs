@@ -506,11 +506,7 @@ fn target_option(command: &str) -> Arg {
 fn additional_help() -> String {
   cformat!(
     r#"<bold><underline>References:</underline></bold>
-- Documentation: <blue><underline>https://jamiemason.github.io/syncpack</></>
-- Learn glob patterns: <blue><underline>https://github.com/isaacs/node-glob#glob-primer</></>
-- lerna.json: <blue><underline>https://github.com/lerna/lerna#lernajson</></>
-- Yarn Workspaces: <blue><underline>https://yarnpkg.com/lang/en/docs/workspaces</></>
-- Pnpm Workspaces: <blue><underline>https://pnpm.js.org/en/workspaces</></>"#
+- Documentation: <blue><underline>https://jamiemason.github.io/syncpack</></>"#
   )
 }
 

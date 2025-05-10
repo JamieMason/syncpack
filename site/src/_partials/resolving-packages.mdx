@@ -1,0 +1,7 @@
+package.json files are resolved in this order of precedence:
+
+1.  If `--source` [glob](HREF_GLOB) patterns are provided, use those.
+2.  If using [Yarn Workspaces](HREF_YARN_WORKSPACES), read `workspaces` from `./package.json`.
+3.  If using [Lerna](HREF_LERNA), read `packages` from `./lerna.json`.
+4.  If using [pnpm](HREF_PNPM), read `packages` from `./pnpm-workspace.yaml`.
+5.  Default to `'package.json'` and `'packages/*/package.json'`.

@@ -1,7 +1,7 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import { visit } from 'unist-util-visit';
 
-// https://astro.build/config
 export default defineConfig({
   site: 'https://jamiemason.github.io/syncpack',
   base: '/syncpack',
@@ -32,6 +32,62 @@ export default defineConfig({
     '/command/set-semver-ranges/': '/command/fix',
     '/command/lint-semver-ranges/': '/command/lint',
     '/command/list-mismatches/': '/command/lint',
+  },
+  markdown: {
+    smartypants: false,
+    remarkPlugins: [
+      function globalReferenceLinks() {
+        const linksById = {
+          CONFIG_CUSTOM_TYPES: '/syncpack/config/custom-types/',
+          GUIDE_DEPENDENCY_TYPES: '/syncpack/guide/dependency-types/',
+          GUIDE_SPECIFIER_TYPES: '/syncpack/guide/specifier-types/',
+          HREF_ANSI: 'https://en.wikipedia.org/wiki/ANSI_escape_code',
+          HREF_AWS_SDK: 'https://aws.amazon.com/sdk-for-javascript/',
+          HREF_CONDITIONAL_EXPORTS:
+            'https://nodejs.org/api/packages.html#conditional-exports',
+          HREF_COSMICONFIG: 'https://github.com/cosmiconfig/cosmiconfig',
+          HREF_DEPENDENCIES:
+            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies',
+          HREF_DEV_DEPENDENCIES:
+            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#devDependencies',
+          HREF_ENGINES:
+            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#engines',
+          HREF_GLOB: 'https://github.com/rust-lang/glob',
+          HREF_LERNA: 'https://lerna.js.org/',
+          HREF_NEW_ISSUE:
+            'https://github.com/JamieMason/syncpack-github-action/issues/new',
+          HREF_NPM_EXEC: 'https://docs.npmjs.com/cli/v10/commands/npm-exec',
+          HREF_NPX: 'https://docs.npmjs.com/cli/v7/commands/npx',
+          HREF_OVERRIDES:
+            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#overrides',
+          HREF_PACKAGE_MANAGER:
+            'https://nodejs.org/api/packages.html#packagemanager',
+          HREF_PEER_DEPENDENCIES:
+            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#peerDependencies',
+          HREF_PNPM: 'https://pnpm.js.org/',
+          HREF_PNPM_OVERRIDES: 'https://pnpm.io/package_json#pnpmoverrides',
+          HREF_RESOLUTIONS:
+            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#resolutions',
+          HREF_SYNCPACK_GITHUB_ACTION:
+            'https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions',
+          HREF_TYPES: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
+          HREF_VERSION:
+            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#version',
+          HREF_WORKSPACE_PROTOCOL:
+            'https://pnpm.io/workspaces#workspace-protocol-workspace',
+          HREF_YARN_WORKSPACES: 'https://yarnpkg.com/lang/en/docs/workspaces/',
+        };
+
+        return function transformer(tree) {
+          visit(tree, 'link', node => {
+            if (linksById[node.url]) {
+              node.url = linksById[node.url];
+            }
+          });
+          return tree;
+        };
+      },
+    ],
   },
   integrations: [
     starlight({
@@ -73,8 +129,11 @@ export default defineConfig({
           label: 'Guides',
           items: [
             { slug: 'guide/getting-started' },
+            { slug: 'guide/dependency-types' },
+            { slug: 'guide/glossary' },
             { slug: 'guide/local-package-versions' },
             { slug: 'guide/semver-groups' },
+            { slug: 'guide/specifier-types' },
             { slug: 'status', label: 'Status Codes' },
             { slug: 'guide/upgrading' },
             { slug: 'guide/version-groups' },
