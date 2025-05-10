@@ -2,14 +2,14 @@
 title: Ignored
 ---
 
-import RequiredPill from '@site/components/pill/required.astro';
-import Packages from '@partials/group-config/packages.mdx';
-import Dependencies from '@partials/group-config/dependencies.mdx';
-import DependencyTypes from '@partials/group-config/dependency-types.mdx';
-import SpecifierTypes from '@partials/group-config/specifier-types.mdx';
-import Label from '@partials/group-config/label.mdx';
-import Example from '@partials/examples/ignore-deps.mdx';
-import Details from '@site/components/details.astro';
+import { Badge } from "@astrojs/starlight/components";
+import Packages from "@partials/group-config/packages.mdx";
+import Dependencies from "@partials/group-config/dependencies.mdx";
+import DependencyTypes from "@partials/group-config/dependency-types.mdx";
+import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
+import Label from "@partials/group-config/label.mdx";
+import Example from "@partials/examples/ignore-deps.mdx";
+import Details from "@site/components/details.astro";
 
 Have syncpack ignore the versions of these dependencies completely.
 
@@ -22,10 +22,7 @@ Have syncpack ignore the versions of these dependencies completely.
 
 ## Configuration
 
-<RequiredPill>
-  {/**/}
-  ### isIgnored
-</RequiredPill>
+### isIgnored <Badge text="Required" variant="danger" />
 
 This property activates this behaviour for a given Version Group.
 
@@ -40,27 +37,22 @@ This property activates this behaviour for a given Version Group.
 }
 ```
 
-<Dependencies>
-  {/**/}
-  ### dependencies
-</Dependencies>
+### dependencies <Badge text="Optional" variant="note" />
 
-<DependencyTypes>
-  {/**/}
-  ### dependencyTypes
-</DependencyTypes>
+<Dependencies />
 
-<SpecifierTypes>
-  {/**/}
-  ### specifierTypes
-</SpecifierTypes>
+### dependencyTypes <Badge text="Optional" variant="note" />
 
-<Label>
-  {/**/}
-  ### label
-</Label>
+<DependencyTypes />
 
-<Packages>
-  {/**/}
-  ### packages
-</Packages>
+### specifierTypes <Badge text="Optional" variant="note" />
+
+<SpecifierTypes />
+
+### label <Badge text="Optional" variant="note" />
+
+<Label />
+
+### packages <Badge text="Optional" variant="note" />
+
+<Packages />

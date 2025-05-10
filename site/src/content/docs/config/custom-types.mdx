@@ -2,8 +2,8 @@
 title: customTypes
 ---
 
+import { Badge } from '@astrojs/starlight/components';
 import NodeEngineExample from '@partials/examples/engines-node.mdx';
-import RequiredPill from '@site/components/pill/required.astro';
 import Details from '@site/components/details.astro';
 
 Extend syncpack to manage other parts of your package.json files than those provided by default.
@@ -18,9 +18,7 @@ Custom types behave indentically to the default dependency types (such as `prod`
   <NodeEngineExample level="h4" />
 </Details>
 
-## \[name\]
-
-<RequiredPill />
+## \[name\] <Badge text="Required" variant="danger" />
 
 The key of each custom type is its name, this is equivalent to the default names such as `prod` and `dev` and can be used in all of the same places those can:
 
@@ -28,15 +26,11 @@ The key of each custom type is its name, this is equivalent to the default names
 1. `versionGroup.dependencyTypes`
 1. `semverGroup.dependencyTypes`
 
-## \[name\].path
-
-<RequiredPill />
+## \[name\].path <Badge text="Required" variant="danger" />
 
 Where the version can be found in each package.json file, such as `engines`, `packageManager` or `some.nested.property`.
 
-## \[name\].strategy
-
-<RequiredPill />
+## \[name\].strategy <Badge text="Required" variant="danger" />
 
 A strategy defines how syncpack needs to read and write dependency names and versions, there are 3 to choose from:
 

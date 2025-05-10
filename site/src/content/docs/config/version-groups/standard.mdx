@@ -2,7 +2,7 @@
 title: Standard
 ---
 
-import OptionalPill from '@site/components/pill/optional.astro';
+import { Badge } from "@astrojs/starlight/components";
 import Packages from '@partials/group-config/packages.mdx';
 import Dependencies from '@partials/group-config/dependencies.mdx';
 import DependencyTypes from '@partials/group-config/dependency-types.mdx';
@@ -11,10 +11,7 @@ import Label from '@partials/group-config/label.mdx';
 
 ## Configuration
 
-<OptionalPill>
-  {/**/}
-  ### preferVersion
-</OptionalPill>
+### preferVersion <Badge text="Optional" variant="note" />
 
 Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
 
@@ -30,27 +27,22 @@ To set this as your standard policy, create a version group which applies to eve
 }
 ```
 
-<Dependencies>
-  {/**/}
-  ### dependencies
-</Dependencies>
+### dependencies <Badge text="Optional" variant="note" />
 
-<DependencyTypes>
-  {/**/}
-  ### dependencyTypes
-</DependencyTypes>
+<Dependencies />
 
-<SpecifierTypes>
-  {/**/}
-  ### specifierTypes
-</SpecifierTypes>
+### dependencyTypes <Badge text="Optional" variant="note" />
 
-<Label>
-  {/**/}
-  ### label
-</Label>
+<DependencyTypes />
 
-<Packages>
-  {/**/}
-  ### packages
-</Packages>
+### specifierTypes <Badge text="Optional" variant="note" />
+
+<SpecifierTypes />
+
+### label <Badge text="Optional" variant="note" />
+
+<Label />
+
+### packages <Badge text="Optional" variant="note" />
+
+<Packages />

@@ -2,7 +2,7 @@
 title: Pinned
 ---
 
-import RequiredPill from '@site/components/pill/required.astro';
+import { Badge } from '@astrojs/starlight/components';
 import Packages from '@partials/group-config/packages.mdx';
 import Dependencies from '@partials/group-config/dependencies.mdx';
 import DependencyTypes from '@partials/group-config/dependency-types.mdx';
@@ -22,10 +22,7 @@ Pin the version of all dependencies in this group to match a specific version yo
 
 ## Configuration
 
-<RequiredPill>
-  {/**/}
-  ### pinVersion
-</RequiredPill>
+### pinVersion <Badge text="Required" variant="danger" />
 
 The version specifier you would like to use, this can be anything supported by a package manager.
 
@@ -40,27 +37,22 @@ The version specifier you would like to use, this can be anything supported by a
 }
 ```
 
-<Dependencies>
-  {/**/}
-  ### dependencies
-</Dependencies>
+### dependencies <Badge text="Optional" variant="note" />
 
-<DependencyTypes>
-  {/**/}
-  ### dependencyTypes
-</DependencyTypes>
+<Dependencies />
 
-<SpecifierTypes>
-  {/**/}
-  ### specifierTypes
-</SpecifierTypes>
+### dependencyTypes <Badge text="Optional" variant="note" />
 
-<Label>
-  {/**/}
-  ### label
-</Label>
+<DependencyTypes />
 
-<Packages>
-  {/**/}
-  ### packages
-</Packages>
+### specifierTypes <Badge text="Optional" variant="note" />
+
+<SpecifierTypes />
+
+### label <Badge text="Optional" variant="note" />
+
+<Label />
+
+### packages <Badge text="Optional" variant="note" />
+
+<Packages />

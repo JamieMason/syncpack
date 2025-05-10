@@ -2,7 +2,7 @@
 title: With Range
 ---
 
-import RequiredPill from '@site/components/pill/required.astro';
+import { Badge } from '@astrojs/starlight/components';
 import Packages from '@partials/group-config/packages.mdx';
 import Dependencies from '@partials/group-config/dependencies.mdx';
 import DependencyTypes from '@partials/group-config/dependency-types.mdx';
@@ -13,9 +13,7 @@ Ensure all dependencies within this group have the specified semver range.
 
 ## Configuration
 
-### range
-
-<RequiredPill />
+### range <Badge text="Required" variant="danger" />
 
 Which of the Supported Ranges this group should use.
 
