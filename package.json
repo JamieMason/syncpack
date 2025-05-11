@@ -41,7 +41,7 @@
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.1",
     "auto-changelog": "^2.5.0",
-    "release-it": "^18.1.2",
+    "release-it": "^19.0.2",
     "ts-json-schema-generator": "^2.4.0"
   },
   "engines": {
