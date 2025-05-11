@@ -17,6 +17,7 @@ export default defineConfig({
     '/config/version-groups/snapped-to/': '/syncpack/version-groups/snapped-to/',
     '/config/version-groups/standard/': '/syncpack/version-groups/highest-semver/',
     '/guide/status-codes/': '/syncpack/status/',
+    '/guide/getting-started/': '/syncpack/',
     // Deprecated: Removed
     '/config/dependency-types/': '/syncpack/guide/upgrading/',
     '/config/lint-formatting/': '/syncpack/guide/upgrading/',
@@ -113,7 +114,7 @@ export default defineConfig({
         {
           label: 'Guides',
           items: [
-            { slug: 'guide/getting-started' },
+            { slug: 'index', label: 'Getting Started' },
             { slug: 'guide/dependency-types' },
             { slug: 'guide/glossary' },
             { slug: 'guide/local-package-versions' },
