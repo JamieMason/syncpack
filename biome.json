@@ -6,9 +6,16 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 80,
+    "lineWidth": 120,
     "attributePosition": "auto",
-    "ignore": ["**/CHANGELOG.md", "**/DEPENDENCIES.md"]
+    "ignore": [
+      "**/CHANGELOG.md",
+      "**/DEPENDENCIES.md",
+      "dist",
+      "fixtures",
+      "site/.astro",
+      "npm/packages"
+    ]
   },
   "organizeImports": {
     "enabled": true
@@ -27,6 +34,11 @@
       "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto"
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": false
     }
   }
 }

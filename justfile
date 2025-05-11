@@ -26,6 +26,7 @@ install-system-dependencies:
 format:
     cargo +nightly fmt --all -- --verbose
     cargo clippy --fix --allow-dirty
+    npm exec biome -- format --write .
 
 # Update dependencies in Cargo.toml and Cargo.lock
 update-dependencies:
