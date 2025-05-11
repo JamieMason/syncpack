@@ -1,0 +1,75 @@
+---
+title: semverGroups
+slug: semver-groups
+---
+
+Allow some packages to have different semver range rules to the rest of your monorepo. Each dependency can only belong to one semver group, the first rule which matches a given dependency and package will apply.
+
+## Examples
+
+1: Every dependency of `@myrepo/library` should have a semver range of `~`, regardless of what the rest of the monorepo uses:
+
+```json title=".syncpackrc.json"
+{
+  "semverGroups": [
+    {
+      "packages": ["@myrepo/library"],
+      "range": "~"
+    }
+  ]
+}
+```
+
+2: Every dependency of `@myrepo/library` whose name matches `@alpha/**` should have a semver range of `^`, regardless of what the rest of that package or the rest of the monorepo uses:
+
+```json title=".syncpackrc.json"
+{
+  "semverGroups": [
+    {
+      "dependencies": ["@alpha/**"],
+      "packages": ["@myrepo/library"],
+      "range": "^"
+    }
+  ]
+}
+```
+
+3: Every dependency in the monorepo whose name matches `@alpha/**` should have a semver range of `~`, regardless of what the rest of the monorepo uses:
+
+```json title=".syncpackrc.json"
+{
+  "semverGroups": [
+    {
+      "dependencies": ["@alpha/**"],
+      "range": "~"
+    }
+  ]
+}
+```
+
+4: Production dependencies should have fixed version numbers, but development and peer dependencies can be broader.
+
+```json title=".syncpackrc.json"
+{
+  "semverGroups": [
+    {
+      "dependencyTypes": [
+        "prod",
+        "resolutions",
+        "overrides",
+        "pnpmOverrides",
+        "local"
+      ],
+      "range": ""
+    },
+    {
+      "dependencyTypes": ["dev"],
+      "range": "~"
+    },
+    {
+      "dependencyTypes": ["peer"],
+      "range": "^"
+    }
+  ]
+}
+```

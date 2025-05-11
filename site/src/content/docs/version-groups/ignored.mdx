@@ -8,17 +8,9 @@ import Dependencies from "@partials/group-config/dependencies.mdx";
 import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
-import Example from "@partials/examples/ignore-deps.mdx";
 import Details from "@site/components/details.astro";
 
 Have syncpack ignore the versions of these dependencies completely.
-
-## Examples
-
-<Details title="Example: Ignore one or more dependencies">
-
-  <Example level="h3" />
-</Details>
 
 ## Configuration
 
@@ -26,7 +18,7 @@ Have syncpack ignore the versions of these dependencies completely.
 
 This property activates this behaviour for a given Version Group.
 
-```json title=".syncpackrc"
+```json title=".syncpackrc.json"
 {
   "versionGroups": [
     {

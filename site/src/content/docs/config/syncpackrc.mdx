@@ -1,93 +1,51 @@
 ---
 title: .syncpackrc
+sidebar:
+  order: 1
 ---
 
-## Configuration File
+Syncpack searches the current directory for a:
 
-Syncpack uses [cosmiconfig](HREF_COSMICONFIG) to search the current and ancestor directories for a:
-
-- `.syncpackrc` file in JSON or YAML format.
-- `.syncpackrc.json`, `.syncpackrc.yaml`, `.syncpackrc.yml`, `.syncpackrc.js`, `.syncpackrc.cjs`, `syncpack.config.js`, `syncpack.config.cjs` file.
+- `.syncpackrc` file with no extension in JSON format
+- `.syncpackrc` file with the extension `.json`, `.yaml`, `.yml`, `.js`, `.ts`, `.mjs`, or `.cjs`
+- `syncpack.config.js`, `syncpack.config.ts`, `syncpack.config.mjs`, or `syncpack.config.cjs` file
 - `config.syncpack` or `syncpack` property in `package.json`.
 
-A custom name and location can be provided instead:
+A custom name and location can be provided instead, but it must have a file extension:
 
 ```bash
 syncpack list --config ./config/syncpack.json
 ```
 
-## Defaults
+Your config file only needs to define values for those you want to change from the defaults.
 
-Your config file only needs to define values for those you want to change from the defaults below.
+## JSON
 
-```js title=".syncpackrc.js"
+JSON is preferred as it is the fastest, without the overhead of calling out to Node.js and TypeScript.
+
+```json title=".syncpackrc.json"
+{
+  "$schema": "./node_modules/syncpack/schema.json",
+  "indent": "    "
+}
+```
+
+## TypeScript
+
+```ts title=".syncpackrc.ts"
+export default {
+  indent: "    ",
+} satisfies import("syncpack").RcFile;
+```
+
+## JavaScript
+
+```js title=".syncpackrc.cjs"
 // @ts-check
 
 /** @type {import("syncpack").RcFile} */
 const config = {
-  customTypes: {
-    dev: {
-      strategy: "versionsByName",
-      path: "devDependencies",
-    },
-    local: {
-      strategy: "name~version",
-      namePath: "name",
-      path: "version",
-    },
-    overrides: {
-      strategy: "versionsByName",
-      path: "overrides",
-    },
-    peer: {
-      strategy: "versionsByName",
-      path: "peerDependencies",
-    },
-    pnpmOverrides: {
-      strategy: "versionsByName",
-      path: "pnpm.overrides",
-    },
-    prod: {
-      strategy: "versionsByName",
-      path: "dependencies",
-    },
-    resolutions: {
-      strategy: "versionsByName",
-      path: "resolutions",
-    },
-  },
-  dependencyTypes: ["**"],
-  filter: ".",
-  formatBugs: true,
-  formatRepository: true,
-  indent: "  ",
-  semverGroups: [],
-  sortAz: [
-    "bin",
-    "contributors",
-    "dependencies",
-    "devDependencies",
-    "keywords",
-    "peerDependencies",
-    "resolutions",
-    "scripts",
-  ],
-  sortExports: [
-    "types",
-    "node-addons",
-    "node",
-    "browser",
-    "import",
-    "require",
-    "development",
-    "production",
-    "default",
-  ],
-  sortFirst: ["name", "description", "version", "author"],
-  sortPackages: true,
-  source: ["package.json", "packages/*/package.json"],
-  specifierTypes: ["**"],
-  versionGroups: [],
+  indent: "    ",
 };
 
 module.exports = config;

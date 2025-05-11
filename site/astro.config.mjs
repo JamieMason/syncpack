@@ -6,7 +6,7 @@ export default defineConfig({
   site: 'https://jamiemason.github.io/syncpack',
   base: '/syncpack',
   redirects: {
-    // Hoisted
+    // Hoisted docs
     '/config/semver-groups/ignored/': '/syncpack/semver-groups/ignored/',
     '/config/semver-groups/with-range/': '/syncpack/semver-groups/with-range/',
     '/config/version-groups/banned/': '/syncpack/version-groups/banned/',
@@ -18,13 +18,26 @@ export default defineConfig({
     '/config/version-groups/standard/': '/syncpack/version-groups/highest-semver/',
     '/guide/status-codes/': '/syncpack/status/',
     '/guide/getting-started/': '/syncpack/',
-    // Deprecated: Removed
+    // Moved docs
+    '/guide/semver-groups/': '/semver-groups/',
+    '/guide/version-groups/': '/version-groups/',
+    // Removed docs
+    '/integrations/github-actions': '/syncpack/',
+    '/integrations/intellisense': '/syncpack/',
+    '/integrations/json-schema': '/syncpack/',
+    '/integrations/lerna': '/syncpack/',
+    '/integrations/npm': '/syncpack/',
+    '/integrations/pnpm': '/syncpack/',
+    '/integrations/yarn': '/syncpack/',
+    // Merged docs
+    '/guide/local-package-versions/': '/syncpack/dependency-types',
+    // Deprecated Feature: Removed
     '/config/dependency-types/': '/syncpack/guide/upgrading/',
     '/config/lint-formatting/': '/syncpack/guide/upgrading/',
     '/config/lint-semver-ranges/': '/syncpack/guide/upgrading/',
     '/config/lint-versions/': '/syncpack/guide/upgrading/',
     '/config/specifier-types/': '/syncpack/guide/upgrading/',
-    // Deprecated: Moved
+    // Deprecated Feature: Moved
     '/command/fix-mismatches/': '/command/fix',
     '/command/set-semver-ranges/': '/command/fix',
     '/command/lint-semver-ranges/': '/command/lint',
@@ -35,11 +48,52 @@ export default defineConfig({
     remarkPlugins: [
       function globalReferenceLinks() {
         const linksById = {
+          COMMAND_FIX: '/syncpack/command/fix/',
+          COMMAND_FORMAT: '/syncpack/command/format/',
+          COMMAND_LINT: '/syncpack/command/lint/',
+          COMMAND_LIST: '/syncpack/command/list/',
+          COMMAND_UPDATE: '/syncpack/command/update/',
+
           CONFIG_CUSTOM_TYPES: '/syncpack/config/custom-types/',
-          GUIDE_DEPENDENCY_TYPES: '/syncpack/guide/dependency-types/',
-          GUIDE_SPECIFIER_TYPES: '/syncpack/guide/specifier-types/',
+          CONFIG_DEPENDENCY_GROUPS: '/syncpack/config/dependency-groups/',
+          CONFIG_FORMAT_BUGS: '/syncpack/config/format-bugs/',
+          CONFIG_FORMAT_REPOSITORY: '/syncpack/config/format-repository/',
+          CONFIG_INDENT: '/syncpack/config/indent/',
+          CONFIG_SEMVER_GROUPS: '/syncpack/semver-groups/',
+          CONFIG_SORT_AZ: '/syncpack/config/sort-az/',
+          CONFIG_SORT_EXPORTS: '/syncpack/config/sort-exports/',
+          CONFIG_SORT_FIRST: '/syncpack/config/sort-first/',
+          CONFIG_SORT_PACKAGES: '/syncpack/config/sort-packages/',
+          CONFIG_SOURCE: '/syncpack/config/source/',
+          CONFIG_SYNCPACKRC: '/syncpack/config/syncpackrc/',
+          CONFIG_VERSION_GROUPS: '/syncpack/version-groups/',
+
+          GUIDE_PEER_DEPENDENCIES: '/syncpack/guide/peer-dependencies/',
+
+          REF_DEPENDENCY_TYPES: '/syncpack/dependency-types/',
+          REF_GLOSSARY: '/syncpack/glossary/',
+          REF_SPECIFIER_TYPES: '/syncpack/specifier-types/',
+          REF_STATUS_CODES: '/syncpack/status/',
+
+          TERM_CUSTOM_TYPE: '/syncpack/glossary/#custom-type',
+          TERM_DEPENDENCY: '/syncpack/glossary/#dependency',
+          TERM_DEPENDENCY_GROUP: '/syncpack/glossary/#dependency-group',
+          TERM_DEPENDENCY_TYPE: '/syncpack/glossary/#dependency-type',
+          TERM_INSTANCE: '/syncpack/glossary/#instance',
+          TERM_PACKAGE: '/syncpack/glossary/#package',
+          TERM_RCFILE: '/syncpack/glossary/#rcfile',
+          TERM_SEMVER: '/syncpack/glossary/#semver',
+          TERM_SEMVER_GROUP: '/syncpack/glossary/#semver-group',
+          TERM_SEMVER_RANGE: '/syncpack/glossary/#semver-range',
+          TERM_SPECIFIER: '/syncpack/glossary/#specifier',
+          TERM_SPECIFIER_TYPE: '/syncpack/glossary/#specifier-type',
+          TERM_STATUS_CODE: '/syncpack/glossary/#status-code',
+          TERM_VERSION_GROUP: '/syncpack/glossary/#version-group',
+          TERM_WORKSPACE: '/syncpack/glossary/#workspace',
+
           HREF_ANSI: 'https://en.wikipedia.org/wiki/ANSI_escape_code',
           HREF_AWS_SDK: 'https://aws.amazon.com/sdk-for-javascript/',
+          HREF_CATEGORIZE_YOUR_DEPENDENCIES: 'https://antfu.me/posts/categorize-deps',
           HREF_CONDITIONAL_EXPORTS: 'https://nodejs.org/api/packages.html#conditional-exports',
           HREF_COSMICONFIG: 'https://github.com/cosmiconfig/cosmiconfig',
           HREF_DEPENDENCIES: 'https://docs.npmjs.com/cli/v11/configuring-npm/package-json#dependencies',
@@ -49,6 +103,7 @@ export default defineConfig({
           HREF_LERNA: 'https://lerna.js.org/',
           HREF_NEW_ISSUE: 'https://github.com/JamieMason/syncpack-github-action/issues/new',
           HREF_NPM_EXEC: 'https://docs.npmjs.com/cli/v11/commands/npm-exec',
+          HREF_NPM_WORKSPACES: 'https://docs.npmjs.com/cli/v11/using-npm/workspaces',
           HREF_NPX: 'https://docs.npmjs.com/cli/v11/commands/npx',
           HREF_OVERRIDES: 'https://docs.npmjs.com/cli/v11/configuring-npm/package-json#overrides',
           HREF_PACKAGE_MANAGER: 'https://nodejs.org/api/packages.html#packagemanager',
@@ -62,6 +117,17 @@ export default defineConfig({
           HREF_VERSION: 'https://docs.npmjs.com/cli/v11/configuring-npm/package-json#version',
           HREF_WORKSPACE_PROTOCOL: 'https://pnpm.io/workspaces#workspace-protocol-workspace',
           HREF_YARN_WORKSPACES: 'https://yarnpkg.com/lang/en/docs/workspaces/',
+
+          SEMVER_GROUP_IGNORED: '/syncpack/semver-groups/ignored/',
+          SEMVER_GROUP_WITH_RANGE: '/syncpack/semver-groups/with-range/',
+
+          VERSION_GROUP_BANNED: '/syncpack/version-groups/banned/',
+          VERSION_GROUP_HIGHEST_SEMVER: '/syncpack/version-groups/highest-semver/',
+          VERSION_GROUP_IGNORED: '/syncpack/version-groups/ignored/',
+          VERSION_GROUP_LOWEST_SEMVER: '/syncpack/version-groups/lowest-semver/',
+          VERSION_GROUP_PINNED: '/syncpack/version-groups/pinned/',
+          VERSION_GROUP_SAME_RANGE: '/syncpack/version-groups/same-range/',
+          VERSION_GROUP_SNAPPED_TO: '/syncpack/version-groups/snapped-to/',
         };
 
         return function transformer(tree) {
@@ -102,10 +168,12 @@ export default defineConfig({
       logo: {
         src: './src/assets/logo.svg',
       },
-      components: {
-        Sidebar: './src/components/Sidebar.astro',
+      expressiveCode: {
+        themes: ['github-light-default', 'github-dark-default'],
+        removeUnusedThemes: false,
       },
       customCss: ['./src/styles/custom.css'],
+      pagination: false,
       sidebar: [
         {
           label: 'Github',
@@ -113,17 +181,7 @@ export default defineConfig({
         },
         {
           label: 'Guides',
-          items: [
-            { slug: 'index', label: 'Getting Started' },
-            { slug: 'guide/dependency-types' },
-            { slug: 'guide/glossary' },
-            { slug: 'guide/local-package-versions' },
-            { slug: 'guide/semver-groups' },
-            { slug: 'guide/specifier-types' },
-            { slug: 'status', label: 'Status Codes' },
-            { slug: 'guide/upgrading' },
-            { slug: 'guide/version-groups' },
-          ],
+          autogenerate: { directory: 'guide' },
         },
         {
           label: 'Commands',
@@ -142,12 +200,8 @@ export default defineConfig({
           autogenerate: { directory: 'config' },
         },
         {
-          label: 'Integrations',
-          autogenerate: { directory: 'integrations' },
-        },
-        {
-          label: 'Examples',
-          autogenerate: { directory: 'examples' },
+          label: 'Reference',
+          autogenerate: { directory: 'reference' },
         },
       ],
       head: [

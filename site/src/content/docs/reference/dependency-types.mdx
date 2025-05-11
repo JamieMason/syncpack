@@ -1,0 +1,49 @@
+---
+title: Dependency Types
+slug: dependency-types
+---
+
+import DefaultDependencyTypes from "@partials/default-dependency-types.mdx";
+
+Dependency types refer to the different locations in package.json files where dependencies can be defined.
+
+## Default Values
+
+The default dependency types in syncpack are the ones defined by npm, pnpm, and yarn:
+
+<DefaultDependencyTypes />
+
+## Custom Values
+
+You can extend the above list by defining your own [custom types](CONFIG_CUSTOM_TYPES), such as:
+
+- Engine versions (`engines`)
+- Package manager versions (`packageManager`)
+- Any other nested property in package.json
+
+## Using Dependency Types
+
+Dependency types can be specified in these contexts:
+
+### Command Line Filtering
+
+Use the `--dependency-types` option to target specific types in commands:
+
+```bash
+# Only check production dependencies
+syncpack lint --dependency-types prod
+
+# Check both production and development dependencies
+syncpack lint --dependency-types prod,dev
+
+# Check everything except peer dependencies
+syncpack lint --dependency-types '!peer'
+```
+
+### Configuration
+
+Dependency types can be used to target and filter:
+
+1. [Version Groups](CONFIG_VERSION_GROUPS) - Carve out specific version policies
+2. [Semver Groups](CONFIG_SEMVER_GROUPS) - Define which semver ranges to use with specific dependencies
+3. [Dependency Groups](CONFIG_DEPENDENCY_GROUPS) - Merge and alias families of dependencies as one

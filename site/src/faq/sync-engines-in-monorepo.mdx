@@ -1,0 +1,79 @@
+---
+title: Manage npm engines throughout monorepo
+---
+
+
+Add the [`engines`](HREF_ENGINES) property of package.json files to also be inspected by syncpack.
+
+### 1. Add a custom type
+
+I've chosen a name of `engines` but it can be anything you like.
+
+```jsonc title=".syncpackrc.json"
+{
+  "customTypes": {
+    "engines": {
+      // ^ this is your custom name
+      "path": "engines",
+      "strategy": "versionsByName",
+    },
+  },
+}
+```
+
+### 2. Look for mismatches
+
+Perform a one-off check of all versions defined under `engines` in your monorepo.
+
+```bash
+syncpack list --dependency-types engines
+```
+
+If the versions are not identical, they can be synchronised to all use the highest of the semver versions currently in use.
+
+```bash
+syncpack fix-mismatches --dependency-types engines
+```
+
+### 3. Track them in future
+
+Add your new custom type to your `dependencyTypes`.
+
+```json title=".syncpackrc.json"
+{
+  "dependencyTypes": [
+    "dev"
+    "engines"
+    "peer"
+    "prod"
+  ]
+}
+```
+
+Now when you run any syncpack command, versions under `engines` will also be checked.
+
+```bash
+syncpack list
+```
+
+### 4. Relax the rules (optional)
+
+If you don't want the Node.js version to be identical in every package but do want them all to be compatible with each other, you can use a [Same Range](VERSION_GROUP_SAME_RANGE) Version Group. This defines an exception which only applies to Node.js, leaving anything else found under `engines` unaffected.
+
+```json title=".syncpackrc.json"
+{
+  "dependencyTypes": [
+    "dev"
+    "engines"
+    "peer"
+    "prod"
+  ],
+  "versionGroups": [
+    {
+      "dependencies": ["node"],
+      "dependencyTypes": ["engines"],
+      "policy": "sameRange"
+    }
+  ]
+}
+```

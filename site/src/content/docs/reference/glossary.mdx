@@ -1,0 +1,71 @@
+---
+title: Glossary
+slug: glossary
+---
+
+## Custom Type
+
+A user-defined configuration that extends syncpack to manage parts of your package.json files beyond the default dependency types. Custom types behave identically to the default dependency types (such as `prod` or `peer`) but allow you to manage additional sections like `engines`, `packageManager`, or arbitrary nested properties.
+
+## Dependency Group
+
+A collection of related dependencies that are merged together and treated as one. Dependencies can be grouped by name pattern, package location, or dependency type.
+
+## Dependency Type
+
+Refers to the path/location within package.json files where dependencies are defined. The standard types include `prod` (`dependencies`), `dev` (`devDependencies`), `peer` (`peerDependencies`), `overrides`, `pnpmOverrides`, `resolutions`, and `local` (the package's own `version` property).
+
+## Dependency
+
+A package that your project relies on. In syncpack, this refers to an npm package that's listed in any of the dependency fields of your package.json files. A dependency has a name and a version specifier.
+
+## Instance
+
+A specific occurrence of a dependency in your monorepo, for example:
+
+- There are 4 packages in your monorepo (A, B, C, and D).
+- A, B, C, and D all depend on `uuid`.
+- A, B, and C each have it under `dependencies` (3x).
+- D has it under `devDependencies` and `peerDependencies` (2x).
+
+There are 5 "instances" of the 1 "dependency" `uuid`.
+
+## Package
+
+A module within your monorepo defined by a package.json file. In a monorepo, you typically have multiple packages that may depend on each other and on external dependencies.
+
+## Rcfile
+
+A configuration file for syncpack (typically `.syncpackrc`, `.syncpackrc.js`, `.syncpackrc.json`, etc.) that defines how dependencies should be managed. This includes settings like version groups, semver groups, formatting options, and more.
+
+## Semver Group
+
+A configuration that defines how semver ranges should be formatted for a specific set of dependencies. For example, you might want production dependencies to use exact versions (`1.2.3`) while development dependencies use caret ranges (`^1.2.3`).
+
+## Semver Range
+
+A pattern that specifies which versions of a dependency are acceptable. Common ranges include exact (`1.2.3`), caret (`^1.2.3`, which allows compatible minor and patch updates), and tilde (`~1.2.3`, which allows compatible patch updates).
+
+## Semver
+
+Semantic Versioning, a versioning scheme that uses a three-part number (MAJOR.MINOR.PATCH) to convey meaning about the underlying changes. Major versions indicate breaking changes, minor versions indicate new features without breaking changes, and patch versions indicate bug fixes.
+
+## Specifier
+
+The full version string for a dependency, including any prefixes or range indicators. Examples include `^1.2.3`, `~1.2.3`, `>=1.0.0`, `1.x`, and `*`.
+
+## Specifier Type
+
+A categorization of version specifiers based on their format. Types include `exact` (`1.2.3`), `range` (`^1.2.3`), `latest` (`*`), `tag` (`alpha`), and others like `file`, `git`, or `url`.
+
+## Status Code
+
+A code assigned by syncpack to each dependency instance that indicates its validation status. Status codes help identify issues such as version mismatches, banned dependencies, or configurations that need attention.
+
+## Version Group
+
+A configuration object that defines a partition of your monorepo with its own versioning policy. Version groups let you create separate rules for different sections of your project, such as pinning specific dependencies to exact versions, banning certain dependencies, or ensuring dependencies follow the version used by a specific package.
+
+## Workspace
+
+A collection of packages managed together in a monorepo. Workspaces are typically defined by your package manager (npm, Yarn, pnpm) and help syncpack locate all the package.json files in your project.

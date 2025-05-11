@@ -2,8 +2,6 @@
 title: Banned
 ---
 
-import BanAlwaysExample from "@partials/examples/ban-always.mdx";
-import BanTypesExample from "@partials/examples/ban-types.mdx";
 import Dependencies from "@partials/group-config/dependencies.mdx";
 import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
@@ -14,25 +12,13 @@ import Details from "@site/components/details.astro";
 
 Find and remove dependencies which you've decided should never be used.
 
-## Examples
-
-<Details title="Example: Completely ban a dependency from being used">
-
-  <BanAlwaysExample level="h3" />
-</Details>
-
-<Details title="Example: Ensure `@types` are only installed as `devDependencies`">
-
-  <BanTypesExample level="h3" />
-</Details>
-
 ## Configuration
 
 ### isBanned <Badge text="Required" variant="danger" />
 
 This property activates this behaviour for a given Version Group.
 
-```json title=".syncpackrc"
+```json title=".syncpackrc.json"
 {
   "versionGroups": [
     {

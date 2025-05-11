@@ -9,23 +9,9 @@ import DependencyTypes from '@partials/group-config/dependency-types.mdx';
 import SpecifierTypes from '@partials/group-config/specifier-types.mdx';
 import Label from '@partials/group-config/label.mdx';
 
+Fix mismatched versions in this group by choosing the highest/newest semver version in use.
+
 ## Configuration
-
-### preferVersion <Badge text="Optional" variant="note" />
-
-Defaults to `highestSemver` but can be optionally changed to `lowestSemver`.
-
-To set this as your standard policy, create a version group which applies to every dependency as the last item in your `versionGroups` array. You can also just set this for some of the packages if you need to.
-
-```json title="Choose the lowest valid semver version when fixing mismatches"
-{
-  "versionGroups": [
-    {
-      "preferVersion": "lowestSemver"
-    }
-  ]
-}
-```
 
 ### dependencies <Badge text="Optional" variant="note" />
 

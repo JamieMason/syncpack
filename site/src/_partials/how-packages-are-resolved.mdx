@@ -1,0 +1,8 @@
+Syncpack will look in the following places for [glob](HREF_GLOB) patterns matching package.json files, in this order of precedence, and stop looking when a match is found:
+
+1. If `--source` CLI options are provided, use those.
+1. If [`source`](CONFIG_SOURCE) is defined in configuration, use that.
+1. If using [npm workspaces](HREF_NPM_WORKSPACES) or [Yarn workspaces](HREF_YARN_WORKSPACES), read `workspaces` from `./package.json`.
+1. If using [pnpm](HREF_PNPM), read `packages` from `./pnpm-workspace.yaml`.
+1. If using [Lerna](HREF_LERNA), read `packages` from `./lerna.json`.
+1. Default to `'package.json'` and `'packages/*/package.json'`.

@@ -2,29 +2,63 @@
 title: customTypes
 ---
 
-import { Badge } from '@astrojs/starlight/components';
-import NodeEngineExample from '@partials/examples/engines-node.mdx';
-import Details from '@site/components/details.astro';
+import { Badge } from "@astrojs/starlight/components";
+import Details from "@site/components/details.astro";
 
-Extend syncpack to manage other parts of your package.json files than those provided by default.
+Extend syncpack to manage other parts of package.json files than those provided by default.
 
-Custom types behave indentically to the default dependency types (such as `prod` or `peer`) and can be used in all of the same places.
+Custom types behave indentically to the default [dependency types](REF_DEPENDENCY_TYPES) (such as `prod` or `peer`). When you define a custom type, you are adding to the list of valid names that can be passed to the:
 
-<Details title="Example: Manage `engines` property of package.json files">
-  <NodeEngineExample level="h4" />
-</Details>
+- `--dependency-types` CLI option
+- `dependencyTypes` property of [Version Groups](CONFIG_VERSION_GROUPS), [Semver Groups](CONFIG_SEMVER_GROUPS), and [Dependency Groups](CONFIG_DEPENDENCY_GROUPS).
 
-<Details title="Example: Synchronise Node.js version">
-  <NodeEngineExample level="h4" />
-</Details>
+This is how the default dependency types are defined:
+
+```json title=".syncpackrc.json"
+{
+  "$schema": "./node_modules/syncpack/schema.json",
+  "customTypes": {
+    "dev": {
+      "strategy": "versionsByName",
+      "path": "devDependencies"
+    },
+    "local": {
+      "strategy": "name~version",
+      "namePath": "name",
+      "path": "version"
+    },
+    "overrides": {
+      "strategy": "versionsByName",
+      "path": "overrides"
+    },
+    "peer": {
+      "strategy": "versionsByName",
+      "path": "peerDependencies"
+    },
+    "pnpmOverrides": {
+      "strategy": "versionsByName",
+      "path": "pnpm.overrides"
+    },
+    "prod": {
+      "strategy": "versionsByName",
+      "path": "dependencies"
+    },
+    "resolutions": {
+      "strategy": "versionsByName",
+      "path": "resolutions"
+    }
+  }
+}
+```
 
 ## \[name\] <Badge text="Required" variant="danger" />
 
 The key of each custom type is its name, this is equivalent to the default names such as `prod` and `dev` and can be used in all of the same places those can:
 
-1. `--types` and `dependencyTypes`
+1. `--dependency-types`
 1. `versionGroup.dependencyTypes`
 1. `semverGroup.dependencyTypes`
+1. `dependencyGroup.dependencyTypes`
 
 ## \[name\].path <Badge text="Required" variant="danger" />
 
@@ -32,10 +66,38 @@ Where the version can be found in each package.json file, such as `engines`, `pa
 
 ## \[name\].strategy <Badge text="Required" variant="danger" />
 
-A strategy defines how syncpack needs to read and write dependency names and versions, there are 3 to choose from:
+A strategy defines how syncpack should read and write dependency names and versions.
 
-| Name             | Example                                |
-| ---------------- | -------------------------------------- |
-| `name@version`   | `pnpm@7.27.0`                          |
-| `version`        | `12.4.2`                               |
-| `versionsByName` | `{"pnpm":"7.27.0", "semver": "7.3.8"}` |
+There are 3 to choose from:
+
+### `name@version`
+
+The name and version are combined in a single string. Commonly seen in package manager specifications.
+
+```json
+{
+  "packageManager": "pnpm@7.27.0"
+}
+```
+
+### `name~version`
+
+The name and version are in different locations.
+
+```json
+{
+  "name": "some-local-package",
+  "version": "12.4.2"
+}
+```
+
+### `versionsByName`
+
+Typical dependency objects where keys are package names and values are version strings.
+
+```json
+{
+  "pnpm": "10.10.0",
+  "prettier": "3.5.3"
+}
+```

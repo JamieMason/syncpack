@@ -1,0 +1,37 @@
+---
+title: Ensure AWS SDK dependencies always have the same version
+---
+
+Pin all dependencies from [@aws-sdk](HREF_AWS_SDK) so that they are always identical.
+
+### 1. Add a pinned version group
+
+- Match all **dependencies** whose name starts with `@aws-sdk/`.
+- Mark the version as being pinned to **3.272.0** in this case.
+- Add a **label** to document the decision/expectation.
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["@aws-sdk/**"],
+      "pinVersion": "3.272.0",
+      "label": "AWS SDK Dependencies should all have the same version"
+    }
+  ]
+}
+```
+
+### 2. Look for mismatches
+
+Any `@aws-sdk` packages which do not have the expected version can then be found:
+
+```bash
+syncpack list-mismatches
+```
+
+And fixed:
+
+```bash
+syncpack fix-mismatches
+```

@@ -1,0 +1,58 @@
+---
+title: dependencyGroups
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Packages from "@partials/group-config/packages.mdx";
+import Dependencies from "@partials/group-config/dependencies.mdx";
+import DependencyTypes from "@partials/group-config/dependency-types.mdx";
+import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
+import Label from "@partials/group-config/label.mdx";
+
+Allow many dependencies to be interpreted as one.
+
+## Example
+
+Treat all dependencies from the [AWS SDK for JavaScript](https://aws.amazon.com/sdk-for-javascript/) as if they were all instances of a single dependency called `aws-sdk-dependencies`.
+
+```jsonc title=".syncpackrc.json"
+{
+  "dependencyGroups": [
+    {
+      "dependencies": ["@aws-sdk/**"],
+      "aliasName": "aws-sdk-dependencies",
+    },
+  ],
+}
+```
+
+With the above config: "@aws-sdk/core", "@aws-sdk/middleware-logger" etc will be treated as if they were one dependency – any differences in their versions will be caught in the usual way.
+
+
+## Configuration
+
+### aliasName <Badge text="Required" variant="danger" />
+
+The name to use in place of the originals when referring to this group of merged dependencies.
+
+When assigning this new dependency to version/semver groups etc, use the **aliasName** instead of the original name.
+
+### dependencies <Badge text="Optional" variant="note" />
+
+<Dependencies />
+
+### dependencyTypes <Badge text="Optional" variant="note" />
+
+<DependencyTypes />
+
+### specifierTypes <Badge text="Optional" variant="note" />
+
+<SpecifierTypes />
+
+### label <Badge text="Optional" variant="note" />
+
+<Label />
+
+### packages <Badge text="Optional" variant="note" />
+
+<Packages />

@@ -1,0 +1,93 @@
+---
+title: Synchronise Node.js version in monorepo
+---
+
+Ensure [`engines.node`](HREF_ENGINES) version is identical in every package.
+
+### 1. Add a custom type
+
+I've chosen a name of `nodeEngine` but it can be anything you like.
+
+```json title=".syncpackrc.json"
+{
+  "customTypes": {
+    "nodeEngine": {
+      "path": "engines.node",
+      "strategy": "version"
+    }
+  }
+}
+```
+
+### 2. Look for mismatches
+
+Perform a one-off check for every usage of `engines.node` in your monorepo.
+
+```bash
+syncpack list --dependency-types nodeEngine
+```
+
+If the versions are not identical, they can be synchronised to all use the highest of the semver versions currently in use.
+
+```bash
+syncpack fix-mismatches --dependency-types nodeEngine
+```
+
+### 3. Track them in future
+
+Add your new custom type to your `dependencyTypes` at the root level. It is included in the list of all possible dependency types.
+
+```json title=".syncpackrc.json"
+{
+  "customTypes": {
+    "nodeEngine": {
+      "path": "engines.node",
+      "strategy": "version"
+    }
+  },
+
+  "dependencyTypes": [
+    "dev"
+    "nodeEngine"
+    "peer"
+    "prod"
+  ]
+}
+```
+
+Now when you run any syncpack command, `engines.node` will also be checked.
+
+```bash
+syncpack list
+```
+
+### 4. Relax the rules (optional)
+
+If you don't want the Node.js version to be identical in every package but do want them all to be compatible with each other, you can use a [Same Range](VERSION_GROUP_SAME_RANGE) Version Group.
+
+Note that you do have to list your customType in `dependencyTypes` for it to work within `versionGroups#dependencyTypes` or `semverGroups#dependencyTypes`.
+
+```json title=".syncpackrc.json"
+{
+  "customTypes": {
+    "nodeEngine": {
+      "path": "engines.node",
+      "strategy": "version"
+    }
+  },
+
+  "dependencyTypes": [
+    "dev"
+    "nodeEngine"
+    "peer"
+    "prod"
+  ],
+
+  "versionGroups": [
+    {
+      "dependencyTypes": ["nodeEngine"],
+      "policy": "sameRange"
+    }
+  ]
+}
+```

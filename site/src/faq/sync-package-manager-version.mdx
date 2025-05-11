@@ -1,0 +1,20 @@
+---
+title: Manage monorepo packageManager version
+---
+
+Add support for managing versions in [`engines`](HREF_ENGINES) and [`packageManager`](HREF_PACKAGE_MANAGER) properties of your package.json files.
+
+```json title=".syncpackrc.json"
+{
+  "customTypes": {
+    "engines": {
+      "path": "engines",
+      "strategy": "versionsByName"
+    },
+    "packageManager": {
+      "path": "packageManager",
+      "strategy": "name@version"
+    }
+  }
+}
+```

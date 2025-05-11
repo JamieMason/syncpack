@@ -1,0 +1,127 @@
+---
+title: Specifier Types
+slug: specifier-types
+---
+
+Specifier types categorise the different formats a version specifier can have in package.json files.
+
+They can be used in version groups and other configuration to apply specific rules to dependencies based on how their versions are specified, to ban `unsupported` versions or check for updates for only `exact` versions for example.
+
+## All Values
+
+### alias
+
+A dependency that uses npm's alias syntax to reference a package under a different name.
+
+Example: `npm:@preact/compat`
+
+### exact
+
+A dependency with a precise version number, including potential pre-release identifiers.
+
+Examples: `1.2.3`, `1.2.3-alpha`, `1.2.3-rc.1`
+
+### file
+
+A dependency referencing a local file path on the filesystem.
+
+Example: `file:./path/to/package`
+
+### git
+
+A dependency directly referencing a Git repository.
+
+Example: `git+https://github.com/user/repo.git`
+
+### latest
+
+A dependency that resolves to the latest available version. Includes wildcard patterns.
+
+Examples: `latest`, `*`
+
+### major
+
+A dependency specifier that only indicates the major version number.
+
+Example: `1`
+
+### minor
+
+A dependency specifier that includes both major and minor version numbers.
+
+Example: `1.2`
+
+### missing
+
+A local package.json with a missing `version` field
+
+### range
+
+A dependency that uses standard semver range syntax with a complete version number.
+
+Examples: `^1.2.3`, `^1.2.3-alpha`, `^1.2.3-rc.1`
+
+### range-complex
+
+A dependency that uses multiple ranges combined with logical operators.
+
+Example: `^1.2.3-alpha || ~1.2.3-rc.1`
+
+### range-major
+
+A dependency that uses a range operator with only a major version.
+
+Example: `^1`
+
+### range-minor
+
+A dependency that uses a range operator with major and minor versions.
+
+Example: `^1.2`
+
+### tag
+
+A dependency referencing an npm distribution tag rather than a version.
+
+Example: `alpha`
+
+### unsupported
+
+A dependency with a version specifier that syncpack cannot parse or handle.
+
+Example: `wtf|#|broken`
+
+### url
+
+A dependency referencing a URL to a package distribution.
+
+Example: `https://example.com/package`
+
+### workspace-protocol
+
+A dependency that uses the [workspace protocol](HREF_WORKSPACE_PROTOCOL) for monorepo local references.
+
+Example: `workspace:*`
+
+## Using Specifier Types
+
+Specifier types can be used in various contexts within syncpack:
+
+### Command Line Filtering
+
+Use the `--specifier-types` option to target dependencies with specific version formats:
+
+```bash
+# Only check dependencies with exact versions
+syncpack lint --specifier-types exact
+
+# Find dependencies using any kind of range
+syncpack list --specifier-types range,range-major,range-minor
+
+# Check everything except URL dependencies
+syncpack lint --specifier-types '!url'
+```
+
+### Configuration
+
+Specifier types can be used to target and filter [Version Groups](CONFIG_VERSION_GROUPS), to apply specific rules to dependencies based on their version format.

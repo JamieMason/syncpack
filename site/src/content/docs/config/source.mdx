@@ -2,20 +2,25 @@
 title: source
 ---
 
-import ResolvingPackages from "@partials/resolving-packages.mdx";
+import HowPackagesAreResolved from "@partials/how-packages-are-resolved.mdx";
+import MonorepoNotEssentialTip from "@partials/tips/monorepo-not-essential.mdx";
 
-Patterns supported by [glob](HREF_GLOB) to find package.json files you want to manage with syncpack.
+A list of [Glob](HREF_GLOB) patterns to find package.json files you want to manage with syncpack.
 
-## Default Value
+<MonorepoNotEssentialTip />
 
-Defaulted to match most Projects using Lerna or Yarn Workspaces
+## Example
 
-```json title=".syncpackrc"
+In this example we have a directory on our machine called `my-projects` where we `git clone` all of the repositories we work on for our company.
+
+Despite us not having a monorepo, a .syncpackrc.json placed alongside each `git clone` allows us to use syncpack to find and fix problems.
+
+```json title="~/my-projects/.syncpackrc.json"
 {
-  "source": ["package.json", "packages/*/package.json"]
+  "source": ["./*/package.json", "./*/packages/*/package.json"]
 }
 ```
 
 ## Resolving Packages
 
-<ResolvingPackages />
+<HowPackagesAreResolved />

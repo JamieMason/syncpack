@@ -8,25 +8,30 @@ By default, Syncpack will order properties according to the Node.js documentatio
 
 ## Default Value
 
-```json title=".syncpackrc"
+```json title=".syncpackrc.json"
 {
   "sortExports": [
     "types",
     "node-addons",
     "node",
     "browser",
+    "module",
     "import",
     "require",
+    "svelte",
     "development",
     "production",
+    "script",
     "default"
   ]
 }
 ```
 
+## Disable
+
 Set to an empty array to disable.
 
-```json title=".syncpackrc"
+```json title=".syncpackrc.json"
 {
   "sortExports": []
 }

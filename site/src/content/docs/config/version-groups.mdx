@@ -1,0 +1,79 @@
+---
+title: versionGroups
+slug: version-groups
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Version groups split your project into isolated sections, each with their own policy for how versions should be managed.
+
+Without any configuration, your entire monorepo is one big [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) version group, but there are situations where you will want to break it up.
+
+## How groups are assigned
+
+When syncpack reads each [instance](TERM_INSTANCE) of a [dependency](TERM_DEPENDENCY), it walks through your `versionGroups` array in source code order until it finds a match – the first match wins and syncpack stops searching.
+
+An instance can only belong to one Version Group, and the type of group it belongs to defines the rules that form its version policy.
+
+If an instance doesn't match any of your version groups, or you don't have any, they are assigned to a default [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) version group which applies to everything not already assigned to something more specific.
+
+## Order by specificity
+
+Syncpack walks through your `versionGroups` array in source code order until it finds a match, the first match wins and syncpack stops searching.
+
+Order your groups by most specific first to most general last, otherwise the generic groups will always win and the specific groups will never be read.
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "label": "Please use lodash instead of underscore",
+      "dependencies": ["underscore"],
+      "isBanned": true
+    },
+    {
+      "label": "Ignore everything else",
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+## Default values
+
+Any properties of a version group that are omitted will match-all by default, so the two examples in the tabs below are equivalent.
+
+<Tabs>
+  <TabItem label="Short form">
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Ignore everything",
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+  </TabItem>
+  <TabItem label="Long form">
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Ignore everything",
+      "dependencies": ["**"],
+      "dependencyTypes": ["**"],
+      "packages": ["**"],
+      "specifierTypes": ["**"],
+      "isIgnored": true
+    },
+  ],
+}
+```
+
+  </TabItem>
+</Tabs>

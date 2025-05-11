@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Question from '@components/question.astro';
+
+export async function getStaticPaths() {
+  const faqs = await getCollection('faq');
+  return faqs.map(faq => ({
+    params: { id: faq.id },
+    props: {
+      faq,
+      slug: faq.id,
+      title: faq.data.title,
+    },
+  }));
+}
+
+const { faq, slug, title } = Astro.props;
+const frontmatter = faq.data;
+const { Content: Answer } = await render(faq);
+---
+
+<StarlightPage
+  frontmatter={{
+    title: frontmatter.title,
+    editUrl: `https://github.com/JamieMason/syncpack/edit/main/site/${faq.filePath}`,
+    head: frontmatter.head,
+    template: frontmatter.template,
+    pagefind: frontmatter.pagefind,
+    draft: frontmatter.draft,
+  }}
+>
+  <Question slug={slug} title={title}>
+    <Answer />
+  </Question>
+</StarlightPage>

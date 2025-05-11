@@ -1,0 +1,22 @@
+---
+title: Peer Dependencies
+---
+
+If any of your packages define [`peerDependencies`](HREF_PEER_DEPENDENCIES) (find out with `syncpack list --dependency-types peer`) it's really important that we understand them as they have a very different role.
+
+[`dependencies`](HREF_DEPENDENCIES) tend to be exact (`1.2.3`) or clamped within the patch `~1.2.0` or sometimes even minor `^1.2.0` ranges. They're narrower in scope because there we are a **consumer** and we want higher confidence over knowing what we are running.
+
+[`peerDependencies`](HREF_PEER_DEPENDENCIES) tend to be far broader in scope because in those scenarios we are a **provider** and we want our package to be suitable for as many consuming projects as possible. These versions tend to span entire majors (`^1`) and sometimes multiple majors (`>=6.0.0 <9.0.0`).
+
+## Why this matters
+
+Unless your project is well-organised using [Version Groups](CONFIG_VERSION_GROUPS), it is very likely that at some point you will see a version mismatch because a peer dependency is not equal to a production dependency.
+
+Here's a common example:
+
+1. One of the packages you develop is an ESLint Plugin and in its `peerDependencies` you define a range of `"eslint": ">=6.0.0 <9.0.0"` for the ESLint versions it is compatible with.
+1. Elsewhere you have `"eslint": "8.53.0"` installed under `devDependencies` because you use ESLint to lint the monorepo.
+
+Syncpack will report a version mismatch because ESLint is referenced twice with wildly different versions.
+
+That we don't consider this particular mismatch to be a problem is domain knowledge about our specific project. Syncpack needs us to share with it that domain knowledge via its [Configuration file](CONFIG_SYNCPACKRC).

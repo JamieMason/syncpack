@@ -1,9 +1,3 @@
-import SpecifierTypes from "@partials/specifier-types.mdx";
-
-- When set, only dependencies whose version specifier matches the named formats will be assigned to this group.
+- When set, only dependencies whose version specifier matches the given [specifier types](REF_SPECIFIER_TYPES) will be assigned to this group.
 - If omitted, the default behaviour is to match all dependencies.
 - Negated types are also supported, so a value of `["!latest", "!file"]` would assign everything **except** specifiers of the format `*` and `file:path/to/package.tgz` to this group.
-
-#### Available values
-
-<SpecifierTypes />

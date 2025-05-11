@@ -1,0 +1,35 @@
+---
+import { getCollection, render } from 'astro:content';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Question from '@components/question.astro';
+
+const files = await getCollection('faq');
+const faqs = await Promise.all(
+  files.map(async faq => ({
+    Answer: (await render(faq)).Content,
+    faq,
+    slug: faq.id,
+    title: faq.data.title,
+  })),
+);
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "FAQ",
+    editUrl: `https://github.com/JamieMason/syncpack/edit/main/site/src/pages/faq.astro`,
+  }}
+  headings={faqs.map((faq) => ({
+    depth: 2,
+    text: faq.title,
+    slug: faq.slug,
+  }))}
+>
+  {
+    faqs.map(({ Answer, slug, title }) => (
+      <Question slug={slug} title={title}>
+        <Answer />
+      </Question>
+    ))
+  }
+</StarlightPage>

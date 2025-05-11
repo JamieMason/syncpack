@@ -1,0 +1,144 @@
+---
+title: Syncpack
+description: Consistent dependency versions in large JavaScript Monorepos
+slug: index
+sidebar:
+  label: Getting Started
+---
+
+Syncpack is a command-line tool for consistent dependency versions in large JavaScript Monorepos, some of the things it can do are:
+
+- Find and fix dependency version mismatches.
+- Enforce a single version policy, or create partitions with separate policies.
+- Find and bump outdated versions from the npm registry.
+- Ensure some dependencies always remain pinned at a specific version.
+- Ban some dependencies from being used: anywhere, or in specific places.
+- Define rules for where exact or loose semver ranges should be used.
+- Assign packages as the source of truth for specific dependencies' versions.
+- Sort and format package.json files consistently.
+
+## Try it
+
+The fastest way to try syncpack is via [npx](HREF_NPX).
+
+Run this command from the root directory of a monorepo and it will list every dependency installed under a [`dependencies`](HREF_DEPENDENCIES) property of a package.json file in the project.
+
+Syncpack uses your package manager's workspace configuration to locate your package.json files, or you can target specific files using the [`source`](CONFIG_SOURCE) configuration or `--source` option.
+
+```bash
+npx syncpack@alpha list --dependency-types prod
+```
+
+For any given command, browse a summary of its options with `-h`
+
+```bash
+npx syncpack@alpha update -h
+```
+
+or display documentation and examples with `--help`
+
+```bash
+npx syncpack@alpha update --help
+```
+
+## Install
+
+When setting up a project for real, install `syncpack` in [`devDependencies`](HREF_DEV_DEPENDENCIES) so that everyone working on your project uses the same version.
+
+```bash
+npm install syncpack@alpha --save-dev
+```
+
+The locally installed binary can be run using [npm exec](HREF_NPM_EXEC)
+
+```bash
+npm exec syncpack -- list
+```
+
+## Introduction
+
+:::note
+
+For the rest of this guide I will run syncpack as if it was installed globally
+
+```
+npm install -g syncpack@alpha
+```
+
+:::
+
+We're going to run a few commands to better understand not only syncpack, but our own project as well. Monorepos can be _huge_, it's not easy to drill down and see all of the many dependencies we might be using, and harder still to know where any inconsistencies are.
+
+Let's see which dependencies we use the most.
+
+```bash
+syncpack list --dependency-types prod --sort count
+```
+
+Some of our dependencies might have errors next to them, if our Terminal supports it we can command + click each error to view its documentation, or each filename to open the file.
+
+To focus only on dependencies with errors, use `lint` instead of `list`.
+
+```bash
+syncpack lint --dependency-types prod
+```
+
+If the suggested changes look ok, we can autofix them.
+
+```bash
+syncpack fix --dependency-types prod
+```
+
+Or we could choose to only autofix one of them, for this example I've chosen `react`.
+
+```bash
+syncpack fix --dependency-types prod --dependencies react
+```
+
+All of syncpack's commands can be filtered in the same way, let's see if `react` needs updating.
+
+```bash
+syncpack update --check --dependencies react
+```
+
+Or list every dependency with `eslint` somewhere in the name.
+
+```bash
+syncpack list --dependencies '**eslint**'
+```
+
+Or every dependency published under the `@types` scope.
+
+```bash
+syncpack list --dependencies '@types/**'
+```
+
+We can find every dependency installed with an exact version number.
+
+```bash
+syncpack list --specifier-types exact
+```
+
+Or look for updates to [`devDependencies`](HREF_DEV_DEPENDENCIES) where only the patch version is newer than what we have installed.
+
+```bash
+syncpack update --check --dependency-types dev --target patch
+```
+
+And by removing the `--check` option we can write the newer versions to our files.
+
+```bash
+syncpack update --dependencies react
+```
+
+I'm hoping by this point that you're starting to develop an intuition for how syncpack works and how its options can be combined. Take a look at the `--help` documentation of each command to see examples and what options are available.
+
+```bash
+syncpack list --help
+```
+
+## Further reading
+
+1. Read the [`Peer Dependencies`](GUIDE_PEER_DEPENDENCIES) guide if your projects uses them, it will be important to understand them from a version consistency point of view.
+1. [`Semver Groups`](CONFIG_SEMVER_GROUPS) configuration lets you ensure for example that version numbers in `devDependencies` always use `^` while `dependencies` always use `~`.
+1. With [`Version Groups`](CONFIG_VERSION_GROUPS) configuration you can slice up your packages and dependencies in a lot of different ways. Each group can have different versioning policies to the rest of the repo, but are each kept internally consistent and valid according to their own rules.

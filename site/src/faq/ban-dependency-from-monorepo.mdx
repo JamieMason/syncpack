@@ -1,0 +1,32 @@
+---
+title: How to stop an npm dependency being installed?
+---
+
+Ban a dependency from being used anywhere in your monorepo.
+
+### 1. Add a version group
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["never-gonna"],
+      "isBanned": true
+    }
+  ]
+}
+```
+
+### 2. Look for mismatches
+
+Now when you run any syncpack command, banned dependencies will be listed:
+
+```bash
+syncpack list
+```
+
+And can be removed:
+
+```bash
+syncpack fix-mismatches
+```
