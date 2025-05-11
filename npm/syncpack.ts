@@ -105,13 +105,7 @@ namespace VersionGroup {
     /** @see https://jamiemason.github.io/syncpack/config/version-groups/lowest-version/#preferversion */
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
-  export type Any =
-    | Banned
-    | Ignored
-    | Pinned
-    | SameRange
-    | SnappedTo
-    | Standard;
+  export type Any = Banned | Ignored | Pinned | SameRange | SnappedTo | Standard;
 }
 
 namespace CustomType {
@@ -141,24 +135,12 @@ namespace CustomType {
     /** @see https://jamiemason.github.io/syncpack/config/custom-types/#namestrategy */
     strategy: 'versionsByName';
   }
-  export type Any =
-    | NameAndVersionProps
-    | NamedVersionString
-    | UnnamedVersionString
-    | VersionsByName;
+  export type Any = NameAndVersionProps | NamedVersionString | UnnamedVersionString | VersionsByName;
 }
 
 type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~';
 
-type DependencyType =
-  | 'dev'
-  | 'local'
-  | 'overrides'
-  | 'peer'
-  | 'pnpmOverrides'
-  | 'prod'
-  | 'resolutions'
-  | AnyString;
+type DependencyType = 'dev' | 'local' | 'overrides' | 'peer' | 'pnpmOverrides' | 'prod' | 'resolutions' | AnyString;
 
 type SpecifierType =
   | 'alias'

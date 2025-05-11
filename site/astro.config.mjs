@@ -11,15 +11,11 @@ export default defineConfig({
     '/config/semver-groups/with-range/': '/syncpack/semver-groups/with-range/',
     '/config/version-groups/banned/': '/syncpack/version-groups/banned/',
     '/config/version-groups/ignored/': '/syncpack/version-groups/ignored/',
-    '/config/version-groups/lowest-version/':
-      '/syncpack/version-groups/lowest-semver/',
+    '/config/version-groups/lowest-version/': '/syncpack/version-groups/lowest-semver/',
     '/config/version-groups/pinned/': '/syncpack/version-groups/pinned/',
-    '/config/version-groups/same-range/':
-      '/syncpack/version-groups/same-range/',
-    '/config/version-groups/snapped-to/':
-      '/syncpack/version-groups/snapped-to/',
-    '/config/version-groups/standard/':
-      '/syncpack/version-groups/highest-semver/',
+    '/config/version-groups/same-range/': '/syncpack/version-groups/same-range/',
+    '/config/version-groups/snapped-to/': '/syncpack/version-groups/snapped-to/',
+    '/config/version-groups/standard/': '/syncpack/version-groups/highest-semver/',
     '/guide/status-codes/': '/syncpack/status/',
     // Deprecated: Removed
     '/config/dependency-types/': '/syncpack/guide/upgrading/',
@@ -43,38 +39,27 @@ export default defineConfig({
           GUIDE_SPECIFIER_TYPES: '/syncpack/guide/specifier-types/',
           HREF_ANSI: 'https://en.wikipedia.org/wiki/ANSI_escape_code',
           HREF_AWS_SDK: 'https://aws.amazon.com/sdk-for-javascript/',
-          HREF_CONDITIONAL_EXPORTS:
-            'https://nodejs.org/api/packages.html#conditional-exports',
+          HREF_CONDITIONAL_EXPORTS: 'https://nodejs.org/api/packages.html#conditional-exports',
           HREF_COSMICONFIG: 'https://github.com/cosmiconfig/cosmiconfig',
-          HREF_DEPENDENCIES:
-            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies',
-          HREF_DEV_DEPENDENCIES:
-            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#devDependencies',
-          HREF_ENGINES:
-            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#engines',
+          HREF_DEPENDENCIES: 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies',
+          HREF_DEV_DEPENDENCIES: 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#devDependencies',
+          HREF_ENGINES: 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#engines',
           HREF_GLOB: 'https://github.com/rust-lang/glob',
           HREF_LERNA: 'https://lerna.js.org/',
-          HREF_NEW_ISSUE:
-            'https://github.com/JamieMason/syncpack-github-action/issues/new',
+          HREF_NEW_ISSUE: 'https://github.com/JamieMason/syncpack-github-action/issues/new',
           HREF_NPM_EXEC: 'https://docs.npmjs.com/cli/v10/commands/npm-exec',
           HREF_NPX: 'https://docs.npmjs.com/cli/v7/commands/npx',
-          HREF_OVERRIDES:
-            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#overrides',
-          HREF_PACKAGE_MANAGER:
-            'https://nodejs.org/api/packages.html#packagemanager',
-          HREF_PEER_DEPENDENCIES:
-            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#peerDependencies',
+          HREF_OVERRIDES: 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#overrides',
+          HREF_PACKAGE_MANAGER: 'https://nodejs.org/api/packages.html#packagemanager',
+          HREF_PEER_DEPENDENCIES: 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#peerDependencies',
           HREF_PNPM: 'https://pnpm.js.org/',
           HREF_PNPM_OVERRIDES: 'https://pnpm.io/package_json#pnpmoverrides',
-          HREF_RESOLUTIONS:
-            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#resolutions',
+          HREF_RESOLUTIONS: 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#resolutions',
           HREF_SYNCPACK_GITHUB_ACTION:
             'https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions',
           HREF_TYPES: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
-          HREF_VERSION:
-            'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#version',
-          HREF_WORKSPACE_PROTOCOL:
-            'https://pnpm.io/workspaces#workspace-protocol-workspace',
+          HREF_VERSION: 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json#version',
+          HREF_WORKSPACE_PROTOCOL: 'https://pnpm.io/workspaces#workspace-protocol-workspace',
           HREF_YARN_WORKSPACES: 'https://yarnpkg.com/lang/en/docs/workspaces/',
         };
 

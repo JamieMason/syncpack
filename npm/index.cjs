@@ -4,9 +4,7 @@ const { spawnSync } = require('node:child_process');
 
 const args = process.argv.slice(2);
 const arch = process.arch;
-const [os, extension] = ['win32', 'cygwin'].includes(process.platform)
-  ? ['windows', '.exe']
-  : [process.platform, ''];
+const [os, extension] = ['win32', 'cygwin'].includes(process.platform) ? ['windows', '.exe'] : [process.platform, ''];
 const optionalDep = `syncpack-${os}-${arch}`;
 const pkgSpecifier = `${optionalDep}/bin/syncpack${extension}`;
 const pathToBinary = require.resolve(pkgSpecifier);
