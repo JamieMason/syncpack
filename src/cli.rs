@@ -228,6 +228,7 @@ interpret it.
       has_braces = "{react,webpack}"
     ))
     .action(clap::ArgAction::Append)
+    .value_name("dependency-name-pattern")
 }
 
 fn show_option_versions(command: &str) -> Arg {
@@ -257,6 +258,7 @@ fn show_option_versions(command: &str) -> Arg {
     ))
     .value_delimiter(',')
     .value_parser(["hints", "instances", "statuses", "all", "none"])
+    .value_name("comma-separated-detail-names")
     .default_value("all")
 }
 
@@ -291,6 +293,7 @@ fn show_option_list(command: &str) -> Arg {
     ))
     .value_delimiter(',')
     .value_parser(["hints", "ignored", "instances", "statuses", "all", "none"])
+    .value_name("comma-separated-detail-names")
     .default_value("hints,statuses")
 }
 
@@ -310,6 +313,7 @@ fn sort_option(command: &str) -> Arg {
     ))
     .action(clap::ArgAction::Set)
     .value_parser(["count", "name"])
+    .value_name("choice")
     .default_value("name")
 }
 
@@ -366,6 +370,7 @@ fn specifier_types_option(command: &str) -> Arg {
       "url",
       "workspace-protocol",
     ])
+    .value_name("comma-separated-specifier-type-names")
 }
 
 fn dependency_types_option(command: &str) -> Arg {
@@ -395,6 +400,7 @@ See <blue>https://jamiemason.github.io/syncpack/config/custom-types/</>
 <dim>$</dim> <blue><bold>syncpack {command}</bold> --dependency-types dev,prod"#
     ))
     .value_delimiter(',')
+    .value_name("comma-separated-dependency-type-names")
     .default_value("dev,local,overrides,peer,pnpmOverrides,prod,resolutions")
 }
 
@@ -430,6 +436,7 @@ fn log_levels_option(command: &str) -> Arg {
     ))
     .value_delimiter(',')
     .value_parser(["off", "error", "warn", "info", "debug"])
+    .value_name("comma-separated-log-level-names")
     .default_value("error,warn,info")
 }
 
@@ -471,6 +478,7 @@ Patterns are discovered in the following order, first one wins:
     ))
     .action(clap::ArgAction::Append)
     .value_parser(ValueParser::new(validate_source))
+    .value_name("file-pattern")
 }
 
 fn target_option(command: &str) -> Arg {
@@ -491,6 +499,7 @@ fn target_option(command: &str) -> Arg {
     ))
     .action(clap::ArgAction::Set)
     .value_parser(["latest", "minor", "patch"])
+    .value_name("greediness")
     .default_value("latest")
 }
 
