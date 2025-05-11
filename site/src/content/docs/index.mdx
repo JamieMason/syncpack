@@ -1,12 +1,13 @@
 ---
 title: Syncpack
+description: Consistent dependency versions in large JavaScript Monorepos
 ---
 
 import SupportedRanges from "@partials/supported-ranges.mdx";
 import VersionGroupList from "@partials/version-group-list.mdx";
 import Details from "@site/components/details.astro";
 
-Syncpack is a command-line tool to manage multiple package.json files.
+Consistent dependency versions in large JavaScript Monorepos. `syncpack` is a command-line tool to manage multiple package.json files.
 
 - Find and fix dependency version mismatches.
 - Enforce a single version policy, or create partitions with separate policies.
@@ -17,9 +18,11 @@ Syncpack is a command-line tool to manage multiple package.json files.
 - Assign packages as the source of truth for specific dependencies' versions.
 - Sort and format package.json files consistently.
 
-## Quick run
+## Try it first
 
-The quickest way to try syncpack is via [npx](HREF_NPX).
+The fastest way to try syncpack is via [npx](HREF_NPX).
+
+Run the command below from the root directory of your monorepo to list every dependency installed under a [`dependencies`](HREF_DEPENDENCIES) property of a package.json file in your project. Syncpack uses your npm/pnpm/yarn/lerna workspace configuration to know which package.json files to manage.
 
 ```bash
 npx syncpack list --dependency-types prod
@@ -27,7 +30,7 @@ npx syncpack list --dependency-types prod
 
 ## Install
 
-It's best to install syncpack as a dev dependency, so that everyone working on your project uses the same version.
+When setting up a project for real, install syncpack as a dev dependency so that everyone working on your project uses the same version.
 
 ```bash
 npm install syncpack --save-dev
@@ -39,311 +42,86 @@ Anyone on the team can now use [npm exec](HREF_NPM_EXEC) to access their local i
 npm exec syncpack -- list
 ```
 
-For the rest of this guide I will run synpack as if it is installed globally.
+## Explore
 
-## Run
+:::note
 
-List every dependency in every package.json file in the project:
-
-```bash
-syncpack list
-```
-
-List only the contents of the `dependencies` and `devDependencies` objects:
-
-```bash
-syncpack list --types dev,prod
-```
-
-List the versions of packages developed in this project:
-
-```bash
-syncpack list --types local
-```
-
-## Start Small
-
-When setting up a project, I'd recommend that you start small and focus on only production dependencies. Monorepos are large and complex and I think it's better to tackle them in stages.
-
-Create the following [config file](/syncpack/config/syncpackrc) at `.syncpackrc` in the root of your project:
-
-```json title=".syncpackrc"
-{
-  "dependencyTypes": ["prod"]
-}
-```
-
-Now syncpack commands will only inspect the `dependencies` properties of package.json files.
-
-:::tip[Why start small?]
-
-If you have a monorepo-wide single version policy which applies universally without exception, you will not need to define any configuration, but most projects are not like that.
-
-Here are two common examples where a single version policy is unsuitable.
-
-1. ### `peerDependencies`
-
-   One of the packages you develop is an ESLint Plugin and in its `peerDependencies` you define a range of `"eslint": ">=6.0.0 <9.0.0"` for the ESLint versions it is compatible with.
-
-   In the root package.json you have `"eslint": "8.53.0"` installed under `devDependencies` because you use ESLint to lint the monorepo.
-
-   That's a version mismatch because ESLint is referenced twice with different versions. As Developers on the project we know this is Ok but a tool like syncpack can't know whether any given mismatch is deliberate or a mistake, without information about the project.
-
-1. ### `workspace:*`
-
-   Projects using the [pnpm workspace protocol](HREF_WORKSPACE_PROTOCOL) may use `workspace:*` when referencing a local package in `devDependencies`, but the latest semver version in `dependencies` so it is understood by other package managers.
-
-   Again, this is a mismatch but a deliberate one which syncpack needs to be informed of.
+For the rest of this guide I will run syncpack as if it is installed globally.
 
 :::
 
-## Audit
+We're going to run a few commands to better understand not only syncpack, but our own project as well. Monorepos can be _huge_, it's not easy to drill down and see all of the many dependencies we might be using, and harder still to know where any inconsistencies are.
 
-Now take a look at your production dependencies:
-
-```bash
-syncpack list
-```
-
-You will likely see some warnings, and each warning will display an error code to identify the reason it is invalid. Every warning is explained in the [Status Codes](/syncpack/guide/status-codes) documentation.
-
-We'll look at how to fix mismatching versions, but first let's look at the semver ranges.
-
-## Semver Ranges
-
-<Details title="Examples of Semver Ranges">
-  <SupportedRanges />
-</Details>
-
-Looking at your `syncpack list` output, which semver range is used in the majority of cases?
-
-Supposing you prefer exact version numbers, you can define a policy to standardise them:
-
-```diff lang="json" title=".syncpackrc"
-{
-  "dependencyTypes": ["prod"],
-+  "semverGroups": [
-+    {
-+      "label": "use exact version numbers in production",
-+      "packages": ["**"],
-+      "dependencyTypes": ["prod"],
-+      "dependencies": ["**"],
-+      "range": ""
-+    }
-+  ]
-}
-```
-
-:::tip
-
-[packages](/syncpack/config/semver-groups/with-range#packages) and [dependencies](/syncpack/config/semver-groups/with-range#dependencies) match all by default, so you can remove those properties from your config if you prefer.
-
-:::
-
-What we've created is called a [Semver Group](/syncpack/config/semver-groups/with-range). Whenever syncpack finds an [instance of a dependency](#whats-an-instance), it walks through your `semverGroups` array in source code order until it finds a match – the first match wins and syncpack stops searching. An instance can only belong to one Semver Group (and one [Version Group](/syncpack/config/version-groups/standard), which we'll see later) and the groups an instance belongs to define the rules that form its version policy.
-
-In our case we've decided that every instance under a `dependencies` object must always have a semver range of `""` for an exact version number.
-
-<div id="whats-an-instance">
-
-:::tip[What's an instance of a dependency?]
-
-- There are 4 packages in your monorepo (A, B, C, and D).
-- A B C D all depend on `uuid`.
-- A B C each have it under `dependencies` (3x).
-- D has it under `devDependencies` and `peerDependencies` (2x).
-
-There are 5 "instances" of the dependency `uuid`.
-
-:::
-
-</div>
-
-We can now check the semver ranges of our production dependencies:
+Let's see which dependencies we use the most.
 
 ```bash
-syncpack lint-semver-ranges
+syncpack list --dependency-types prod --sort count
 ```
 
-...fix them
+Some of our dependencies might have errors next to them, if our Terminal supports it we can command + click each error to view its documentation, or each filename to open the file.
+
+To focus only on dependencies with errors, use `lint` instead of `list`.
 
 ```bash
-syncpack set-semver-ranges
+syncpack lint --dependency-types prod
 ```
 
-...and see that they are now valid
+If the suggested changes look ok, we can autofix them.
 
 ```bash
-syncpack lint-semver-ranges
+syncpack fix --dependency-types prod
 ```
 
-### Adding overrides
-
-Sometimes you will have exceptions to a rule, instances which for whatever reason can't conform to a broader policy and need special treatment. To override a Semver or Version Group, define a more specific one nearer the start of the `semverGroups` or `versionGroups` array.
-
-For example, to use `^` in just one package we could use the following config, where `dashboard-ui` is the `name` property of the package.json file we want to make an exception for.
-
-```diff lang="json" title=".syncpackrc"
-{
-  "dependencyTypes": ["prod"],
-  "semverGroups": [
-+    {
-+      "label": "use caret ranges in the dashboard-ui in production",
-+      "packages": ["dashboard-ui"],
-+      "dependencyTypes": ["prod"],
-+      "dependencies": ["**"],
-+      "range": "^"
-+    },
-    {
-      "label": "use exact version numbers in production",
-      "packages": ["**"],
-      "dependencyTypes": ["prod"],
-      "dependencies": ["**"],
-      "range": ""
-    }
-  ]
-}
-```
-
-:::tip[Order groups by most to least specific]
-
-- Syncpack matches instances against each group from first to last.
-- The first group which matches a given instance wins and syncpack stops searching.
-- The `^` group we just added requires that an instance be located in `dependencies` _and_ in a local package.json file with a `name` property of `dashboard-ui`.
-- The `""` group only requires that an instance be located in `dependencies` and nothing more.
-
-So our new `^` group must appear before the `""` group or else the more generic requirements of only needing to be in `dependencies` would win out and syncpack would stop searching before looking at which package the instance is in.
-
-:::
-
-Now when we run `syncpack lint-semver-ranges` we will see that `dashboard-ui` is invalid because we updated out configuration to expect caret ranges and haven't updated them yet. When we run `syncpack set-semver-ranges` they are fixed to have caret ranges as expected. The rest of the monorepo continues to use exact version numbers for production dependencies.
-
-## Version Mismatches
-
-Now that we're using consistent semver ranges under `dependencies`, let's return to version mismatches.
+Or we could choose to only autofix one of them, for this example I've chosen `react`.
 
 ```bash
-syncpack list-mismatches
+syncpack fix --dependency-types prod --dependencies react
 ```
 
-The most common of syncpack's [Status Codes](/syncpack/guide/status-codes) is `HighestSemverMismatch` which tells us that all versions used for that dependency are valid semver, but they are not identical and the one with the highest semver version should be used by all.
-
-If you don't have any special requirements, they can be fixed automatically
+All of syncpack's commands can be filtered in the same way, let's see if `react` needs updating.
 
 ```bash
-syncpack fix-mismatches
+syncpack update --check --dependencies react
 ```
 
-If you see `UnsupportedMismatch` warnings, those are cases where there is no semver version (such as a reference to a file or a git hash) and syncpack cannot know what you would want to do.
-
-You can resolve those using an interactive walkthrough:
+Or list every dependency with `eslint` somewhere in the name.
 
 ```bash
-syncpack prompt
+syncpack list --dependencies '**eslint**'
 ```
 
-### Adding overrides
-
-We saw earlier how to handle overrides for [Semver Groups](/syncpack/config/semver-groups/with-range) and [Version Groups](/syncpack/config/version-groups/standard) work in exactly the same way.
-
-A group can be applied to an entire monorepo, specific instances, or anything in between. Groups can be layered over others to apply overrides as we saw in the previous section.
-
-You should hopefully now have a good intuition for how instances get assigned to groups. All that remains is to choose groups which exhibit the behaviour you need and to apply combinations of the [dependencies](/syncpack/config/version-groups/standard#dependencies), [dependencyTypes](/syncpack/config/version-groups/standard#dependencyTypes), and [packages](/syncpack/config/version-groups/standard#packages) properties to them to target the instances you need to.
-
-Version Groups provide a lot of really useful functionality, let's look at them some more.
-
-### Version Groups
-
-Version Groups create partitions where dependencies inside each group can be internally consistent, without affecting the other groups. They let you handle special cases or provide more specific rules for what to do in certain situations and are best understood by looking at some example use cases.
-
-#### Incompatible packages using the same framework
-
-A 3rd party framework has had a major update which requires breaking changes but some of your packages can't easily be upgraded and will need to remain on an older version, while the rest are able to upgrade today.
-
-1. You **don't** want mismatches between your packages using the latest version of the framework - they should all use eg. `next@13.1.6` and `react@18.2.0`.
-1. You **don't** want mismatches between the packages using the old version - they should all use eg. `next@11.1.4` and `react@17.0.2`.
-1. You **do** want those groups to use **different versions to each other** and not have Syncpack make them all the same.
-1. You only have this problem with `next` and `react`, other dependencies can continue to be kept consistent with each other throughout the full monorepo.
-
-```diff lang="json" title=".syncpackrc"
-{
-  "dependencyTypes": ["prod"],
-  "semverGroups": [
-    {
-      "label": "use caret ranges in the dashboard-ui in production",
-      "packages": ["dashboard-ui"],
-      "dependencyTypes": ["prod"],
-      "dependencies": ["**"],
-      "range": "^"
-    },
-    {
-      "label": "use exact version numbers in production",
-      "packages": ["**"],
-      "dependencyTypes": ["prod"],
-      "dependencies": ["**"],
-      "range": ""
-    }
-  ],
-+  "versionGroups": [
-+    {
-+      "label": "These packages are stuck on next@11 for now",
-+      "packages": ["@stricken/server", "@stricken/ui"],
-+      "dependencyTypes": ["prod"],
-+      "dependencies": ["next", "react", "react-dom"]
-+    }
-+  ]
-}
-```
-
-:::tip[Syncpack will ensure that]
-
-- The versions of `next` and `react`
-  - are the same between `@stricken/server` and `@stricken/ui`.
-  - are the same across every package **except** `@stricken/server` and `@stricken/ui`.
-  - can be different in `@stricken/server` and `@stricken/ui` to the other packages.
-- The versions of every **other** dependency in the monorepo (eg `lodash`)
-  - are the same across every package **including** `@stricken/server` and `@stricken/ui`.
-
-:::
-
-## Keep going
-
-:::caution[Remember we've only been linting "dependencies"]
-
-At the start of this guide we used [dependencyTypes](/syncpack/config/dependency-types) to configure syncpack to only look at `dependencies`, so the rest of our monorepo is currently being ignored.
-
-Move onto `dev` for `devDependencies` next and repeat the process we just followed.
-
-```json title=".syncpackrc" ins=', "dev"'
-{
-  "dependencyTypes": ["prod", "dev"]
-}
-```
-
-Then do the same for `local` (versions of your local packages) and `peer` (`peerDependencies`).
-
-:::
-
-## Update monorepo dependencies
-
-Syncpack can also update dependencies to the latest versions from the npm registry and is best demonstrated by example.
+Or every dependency published under the `@types` scope.
 
 ```bash
-# update packages in `devDependencies` in the whole repo
-syncpack update --types dev
-# update eslint related packages
-syncpack update --filter eslint
-# update `dependencies` in just one package
-syncpack update --source packages/foo --types prod
-# update react related packages in `dependencies` only
-syncpack update --filter react --types prod
+syncpack list --dependencies '@types/**'
 ```
 
-You'll be guided through an interactive prompt to choose which updates you want to apply.
+We can find every dependency installed with an exact version number.
 
-## Next Steps
+```bash
+syncpack list --specifier-types exact
+```
 
-- Browse the [Examples](/syncpack/examples/ban-dependency-from-monorepo/) to see some common use cases and how to handle them.
-- See what other functionality is provided by Version Groups <VersionGroupList/>.
-- Read the guide on [Local Package Versions](/syncpack/guide/local-package-versions), which is an advanced topic.
-- If you like Syncpack, **tell people about it**. Syncpack is a single person project done in what spare time I can find, has been an absolute ton of work, and is completely free.
+Or look for updates to [`devDependencies`](HREF_DEV_DEPENDENCIES) where only the patch version is newer than what we have installed.
+
+```bash
+syncpack update --check --dependency-types dev --target patch
+```
+
+And by removing the `--check` option we can write the newer versions to our files.
+
+```bash
+syncpack update --dependencies react
+```
+
+I'm hoping by this point that you're starting to develop an intuition for how syncpack works and how its options can be combined. Take a look at the `--help` documentation of each command to see which other options are available.
+
+```bash
+syncpack list --help
+```
+
+## Next steps
+
+1. Definitely read the [`Peer Dependencies`](GUIDE_PEER_DEPENDENCIES) guide as they are very important to understand.
+1. Check out [`Semver Groups`](GUIDE_SEMVER_GROUPS) to have things like version numbers in `devDependencies` always using `^` while `dependencies` always uses `~`.
+1. Learn how [`Version Groups`](GUIDE_VERSION_GROUPS) can slice up your packages and dependencies in different ways. Each group can have different versioning policies to the rest of the repo, but are each kept internally consistent and valid according to their own rules.

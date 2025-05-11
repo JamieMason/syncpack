@@ -37,7 +37,10 @@ export default defineConfig({
         const linksById = {
           CONFIG_CUSTOM_TYPES: '/syncpack/config/custom-types/',
           GUIDE_DEPENDENCY_TYPES: '/syncpack/guide/dependency-types/',
+          GUIDE_PEER_DEPENDENCIES: '/syncpack/guide/peer-dependencies/',
+          GUIDE_SEMVER_GROUPS: '/syncpack/guide/semver-groups/',
           GUIDE_SPECIFIER_TYPES: '/syncpack/guide/specifier-types/',
+          GUIDE_VERSION_GROUPS: '/syncpack/guide/version-groups/',
           HREF_ANSI: 'https://en.wikipedia.org/wiki/ANSI_escape_code',
           HREF_AWS_SDK: 'https://aws.amazon.com/sdk-for-javascript/',
           HREF_CONDITIONAL_EXPORTS: 'https://nodejs.org/api/packages.html#conditional-exports',
@@ -118,6 +121,7 @@ export default defineConfig({
             { slug: 'guide/dependency-types' },
             { slug: 'guide/glossary' },
             { slug: 'guide/local-package-versions' },
+            { slug: 'guide/peer-dependencies' },
             { slug: 'guide/semver-groups' },
             { slug: 'guide/specifier-types' },
             { slug: 'status', label: 'Status Codes' },
