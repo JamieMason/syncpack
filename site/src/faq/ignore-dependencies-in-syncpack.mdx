@@ -1,10 +1,10 @@
-import Hx from '@site/components/hx.astro';
-
-export const level = 'h1';
+---
+title: Hide dependencies from syncpack
+---
 
 Ignore one or more dependencies so that syncpack does not inspect them.
 
-<Hx level={props.level}>1. Add an ignored version group</Hx>
+### 1. Add an ignored version group
 
 - Match 2 specific **packages** in the repo.
 - Match only the **peerDependencies** in those packages.

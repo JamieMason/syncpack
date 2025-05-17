@@ -6,7 +6,7 @@ export default defineConfig({
   site: 'https://jamiemason.github.io/syncpack',
   base: '/syncpack',
   redirects: {
-    // Hoisted
+    // Hoisted docs
     '/config/semver-groups/ignored/': '/syncpack/semver-groups/ignored/',
     '/config/semver-groups/with-range/': '/syncpack/semver-groups/with-range/',
     '/config/version-groups/banned/': '/syncpack/version-groups/banned/',
@@ -18,13 +18,15 @@ export default defineConfig({
     '/config/version-groups/standard/': '/syncpack/version-groups/highest-semver/',
     '/guide/status-codes/': '/syncpack/status/',
     '/guide/getting-started/': '/syncpack/',
-    // Deprecated: Removed
+    // Merged docs
+    '/guide/local-package-versions/': '/syncpack/dependency-types',
+    // Deprecated Feature: Removed
     '/config/dependency-types/': '/syncpack/guide/upgrading/',
     '/config/lint-formatting/': '/syncpack/guide/upgrading/',
     '/config/lint-semver-ranges/': '/syncpack/guide/upgrading/',
     '/config/lint-versions/': '/syncpack/guide/upgrading/',
     '/config/specifier-types/': '/syncpack/guide/upgrading/',
-    // Deprecated: Moved
+    // Deprecated Feature: Moved
     '/command/fix-mismatches/': '/command/fix',
     '/command/set-semver-ranges/': '/command/fix',
     '/command/lint-semver-ranges/': '/command/lint',
@@ -36,11 +38,34 @@ export default defineConfig({
       function globalReferenceLinks() {
         const linksById = {
           CONFIG_CUSTOM_TYPES: '/syncpack/config/custom-types/',
-          GUIDE_DEPENDENCY_TYPES: '/syncpack/guide/dependency-types/',
+          CONFIG_SOURCE: '/syncpack/config/source/',
+
+          GUIDE_CATALOGS: '/syncpack/guide/catalogs/',
           GUIDE_PEER_DEPENDENCIES: '/syncpack/guide/peer-dependencies/',
           GUIDE_SEMVER_GROUPS: '/syncpack/guide/semver-groups/',
-          GUIDE_SPECIFIER_TYPES: '/syncpack/guide/specifier-types/',
           GUIDE_VERSION_GROUPS: '/syncpack/guide/version-groups/',
+
+          REF_DEPENDENCY_TYPES: '/syncpack/dependency-types/',
+          REF_GLOSSARY: '/syncpack/glossary/',
+          REF_SPECIFIER_TYPES: '/syncpack/specifier-types/',
+          REF_STATUS_CODES: '/syncpack/status/',
+
+          TERM_CUSTOM_TYPE: '/syncpack/glossary/#custom-type',
+          TERM_DEPENDENCY: '/syncpack/glossary/#dependency',
+          TERM_DEPENDENCY_GROUP: '/syncpack/glossary/#dependency-group',
+          TERM_DEPENDENCY_TYPE: '/syncpack/glossary/#dependency-type',
+          TERM_INSTANCE: '/syncpack/glossary/#instance',
+          TERM_PACKAGE: '/syncpack/glossary/#package',
+          TERM_RCFILE: '/syncpack/glossary/#rcfile',
+          TERM_SEMVER: '/syncpack/glossary/#semver',
+          TERM_SEMVER_GROUP: '/syncpack/glossary/#semver-group',
+          TERM_SEMVER_RANGE: '/syncpack/glossary/#semver-range',
+          TERM_SPECIFIER: '/syncpack/glossary/#specifier',
+          TERM_SPECIFIER_TYPE: '/syncpack/glossary/#specifier-type',
+          TERM_STATUS_CODE: '/syncpack/glossary/#status-code',
+          TERM_VERSION_GROUP: '/syncpack/glossary/#version-group',
+          TERM_WORKSPACE: '/syncpack/glossary/#workspace',
+
           HREF_ANSI: 'https://en.wikipedia.org/wiki/ANSI_escape_code',
           HREF_AWS_SDK: 'https://aws.amazon.com/sdk-for-javascript/',
           HREF_CONDITIONAL_EXPORTS: 'https://nodejs.org/api/packages.html#conditional-exports',
@@ -105,9 +130,7 @@ export default defineConfig({
       logo: {
         src: './src/assets/logo.svg',
       },
-      components: {
-        Sidebar: './src/components/Sidebar.astro',
-      },
+      // expressiveCode: false,
       customCss: ['./src/styles/custom.css'],
       sidebar: [
         {
@@ -118,15 +141,20 @@ export default defineConfig({
           label: 'Guides',
           items: [
             { slug: 'index', label: 'Getting Started' },
-            { slug: 'guide/dependency-types' },
-            { slug: 'guide/glossary' },
-            { slug: 'guide/local-package-versions' },
+            { slug: 'guide/catalogs' },
             { slug: 'guide/peer-dependencies' },
             { slug: 'guide/semver-groups' },
-            { slug: 'guide/specifier-types' },
-            { slug: 'status', label: 'Status Codes' },
             { slug: 'guide/upgrading' },
             { slug: 'guide/version-groups' },
+          ],
+        },
+        {
+          label: 'Reference',
+          items: [
+            { slug: 'dependency-types' },
+            { slug: 'glossary' },
+            { slug: 'specifier-types' },
+            { slug: 'status', label: 'Status Codes' },
           ],
         },
         {
@@ -148,10 +176,6 @@ export default defineConfig({
         {
           label: 'Integrations',
           autogenerate: { directory: 'integrations' },
-        },
-        {
-          label: 'Examples',
-          autogenerate: { directory: 'examples' },
         },
       ],
       head: [

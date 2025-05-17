@@ -1,10 +1,10 @@
-import Hx from '@site/components/hx.astro';
-
-export const level = 'h1';
+---
+title: How do I ban an npm dependency from being used?
+---
 
 Ban a dependency from being used anywhere in your monorepo.
 
-<Hx level={props.level}>1. Add a version group</Hx>
+### 1. Add a version group
 
 ```json title=".syncpackrc"
 {
@@ -17,7 +17,7 @@ Ban a dependency from being used anywhere in your monorepo.
 }
 ```
 
-<Hx level={props.level}>2. Look for mismatches</Hx>
+### 2. Look for mismatches
 
 Now when you run any syncpack command, banned dependencies will be listed:
 

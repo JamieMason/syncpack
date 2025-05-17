@@ -3,11 +3,7 @@ title: Syncpack
 description: Consistent dependency versions in large JavaScript Monorepos
 ---
 
-import SupportedRanges from "@partials/supported-ranges.mdx";
-import VersionGroupList from "@partials/version-group-list.mdx";
-import Details from "@site/components/details.astro";
-
-Consistent dependency versions in large JavaScript Monorepos. `syncpack` is a command-line tool to manage multiple package.json files.
+Syncpack is a command-line tool for consistent dependency versions in large JavaScript Monorepos, some of the things it can do are:
 
 - Find and fix dependency version mismatches.
 - Enforce a single version policy, or create partitions with separate policies.
@@ -18,35 +14,53 @@ Consistent dependency versions in large JavaScript Monorepos. `syncpack` is a co
 - Assign packages as the source of truth for specific dependencies' versions.
 - Sort and format package.json files consistently.
 
-## Try it first
+## Try it
 
 The fastest way to try syncpack is via [npx](HREF_NPX).
 
-Run the command below from the root directory of your monorepo to list every dependency installed under a [`dependencies`](HREF_DEPENDENCIES) property of a package.json file in your project. Syncpack uses your npm/pnpm/yarn/lerna workspace configuration to know which package.json files to manage.
+Run this command from the root directory of a monorepo and it will list every dependency installed under a [`dependencies`](HREF_DEPENDENCIES) property of a package.json file in the project.
+
+Syncpack uses your package manager's workspace configuration to locate your package.json files, or you can target specific files using the [`source`](CONFIG_SOURCE) configuration or `--source` option.
 
 ```bash
-npx syncpack list --dependency-types prod
+npx syncpack@alpha list --dependency-types prod
+```
+
+For any given command, browse a summary of its options with `-h`
+
+```bash
+npx syncpack@alpha update -h
+```
+
+or display documentation and examples with `--help`
+
+```bash
+npx syncpack@alpha update --help
 ```
 
 ## Install
 
-When setting up a project for real, install syncpack as a dev dependency so that everyone working on your project uses the same version.
+When setting up a project for real, install `syncpack` in [`devDependencies`](HREF_DEV_DEPENDENCIES) so that everyone working on your project uses the same version.
 
 ```bash
-npm install syncpack --save-dev
+npm install syncpack@alpha --save-dev
 ```
 
-Anyone on the team can now use [npm exec](HREF_NPM_EXEC) to access their local installation of syncpack:
+The locally installed binary can be run using [npm exec](HREF_NPM_EXEC)
 
 ```bash
 npm exec syncpack -- list
 ```
 
-## Explore
+## Introduction
 
 :::note
 
-For the rest of this guide I will run syncpack as if it is installed globally.
+For the rest of this guide I will run syncpack as if it was installed globally
+
+```
+npm install -g syncpack@alpha
+```
 
 :::
 
@@ -114,14 +128,14 @@ And by removing the `--check` option we can write the newer versions to our file
 syncpack update --dependencies react
 ```
 
-I'm hoping by this point that you're starting to develop an intuition for how syncpack works and how its options can be combined. Take a look at the `--help` documentation of each command to see which other options are available.
+I'm hoping by this point that you're starting to develop an intuition for how syncpack works and how its options can be combined. Take a look at the `--help` documentation of each command to see examples and what options are available.
 
 ```bash
 syncpack list --help
 ```
 
-## Next steps
+## Further reading
 
-1. Definitely read the [`Peer Dependencies`](GUIDE_PEER_DEPENDENCIES) guide as they are very important to understand.
-1. Check out [`Semver Groups`](GUIDE_SEMVER_GROUPS) to have things like version numbers in `devDependencies` always using `^` while `dependencies` always uses `~`.
-1. Learn how [`Version Groups`](GUIDE_VERSION_GROUPS) can slice up your packages and dependencies in different ways. Each group can have different versioning policies to the rest of the repo, but are each kept internally consistent and valid according to their own rules.
+1. Read the [`Peer Dependencies`](GUIDE_PEER_DEPENDENCIES) guide if your projects uses them, it will be important to understand them from a version consistency point of view.
+1. [`Semver Groups`](GUIDE_SEMVER_GROUPS) configuration lets you ensure for example that version numbers in `devDependencies` always use `^` while `dependencies` always use `~`.
+1. With [`Version Groups`](GUIDE_VERSION_GROUPS) configuration you can slice up your packages and dependencies in a lot of different ways. Each group can have different versioning policies to the rest of the repo, but are each kept internally consistent and valid according to their own rules.

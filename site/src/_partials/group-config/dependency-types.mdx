@@ -1,12 +1,11 @@
-import DefaultDependencyTypes from '@partials/default-dependency-types.mdx';
-import CustomTypesTip from '@partials/tips/custom-types.mdx';
+import CustomTypesTip from "@partials/tips/custom-types.mdx";
 
-<CustomTypesTip />
+A "dependency type" refers to the path/location/nested property of package.json files where dependencies can be found.
 
 - When set, only dependencies present in the named locations will be assigned to this group.
 - If omitted, the default behaviour is to match dependencies everywhere they are found.
 - Negated types are also supported, so a value of `["!dev", "!prod"]` would assign everything **except** `dependencies` and `devDependencies` to this group.
 
-#### Default values
+See the [Dependency Types](REF_DEPENDENCY_TYPES) guide for the list of possible values.
 
-<DefaultDependencyTypes />
+<CustomTypesTip />

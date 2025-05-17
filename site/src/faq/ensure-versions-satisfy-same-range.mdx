@@ -1,4 +1,6 @@
-export const level = 'h1';
+---
+title: Ensure that semver ranges for a dependency all match each other
+---
 
 Add a [Same Range Version Group](/syncpack/config/version-groups/same-range) which allows local packages installed in `devDependencies` or `peerDependencies` to use different semver ranges, as long as they all match the local package version.
 
@@ -12,7 +14,11 @@ Add a [Same Range Version Group](/syncpack/config/version-groups/same-range) whi
   "versionGroups": [
     {
       "label": "Ensure semver ranges for locally developed packages satisfy the local version",
-      "dependencies": ["@your-repo/node-client-plugin-retry", "@your-repo/node-client", "dashboard-ui"],
+      "dependencies": [
+        "@your-repo/node-client-plugin-retry",
+        "@your-repo/node-client",
+        "dashboard-ui"
+      ],
       "dependencyTypes": ["dev", "peer"],
       "policy": "sameRange"
     }

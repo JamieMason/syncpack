@@ -11,7 +11,20 @@
   --sl-color-gray-5: #303c2d;
   --sl-color-gray-6: #1f2a1c;
   --sl-color-black: #151a13;
+
+  --sl-text-2xs: 0.75rem;
+  --sl-text-xs: 0.8125rem;
+  --sl-text-sm: 0.875rem;
+  --sl-text-base: 1rem;
+  --sl-text-lg: 1.05rem; /* h5 */
+  --sl-text-xl: 1.25rem; /* h4 */
+  --sl-text-2xl: 1.5rem; /* h3 */
+  --sl-text-3xl: 1.5rem; /* h2 */
+  --sl-text-4xl: 1.85rem; /* h1 */
+  --sl-text-5xl: 1.3rem;
+  --sl-text-6xl: 1.55rem;
 }
+
 /* Light mode colors. */
 :root[data-theme="light"] {
   --sl-color-accent-low: #c0e2b8;

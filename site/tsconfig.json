@@ -4,7 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@site/*": ["./src/*"],
-      "@partials/*": ["./src/_partials/*"]
+      "@partials/*": ["./src/_partials/*"],
+      "@components/*": ["./src/components/*"]
     }
   }
 }
