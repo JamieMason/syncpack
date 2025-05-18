@@ -247,6 +247,14 @@ export default defineConfig({
             content: '@fold_left',
           },
         },
+        {
+          tag: 'script',
+          attrs: {
+            src: 'https://app.rybbit.io/api/script.js',
+            'data-site-id': '619',
+            defer: true,
+          },
+        },
       ],
     }),
   ],
