@@ -32,11 +32,12 @@ export default defineConfig({
     // Merged docs
     '/guide/local-package-versions/': '/syncpack/dependency-types',
     // Deprecated Feature: Removed
-    '/config/dependency-types/': '/syncpack/guide/upgrading/',
-    '/config/lint-formatting/': '/syncpack/guide/upgrading/',
-    '/config/lint-semver-ranges/': '/syncpack/guide/upgrading/',
-    '/config/lint-versions/': '/syncpack/guide/upgrading/',
-    '/config/specifier-types/': '/syncpack/guide/upgrading/',
+    // @TODO: change to /syncpack/guide/upgrading/ once written
+    '/config/dependency-types/': '/syncpack/',
+    '/config/lint-formatting/': '/syncpack/',
+    '/config/lint-semver-ranges/': '/syncpack/',
+    '/config/lint-versions/': '/syncpack/',
+    '/config/specifier-types/': '/syncpack/',
     // Deprecated Feature: Moved
     '/command/fix-mismatches/': '/command/fix',
     '/command/set-semver-ranges/': '/command/fix',
