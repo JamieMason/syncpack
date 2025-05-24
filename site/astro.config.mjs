@@ -145,6 +145,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Syncpack',
+      routeMiddleware: './src/route-data.ts',
       social: [
         {
           icon: 'github',

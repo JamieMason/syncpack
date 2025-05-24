@@ -14,7 +14,7 @@
   "private": true,
   "scripts": {
     "astro": "astro",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && scripts/patch-sitemap.sh",
     "dev": "astro dev",
     "preview": "astro preview",
     "start": "astro dev"
