@@ -36,7 +36,10 @@
   ],
   "dependencies": {
     "cosmiconfig": "^9.0.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "@jsr/luca__cases": "1",
+    "@std/path": "npm:@jsr/std__path@^1.0.3",
+    "@std/fs": "npm:@jsr/std__fs@^1.0.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

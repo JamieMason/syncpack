@@ -124,6 +124,8 @@ impl Context {
       let client = Arc::clone(&client);
       let progress_bars = Arc::clone(&progress_bars);
 
+      println!("{update_url:?}");
+
       handles.push((
         update_url.internal_name.clone(),
         spawn(async move {

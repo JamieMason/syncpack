@@ -67,16 +67,52 @@ impl Dependency {
     }
   }
 
-  pub fn is_updateable(&self) -> bool {
-    self.matches_cli_filter && self.internal_name_is_supported() && !self.has_local_instance() && !self.contains_alias_specifier()
-  }
-
   pub fn get_update_url(&self) -> Option<UpdateUrl> {
-    if self.is_updateable() {
-      Some(UpdateUrl {
-        internal_name: self.internal_name.clone(),
-        url: format!("https://registry.npmjs.org/{}", self.internal_name),
-      })
+    if self.matches_cli_filter && self.internal_name_is_supported() && !self.has_local_instance() {
+      if self.contains_alias_specifier() {
+        self
+          .instances
+          .iter()
+          .find(|instance| instance.descriptor.specifier.is_alias())
+          .and_then(|instance| {
+            if instance.descriptor.specifier.get_raw().starts_with("npm:@jsr/") {
+              let raw = instance.descriptor.specifier.get_raw();
+              let without_npm = raw.strip_prefix("npm:").unwrap_or(&raw);
+              let parts: Vec<&str> = without_npm.split('@').collect();
+              let name = if parts.len() > 2 {
+                format!("{}@{}", parts[0], parts[1])
+              } else {
+                without_npm.to_string()
+              };
+
+              Some(UpdateUrl {
+                internal_name: self.internal_name.clone(),
+                url: format!("https://npm.jsr.io/{}", name),
+              })
+            } else {
+              None
+            }
+          })
+      }
+      // @FIXME: Cannot alias JSR dependencies with this in place
+      else if self.internal_name.starts_with("@jsr/") {
+        Some(UpdateUrl {
+          internal_name: self.internal_name.clone(),
+          url: format!(
+            "https://npm.jsr.io/{}",
+            &self
+              .internal_name
+              .replace("/", "__")
+              // @TODO: do this properly
+              .replace("@jsr__", "@jsr/")
+          ),
+        })
+      } else {
+        Some(UpdateUrl {
+          internal_name: self.internal_name.clone(),
+          url: format!("https://registry.npmjs.org/{}", self.internal_name),
+        })
+      }
     } else {
       None
     }
