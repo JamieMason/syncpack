@@ -1,6 +1,11 @@
 use {
   crate::{
-    cli::SortBy, dependency::Dependency, group_selector::GroupSelector, instance::Instance, package_json::PackageJson, packages::Packages,
+    cli::SortBy,
+    dependency::{Dependency, UpdateUrl},
+    group_selector::GroupSelector,
+    instance::Instance,
+    package_json::PackageJson,
+    packages::Packages,
     specifier::Specifier,
   },
   itertools::Itertools,
@@ -193,20 +198,12 @@ impl VersionGroup {
       })
   }
 
-  /// Get the names for every dependency that we're able to update from the npm
-  /// registry. Examples of dependencies we can't update are those inside banned
-  /// or ignored version groups, ones that are pinned to a specific version.
-  pub fn get_internal_names_of_updateable_dependencies(&self) -> Option<Vec<String>> {
+  /// Get the registry urls for every dependency that we're able to update.
+  /// Examples of dependencies we can't update are those inside banned or
+  /// ignored version groups, or ones that are pinned to a specific version.
+  pub fn get_update_urls(&self) -> Option<Vec<UpdateUrl>> {
     match self.variant {
-      VersionGroupVariant::HighestSemver => Some(
-        self
-          .dependencies
-          .values()
-          .filter(|dep| dep.is_updateable())
-          .map(|dep| dep.internal_name.clone())
-          .collect(),
-      )
-      .filter(|names: &Vec<String>| !names.is_empty()),
+      VersionGroupVariant::HighestSemver => Some(self.dependencies.values().filter_map(|dep| dep.get_update_url()).collect()),
       _ => None,
     }
   }

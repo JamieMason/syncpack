@@ -14,19 +14,19 @@ pub struct MockRegistryClient {
 #[async_trait::async_trait]
 impl RegistryClient for MockRegistryClient {
   /// Return a dynamically constructed PackageMeta based on the package name
-  async fn fetch(&self, name: &str) -> Result<PackageMeta, RegistryError> {
+  async fn fetch(&self, url: &str) -> Result<PackageMeta, RegistryError> {
     self
       .package_data
-      .get(name)
+      .get(url)
       .map(|versions| {
         let mut time = BTreeMap::new();
         for version in versions {
           time.insert(version.clone(), "2025-04-18T00:00:00.000Z".to_string());
         }
-        PackageMeta { name: name.into(), time }
+        PackageMeta { name: url.into(), time }
       })
       .ok_or_else(|| RegistryError::HttpError {
-        name: name.to_string(),
+        url: url.to_string(),
         status: StatusCode::NOT_FOUND,
       })
   }
