@@ -114,15 +114,16 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
     dependency.instances.iter().for_each(|instance| {
       let actual_specifier = &instance.descriptor.specifier;
       debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
-      specifiers_by_eligible_update.iter().for_each(|(update, effected_specifiers)| {
-        if effected_specifiers.contains(actual_specifier) {
+      specifiers_by_eligible_update.iter().for_each(|(update, affected_specifiers)| {
+        if affected_specifiers.contains(actual_specifier) {
           debug!("{L4}an eligible update {update:?} is available");
           let range = &instance
             .preferred_semver_range
             .clone()
             .or_else(|| actual_specifier.get_semver_range().cloned())
             .unwrap_or(SemverRange::Exact);
-          let with_preferred_range = &update.clone().with_range(range);
+          let with_updated_version = actual_specifier.clone().with_semver(update.get_semver().unwrap());
+          let with_preferred_range = &with_updated_version.with_range(range);
           debug!("{L4}with semver group applied update becomes {with_preferred_range:?}");
           instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, with_preferred_range);
         }

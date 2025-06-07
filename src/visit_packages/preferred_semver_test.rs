@@ -1617,6 +1617,86 @@ mod registry_updates {
         },
       ]);
     }
+
+    #[tokio::test]
+    async fn reports_latest_exact_semver_updates_for_npm_aliases() {
+      let config = test::mock::config();
+      let packages = test::mock::packages_from_mocks(vec![json!({
+        "name": "package-a",
+        "dependencies": {
+          // JSR dependencies (https://jsr.io/docs/npm-compatibility)
+          "@jsr/luca__cases": "1.2.3",
+          "@luca/cases": "npm:@jsr/luca__cases@1.2.3",
+          "@std/fmt": "npm:@jsr/std__fmt@1.2.3",
+          // normal npm dependencies, but aliased
+          "@lit-labs/ssr": "npm:@lit-labs/ssr@1.2.3",
+          "lit": "npm:lit@1.2.3",
+        }
+      })]);
+      let ctx = test::mock::context_with_registry_updates(
+        config,
+        packages,
+        json!({
+          "@jsr/luca__cases": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
+          "@lit-labs/ssr": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
+          "@luca/cases": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
+          "@std/fmt": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
+          "lit": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
+        }),
+      )
+      .await;
+      let ctx = visit_packages(ctx);
+      expect(&ctx).to_have_instances(vec![
+        ExpectedInstance {
+          state: InstanceState::suspect(InvalidLocalVersion),
+          dependency_name: "package-a",
+          id: "package-a in /version of package-a",
+          actual: "",
+          expected: Some(""),
+          overridden: None,
+        },
+        ExpectedInstance {
+          state: InstanceState::fixable(DiffersToNpmRegistry),
+          dependency_name: "@jsr/luca__cases",
+          id: "@jsr/luca__cases in /dependencies of package-a",
+          actual: "1.2.3",
+          expected: Some("2.0.0"),
+          overridden: None,
+        },
+        ExpectedInstance {
+          state: InstanceState::fixable(DiffersToNpmRegistry),
+          dependency_name: "@lit-labs/ssr",
+          id: "@lit-labs/ssr in /dependencies of package-a",
+          actual: "npm:@lit-labs/ssr@1.2.3",
+          expected: Some("npm:@lit-labs/ssr@2.0.0"),
+          overridden: None,
+        },
+        ExpectedInstance {
+          state: InstanceState::fixable(DiffersToNpmRegistry),
+          dependency_name: "@luca/cases",
+          id: "@luca/cases in /dependencies of package-a",
+          actual: "npm:@jsr/luca__cases@1.2.3",
+          expected: Some("npm:@jsr/luca__cases@2.0.0"),
+          overridden: None,
+        },
+        ExpectedInstance {
+          state: InstanceState::fixable(DiffersToNpmRegistry),
+          dependency_name: "@std/fmt",
+          id: "@std/fmt in /dependencies of package-a",
+          actual: "npm:@jsr/std__fmt@1.2.3",
+          expected: Some("npm:@jsr/std__fmt@2.0.0"),
+          overridden: None,
+        },
+        ExpectedInstance {
+          state: InstanceState::fixable(DiffersToNpmRegistry),
+          dependency_name: "lit",
+          id: "lit in /dependencies of package-a",
+          actual: "npm:lit@1.2.3",
+          expected: Some("npm:lit@2.0.0"),
+          overridden: None,
+        },
+      ]);
+    }
   }
 
   mod minor {

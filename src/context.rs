@@ -1,6 +1,7 @@
 use {
   crate::{
     config::Config,
+    dependency::UpdateUrl,
     instance::Instance,
     packages::Packages,
     registry_client::{LiveRegistryClient, PackageMeta, RegistryClient, RegistryError},
@@ -118,20 +119,20 @@ impl Context {
     let mut all_updates_by_internal_name: HashMap<String, Vec<Specifier>> = HashMap::new();
     let mut failed_updates: Vec<String> = vec![];
 
-    for internal_name in self.get_unique_internal_names_of_updateable_dependencies() {
+    for update_url in self.get_unique_update_urls() {
       let permit = Arc::clone(&semaphore).acquire_owned().await;
       let client = Arc::clone(&client);
       let progress_bars = Arc::clone(&progress_bars);
 
       handles.push((
-        internal_name.clone(),
+        update_url.internal_name.clone(),
         spawn(async move {
           let _permit = permit;
           let progress_bar = progress_bars.add(ProgressBar::new_spinner());
           progress_bar.enable_steady_tick(Duration::from_millis(100));
           progress_bar.set_style(ProgressStyle::default_spinner());
-          progress_bar.set_message(internal_name.clone());
-          let package_meta = client.fetch(&internal_name).await;
+          progress_bar.set_message(update_url.internal_name.clone());
+          let package_meta = client.fetch(&update_url).await;
           progress_bar.finish_and_clear();
           progress_bars.remove(&progress_bar);
           package_meta
@@ -143,7 +144,7 @@ impl Context {
       match handle.await {
         Ok(result) => match result {
           Ok(package_meta) => {
-            let all_updates = all_updates_by_internal_name.entry(package_meta.name.clone()).or_default();
+            let all_updates = all_updates_by_internal_name.entry(internal_name.clone()).or_default();
             for (version, _timestamp) in package_meta.time.iter() {
               if !version.contains("created") && !version.contains("modified") {
                 all_updates.push(Specifier::new(version, None));
@@ -169,18 +170,18 @@ impl Context {
   /// Return a list of every dependency we should query the registry for
   /// updates. We use internal names in order to support dependency groups,
   /// where many dependencies can be aliased as one.
-  fn get_unique_internal_names_of_updateable_dependencies(&self) -> HashSet<String> {
+  fn get_unique_update_urls(&self) -> HashSet<UpdateUrl> {
     self
       .version_groups
       .iter()
       .filter(|group| group.matches_cli_filter)
-      .fold(HashSet::new(), |mut unique_internal_names, group| {
-        group.get_internal_names_of_updateable_dependencies().inspect(|internal_names| {
-          internal_names.iter().for_each(|internal_name| {
-            unique_internal_names.insert(internal_name.clone());
+      .fold(HashSet::new(), |mut unique_update_urls, group| {
+        group.get_update_urls().inspect(|update_urls| {
+          update_urls.iter().for_each(|url| {
+            unique_update_urls.insert(url.clone());
           });
         });
-        unique_internal_names
+        unique_update_urls
       })
   }
 }

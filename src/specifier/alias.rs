@@ -1,5 +1,6 @@
 use {
   super::{basic_semver::BasicSemver, semver_range::SemverRange},
+  crate::specifier::regexes::NAME_WITHIN_NPM_ALIAS,
   log::debug,
 };
 
@@ -42,5 +43,18 @@ impl Alias {
       name: self.name,
       semver: Some(semver.clone()),
     }
+  }
+
+  /// Match a package name inside an npm alias specifier
+  /// "npm:@lit-labs/ssr@3.3.0" -> "@lit-labs/ssr"
+  /// "npm:@jsr/luca__cases@1" -> "@jsr/luca__cases"
+  /// "npm:@jsr/std__fmt@^1.0.3" -> "@jsr/std__fmt"
+  /// "npm:@jsr/std__yaml" -> "@jsr/std__yaml"
+  /// "npm:lit@3.2.1" -> "lit"
+  pub fn extract_package_name(&self) -> Option<String> {
+    NAME_WITHIN_NPM_ALIAS
+      .captures(&self.raw)
+      .and_then(|caps| caps.get(1))
+      .map(|m| m.as_str().to_string())
   }
 }

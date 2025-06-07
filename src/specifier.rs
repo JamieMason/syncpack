@@ -148,14 +148,20 @@ impl Specifier {
 
   /// Create a new instance from an npm alias specifier
   fn from_alias(value: &str, raw: String) -> Self {
-    let aliased_version = {
-      let start = value.rfind('@').unwrap() + 1;
-      value[start..].to_string()
-    };
-    let aliased_name = {
+    let (aliased_name, aliased_version) = {
       let start = value.find(':').unwrap() + 1;
-      let end = value.rfind('@').unwrap();
-      value[start..end].to_string()
+      if let Some(at_pos) = value.rfind('@') {
+        if at_pos > start {
+          // There's a version specifier
+          (value[start..at_pos].to_string(), value[at_pos + 1..].to_string())
+        } else {
+          // The @ is part of a scoped package name, no version
+          (value[start..].to_string(), String::new())
+        }
+      } else {
+        // No @ at all, unscoped package without version
+        (value[start..].to_string(), String::new())
+      }
     };
     if aliased_name.is_empty() {
       Self::Unsupported(raw::Raw { raw })
@@ -384,8 +390,8 @@ impl Specifier {
 
   /// Are both specifiers on eg. "-alpha", or neither have a release channel?
   pub fn has_same_release_channel_as(&self, other: &Specifier) -> bool {
-    if let (Specifier::BasicSemver(a), Specifier::BasicSemver(b)) = (self, other) {
-      a.node_version.pre_release.first() == b.node_version.pre_release.first()
+    if let (Some(a), Some(b)) = (self.get_node_version(), other.get_node_version()) {
+      a.pre_release.first() == b.pre_release.first()
     } else {
       false
     }
@@ -402,7 +408,7 @@ impl Specifier {
   }
 
   pub fn is_older_than(&self, other: &Specifier) -> bool {
-    if let (Specifier::BasicSemver(_), Specifier::BasicSemver(_)) = (self, other) {
+    if self.get_node_version().is_some() && other.get_node_version().is_some() {
       other > self
     } else {
       false
@@ -411,8 +417,8 @@ impl Specifier {
 
   /// Is this specifier on the same major version, but otherwise older?
   pub fn is_older_than_by_minor(&self, other: &Specifier) -> bool {
-    if let (Specifier::BasicSemver(a), Specifier::BasicSemver(b)) = (self, other) {
-      b.node_version.major == a.node_version.major && other > self
+    if let (Some(a), Some(b)) = (self.get_node_version(), other.get_node_version()) {
+      b.major == a.major && other > self
     } else {
       false
     }
@@ -421,8 +427,8 @@ impl Specifier {
   /// Is this specifier on the same major and minor version, but otherwise
   /// older?
   pub fn is_older_than_by_patch(&self, other: &Specifier) -> bool {
-    if let (Specifier::BasicSemver(a), Specifier::BasicSemver(b)) = (self, other) {
-      b.node_version.major == a.node_version.major && b.node_version.minor == a.node_version.minor && other > self
+    if let (Some(a), Some(b)) = (self.get_node_version(), other.get_node_version()) {
+      b.major == a.major && b.minor == a.minor && other > self
     } else {
       false
     }

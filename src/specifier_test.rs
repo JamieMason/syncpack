@@ -744,6 +744,20 @@ fn sorting() {
 }
 
 #[test]
+fn sorting_aliases() {
+  fn to_specifiers(specifiers: Vec<&str>) -> Vec<Specifier> {
+    specifiers
+      .iter()
+      .map(|r| Specifier::new(&format!("npm:@jsr/std__fmt@{r}"), None))
+      .collect()
+  }
+  let mut specifiers = to_specifiers(vec!["0.0.0", "<0.0.0", "*", ">0.0.0", ">=0.0.0", "<=0.0.0", "^0.0.0", "~0.0.0"]);
+  let expected = to_specifiers(vec!["<0.0.0", "<=0.0.0", "0.0.0", "~0.0.0", "^0.0.0", ">=0.0.0", ">0.0.0", "*"]);
+  specifiers.sort();
+  assert_eq!(specifiers, expected, "{specifiers:?}, {expected:?}");
+}
+
+#[test]
 fn satisfies_all() {
   let cases: Vec<(&str, Vec<&str>, bool)> = vec![
     ("*", vec!["1.4.2"], true),

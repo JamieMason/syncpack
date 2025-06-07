@@ -15,6 +15,15 @@ use {
 #[path = "dependency_test.rs"]
 mod dependency_test;
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct UpdateUrl {
+  /// The name of the dependency
+  pub internal_name: String,
+  /// @example https://registry.npmjs.org/syncpack
+  /// @example https://npm.jsr.io/@jsr/std__path
+  pub url: String,
+}
+
 #[derive(Debug)]
 pub struct Dependency {
   /// The expected version specifier which all instances of this dependency
@@ -58,8 +67,12 @@ impl Dependency {
     }
   }
 
-  pub fn is_updateable(&self) -> bool {
-    self.matches_cli_filter && self.internal_name_is_supported() && !self.has_local_instance() && !self.contains_alias_specifier()
+  pub fn get_update_url(&self) -> Option<UpdateUrl> {
+    if self.matches_cli_filter && self.internal_name_is_supported() {
+      self.instances.iter().find_map(|instance| instance.get_update_url())
+    } else {
+      None
+    }
   }
 
   pub fn add_instance(&mut self, instance: Rc<Instance>) {

@@ -60,7 +60,7 @@ lazy_static! {
   /// "1.2"
   pub static ref MINOR: Regex = Regex::new(r"^(\d+\.\d+)$").unwrap();
   /// "npm:"
-  pub static ref ALIAS: Regex = Regex::new(r"^npm:@?.+@.+").unwrap();
+  pub static ref ALIAS: Regex = Regex::new(r"^npm:.+").unwrap();
   /// "file:"
   pub static ref FILE: Regex = Regex::new(r"^file:").unwrap();
   /// "workspace:"
@@ -79,4 +79,11 @@ lazy_static! {
   /// "1.0.0 - 2.0.0"
   /// "<1.0.0 >2.0.0"
   pub static ref INFIX_OPERATORS:Regex = Regex::new(r" ?(-|\|\|) ?| ").unwrap();
+  /// Match a package name inside an npm alias specifier
+  /// "npm:@lit-labs/ssr@3.3.0" -> "@lit-labs/ssr"
+  /// "npm:@jsr/luca__cases@1" -> "@jsr/luca__cases"
+  /// "npm:@jsr/std__fmt@^1.0.3" -> "@jsr/std__fmt"
+  /// "npm:@jsr/std__yaml" -> "@jsr/std__yaml"
+  /// "npm:lit@3.2.1" -> "lit"
+  pub static ref NAME_WITHIN_NPM_ALIAS:Regex = Regex::new(r"^npm:(.+?)(?:@.+)?$").unwrap();
 }
