@@ -24,7 +24,7 @@ publish = false
 
 [dependencies]
 async-trait = "0.1.88"
-clap = { version = "4.5.37", features = ["cargo"] }
+clap = { version = "4.5.40", features = ["cargo"] }
 color-print = "0.3.7"
 colored = "3.0.0"
 ctor = "0.4.2"
