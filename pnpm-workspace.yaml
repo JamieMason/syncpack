@@ -1,2 +1,5 @@
 packages:
-  - "site"
+  - site
+
+ignoredBuiltDependencies:
+  - sharp
