@@ -5,8 +5,8 @@ mod format_test;
 use {
   crate::{package_json::PackageJson, rcfile::Rcfile},
   icu::{
-    collator::{Collator, CollatorOptions},
-    locid::{locale, Locale},
+    collator::Collator,
+    locale::{locale, Locale},
   },
   regex::Regex,
   serde_json::{self, Map, Value},
@@ -122,7 +122,7 @@ fn sort_keys_with_priority(order: &[String], sort_remaining_keys: bool, obj: &mu
 
   if sort_remaining_keys {
     let collator = get_locale_collator();
-    remaining_keys.sort_by(|a, b| collator.compare(a, b));
+    remaining_keys.sort_by(|a, b| collator(a, b));
   }
 
   for key in order {
@@ -146,13 +146,13 @@ fn sort_alphabetically(value: &mut Value) {
   match value {
     Value::Object(obj) => {
       let mut entries: Vec<_> = obj.clone().into_iter().collect();
-      entries.sort_by(|a, b| collator.compare(&a.0, &b.0));
+      entries.sort_by(|a, b| collator(&a.0, &b.0));
       *value = Value::Object(Map::from_iter(entries));
     }
     Value::Array(arr) => {
       arr.sort_by(|a, b| {
         if let (Some(a), Some(b)) = (a.as_str(), b.as_str()) {
-          collator.compare(a, b)
+          collator(a, b)
         } else {
           Ordering::Equal
         }
@@ -163,9 +163,8 @@ fn sort_alphabetically(value: &mut Value) {
 }
 
 /// Get a collator for the EN locale to sort strings
-fn get_locale_collator() -> Collator {
+fn get_locale_collator() -> impl Fn(&str, &str) -> Ordering {
   let locale_en: Locale = locale!("en");
-  let options = CollatorOptions::new();
-  let collator: Collator = Collator::try_new(&locale_en.into(), options).unwrap();
-  collator
+  let collator = Collator::try_new(locale_en.into(), Default::default()).unwrap();
+  move |a: &str, b: &str| collator.compare(a, b)
 }
