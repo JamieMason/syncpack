@@ -10,10 +10,13 @@ use {
   },
   log::{debug, error},
   serde::Deserialize,
+  serde_json::Value,
   std::{
     collections::HashMap,
-    env, io,
+    fs,
+    path::Path,
     process::{exit, Command},
+    time::Instant,
   },
 };
 
@@ -136,54 +139,166 @@ pub struct Rcfile {
   pub version_groups: Vec<AnyVersionGroup>,
 }
 
-impl Rcfile {
-  /// Until we can port cosmiconfig to Rust, call out to Node.js to get the
-  /// rcfile from the filesystem
-  pub fn from_cosmiconfig(cli: &Cli) -> Rcfile {
-    let require_path = match env::var("COSMICONFIG_REQUIRE_PATH") {
-      Ok(v) => serde_json::to_string(&v).unwrap(),
-      Err(_) => "'cosmiconfig'".to_string(),
-    };
+impl Default for Rcfile {
+  fn default() -> Self {
+    Rcfile::from_json("{}".to_string())
+  }
+}
 
+impl Rcfile {
+  fn from_json_path(file_path: &Path) -> Option<Rcfile> {
+    fs::read_to_string(file_path)
+      .map_err(|err| error!("Failed to read config file {:?}: {}", file_path, err))
+      .ok()
+      .map(Rcfile::from_json)
+  }
+
+  fn from_yaml_path(file_path: &Path) -> Option<Rcfile> {
+    fs::read_to_string(file_path)
+      .map_err(|err| error!("Failed to read config file {:?}: {}", file_path, err))
+      .ok()
+      .and_then(|contents| {
+        serde_yaml::from_str::<Rcfile>(&contents)
+          .map_err(|err| error!("Failed to parse YAML config file {:?}: {}", file_path, err))
+          .ok()
+      })
+  }
+
+  fn from_javascript_path(file_path: &Path) -> Option<Rcfile> {
     let nodejs_script = format!(
       r#"
-        require({})
-          .cosmiconfig('syncpack')
-          .search({})
-          .then(res => (res.config ? JSON.stringify(res.config) : '{{}}'))
-          .catch(() => '{{}}')
-          .then(console.log);
+        (async () => {{
+          try {{
+            // Use tsx to import the config file (handles both JS and TS)
+            const {{ default: config }} = await import('{}');
+            console.log(JSON.stringify(config || {{}}));
+          }} catch (error) {{
+            // Fallback to require for CommonJS modules
+            try {{
+              const config = require('{}');
+              console.log(JSON.stringify(config.default || config || {{}}));
+            }} catch (requireError) {{
+              console.error('Failed to load config:', error.message);
+              console.log('{{}}');
+            }}
+          }}
+        }})();
         "#,
-      require_path,
-      serde_json::to_string(&cli.cwd).unwrap()
+      file_path.to_string_lossy().replace('\\', "\\\\").replace('"', "\\\""),
+      file_path.to_string_lossy().replace('\\', "\\\\").replace('"', "\\\"")
     );
 
-    let output = Command::new("node")
-      .arg("-e")
-      .arg(nodejs_script)
-      .current_dir(&cli.cwd)
+    Command::new("npx")
+      .args(["tsx", "-e", &nodejs_script])
+      .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
       .output()
+      .map_err(|err| error!("Failed to execute tsx: {}", err))
+      .ok()
       .and_then(|output| {
         if output.status.success() {
-          String::from_utf8(output.stdout).map_err(io::Error::other)
+          String::from_utf8(output.stdout)
+            .map_err(|err| error!("Invalid UTF-8 in config output: {}", err))
+            .ok()
         } else {
-          Err(io::Error::other(
-            String::from_utf8(output.stderr).expect("Failed to run cosmiconfig"),
-          ))
+          error!(
+            "Failed to load JavaScript/TypeScript config {:?}: {}",
+            file_path,
+            String::from_utf8_lossy(&output.stderr)
+          );
+          None
         }
       })
-      .inspect(|json| debug!("raw rcfile contents: '{}'", json.trim()))
-      .map(Rcfile::from_json);
+      .map(|json_str| {
+        debug!("Loaded config from {:?}: {}", file_path, json_str.trim());
+        Rcfile::from_json(json_str)
+      })
+  }
 
-    match output {
-      Ok(rcfile) => rcfile,
-      Err(err) => {
-        error!("There was an error when attempting to locate your syncpack rcfile");
-        error!("Please raise an issue at https://github.com/JamieMason/syncpack/issues/new?template=bug_report.yaml");
-        error!("{err}");
-        exit(1);
+  fn try_from_package_json_config_property(cli: &Cli) -> Option<Rcfile> {
+    let package_json_path = cli.cwd.join("package.json");
+    package_json_path
+      .exists()
+      .then(|| {
+        fs::read_to_string(&package_json_path)
+          .map_err(|err| error!("Failed to read package.json: {}", err))
+          .ok()
+      })
+      .flatten()
+      .and_then(|contents| {
+        serde_json::from_str::<Value>(&contents)
+          .map_err(|err| error!("Failed to parse package.json: {}", err))
+          .ok()
+      })
+      .and_then(|package_json| {
+        package_json
+          .get("syncpack")
+          .inspect(|_| debug!("Found syncpack config in package.json"))
+          .or_else(|| {
+            package_json
+              .pointer("/config/syncpack")
+              .inspect(|_| debug!("Found config.syncpack in package.json"))
+          })
+          .and_then(|syncpack_config| serde_json::to_string(syncpack_config).ok().map(Rcfile::from_json))
+      })
+  }
+
+  fn try_from_json_candidates(cli: &Cli) -> Option<Rcfile> {
+    let candidates = vec![".syncpackrc", ".syncpackrc.json"];
+    for candidate in candidates {
+      let config_path = cli.cwd.join(candidate);
+      if config_path.exists() {
+        debug!("Found JSON config file: {:?}", config_path);
+        return Rcfile::from_json_path(&config_path);
       }
     }
+    None
+  }
+
+  fn try_from_yaml_candidates(cli: &Cli) -> Option<Rcfile> {
+    let candidates = vec![".syncpackrc.yaml", ".syncpackrc.yml"];
+    for candidate in candidates {
+      let config_path = cli.cwd.join(candidate);
+      if config_path.exists() {
+        debug!("Found YAML config file: {:?}", config_path);
+        return Rcfile::from_yaml_path(&config_path);
+      }
+    }
+    None
+  }
+
+  fn try_from_js_candidates(cli: &Cli) -> Option<Rcfile> {
+    let candidates = vec![
+      ".syncpackrc.js",
+      ".syncpackrc.ts",
+      ".syncpackrc.mjs",
+      ".syncpackrc.cjs",
+      "syncpack.config.js",
+      "syncpack.config.ts",
+      "syncpack.config.mjs",
+      "syncpack.config.cjs",
+    ];
+    for candidate in candidates {
+      let config_path = cli.cwd.join(candidate);
+      if config_path.exists() {
+        debug!("Found JavaScript/TypeScript config file: {:?}", config_path);
+        return Rcfile::from_javascript_path(&config_path);
+      }
+    }
+    None
+  }
+
+  pub fn from_disk(cli: &Cli) -> Rcfile {
+    let start = Instant::now();
+    let rcfile = Rcfile::try_from_json_candidates(cli)
+      .or_else(|| Rcfile::try_from_yaml_candidates(cli))
+      .or_else(|| Rcfile::try_from_package_json_config_property(cli))
+      .or_else(|| Rcfile::try_from_js_candidates(cli))
+      .unwrap_or_else(|| {
+        debug!("No config file found, using defaults");
+        Rcfile::default()
+      });
+    debug!("Config discovery completed in {:?}", start.elapsed());
+    rcfile
   }
 
   /// Create a new rcfile from a JSON string or revert to defaults

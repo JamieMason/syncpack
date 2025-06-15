@@ -15,7 +15,6 @@ process.exit(
     stdio: ['ignore', 'inherit', 'inherit'],
     env: {
       ...process.env,
-      COSMICONFIG_REQUIRE_PATH: require.resolve('cosmiconfig'),
       RUST_BACKTRACE: 'full',
     },
   }).status || 0,
