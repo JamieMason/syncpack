@@ -1,5 +1,5 @@
 export interface RcFile {
-  /** @see https://jamiemason.github.io/syncpack/integrations/json-schema */
+  /** @see https://jamiemason.github.io/syncpack/config/syncpackrc/#json */
   $schema?: string;
   /** @see https://jamiemason.github.io/syncpack/config/custom-types */
   customTypes?: {
@@ -13,7 +13,9 @@ export interface RcFile {
   formatRepository?: boolean;
   /** @see https://jamiemason.github.io/syncpack/config/indent */
   indent?: string;
-  /** @see https://jamiemason.github.io/syncpack/config/semver-groups */
+  /** @see https://jamiemason.github.io/syncpack/config/max-concurrent-requests */
+  maxConcurrentRequests?: number;
+  /** @see https://jamiemason.github.io/syncpack/semver-groups */
   semverGroups?: SemverGroup.Any[];
   /** @see https://jamiemason.github.io/syncpack/config/sort-az */
   sortAz?: string[];
@@ -25,7 +27,9 @@ export interface RcFile {
   sortPackages?: boolean;
   /** @see https://jamiemason.github.io/syncpack/config/source */
   source?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/version-groups */
+  /** @see https://jamiemason.github.io/syncpack/config/strict */
+  strict?: boolean;
+  /** @see https://jamiemason.github.io/syncpack/version-groups */
   versionGroups?: VersionGroup.Any[];
 
   /** @deprecated */
@@ -43,15 +47,15 @@ export interface RcFile {
 }
 
 export interface GroupSelector {
-  /** @see https://jamiemason.github.io/syncpack/config/version-groups/standard/#dependencies */
+  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#dependencies */
   dependencies?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/version-groups/standard/#dependencytypes */
+  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#dependencytypes */
   dependencyTypes?: DependencyType[];
-  /** @see https://jamiemason.github.io/syncpack/config/version-groups/standard/#label */
+  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#label */
   label?: string;
-  /** @see https://jamiemason.github.io/syncpack/config/version-groups/standard/#packages */
+  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#packages */
   packages?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/version-groups/standard/#specifiertypes */
+  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#specifiertypes */
   specifierTypes?: SpecifierType[];
 }
 
@@ -70,11 +74,11 @@ export interface DependencyGroup {
 
 namespace SemverGroup {
   export interface Ignored extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/semver-groups/ignored/#isignored */
+    /** @see https://jamiemason.github.io/syncpack/semver-groups/ignored/#isignored */
     isIgnored: true;
   }
   export interface WithRange extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/semver-groups/with-range/#range */
+    /** @see https://jamiemason.github.io/syncpack/semver-groups/with-range/#range */
     range: SemverRange;
   }
   export type Any = Ignored | WithRange;
@@ -82,27 +86,27 @@ namespace SemverGroup {
 
 namespace VersionGroup {
   export interface Banned extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/version-groups/banned/#isbanned */
+    /** @see https://jamiemason.github.io/syncpack/version-groups/banned/#isbanned */
     isBanned: true;
   }
   export interface Ignored extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/version-groups/ignored/#isignored */
+    /** @see https://jamiemason.github.io/syncpack/version-groups/ignored/#isignored */
     isIgnored: true;
   }
   export interface Pinned extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/version-groups/pinned/#pinversion */
+    /** @see https://jamiemason.github.io/syncpack/version-groups/pinned/#pinversion */
     pinVersion: string;
   }
   export interface SnappedTo extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/version-groups/snapped-to/#snapto */
+    /** @see https://jamiemason.github.io/syncpack/version-groups/snapped-to/#snapto */
     snapTo: string[];
   }
   export interface SameRange extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/version-groups/same-range/#policy */
+    /** @see https://jamiemason.github.io/syncpack/version-groups/same-range/#policy */
     policy: 'sameRange';
   }
   export interface Standard extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/config/version-groups/lowest-version/#preferversion */
+    /** @see https://jamiemason.github.io/syncpack/version-groups/lowest-semver/#preferversion */
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
   export type Any = Banned | Ignored | Pinned | SameRange | SnappedTo | Standard;

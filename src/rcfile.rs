@@ -94,7 +94,6 @@ pub struct CustomType {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DependencyGroup {
-  #[serde(default)]
   pub alias_name: String,
   #[serde(default)]
   pub dependencies: Vec<String>,
@@ -318,11 +317,6 @@ impl Rcfile {
       .dependency_groups
       .iter()
       .map(|dependency_group_config| {
-        if dependency_group_config.alias_name.is_empty() {
-          error!("A unique aliasName is required for each dependency group");
-          error!("{:?}", dependency_group_config);
-          exit(1);
-        }
         GroupSelector::new(
           /* all_packages: */ packages,
           /* include_dependencies: */ dependency_group_config.dependencies.clone(),
