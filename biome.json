@@ -14,7 +14,8 @@
       "dist",
       "fixtures",
       "site/.astro",
-      "npm/packages"
+      "npm/packages",
+      "target"
     ]
   },
   "organizeImports": {
