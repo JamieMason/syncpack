@@ -279,13 +279,40 @@ impl Instance {
   pub fn remove(&self) {
     match self.descriptor.dependency_type.strategy {
       Strategy::NameAndVersionProps => {
-        debug!("@TODO: remove instance for NameAndVersionProps");
+        let path_to_prop = &self.descriptor.dependency_type.path;
+        if let Some(parent_path) = path_to_prop.rfind('/') {
+          let parent_path = &path_to_prop[..parent_path];
+          let prop_name = &path_to_prop[parent_path.len() + 1..];
+          if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(parent_path) {
+            obj.remove(prop_name);
+          }
+        } else if path_to_prop == "/" {
+          debug!("Cannot remove root property for NameAndVersionProps");
+        }
       }
       Strategy::NamedVersionString => {
-        debug!("@TODO: remove instance for NamedVersionString");
+        let path_to_prop = &self.descriptor.dependency_type.path;
+        if let Some(parent_path) = path_to_prop.rfind('/') {
+          let parent_path = &path_to_prop[..parent_path];
+          let prop_name = &path_to_prop[parent_path.len() + 1..];
+          if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(parent_path) {
+            obj.remove(prop_name);
+          }
+        } else if path_to_prop == "/" {
+          debug!("Cannot remove root property for NamedVersionString");
+        }
       }
       Strategy::UnnamedVersionString => {
-        debug!("@TODO: remove instance for UnnamedVersionString");
+        let path_to_prop = &self.descriptor.dependency_type.path;
+        if let Some(parent_path) = path_to_prop.rfind('/') {
+          let parent_path = &path_to_prop[..parent_path];
+          let prop_name = &path_to_prop[parent_path.len() + 1..];
+          if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(parent_path) {
+            obj.remove(prop_name);
+          }
+        } else if path_to_prop == "/" {
+          debug!("Cannot remove root property for UnnamedVersionString");
+        }
       }
       Strategy::VersionsByName => {
         let path_to_obj = &self.descriptor.dependency_type.path;
