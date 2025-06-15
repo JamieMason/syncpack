@@ -2,43 +2,41 @@ use {
   crate::{
     instance_state::{FixableInstance::*, InstanceState, UnfixableInstance::*, ValidInstance::*},
     test::{
-      self,
+      builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    visit_packages::visit_packages,
-    Context,
   },
   serde_json::json,
 };
 
 #[test]
 fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_semver_groups() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencyTypes": ["local"],
-      "isIgnored": true
-    }, {
-      "dependencies": ["foo"],
-      "policy": "sameRange"
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "package-a",
-      "dependencies": {
-        "foo": ">=1.0.0"
-      }
-    }),
-    json!({
-      "name": "package-b",
-      "dependencies": {
-        "foo": "<=2.0.0"
-      }
-    }),
-  ]);
-  let registry_client = None;
-  let ctx = Context::create(config, packages, registry_client);
-  let ctx = visit_packages(ctx);
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "dependencies": {
+          "foo": ">=1.0.0"
+        }
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {
+          "foo": "<=2.0.0"
+        }
+      }),
+    ])
+    .with_version_groups(vec![
+      json!({
+        "dependencyTypes": ["local"],
+        "isIgnored": true
+      }),
+      json!({
+        "dependencies": ["foo"],
+        "policy": "sameRange"
+      }),
+    ])
+    .build_and_visit();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -77,36 +75,36 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_semver_
 
 #[test]
 fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "semverGroups": [{
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "dependencies": {
+          "foo": ">=1.0.0"
+        }
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {
+          "foo": "^1.2.3"
+        }
+      }),
+    ])
+    .with_semver_group(json!({
       "packages": ["package-b"],
       "range": "^"
-    }],
-    "versionGroups": [{
-      "dependencyTypes": ["local"],
-      "isIgnored": true
-    }, {
-      "dependencies": ["foo"],
-      "policy": "sameRange"
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "package-a",
-      "dependencies": {
-        "foo": ">=1.0.0"
-      }
-    }),
-    json!({
-      "name": "package-b",
-      "dependencies": {
-        "foo": "^1.2.3"
-      }
-    }),
-  ]);
-  let registry_client = None;
-  let ctx = Context::create(config, packages, registry_client);
-  let ctx = visit_packages(ctx);
+    }))
+    .with_version_groups(vec![
+      json!({
+        "dependencyTypes": ["local"],
+        "isIgnored": true
+      }),
+      json!({
+        "dependencies": ["foo"],
+        "policy": "sameRange"
+      }),
+    ])
+    .build_and_visit();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -145,36 +143,36 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_semver_g
 
 #[test]
 fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "semverGroups": [{
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "dependencies": {
+          "foo": ">=1.0.0"
+        }
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {
+          "foo": "^1.2.3"
+        }
+      }),
+    ])
+    .with_semver_group(json!({
       "packages": ["package-b"],
       "range": "~"
-    }],
-    "versionGroups": [{
-      "dependencyTypes": ["local"],
-      "isIgnored": true
-    }, {
-      "dependencies": ["foo"],
-      "policy": "sameRange"
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "package-a",
-      "dependencies": {
-        "foo": ">=1.0.0"
-      }
-    }),
-    json!({
-      "name": "package-b",
-      "dependencies": {
-        "foo": "^1.2.3"
-      }
-    }),
-  ]);
-  let registry_client = None;
-  let ctx = Context::create(config, packages, registry_client);
-  let ctx = visit_packages(ctx);
+    }))
+    .with_version_groups(vec![
+      json!({
+        "dependencyTypes": ["local"],
+        "isIgnored": true
+      }),
+      json!({
+        "dependencies": ["foo"],
+        "policy": "sameRange"
+      }),
+    ])
+    .build_and_visit();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -213,32 +211,32 @@ fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its_semve
 
 #[test]
 fn instance_in_a_same_range_group_does_not_satisfy_another() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencyTypes": ["local"],
-      "isIgnored": true
-    }, {
-      "dependencies": ["foo"],
-      "policy": "sameRange"
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "package-a",
-      "dependencies": {
-        "foo": ">=1.0.0"
-      }
-    }),
-    json!({
-      "name": "package-b",
-      "dependencies": {
-        "foo": "<1.0.0"
-      }
-    }),
-  ]);
-  let registry_client = None;
-  let ctx = Context::create(config, packages, registry_client);
-  let ctx = visit_packages(ctx);
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "dependencies": {
+          "foo": ">=1.0.0"
+        }
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {
+          "foo": "<1.0.0"
+        }
+      }),
+    ])
+    .with_version_groups(vec![
+      json!({
+        "dependencyTypes": ["local"],
+        "isIgnored": true
+      }),
+      json!({
+        "dependencies": ["foo"],
+        "policy": "sameRange"
+      }),
+    ])
+    .build_and_visit();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),

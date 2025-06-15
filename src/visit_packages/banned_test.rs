@@ -2,38 +2,31 @@ use {
   crate::{
     instance_state::{FixableInstance::*, InstanceState, SuspectInstance::*},
     test::{
-      self,
+      builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    visit_packages::visit_packages,
-    Context,
   },
   serde_json::json,
 };
 
 #[test]
 fn refuses_to_ban_local_version() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "version": "1.0.0"
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {"package-a": "1.1.0"}
+      }),
+    ])
+    .with_version_group(json!({
       "dependencies": ["package-a"],
       "isBanned": true
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "package-a",
-      "version": "1.0.0"
-    }),
-    json!({
-      "name": "package-b",
-      "dependencies": {
-        "package-a": "1.1.0"
-      }
-    }),
-  ]);
-  let registry_client = None;
-  let ctx = Context::create(config, packages, registry_client);
-  let ctx = visit_packages(ctx);
+    }))
+    .build_and_visit();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
