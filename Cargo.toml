@@ -7,20 +7,9 @@ homepage = "https://jamiemason.github.io/syncpack"
 repository = "https://github.com/JamieMason/syncpack/tree/rust/main"
 description = "Consistent dependency versions in large JavaScript Monorepos"
 license = "MIT"
-keywords = [
-  "npm",
-  "yarn",
-  "linter",
-  "monorepo",
-  "semver",
-  "version-manager",
-  "pnpm",
-  "nx",
-  "version-management",
-  "turborepo",
-]
+keywords = ["monorepo", "npm", "pnpm", "semver", "turborepo"]
 readme = "./README.md"
-publish = false
+include = ["src/**/*.rs"]
 
 [dependencies]
 async-trait = "0.1.88"
