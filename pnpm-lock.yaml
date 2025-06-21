@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.3
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -23,9 +27,6 @@ importers:
       ts-json-schema-generator:
         specifier: ^2.4.0
         version: 2.4.0
-      tsx:
-        specifier: ^4.20.3
-        version: 4.20.3
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

@@ -34,13 +34,15 @@
     "Stuart Knightley (https://github.com/Stuk)",
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
+  "dependencies": {
+    "tsx": "^4.20.3"
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@release-it/conventional-changelog": "^10.0.1",
     "auto-changelog": "^2.5.0",
     "release-it": "^19.0.3",
     "ts-json-schema-generator": "^2.4.0",
-    "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   },
   "engines": {
@@ -69,13 +71,5 @@
     "yarn"
   ],
   "license": "MIT",
-  "peerDependencies": {
-    "tsx": "4"
-  },
-  "peerDependenciesMeta": {
-    "tsx": {
-      "optional": true
-    }
-  },
   "repository": "JamieMason/syncpack"
 }
