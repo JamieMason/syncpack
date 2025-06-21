@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-#![allow(unreachable_code)]
 
 use {
   crate::{
@@ -12,7 +11,6 @@ use {
   context::Context,
   effects::list,
   log::{debug, error},
-  std::error::Error,
   visit_formatting::visit_formatting,
   visit_packages::visit_packages,
 };
@@ -42,7 +40,7 @@ mod visit_formatting;
 mod visit_packages;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> ! {
   let cli = Cli::parse();
 
   logger::init(&cli);
@@ -89,6 +87,4 @@ async fn main() -> Result<(), Box<dyn Error>> {
       list::run(ctx);
     }
   };
-
-  Ok(())
 }
