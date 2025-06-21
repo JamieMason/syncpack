@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.0.4/schema.json",
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
@@ -8,21 +8,34 @@
     "lineEnding": "lf",
     "lineWidth": 120,
     "attributePosition": "auto",
-    "ignore": [
-      "**/CHANGELOG.md",
-      "**/DEPENDENCIES.md",
-      "dist",
-      "fixtures",
-      "site/.astro",
-      "npm/packages",
-      "target"
+    "includes": [
+      "**",
+      "!**/CHANGELOG.md",
+      "!**/DEPENDENCIES.md",
+      "!**/dist",
+      "!**/fixtures",
+      "!**/site/.astro",
+      "!**/npm/packages",
+      "!**/target"
     ]
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
-    "enabled": true
+    "enabled": true,
+    "rules": {
+      "style": {
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
+      }
+    }
   },
   "javascript": {
     "formatter": {

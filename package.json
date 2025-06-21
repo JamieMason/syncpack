@@ -38,7 +38,7 @@
     "tsx": "^4.20.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.0.4",
     "@release-it/conventional-changelog": "^10.0.1",
     "auto-changelog": "^2.5.0",
     "release-it": "^19.0.3",
