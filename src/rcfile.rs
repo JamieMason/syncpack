@@ -1,24 +1,21 @@
 use {
   crate::{
-    cli::Cli,
     dependency_type::DependencyType,
-    effects::ui::LINE_ENDING,
     group_selector::GroupSelector,
     packages::Packages,
     semver_group::{AnySemverGroup, SemverGroup},
     version_group::{AnyVersionGroup, VersionGroup},
   },
-  log::{debug, error},
   serde::Deserialize,
-  serde_json::Value,
-  std::{
-    collections::HashMap,
-    fs,
-    path::Path,
-    process::{exit, Command},
-    time::Instant,
-  },
+  std::collections::HashMap,
 };
+
+mod discovery;
+mod error;
+mod javascript;
+mod json;
+mod package_json;
+mod yaml;
 
 fn empty_custom_types() -> HashMap<String, CustomType> {
   HashMap::new()
@@ -140,177 +137,11 @@ pub struct Rcfile {
 
 impl Default for Rcfile {
   fn default() -> Self {
-    Rcfile::from_json("{}".to_string())
+    serde_json::from_str("{}").expect("An empty object should produce a default Rcfile")
   }
 }
 
 impl Rcfile {
-  fn from_json_path(file_path: &Path) -> Option<Rcfile> {
-    fs::read_to_string(file_path)
-      .map_err(|err| error!("Failed to read config file {:?}: {}", file_path, err))
-      .ok()
-      .map(Rcfile::from_json)
-  }
-
-  fn from_yaml_path(file_path: &Path) -> Option<Rcfile> {
-    fs::read_to_string(file_path)
-      .map_err(|err| error!("Failed to read config file {:?}: {}", file_path, err))
-      .ok()
-      .and_then(|contents| {
-        serde_yaml::from_str::<Rcfile>(&contents)
-          .map_err(|err| error!("Failed to parse YAML config file {:?}: {}", file_path, err))
-          .ok()
-      })
-  }
-
-  fn from_javascript_path(file_path: &Path) -> Option<Rcfile> {
-    let nodejs_script = format!(
-      r#"
-        (async () => {{
-          try {{
-            // Use tsx to import the config file (handles both JS and TS)
-            const {{ default: config }} = await import('{}');
-            console.log(JSON.stringify(config || {{}}));
-          }} catch (error) {{
-            // Fallback to require for CommonJS modules
-            try {{
-              const config = require('{}');
-              console.log(JSON.stringify(config.default || config || {{}}));
-            }} catch (requireError) {{
-              console.error('Failed to load config:', error.message);
-              console.log('{{}}');
-            }}
-          }}
-        }})();
-        "#,
-      file_path.to_string_lossy().replace('\\', "\\\\").replace('"', "\\\""),
-      file_path.to_string_lossy().replace('\\', "\\\\").replace('"', "\\\"")
-    );
-
-    Command::new("npx")
-      .args(["tsx", "-e", &nodejs_script])
-      .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
-      .output()
-      .map_err(|err| error!("Failed to execute tsx: {}", err))
-      .ok()
-      .and_then(|output| {
-        if output.status.success() {
-          String::from_utf8(output.stdout)
-            .map_err(|err| error!("Invalid UTF-8 in config output: {}", err))
-            .ok()
-        } else {
-          error!(
-            "Failed to load JavaScript/TypeScript config {:?}: {}",
-            file_path,
-            String::from_utf8_lossy(&output.stderr)
-          );
-          None
-        }
-      })
-      .map(|json_str| {
-        debug!("Loaded config from {:?}: {}", file_path, json_str.trim());
-        Rcfile::from_json(json_str)
-      })
-  }
-
-  fn try_from_package_json_config_property(cli: &Cli) -> Option<Rcfile> {
-    let package_json_path = cli.cwd.join("package.json");
-    package_json_path
-      .exists()
-      .then(|| {
-        fs::read_to_string(&package_json_path)
-          .map_err(|err| error!("Failed to read package.json: {}", err))
-          .ok()
-      })
-      .flatten()
-      .and_then(|contents| {
-        serde_json::from_str::<Value>(&contents)
-          .map_err(|err| error!("Failed to parse package.json: {}", err))
-          .ok()
-      })
-      .and_then(|package_json| {
-        package_json
-          .get("syncpack")
-          .inspect(|_| debug!("Found syncpack config in package.json"))
-          .or_else(|| {
-            package_json
-              .pointer("/config/syncpack")
-              .inspect(|_| debug!("Found config.syncpack in package.json"))
-          })
-          .and_then(|syncpack_config| serde_json::to_string(syncpack_config).ok().map(Rcfile::from_json))
-      })
-  }
-
-  fn try_from_json_candidates(cli: &Cli) -> Option<Rcfile> {
-    let candidates = vec![".syncpackrc", ".syncpackrc.json"];
-    for candidate in candidates {
-      let config_path = cli.cwd.join(candidate);
-      if config_path.exists() {
-        debug!("Found JSON config file: {:?}", config_path);
-        return Rcfile::from_json_path(&config_path);
-      }
-    }
-    None
-  }
-
-  fn try_from_yaml_candidates(cli: &Cli) -> Option<Rcfile> {
-    let candidates = vec![".syncpackrc.yaml", ".syncpackrc.yml"];
-    for candidate in candidates {
-      let config_path = cli.cwd.join(candidate);
-      if config_path.exists() {
-        debug!("Found YAML config file: {:?}", config_path);
-        return Rcfile::from_yaml_path(&config_path);
-      }
-    }
-    None
-  }
-
-  fn try_from_js_candidates(cli: &Cli) -> Option<Rcfile> {
-    let candidates = vec![
-      ".syncpackrc.js",
-      ".syncpackrc.ts",
-      ".syncpackrc.mjs",
-      ".syncpackrc.cjs",
-      "syncpack.config.js",
-      "syncpack.config.ts",
-      "syncpack.config.mjs",
-      "syncpack.config.cjs",
-    ];
-    for candidate in candidates {
-      let config_path = cli.cwd.join(candidate);
-      if config_path.exists() {
-        debug!("Found JavaScript/TypeScript config file: {:?}", config_path);
-        return Rcfile::from_javascript_path(&config_path);
-      }
-    }
-    None
-  }
-
-  pub fn from_disk(cli: &Cli) -> Rcfile {
-    let start = Instant::now();
-    let rcfile = Rcfile::try_from_json_candidates(cli)
-      .or_else(|| Rcfile::try_from_yaml_candidates(cli))
-      .or_else(|| Rcfile::try_from_package_json_config_property(cli))
-      .or_else(|| Rcfile::try_from_js_candidates(cli))
-      .unwrap_or_else(|| {
-        debug!("No config file found, using defaults");
-        Rcfile::default()
-      });
-    debug!("Config discovery completed in {:?}", start.elapsed());
-    rcfile
-  }
-
-  /// Create a new rcfile from a JSON string or revert to defaults
-  pub fn from_json(json: String) -> Rcfile {
-    match serde_json::from_str(&json) {
-      Ok(rcfile) => rcfile,
-      Err(err) => {
-        error!("Your syncpack config file failed validation{LINE_ENDING}  {err}");
-        exit(1);
-      }
-    }
-  }
-
   /// Create every alias defined in the rcfile.
   pub fn get_dependency_groups(&self, packages: &Packages) -> Vec<GroupSelector> {
     self
