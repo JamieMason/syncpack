@@ -18,11 +18,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
           components: rustfmt, clippy
       - name: Set up cargo cache
         uses: Swatinem/rust-cache@v2
