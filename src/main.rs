@@ -1,5 +1,3 @@
-#![allow(unused_variables)]
-
 use {
   crate::{
     cli::{Cli, Subcommand},

@@ -134,7 +134,7 @@ fn get_invalid_status_codes_in_brackets(ctx: &Context, dependency: &Dependency) 
 fn get_common_parts(
   ctx: &Context,
   dependency: &Dependency,
-  group_variant: &VersionGroupVariant,
+  _group_variant: &VersionGroupVariant,
 ) -> (String, String, String, String, String, String) {
   let instances_len = dependency.instances.len();
   let count_column = ui::util::count_column(instances_len);

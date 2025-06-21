@@ -4,7 +4,7 @@ use {
   log::info,
 };
 
-pub fn print_header(ctx: &Context, group: &VersionGroup) {
+pub fn print_header(_ctx: &Context, group: &VersionGroup) {
   let print_width = 80;
   let label = &group.selector.label;
   let header = format!("= {label} ");
