@@ -16,10 +16,6 @@ pub fn warn() -> String {
   "!".yellow().to_string()
 }
 
-pub fn unknown() -> String {
-  "?".dimmed().to_string()
-}
-
 pub fn dim_right_arrow() -> String {
   "\u{2192}".dimmed().to_string()
 }

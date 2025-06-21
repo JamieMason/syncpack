@@ -56,21 +56,6 @@ impl TestBuilder {
     self
   }
 
-  pub fn with_semver_groups(mut self, groups: Vec<Value>) -> Self {
-    self.semver_groups.extend(groups);
-    self
-  }
-
-  pub fn with_dependency_group(mut self, group: Value) -> Self {
-    self.dependency_groups.push(group);
-    self
-  }
-
-  pub fn with_dependency_groups(mut self, groups: Vec<Value>) -> Self {
-    self.dependency_groups.extend(groups);
-    self
-  }
-
   pub fn with_strict(mut self, strict: bool) -> Self {
     self.strict = Some(strict);
     self

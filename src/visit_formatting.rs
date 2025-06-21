@@ -21,7 +21,6 @@ pub fn visit_formatting(ctx: Context) -> Context {
           package,
           FormatMismatch {
             expected,
-            package: Rc::clone(package),
             property_path: "/".to_string(),
             variant: PackagePropertiesAreNotSorted,
           },
@@ -34,7 +33,6 @@ pub fn visit_formatting(ctx: Context) -> Context {
           package,
           FormatMismatch {
             expected,
-            package: Rc::clone(package),
             property_path: "/bugs".to_string(),
             variant: BugsPropertyIsNotFormatted,
           },
@@ -47,7 +45,6 @@ pub fn visit_formatting(ctx: Context) -> Context {
           package,
           FormatMismatch {
             expected,
-            package: Rc::clone(package),
             property_path: "/repository".to_string(),
             variant: RepositoryPropertyIsNotFormatted,
           },
@@ -60,7 +57,6 @@ pub fn visit_formatting(ctx: Context) -> Context {
           package,
           FormatMismatch {
             expected,
-            package: Rc::clone(package),
             property_path: "/exports".to_string(),
             variant: ExportsPropertyIsNotSorted,
           },
@@ -74,7 +70,6 @@ pub fn visit_formatting(ctx: Context) -> Context {
             package,
             FormatMismatch {
               expected,
-              package: Rc::clone(package),
               property_path: format!("/{}", key),
               variant: PropertyIsNotSortedAz,
             },

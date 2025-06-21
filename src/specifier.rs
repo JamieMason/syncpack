@@ -348,42 +348,6 @@ impl Specifier {
       .is_some_and(|a| other.get_node_range().is_some_and(|b| a.allows_any(b)))
   }
 
-  pub fn is_alias(&self) -> bool {
-    matches!(self, Self::Alias(_))
-  }
-
-  pub fn is_basic_semver(&self) -> bool {
-    matches!(self, Self::BasicSemver(_))
-  }
-
-  pub fn is_complex_semver(&self) -> bool {
-    matches!(self, Self::ComplexSemver(_))
-  }
-
-  pub fn is_file(&self) -> bool {
-    matches!(self, Self::File(_))
-  }
-
-  pub fn is_git(&self) -> bool {
-    matches!(self, Self::Git(_))
-  }
-
-  pub fn is_none(&self) -> bool {
-    matches!(self, Self::None)
-  }
-
-  pub fn is_tag(&self) -> bool {
-    matches!(self, Self::Tag(_))
-  }
-
-  pub fn is_unsupported(&self) -> bool {
-    matches!(self, Self::Unsupported(_))
-  }
-
-  pub fn is_url(&self) -> bool {
-    matches!(self, Self::Url(_))
-  }
-
   pub fn is_workspace_protocol(&self) -> bool {
     matches!(self, Self::WorkspaceProtocol(_))
   }

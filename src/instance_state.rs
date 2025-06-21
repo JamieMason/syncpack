@@ -9,22 +9,27 @@ pub enum InstanceState {
 }
 
 impl InstanceState {
+  #[cfg(test)]
   pub fn valid(state: ValidInstance) -> Self {
     InstanceState::Valid(state)
   }
 
+  #[cfg(test)]
   pub fn suspect(state: SuspectInstance) -> Self {
     InstanceState::Suspect(state)
   }
 
+  #[cfg(test)]
   pub fn fixable(state: FixableInstance) -> Self {
     InstanceState::Invalid(InvalidInstance::Fixable(state))
   }
 
+  #[cfg(test)]
   pub fn conflict(state: SemverGroupAndVersionConflict) -> Self {
     InstanceState::Invalid(InvalidInstance::Conflict(state))
   }
 
+  #[cfg(test)]
   pub fn unfixable(state: UnfixableInstance) -> Self {
     InstanceState::Invalid(InvalidInstance::Unfixable(state))
   }
@@ -69,10 +74,6 @@ impl InstanceState {
 
   pub fn is_banned(&self) -> bool {
     matches!(self, InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::IsBanned)))
-  }
-
-  pub fn is_conflict(&self) -> bool {
-    matches!(self, InstanceState::Invalid(InvalidInstance::Conflict(_)))
   }
 
   pub fn is_unfixable(&self) -> bool {

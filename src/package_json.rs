@@ -24,8 +24,6 @@ pub struct PackageJson {
 pub struct FormatMismatch {
   /// The formatted value
   pub expected: Value,
-  /// The name of the package.json file being linted
-  pub package: Rc<RefCell<PackageJson>>,
   /// The path to the property that was linted
   pub property_path: String,
   /// The broken linting rule
@@ -86,15 +84,6 @@ impl PackageJson {
 
   pub fn has_formatting_mismatches(&self) -> bool {
     !self.formatting_mismatches.borrow().is_empty()
-  }
-
-  /// Convenience method to get a string property from the parsed package.json
-  pub fn get_string(&self, pointer: &str) -> Option<String> {
-    if let Some(Value::String(name)) = self.get_prop(pointer) {
-      Some(name)
-    } else {
-      None
-    }
   }
 
   /// Deeply get a property in the parsed package.json

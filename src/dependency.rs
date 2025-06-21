@@ -124,12 +124,6 @@ impl Dependency {
     !self.internal_name.contains('>') && self.internal_name.rfind('@').unwrap_or(0) == 0
   }
 
-  /// Do any of the instances in this group have an npm alias specifier? which
-  /// are not yet fully supported by syncpack
-  fn contains_alias_specifier(&self) -> bool {
-    self.instances.iter().any(|instance| instance.descriptor.specifier.is_alias())
-  }
-
   /// Is this dependency a package developed in this repository?
   pub fn has_local_instance(&self) -> bool {
     self.local_instance.borrow().is_some()

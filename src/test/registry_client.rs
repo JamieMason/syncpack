@@ -39,13 +39,6 @@ impl RegistryClient for MockRegistryClient {
 }
 
 impl MockRegistryClient {
-  /// Create a new MockRegistryClient with predefined package data
-  pub fn new<T: Into<BTreeMap<String, Vec<String>>>>(package_data: T) -> Self {
-    MockRegistryClient {
-      package_data: package_data.into(),
-    }
-  }
-
   /// Create a new MockRegistryClient from a serde_json::Value
   ///
   /// ```

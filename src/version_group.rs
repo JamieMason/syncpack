@@ -208,32 +208,8 @@ impl VersionGroup {
     }
   }
 
-  pub fn has_banned_variant(&self) -> bool {
-    matches!(self.variant, VersionGroupVariant::Banned)
-  }
-
-  pub fn has_highest_semver_variant(&self) -> bool {
-    matches!(self.variant, VersionGroupVariant::HighestSemver)
-  }
-
   pub fn has_ignored_variant(&self) -> bool {
     matches!(self.variant, VersionGroupVariant::Ignored)
-  }
-
-  pub fn has_lowest_semver_variant(&self) -> bool {
-    matches!(self.variant, VersionGroupVariant::LowestSemver)
-  }
-
-  pub fn has_pinned_variant(&self) -> bool {
-    matches!(self.variant, VersionGroupVariant::Pinned)
-  }
-
-  pub fn has_same_range_variant(&self) -> bool {
-    matches!(self.variant, VersionGroupVariant::SameRange)
-  }
-
-  pub fn has_snapped_to_variant(&self) -> bool {
-    matches!(self.variant, VersionGroupVariant::SnappedTo)
   }
 }
 

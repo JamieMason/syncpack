@@ -78,10 +78,6 @@ impl Instance {
     }
   }
 
-  pub fn get_state(&self) -> InstanceState {
-    self.state.borrow().clone()
-  }
-
   /// Record what syncpack has determined the state of this instance is and what
   /// its expected specifier should be
   fn set_state(&self, state: InstanceState, expected_specifier: &Specifier) -> &Self {
@@ -140,10 +136,6 @@ impl Instance {
 
   pub fn is_banned(&self) -> bool {
     self.state.borrow().is_banned()
-  }
-
-  pub fn is_conflict(&self) -> bool {
-    self.state.borrow().is_conflict()
   }
 
   pub fn is_unfixable(&self) -> bool {

@@ -5,8 +5,7 @@ use {
     instance::Instance,
     packages::Packages,
     registry_client::{LiveRegistryClient, PackageMeta, RegistryClient, RegistryError},
-    semver_group::SemverGroup,
-    specifier::{basic_semver::BasicSemver, Specifier},
+    specifier::Specifier,
     version_group::VersionGroup,
   },
   indicatif::{MultiProgress, ProgressBar, ProgressStyle},
@@ -31,14 +30,10 @@ pub struct Context {
   pub failed_updates: Vec<String>,
   /// Every instance in the project
   pub instances: Vec<Rc<Instance>>,
-  /// Index of every local package with a valid name and version
-  pub local_versions: HashMap<String, BasicSemver>,
   /// Every package.json in the project
   pub packages: Packages,
   /// Registry client for fetching package metadata
   pub registry_client: Arc<dyn RegistryClient>,
-  /// All semver groups
-  pub semver_groups: Vec<SemverGroup>,
   /// All updates from the npm registry which have been chosen either by the
   /// user via a prompt or automatically by choosing the latest version
   pub updates_by_internal_name: HashMap<String, Vec<Specifier>>,
@@ -55,7 +50,7 @@ impl Context {
     let dependency_groups = config.rcfile.get_dependency_groups(&packages);
     let semver_groups = config.rcfile.get_semver_groups(&packages);
     let mut version_groups = config.rcfile.get_version_groups(&packages);
-    let local_versions = packages.get_local_versions();
+
     let failed_updates = Vec::new();
 
     packages.get_all_instances(&all_dependency_types, |mut descriptor| {
@@ -96,10 +91,8 @@ impl Context {
       config,
       failed_updates,
       instances,
-      local_versions,
       packages,
       registry_client,
-      semver_groups,
       updates_by_internal_name,
       version_groups,
     }

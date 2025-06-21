@@ -49,6 +49,7 @@ pub struct Cli {
   /// - `--packages` to filter by package name
   pub filter: Option<GroupSelector>,
   /// Which severity levels of logging to display
+  #[allow(dead_code)]
   pub log_levels: Vec<LevelFilter>,
   /// Whether to indicate that a dependency is a package developed locally
   pub show_hints: bool,
