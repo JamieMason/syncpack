@@ -17,6 +17,10 @@ install-system-dependencies:
     cargo +stable install cargo-llvm-cov
     # https://github.com/killercup/cargo-edit
     cargo +stable install cargo-edit
+    # https://github.com/sharkdp/hyperfine
+    cargo +stable install hyperfine
+    # https://github.com/flamegraph-rs/flamegraph
+    cargo +stable install flamegraph
 
 # ==============================================================================
 # Write
@@ -71,6 +75,40 @@ run-release-action:
 # Run the CI github action locally
 run-ci-action:
     act --workflows .github/workflows/ci.yml pull_request
+
+# ==============================================================================
+# Benchmark & Profile
+# ==============================================================================
+
+# Build release version with debug symbols for profiling
+build-profile-release:
+    cargo build --release
+
+# Benchmark the current release build with hyperfine
+benchmark:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    just build-profile-release
+    cd fixtures/fluid-framework
+    hyperfine --warmup 2 --runs 4 --ignore-failure "../../target/release/syncpack list"
+
+flamegraph:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    just build-profile-release
+    cd fixtures/fluid-framework
+    CARGO_PROFILE_RELEASE_DEBUG=true cargo flamegraph -- list
+
+dhat:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    just build-profile-release
+    cd fixtures/fluid-framework
+    cargo run --release --features dhat-heap -- lint
+    echo "Memory profile saved to dhat-heap.json - view at https://nnethercote.github.io/dh_view/dh_view.html"
 
 # ==============================================================================
 # Test

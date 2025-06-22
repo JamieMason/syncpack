@@ -11,3 +11,7 @@ target/
 
 # Generated packages published to npm
 npm/packages
+
+# Benchmarks
+dhat-heap.json
+flamegraph.svg

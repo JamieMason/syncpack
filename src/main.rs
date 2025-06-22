@@ -8,9 +8,14 @@ use {
   context::Context,
   effects::list,
   log::{debug, error},
+  std::process::exit,
   visit_formatting::visit_formatting,
   visit_packages::visit_packages,
 };
+
+#[cfg(feature = "dhat-heap")]
+#[global_allocator]
+static ALLOC: dhat::Alloc = dhat::Alloc;
 
 #[cfg(test)]
 #[path = "test/test.rs"]
@@ -37,7 +42,10 @@ mod visit_formatting;
 mod visit_packages;
 
 #[tokio::main]
-async fn main() -> ! {
+async fn main() {
+  #[cfg(feature = "dhat-heap")]
+  let _profiler = dhat::Profiler::new_heap();
+
   let cli = Cli::parse();
 
   logger::init(&cli);
@@ -53,7 +61,7 @@ async fn main() -> ! {
   match packages.all.len() {
     0 => {
       error!("Found 0 package.json files");
-      std::process::exit(1);
+      exit(1);
     }
     len => debug!("Found {len} package.json files"),
   }
@@ -84,4 +92,7 @@ async fn main() -> ! {
       list::run(ctx);
     }
   };
+
+  #[cfg(feature = "dhat-heap")]
+  drop(_profiler);
 }
