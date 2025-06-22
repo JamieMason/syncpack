@@ -4,7 +4,7 @@ use {
     dependency::UpdateUrl,
     instance::Instance,
     packages::Packages,
-    registry_client::{LiveRegistryClient, PackageMeta, RegistryClient, RegistryError},
+    registry_client::{PackageMeta, RegistryClient, RegistryError},
     specifier::Specifier,
     version_group::VersionGroup,
   },
@@ -33,7 +33,7 @@ pub struct Context {
   /// Every package.json in the project
   pub packages: Packages,
   /// Registry client for fetching package metadata
-  pub registry_client: Arc<dyn RegistryClient>,
+  pub registry_client: Option<Arc<dyn RegistryClient>>,
   /// All updates from the npm registry which have been chosen either by the
   /// user via a prompt or automatically by choosing the latest version
   pub updates_by_internal_name: HashMap<String, Vec<Specifier>>,
@@ -44,7 +44,6 @@ pub struct Context {
 impl Context {
   pub fn create(config: Config, packages: Packages, registry_client: Option<Arc<dyn RegistryClient>>) -> Self {
     let mut instances = vec![];
-    let registry_client = registry_client.unwrap_or_else(|| Arc::new(LiveRegistryClient::new()));
     let updates_by_internal_name = HashMap::new();
     let all_dependency_types = config.rcfile.get_all_dependency_types();
     let cli_filters = config.cli.get_filters(&packages, &all_dependency_types);
@@ -100,7 +99,7 @@ impl Context {
   /// Fetch every version specifier ever published for all updateable
   /// dependencies in the project.
   pub async fn fetch_all_updates(&mut self) {
-    let client = Arc::clone(&self.registry_client);
+    let client = Arc::clone(self.registry_client.as_ref().expect("Registry client not initialized"));
     let semaphore = Arc::new(Semaphore::new(self.config.rcfile.max_concurrent_requests));
     let progress_bars = Arc::new(MultiProgress::new());
     let mut handles: Vec<(String, JoinHandle<Result<PackageMeta, RegistryError>>)> = vec![];

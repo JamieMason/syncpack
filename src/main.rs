@@ -4,11 +4,12 @@ use {
     config::Config,
     effects::{fix, format, lint, update},
     packages::Packages,
+    registry_client::LiveRegistryClient,
   },
   context::Context,
   effects::list,
   log::{debug, error},
-  std::process::exit,
+  std::{process::exit, sync::Arc},
   visit_formatting::visit_formatting,
   visit_packages::visit_packages,
 };
@@ -51,6 +52,7 @@ async fn main() {
   logger::init(&cli);
 
   let config = Config::from_cli(cli);
+  let is_update_command = matches!(&config.cli.subcommand, Subcommand::Update);
 
   debug!("Command: {:?}", config.cli.subcommand);
   debug!("{:#?}", config.cli);
@@ -66,7 +68,15 @@ async fn main() {
     len => debug!("Found {len} package.json files"),
   }
 
-  let ctx = Context::create(config, packages, None);
+  let ctx = Context::create(
+    config,
+    packages,
+    if is_update_command {
+      Some(Arc::new(LiveRegistryClient::new()))
+    } else {
+      None
+    },
+  );
 
   let _exit_code = match ctx.config.cli.subcommand {
     Subcommand::Fix => {
