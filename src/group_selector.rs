@@ -47,6 +47,11 @@ pub struct GroupSelector {
   /// - "workspace-protocol" or -!workspace-protocol"
   pub include_specifier_types: Vec<String>,
   pub exclude_specifier_types: Vec<String>,
+  // Cache frequently accessed values
+  has_dependency_type_filters: bool,
+  has_specifier_type_filters: bool,
+  has_dependency_filters: bool,
+  has_package_filters: bool,
 }
 
 impl GroupSelector {
@@ -57,44 +62,73 @@ impl GroupSelector {
     label: String,
     packages: Vec<String>,
     specifier_types: Vec<String>,
+    all_dependency_types: &[DependencyType],
   ) -> GroupSelector {
     let dependencies = with_resolved_keywords(&dependencies, all_packages);
+
+    let include_dependencies = create_globs(true, &dependencies);
+    let exclude_dependencies = create_globs(false, &dependencies);
+    let include_dependency_types = create_identifiers(true, &dependency_types);
+    let exclude_dependency_types = create_identifiers(false, &dependency_types);
+    let include_packages = create_globs(true, &packages);
+    let exclude_packages = create_globs(false, &packages);
+    let include_specifier_types = create_identifiers(true, &specifier_types);
+    let exclude_specifier_types = create_identifiers(false, &specifier_types);
+
+    // Validate dependency types during construction
+    for expected in include_dependency_types.iter().chain(exclude_dependency_types.iter()) {
+      if !all_dependency_types.iter().any(|actual| actual.name == *expected) {
+        error!("dependencyType '{expected}' does not match any of syncpack or your customTypes");
+        error!("check your syncpack config file");
+        process::exit(1);
+      }
+    }
+
     GroupSelector {
-      include_dependencies: create_globs(true, &dependencies),
-      exclude_dependencies: create_globs(false, &dependencies),
-      include_dependency_types: create_identifiers(true, &dependency_types),
-      exclude_dependency_types: create_identifiers(false, &dependency_types),
+      // Pre-compute boolean flags to avoid repeated empty checks
+      has_dependency_type_filters: !include_dependency_types.is_empty() || !exclude_dependency_types.is_empty(),
+      has_specifier_type_filters: !include_specifier_types.is_empty() || !exclude_specifier_types.is_empty(),
+      has_dependency_filters: !include_dependencies.is_empty() || !exclude_dependencies.is_empty(),
+      has_package_filters: !include_packages.is_empty() || !exclude_packages.is_empty(),
+
+      include_dependencies,
+      exclude_dependencies,
+      include_dependency_types,
+      exclude_dependency_types,
       label,
-      include_packages: create_globs(true, &packages),
-      exclude_packages: create_globs(false, &packages),
-      include_specifier_types: create_identifiers(true, &specifier_types),
-      exclude_specifier_types: create_identifiers(false, &specifier_types),
+      include_packages,
+      exclude_packages,
+      include_specifier_types,
+      exclude_specifier_types,
     }
   }
 
-  pub fn can_add(&self, all_dependency_types: &[DependencyType], descriptor: &InstanceDescriptor) -> bool {
-    self.has_valid_dependency_types(all_dependency_types)
-      && self.matches_dependency_types(descriptor)
-      && self.matches_packages(descriptor)
-      && self.matches_dependencies(descriptor)
-      && self.matches_specifier_types(descriptor)
-  }
+  pub fn can_add(&self, descriptor: &InstanceDescriptor) -> bool {
+    // Order checks from cheapest/most-likely-to-fail to most expensive
+    // 1. Specifier types (often empty, cheap string comparison)
+    if self.has_specifier_type_filters && !self.matches_specifier_types(descriptor) {
+      return false;
+    }
 
-  fn has_valid_dependency_types(&self, all_dependency_types: &[DependencyType]) -> bool {
-    self
-      .include_dependency_types
-      .iter()
-      .chain(self.exclude_dependency_types.iter())
-      .for_each(|expected| {
-        if !all_dependency_types.iter().any(|actual| actual.name == *expected) {
-          error!("dependencyType '{expected}' does not match any of syncpack or your customTypes");
-          error!("check your syncpack config file");
-          process::exit(1);
-        }
-      });
+    // 2. Dependency types (cheap string comparison)
+    if self.has_dependency_type_filters && !self.matches_dependency_types(descriptor) {
+      return false;
+    }
+
+    // 3. Dependencies (glob matching, more expensive)
+    if self.has_dependency_filters && !self.matches_dependencies(descriptor) {
+      return false;
+    }
+
+    // 4. Packages (glob matching + borrow, most expensive)
+    if self.has_package_filters && !self.matches_packages(descriptor) {
+      return false;
+    }
+
     true
   }
 
+  #[inline]
   fn matches_dependency_types(&self, descriptor: &InstanceDescriptor) -> bool {
     matches_identifiers(
       &descriptor.dependency_type.name,
@@ -103,21 +137,25 @@ impl GroupSelector {
     )
   }
 
+  #[inline]
   fn matches_packages(&self, descriptor: &InstanceDescriptor) -> bool {
-    matches_globs(&descriptor.package.borrow().name, &self.include_packages, &self.exclude_packages)
+    // Cache the borrow result to avoid repeated borrow checks
+    let package_name = &descriptor.package.borrow().name;
+    matches_globs(package_name, &self.include_packages, &self.exclude_packages)
   }
 
+  #[inline]
   fn matches_dependencies(&self, descriptor: &InstanceDescriptor) -> bool {
     matches_globs(&descriptor.internal_name, &self.include_dependencies, &self.exclude_dependencies)
   }
 
+  #[inline]
   fn matches_specifier_types(&self, descriptor: &InstanceDescriptor) -> bool {
-    self.include_specifier_types.is_empty()
-      || matches_identifiers(
-        &descriptor.specifier.get_config_identifier(),
-        &self.include_specifier_types,
-        &self.exclude_specifier_types,
-      )
+    matches_identifiers(
+      &descriptor.specifier.get_config_identifier(),
+      &self.include_specifier_types,
+      &self.exclude_specifier_types,
+    )
   }
 }
 
@@ -158,7 +196,7 @@ fn matches_identifiers(name: &str, includes: &[String], excludes: &[String]) -> 
 }
 
 fn matches_any_identifier(value: &str, identifiers: &[String]) -> bool {
-  identifiers.contains(&value.to_string())
+  identifiers.iter().any(|id| id == value)
 }
 
 /// Resolve keywords such as `$LOCAL` and `!$LOCAL` to their actual values.

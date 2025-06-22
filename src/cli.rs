@@ -1,5 +1,5 @@
 use {
-  crate::{group_selector::GroupSelector, packages::Packages},
+  crate::{dependency_type::DependencyType, group_selector::GroupSelector, packages::Packages},
   clap::{builder::ValueParser, crate_description, crate_name, crate_version, Arg, ArgMatches, Command},
   color_print::cformat,
   itertools::Itertools,
@@ -42,12 +42,14 @@ pub struct Cli {
   pub disable_ansi: bool,
   /// Whether to simulate changes without writing them to disk
   pub dry_run: bool,
-  /// A set of filters made up of filter options passed in as CLI arguments:
   /// - `--dependencies` to filter by dependency name
+  pub dependencies: Vec<String>,
   /// - `--dependency-types` to filter by dependency type
-  /// - `--specifier-types` to filter by specifier type
+  pub dependency_types: Vec<String>,
   /// - `--packages` to filter by package name
-  pub filter: Option<GroupSelector>,
+  pub packages: Vec<String>,
+  /// - `--specifier-types` to filter by specifier type
+  pub specifier_types: Vec<String>,
   /// Which severity levels of logging to display
   #[allow(dead_code)]
   pub log_levels: Vec<LevelFilter>,
@@ -91,18 +93,37 @@ impl Cli {
     Self {
       check: (matches!(&subcommand, Subcommand::Format | Subcommand::Update)) && matches.get_flag("check"),
       cwd: env::current_dir().unwrap(),
-      filter: get_filters(matches),
+      dependencies: get_patterns(matches, "dependencies"),
+      dependency_types: get_patterns(matches, "dependency-types"),
       disable_ansi: matches.get_flag("no-ansi"),
       dry_run: (matches!(&subcommand, Subcommand::Fix | Subcommand::Format | Subcommand::Update)) && matches.get_flag("dry-run"),
       log_levels: get_log_levels(matches),
-      sort: get_order_by(matches),
-      show_ignored: should_show(matches, "ignored"),
+      packages: get_patterns(matches, "packages"),
       show_hints: should_show(matches, "hints"),
+      show_ignored: should_show(matches, "ignored"),
       show_instances: should_show(matches, "instances"),
       show_status_codes: should_show(matches, "statuses"),
+      sort: get_order_by(matches),
       source_patterns: get_patterns(matches, "source"),
+      specifier_types: get_patterns(matches, "specifier-types"),
       subcommand,
       target: get_target(matches),
+    }
+  }
+
+  pub fn get_filters(&self, packages: &Packages, all_dependency_types: &[DependencyType]) -> Option<GroupSelector> {
+    if !self.dependencies.is_empty() && !self.dependency_types.is_empty() && !self.packages.is_empty() && !self.specifier_types.is_empty() {
+      Some(GroupSelector::new(
+        /* all_packages: */ packages,
+        /* include_dependencies: */ self.dependencies.clone(),
+        /* include_dependency_types: */ self.dependency_types.clone(),
+        /* alias_name: */ "CLI filters".to_string(),
+        /* include_packages: */ self.packages.clone(),
+        /* include_specifier_types: */ self.specifier_types.clone(),
+        /* all_dependency_types: */ all_dependency_types,
+      ))
+    } else {
+      None
     }
   }
 }
@@ -581,25 +602,4 @@ fn get_log_levels(matches: &ArgMatches) -> Vec<LevelFilter> {
   })
   .map(|(_, level)| level)
   .collect_vec()
-}
-
-fn get_filters(matches: &ArgMatches) -> Option<GroupSelector> {
-  let dependencies = get_patterns(matches, "dependencies");
-  let dependency_types = get_patterns(matches, "dependency-types");
-  let label = "CLI filters".to_string();
-  let all_packages = &Packages::new();
-  let packages = get_patterns(matches, "packages");
-  let specifier_types = get_patterns(matches, "specifier-types");
-  if dependencies.is_empty() && dependency_types.is_empty() && packages.is_empty() && specifier_types.is_empty() {
-    None
-  } else {
-    Some(GroupSelector::new(
-      all_packages,
-      dependencies,
-      dependency_types,
-      label,
-      packages,
-      specifier_types,
-    ))
-  }
 }

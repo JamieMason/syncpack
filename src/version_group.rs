@@ -2,6 +2,7 @@ use {
   crate::{
     cli::SortBy,
     dependency::{Dependency, UpdateUrl},
+    dependency_type::DependencyType,
     group_selector::GroupSelector,
     instance::Instance,
     package_json::PackageJson,
@@ -45,7 +46,7 @@ pub struct VersionGroup {
 
 impl VersionGroup {
   /// Create a default/catch-all group which would apply to any instance
-  pub fn get_catch_all() -> VersionGroup {
+  pub fn get_catch_all(all_dependency_types: &[DependencyType]) -> VersionGroup {
     VersionGroup {
       dependencies: BTreeMap::new(),
       matches_cli_filter: false,
@@ -57,6 +58,7 @@ impl VersionGroup {
         /* label: */ "Default Version Group".to_string(),
         /* include_packages: */ vec![],
         /* include_specifier_types: */ vec![],
+        /* all_dependency_types: */ all_dependency_types,
       ),
       snap_to: None,
       variant: VersionGroupVariant::HighestSemver,
@@ -86,7 +88,7 @@ impl VersionGroup {
   }
 
   /// Create a single version group from a config item from the rcfile.
-  pub fn from_config(group: &AnyVersionGroup, packages: &Packages) -> VersionGroup {
+  pub fn from_config(group: &AnyVersionGroup, packages: &Packages, all_dependency_types: &[DependencyType]) -> VersionGroup {
     let selector = GroupSelector::new(
       /* all_packages: */ packages,
       /* include_dependencies: */ group.dependencies.clone(),
@@ -94,6 +96,7 @@ impl VersionGroup {
       /* label: */ group.label.clone(),
       /* include_packages: */ group.packages.clone(),
       /* include_specifier_types: */ group.specifier_types.clone(),
+      /* all_dependency_types: */ all_dependency_types,
     );
 
     if let Some(true) = group.is_banned {

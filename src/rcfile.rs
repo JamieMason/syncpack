@@ -143,7 +143,7 @@ impl Default for Rcfile {
 
 impl Rcfile {
   /// Create every alias defined in the rcfile.
-  pub fn get_dependency_groups(&self, packages: &Packages) -> Vec<GroupSelector> {
+  pub fn get_dependency_groups(&self, packages: &Packages, all_dependency_types: &[DependencyType]) -> Vec<GroupSelector> {
     self
       .dependency_groups
       .iter()
@@ -155,30 +155,31 @@ impl Rcfile {
           /* alias_name: */ dependency_group_config.alias_name.clone(),
           /* include_packages: */ dependency_group_config.packages.clone(),
           /* include_specifier_types: */ dependency_group_config.specifier_types.clone(),
+          /* all_dependency_types: */ all_dependency_types,
         )
       })
       .collect()
   }
 
   /// Create every semver group defined in the rcfile.
-  pub fn get_semver_groups(&self, packages: &Packages) -> Vec<SemverGroup> {
+  pub fn get_semver_groups(&self, packages: &Packages, all_dependency_types: &[DependencyType]) -> Vec<SemverGroup> {
     let mut all_groups: Vec<SemverGroup> = vec![];
-    all_groups.push(SemverGroup::get_exact_local_specifiers());
+    all_groups.push(SemverGroup::get_exact_local_specifiers(all_dependency_types));
     self.semver_groups.iter().for_each(|group_config| {
-      all_groups.push(SemverGroup::from_config(group_config, packages));
+      all_groups.push(SemverGroup::from_config(group_config, packages, all_dependency_types));
     });
-    all_groups.push(SemverGroup::get_catch_all());
+    all_groups.push(SemverGroup::get_catch_all(all_dependency_types));
     all_groups
   }
 
   /// Create every version group defined in the rcfile.
-  pub fn get_version_groups(&self, packages: &Packages) -> Vec<VersionGroup> {
+  pub fn get_version_groups(&self, packages: &Packages, all_dependency_types: &[DependencyType]) -> Vec<VersionGroup> {
     let mut all_groups: Vec<VersionGroup> = self
       .version_groups
       .iter()
-      .map(|group_config| VersionGroup::from_config(group_config, packages))
+      .map(|group_config| VersionGroup::from_config(group_config, packages, all_dependency_types))
       .collect();
-    all_groups.push(VersionGroup::get_catch_all());
+    all_groups.push(VersionGroup::get_catch_all(all_dependency_types));
     all_groups
   }
 

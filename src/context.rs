@@ -47,36 +47,31 @@ impl Context {
     let registry_client = registry_client.unwrap_or_else(|| Arc::new(LiveRegistryClient::new()));
     let updates_by_internal_name = HashMap::new();
     let all_dependency_types = config.rcfile.get_all_dependency_types();
-    let dependency_groups = config.rcfile.get_dependency_groups(&packages);
-    let semver_groups = config.rcfile.get_semver_groups(&packages);
-    let mut version_groups = config.rcfile.get_version_groups(&packages);
+    let cli_filters = config.cli.get_filters(&packages, &all_dependency_types);
+    let dependency_groups = config.rcfile.get_dependency_groups(&packages, &all_dependency_types);
+    let semver_groups = config.rcfile.get_semver_groups(&packages, &all_dependency_types);
+    let mut version_groups = config.rcfile.get_version_groups(&packages, &all_dependency_types);
 
     let failed_updates = Vec::new();
 
     packages.get_all_instances(&all_dependency_types, |mut descriptor| {
-      let dependency_group = dependency_groups
-        .iter()
-        .find(|alias| alias.can_add(&all_dependency_types, &descriptor));
+      let dependency_group = dependency_groups.iter().find(|alias| alias.can_add(&descriptor));
 
       if let Some(group) = dependency_group {
         descriptor.internal_name = group.label.clone();
       }
 
-      match &config.cli.filter {
-        Some(cli_group) => {
-          descriptor.matches_cli_filter = cli_group.can_add(&all_dependency_types, &descriptor);
-        }
-        None => descriptor.matches_cli_filter = true,
-      }
+      descriptor.matches_cli_filter = match cli_filters.as_ref() {
+        Some(filters) => filters.can_add(&descriptor),
+        None => true,
+      };
 
       let preferred_semver_range = semver_groups
         .iter()
-        .find(|group| group.selector.can_add(&all_dependency_types, &descriptor))
+        .find(|group| group.selector.can_add(&descriptor))
         .and_then(|group| group.range.clone());
 
-      let version_group = version_groups
-        .iter_mut()
-        .find(|group| group.selector.can_add(&all_dependency_types, &descriptor));
+      let version_group = version_groups.iter_mut().find(|group| group.selector.can_add(&descriptor));
 
       let instance = Rc::new(Instance::new(descriptor, preferred_semver_range));
 
