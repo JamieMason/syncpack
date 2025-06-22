@@ -2,7 +2,7 @@ use {
   crate::{
     cli::Cli,
     rcfile::{
-      error::{ConfigError, NodeJsResult},
+      error::{NodeJsResult, RcfileError},
       Rcfile,
     },
   },
@@ -10,7 +10,7 @@ use {
   std::{path::Path, process::Command},
 };
 
-pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, ConfigError> {
+pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
   let escaped_file_path_for_nodejs = file_path.to_string_lossy().replace('\\', "\\\\");
   let nodejs_script = format!(
     r#"
@@ -67,34 +67,34 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, ConfigError> {
     .args(["tsx", "-e", &nodejs_script])
     .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
     .output()
-    .map_err(ConfigError::CommandExecutionFailed)
+    .map_err(RcfileError::NodeJsExecutionFailed)
     .and_then(|output| {
       if output.status.success() {
         Ok(output.stdout)
       } else {
-        Err(ConfigError::ProcessFailed {
+        Err(RcfileError::ProcessFailed {
           stderr: String::from_utf8_lossy(&output.stderr).to_string(),
         })
       }
     })
-    .and_then(|stdout| String::from_utf8(stdout).map_err(ConfigError::InvalidUtf8))
+    .and_then(|stdout| String::from_utf8(stdout).map_err(RcfileError::InvalidUtf8))
     .inspect(|json_str| {
       debug!("Raw output from {:?}: {}", file_path, json_str.trim());
     })
-    .and_then(|json_str| serde_json::from_str::<NodeJsResult>(&json_str).map_err(ConfigError::JsonParseFailed))
+    .and_then(|json_str| serde_json::from_str::<NodeJsResult>(&json_str).map_err(RcfileError::JsonParseFailed))
     .and_then(|response| match response {
-      NodeJsResult::Success { value } => serde_json::from_value(value).map_err(ConfigError::ConfigDeserializationFailed),
+      NodeJsResult::Success { value } => serde_json::from_value(value).map_err(RcfileError::InvalidConfig),
       NodeJsResult::Error {
         import_error,
         require_error,
-      } => Err(ConfigError::ImportAndRequireFailed {
+      } => Err(RcfileError::JavaScriptImportFailed {
         import_error,
         require_error,
       }),
     })
 }
 
-pub fn try_from_js_candidates(cli: &Cli) -> Option<Result<Rcfile, ConfigError>> {
+pub fn try_from_js_candidates(cli: &Cli) -> Option<Result<Rcfile, RcfileError>> {
   let candidates = vec![
     ".syncpackrc.js",
     ".syncpackrc.ts",

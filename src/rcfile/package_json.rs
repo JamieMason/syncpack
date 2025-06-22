@@ -1,14 +1,14 @@
 use {
   crate::{
     cli::Cli,
-    rcfile::{error::ConfigError, Rcfile},
+    rcfile::{error::RcfileError, Rcfile},
   },
   log::debug,
   serde_json::Value,
   std::fs,
 };
 
-pub fn try_from_package_json_config_property(cli: &Cli) -> Option<Result<Rcfile, ConfigError>> {
+pub fn try_from_package_json_config_property(cli: &Cli) -> Option<Result<Rcfile, RcfileError>> {
   let package_json_path = cli.cwd.join("package.json");
   package_json_path
     .exists()
@@ -26,6 +26,6 @@ pub fn try_from_package_json_config_property(cli: &Cli) -> Option<Result<Rcfile,
             .inspect(|_| debug!("Found .config.syncpack property in package.json"))
             .map(|config| config.take())
         })
-        .map(|syncpack_config| serde_json::from_value(syncpack_config).map_err(ConfigError::PackageJsonConfigInvalid))
+        .map(|syncpack_config| serde_json::from_value(syncpack_config).map_err(RcfileError::PackageJsonConfigInvalid))
     })
 }
