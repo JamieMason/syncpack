@@ -1,10 +1,10 @@
-use {serde::Deserialize, serde_json::Value, thiserror::Error};
+use {serde::Deserialize, thiserror::Error};
 
 #[derive(Debug, Deserialize)]
 #[serde(tag = "_tag")]
 pub enum NodeJsResult {
   #[serde(rename = "Ok")]
-  Success { value: Value },
+  Success { value: String },
   #[serde(rename = "Err")]
   Error {
     #[serde(rename = "importError")]

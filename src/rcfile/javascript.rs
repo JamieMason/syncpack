@@ -15,12 +15,13 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
   let nodejs_script = format!(
     r#"
         import('{escaped_file_path_for_nodejs}')
-          .then((mod) => mod.default)
+          .then(findConfig)
           .then((value) => {{
             if (isNonEmptyObject(value)) {{
               console.log(JSON.stringify({{
                 _tag: 'Ok',
-                value,
+                value: JSON.stringify(value),
+                source: 'import',
               }}));
             }} else {{
               tryRequire('Config expected at default export');
@@ -33,12 +34,13 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
         function tryRequire(importError) {{
           Promise.resolve(null)
             .then(() => require('{escaped_file_path_for_nodejs}'))
-            .then((mod) => mod.default || mod)
+            .then(findConfig)
             .then((value) => {{
               if (isNonEmptyObject(value)) {{
                 console.log(JSON.stringify({{
                   _tag: 'Ok',
-                  value,
+                  value: JSON.stringify(value),
+                  source: 'require',
                 }}));
               }} else {{
                 console.log(JSON.stringify({{
@@ -59,6 +61,10 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
 
         function isNonEmptyObject(value) {{
           return value && typeof value === 'object' && value.constructor === Object && Object.keys(value).length > 0;
+        }}
+
+        function findConfig(mod) {{
+          return mod.default && mod.default.default ? mod.default.default : mod.default;
         }}
       "#
   );
@@ -83,7 +89,7 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
     })
     .and_then(|json_str| serde_json::from_str::<NodeJsResult>(&json_str).map_err(RcfileError::JsonParseFailed))
     .and_then(|response| match response {
-      NodeJsResult::Success { value } => serde_json::from_value(value).map_err(RcfileError::InvalidConfig),
+      NodeJsResult::Success { value } => serde_json::from_str::<Rcfile>(&value).map_err(RcfileError::InvalidConfig),
       NodeJsResult::Error {
         import_error,
         require_error,
