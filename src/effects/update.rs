@@ -7,7 +7,7 @@ use {
   log::{error, warn},
 };
 
-pub fn run(ctx: Context) -> ! {
+pub fn run(ctx: Context) -> i32 {
   let mut was_outdated = false;
 
   ctx
@@ -58,7 +58,7 @@ pub fn run(ctx: Context) -> ! {
   }
 
   if ctx.config.cli.check {
-    std::process::exit(if was_outdated { 1 } else { 0 });
+    return if was_outdated { 1 } else { 0 };
   }
 
   if !ctx.config.cli.dry_run {
@@ -67,5 +67,5 @@ pub fn run(ctx: Context) -> ! {
     });
   }
 
-  std::process::exit(0);
+  0
 }

@@ -1,6 +1,6 @@
 use crate::{context::Context, effects::ui};
 
-pub fn run(ctx: Context) -> ! {
+pub fn run(ctx: Context) -> i32 {
   let mut is_invalid = false;
 
   ctx
@@ -25,5 +25,9 @@ pub fn run(ctx: Context) -> ! {
     ui::util::print_no_issues_found();
   }
 
-  std::process::exit(if is_invalid { 1 } else { 0 });
+  if is_invalid {
+    1
+  } else {
+    0
+  }
 }

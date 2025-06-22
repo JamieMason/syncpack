@@ -1,7 +1,7 @@
 use crate::{context::Context, effects::ui};
 
 /// Run the lint command side effects
-pub fn run(ctx: Context) -> ! {
+pub fn run(ctx: Context) -> i32 {
   let mut is_invalid = false;
 
   ctx.get_version_groups().for_each(|group| {
@@ -28,9 +28,10 @@ pub fn run(ctx: Context) -> ! {
     });
   });
 
-  if !is_invalid {
+  if is_invalid {
+    1
+  } else {
     ui::util::print_no_issues_found();
+    0
   }
-
-  std::process::exit(if is_invalid { 1 } else { 0 });
 }

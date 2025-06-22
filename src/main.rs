@@ -68,31 +68,33 @@ async fn main() {
 
   let ctx = Context::create(config, packages, None);
 
-  match ctx.config.cli.subcommand {
+  let _exit_code = match ctx.config.cli.subcommand {
     Subcommand::Fix => {
       let ctx = visit_packages(ctx);
-      fix::run(ctx);
+      fix::run(ctx)
     }
     Subcommand::Format => {
       let ctx = visit_formatting(ctx);
-      format::run(ctx);
+      format::run(ctx)
     }
     Subcommand::Lint => {
       let ctx = visit_packages(ctx);
-      lint::run(ctx);
+      lint::run(ctx)
     }
     Subcommand::Update => {
       let mut ctx = ctx;
       ctx.fetch_all_updates().await;
       let ctx = visit_packages(ctx);
-      update::run(ctx);
+      update::run(ctx)
     }
     Subcommand::List => {
       let ctx = visit_packages(ctx);
-      list::run(ctx);
+      list::run(ctx)
     }
   };
 
   #[cfg(feature = "dhat-heap")]
   drop(_profiler);
+
+  exit(_exit_code);
 }

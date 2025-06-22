@@ -1,6 +1,6 @@
 use crate::{context::Context, effects::ui};
 
-pub fn run(ctx: Context) -> ! {
+pub fn run(ctx: Context) -> i32 {
   if ctx.config.cli.check {
     check_formatting(ctx)
   } else {
@@ -8,7 +8,7 @@ pub fn run(ctx: Context) -> ! {
   }
 }
 
-fn check_formatting(ctx: Context) -> ! {
+fn check_formatting(ctx: Context) -> i32 {
   let mut is_invalid = false;
   ctx
     .packages
@@ -25,10 +25,14 @@ fn check_formatting(ctx: Context) -> ! {
   if !is_invalid {
     ui::util::print_no_issues_found();
   }
-  std::process::exit(if is_invalid { 1 } else { 0 });
+  if is_invalid {
+    1
+  } else {
+    0
+  }
 }
 
-fn fix_formatting(ctx: Context) -> ! {
+fn fix_formatting(ctx: Context) -> i32 {
   let mut was_invalid = false;
   ctx
     .packages
@@ -53,8 +57,10 @@ fn fix_formatting(ctx: Context) -> ! {
       package.borrow().write_to_disk(&ctx.config);
     });
   }
-  if !was_invalid {
+  if was_invalid {
+    1
+  } else {
     ui::util::print_no_issues_found();
+    0
   }
-  std::process::exit(0);
 }

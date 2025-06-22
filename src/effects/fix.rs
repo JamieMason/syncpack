@@ -3,7 +3,7 @@ use {
   log::warn,
 };
 
-pub fn run(ctx: Context) -> ! {
+pub fn run(ctx: Context) -> i32 {
   let mut contains_unfixable_issues = false;
   let mut was_invalid = false;
 
@@ -59,5 +59,9 @@ pub fn run(ctx: Context) -> ! {
     ui::util::print_no_issues_found();
   }
 
-  std::process::exit(if contains_unfixable_issues { 1 } else { 0 });
+  if contains_unfixable_issues {
+    1
+  } else {
+    0
+  }
 }
