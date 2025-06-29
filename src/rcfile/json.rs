@@ -18,7 +18,7 @@ pub fn try_from_json_candidates(cli: &Cli) -> Option<Result<Rcfile, RcfileError>
   for candidate in candidates {
     let config_path = cli.cwd.join(candidate);
     if config_path.exists() {
-      debug!("Found JSON config file: {:?}", config_path);
+      debug!("Found JSON config file: {config_path:?}");
       return Some(from_json_path(&config_path));
     }
   }

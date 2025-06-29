@@ -37,13 +37,13 @@ impl InstanceState {
   pub fn get_name(&self) -> String {
     match self {
       InstanceState::Unknown => "Unknown".to_string(),
-      InstanceState::Valid(variant) => format!("{:?}", variant),
+      InstanceState::Valid(variant) => format!("{variant:?}"),
       InstanceState::Invalid(variant) => match variant {
-        InvalidInstance::Fixable(variant) => format!("{:?}", variant),
-        InvalidInstance::Conflict(variant) => format!("{:?}", variant),
-        InvalidInstance::Unfixable(variant) => format!("{:?}", variant),
+        InvalidInstance::Fixable(variant) => format!("{variant:?}"),
+        InvalidInstance::Conflict(variant) => format!("{variant:?}"),
+        InvalidInstance::Unfixable(variant) => format!("{variant:?}"),
       },
-      InstanceState::Suspect(variant) => format!("{:?}", variant),
+      InstanceState::Suspect(variant) => format!("{variant:?}"),
     }
   }
 

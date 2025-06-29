@@ -213,12 +213,12 @@ impl Instance {
             if aliased_name.starts_with("@jsr/") {
               Some(UpdateUrl {
                 internal_name: internal_name.clone(),
-                url: format!("https://npm.jsr.io/{}", aliased_name),
+                url: format!("https://npm.jsr.io/{aliased_name}"),
               })
             } else if &aliased_name == actual_name {
               Some(UpdateUrl {
                 internal_name: internal_name.clone(),
-                url: format!("https://registry.npmjs.org/{}", actual_name),
+                url: format!("https://registry.npmjs.org/{actual_name}"),
               })
             } else {
               debug!("'{aliased_name}' in '{raw}' does not equal the instance name '{actual_name}', skipping update as this might create mismatches");
@@ -232,12 +232,12 @@ impl Instance {
           if actual_name.starts_with("@jsr/") {
             Some(UpdateUrl {
               internal_name: internal_name.clone(),
-              url: format!("https://npm.jsr.io/{}", actual_name),
+              url: format!("https://npm.jsr.io/{actual_name}"),
             })
           } else {
             Some(UpdateUrl {
               internal_name: internal_name.clone(),
-              url: format!("https://registry.npmjs.org/{}", actual_name),
+              url: format!("https://registry.npmjs.org/{actual_name}"),
             })
           }
         }

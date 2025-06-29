@@ -141,7 +141,7 @@ impl VersionGroup {
         };
       } else {
         // @FIXME: show user friendly error message and exit with error code
-        panic!("Unrecognised version group policy: {}", policy);
+        panic!("Unrecognised version group policy: {policy}");
       }
     }
     if let Some(snap_to) = &group.snap_to {

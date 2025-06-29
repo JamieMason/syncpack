@@ -449,8 +449,8 @@ fn with_range_on_patch_variant() {
     for start in starts.clone() {
       let local_version = if start == "workspace:" { BasicSemver::new("1.2.3") } else { None };
       for (range, expected) in &changes {
-        let full_value = format!("{}{}", start, value);
-        let full_expected = format!("{}{}", start, expected);
+        let full_value = format!("{start}{value}");
+        let full_expected = format!("{start}{expected}");
         assert_eq!(
           Specifier::new(&full_value, local_version.as_ref()).with_range(range),
           Specifier::new(&full_expected, local_version.as_ref()),
@@ -478,8 +478,8 @@ fn with_range_on_major_variant() {
     for start in starts.clone() {
       let local_version = if start == "workspace:" { BasicSemver::new("1.2.3") } else { None };
       for (range, expected) in &changes {
-        let full_value = format!("{}{}", start, value);
-        let full_expected = format!("{}{}", start, expected);
+        let full_value = format!("{start}{value}");
+        let full_expected = format!("{start}{expected}");
         assert_eq!(
           Specifier::new(&full_value, local_version.as_ref()).with_range(range),
           Specifier::new(&full_expected, local_version.as_ref()),

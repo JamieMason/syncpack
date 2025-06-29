@@ -67,7 +67,7 @@ pub fn get_sorted_exports(rcfile: &Rcfile, package: &PackageJson) -> Option<Valu
 /// Get a sorted version of the given property from package.json
 pub fn get_sorted_az(key: &str, package: &PackageJson) -> Option<Value> {
   let contents = package.contents.borrow();
-  if let Some(value) = contents.pointer(format!("/{}", key).as_str()) {
+  if let Some(value) = contents.pointer(format!("/{key}").as_str()) {
     let mut sorted = value.clone();
     sort_alphabetically(&mut sorted);
     if !is_identical(value, &sorted) {

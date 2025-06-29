@@ -139,12 +139,12 @@ impl Context {
             }
           }
           Err(err) => {
-            debug!("{}", err);
+            debug!("{err}");
             failed_updates.push(internal_name);
           }
         },
         Err(err) => {
-          debug!("{}", err);
+          debug!("{err}");
           failed_updates.push(internal_name);
         }
       }

@@ -20,7 +20,7 @@ impl Rcfile {
       .map(|result| match result {
         Ok(rcfile) => rcfile,
         Err(err) => {
-          error!("{}", err);
+          error!("{err}");
           exit(1);
         }
       })

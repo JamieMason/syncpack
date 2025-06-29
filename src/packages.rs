@@ -220,7 +220,7 @@ fn get_source_patterns(config: &Config) -> Vec<String> {
           if pattern.contains("package.json") {
             pattern
           } else {
-            format!("{}/package.json", pattern)
+            format!("{pattern}/package.json")
           }
         })
         .collect()

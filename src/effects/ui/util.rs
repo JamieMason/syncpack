@@ -14,14 +14,14 @@ pub fn join_line(lines: Vec<&String>) -> String {
 /// Example "    38x"
 pub fn count_column(count: usize) -> String {
   match ui::DEFAULT_INDENT {
-    0 => format!("{: >0}x", count),
-    1 => format!("{: >1}x", count),
-    2 => format!("{: >2}x", count),
-    3 => format!("{: >3}x", count),
-    4 => format!("{: >4}x", count),
-    5 => format!("{: >5}x", count),
-    6 => format!("{: >6}x", count),
-    _ => format!("{: >7}x", count),
+    0 => format!("{count: >0}x"),
+    1 => format!("{count: >1}x"),
+    2 => format!("{count: >2}x"),
+    3 => format!("{count: >3}x"),
+    4 => format!("{count: >4}x"),
+    5 => format!("{count: >5}x"),
+    6 => format!("{count: >6}x"),
+    _ => format!("{count: >7}x"),
   }
   .dimmed()
   .to_string()

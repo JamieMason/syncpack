@@ -70,7 +70,7 @@ pub fn visit_formatting(ctx: Context) -> Context {
             package,
             FormatMismatch {
               expected,
-              property_path: format!("/{}", key),
+              property_path: format!("/{key}"),
               variant: PropertyIsNotSortedAz,
             },
           );

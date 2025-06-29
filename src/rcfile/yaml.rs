@@ -18,7 +18,7 @@ pub fn try_from_yaml_candidates(cli: &Cli) -> Option<Result<Rcfile, RcfileError>
   for candidate in candidates {
     let config_path = cli.cwd.join(candidate);
     if config_path.exists() {
-      debug!("Found YAML config file: {:?}", config_path);
+      debug!("Found YAML config file: {config_path:?}");
       return Some(from_yaml_path(&config_path));
     }
   }

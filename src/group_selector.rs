@@ -213,7 +213,7 @@ fn with_resolved_keywords(dependency_names: &[String], packages: &Packages) -> V
       "!$LOCAL" => {
         for package in packages.all.iter() {
           let package_name = package.borrow().name.clone();
-          resolved_dependencies.push(format!("!{}", package_name));
+          resolved_dependencies.push(format!("!{package_name}"));
         }
       }
       _ => {
