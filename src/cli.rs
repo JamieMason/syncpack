@@ -112,7 +112,9 @@ impl Cli {
   }
 
   pub fn get_filters(&self, packages: &Packages, all_dependency_types: &[DependencyType]) -> Option<GroupSelector> {
-    if !self.dependencies.is_empty() && !self.dependency_types.is_empty() && !self.packages.is_empty() && !self.specifier_types.is_empty() {
+    if self.dependencies.is_empty() && self.dependency_types.is_empty() && self.packages.is_empty() && self.specifier_types.is_empty() {
+      None
+    } else {
       Some(GroupSelector::new(
         /* all_packages: */ packages,
         /* include_dependencies: */ self.dependencies.clone(),
@@ -122,8 +124,6 @@ impl Cli {
         /* include_specifier_types: */ self.specifier_types.clone(),
         /* all_dependency_types: */ all_dependency_types,
       ))
-    } else {
-      None
     }
   }
 }
