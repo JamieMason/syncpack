@@ -166,3 +166,69 @@ type SpecifierType =
   | AnyString;
 
 type AnyString = string & {};
+
+/** Each Instance printed by `syncpack json` */
+export type JsonOutput = {
+  dependency: string;
+  dependencyGroup: string;
+  dependencyType: DependencyType;
+  package: string;
+  property: ['dependencies'];
+  strategy: CustomType.Any['strategy'];
+  versionGroup: VersionGroupVariant;
+  preferredSemverRange: SemverRange | null;
+  statusCode: StatusCode;
+  actual: {
+    raw: string;
+    type: SpecifierType;
+  };
+  expected: {
+    raw: string;
+    type: SpecifierType;
+  } | null;
+};
+
+export type VersionGroupVariant =
+  | 'Banned'
+  | 'HighestSemver'
+  | 'Ignored'
+  | 'LowestSemver'
+  | 'Pinned'
+  | 'SameRange'
+  | 'SnappedTo';
+
+export type StatusCode =
+  | 'IsHighestOrLowestSemver'
+  | 'IsIdenticalToLocal'
+  | 'IsIdenticalToPin'
+  | 'IsIdenticalToSnapTarget'
+  | 'IsIgnored'
+  | 'IsLocalAndValid'
+  | 'IsNonSemverButIdentical'
+  | 'SatisfiesHighestOrLowestSemver'
+  | 'SatisfiesLocal'
+  | 'SatisfiesSameRangeGroup'
+  | 'SatisfiesSnapTarget'
+  | 'DiffersToHighestOrLowestSemver'
+  | 'DiffersToLocal'
+  | 'DiffersToNpmRegistry'
+  | 'DiffersToPin'
+  | 'DiffersToSnapTarget'
+  | 'IsBanned'
+  | 'PinOverridesSemverRange'
+  | 'PinOverridesSemverRangeMismatch'
+  | 'SemverRangeMismatch'
+  | 'DependsOnInvalidLocalPackage'
+  | 'NonSemverMismatch'
+  | 'SameRangeMismatch'
+  | 'DependsOnMissingSnapTarget'
+  | 'InvalidLocalVersion'
+  | 'RefuseToBanLocal'
+  | 'RefuseToPinLocal'
+  | 'RefuseToSnapLocal'
+  | 'MatchConflictsWithHighestOrLowestSemver'
+  | 'MatchConflictsWithLocal'
+  | 'MatchConflictsWithSnapTarget'
+  | 'MismatchConflictsWithHighestOrLowestSemver'
+  | 'MismatchConflictsWithLocal'
+  | 'MismatchConflictsWithSnapTarget';
