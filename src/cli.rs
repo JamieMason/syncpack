@@ -14,6 +14,7 @@ pub enum Subcommand {
   Format,
   Update,
   List,
+  Json,
 }
 
 #[derive(Debug)]
@@ -82,6 +83,7 @@ impl Cli {
       Some(("format", matches)) => Cli::from_arg_matches(Subcommand::Format, matches),
       Some(("update", matches)) => Cli::from_arg_matches(Subcommand::Update, matches),
       Some(("list", matches)) => Cli::from_arg_matches(Subcommand::List, matches),
+      Some(("json", matches)) => Cli::from_arg_matches(Subcommand::Json, matches),
       _ => {
         std::process::exit(1);
       }
@@ -219,6 +221,18 @@ fn create() -> Command {
         .arg(sort_option("list"))
         .arg(source_option("list"))
         .arg(specifier_types_option("list")),
+    )
+    .subcommand(
+      Command::new("json")
+        .about("Output all dependencies as flattened JSON objects")
+        .after_long_help(additional_help())
+        .arg(dependencies_option("json"))
+        .arg(dependency_types_option("json"))
+        .arg(log_levels_option("json"))
+        .arg(no_ansi_option("json"))
+        .arg(sort_option("json"))
+        .arg(source_option("json"))
+        .arg(specifier_types_option("json")),
     )
 }
 

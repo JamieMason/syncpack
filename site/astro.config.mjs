@@ -51,6 +51,7 @@ export default defineConfig({
         const linksById = {
           COMMAND_FIX: '/syncpack/command/fix/',
           COMMAND_FORMAT: '/syncpack/command/format/',
+          COMMAND_JSON: '/syncpack/command/json/',
           COMMAND_LINT: '/syncpack/command/lint/',
           COMMAND_LIST: '/syncpack/command/list/',
           COMMAND_UPDATE: '/syncpack/command/update/',

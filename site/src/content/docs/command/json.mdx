@@ -1,0 +1,62 @@
+---
+title: json
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import ConfigOption from "@partials/option/config.mdx";
+import DependenciesOption from "@partials/option/dependencies.mdx";
+import DependencyTypesOption from "@partials/option/dependency-types.mdx";
+import HelpOption from "@partials/option/help.mdx";
+import LogLevelsOption from "@partials/option/log-levels.mdx";
+import NoAnsiOption from "@partials/option/no-ansi.mdx";
+import SortOption from "@partials/option/sort.mdx";
+import SourceOption from "@partials/option/source.mdx";
+import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
+
+import QuoteFilters from "@partials/tips/quote-filters.mdx";
+
+Output the state of every instance of every dependency as a JSON object, one per line. This command is best used with tools like [`jq`](https://jqlang.org/) for filtering and processing.
+
+## TypeScript
+
+Each instance printed by `syncpack json` has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
+
+## Options
+
+<QuoteFilters />
+
+### --config <Badge text="<file-path>" />
+
+<ConfigOption command="json" />
+
+### --dependencies <Badge text="<dependency-name-pattern>" />
+
+<DependenciesOption command="json" />
+
+### --dependency-types <Badge text="<comma-separated-dependency-type-names>" />
+
+<DependencyTypesOption command="json" />
+
+### --log-levels <Badge text="<comma-separated-log-level-names>" />
+
+<LogLevelsOption command="json" />
+
+### --no-ansi
+
+<NoAnsiOption command="json" />
+
+### --sort <Badge text="<choice>" />
+
+<SortOption command="json" />
+
+### --source <Badge text="<file-pattern>" />
+
+<SourceOption command="json" />
+
+### --specifier-types <Badge text="<comma-separated-specifier-type-names>" />
+
+<SpecifierTypesOption command="json" />
+
+### --help
+
+<HelpOption command="json" />

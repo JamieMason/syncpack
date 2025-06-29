@@ -7,7 +7,7 @@ use {
     registry_client::LiveRegistryClient,
   },
   context::Context,
-  effects::list,
+  effects::{json, list},
   log::{debug, error},
   std::{process::exit, sync::Arc},
   visit_formatting::visit_formatting,
@@ -100,6 +100,10 @@ async fn main() {
     Subcommand::List => {
       let ctx = visit_packages(ctx);
       list::run(ctx)
+    }
+    Subcommand::Json => {
+      let ctx = visit_packages(ctx);
+      json::run(ctx)
     }
   };
 

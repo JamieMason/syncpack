@@ -1,6 +1,6 @@
-use crate::rcfile::CustomType;
+use {crate::rcfile::CustomType, serde::Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub enum Strategy {
   /// "name~version"
   NameAndVersionProps,
@@ -26,7 +26,7 @@ impl Strategy {
   }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct DependencyType {
   /// The path to the property that contains the dependency name
   pub name_path: Option<String>,

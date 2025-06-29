@@ -159,6 +159,13 @@ run-fluid-list:
     cd fixtures/fluid-framework
     RUST_BACKTRACE=1 cargo run -- list
 
+run-fluid-json:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    cd fixtures/fluid-framework
+    RUST_BACKTRACE=1 cargo run -- json
+
 # Run the dev rust binary against a clone of microsoft/FluidFramework
 run-fluid-fix:
     #!/usr/bin/env bash

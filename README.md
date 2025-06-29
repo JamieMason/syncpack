@@ -144,6 +144,25 @@ syncpack list --help
 syncpack list -h
 ```
 
+### [json](https://jamiemason.github.io/syncpack/command/json)
+
+Output the state of every instance of every dependency as a JSON object, one per line. This command is best used with tools like [`jq`](https://jqlang.org/) for filtering and processing.
+
+#### Examples
+
+```bash
+# Output all dependencies as JSON
+syncpack json
+# Output only AWS SDK dependencies
+syncpack json --dependencies '@aws-sdk/**'
+# Count dependencies by type
+syncpack json | jq -r '.dependencyType' | sort | uniq -c
+# See more examples
+syncpack json --help
+# See a short summary of options
+syncpack json -h
+```
+
 ## Badges
 
 - [![support on ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C4PY4P)
