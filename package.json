@@ -1,7 +1,7 @@
 {
   "name": "syncpack",
   "description": "Consistent dependency versions in large JavaScript Monorepos",
-  "version": "14.0.0-alpha.17",
+  "version": "14.0.0-alpha.18",
   "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
   "bugs": "https://github.com/JamieMason/syncpack/issues",
   "contributors": [
