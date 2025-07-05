@@ -21,6 +21,21 @@ Output the state of every instance of every dependency as a JSON object, one per
 
 Each instance printed by `syncpack json` has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
 
+## Examples
+
+```bash
+# Output all dependencies as JSON
+syncpack json
+# Output only AWS SDK dependencies
+syncpack json --dependencies '@aws-sdk/**'
+# Count dependencies by type
+syncpack json | jq -r '.dependencyType' | sort | uniq -c
+# See more examples
+syncpack json --help
+# See a short summary of options
+syncpack json -h
+```
+
 ## Options
 
 <QuoteFilters />

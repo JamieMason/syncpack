@@ -18,6 +18,21 @@ import QuoteFilters from "@partials/tips/quote-filters.mdx";
 
 Fix every autofixable issue found by `syncpack lint`.
 
+## Examples
+
+```bash
+# Only fix issues in dependencies and devDependencies
+syncpack fix --dependency-types prod,dev
+# Only fix inconsistencies with exact versions (eg "1.2.3")
+syncpack fix --specifier-types exact
+# Only fix issues in "react" specifically
+syncpack fix --dependencies react
+# See more examples
+syncpack fix --help
+# See a short summary of options
+syncpack fix -h
+```
+
 ## Options
 
 <QuoteFilters />

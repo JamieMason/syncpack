@@ -17,6 +17,29 @@ import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
 Lint all versions and ranges and exit with 0 or 1 based on whether all files match your Syncpack configuration file.
 
+## Examples
+
+```bash
+# Find all issues in "dependencies" or "devDependencies"
+syncpack lint --dependency-types prod,dev
+# Only lint issues in "react" specifically
+syncpack lint --dependencies react
+# Look for issues in dependencies containing "react" in the name
+syncpack lint --dependencies '**react**'
+# Find issues in scoped packages only
+syncpack lint --dependencies '@types/**'
+# Find issues everywhere except "peerDependencies"
+syncpack lint --dependency-types '!peer'
+# Only look for issues where an exact version is used (eg "1.2.3")
+syncpack lint --specifier-types exact
+# Sort dependencies by how many times they are used
+syncpack lint --sort count
+# See more examples
+syncpack lint --help
+# See a short summary of options
+syncpack lint -h
+```
+
 ## Options
 
 <QuoteFilters />

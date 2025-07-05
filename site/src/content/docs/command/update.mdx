@@ -20,6 +20,33 @@ import TargetOption from "@partials/option/target.mdx";
 
 Update to the latest versions on the npm registry.
 
+## Examples
+
+```bash
+# Accept any update in latest (x.x.x)
+syncpack update --target latest
+# Only update minor versions (1.x.x)
+syncpack update --target minor
+# Only update patch versions (1.2.x)
+syncpack update --target patch
+# Check for outdated dependencies in one package
+syncpack update --check --source 'packages/pingu/package.json'
+# Update dependencies and devDependencies in the whole monorepo
+syncpack update --dependency-types dev,prod
+# Only update dependencies with a semver range specifier (^, ~, etc.)
+syncpack update --specifier-types range
+# Update dependencies where name exactly matches 'react'
+syncpack update --dependencies 'react'
+# Update dependencies where name contains 'react'
+syncpack update --dependencies '**react**'
+# Update dependencies with the '@aws-sdk' scope
+syncpack update --dependencies '@aws-sdk/**'
+# See more examples
+syncpack update --help
+# See a short summary of options
+syncpack update -h
+```
+
 ## Options
 
 <QuoteFilters />

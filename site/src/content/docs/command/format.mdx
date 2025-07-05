@@ -14,6 +14,21 @@ import SourceOption from "@partials/option/source.mdx";
 
 Sort package.json fields into a predictable order and nested fields alphabetically.
 
+## Examples
+
+```bash
+# Fix every formatting issue in the monorepo
+syncpack format
+# List all formatting issues in the monorepo
+syncpack format --check
+# Check the formatting of one package
+syncpack format --check --source 'packages/pingu/package.json'
+# See more examples
+syncpack format --help
+# See a short summary of options
+syncpack format -h
+```
+
 ## Options
 
 <QuoteFilters />
