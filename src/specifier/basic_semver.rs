@@ -55,7 +55,7 @@ impl BasicSemver {
       } else if parser::is_range(value) {
         let range_variant = determine_semver_range(value).unwrap();
         let exact = get_raw_without_range(value);
-        let node_version = Version::parse(exact).unwrap();
+        let node_version = Version::parse(&exact).unwrap();
         Some(BasicSemver {
           raw,
           variant: BasicSemverVariant::Patch,

@@ -55,16 +55,21 @@ fn determine_semver_range(value: &str) -> Option<SemverRange> {
 }
 
 /// Normalise values which are needlessly different
-fn sanitise_value(value: &str) -> String {
+/// Returns None if no changes needed, Some(String) if modified
+fn sanitise_value(value: &str) -> Option<String> {
   if value == "latest" || value == "x" {
-    "*".to_string()
-  } else {
-    let value = value.replace(".x", "").replace(".*", "");
-    if value.starts_with("v") {
-      value.chars().skip(1).collect()
+    Some("*".to_string())
+  } else if value.contains(".x") || value.contains(".*") {
+    let sanitised = value.replace(".x", "").replace(".*", "");
+    if sanitised.starts_with('v') {
+      Some(sanitised.chars().skip(1).collect())
     } else {
-      value
+      Some(sanitised)
     }
+  } else if value.starts_with('v') {
+    Some(value.chars().skip(1).collect())
+  } else {
+    None
   }
 }
 
@@ -83,41 +88,79 @@ pub enum Specifier {
 }
 
 impl Specifier {
-  /// Create a new instance
   pub fn new(value: &str, local_version: Option<&BasicSemver>) -> Self {
-    let raw = value.to_string();
+    let first_char = value.chars().next().unwrap_or('\0');
 
-    if parser::is_workspace_protocol(value) {
-      return Self::from_workspace_protocol(value, local_version, raw);
-    } else if parser::is_alias(value) {
-      return Self::from_alias(value, raw);
-    } else if parser::is_git(value) {
-      return Self::from_git(value, raw);
-    } else if parser::is_file(value) {
-      return Self::File(raw::Raw { raw });
-    } else if parser::is_url(value) {
-      return Self::Url(raw::Raw { raw });
+    if first_char.is_ascii_digit()
+      || first_char == '^'
+      || first_char == '~'
+      || first_char == '>'
+      || first_char == '<'
+      || first_char == '*'
+      || (first_char == 'l' && value == "latest")
+      || (first_char == 'x' && value == "x")
+    {
+      let sanitised = sanitise_value(value);
+      let sanitised_str = sanitised.as_deref().unwrap_or(value);
+      match Range::parse(sanitised_str) {
+        Ok(node_range) => {
+          if parser::is_complex_range(sanitised_str) {
+            return Self::ComplexSemver(ComplexSemver {
+              raw: value.to_string(),
+              node_range,
+            });
+          } else {
+            match BasicSemver::new(sanitised_str) {
+              Some(semver) => return Self::BasicSemver(semver),
+              None => return Self::Unsupported(raw::Raw { raw: value.to_string() }),
+            }
+          }
+        }
+        Err(_) => return Self::Unsupported(raw::Raw { raw: value.to_string() }),
+      }
     }
 
+    if first_char == 'w' && value.starts_with("workspace:") {
+      return Self::from_workspace_protocol(value, local_version, value.to_string());
+    }
+    if first_char == 'n' && value.starts_with("npm:") {
+      return Self::from_alias(value, value.to_string());
+    }
+    if first_char == 'g' && parser::is_git(value) {
+      return Self::from_git(value, value.to_string());
+    }
+    if first_char == 'f' && value.starts_with("file:") {
+      return Self::File(raw::Raw { raw: value.to_string() });
+    }
+    if first_char == 'h' && (value.starts_with("http://") || value.starts_with("https://")) {
+      return Self::Url(raw::Raw { raw: value.to_string() });
+    }
+
+    // Handle remaining cases (tags, etc.)
     let sanitised = sanitise_value(value);
-    let value = sanitised.as_str();
+    let sanitised_str = sanitised.as_deref().unwrap_or(value);
 
-    if parser::is_tag(value) {
-      return Self::Tag(raw::Raw { raw });
+    // Check if it's a tag (alphabetic only)
+    if parser::is_tag(sanitised_str) {
+      return Self::Tag(raw::Raw { raw: value.to_string() });
     }
 
-    match Range::parse(value) {
+    // Final fallback - try to parse as semver range anyway
+    match Range::parse(sanitised_str) {
       Ok(node_range) => {
-        if parser::is_complex_range(value) {
-          Self::ComplexSemver(ComplexSemver { raw, node_range })
+        if parser::is_complex_range(sanitised_str) {
+          Self::ComplexSemver(ComplexSemver {
+            raw: value.to_string(),
+            node_range,
+          })
         } else {
-          match BasicSemver::new(value) {
+          match BasicSemver::new(sanitised_str) {
             Some(semver) => Self::BasicSemver(semver),
-            None => Self::Unsupported(raw::Raw { raw }),
+            None => Self::Unsupported(raw::Raw { raw: value.to_string() }),
           }
         }
       }
-      Err(_) => Self::Unsupported(raw::Raw { raw }),
+      Err(_) => Self::Unsupported(raw::Raw { raw: value.to_string() }),
     }
   }
 
@@ -125,56 +168,66 @@ impl Specifier {
   fn from_workspace_protocol(value: &str, local_version: Option<&BasicSemver>, raw: String) -> Self {
     local_version
       .and_then(|local| {
-        let without_protocol = value.replace("workspace:", "");
-        let sanitised = sanitise_value(&without_protocol);
-        if parser::is_simple_semver(&sanitised) {
+        // Skip "workspace:" prefix (10 chars) to avoid allocation
+        let without_protocol = &value[10..];
+        let sanitised = sanitise_value(without_protocol);
+        let sanitised_str = sanitised.as_deref().unwrap_or(without_protocol);
+
+        if parser::is_simple_semver(sanitised_str) {
           Some(Self::WorkspaceProtocol(WorkspaceProtocol {
-            raw: format!("workspace:{sanitised}"),
+            raw: if sanitised.is_some() {
+              format!("workspace:{sanitised_str}")
+            } else {
+              value.to_string()
+            },
             local_version: local.clone(),
-            semver: BasicSemver::new(&sanitised).unwrap(),
+            semver: BasicSemver::new(sanitised_str).unwrap(),
           }))
-        } else if sanitised == "~" || sanitised == "^" {
+        } else if sanitised_str == "~" || sanitised_str == "^" {
+          let combined_version = format!("{}{}", sanitised_str, local.raw);
           Some(Self::WorkspaceProtocol(WorkspaceProtocol {
-            raw: format!("workspace:{sanitised}"),
+            raw: format!("workspace:{sanitised_str}"),
             local_version: local.clone(),
-            semver: BasicSemver::new(&format!("{}{}", sanitised, local.raw)).unwrap(),
+            semver: BasicSemver::new(&combined_version).unwrap(),
           }))
         } else {
           None
         }
       })
-      .unwrap_or_else(|| Self::Unsupported(raw::Raw { raw: raw.clone() }))
+      .unwrap_or(Self::Unsupported(raw::Raw { raw }))
   }
 
   /// Create a new instance from an npm alias specifier
   fn from_alias(value: &str, raw: String) -> Self {
-    let (aliased_name, aliased_version) = {
-      let start = value.find(':').unwrap() + 1;
-      if let Some(at_pos) = value.rfind('@') {
-        if at_pos > start {
-          // There's a version specifier
-          (value[start..at_pos].to_string(), value[at_pos + 1..].to_string())
-        } else {
-          // The @ is part of a scoped package name, no version
-          (value[start..].to_string(), String::new())
-        }
+    // Skip "npm:" prefix (4 chars) to avoid allocation
+    let after_prefix = &value[4..];
+
+    let (aliased_name, aliased_version) = if let Some(at_pos) = after_prefix.rfind('@') {
+      // Check if this @ is actually a version separator (not part of scoped name)
+      if at_pos > 0 && !after_prefix[..at_pos].is_empty() {
+        // There's a version specifier
+        (&after_prefix[..at_pos], &after_prefix[at_pos + 1..])
       } else {
-        // No @ at all, unscoped package without version
-        (value[start..].to_string(), String::new())
+        // The @ is part of a scoped package name, no version
+        (after_prefix, "")
       }
+    } else {
+      // No @ at all, unscoped package without version
+      (after_prefix, "")
     };
+
     if aliased_name.is_empty() {
       Self::Unsupported(raw::Raw { raw })
     } else if aliased_version.is_empty() {
       Self::Alias(alias::Alias {
         raw,
-        name: aliased_name,
+        name: aliased_name.to_string(),
         semver: None,
       })
-    } else if let Self::BasicSemver(inner) = Self::new(&aliased_version, None) {
+    } else if let Self::BasicSemver(inner) = Self::new(aliased_version, None) {
       Self::Alias(alias::Alias {
         raw,
-        name: aliased_name,
+        name: aliased_name.to_string(),
         semver: Some(inner),
       })
     } else {
@@ -185,22 +238,44 @@ impl Specifier {
   /// Create a new instance from a git specifier, this can be a git url or some
   /// kind of github shorthand
   fn from_git(value: &str, raw: String) -> Self {
-    let parts = value.split('#').collect::<Vec<&str>>();
-    let git_tag = parts.get(1).map(|tag| tag.to_string()).unwrap_or_default();
-    let git_tag = sanitise_value(&git_tag);
-    let origin = parts.first().map(|origin| origin.to_string()).unwrap_or_default();
-    if origin.is_empty() {
-      Self::Unsupported(raw::Raw { raw })
-    } else if git_tag.is_empty() {
-      Self::Git(git::Git { raw, origin, semver: None })
-    } else if let Some(inner) = BasicSemver::new(&git_tag) {
+    if let Some(hash_pos) = value.find('#') {
+      let origin = &value[..hash_pos];
+      let git_tag_str = &value[hash_pos + 1..];
+
+      if origin.is_empty() {
+        return Self::Unsupported(raw::Raw { raw });
+      }
+
+      if git_tag_str.is_empty() {
+        Self::Git(git::Git {
+          raw,
+          origin: origin.to_string(),
+          semver: None,
+        })
+      } else {
+        let sanitised_tag = sanitise_value(git_tag_str);
+        let tag_str = sanitised_tag.as_deref().unwrap_or(git_tag_str);
+        if let Some(inner) = BasicSemver::new(tag_str) {
+          Self::Git(git::Git {
+            raw,
+            origin: origin.to_string(),
+            semver: Some(inner),
+          })
+        } else {
+          Self::Git(git::Git {
+            raw,
+            origin: origin.to_string(),
+            semver: None,
+          })
+        }
+      }
+    } else {
+      // No hash, just the origin
       Self::Git(git::Git {
         raw,
-        origin,
-        semver: Some(inner),
+        origin: value.to_string(),
+        semver: None,
       })
-    } else {
-      Self::Git(git::Git { raw, origin, semver: None })
     }
   }
 

@@ -75,22 +75,6 @@ pub fn is_tag(str: &str) -> bool {
   regexes::TAG.is_match(str)
 }
 
-pub fn is_workspace_protocol(str: &str) -> bool {
-  regexes::WORKSPACE_PROTOCOL.is_match(str)
-}
-
-pub fn is_alias(str: &str) -> bool {
-  regexes::ALIAS.is_match(str)
-}
-
 pub fn is_git(str: &str) -> bool {
   regexes::GIT.is_match(str)
-}
-
-pub fn is_url(str: &str) -> bool {
-  regexes::URL.is_match(str)
-}
-
-pub fn is_file(str: &str) -> bool {
-  regexes::FILE.is_match(str)
 }
