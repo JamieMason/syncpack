@@ -63,6 +63,8 @@ lazy_static! {
   pub static ref ALIAS: Regex = Regex::new(r"^npm:.+").unwrap();
   /// "file:"
   pub static ref FILE: Regex = Regex::new(r"^file:").unwrap();
+  /// "link:"
+  pub static ref LINK: Regex = Regex::new(r"^link:").unwrap();
   /// "workspace:"
   pub static ref WORKSPACE_PROTOCOL: Regex = Regex::new(r"^workspace:").unwrap();
   /// "https://"

@@ -44,6 +44,12 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
         return;
       }
       debug!("{L4}it depends on the local instance");
+      if instance.descriptor.specifier.is_link() {
+        debug!("{L5}it is using the link specifier");
+        debug!("{L6}mark as satisfying local");
+        instance.mark_valid(ValidInstance::SatisfiesLocal, &instance.descriptor.specifier);
+        return;
+      }
       if instance.descriptor.specifier.is_workspace_protocol() {
         debug!("{L5}it is using the workspace protocol");
         if !ctx.config.rcfile.strict {

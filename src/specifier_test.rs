@@ -373,6 +373,22 @@ fn file_paths() {
 }
 
 #[test]
+fn links() {
+  let cases: Vec<&str> = vec![
+    "link:../foo",
+    "link:path/to/foo"
+  ];
+  for value in cases {
+    match Specifier::new(value, None) {
+      Specifier::Link(actual) => {
+        assert_eq!(actual.raw, value)
+      },
+      _ => panic!("Expected Link")
+    }
+  }
+}
+
+#[test]
 fn urls() {
   let cases: Vec<&str> = vec![
     "http://insecure.com/foo.tgz",
