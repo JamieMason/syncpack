@@ -79,6 +79,10 @@ pub fn is_workspace_protocol(str: &str) -> bool {
   regexes::WORKSPACE_PROTOCOL.is_match(str)
 }
 
+pub fn is_link(str: &str) -> bool {
+  regexes::LINK.is_match(str)
+}
+
 pub fn is_alias(str: &str) -> bool {
   regexes::ALIAS.is_match(str)
 }
