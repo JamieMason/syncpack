@@ -14,10 +14,6 @@ use {
   visit_packages::visit_packages,
 };
 
-#[cfg(feature = "dhat-heap")]
-#[global_allocator]
-static ALLOC: dhat::Alloc = dhat::Alloc;
-
 #[cfg(test)]
 #[path = "test/test.rs"]
 mod test;
@@ -44,9 +40,6 @@ mod visit_packages;
 
 #[tokio::main]
 async fn main() {
-  #[cfg(feature = "dhat-heap")]
-  let _profiler = dhat::Profiler::new_heap();
-
   let cli = Cli::parse();
 
   logger::init(&cli);
@@ -106,9 +99,6 @@ async fn main() {
       json::run(ctx)
     }
   };
-
-  #[cfg(feature = "dhat-heap")]
-  drop(_profiler);
 
   exit(_exit_code);
 }

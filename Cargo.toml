@@ -17,7 +17,6 @@ clap = { version = "4.5.42", features = ["cargo"] }
 color-print = "0.3.7"
 colored = "3.0.0"
 ctor = "0.4.3"
-dhat = { version = "0.3", optional = true }
 env_logger = "0.11.8"
 glob = "0.3.2"
 globset = "0.4.16"
@@ -40,7 +39,6 @@ tokio = { version = "1", features = ["full"] }
 
 [features]
 default = []
-dhat-heap = ["dhat"]
 
 [profile.release]
 codegen-units = 1 # Reduce number of codegen units to increase optimizations

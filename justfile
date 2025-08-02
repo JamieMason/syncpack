@@ -107,15 +107,6 @@ flamegraph:
     cd fixtures/fluid-framework
     CARGO_PROFILE_RELEASE_DEBUG=true cargo flamegraph -- list
 
-dhat:
-    #!/usr/bin/env bash
-    set -euxo pipefail
-
-    just build-profile-release
-    cd fixtures/fluid-framework
-    cargo run --release --features dhat-heap -- lint
-    echo "Memory profile saved to dhat-heap.json - view at https://nnethercote.github.io/dh_view/dh_view.html"
-
 # ==============================================================================
 # Test
 # ==============================================================================
