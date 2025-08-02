@@ -17,6 +17,8 @@ install-system-dependencies:
     cargo +stable install cargo-llvm-cov
     # https://github.com/killercup/cargo-edit
     cargo +stable install cargo-edit
+    # https://github.com/bnjbvr/cargo-machete
+    cargo +stable install cargo-machete
     # https://github.com/sharkdp/hyperfine
     cargo +stable install hyperfine
     # https://github.com/flamegraph-rs/flamegraph
@@ -63,6 +65,10 @@ check-clippy:
 # Look for outdated dependencies
 check-for-updates:
     cargo upgrade --dry-run
+
+# Look for unused dependencies
+check-unused-dependencies:
+    cargo machete
 
 # ==============================================================================
 # GitHub Actions
