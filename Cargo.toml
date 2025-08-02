@@ -27,14 +27,16 @@ itertools = "0.14.0"
 lazy_static = "1.5.0"
 log = "0.4.27"
 node-semver = "2.2.0"
-openssl = { version = "0.10", features = ["vendored"] }
 regex = "1.11.1"
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = [
+  "json",
+  "rustls-tls",
+], default-features = false }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = { version = "1.0.142", features = ["preserve_order"] }
 serde_yaml = "0.9"
-tokio = { version = "1", features = ["full"] }
 thiserror = "2.0.12"
+tokio = { version = "1", features = ["full"] }
 
 [features]
 default = []
