@@ -41,4 +41,9 @@ default = []
 dhat-heap = ["dhat"]
 
 [profile.release]
-debug = true
+codegen-units = 1 # Reduce number of codegen units to increase optimizations
+debug = false     # Remove debug information
+lto = true        # Enable Link Time Optimization
+opt-level = "z"   # Optimize for size rather than speed
+panic = "abort"   # Abort on panic rather than unwinding
+strip = true      # Strip symbols from binary

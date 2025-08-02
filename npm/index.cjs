@@ -13,9 +13,6 @@ process.exit(
   spawnSync(pathToBinary, args, {
     cwd: process.cwd(),
     stdio: ['ignore', 'inherit', 'inherit'],
-    env: {
-      ...process.env,
-      RUST_BACKTRACE: 'full',
-    },
+    env: process.env,
   }).status || 0,
 );
