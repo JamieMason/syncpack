@@ -57,10 +57,8 @@ fn fix_formatting(ctx: Context) -> i32 {
       package.borrow().write_to_disk(&ctx.config);
     });
   }
-  if was_invalid {
-    1
-  } else {
+  if !was_invalid {
     ui::util::print_no_issues_found();
-    0
   }
+  0
 }
