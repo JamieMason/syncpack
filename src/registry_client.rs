@@ -3,7 +3,7 @@ use {
   log::{debug, error},
   reqwest::{header::ACCEPT, Client, StatusCode},
   serde::{Deserialize, Serialize},
-  std::collections::BTreeMap,
+  std::{collections::BTreeMap, time::Duration},
   thiserror::Error,
 };
 
@@ -69,6 +69,12 @@ impl RegistryClient for LiveRegistryClient {
 
 impl LiveRegistryClient {
   pub fn new() -> Self {
-    LiveRegistryClient { client: Client::new() }
+    LiveRegistryClient {
+      client: Client::builder()
+        .connect_timeout(Duration::from_secs(5))
+        .timeout(Duration::from_secs(30))
+        .build()
+        .expect("Failed to build reqwest client"),
+    }
   }
 }
