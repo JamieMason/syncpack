@@ -4,10 +4,6 @@ mod format_test;
 
 use {
   crate::{package_json::PackageJson, rcfile::Rcfile},
-  icu::{
-    collator::Collator,
-    locale::{locale, Locale},
-  },
   regex::Regex,
   serde_json::{self, Map, Value},
   std::{cmp::Ordering, collections::HashSet},
@@ -162,9 +158,34 @@ fn sort_alphabetically(value: &mut Value) {
   }
 }
 
-/// Get a collator for the EN locale to sort strings
+/// Get a collator that mimics JavaScript's localeCompare behavior
+/// Expected order: symbols (@), then numbers (1), then letters (A)
 fn get_locale_collator() -> impl Fn(&str, &str) -> Ordering {
-  let locale_en: Locale = locale!("en");
-  let collator = Collator::try_new(locale_en.into(), Default::default()).unwrap();
-  move |a: &str, b: &str| collator.compare(a, b)
+  |a: &str, b: &str| {
+    // Extract the first character to determine sorting priority
+    let a_first = a.chars().next().unwrap_or('\0');
+    let b_first = b.chars().next().unwrap_or('\0');
+
+    // Classify characters into three categories
+    let get_priority = |c: char| -> u8 {
+      if c.is_ascii_alphabetic() {
+        2 // Letters last
+      } else if c.is_ascii_digit() {
+        1 // Numbers in middle
+      } else {
+        0 // Symbols first (@, etc.)
+      }
+    };
+
+    let a_priority = get_priority(a_first);
+    let b_priority = get_priority(b_first);
+
+    match a_priority.cmp(&b_priority) {
+      Ordering::Equal => {
+        // Same category, use case-insensitive comparison
+        a.to_lowercase().cmp(&b.to_lowercase())
+      }
+      other => other,
+    }
+  }
 }
