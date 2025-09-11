@@ -11,16 +11,17 @@ keywords = ["monorepo", "npm", "pnpm", "semver", "turborepo"]
 readme = "./README.md"
 include = ["src/**/*.rs"]
 
+[dev-dependencies]
+ctor = "0.5.0"
+
 [dependencies]
 async-trait = "0.1.89"
 clap = { version = "4.5.47", features = ["cargo"] }
 color-print = "0.3.7"
 colored = "3.0.0"
-ctor = "0.5.0"
 env_logger = "0.11.8"
 glob = "0.3.3"
 globset = "0.4.16"
-
 indicatif = "0.18.0"
 itertools = "0.14.0"
 lazy_static = "1.5.0"
