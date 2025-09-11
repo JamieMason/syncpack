@@ -35,10 +35,10 @@
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
   "dependencies": {
-    "tsx": "^4.20.3"
+    "tsx": "^4.20.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.3",
+    "@biomejs/biome": "^2.2.4",
     "@release-it/conventional-changelog": "^10.0.1",
     "auto-changelog": "^2.5.0",
     "release-it": "^19.0.4",
