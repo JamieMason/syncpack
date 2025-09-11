@@ -1793,6 +1793,52 @@ mod registry_updates {
     }
 
     #[tokio::test]
+    async fn reports_two_minor_exact_semver_updates_in_one_file() {
+      let ctx = TestBuilder::new()
+        .with_package(json!({
+          "name": "package-a",
+          "dependencies": {
+            "wat": "1.0.1"
+          },
+          "devDependencies": {
+            "wat": "1.1.1"
+          }
+        }))
+        .with_update_target(UpdateTarget::Patch)
+        .with_registry_updates(json!({
+          "wat": ["1.0.1", "1.0.2", "1.1.1", "1.1.2", "1.3.3", "2.0.0"],
+        }))
+        .build_with_registry_and_visit()
+        .await;
+      expect(&ctx).to_have_instances(vec![
+        ExpectedInstance {
+          state: InstanceState::suspect(InvalidLocalVersion),
+          dependency_name: "package-a",
+          id: "package-a in /version of package-a",
+          actual: "",
+          expected: Some(""),
+          overridden: None,
+        },
+        ExpectedInstance {
+          state: InstanceState::fixable(DiffersToNpmRegistry),
+          dependency_name: "wat",
+          id: "wat in /dependencies of package-a",
+          actual: "1.0.1",
+          expected: Some("1.0.2"),
+          overridden: None,
+        },
+        ExpectedInstance {
+          state: InstanceState::fixable(DiffersToNpmRegistry),
+          dependency_name: "wat",
+          id: "wat in /devDependencies of package-a",
+          actual: "1.1.1",
+          expected: Some("1.1.2"),
+          overridden: None,
+        },
+      ]);
+    }
+
+    #[tokio::test]
     async fn reports_one_patch_update_with_loose_semver_range_in_one_file() {
       let ctx = TestBuilder::new()
         .with_package(json!({
