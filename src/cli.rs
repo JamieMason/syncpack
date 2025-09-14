@@ -76,43 +76,49 @@ pub struct Cli {
 }
 
 impl Cli {
-  pub fn parse() -> Cli {
+  /// Parse all command-line arguments from the user into a `Cli` struct
+  pub fn parse() -> Self {
+    fn from_arg_matches(subcommand: Subcommand, matches: &ArgMatches) -> Cli {
+      Cli {
+        check: (matches!(&subcommand, Subcommand::Format | Subcommand::Update)) && matches.get_flag("check"),
+        cwd: env::current_dir().unwrap(),
+        dependencies: get_patterns(matches, "dependencies"),
+        dependency_types: get_patterns(matches, "dependency-types"),
+        disable_ansi: matches.get_flag("no-ansi"),
+        dry_run: (matches!(&subcommand, Subcommand::Fix | Subcommand::Format | Subcommand::Update)) && matches.get_flag("dry-run"),
+        log_levels: get_log_levels(matches),
+        packages: get_patterns(matches, "packages"),
+        show_hints: should_show(matches, "hints"),
+        show_ignored: should_show(matches, "ignored"),
+        show_instances: should_show(matches, "instances"),
+        show_status_codes: should_show(matches, "statuses"),
+        sort: get_order_by(matches),
+        source_patterns: get_patterns(matches, "source"),
+        specifier_types: get_patterns(matches, "specifier-types"),
+        subcommand,
+        target: get_target(matches),
+      }
+    }
+
     match create().get_matches().subcommand() {
-      Some(("lint", matches)) => Cli::from_arg_matches(Subcommand::Lint, matches),
-      Some(("fix", matches)) => Cli::from_arg_matches(Subcommand::Fix, matches),
-      Some(("format", matches)) => Cli::from_arg_matches(Subcommand::Format, matches),
-      Some(("update", matches)) => Cli::from_arg_matches(Subcommand::Update, matches),
-      Some(("list", matches)) => Cli::from_arg_matches(Subcommand::List, matches),
-      Some(("json", matches)) => Cli::from_arg_matches(Subcommand::Json, matches),
+      Some(("lint", matches)) => from_arg_matches(Subcommand::Lint, matches),
+      Some(("fix", matches)) => from_arg_matches(Subcommand::Fix, matches),
+      Some(("format", matches)) => from_arg_matches(Subcommand::Format, matches),
+      Some(("update", matches)) => from_arg_matches(Subcommand::Update, matches),
+      Some(("list", matches)) => from_arg_matches(Subcommand::List, matches),
+      Some(("json", matches)) => from_arg_matches(Subcommand::Json, matches),
       _ => {
         std::process::exit(1);
       }
     }
   }
 
-  /// Create a new `Cli` from CLI arguments provided by the user
-  fn from_arg_matches(subcommand: Subcommand, matches: &ArgMatches) -> Self {
-    Self {
-      check: (matches!(&subcommand, Subcommand::Format | Subcommand::Update)) && matches.get_flag("check"),
-      cwd: env::current_dir().unwrap(),
-      dependencies: get_patterns(matches, "dependencies"),
-      dependency_types: get_patterns(matches, "dependency-types"),
-      disable_ansi: matches.get_flag("no-ansi"),
-      dry_run: (matches!(&subcommand, Subcommand::Fix | Subcommand::Format | Subcommand::Update)) && matches.get_flag("dry-run"),
-      log_levels: get_log_levels(matches),
-      packages: get_patterns(matches, "packages"),
-      show_hints: should_show(matches, "hints"),
-      show_ignored: should_show(matches, "ignored"),
-      show_instances: should_show(matches, "instances"),
-      show_status_codes: should_show(matches, "statuses"),
-      sort: get_order_by(matches),
-      source_patterns: get_patterns(matches, "source"),
-      specifier_types: get_patterns(matches, "specifier-types"),
-      subcommand,
-      target: get_target(matches),
-    }
-  }
-
+  /// Create a `GroupSelector` struct based on the provided command line options
+  /// which relate to filtering of packages and dependencies.
+  ///
+  /// `GroupSelector` is the same struct as used by `VersionGroup` and
+  /// `SemverGroup` and this CLI `GroupSelector`, when configured, serves as a
+  /// single `VersionGroup` which overrides all those set in config.
   pub fn get_filters(&self, packages: &Packages, all_dependency_types: &[DependencyType]) -> Option<GroupSelector> {
     if self.dependencies.is_empty() && self.dependency_types.is_empty() && self.packages.is_empty() && self.specifier_types.is_empty() {
       None
@@ -128,20 +134,6 @@ impl Cli {
       ))
     }
   }
-}
-
-fn get_target(matches: &ArgMatches) -> UpdateTarget {
-  matches
-    .try_get_one::<String>("target")
-    .ok()
-    .flatten()
-    .map(|target| match target.as_str() {
-      "latest" => UpdateTarget::Latest,
-      "minor" => UpdateTarget::Minor,
-      "patch" => UpdateTarget::Patch,
-      _ => unreachable!(),
-    })
-    .unwrap_or(UpdateTarget::Latest)
 }
 
 fn create() -> Command {
@@ -574,6 +566,20 @@ fn get_patterns(matches: &ArgMatches, option_name: &str) -> Vec<String> {
     .flatten()
     .map(|source| source.into_iter().map(|source| source.to_owned()).collect_vec())
     .unwrap_or_default()
+}
+
+fn get_target(matches: &ArgMatches) -> UpdateTarget {
+  matches
+    .try_get_one::<String>("target")
+    .ok()
+    .flatten()
+    .map(|target| match target.as_str() {
+      "latest" => UpdateTarget::Latest,
+      "minor" => UpdateTarget::Minor,
+      "patch" => UpdateTarget::Patch,
+      _ => unreachable!(),
+    })
+    .unwrap_or(UpdateTarget::Latest)
 }
 
 fn should_show(matches: &ArgMatches, name: &str) -> bool {
