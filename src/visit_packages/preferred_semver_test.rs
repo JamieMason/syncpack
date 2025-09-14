@@ -466,6 +466,51 @@ mod local {
       },
     ]);
   }
+
+  #[test]
+  fn instance_is_linked() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "version": "1.0.0"
+        }),
+        json!({
+          "name": "package-b",
+          "version": "2.0.0",
+          "dependencies": {
+            "package-a": "link:../package-a"
+          }
+        }),
+      ])
+      .build_and_visit_packages();
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "2.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(SatisfiesLocal),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "link:../package-a",
+        expected: Some("link:../package-a"),
+        overridden: None,
+      },
+    ]);
+  }
 }
 
 mod highest_or_lowest {

@@ -84,6 +84,7 @@ pub enum Specifier {
   Tag(Raw),
   Unsupported(Raw),
   Url(Raw),
+  Link(Raw),
   WorkspaceProtocol(WorkspaceProtocol),
 }
 
@@ -131,6 +132,9 @@ impl Specifier {
     }
     if first_char == 'f' && value.starts_with("file:") {
       return Self::File(raw::Raw { raw: value.to_string() });
+    }
+    if first_char == 'l' && value.starts_with("link:") {
+      return Self::Link(raw::Raw { raw: value.to_string() });
     }
     if first_char == 'h' && (value.starts_with("http://") || value.starts_with("https://")) {
       return Self::Url(raw::Raw { raw: value.to_string() });
@@ -324,6 +328,7 @@ impl Specifier {
       Self::ComplexSemver(s) => Self::ComplexSemver(s.with_range(range)),
       Self::File(s) => Self::File(s.with_range(range)),
       Self::Git(s) => Self::Git(s.with_range(range)),
+      Self::Link(s) => Self::Link(s.with_range(range)),
       Self::None => Self::None,
       Self::Tag(s) => Self::Tag(s.with_range(range)),
       Self::Unsupported(s) => Self::Unsupported(s.with_range(range)),
@@ -342,6 +347,7 @@ impl Specifier {
       Self::ComplexSemver(s) => Self::ComplexSemver(s.with_semver(semver)),
       Self::File(s) => Self::File(s.with_semver(semver)),
       Self::Git(s) => Self::Git(s.with_semver(semver)),
+      Self::Link(s) => Self::Link(s.with_semver(semver)),
       Self::None => Self::None,
       Self::Tag(s) => Self::Tag(s.with_semver(semver)),
       Self::Unsupported(s) => Self::Unsupported(s.with_semver(semver)),
@@ -357,6 +363,7 @@ impl Specifier {
       Self::ComplexSemver(inner) => inner.raw.clone(),
       Self::File(inner) => inner.raw.clone(),
       Self::Git(inner) => inner.raw.clone(),
+      Self::Link(inner) => inner.raw.clone(),
       Self::None => "".to_string(),
       Self::Tag(inner) => inner.raw.clone(),
       Self::Unsupported(inner) => inner.raw.clone(),
@@ -388,6 +395,7 @@ impl Specifier {
       Self::ComplexSemver(_) => "range-complex",
       Self::File(_) => "file",
       Self::Git(_) => "git",
+      Self::Link(_) => "link",
       Self::None => "missing",
       Self::Tag(_) => "tag",
       Self::Unsupported(_) => "unsupported",
@@ -425,6 +433,10 @@ impl Specifier {
 
   pub fn is_workspace_protocol(&self) -> bool {
     matches!(self, Self::WorkspaceProtocol(_))
+  }
+
+  pub fn is_link(&self) -> bool {
+    matches!(self, Self::Link(_))
   }
 
   /// Are both specifiers on eg. "-alpha", or neither have a release channel?
