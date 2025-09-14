@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/starlight": "^0.35.2",
+    "@astrojs/starlight": "^0.35.3",
     "astro": "^5.13.7",
     "sharp": "^0.34.3",
     "typescript": "^5.9.2"
