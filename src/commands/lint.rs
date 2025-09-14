@@ -1,4 +1,4 @@
-use crate::{context::Context, effects::ui};
+use crate::{commands::ui, context::Context};
 
 /// Run the lint command side effects
 pub fn run(ctx: Context) -> i32 {

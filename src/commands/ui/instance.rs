@@ -1,7 +1,7 @@
 use {
   crate::{
+    commands::ui,
     context::Context,
-    effects::ui,
     instance::Instance,
     instance_state::{InstanceState, InvalidInstance, ValidInstance},
     version_group::VersionGroupVariant,

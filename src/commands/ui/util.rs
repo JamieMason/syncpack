@@ -1,5 +1,5 @@
 use {
-  crate::{context::Context, effects::ui},
+  crate::{commands::ui, context::Context},
   colored::*,
   itertools::Itertools,
   log::info,

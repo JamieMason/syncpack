@@ -1,5 +1,5 @@
 use {
-  crate::{context::Context, effects::ui},
+  crate::{commands::ui, context::Context},
   log::warn,
 };
 

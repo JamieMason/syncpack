@@ -1,7 +1,7 @@
 use {
   crate::{
+    commands::ui,
     context::Context,
-    effects::ui,
     package_json::{FormatMismatch, PackageJson},
   },
   colored::*,

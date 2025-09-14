@@ -1,4 +1,4 @@
-use crate::{context::Context, effects::ui};
+use crate::{commands::ui, context::Context};
 
 pub fn run(ctx: Context) -> i32 {
   if ctx.config.cli.check {

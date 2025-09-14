@@ -1,7 +1,7 @@
 use {
   crate::{
+    commands::{ui, ui::LINE_ENDING},
     context::Context,
-    effects::{ui, ui::LINE_ENDING},
     version_group::VersionGroupVariant,
   },
   log::{error, warn},

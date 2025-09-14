@@ -1,17 +1,16 @@
 use {
   crate::{
     cli::{Cli, Subcommand},
+    commands::{fix, format, json, lint, list, update},
     config::Config,
-    effects::{fix, format, lint, update},
+    context::Context,
     packages::Packages,
     registry_client::LiveRegistryClient,
+    visit_formatting::visit_formatting,
+    visit_packages::visit_packages,
   },
-  context::Context,
-  effects::{json, list},
   log::{debug, error},
   std::{process::exit, sync::Arc},
-  visit_formatting::visit_formatting,
-  visit_packages::visit_packages,
 };
 
 #[cfg(test)]
@@ -19,11 +18,11 @@ use {
 mod test;
 
 mod cli;
+mod commands;
 mod config;
 mod context;
 mod dependency;
 mod dependency_type;
-mod effects;
 mod group_selector;
 mod instance;
 mod instance_state;
