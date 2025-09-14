@@ -26,7 +26,7 @@ fn refuses_to_ban_local_version() {
       "dependencies": ["package-a"],
       "isBanned": true
     }))
-    .build_and_visit();
+    .build_and_visit_packages();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -78,7 +78,7 @@ fn removes_instance_with_name_and_version_props_strategy() {
       "dependencyTypes": ["customPackage"],
       "isBanned": true
     }))
-    .build_and_visit();
+    .build_and_visit_packages();
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -121,7 +121,7 @@ fn removes_instance_with_named_version_string_strategy() {
       "dependencyTypes": ["packageManager"],
       "isBanned": true
     }))
-    .build_and_visit();
+    .build_and_visit_packages();
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -166,7 +166,7 @@ fn removes_instance_with_unnamed_version_string_strategy() {
       "dependencyTypes": ["nodeVersion"],
       "isBanned": true
     }))
-    .build_and_visit();
+    .build_and_visit_packages();
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -203,7 +203,7 @@ fn removes_instance_with_versions_by_name_strategy() {
       "dependencies": ["react"],
       "isBanned": true
     }))
-    .build_and_visit();
+    .build_and_visit_packages();
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -259,7 +259,7 @@ fn removes_nested_property_with_unnamed_version_string_strategy() {
       "dependencyTypes": ["customConfig"],
       "isBanned": true
     }))
-    .build_and_visit();
+    .build_and_visit_packages();
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {

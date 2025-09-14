@@ -36,7 +36,7 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_semver_
         "policy": "sameRange"
       }),
     ])
-    .build_and_visit();
+    .build_and_visit_packages();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -104,7 +104,7 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_semver_g
         "policy": "sameRange"
       }),
     ])
-    .build_and_visit();
+    .build_and_visit_packages();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -172,7 +172,7 @@ fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its_semve
         "policy": "sameRange"
       }),
     ])
-    .build_and_visit();
+    .build_and_visit_packages();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -236,7 +236,7 @@ fn instance_in_a_same_range_group_does_not_satisfy_another() {
         "policy": "sameRange"
       }),
     ])
-    .build_and_visit();
+    .build_and_visit_packages();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),

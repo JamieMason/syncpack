@@ -31,7 +31,7 @@ mod local {
         "dependencies": ["package-a"],
         "pinVersion": "1.2.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -78,7 +78,7 @@ mod normal {
         "dependencies": ["foo"],
         "pinVersion": "1.2.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -117,7 +117,7 @@ mod normal {
         "dependencies": ["foo"],
         "pinVersion": "1.0.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::fixable(PinOverridesSemverRange),
@@ -156,7 +156,7 @@ mod normal {
         "dependencies": ["foo"],
         "pinVersion": "1.0.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::fixable(PinOverridesSemverRangeMismatch),
@@ -191,7 +191,7 @@ mod normal {
         "dependencies": ["foo"],
         "pinVersion": "1.0.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -226,7 +226,7 @@ mod normal {
         "dependencies": ["foo"],
         "pinVersion": "1.2.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -262,7 +262,7 @@ mod normal {
         "dependencyTypes": ["dev"],
         "pinVersion": "workspace:*"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),

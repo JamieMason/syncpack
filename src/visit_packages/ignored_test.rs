@@ -27,7 +27,7 @@ fn all_instances_are_ignored() {
     .with_version_group(json!({
       "isIgnored": true
     }))
-    .build_and_visit();
+    .build_and_visit_packages();
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),

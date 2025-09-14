@@ -108,7 +108,7 @@ impl TestBuilder {
     Context::create(config, packages, registry_client)
   }
 
-  pub fn build_and_visit(self) -> Context {
+  pub fn build_and_visit_packages(self) -> Context {
     let ctx = self.build();
     visit_packages(ctx)
   }
@@ -166,7 +166,7 @@ mod tests {
         "name": "package-a",
         "version": "1.0.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
 
     expect(&ctx).to_have_instances(vec![ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -190,7 +190,7 @@ mod tests {
         "dependencies": ["foo"],
         "pinVersion": "2.0.0"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
 
     // The test should show that foo gets pinned to 2.0.0
     assert!(ctx.instances.len() > 1);
@@ -203,7 +203,7 @@ mod tests {
         json!({"name": "package-a", "version": "1.0.0"}),
         json!({"name": "package-b", "version": "2.0.0"}),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
 
     assert_eq!(ctx.instances.len(), 2);
   }
@@ -217,7 +217,7 @@ mod tests {
         "dependencies": {"package-a": "workspace:*"}
       }))
       .with_strict(true)
-      .build_and_visit();
+      .build_and_visit_packages();
 
     // In strict mode, workspace protocol should be invalid when differs from local
     assert!(ctx.instances.iter().any(|i| i.state.borrow().is_invalid()));

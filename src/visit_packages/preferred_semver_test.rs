@@ -30,7 +30,7 @@ mod local {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -74,7 +74,7 @@ mod local {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -118,7 +118,7 @@ mod local {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -162,7 +162,7 @@ mod local {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -206,7 +206,7 @@ mod local {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -250,7 +250,7 @@ mod local {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -297,7 +297,7 @@ mod local {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -344,7 +344,7 @@ mod local {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -391,7 +391,7 @@ mod local {
       .with_semver_group(json!({
         "range": "<"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -438,7 +438,7 @@ mod local {
       .with_semver_group(json!({
         "range": ">"
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -483,7 +483,7 @@ mod highest_or_lowest {
           "wat": "2.0.0"
         }
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -527,7 +527,7 @@ mod highest_or_lowest {
           "wat": "0.2.0"
         }
       }))
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -581,7 +581,7 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -636,7 +636,7 @@ mod highest_or_lowest {
         }),
       ])
       .with_version_groups(vec![json!({"packages": ["package-a"]}), json!({"packages": ["package-b"]})])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -698,7 +698,7 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -768,7 +768,7 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build_and_visit();
+      .build_and_visit_packages();
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
