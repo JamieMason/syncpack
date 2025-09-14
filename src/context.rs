@@ -4,7 +4,7 @@ use {
     dependency::UpdateUrl,
     instance::Instance,
     packages::Packages,
-    registry_client::{PackageMeta, RegistryClient, RegistryError},
+    registry_client::{AllPackageVersions, RegistryClient, RegistryError},
     specifier::Specifier,
     version_group::VersionGroup,
   },
@@ -102,7 +102,7 @@ impl Context {
     let client = Arc::clone(self.registry_client.as_ref().expect("Registry client not initialized"));
     let semaphore = Arc::new(Semaphore::new(self.config.rcfile.max_concurrent_requests));
     let progress_bars = Arc::new(MultiProgress::new());
-    let mut handles: Vec<(String, JoinHandle<Result<PackageMeta, RegistryError>>)> = vec![];
+    let mut handles: Vec<(String, JoinHandle<Result<AllPackageVersions, RegistryError>>)> = vec![];
     let mut all_updates_by_internal_name: HashMap<String, Vec<Specifier>> = HashMap::new();
     let mut failed_updates: Vec<String> = vec![];
 
@@ -132,7 +132,7 @@ impl Context {
         Ok(result) => match result {
           Ok(package_meta) => {
             let all_updates = all_updates_by_internal_name.entry(internal_name.clone()).or_default();
-            for (version, _timestamp) in package_meta.time.iter() {
+            for version in package_meta.versions.iter() {
               if !version.contains("created") && !version.contains("modified") {
                 all_updates.push(Specifier::new(version, None));
               }

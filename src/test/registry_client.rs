@@ -1,7 +1,7 @@
 use {
   crate::{
     dependency::UpdateUrl,
-    registry_client::{PackageMeta, RegistryClient, RegistryError},
+    registry_client::{AllPackageVersions, RegistryClient, RegistryError},
   },
   reqwest::StatusCode,
   std::collections::BTreeMap,
@@ -17,19 +17,13 @@ pub struct MockRegistryClient {
 #[async_trait::async_trait]
 impl RegistryClient for MockRegistryClient {
   /// Return a dynamically constructed PackageMeta based on the package name
-  async fn fetch(&self, update_url: &UpdateUrl) -> Result<PackageMeta, RegistryError> {
+  async fn fetch(&self, update_url: &UpdateUrl) -> Result<AllPackageVersions, RegistryError> {
     self
       .package_data
       .get(&update_url.internal_name)
-      .map(|versions| {
-        let mut time = BTreeMap::new();
-        for version in versions {
-          time.insert(version.clone(), "2025-04-18T00:00:00.000Z".to_string());
-        }
-        PackageMeta {
-          name: update_url.internal_name.to_string(),
-          time,
-        }
+      .map(|versions| AllPackageVersions {
+        name: update_url.internal_name.to_string(),
+        versions: versions.clone(),
       })
       .ok_or_else(|| RegistryError::HttpError {
         url: update_url.internal_name.to_string(),
