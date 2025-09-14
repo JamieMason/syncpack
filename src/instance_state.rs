@@ -90,7 +90,13 @@ impl InstanceState {
 
 impl PartialEq for InstanceState {
   fn eq(&self, other: &Self) -> bool {
-    self.cmp(other) == Ordering::Equal
+    match (self, other) {
+      (InstanceState::Unknown, InstanceState::Unknown) => true,
+      (InstanceState::Valid(a), InstanceState::Valid(b)) => a == b,
+      (InstanceState::Invalid(a), InstanceState::Invalid(b)) => a == b,
+      (InstanceState::Suspect(a), InstanceState::Suspect(b)) => a == b,
+      _ => false,
+    }
   }
 }
 

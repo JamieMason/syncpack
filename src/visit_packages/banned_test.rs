@@ -223,7 +223,7 @@ fn removes_instance_with_versions_by_name_strategy() {
       overridden: None,
     },
     ExpectedInstance {
-      state: InstanceState::valid(IsNonSemverButIdentical),
+      state: InstanceState::valid(IsHighestOrLowestSemver),
       dependency_name: "lodash",
       id: "lodash in /dependencies of package-a",
       actual: "4.17.21",
