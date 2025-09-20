@@ -3,6 +3,10 @@ title: Glossary
 slug: glossary
 ---
 
+## Complex Semver
+
+A semver version with conditional logic, such as `^1.2.3-alpha || ~1.2.3-rc.1`.
+
 ## Custom Type
 
 A user-defined configuration that extends syncpack to manage parts of your package.json files beyond the default dependency types. Custom types behave identically to the default dependency types (such as `prod` or `peer`) but allow you to manage additional sections like `engines`, `packageManager`, or arbitrary nested properties.
@@ -30,6 +34,10 @@ A specific occurrence of a dependency in your monorepo, for example:
 
 There are 5 "instances" of the 1 "dependency" `uuid`.
 
+## Local Instance
+
+A specific occurrence of a dependency in your monorepo that is defined by the package's own `version` property. This is a package developed internally within your monorepo.
+
 ## Package
 
 A module within your monorepo defined by a package.json file. In a monorepo, you typically have multiple packages that may depend on each other and on external dependencies.
@@ -42,6 +50,10 @@ A configuration file for syncpack (typically `.syncpackrc`, `.syncpackrc.js`, `.
 
 A configuration that defines how semver ranges should be formatted for a specific set of dependencies. For example, you might want production dependencies to use exact versions (`1.2.3`) while development dependencies use caret ranges (`^1.2.3`).
 
+## Semver Number
+
+The version number portion of the version specifier, such as `1.2.3`, excluding any [Semver Range](#semver-range) that may be present.
+
 ## Semver Range
 
 A pattern that specifies which versions of a dependency are acceptable. Common ranges include exact (`1.2.3`), caret (`^1.2.3`, which allows compatible minor and patch updates), and tilde (`~1.2.3`, which allows compatible patch updates).
@@ -49,6 +61,10 @@ A pattern that specifies which versions of a dependency are acceptable. Common r
 ## Semver
 
 Semantic Versioning, a versioning scheme that uses a three-part number (MAJOR.MINOR.PATCH) to convey meaning about the underlying changes. Major versions indicate breaking changes, minor versions indicate new features without breaking changes, and patch versions indicate bug fixes.
+
+## Simple Semver
+
+A typical semver version such as `1.2.3`, `^1.2.3`, or `1.2.3.alpha`.
 
 ## Specifier
 

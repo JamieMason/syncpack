@@ -134,8 +134,10 @@ export default defineConfig({
 
         return function transformer(tree) {
           visit(tree, 'link', node => {
-            if (linksById[node.url]) {
-              node.url = linksById[node.url];
+            const [id, hash] = node.url.split('#');
+            const link = linksById[id];
+            if (link) {
+              node.url = hash ? `${link}#${hash}` : link;
             }
           });
           return tree;

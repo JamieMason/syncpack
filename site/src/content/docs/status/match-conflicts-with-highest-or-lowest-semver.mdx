@@ -1,10 +1,12 @@
-
 ---
 title: MatchConflictsWithHighestOrLowestSemver
 status: conflict
 ---
 
-- ✓ Instance has same semver number as highest/lowest semver in its group
-- ✓ Instance matches its semver group
+## When this happens
+
+- ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
+- ✓ Instance has same [Semver Number](REF_GLOSSARY#semver-number) as highest/lowest semver in its group
+- ✓ Instance matches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ✘ Range preferred by semver group will not satisfy the highest/lowest semver
 - ? We can't know whether the incompatible range matters or not and have to ask

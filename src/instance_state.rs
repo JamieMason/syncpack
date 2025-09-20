@@ -114,14 +114,14 @@ pub enum ValidInstance {
   IsIgnored,
   /// - ✓ Instance is a local package and its version is valid
   IsLocalAndValid,
-  /// - ✓ Instance identical to the version of its locally-developed package
+  /// - ✓ Instance is identical to the version of its locally-developed package
   /// - ✓ Instance matches its semver group
   IsIdenticalToLocal,
   /// - ✓ Instance matches the version of its locally-developed package
   /// - ✓ Instance matches its semver group
   /// - ! Considered a loose match we should highlight
   SatisfiesLocal,
-  /// - ✓ Instance identical to highest/lowest semver in its group
+  /// - ✓ Instance is identical to highest/lowest semver in its group
   /// - ✓ Instance matches its semver group
   IsHighestOrLowestSemver,
   /// - ✓ Instance has same semver number as highest/lowest semver in its group
@@ -130,15 +130,15 @@ pub enum ValidInstance {
   /// - ! Considered a loose match we should highlight
   SatisfiesHighestOrLowestSemver,
   /// - ! No Instances are simple semver
-  /// - ✓ Instance identical to every other instance in its version group
+  /// - ✓ Instance is identical to every other instance in its version group
   IsNonSemverButIdentical,
-  /// - ✓ Instance identical to its pinned version group
+  /// - ✓ Instance is identical to its pinned version group
   /// - ✓ Instance matches its semver group
   IsIdenticalToPin,
   /// - ✓ Instance matches its same range group
   /// - ✓ Instance matches its semver group
   SatisfiesSameRangeGroup,
-  /// - ✓ Instance identical to a matching snapTo instance
+  /// - ✓ Instance is identical to a matching snapTo instance
   /// - ✓ Instance matches its semver group
   IsIdenticalToSnapTarget,
   /// - ✓ Instance has same semver number as matching snapTo instance

@@ -1,9 +1,11 @@
-
 ---
 title: SameRangeMismatch
 status: unfixable
 ---
 
-- ✘ Instance mismatches its same range group
-- ? Instance has no semver group
+## When this happens
+
+- ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
+- ✘ Instance mismatches its [Same Range](VERSION_GROUP_SAME_RANGE) version group
+- ? Instance does not belong to a [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ? We can't know what range the user wants and have to ask them

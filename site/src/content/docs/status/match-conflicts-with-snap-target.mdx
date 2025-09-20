@@ -1,10 +1,12 @@
-
 ---
 title: MatchConflictsWithSnapTarget
 status: conflict
 ---
 
-- ✓ Instance has same semver number as the matching snapTo instance
-- ✓ Instance matches its semver group
-- ✘ Range preferred by semver group will not satisfy the matching snapTo instance
+## When this happens
+
+- ✓ Instance is in a [Snapped To](VERSION_GROUP_SNAPPED_TO) version group
+- ✓ Instance has same [Semver Number](REF_GLOSSARY#semver-number) as the matching [snapTo](VERSION_GROUP_SNAPPED_TO#snapto) instance
+- ✓ Instance matches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
+- ✘ Range preferred by semver group will not satisfy the matching [snapTo](VERSION_GROUP_SNAPPED_TO#snapto) instance
 - ? We can't know whether the incompatible range matters or not and have to ask

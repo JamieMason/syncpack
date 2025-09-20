@@ -1,10 +1,12 @@
-
 ---
 title: MismatchConflictsWithLocal
 status: conflict
 ---
 
-- ✓ Instance has same semver number as local instance
-- ✘ Instance mismatches its semver group
-- ✘ Range preferred by semver group will not satisfy the local instance
+## When this happens
+
+- ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
+- ✓ Instance has the same [Semver Number](REF_GLOSSARY#semver-number) as its [Local Instance](REF_GLOSSARY#local-instance)
+- ✘ Instance mismatches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
+- ✘ Range preferred by its [With Range](SEMVER_GROUP_WITH_RANGE) semver group will not satisfy the [Local Instance](REF_GLOSSARY#local-instance)
 - ? We can't know whether the incompatible range matters or not and have to ask

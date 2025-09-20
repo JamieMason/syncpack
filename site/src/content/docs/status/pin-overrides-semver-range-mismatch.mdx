@@ -1,10 +1,12 @@
-
 ---
 title: PinOverridesSemverRangeMismatch
 status: fixable
 ---
 
-- ✓ Instance has same semver number as its pinned version group
-- ✘ Instance mismatches its semver group
+## When this happens
+
+- ✓ Instance is in a [Pinned](VERSION_GROUP_PINNED) version group
+- ✓ Instance has same [Semver Number](REF_GLOSSARY#semver-number) as its pinned version group
+- ✘ Instance mismatches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ! The semver group requires a range which is different to the pinned version
 - ! Pinned version wins
