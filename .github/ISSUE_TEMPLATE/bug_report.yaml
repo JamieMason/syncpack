@@ -3,83 +3,83 @@ description: Explain how to reproduce a Bug
 title: "fix: "
 labels: ["Type: Fix"]
 body:
-- type: input
-  validations:
-    required: true
-  attributes:
-    label: Syncpack version
-    placeholder: eg. 13.0.0
-- type: dropdown
-  validations:
-    required: true
-  attributes:
-    label: Operating system(s)
-    multiple: true
-    options:
-      - Linux
-      - Mac
-      - Windows
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Steps to reproduce
-    description: |
-      A shell script would be perfect, otherwise a bullet list of precise steps to follow (less is more).
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: Syncpack version
+      placeholder: eg. 13.0.0
+  - type: dropdown
+    validations:
+      required: true
+    attributes:
+      label: Operating system(s)
+      multiple: true
+      options:
+        - Linux
+        - Mac
+        - Windows
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Steps to reproduce
+      description: |
+        A shell script would be perfect, otherwise a bullet list of precise steps to follow (less is more).
 
-      <details>
-      <summary>Example</summary>
+        <details>
+        <summary>Example</summary>
 
-      ```bash
-      git clone https://github.com/YOUR_ORG/syncpack-reproduction.git
-      cd syncpack-reproduction
-      npm exec syncpack -- lint
-      ```
+        ```bash
+        git clone https://github.com/YOUR_ORG/syncpack-reproduction.git
+        cd syncpack-reproduction
+        npm exec syncpack -- lint
+        ```
 
-      </details>
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Expected behavior
-    description: A concise description of what you expected to happen.
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Actual behavior
-    description: A concise description of what happened instead.
-- type: textarea
-  validations:
-    required: false
-  attributes:
-    label: Contents of syncpack configuration file
-    description: |
-      If you have not provided a reproduction, at minimum I'd need to see your config to be able to help you.
-      > [!IMPORTANT]
-      > There's nothing better than a public repo which reproduces the problem, as the combination of your config and the contents and locations of your package.json files are what form the complete picture.
-    render: jsonc
-- type: textarea
-  validations:
-    required: false
-  attributes:
-    label: Optional comments
-    description: Any further thoughts, ideas, comments, or context.
-- type: markdown
-  attributes:
-    value: |
-      ### Community health
-      A healthy community is built on fairness, mutual respect, support and collaboration. By giving back — whether through code contributions, documentation, testing, or simply spreading the word — you help maintain a vibrant and sustainable project.
-      | Contribution                                                                               | Cost       |
-      | :----------------------------------------------------------------------------------------- | :--------- |
-      | [Sponsor](https://github.com/sponsors/JamieMason?frequency=one-time)                       | 🔴 Money   |
-      | [Contribute Rust code](https://github.com/JamieMason/syncpack/tree/rust/main)              | 🟠 Time    |
-      | [Improve the docs](https://github.com/JamieMason/syncpack/tree/main/site/src/content/docs) | 🟡 Time    |
-      | [Star syncpack](https://github.com/JamieMason/syncpack)                                    | 🟢 Nothing |
-      | **Recommend syncpack** to others                                                           | 🟢 Nothing |
-- type: checkboxes
-  attributes:
-    label: Code of Conduct
-    options:
-      - label: I agree to follow the [Code of Conduct](https://github.com/JamieMason/syncpack/blob/main/CODE_OF_CONDUCT.md)
-        required: true
+        </details>
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expected behavior
+      description: A concise description of what you expected to happen.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Actual behavior
+      description: A concise description of what happened instead.
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      label: Contents of syncpack configuration file
+      description: |
+        If you have not provided a reproduction, at minimum I'd need to see your config to be able to help you.
+        > [!IMPORTANT]
+        > There's nothing better than a public repo which reproduces the problem, as the combination of your config and the contents and locations of your package.json files are what form the complete picture.
+      render: jsonc
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      label: Optional comments
+      description: Any further thoughts, ideas, comments, or context.
+  - type: markdown
+    attributes:
+      value: |
+        ### Community health
+        A healthy community is built on fairness, mutual respect, support and collaboration. By giving back — whether through code contributions, documentation, testing, or simply spreading the word — you help maintain a vibrant and sustainable project.
+        | Contribution                                                                               | Cost       |
+        | :----------------------------------------------------------------------------------------- | :--------- |
+        | [Sponsor](https://github.com/sponsors/JamieMason?frequency=one-time)                       | 🔴 Money   |
+        | [Contribute Rust code](https://github.com/JamieMason/syncpack/tree/rust/main)              | 🟠 Time    |
+        | [Improve the docs](https://github.com/JamieMason/syncpack/tree/main/site/src/content/docs) | 🟡 Time    |
+        | [Star syncpack](https://github.com/JamieMason/syncpack)                                    | 🟢 Nothing |
+        | **Recommend syncpack** to others                                                           | 🟢 Nothing |
+  - type: checkboxes
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow the [Code of Conduct](https://github.com/JamieMason/syncpack/blob/main/CODE_OF_CONDUCT.md)
+          required: true

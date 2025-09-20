@@ -3,36 +3,36 @@ description: Get help with something
 title: "question: "
 labels: ["Type: Question"]
 body:
-- type: markdown
-  attributes:
-    value: |
-      ### Useful links
-      You're welcome to ask questions, but have a look at these resources as it's possible your question has already been answered:
-      - [Most upvoted questions](https://github.com/JamieMason/syncpack/issues?q=label%3A%22Type%3A+Question%22+sort%3Areactions-%2B1-desc)
-      - [Getting started](https://jamiemason.github.io/syncpack/guide/getting-started/)
-      - [Examples](https://jamiemason.github.io/syncpack/examples/)
-      - [Documentation](https://jamiemason.github.io/syncpack/config/syncpackrc/)
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Question
-    description: Ask your question
-- type: markdown
-  attributes:
-    value: |
-      ### Community health
-      A healthy community is built on fairness, mutual respect, support and collaboration. By giving back — whether through code contributions, documentation, testing, or simply spreading the word — you help maintain a vibrant and sustainable project.
-      | Contribution                                                                               | Cost       |
-      | :----------------------------------------------------------------------------------------- | :--------- |
-      | [Sponsor](https://github.com/sponsors/JamieMason?frequency=one-time)                       | 🔴 Money   |
-      | [Contribute Rust code](https://github.com/JamieMason/syncpack/tree/rust/main)              | 🟠 Time    |
-      | [Improve the docs](https://github.com/JamieMason/syncpack/tree/main/site/src/content/docs) | 🟡 Time    |
-      | [Star syncpack](https://github.com/JamieMason/syncpack)                                    | 🟢 Nothing |
-      | **Recommend syncpack** to others                                                           | 🟢 Nothing |
-- type: checkboxes
-  attributes:
-    label: Code of Conduct
-    options:
-      - label: I agree to follow the [Code of Conduct](https://github.com/JamieMason/syncpack/blob/main/CODE_OF_CONDUCT.md)
-        required: true
+  - type: markdown
+    attributes:
+      value: |
+        ### Useful links
+        You're welcome to ask questions, but have a look at these resources as it's possible your question has already been answered:
+        - [Most upvoted questions](https://github.com/JamieMason/syncpack/issues?q=label%3A%22Type%3A+Question%22+sort%3Areactions-%2B1-desc)
+        - [Getting started](https://jamiemason.github.io/syncpack/guide/getting-started/)
+        - [Examples](https://jamiemason.github.io/syncpack/examples/)
+        - [Documentation](https://jamiemason.github.io/syncpack/config/syncpackrc/)
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Question
+      description: Ask your question
+  - type: markdown
+    attributes:
+      value: |
+        ### Community health
+        A healthy community is built on fairness, mutual respect, support and collaboration. By giving back — whether through code contributions, documentation, testing, or simply spreading the word — you help maintain a vibrant and sustainable project.
+        | Contribution                                                                               | Cost       |
+        | :----------------------------------------------------------------------------------------- | :--------- |
+        | [Sponsor](https://github.com/sponsors/JamieMason?frequency=one-time)                       | 🔴 Money   |
+        | [Contribute Rust code](https://github.com/JamieMason/syncpack/tree/rust/main)              | 🟠 Time    |
+        | [Improve the docs](https://github.com/JamieMason/syncpack/tree/main/site/src/content/docs) | 🟡 Time    |
+        | [Star syncpack](https://github.com/JamieMason/syncpack)                                    | 🟢 Nothing |
+        | **Recommend syncpack** to others                                                           | 🟢 Nothing |
+  - type: checkboxes
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow the [Code of Conduct](https://github.com/JamieMason/syncpack/blob/main/CODE_OF_CONDUCT.md)
+          required: true

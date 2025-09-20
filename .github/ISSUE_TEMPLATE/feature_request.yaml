@@ -3,49 +3,49 @@ description: Suggest an idea for this project
 title: "feat: "
 labels: ["Type: Feat"]
 body:
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Description
-    description: |
-      Try to capture:
-      - Why the feature is required
-      - What problem(s) it solves
-      - Real world scenarios or use cases
-      - What alternatives exist that you might have considered
-      - Why syncpack is the right place for this to live
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Suggested Solution
-    description: |
-      Provide code examples of what using this feature would look like from an end user's point of view.
-      - What would running the `syncpack` CLI command look like?
-      - What would the CLI output contain?
-      - What would changes or additions to the config file look like?
-- type: textarea
-  validations:
-    required: false
-  attributes:
-    label: Optional comments
-    description: Any further thoughts, ideas, comments, or context.
-- type: markdown
-  attributes:
-    value: |
-      ### Community health
-      A healthy community is built on fairness, mutual respect, support and collaboration. By giving back — whether through code contributions, documentation, testing, or simply spreading the word — you help maintain a vibrant and sustainable project.
-      | Contribution                                                                               | Cost       |
-      | :----------------------------------------------------------------------------------------- | :--------- |
-      | [Sponsor](https://github.com/sponsors/JamieMason?frequency=one-time)                       | 🔴 Money   |
-      | [Contribute Rust code](https://github.com/JamieMason/syncpack/tree/rust/main)              | 🟠 Time    |
-      | [Improve the docs](https://github.com/JamieMason/syncpack/tree/main/site/src/content/docs) | 🟡 Time    |
-      | [Star syncpack](https://github.com/JamieMason/syncpack)                                    | 🟢 Nothing |
-      | **Recommend syncpack** to others                                                           | 🟢 Nothing |
-- type: checkboxes
-  attributes:
-    label: Code of Conduct
-    options:
-      - label: I agree to follow the [Code of Conduct](https://github.com/JamieMason/syncpack/blob/main/CODE_OF_CONDUCT.md)
-        required: true
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Description
+      description: |
+        Try to capture:
+        - Why the feature is required
+        - What problem(s) it solves
+        - Real world scenarios or use cases
+        - What alternatives exist that you might have considered
+        - Why syncpack is the right place for this to live
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Suggested Solution
+      description: |
+        Provide code examples of what using this feature would look like from an end user's point of view.
+        - What would running the `syncpack` CLI command look like?
+        - What would the CLI output contain?
+        - What would changes or additions to the config file look like?
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      label: Optional comments
+      description: Any further thoughts, ideas, comments, or context.
+  - type: markdown
+    attributes:
+      value: |
+        ### Community health
+        A healthy community is built on fairness, mutual respect, support and collaboration. By giving back — whether through code contributions, documentation, testing, or simply spreading the word — you help maintain a vibrant and sustainable project.
+        | Contribution                                                                               | Cost       |
+        | :----------------------------------------------------------------------------------------- | :--------- |
+        | [Sponsor](https://github.com/sponsors/JamieMason?frequency=one-time)                       | 🔴 Money   |
+        | [Contribute Rust code](https://github.com/JamieMason/syncpack/tree/rust/main)              | 🟠 Time    |
+        | [Improve the docs](https://github.com/JamieMason/syncpack/tree/main/site/src/content/docs) | 🟡 Time    |
+        | [Star syncpack](https://github.com/JamieMason/syncpack)                                    | 🟢 Nothing |
+        | **Recommend syncpack** to others                                                           | 🟢 Nothing |
+  - type: checkboxes
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow the [Code of Conduct](https://github.com/JamieMason/syncpack/blob/main/CODE_OF_CONDUCT.md)
+          required: true
