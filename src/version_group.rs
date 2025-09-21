@@ -24,6 +24,7 @@ pub enum VersionGroupVariant {
   LowestSemver,
   Pinned,
   SameRange,
+  SameMinor,
   SnappedTo,
 }
 
@@ -138,6 +139,15 @@ impl VersionGroup {
           selector,
           snap_to: None,
           variant: VersionGroupVariant::SameRange,
+        };
+      } else if policy == "sameMinor" {
+        return VersionGroup {
+          dependencies: BTreeMap::new(),
+          matches_cli_filter: false,
+          pin_version: None,
+          selector,
+          snap_to: None,
+          variant: VersionGroupVariant::SameMinor,
         };
       } else {
         // @FIXME: show user friendly error message and exit with error code

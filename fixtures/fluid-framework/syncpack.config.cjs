@@ -72,18 +72,13 @@ module.exports = {
     {
       label: 'Overridden server dependencies should always be exact versions',
       dependencyTypes: ['pnpmOverrides'],
-      dependencies: [
-        '@fluidframework/gitresources',
-        '@fluidframework/protocol-base',
-        '@fluidframework/server-*',
-      ],
+      dependencies: ['@fluidframework/gitresources', '@fluidframework/protocol-base', '@fluidframework/server-*'],
       packages: ['**'],
       range: '',
     },
 
     {
-      label:
-        'Deps in pnpm overrides can use whatever dependency ranges they need',
+      label: 'Deps in pnpm overrides can use whatever dependency ranges they need',
       dependencyTypes: ['pnpmOverrides'],
       dependencies: ['**'],
       packages: ['**'],
@@ -162,19 +157,14 @@ module.exports = {
     {
       label:
         'Version compatibility workarounds should be used, or removed from syncpack.config.cjs if no longer needed.',
-      dependencies: [
-        'react-virtualized-auto-sizer',
-        '@types/react',
-        '@types/react-dom',
-      ],
+      dependencies: ['react-virtualized-auto-sizer', '@types/react', '@types/react-dom'],
       packages: ['**'],
       isIgnored: true,
     },
     // Workaround for this private internal package. Can be removed once our types wrapper around
     // the package is no longer needed - see https://github.com/argos-ci/jest-puppeteer/issues/568.
     {
-      label:
-        'Ignore private workaround package @types/jest-environment-puppeteer',
+      label: 'Ignore private workaround package @types/jest-environment-puppeteer',
       dependencies: ['@types/jest-environment-puppeteer'],
       dependencyTypes: ['dev', 'prod'],
       packages: ['**'],

@@ -1,5 +1,7 @@
 ---
-title: Same Range
+title: Same Minor
+sidebar:
+  badge: New
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -10,20 +12,20 @@ import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
 import Details from "@site/components/details.astro";
 
-Relax syncpack to ensure that all versions have semver ranges which all satisfy each other, instead of having to be identical.
+Ensure that all instances of dependencies in this group have the same `MAJOR.MINOR` version number, while allowing different patch versions. The only Semver Ranges which are allowed are exact and `~`.
 
 ## Configuration
 
 ### policy <Badge text="Required" variant="danger" />
 
-Choose the "sameRange" policy to apply this behaviour to a Version Group.
+Set the policy to "sameMinor" to enable this behaviour for a Version Group.
 
 ```json title=".syncpackrc.json"
 {
   "versionGroups": [
     {
-      "dependencies": ["eslint"],
-      "policy": "sameRange"
+      "dependencies": ["react", "react-dom"],
+      "policy": "sameMinor"
     }
   ]
 }

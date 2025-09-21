@@ -9,6 +9,7 @@ mod ignored;
 mod indent;
 mod pinned;
 mod preferred_semver;
+mod same_minor;
 mod same_range;
 mod snapped_to;
 
@@ -27,6 +28,7 @@ pub fn visit_packages(ctx: Context) -> Context {
       VersionGroupVariant::Ignored => ignored::visit(dependency),
       VersionGroupVariant::Pinned => pinned::visit(dependency),
       VersionGroupVariant::SameRange => same_range::visit(dependency),
+      VersionGroupVariant::SameMinor => same_minor::visit(dependency),
       VersionGroupVariant::SnappedTo => snapped_to::visit(dependency, &ctx),
     });
   });

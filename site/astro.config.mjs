@@ -128,6 +128,7 @@ export default defineConfig({
           VERSION_GROUP_IGNORED: '/syncpack/version-groups/ignored/',
           VERSION_GROUP_LOWEST_SEMVER: '/syncpack/version-groups/lowest-semver/',
           VERSION_GROUP_PINNED: '/syncpack/version-groups/pinned/',
+          VERSION_GROUP_SAME_MINOR: '/syncpack/version-groups/same-minor/',
           VERSION_GROUP_SAME_RANGE: '/syncpack/version-groups/same-range/',
           VERSION_GROUP_SNAPPED_TO: '/syncpack/version-groups/snapped-to/',
         };

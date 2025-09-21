@@ -105,11 +105,15 @@ namespace VersionGroup {
     /** @see https://jamiemason.github.io/syncpack/version-groups/same-range/#policy */
     policy: 'sameRange';
   }
+  export interface SameMinor extends GroupSelector {
+    /** @see https://jamiemason.github.io/syncpack/version-groups/same-minor/#policy */
+    policy: 'sameMinor';
+  }
   export interface Standard extends GroupSelector {
     /** @see https://jamiemason.github.io/syncpack/version-groups/lowest-semver/#preferversion */
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
-  export type Any = Banned | Ignored | Pinned | SameRange | SnappedTo | Standard;
+  export type Any = Banned | Ignored | Pinned | SameRange | SameMinor | SnappedTo | Standard;
 }
 
 namespace CustomType {
@@ -195,6 +199,7 @@ export type VersionGroupVariant =
   | 'LowestSemver'
   | 'Pinned'
   | 'SameRange'
+  | 'SameMinor'
   | 'SnappedTo';
 
 export type StatusCode =
@@ -208,6 +213,7 @@ export type StatusCode =
   | 'SatisfiesHighestOrLowestSemver'
   | 'SatisfiesLocal'
   | 'SatisfiesSameRangeGroup'
+  | 'SatisfiesSameMinorGroup'
   | 'SatisfiesSnapTarget'
   | 'DiffersToHighestOrLowestSemver'
   | 'DiffersToLocal'
@@ -217,10 +223,13 @@ export type StatusCode =
   | 'IsBanned'
   | 'PinOverridesSemverRange'
   | 'PinOverridesSemverRangeMismatch'
+  | 'SameMinorOverridesSemverRange'
+  | 'SameMinorOverridesSemverRangeMismatch'
   | 'SemverRangeMismatch'
   | 'DependsOnInvalidLocalPackage'
   | 'NonSemverMismatch'
   | 'SameRangeMismatch'
+  | 'SameMinorMismatch'
   | 'DependsOnMissingSnapTarget'
   | 'InvalidLocalVersion'
   | 'RefuseToBanLocal'

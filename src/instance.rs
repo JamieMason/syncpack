@@ -258,6 +258,26 @@ impl Instance {
         .satisfies_all(instances.iter().map(|i| &i.descriptor.specifier).collect())
   }
 
+  /// Does this instance have the same major.minor version as all other
+  /// instances? Semver ranges are not taken into account.
+  pub fn already_has_same_minor_number_as_all(&self, instances: &[Rc<Instance>]) -> bool {
+    if matches!(self.descriptor.specifier, Specifier::None) {
+      return false;
+    }
+    match self.descriptor.specifier.get_semver() {
+      None => false,
+      Some(a) => instances.iter().all(|other_instance| {
+        if matches!(other_instance.descriptor.specifier, Specifier::None) {
+          return false;
+        }
+        match other_instance.descriptor.specifier.get_semver() {
+          None => false,
+          Some(b) => a.node_version.major == b.node_version.major && a.node_version.minor == b.node_version.minor,
+        }
+      }),
+    }
+  }
+
   /// Will this instance's specifier, once fixed to match its semver group,
   /// satisfy the given specifier?
   pub fn specifier_with_preferred_semver_range_will_satisfy(&self, other: &Specifier) -> bool {
