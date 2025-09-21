@@ -359,6 +359,7 @@ fn specifier_types_option(command: &str) -> Arg {
 <blue>file</>                <yellow>file:./path/to/package</>
 <blue>git</>                 <yellow>git+https://github.com/user/repo.git</>
 <blue>latest</>              <yellow>latest</>, <yellow>*</>
+<blue>link</>                <yellow>link:../package-a</>
 <blue>major</>               <yellow>1</>
 <blue>minor</>               <yellow>1.2</>
 <blue>missing</>             A local package.json with a missing .version
@@ -386,6 +387,7 @@ fn specifier_types_option(command: &str) -> Arg {
       "file",
       "git",
       "latest",
+      "link",
       "major",
       "minor",
       "missing",
