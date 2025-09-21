@@ -3,7 +3,7 @@ use crate::cli::Cli;
 #[cfg(test)]
 pub fn init(_: &Cli) {
   use {env_logger::Builder, log::LevelFilter};
-  Builder::new().filter_level(LevelFilter::Error).init();
+  Builder::new().filter_level(LevelFilter::Debug).init();
 }
 
 /// Initialize the logger with the given log level
