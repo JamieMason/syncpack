@@ -1,0 +1,75 @@
+---
+title: Same Minor
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Packages from "@partials/group-config/packages.mdx";
+import Dependencies from "@partials/group-config/dependencies.mdx";
+import DependencyTypes from "@partials/group-config/dependency-types.mdx";
+import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
+import Label from "@partials/group-config/label.mdx";
+import Details from "@site/components/details.astro";
+
+Ensure that all instances of dependencies in this group have the same major and minor version numbers, while allowing different patch versions.
+
+## Configuration
+
+### policy <Badge text="Required" variant="danger" />
+
+Set the policy to "sameMinor" to enable this behaviour for a Version Group.
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react", "react-dom"],
+      "policy": "sameMinor"
+    }
+  ]
+}
+```
+
+This example ensures that `react` and `react-dom` always have the same major.minor version across all packages:
+
+- ✅ Valid: `react@18.2.0` and `react-dom@18.2.1` (both 18.2.x)
+- ✅ Valid: `react@18.3.1` and `react-dom@18.3.0` (both 18.3.x)
+- ❌ Invalid: `react@18.2.0` and `react-dom@18.3.0` (different minor versions)
+- ❌ Invalid: `react@17.0.2` and `react-dom@18.2.0` (different major versions)
+
+### dependencies <Badge text="Optional" variant="note" />
+
+<Dependencies />
+
+### dependencyTypes <Badge text="Optional" variant="note" />
+
+<DependencyTypes />
+
+### specifierTypes <Badge text="Optional" variant="note" />
+
+<SpecifierTypes />
+
+### label <Badge text="Optional" variant="note" />
+
+<Label />
+
+### packages <Badge text="Optional" variant="note" />
+
+<Packages />
+
+## Use Cases
+
+The `sameMinor` policy is particularly useful for:
+
+- **Related packages**: Libraries like React and React-DOM that should stay on the same minor version
+- **Plugin ecosystems**: Tools like Babel plugins that should maintain compatibility within the same minor version
+- **Framework packages**: Angular, Vue, or other framework packages that release coordinated updates
+- **Monorepo dependencies**: Internal packages that should maintain API compatibility within the same minor version
+
+## Difference from Same Range
+
+While the [Same Range](./same-range) policy requires semver ranges to satisfy each other, the `sameMinor` policy is more specific:
+
+- **Same Range**: `"^18.2.0"` satisfies `"^18.2.1"` ✅
+- **Same Minor**: `"18.2.0"` and `"18.3.0"` have different minor versions ❌
+
+Use `sameMinor` when you need stricter version alignment based on semantic versioning.

@@ -1,0 +1,11 @@
+---
+title: SameMinorOverridesSemverRange
+status: fixable
+---
+
+## When this happens
+
+- ✓ Instance has same major.minor as all other instances in its group
+- ✓ Instance matches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
+- ! The semver group requires a range which would break [Same Minor](VERSION_GROUP_SAME_MINOR) policy
+- ! Same minor policy wins

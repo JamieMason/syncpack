@@ -144,6 +144,9 @@ pub enum ValidInstance {
   /// - ✓ Instance matches its same range group
   /// - ✓ Instance matches its semver group
   SatisfiesSameRangeGroup,
+  /// - ✓ Instance matches its same minor group
+  /// - ✓ Instance matches its semver group
+  SatisfiesSameMinorGroup,
   /// - ✓ Instance is identical to a matching snapTo instance
   /// - ✓ Instance matches its semver group
   IsIdenticalToSnapTarget,
@@ -192,6 +195,16 @@ pub enum FixableInstance {
   ///   version
   /// - ! Pinned version wins
   PinOverridesSemverRangeMismatch,
+  /// - ✓ Instance has same major.minor as all other instances in its group
+  /// - ✓ Instance matches its semver group
+  /// - ! The semver group requires a range which would break same minor policy
+  /// - ! Same minor policy wins
+  SameMinorOverridesSemverRange,
+  /// - ✓ Instance has same major.minor as all other instances in its group
+  /// - ✘ Instance mismatches its semver group
+  /// - ! The semver group requires a range which would break same minor policy
+  /// - ! Same minor policy wins
+  SameMinorOverridesSemverRangeMismatch,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -208,6 +221,10 @@ pub enum UnfixableInstance {
   /// - ? Instance has no semver group
   /// - ? We can't know what range the user wants and have to ask them
   SameRangeMismatch,
+  /// - ✘ Instance mismatches its same minor group
+  /// - ? Instance has no semver group
+  /// - ? We can't know what range the user wants and have to ask them
+  SameMinorMismatch,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

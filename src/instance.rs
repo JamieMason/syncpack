@@ -258,6 +258,65 @@ impl Instance {
         .satisfies_all(instances.iter().map(|i| &i.descriptor.specifier).collect())
   }
 
+  /// Does this instance have the same major.minor version as all other
+  /// instances?
+  pub fn has_same_major_minor_as_all(&self, instances: &[Rc<Instance>]) -> bool {
+    if matches!(self.descriptor.specifier, Specifier::None) {
+      return false;
+    }
+
+    // Find any instance with an extractable semver to determine the target
+    // major.minor
+    let target_semver = match instances
+      .iter()
+      .find_map(|instance| instance.descriptor.specifier.get_semver())
+      .or_else(|| self.descriptor.specifier.get_semver())
+    {
+      Some(semver) => semver,
+      None => return false,
+    };
+
+    let target_major = target_semver.node_version.major;
+    let target_minor = target_semver.node_version.minor;
+
+    // Create specifiers for the next and previous minor versions to test boundaries
+    let next_minor_raw = format!("{}.{}.0", target_major, target_minor + 1);
+    let next_minor_specifier = Specifier::new(&next_minor_raw, None);
+
+    let prev_minor_spec = if target_minor > 0 {
+      Some(format!("{}.{}.0", target_major, target_minor.saturating_sub(1)))
+    } else {
+      None
+    };
+    let prev_minor_specifier = prev_minor_spec.map(|spec| Specifier::new(&spec, None));
+
+    instances.iter().all(|other_instance| {
+      if matches!(other_instance.descriptor.specifier, Specifier::None) {
+        return false;
+      }
+
+      // For instances with extractable semver, check if they have the same
+      // major.minor
+      if let Some(other_semver) = other_instance.descriptor.specifier.get_semver() {
+        let version_matches = other_semver.node_version.major == target_major && other_semver.node_version.minor == target_minor;
+        if !version_matches {
+          return false;
+        }
+      }
+
+      // Check if this instance's range could satisfy the next or previous minor
+      // version If it can satisfy either, then it's not safe for sameMinor
+      // policy
+      let cannot_satisfy_next = !other_instance.descriptor.specifier.satisfies(&next_minor_specifier);
+      let cannot_satisfy_prev = prev_minor_specifier
+        .as_ref()
+        .map(|prev_spec| !other_instance.descriptor.specifier.satisfies(prev_spec))
+        .unwrap_or(true); // If no previous minor (minor=0), then it's safe
+
+      cannot_satisfy_next && cannot_satisfy_prev
+    })
+  }
+
   /// Will this instance's specifier, once fixed to match its semver group,
   /// satisfy the given specifier?
   pub fn specifier_with_preferred_semver_range_will_satisfy(&self, other: &Specifier) -> bool {
