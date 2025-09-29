@@ -36,7 +36,7 @@
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
   "dependencies": {
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
