@@ -1,3 +1,15 @@
+//! Dependency represents all instances of a single dependency name.
+//!
+//! For example, if "react" appears in package-a, package-b, and package-c,
+//! all three instances are grouped under one Dependency struct.
+//!
+//! Key points:
+//! - Dependency aggregates instances: Vec<Rc<Instance>>
+//! - Each Dependency belongs to one VersionGroup
+//! - The variant field determines validation behavior (Banned, Pinned, etc.)
+//!
+//! See src/version_group.rs for how dependencies are organized.
+
 use {
   crate::{
     context::Context,
@@ -15,35 +27,48 @@ use {
 #[path = "dependency_test.rs"]
 mod dependency_test;
 
+/// URL information for fetching package metadata from npm registry.
+/// Used by the update command to fetch available versions.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct UpdateUrl {
   /// The name of the dependency
   pub internal_name: String,
-  /// @example https://registry.npmjs.org/syncpack
-  /// @example https://npm.jsr.io/@jsr/std__path
+  /// Registry URL, e.g., "https://registry.npmjs.org/react"
   pub url: String,
 }
 
+/// All instances of a single dependency name within a version group.
+///
+/// For example, if "react" appears in 5 different package.json files,
+/// all 5 instances are collected here. Visitor functions iterate through
+/// these instances and assign InstanceState based on the variant.
+///
+/// Wrapped fields use RefCell for interior mutability during inspection.
 #[derive(Debug)]
 pub struct Dependency {
   /// The expected version specifier which all instances of this dependency
   /// should be set to, in the event that they should all use the same version.
+  /// RefCell allows mutation during inspection without &mut Context.
   pub expected: RefCell<Option<Specifier>>,
   /// Whether the internal name for this dependency is an alias.
   pub has_alias: bool,
   /// Every instance of this dependency in this version group.
+  /// Rc<Instance> allows cheap sharing without cloning.
   pub instances: Vec<Rc<Instance>>,
   /// If this dependency is a local package, this is the local instance.
+  /// RefCell allows mutation during inspection.
   pub local_instance: RefCell<Option<Rc<Instance>>>,
   /// Does every instance match the filter options provided via the CLI?
   pub matches_cli_filter: bool,
-  /// The name of the dependency
+  /// The name of the dependency, e.g., "react", "@types/node"
   pub internal_name: String,
   /// The version to pin all instances to when variant is `Pinned`
   pub pinned_specifier: Option<Specifier>,
-  /// package.json files developed in the monorepo when variant is `SnappedTo`
+  /// package.json files developed in the monorepo when variant is `SnappedTo`.
+  /// Rc<RefCell<T>> for shared ownership with interior mutability.
   pub snapped_to_packages: Option<Vec<Rc<RefCell<PackageJson>>>>,
   /// What behaviour has this group been configured to exhibit?
+  /// Determines which visitor function processes this dependency.
   pub variant: VersionGroupVariant,
 }
 
