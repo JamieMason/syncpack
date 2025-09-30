@@ -1,0 +1,563 @@
+# Syncpack Development Rules
+
+You are working on Syncpack, a Rust CLI tool that synchronizes npm dependency versions across monorepos.
+
+## Essential Reading (Read These First!)
+
+<critical_docs>
+
+Before starting any work, ALWAYS read:
+
+1. `.notes/context.md` - Core concepts and mental model
+2. `.notes/index.md` - Central navigation hub for all documentation
+
+</critical_docs>
+
+## When to Ask vs Proceed
+
+<decision_rules>
+
+Ask the user when:
+
+- User intent unclear or ambiguous
+- Multiple valid approaches exist
+- Change would be breaking
+- Creating new top-level modules
+- Modifying core architecture patterns
+- Creating documentation or reports (unless explicitly requested)
+- Writing comments or docs for straightforward code
+
+Proceed without asking when:
+
+- Pattern clearly exists in codebase
+- Following established convention
+- Change is non-breaking
+- Adding tests for new code
+- Fixing obvious bugs
+- Writing comments/docs for complex logic that's difficult to understand
+
+</decision_rules>
+
+<uncertainty_handling>
+
+### When Uncertain About Codebase Facts
+
+**ALWAYS verify before claiming:**
+
+- "Function X exists in module Y" → Search first with ast-grep
+- "The codebase follows pattern Z" → Find examples before asserting
+- "This is how feature W works" → Read the actual implementation
+
+**Explicitly state uncertainty:**
+
+- ✅ "I need to search for existing implementations before recommending"
+- ✅ "Let me verify this pattern exists in the codebase"
+- ✅ "I should check the actual code before assuming"
+- ❌ Don't make confident claims about code you haven't verified
+
+</uncertainty_handling>
+
+## Core Architecture
+
+<system_invariants>
+
+### 3-Phase Pattern (Never Break This!)
+
+Every command follows this pattern:
+
+1. **Create Context** - Read CLI args → config file → package.json files → collect dependencies
+2. **Inspect Context** - Assign InstanceState to each dependency (via visit_packages or visit_formatting)
+3. **Run Command** - Process instances based on their states, return exit code (0 or 1)
+
+### Ownership Rules (Never Violate These!)
+
+- Context owns all project data (config, packages, instances, version_groups)
+- Context is created once and passed through the pipeline
+- Each phase takes ownership of Context and returns it
+- Commands consume Context and return an exit code
+
+### Key Invariants (Breaking These Will Break The System!)
+
+1. **InstanceState is assigned during inspection, NOT during Context creation**
+   - WRONG: Assigning state in Context::create()
+   - RIGHT: Assigning state in visit_packages()
+
+2. **Commands must be registered in three places**
+   - Subcommand enum in src/cli.rs
+   - Match arm in src/main.rs
+   - Implementation in src/commands/\*.rs
+
+3. **Inspection phase is read-only**
+   - visit_packages() and visit_formatting() only TAG instances
+   - They never modify package.json files
+   - File modifications happen in command run() functions
+
+4. **Context fields use Rc for cheap cloning**
+   - Use Rc<Instance> for single-threaded sharing
+   - Use Arc only for cross-thread data (like RegistryClient)
+
+</system_invariants>
+
+<wrong_patterns>
+
+❌ Don't assign InstanceState during Context::create
+✅ Do assign it in visit_packages
+
+❌ Don't implement side effects (file writes) in visit_packages
+✅ Do implement them in command run() functions
+
+❌ Don't forget to update all three places when adding commands
+✅ Do update enum, main.rs match, and create command file
+
+❌ Don't use Arc unless data crosses threads
+✅ Do use Rc for single-threaded sharing
+
+</wrong_patterns>
+
+## Development Guidelines
+
+<communication_requirements>
+
+- **Be extremely concise** - Sacrifice grammar for brevity
+- **No fluff** - Get straight to the point
+- **Short sentences** - Prefer fragments over full sentences when clear
+- **Ground in facts** - Cite code/docs when making architectural claims
+
+</communication_requirements>
+
+### Code Style Requirements
+
+- **Functional style preferred** - Use pipelines (.map, .filter, .and_then, etc.) when appropriate
+- **Prioritise readability** - Ensure code is easy to understand and maintain, functional programming tends to be more readable than imperative programming.
+- **Use descriptive variable and function names** - Choose names that clearly convey the purpose of the variable
+
+<tdd_workflow>
+
+### TDD Workflow (Mandatory)
+
+1. **Write failing test first** - Always ensure test fails before implementation
+2. **Run test to verify failure** - Confirm test actually detects the missing feature
+3. **Implement minimal code** - Make test pass with simplest solution
+4. **Check cargo/clippy** - Fix all errors and warnings after implementation
+5. **Refactor** - Once tests are passing, refactor code to improve readability and maintainability
+6. **Exception**: Known-incomplete code during TDD cycle can have errors until implementation done
+
+</tdd_workflow>
+
+### Code Quality Standards
+
+- Keep functions under 50 lines when possible
+- Commands should be 100-300 lines (stay focused)
+- Use descriptive variable names (prefer clarity over brevity)
+- **TDD mandatory** - Test must fail before writing implementation
+- **Zero warnings** - Fix all cargo and clippy warnings (except during TDD red phase)
+- Follow Rust naming conventions (see `.notes/index.md` for specifics)
+- Prefer functional/pipeline style over imperative loops
+- **No comments by default** - Only write docs/comments for complex logic that's difficult to understand
+- **Scientific debugging** - Don't rush to fix errors; form hypotheses and test them through experiments before attempting fixes
+- **Method documentation style** - For public methods, write doc comments with: (1) concise paragraph description, (2) pseudo-code examples showing typical inputs → outputs (see `src/specifier2.rs` for examples)
+
+### Testing
+
+<test_guidelines>
+
+**Integration tests** - Located in `src/visit_packages/`, always use TestBuilder
+
+<wrong>
+Manually constructing Context
+</wrong>
+
+<correct>
+TestBuilder::new().with_package(...).build_and_visit_packages()
+</correct>
+
+**Unit tests** - Use vec of test scenarios, iterate and assert (see `src/specifier2/*_test.rs`)
+
+<wrong>
+Repeating implementation multiple times in a test function
+</wrong>
+
+<correct>
+Use vec of test cases, iterate and assert
+</correct>
+
+</test_guidelines>
+
+<test_naming>
+
+### Test Naming Conventions
+
+**Unit tests**: `fn {behavior}_{condition}()` - Describe what happens under what condition
+
+<good_examples>
+
+- `fn returns_none_when_invalid()`
+- `fn extracts_version_from_npm_alias()`
+- `fn self_comparison_always_returns_false()`
+
+</good_examples>
+
+<bad_examples>
+
+- `fn with_git_urls()` - missing behavior/outcome
+- `fn edge_cases()` - too vague, be specific
+- `fn comprehensive_check()` - what is being checked?
+
+</bad_examples>
+
+**Integration tests**: `fn {feature}_{scenario}()` - Descriptive names that explain intent and behavior
+
+<good_examples>
+
+- `fn refuses_to_ban_local_version()`
+- `fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_compatible_semver_group()`
+
+</good_examples>
+
+Prefer clarity over brevity - rust lacks describe/it blocks, so function names must convey full context
+
+**General rules**:
+
+- Include the outcome: `returns_none_when_*`, `extracts_*_from_*`, `is_older_when_*`
+- Avoid generic names: `edge_cases`, `comprehensive_*`, `original_*`
+- Be specific about conditions: instead of `with_prerelease` use `prerelease_versions_sort_before_stable`
+
+</test_naming>
+
+### File Organization
+
+- New command → `src/commands/{name}.rs`
+- New test file → same dir as impl, suffix `_test.rs`
+- Integration tests → `src/visit_packages/{feature}_test.rs`
+- **Never create new top-level modules without discussion**
+
+<import_style>
+
+### Import Style
+
+- **Single `use` statement** with all imports in braces
+- **Never use `super::`** - always use `crate::` for internal imports
+- **Order**: Run `just format` to autofix
+
+<example>
+
+```rust
+use {
+  crate::{
+    cli::{Cli, Subcommand},
+    config::Config,
+  },
+  log::{debug, error},
+  std::{process::exit, sync::Arc},
+};
+```
+
+</example>
+
+</import_style>
+
+<documentation_style>
+
+### Documentation Style
+
+For public methods, follow this pattern (see `src/specifier2.rs` for reference):
+
+<template>
+
+```rust
+/// Brief description of what the method does.
+///
+/// Examples:
+/// - "input1" -> output1
+/// - "input2" -> output2
+/// - "input3" -> None
+pub fn method_name(&self) -> ReturnType {
+  // implementation
+}
+```
+
+</template>
+
+<structure>
+
+1. First line: Concise summary (one sentence)
+2. Blank line with `///`
+3. `Examples:` section with bullet points
+4. Each example: `"input"` → `output` (use actual values, not descriptions)
+
+</structure>
+
+<reference_examples>
+
+Examples from codebase:
+
+- `Specifier2::get_config_identifier` - Shows input specifiers → config type strings
+- `Specifier2::get_alias_name` - Shows various inputs → Some(name) or None
+- `Specifier2::get_semver_number` - Shows how semver range chars are stripped
+- `Specifier2::get_node_version` - Shows version extraction with/without ranges
+- `Specifier2::get_node_range` - Shows range preservation
+
+</reference_examples>
+
+</documentation_style>
+
+<common_mistakes>
+
+### Common Style Mistakes
+
+❌ Don't use `super::` in imports
+✅ Do use `crate::` for internal imports
+
+❌ Don't create multiple `use` statements
+✅ Do group all imports in single `use` with braces
+
+❌ Don't use empty placeholders: `println!("Value: {}", var)`
+✅ Do use named placeholders: `println!("Value: {var}")`
+
+❌ Don't write verbose doc comments explaining what code does
+✅ Do write concise summaries with input→output examples
+
+❌ Don't use generic examples in docs: `method(value) -> result`
+✅ Do use concrete examples: `"^1.2.3" -> Some("1.2.3")`
+
+</common_mistakes>
+
+### Error Messages
+
+- Start with what failed: "Failed to parse X"
+- Include context: "in file Y"
+- Suggest fix when possible: "Did you mean Z?"
+
+### Performance vs Readability
+
+- **Readability first** unless proven bottleneck
+- Profile before optimizing
+- Clone is fine for Rc types
+- Functional style usually more readable than loops
+
+## AI-Specific Guidance
+
+<instructions>
+
+### Behavioral Guidelines
+
+1. **Always check `.notes/index.md` first** - Find the right documentation for your task
+2. **Follow existing patterns** - Look at similar code before creating new approaches
+3. **Use the established file organization** - Don't create new locations for similar functionality
+4. **Prefer integration tests** - Use TestBuilder in src/visit_packages/\*\_test.rs
+5. **Maintain type safety** - Leverage Rust's ownership system, don't fight it
+6. **Ground recommendations in actual code** - When suggesting patterns, cite specific files/functions that demonstrate them
+7. **Quote relevant documentation** - When referencing .notes files, extract specific quotes rather than paraphrasing
+
+</instructions>
+
+<tool_requirements>
+
+### Code Search: MUST use ast-grep for Rust files
+
+**REQUIREMENT**: Use `ast-grep` instead of `grep`/`rg` when searching `.rs` files.
+
+**Why**: ast-grep understands Rust syntax and filters out comments, strings, and documentation, preventing false positives.
+
+<ast_grep_usage>
+
+ast-grep works for both literal code AND patterns:
+
+```bash
+# Literal code search (filters out comments/strings/docs)
+ast-grep -p 'Specifier::new' src/           # Only finds ACTUAL function calls
+ast-grep -p 'get_raw()' src/                # Only finds ACTUAL method calls
+ast-grep -p 'impl Context' src/             # Only finds ACTUAL impl blocks
+
+# Pattern search with metavariables
+ast-grep -p 'pub struct $NAME' src/         # Any struct definition
+ast-grep -p 'impl $TYPE' src/               # Any impl block
+ast-grep -p 'pub fn $NAME($$$)' src/        # Any public function
+ast-grep -p '$OBJ.$METHOD($$$)' src/        # Any method call
+ast-grep -p 'Specifier::new($$$)' src/      # Specifier::new with any args
+```
+
+</ast_grep_usage>
+
+<comparison>
+
+**Why ast-grep prevents false positives:**
+
+```bash
+# WRONG: Using grep/rg finds non-code occurrences
+$ rg 'Specifier::new' src/
+src/instance.rs:  // Don't use Specifier::new here
+src/instance.rs:  let spec = Specifier::new("^1.2.3");
+CLAUDE.md:        Example: Specifier::new("1.0.0")
+# ❌ 3 results: 1 comment, 1 real code, 1 markdown doc
+
+# CORRECT: Using ast-grep finds only real code
+$ ast-grep -p 'Specifier::new' src/
+src/instance.rs:  let spec = Specifier::new("^1.2.3");
+# ✅ 1 result: only the actual function call
+```
+
+</comparison>
+
+<when_to_use_grep>
+
+Only use grep/rg when:
+
+- Searching across multiple file types: `rg 'pattern' --type md --type toml`
+- Intentionally searching comments/docs: `rg 'TODO' src/`
+- Searching non-Rust files: `rg 'version' Cargo.toml`
+- **Never use grep/rg for finding Rust code in .rs files**
+
+</when_to_use_grep>
+
+**For complex ast-grep patterns**: Use Context7 MCP to get up-to-date documentation (see `.notes/context7-guide.md`)
+
+**For external library docs**: Use Context7 MCP when working with external Rust crates or npm packages (see `.notes/context7-guide.md`)
+
+<code_verification_workflow>
+
+### Before Making Claims About Code
+
+1. **Search first**: Use ast-grep to verify function/pattern exists
+2. **Read the code**: Use read_file to see actual implementation
+3. **Then advise**: Base recommendations on verified facts
+
+<wrong>
+"The codebase uses Specifier::new() to create instances"
+(without verifying this is true)
+</wrong>
+
+<correct>
+*searches with ast-grep*
+*finds actual usage*
+"The codebase uses Specifier::new() in 3 places (src/instance.rs:45, ...)"
+</correct>
+
+</code_verification_workflow>
+
+</tool_requirements>
+
+<boundaries>
+
+### Scope Boundaries (Off-Limits Without Approval)
+
+- **Don't modify**: Context creation logic, 3-phase pattern structure
+- **Don't refactor**: Working commands unless fixing bugs or explicitly requested
+- **Don't change**: Public API signatures (would be breaking changes)
+- **Don't add**: New dependencies without discussion
+- **Don't remove**: Tests, even if they seem redundant
+
+</boundaries>
+
+<breaking_changes>
+
+### Breaking Change Indicators
+
+Watch for these - they require careful consideration:
+
+- Changing public struct fields
+- Modifying CLI arguments/flags
+- Altering config file schema
+- Changing command behavior/output
+- Renaming public functions/types
+
+</breaking_changes>
+
+<design_rationale>
+
+### Understanding the "Why"
+
+**Why assign InstanceState in visit_packages, not Context::create?**
+
+- Allows testing state assignment independently
+- Enables reusing Context across multiple inspections
+- Clear separation: creation vs inspection vs action
+
+**Why use Rc instead of Arc?**
+
+- Syncpack is single-threaded
+- Rc is cheaper (no atomic operations)
+- Arc only needed for RegistryClient (crosses into tokio runtime)
+
+**Why TestBuilder for tests?**
+
+- Ensures Context is properly constructed
+- Prevents test-specific shortcuts that diverge from real usage
+- Makes tests more maintainable when Context changes
+
+</design_rationale>
+
+<pre_commit_checklist>
+
+### Before Committing Code
+
+Quick sanity checks:
+
+1. ✅ All tests pass (`cargo test`)
+2. ✅ Zero clippy warnings (`cargo clippy`)
+3. ✅ No TODO comments (create issues instead)
+4. ✅ Existing patterns followed
+5. ✅ Only changed what was necessary
+
+</pre_commit_checklist>
+
+## Troubleshooting
+
+<when_stuck>
+
+### When You're Stuck
+
+1. **Start with `.notes/index.md`** - Find the right document for your task
+2. **Check existing similar code** - Use `ast-grep -p "pattern"` or look at comparable implementations
+3. **Follow the 3-phase pattern** - Trace Context creation → inspection → command execution
+4. **Look at test examples** - Check src/visit_packages/\*\_test.rs for patterns
+
+</when_stuck>
+
+<debugging_method>
+
+### Debugging Errors (Scientific Method)
+
+When encountering errors, don't rush to fix. Use scientific method:
+
+<steps>
+
+1. **Observe** - Read error message carefully, note line numbers and context
+2. **Hypothesize** - Form theory about root cause (not symptoms)
+3. **Experiment** - Test hypothesis with targeted changes:
+   - Add logging statements to trace values
+   - Isolate problem with minimal reproduction
+   - **Verify assumptions by checking actual code with ast-grep**
+   - Check assumptions one at a time
+4. **Validate** - Only fix once hypothesis confirmed
+5. **Verify** - Run tests to ensure fix works and doesn't break other things
+
+</steps>
+
+<example_workflow>
+
+Example workflow:
+
+- Error: "borrow checker violation"
+- Hypothesis: Multiple mutable references to same data
+- Experiment: Add debug prints showing where borrows occur
+- Validate: Confirm overlap in borrow scopes
+- Fix: Restructure to use single mutable reference
+- Verify: `cargo test` passes
+
+</example_workflow>
+
+</debugging_method>
+
+## Documentation Navigation
+
+<doc_index>
+
+- **`.notes/index.md`** - Central hub for finding all documentation
+- **`.notes/context.md`** - Essential mental model and concepts
+- **`.notes/context7-guide.md`** - Using Context7 MCP for external library documentation
+- **`.notes/quick-reference.md`** - Fast syntax lookup
+- **`.notes/decision-trees.md`** - Flowcharts for choosing approaches
+- **`.notes/examples/`** - Step-by-step implementation guides
+
+</doc_index>
