@@ -1,10 +1,100 @@
+//! # Instance State Machine
+//!
+//! This module defines the state machine for dependency instances. Every
+//! instance (e.g., "react@18.0.0 in package-a's dependencies") goes through
+//! validation and is assigned one of these states.
+//!
+//! ## State Hierarchy
+//!
+//! ```text
+//! InstanceState
+//! ├── Unknown          - Initial state, not yet inspected
+//! ├── Valid            - Follows all rules correctly (14 variants)
+//! ├── Invalid          - Breaks rules (subdivided into 3 categories)
+//! │   ├── Fixable      - Can auto-fix, we know the correct value (8 variants)
+//! │   ├── Unfixable    - Ambiguous, need human decision (3 variants)
+//! │   └── Conflict     - Conflicting rules between groups (2 variants)
+//! └── Suspect          - Misconfiguration detected (5 variants)
+//! ```
+//!
+//! ## When States Are Assigned
+//!
+//! States are assigned during the **Inspect Phase** in `visit_packages()`,
+//! never during Context creation. This is a critical invariant.
+//!
+//! ```rust,ignore
+//! // Phase 1: Create (states are Unknown)
+//! let ctx = Context::create(config, packages, registry_client);
+//!
+//! // Phase 2: Inspect (states are assigned here)
+//! let ctx = visit_packages(ctx);
+//!
+//! // Phase 3: Commands process based on states
+//! lint::run(ctx);
+//! ```
+//!
+//! ## Choosing the Right State
+//!
+//! ### Valid
+//! Use when the instance follows all rules correctly:
+//! - `IsLocalAndValid` - Local package with valid version
+//! - `IsPinned` - Matches pinned version
+//! - `IsHighestOrLowestSemver` - Correct per version group policy
+//!
+//! ### Invalid::Fixable
+//! Use when we know the correct value and can auto-fix:
+//! - `IsBanned` - Should be removed
+//! - `DiffersToLocal` - Should match local package
+//! - `DiffersToPinnedVersion` - Should use pinned version
+//!
+//! ### Invalid::Unfixable
+//! Use when the situation is ambiguous:
+//! - `NonSemverMismatch` - Multiple non-semver versions, can't pick one
+//! - `DependsOnInvalidLocalPackage` - Local package itself is invalid
+//!
+//! ### Invalid::Conflict
+//! Use when version group and semver group rules conflict:
+//! - `MatchConflictsWithHighestOrLowestSemver` - Range can't satisfy version
+//!
+//! ### Suspect
+//! Use when user has misconfigured something:
+//! - `RefuseToBanLocal` - Can't ban local package (invalid config)
+//! - `RefuseToPinLocal` - Can't pin local package (invalid config)
+//!
+//! ## Example Usage
+//!
+//! ```rust,ignore
+//! // In a visitor function
+//! if instance.version != expected_version {
+//!     *instance.state.borrow_mut() = InstanceState::fixable(DiffersToPinnedVersion);
+//! } else {
+//!     *instance.state.borrow_mut() = InstanceState::valid(IsPinned);
+//! }
+//!
+//! // In a command
+//! dependency.get_sorted_instances()
+//!     .filter(|instance| instance.is_fixable())
+//!     .for_each(|instance| {
+//!         // Auto-fix this instance
+//!     });
+//! ```
+
 use std::cmp::Ordering;
 
+/// The state of a dependency instance after validation.
+///
+/// Assigned during `visit_packages()` to describe whether the instance
+/// follows rules (Valid), breaks rules (Invalid), or represents a
+/// misconfiguration (Suspect).
 #[derive(Clone, Debug)]
 pub enum InstanceState {
+  /// Initial state before inspection. Should not appear after visit_packages().
   Unknown,
+  /// Instance follows all rules correctly.
   Valid(ValidInstance),
+  /// Instance breaks rules in some way.
   Invalid(InvalidInstance),
+  /// Instance represents a user misconfiguration.
   Suspect(SuspectInstance),
 }
 
@@ -141,7 +231,7 @@ pub enum ValidInstance {
   /// - ✓ Instance is identical to its pinned version group
   /// - ✓ Instance matches its semver group
   IsIdenticalToPin,
-  /// - ✓ Instance matches its same range group
+  /// - ✓ Instance's range satisfies all other ranges in its same range group
   /// - ✓ Instance matches its semver group
   SatisfiesSameRangeGroup,
   /// - ✓ Instance matches its same minor group
@@ -218,6 +308,8 @@ pub enum UnfixableInstance {
   /// - ? We can't know what's right or what isn't
   NonSemverMismatch,
   /// - ✘ Instance mismatches its same range group
+  /// - ✘ Instance's range doesn't satisfy all other ranges in its same range
+  ///   group
   /// - ? Instance has no semver group
   /// - ? We can't know what range the user wants and have to ask them
   SameRangeMismatch,

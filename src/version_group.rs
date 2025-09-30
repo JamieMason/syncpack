@@ -1,3 +1,16 @@
+//! Version groups define policies for how dependencies should be versioned.
+//!
+//! Users configure version groups in their syncpack config, and each dependency
+//! instance is assigned to the first matching version group (first match wins).
+//!
+//! Key points:
+//! - VersionGroup contains Dependencies, which contain Instances
+//! - The variant field determines validation behavior
+//! - First matching group wins (order matters in config)
+//!
+//! See DECISION_TREES.md "What VersionGroupVariant Does My Feature Need?"
+//! See PATTERNS.md "First Match Wins" for assignment logic.
+
 use {
   crate::{
     cli::SortBy,
@@ -16,15 +29,28 @@ use {
 };
 
 /// What behaviour has this group been configured to exhibit?
+///
+/// Each variant maps to a specific visitor function in src/visit_packages/.
+/// The variant determines how instances are validated and what their
+/// expected values should be.
 #[derive(Clone, Debug)]
 pub enum VersionGroupVariant {
+  /// Dependencies in this group should not exist (will be removed)
   Banned,
+  /// All instances should use the highest semver version found
   HighestSemver,
+  /// Skip validation for this group
   Ignored,
+  /// All instances should use the lowest semver version found
   LowestSemver,
+  /// All instances should use the exact version specified in config
   Pinned,
+  /// All instances must have ranges that satisfy every other range in the group
+  /// (e.g., ">=1.0.0" and "<=2.0.0" are compatible)
   SameRange,
+  /// All instances must use same minor version (patch can differ)
   SameMinor,
+  /// All instances should match the version from specified package(s)
   SnappedTo,
 }
 

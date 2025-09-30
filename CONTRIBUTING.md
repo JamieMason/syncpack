@@ -4,6 +4,19 @@ Syncpack is a Rust binary crate that creates a command line application for ensu
 
 It is deployed to the npm registry as `syncpack` in the version range `syncpack@14.0.0-alpha.*`. It is an in-development replacement for `syncpack@latest` which is currently on version `13.0.4`.
 
+## LLM-Assisted Development
+
+If you're using an LLM (like Claude, ChatGPT, or Copilot) to assist with development, see **[.notes/index.md](./.notes/index.md)** for a comprehensive development hub optimized for LLM context. It includes:
+
+- Essential file locations and their purposes
+- Core data structures and their relationships
+- Common development patterns and tasks
+- Test writing guidelines with examples
+- Naming conventions and code organization
+- Common pitfalls and how to avoid them
+
+This document (CONTRIBUTING.md) provides the high-level architecture and workflow. The .notes/ directory provides concrete patterns and examples for day-to-day development tasks.
+
 ## Git branches
 
 `main` - The most recently published version of the Rust v14 alpha version of the codebase.

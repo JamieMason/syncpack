@@ -1,3 +1,18 @@
+//! Instance represents a single occurrence of a dependency.
+//!
+//! For example, if package-a has `"react": "18.0.0"` in its dependencies,
+//! that creates one Instance. If package-b also has `"react": "17.0.0"`,
+//! that's a different Instance.
+//!
+//! Key points:
+//! - Instances are wrapped in Rc<Instance> for cheap sharing across version
+//!   groups
+//! - state field uses RefCell for interior mutability during inspection phase
+//! - States start as Unknown and are assigned in visit_packages()
+//!
+//! See .cursorrules for when to use Rc vs Arc.
+//! See PATTERNS.md "State Machine Pattern" for how states work.
+
 #[cfg(test)]
 #[path = "instance_test.rs"]
 mod instance_test;
@@ -17,8 +32,15 @@ use {
   std::{cell::RefCell, rc::Rc},
 };
 
+/// Unique identifier for an instance, format: "{dep} in {location} of
+/// {package}" Examples: "react in /dependencies of package-a"
+///           "pnpm in /packageManager of package-b"
 pub type InstanceId = String;
 
+/// The unchanging descriptor data for an instance.
+///
+/// Contains the original information about where this instance came from
+/// and what it contains. This data never changes during processing.
 #[derive(Debug)]
 pub struct InstanceDescriptor {
   /// The dependency type to use to read/write this instance
@@ -32,15 +54,24 @@ pub struct InstanceDescriptor {
   pub internal_name: String,
   /// Does this instance match the filter options provided via the CLI?
   pub matches_cli_filter: bool,
-  /// The dependency name eg. "react", "react-dom"
+  /// The dependency name, e.g., "react", "react-dom", "@types/node"
   pub name: String,
   /// The package.json this instance belongs to
+  /// The package.json this instance belongs to.
+  /// Wrapped in Rc<RefCell<T>> for shared ownership with interior mutability.
   pub package: Rc<RefCell<PackageJson>>,
-  /// The original version specifier, which should never be mutated.
-  /// eg. `Specifier::Exact("16.8.0")`, `Specifier::Range("^16.8.0")`
+  /// The original version specifier, which should never be mutated,
+  /// e.g., "18.0.0", "^18.0.0", "workspace:*", "git://github.com/..."
   pub specifier: Specifier,
 }
 
+/// A single occurrence of a dependency in the project.
+///
+/// Created during Phase 1 (Context::create), state is assigned during Phase 2
+/// (visit_packages), and processed during Phase 3 (command execution).
+///
+/// The state field uses RefCell to allow mutation during the inspection phase
+/// without requiring &mut references to the entire Context.
 #[derive(Debug)]
 pub struct Instance {
   /// The original data this Instance is derived from
@@ -57,8 +88,10 @@ pub struct Instance {
   /// This is used by Version Groups while determining the preferred version,
   /// to try to also satisfy any applicable semver group ranges
   pub preferred_semver_range: Option<SemverRange>,
-  /// The state of whether this instance has not been processed yet
-  /// (InstanceState::Unknown) or when it has, what it was found to be
+  /// The validation state of this instance.
+  /// Starts as Unknown, assigned during visit_packages().
+  /// RefCell allows interior mutability - states can be assigned without
+  /// requiring mutable access to the entire Context structure.
   pub state: RefCell<InstanceState>,
 }
 

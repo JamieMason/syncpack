@@ -22,17 +22,31 @@ use {
   },
 };
 
+/// The central data structure that owns all project data.
+///
+/// Context is created once and flows through the 3-phase pipeline using Rust's
+/// ownership system. Each phase takes ownership and returns it:
+/// 1. Context::create() - Read files, collect dependencies
+/// 2. visit_packages() - Assign InstanceState to each instance
+/// 3. command::run() - Process instances, consume Context
+///
+/// See PATTERNS.md "Ownership and Borrowing" section for details.
 #[derive(Debug)]
 pub struct Context {
   /// All default configuration with user config applied
   pub config: Config,
   /// The internal names of all failed updates
   pub failed_updates: Vec<String>,
-  /// Every instance in the project
+  /// Every instance in the project.
+  /// Rc<Instance> is used for single-threaded reference counting - instances
+  /// are shared across version groups without expensive cloning.
+  /// See .cursorrules for when to use Rc vs Arc.
   pub instances: Vec<Rc<Instance>>,
   /// Every package.json in the project
   pub packages: Packages,
-  /// Registry client for fetching package metadata
+  /// Registry client for fetching package metadata.
+  /// Arc<dyn RegistryClient> is used because the client is shared across
+  /// async tasks (crosses thread boundaries).
   pub registry_client: Option<Arc<dyn RegistryClient>>,
   /// All updates from the npm registry which have been chosen either by the
   /// user via a prompt or automatically by choosing the latest version
@@ -42,6 +56,17 @@ pub struct Context {
 }
 
 impl Context {
+  /// Phase 1 of the 3-phase pipeline: Create Context (read-only).
+  ///
+  /// This function reads all configuration and package.json files, collects
+  /// all dependency instances, and assigns them to version groups.
+  ///
+  /// Important: InstanceState is NOT assigned here - all instances start as
+  /// Unknown. States are assigned later in visit_packages() (Phase 2).
+  ///
+  /// Called from: src/main.rs
+  /// Next step: visit_packages() in src/visit_packages.rs
+  /// See also: .cursorrules for critical invariants
   pub fn create(config: Config, packages: Packages, registry_client: Option<Arc<dyn RegistryClient>>) -> Self {
     let mut instances = vec![];
     let updates_by_internal_name = HashMap::new();

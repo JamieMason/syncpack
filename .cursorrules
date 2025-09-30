@@ -1,0 +1,95 @@
+# Syncpack Development Rules
+
+You are working on Syncpack, a Rust CLI tool that synchronizes npm dependency versions across monorepos.
+
+## Essential Reading (Read These First!)
+
+Before starting any work, ALWAYS read:
+1. `.notes/context.md` - Core concepts and mental model
+2. `.notes/index.md` - Central navigation hub for all documentation
+
+## Core Architecture Pattern (Never Break This!)
+
+Every command follows this 3-phase pattern:
+1. **Create Context** - Read CLI args → config file → package.json files → collect dependencies
+2. **Inspect Context** - Assign InstanceState to each dependency (via visit_packages or visit_formatting)
+3. **Run Command** - Process instances based on their states, return exit code (0 or 1)
+
+## Critical Ownership Rules (Never Violate These!)
+
+- Context owns all project data (config, packages, instances, version_groups)
+- Context is created once and passed through the pipeline
+- Each phase takes ownership of Context and returns it
+- Commands consume Context and return an exit code
+
+## Key Invariants (Breaking These Will Break The System!)
+
+1. **InstanceState is assigned during inspection, NOT during Context creation**
+   - WRONG: Assigning state in Context::create()
+   - RIGHT: Assigning state in visit_packages()
+
+2. **Tests always use TestBuilder**
+   - WRONG: Manually constructing Context
+   - RIGHT: TestBuilder::new().with_package(...).build_and_visit_packages()
+
+3. **Commands must be registered in three places**
+   - Subcommand enum in src/cli.rs
+   - Match arm in src/main.rs
+   - Implementation in src/commands/*.rs
+
+4. **Inspection phase is read-only**
+   - visit_packages() and visit_formatting() only TAG instances
+   - They never modify package.json files
+   - File modifications happen in command run() functions
+
+5. **Context fields use Rc for cheap cloning**
+   - Use Rc<Instance> for single-threaded sharing
+   - Use Arc only for cross-thread data (like RegistryClient)
+
+## AI Behavioral Guidelines
+
+- **Always check `.notes/index.md` first** - Find the right documentation for your task
+- **Follow existing patterns** - Look at similar code before creating new approaches
+- **Use the established file organization** - Don't create new locations for similar functionality
+- **Prefer integration tests** - Use TestBuilder in src/visit_packages/*_test.rs
+- **Maintain type safety** - Leverage Rust's ownership system, don't fight it
+
+## Common Mistakes to Avoid (AI-Specific)
+
+❌ Don't assign InstanceState during Context::create
+✅ Do assign it in visit_packages
+
+❌ Don't manually construct Context in tests
+✅ Do use TestBuilder
+
+❌ Don't implement side effects (file writes) in visit_packages
+✅ Do implement them in command run() functions
+
+❌ Don't forget to update all three places when adding commands
+✅ Do update enum, main.rs match, and create command file
+
+❌ Don't use Arc unless data crosses threads
+✅ Do use Rc for single-threaded sharing
+
+## Code Quality Standards
+
+- Keep functions under 50 lines when possible
+- Commands should be 100-300 lines (stay focused)
+- Use descriptive variable names (prefer clarity over brevity)
+- Write tests for every new feature before implementation
+- Follow Rust naming conventions (see `.notes/index.md` for specifics)
+
+## When You're Stuck
+
+1. **Start with `.notes/index.md`** - Find the right document for your task
+2. **Check existing similar code** - Use grep or look at comparable implementations
+3. **Follow the 3-phase pattern** - Trace Context creation → inspection → command execution
+4. **Look at test examples** - Check src/visit_packages/*_test.rs for patterns
+
+## Documentation Navigation
+
+- **`.notes/index.md`** - Central hub for finding all documentation
+- **`.notes/context.md`** - Essential mental model and concepts
+- **`.notes/quick-reference.md`** - Fast syntax lookup
+- **`.notes/decision-trees.md`** - Flowcharts for choosing approaches
+- **`.notes/examples/`** - Step-by-step implementation guides
