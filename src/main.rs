@@ -10,6 +10,8 @@
 //! See CONTRIBUTING.md for high-level architecture.
 //! See .cursorrules for critical invariants.
 
+#![allow(dead_code)]
+
 use {
   crate::{
     cli::{Cli, Subcommand},
@@ -45,6 +47,7 @@ mod rcfile;
 mod registry_client;
 mod semver_group;
 mod specifier;
+mod specifier2;
 mod version_group;
 mod visit_formatting;
 mod visit_packages;
