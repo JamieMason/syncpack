@@ -69,7 +69,12 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
       "#
   );
 
-  Command::new("npx")
+  // Prefer bunx if a Bun lockfile exists in the same directory as the config
+  let dir = file_path.parent().unwrap_or_else(|| Path::new("."));
+  let use_bunx = dir.join("bun.lock").exists() || dir.join("bun.lockb").exists();
+  let runner = if use_bunx { "bunx" } else { "npx" };
+
+  Command::new(runner)
     .args(["tsx", "-e", &nodejs_script])
     .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
     .output()
