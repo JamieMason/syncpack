@@ -162,6 +162,7 @@ pub fn with_range(&self, range: &SemverRange) -> Option<String>  // ✅ Already 
 ```
 
 **Category C: Version Resolution (local_version needed for workspace protocols)**
+
 ```rust
 pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>
 pub fn get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>
@@ -170,6 +171,7 @@ pub fn with_semver(&self, semver: &BasicSemver, local_version: Option<&BasicSemv
 ```
 
 **Category D: Version Comparison (local_version needed for workspace protocols)**
+
 ```rust
 pub fn has_same_version_number_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver>) -> Result<bool, String>
@@ -263,9 +265,11 @@ impl Specifier2 {
 ```
 
 #### 3.3 Final Method Signatures
+
 All methods requiring workspace resolution use these signatures:
 
 **Single specifier methods:**
+
 ```rust
 pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>
 pub fn get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>
@@ -276,6 +280,7 @@ pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver
 ```
 
 **Comparison methods (two specifiers):**
+
 ```rust
 pub fn has_same_version_number_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn is_older_than(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
@@ -400,6 +405,7 @@ Based on fluid-framework project analysis:
 - Validate performance with real-world data
 
 ### Phase 2: Integration Planning
+
 - Design integration strategy for replacing `Specifier` with `Specifier2`
 - Plan migration of workspace-dependent operations to use new method signatures
 - Consider whether `BasicSemver` should be replaced entirely by `Specifier2`
@@ -433,6 +439,7 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 ## Testing Strategy
 
 ### Unit Tests
+
 - Port all tests from `specifier_test.rs` to `specifier2_test.rs`
 - Add tests for new method signatures with `local_version` parameters
 - Test error handling for workspace protocols without `local_version`
@@ -463,6 +470,7 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 - Comprehensive parsing tests in `specifier2_test.rs`
 
 ### 🚧 Next Steps
+
 - Add methods requiring `local_version` parameter (see Phase 3.3 for exact signatures)
 - Implement workspace resolution helper methods
 - Add methods not requiring `local_version`:
@@ -471,6 +479,7 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 - Consider replacing `BasicSemver` with `Specifier2` for complete consolidation
 
 ### ⏳ Pending
+
 - Port remaining tests from `specifier_test.rs` with new signatures
 - Performance validation with real workspace protocols
 - Evaluate `BasicSemver` replacement strategy
