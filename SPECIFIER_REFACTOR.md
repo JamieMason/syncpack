@@ -162,7 +162,6 @@ pub fn with_range(&self, range: &SemverRange) -> Option<String>  // ✅ Already 
 ```
 
 **Category C: Version Resolution (local_version needed for workspace protocols)**
-
 ```rust
 pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>
 pub fn get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>
@@ -171,7 +170,6 @@ pub fn with_semver(&self, semver: &BasicSemver, local_version: Option<&BasicSemv
 ```
 
 **Category D: Version Comparison (local_version needed for workspace protocols)**
-
 ```rust
 pub fn has_same_version_number_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver>) -> Result<bool, String>
@@ -182,6 +180,8 @@ pub fn is_older_than(&self, other: &Self, self_local: Option<&BasicSemver>, othe
 pub fn is_older_than_by_minor(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn is_older_than_by_patch(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 ```
+
+**Note**: `BasicSemver` could potentially be replaced by `Specifier2` entirely, with lazy caching of `node_range` and `node_version` properties.
 
 #### 2.3 Return Type Decisions
 
@@ -262,20 +262,26 @@ impl Specifier2 {
 }
 ```
 
-#### 3.3 Methods Requiring local_version (Final Signatures)
+#### 3.3 Final Method Signatures
+All methods requiring workspace resolution use these signatures:
 
-These methods need workspace resolution and return descriptive errors:
-
+**Single specifier methods:**
 ```rust
 pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>
 pub fn get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>
+pub fn get_node_range(&self, local_version: Option<&BasicSemver>) -> Result<Range, String>
+pub fn with_semver(&self, semver: &BasicSemver, local_version: Option<&BasicSemver>) -> Result<String, String>
+pub fn satisfies(&self, range: &Range, local_version: Option<&BasicSemver>) -> Result<bool, String>
+pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver>) -> Result<bool, String>
+```
+
+**Comparison methods (two specifiers):**
+```rust
 pub fn has_same_version_number_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn is_older_than(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn is_older_than_by_minor(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn is_older_than_by_patch(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 pub fn is_eligible_update_for(&self, target: &Self, self_local: Option<&BasicSemver>, target_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn satisfies(&self, range: &Range, local_version: Option<&BasicSemver>) -> Result<bool, String>
-pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver>) -> Result<bool, String>
 pub fn has_same_release_channel_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
 ```
 
@@ -368,16 +374,6 @@ thread_local! {
 }
 ```
 
-#### 5.2 Cache Key Optimization
-
-Consider `Box<str>` or borrowed key techniques to reduce string allocations:
-
-```rust
-thread_local! {
-  static SPECIFIER_CACHE: RefCell<HashMap<Box<str>, Rc<Specifier2>>> = RefCell::new(HashMap::new());
-}
-```
-
 ## Performance Benefits
 
 ### Real-World Impact
@@ -403,12 +399,10 @@ Based on fluid-framework project analysis:
 - Add comprehensive tests matching `specifier_test.rs`
 - Validate performance with real-world data
 
-### Phase 2: Integration Points
-
-- Update `Context::create()` to use `Specifier2::new()` (follows "Context owns all project data")
-- Modify `visit_packages()` to pass `local_version` to workspace-dependent operations
-- Ensure integration follows the 3-phase pattern: Create Context → Inspect → Run Command
-- Keep Context ownership rules intact
+### Phase 2: Integration Planning
+- Design integration strategy for replacing `Specifier` with `Specifier2`
+- Plan migration of workspace-dependent operations to use new method signatures
+- Consider whether `BasicSemver` should be replaced entirely by `Specifier2`
 
 ### Phase 3: Replacement
 
@@ -439,22 +433,12 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 ## Testing Strategy
 
 ### Unit Tests
-
 - Port all tests from `specifier_test.rs` to `specifier2_test.rs`
 - Add tests for new method signatures with `local_version` parameters
-- Test panic behavior for workspace protocols without `local_version`
-
-### Performance Tests
-
-- Cache hit/miss performance validation
-- Memory usage comparison
-- Lazy evaluation benefits measurement
-
-### Integration Tests
-
-- Real-world data from fluid-framework project
-- Workspace protocol resolution accuracy
-- Backward compatibility verification
+- Test error handling for workspace protocols without `local_version`
+- Test workspace resolution accuracy with various patterns
+- Performance tests comparing cache hit/miss ratios
+- Memory usage validation for cached instances
 
 ## Current Implementation Status
 
@@ -479,24 +463,18 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 - Comprehensive parsing tests in `specifier2_test.rs`
 
 ### 🚧 Next Steps
-
-- Add methods requiring `local_version` parameter:
-  - `get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>`
-  - `get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>`
-  - Version comparison methods with `Result<bool, String>` returns
+- Add methods requiring `local_version` parameter (see Phase 3.3 for exact signatures)
 - Implement workspace resolution helper methods
 - Add methods not requiring `local_version`:
   - `get_raw(&self) -> &str`
   - `is_workspace_protocol(&self) -> bool`
-- Follow project testing patterns: Use TestBuilder for integration tests
+- Consider replacing `BasicSemver` with `Specifier2` for complete consolidation
 
 ### ⏳ Pending
-
-- Port remaining tests from `specifier_test.rs` (use TestBuilder pattern)
-- Write integration tests in `src/visit_packages/*_test.rs` following project conventions
+- Port remaining tests from `specifier_test.rs` with new signatures
 - Performance validation with real workspace protocols
-- Integration following 3-phase pattern: Context creation → visit_packages → commands
-- Migration from `Specifier` to `Specifier2` while maintaining Context ownership rules
+- Evaluate `BasicSemver` replacement strategy
+- Plan migration from `Specifier` to `Specifier2`
 
 ## Benefits Summary
 
