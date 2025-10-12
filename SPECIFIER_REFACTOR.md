@@ -29,7 +29,7 @@
 ### 1. **Stateless and Cacheable**
 
 - Store only the raw specifier string (e.g., `"workspace:^"`)
-- Move workspace resolution from creation-time to call-time
+- No workspace resolution logic in `Specifier2` - handled externally by callers
 - Enable aggressive caching: same input string = same cached instance
 
 ### 2. **Optimized Single-Threaded Design**
@@ -38,11 +38,11 @@
 - Use `RefCell` + `thread_local!` for optimal single-threaded caching
 - Follow established project rule: "Use Rc for single-threaded sharing"
 
-### 3. **Lazy Evaluation**
+### 3. **Pure Methods**
 
-- Only compute workspace resolution when methods are actually called
-- Avoid unnecessary work during bulk specifier creation
-- Pay resolution cost only when needed
+- All methods work with the stored specifier string directly
+- No context-dependent behavior or external dependencies
+- Workspace protocols handled by external resolution before method calls
 
 ## Architecture Comparison
 
@@ -64,12 +64,13 @@ specifier.get_node_version() // ← Uses pre-resolved semver
 ### New Specifier2 (Stateless)
 
 ```rust
-// No resolution at creation
+// No resolution at creation - just stores the raw string
 Specifier2::new("workspace:^")
 → WorkspaceProtocol("workspace:^")  // ← Raw string only
 
-// Resolution at call time
-specifier.get_node_version(Some(local_version)) // ← Resolves on demand
+// External resolution before method calls
+resolved_specifier = resolve_workspace_specifier(specifier, local_version)
+resolved_specifier.get_node_version() // ← Works with resolved specifier
 ```
 
 ## Implementation Plan
@@ -112,75 +113,69 @@ impl Specifier2 {
 
 ### Phase 2: Method Signature Analysis
 
-#### 2.1 Current Specifier Method Analysis
+#### 2.1 Method Categories Analysis
 
-First, analyze each method from the original `Specifier` to determine:
-
-- Return type requirements
-- Whether `local_version` parameter is needed
-- Complexity of implementation
-- Dependencies on other methods
+All methods work with the stored specifier string directly. Workspace protocol resolution is handled externally.
 
 ```rust
-// From specifier.rs - methods to analyze:
-pub fn get_semver(&self) -> Option<&BasicSemver>
-pub fn get_node_version(&self) -> Option<&Version>
-pub fn get_node_range(&self) -> Option<&Range>
-pub fn get_semver_range(&self) -> Option<SemverRange>
-pub fn with_range(&self, range: &SemverRange) -> Self  // ✅ Already implemented
-pub fn with_semver(&self, semver: &BasicSemver) -> Self
-pub fn get_raw(&self) -> String
-pub fn get_config_identifier(&self) -> String  // ✅ Already implemented (returns &'static str)
+// Target method signatures (all pure, no external dependencies):
+pub fn get_semver(&self) -> Result<BasicSemver, String>
+pub fn get_node_version(&self) -> Result<Version, String>
+pub fn get_node_range(&self) -> Result<Range, String>
+pub fn get_semver_range(&self) -> Result<SemverRange, String>
+pub fn with_range(&self, range: &SemverRange) -> Option<String>  // ✅ Already implemented
+pub fn with_semver(&self, semver: &BasicSemver) -> Result<String, String>
+pub fn get_raw(&self) -> &str
+pub fn get_config_identifier(&self) -> &'static str  // ✅ Already implemented
 pub fn has_semver_range_of(&self, range: &SemverRange) -> bool
-pub fn has_same_version_number_as(&self, other: &Self) -> bool
-pub fn satisfies_all(&self, ranges: &[Range]) -> bool
-pub fn satisfies(&self, range: &Range) -> bool
+pub fn has_same_version_number_as(&self, other: &Self) -> Result<bool, String>
+pub fn satisfies_all(&self, ranges: &[Range]) -> Result<bool, String>
+pub fn satisfies(&self, range: &Range) -> Result<bool, String>
 pub fn is_workspace_protocol(&self) -> bool
-pub fn has_same_release_channel_as(&self, other: &Self) -> bool
-pub fn is_eligible_update_for(&self, target: &Self) -> bool
-pub fn is_older_than(&self, other: &Self) -> bool
-pub fn is_older_than_by_minor(&self, other: &Self) -> bool
-pub fn is_older_than_by_patch(&self, other: &Self) -> bool
+pub fn has_same_release_channel_as(&self, other: &Self) -> Result<bool, String>
+pub fn is_eligible_update_for(&self, target: &Self) -> Result<bool, String>
+pub fn is_older_than(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_minor(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 ```
 
 #### 2.2 Method Categories
 
-**Category A: Simple String Operations (No local_version needed)**
+All methods are pure and work with the stored specifier string. Workspace protocol resolution happens externally before calling these methods.
+
+**Category A: Simple Operations**
 
 ```rust
 pub fn get_raw(&self) -> &str                           // Return stored string
 pub fn is_workspace_protocol(&self) -> bool             // Check string prefix
-pub fn get_config_identifier(&self) -> &'static str     // ✅ Already done
+pub fn get_config_identifier(&self) -> &'static str     // ✅ Already implemented
+pub fn has_semver_range_of(&self, range: &SemverRange) -> bool // String comparison
+pub fn with_range(&self, range: &SemverRange) -> Option<String>  // ✅ Already implemented
 ```
 
-**Category B: Range/Pattern Operations (No local_version needed)**
+**Category B: Version Resolution Methods**
+These parse version information from the stored string:
 
 ```rust
-pub fn get_semver_range(&self) -> Option<SemverRange>   // Parse range from string
-pub fn has_semver_range_of(&self, range: &SemverRange) -> bool
-pub fn with_range(&self, range: &SemverRange) -> Option<String>  // ✅ Already done
+pub fn get_semver(&self) -> Result<BasicSemver, String>
+pub fn get_node_version(&self) -> Result<Version, String>
+pub fn get_node_range(&self) -> Result<Range, String>
+pub fn get_semver_range(&self) -> Result<SemverRange, String>
+pub fn with_semver(&self, semver: &BasicSemver) -> Result<String, String>
 ```
 
-**Category C: Version Resolution (local_version needed for workspace protocols)**
+**Category C: Comparison Methods**
+These delegate to Category B methods:
 
 ```rust
-pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>
-pub fn get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>
-pub fn get_node_range(&self, local_version: Option<&BasicSemver>) -> Result<Range, String>
-pub fn with_semver(&self, semver: &BasicSemver, local_version: Option<&BasicSemver>) -> Result<String, String>
-```
-
-**Category D: Version Comparison (local_version needed for workspace protocols)**
-
-```rust
-pub fn has_same_version_number_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver>) -> Result<bool, String>
-pub fn satisfies(&self, range: &Range, local_version: Option<&BasicSemver>) -> Result<bool, String>
-pub fn has_same_release_channel_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_eligible_update_for(&self, target: &Self, self_local: Option<&BasicSemver>, target_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than_by_minor(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than_by_patch(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
+pub fn has_same_version_number_as(&self, other: &Self) -> Result<bool, String>
+pub fn satisfies(&self, range: &Range) -> Result<bool, String>
+pub fn satisfies_all(&self, ranges: &[Range]) -> Result<bool, String>
+pub fn has_same_release_channel_as(&self, other: &Self) -> Result<bool, String>
+pub fn is_eligible_update_for(&self, target: &Self) -> Result<bool, String>
+pub fn is_older_than(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_minor(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 ```
 
 **Note**: `BasicSemver` could potentially be replaced by `Specifier2` entirely, with lazy caching of `node_range` and `node_version` properties.
@@ -197,111 +192,100 @@ pub fn is_older_than_by_patch(&self, other: &Self, self_local: Option<&BasicSemv
 
 - Methods return `Result<T, String>` for operations that can fail
 - Error messages include context about what failed and why
-- Invalid workspace patterns become `Specifier2::Unsupported` during creation
+- Workspace protocols return errors when methods can't extract version info from raw string
 
 ### Phase 3: Method Implementation
 
 #### 3.1 Implementation Priority Order
 
-**Phase 3A: Simple Methods (No Dependencies)**
+**Phase 3A: Simple Methods**
 
 ```rust
 pub fn get_raw(&self) -> &str
 pub fn is_workspace_protocol(&self) -> bool
-pub fn get_semver_range(&self) -> Option<SemverRange>
-```
-
-**Phase 3B: Core Resolution Methods**
-
-```rust
-pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>
-pub fn get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>
-pub fn get_node_range(&self, local_version: Option<&BasicSemver>) -> Result<Range, String>
-```
-
-**Phase 3C: Transformation Methods**
-
-```rust
-pub fn with_semver(&self, semver: &BasicSemver, local_version: Option<&BasicSemver>) -> Result<String, String>
 pub fn has_semver_range_of(&self, range: &SemverRange) -> bool
 ```
 
-**Phase 3D: Comparison Methods (Depend on 3B)**
+**Phase 3B: Version Resolution Methods**
+These parse version information from the stored string:
 
 ```rust
-pub fn has_same_version_number_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn satisfies(&self, range: &Range, local_version: Option<&BasicSemver>) -> Result<bool, String>
-pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver>) -> Result<bool, String>
-pub fn has_same_release_channel_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_eligible_update_for(&self, target: &Self, self_local: Option<&BasicSemver>, target_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than_by_minor(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than_by_patch(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
+pub fn get_semver(&self) -> Result<BasicSemver, String>
+pub fn get_node_version(&self) -> Result<Version, String>
+pub fn get_node_range(&self) -> Result<Range, String>
+pub fn get_semver_range(&self) -> Result<SemverRange, String>
+pub fn with_semver(&self, semver: &BasicSemver) -> Result<String, String>
 ```
 
-#### 3.2 Workspace Resolution Helper
+**Phase 3C: Comparison Methods**
+These delegate to Phase 3B methods:
+
+```rust
+pub fn has_same_version_number_as(&self, other: &Self) -> Result<bool, String>
+pub fn satisfies(&self, range: &Range) -> Result<bool, String>
+pub fn satisfies_all(&self, ranges: &[Range]) -> Result<bool, String>
+pub fn has_same_release_channel_as(&self, other: &Self) -> Result<bool, String>
+pub fn is_eligible_update_for(&self, target: &Self) -> Result<bool, String>
+pub fn is_older_than(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_minor(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
+```
+
+#### 3.2 Error Handling for Workspace Protocols
 
 ```rust
 impl Specifier2 {
-  fn resolve_workspace_protocol(&self, local_version: &BasicSemver) -> Result<BasicSemver, String> {
-    // Simple approach - no sanitise_value(), direct string manipulation
+  // Workspace protocols return errors when version info can't be extracted
+  pub fn get_semver(&self) -> Result<BasicSemver, String> {
     match self {
       Self::WorkspaceProtocol(raw) => {
-        let without_protocol = &raw[10..]; // Skip "workspace:"
-        match without_protocol {
-          "*" => Ok(local_version.clone()),
-          "^" => BasicSemver::new(&format!("^{}", local_version.raw))
-            .ok_or_else(|| format!("Failed to create semver from '^{}'", local_version.raw)),
-          "~" => BasicSemver::new(&format!("~{}", local_version.raw))
-            .ok_or_else(|| format!("Failed to create semver from '~{}'", local_version.raw)),
-          other => BasicSemver::new(other)
-            .ok_or_else(|| format!("Invalid workspace protocol pattern: 'workspace:{}'", other)),
-        }
+        Err(format!("Cannot extract semver from unresolved workspace protocol: '{}'", raw))
       }
-      _ => Err(format!("resolve_workspace_protocol called on non-workspace specifier: '{}'", self.get_raw()))
+      Self::Exact(version) => BasicSemver::new(version)
+        .ok_or_else(|| format!("Invalid semver: '{}'", version)),
+      // ... other variants
     }
   }
 }
 ```
 
-#### 3.3 Final Method Signatures
+#### 3.3 Final Method Signatures (Pure and Stateless)
 
-All methods requiring workspace resolution use these signatures:
-
-**Single specifier methods:**
+**Simple methods:**
 
 ```rust
-pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>
-pub fn get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>
-pub fn get_node_range(&self, local_version: Option<&BasicSemver>) -> Result<Range, String>
-pub fn with_semver(&self, semver: &BasicSemver, local_version: Option<&BasicSemver>) -> Result<String, String>
-pub fn satisfies(&self, range: &Range, local_version: Option<&BasicSemver>) -> Result<bool, String>
-pub fn satisfies_all(&self, ranges: &[Range], local_version: Option<&BasicSemver>) -> Result<bool, String>
-```
-
-**Comparison methods (two specifiers):**
-
-```rust
-pub fn has_same_version_number_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than_by_minor(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_older_than_by_patch(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn is_eligible_update_for(&self, target: &Self, self_local: Option<&BasicSemver>, target_local: Option<&BasicSemver>) -> Result<bool, String>
-pub fn has_same_release_channel_as(&self, other: &Self, self_local: Option<&BasicSemver>, other_local: Option<&BasicSemver>) -> Result<bool, String>
-```
-
-#### 3.4 Methods NOT Requiring local_version (Detailed Signatures)
-
-These methods work with the raw string and don't need workspace resolution:
-
-```rust
-pub fn get_raw(&self) -> &str                           // ✅ Return stored string
-pub fn is_workspace_protocol(&self) -> bool             // ✅ Check string prefix
-pub fn get_semver_range(&self) -> Option<SemverRange>   // ✅ Parse range from string
+pub fn get_raw(&self) -> &str                           // ✅ Already implemented
+pub fn is_workspace_protocol(&self) -> bool             // Check string prefix
 pub fn get_config_identifier(&self) -> &'static str     // ✅ Already implemented
 pub fn get_alias_name(&self) -> Option<&str>            // ✅ Already implemented
 pub fn get_semver_number(&self) -> Option<&str>         // ✅ Already implemented
 pub fn with_range(&self, range: &SemverRange) -> Option<String>  // ✅ Already implemented
+pub fn has_semver_range_of(&self, range: &SemverRange) -> bool   // String comparison only
+```
+
+**Version resolution methods:**
+These parse version information from the stored string:
+
+```rust
+pub fn get_semver(&self) -> Result<BasicSemver, String>
+pub fn get_node_version(&self) -> Result<Version, String>
+pub fn get_node_range(&self) -> Result<Range, String>
+pub fn get_semver_range(&self) -> Result<SemverRange, String>
+pub fn with_semver(&self, semver: &BasicSemver) -> Result<String, String>
+```
+
+**Comparison methods:**
+These delegate to version resolution methods above:
+
+```rust
+pub fn has_same_version_number_as(&self, other: &Self) -> Result<bool, String>
+pub fn satisfies(&self, range: &Range) -> Result<bool, String>
+pub fn satisfies_all(&self, ranges: &[Range]) -> Result<bool, String>
+pub fn has_same_release_channel_as(&self, other: &Self) -> Result<bool, String>
+pub fn is_eligible_update_for(&self, target: &Self) -> Result<bool, String>
+pub fn is_older_than(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_minor(&self, other: &Self) -> Result<bool, String>
+pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 ```
 
 ### Phase 4: Advanced Features
@@ -350,14 +334,13 @@ impl Specifier2 {
 }
 ```
 
-#### 4.3 Integration Helpers
+#### 4.3 Pure Method Implementation
 
 ```rust
-pub fn get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String> {
+pub fn get_semver(&self) -> Result<BasicSemver, String> {
   match self {
-    Self::WorkspaceProtocol(_) => {
-      let local = local_version.ok_or("local_version required for workspace protocols")?;
-      self.resolve_workspace_protocol(local)
+    Self::WorkspaceProtocol(raw) => {
+      Err(format!("Cannot extract semver from unresolved workspace protocol: '{}'", raw))
     }
     Self::Exact(version) => BasicSemver::new(version)
       .ok_or_else(|| format!("Invalid semver: '{}'", version)),
@@ -416,25 +399,26 @@ Based on fluid-framework project analysis:
 - Remove old `Specifier` and related types
 - Clean up workspace protocol handling
 
-## Error Handling Strategy
+### Error Handling Strategy
 
-### Workspace Protocol Requirements
+### Workspace Protocol Handling
 
 ```rust
-// This will panic with descriptive message:
-workspace_spec.get_semver(None)
+// Workspace protocols return descriptive errors:
+workspace_spec.get_semver()
 // ↓
-// panic!("local_version required for workspace protocol specifiers")
+// Err("Cannot extract semver from unresolved workspace protocol: 'workspace:^'")
 
-// This works:
-workspace_spec.get_semver(Some(&local_version))  // ✅
+// Resolution happens externally before calling methods:
+resolved_spec = resolve_workspace_protocol(workspace_spec, local_version);
+resolved_spec.get_semver()  // ✅ Works with resolved specifier
 ```
 
 ### Validation
 
-- Non-workspace specifiers ignore `local_version` parameter
-- Workspace specifiers require `local_version` for resolution methods
-- Clear panic messages for misuse
+- All methods are pure and work with stored strings
+- Workspace protocols return clear error messages when version info is needed
+- External callers handle workspace resolution before calling methods
 
 ## Testing Strategy
 
@@ -455,7 +439,7 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 2. **Perfect caching**: Cache key is only the raw string, enabling maximum reuse
 3. **Raw string storage**: All variants store the original string unchanged
 4. **Call-time resolution**: Workspace resolution happens in methods that need it
-5. **Result-based error handling**: Descriptive errors instead of panics
+5. **Pure methods**: No external dependencies or context-dependent behavior
 6. **Follows project patterns**: Uses `Rc<Specifier2>` and single-threaded design
 
 ## Current Status
@@ -471,17 +455,16 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 
 ### 🚧 Next Steps
 
-- Add methods requiring `local_version` parameter (see Phase 3.3 for exact signatures)
-- Implement workspace resolution helper methods
-- Add methods not requiring `local_version`:
-  - `get_raw(&self) -> &str`
-  - `is_workspace_protocol(&self) -> bool`
+- Add simple methods (Phase 3A): `get_raw()`, `is_workspace_protocol()`, `has_semver_range_of()`
+- Add version resolution methods (Phase 3B) that parse from stored strings
+- Add comparison methods (Phase 3C) that delegate to resolution methods
+- Implement error handling for workspace protocols (return descriptive errors)
 - Consider replacing `BasicSemver` with `Specifier2` for complete consolidation
 
 ### ⏳ Pending
 
-- Port remaining tests from `specifier_test.rs` with new signatures
-- Performance validation with real workspace protocols
+- Port remaining tests from `specifier_test.rs` with pure method signatures
+- Performance validation with simplified architecture
 - Evaluate `BasicSemver` replacement strategy
 - Plan migration from `Specifier` to `Specifier2`
 

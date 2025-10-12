@@ -1,5 +1,6 @@
 use {
   crate::specifier::{parser, semver_range::SemverRange},
+  node_semver::{Range, Version},
   std::{cell::RefCell, collections::HashMap, rc::Rc},
 };
 
@@ -9,6 +10,8 @@ mod specifier2_test;
 
 thread_local! {
   static SPECIFIER_CACHE: RefCell<HashMap<String, Rc<Specifier2>>> = RefCell::new(HashMap::new());
+  static RANGE_CACHE: RefCell<HashMap<String, Rc<Range>>> = RefCell::new(HashMap::new());
+  static VERSION_CACHE: RefCell<HashMap<String, Rc<Version>>> = RefCell::new(HashMap::new());
 }
 
 const ALIAS: &str = "alias";
