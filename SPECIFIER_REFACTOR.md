@@ -16,10 +16,10 @@
 - Resolution happens at creation time and is stored in the struct
 - Makes sharing instances across different contexts impossible
 
-### 3. **Thread Safety Overhead**
-- Uses `Arc<Specifier>` and `Mutex` for thread safety
-- Most of the application is single-threaded, making this overhead unnecessary
-- Only `fetch_all_updates` uses threads, and could be refactored
+### 3. **Follows Single-Threaded Architecture**
+- Current `Specifier` already uses `Rc<Specifier>` following the project's single-threaded design
+- However, caching issues remain due to stateful workspace protocol design
+- The refactor improves on the existing `Rc` pattern with better caching
 
 ## Specifier2 Design Goals
 
@@ -28,10 +28,10 @@
 - Move workspace resolution from creation-time to call-time
 - Enable aggressive caching: same input string = same cached instance
 
-### 2. **Single-Threaded Optimized**
-- Use `Rc<Specifier2>` instead of `Arc<Specifier2>`
-- Use `RefCell` + `thread_local!` instead of `Mutex` + `lazy_static!`
-- Eliminate all thread synchronization overhead
+### 2. **Optimized Single-Threaded Design**
+- Continue using `Rc<Specifier2>` (consistent with project patterns)
+- Use `RefCell` + `thread_local!` for optimal single-threaded caching
+- Follow established project rule: "Use Rc for single-threaded sharing"
 
 ### 3. **Lazy Evaluation**
 - Only compute workspace resolution when methods are actually called
@@ -357,7 +357,7 @@ Based on fluid-framework project analysis:
 
 ### Expected Performance Gains
 - **31x faster** cache hits (measured)
-- **Zero thread synchronization** overhead
+- **Improved single-threaded performance** with `thread_local!` caching
 - **Lazy workspace resolution** - only when needed
 - **Perfect caching** - same string = same instance regardless of context
 
@@ -369,9 +369,10 @@ Based on fluid-framework project analysis:
 - Validate performance with real-world data
 
 ### Phase 2: Integration Points
-- Update `Context::create()` to use `Specifier2::new()`
-- Modify methods that call workspace-dependent operations to pass `local_version`
-- Update `fetch_all_updates` to work with stateless specifiers
+- Update `Context::create()` to use `Specifier2::new()` (follows "Context owns all project data")
+- Modify `visit_packages()` to pass `local_version` to workspace-dependent operations
+- Ensure integration follows the 3-phase pattern: Create Context → Inspect → Run Command
+- Keep Context ownership rules intact
 
 ### Phase 3: Replacement
 - Replace `Specifier` with `Specifier2` throughout codebase
@@ -420,7 +421,8 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 2. **Perfect caching**: Cache key is only the raw string, enabling maximum reuse
 3. **Raw string storage**: All variants store the original string unchanged
 4. **Call-time resolution**: Workspace resolution happens in methods that need it
-5. **Panic on missing local_version**: Clear error handling for workspace protocols
+5. **Result-based error handling**: Descriptive errors instead of panics
+6. **Follows project patterns**: Uses `Rc<Specifier2>` and single-threaded design
 
 ## Current Status
 
@@ -434,19 +436,21 @@ workspace_spec.get_semver(Some(&local_version))  // ✅
 
 ### 🚧 Next Steps
 - Add methods requiring `local_version` parameter:
-  - `get_semver(&self, local_version: Option<&BasicSemver>) -> Option<BasicSemver>`
-  - `get_node_version(&self, local_version: Option<&BasicSemver>) -> Option<Version>`
-  - Version comparison methods
+  - `get_semver(&self, local_version: Option<&BasicSemver>) -> Result<BasicSemver, String>`
+  - `get_node_version(&self, local_version: Option<&BasicSemver>) -> Result<Version, String>`
+  - Version comparison methods with `Result<bool, String>` returns
 - Implement workspace resolution helper methods
 - Add methods not requiring `local_version`:
   - `get_raw(&self) -> &str`
   - `is_workspace_protocol(&self) -> bool`
+- Follow project testing patterns: Use TestBuilder for integration tests
 
 ### ⏳ Pending
-- Port remaining tests from `specifier_test.rs`
+- Port remaining tests from `specifier_test.rs` (use TestBuilder pattern)
+- Write integration tests in `src/visit_packages/*_test.rs` following project conventions
 - Performance validation with real workspace protocols
-- Integration with main codebase (`Context::create()`, etc.)
-- Migration from `Specifier` to `Specifier2`
+- Integration following 3-phase pattern: Context creation → visit_packages → commands
+- Migration from `Specifier` to `Specifier2` while maintaining Context ownership rules
 
 ## Benefits Summary
 
