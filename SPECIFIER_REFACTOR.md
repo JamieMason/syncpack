@@ -6,39 +6,39 @@
 
 ## Problems with Current Specifier
 
-### 1. **Not Cacheable**
+### 1. Not Cacheable
 
 - `Specifier::new(value, local_version)` creates different instances for the same `value` with different `local_version`
 - Cannot cache effectively due to workspace protocol state dependency
 - Performance penalty: 2.8x slower cache misses due to repeated parsing
 
-### 2. **Stateful Design**
+### 2. Stateful Design
 
 - `WorkspaceProtocol` struct stores both `local_version` and resolved `semver`
 - Resolution happens at creation time and is stored in the struct
 - Makes sharing instances across different contexts impossible
 
-### 3. **Follows Single-Threaded Architecture**
+### 3. Stateful Design Prevents Effective Caching
 
-- Current `Specifier` already uses `Rc<Specifier>` following the project's single-threaded design
-- However, caching issues remain due to stateful workspace protocol design
-- The refactor improves on the existing `Rc` pattern with better caching
+- Workspace protocol resolution happens at creation time and is stored in the struct
+- Same specifier string with different `local_version` creates different instances
+- Cannot cache effectively due to workspace protocol state dependency
 
 ## Specifier2 Design Goals
 
-### 1. **Stateless and Cacheable**
+### 1. Stateless and Cacheable
 
 - Store only the raw specifier string (e.g., `"workspace:^"`)
 - No workspace resolution logic in `Specifier2` - handled externally by callers
 - Enable aggressive caching: same input string = same cached instance
 
-### 2. **Optimized Single-Threaded Design**
+### 2. Optimized Single-Threaded Design
 
 - Continue using `Rc<Specifier2>` (consistent with project patterns)
 - Use `RefCell` + `thread_local!` for optimal single-threaded caching
 - Follow established project rule: "Use Rc for single-threaded sharing"
 
-### 3. **Pure Methods**
+### 3. Pure Methods
 
 - All methods work with the stored specifier string directly
 - No context-dependent behavior or external dependencies
@@ -46,7 +46,7 @@
 
 ## Architecture Comparison
 
-### Current Specifier (Stateful)
+#### Current Specifier (Stateful)
 
 ```rust
 // Creation time resolution
@@ -61,7 +61,7 @@ Specifier::new("workspace:^", Some(local_version))
 specifier.get_node_version() // ← Uses pre-resolved semver
 ```
 
-### New Specifier2 (Stateless)
+#### New Specifier2 (Stateless)
 
 ```rust
 // No resolution at creation - just stores the raw string
@@ -75,9 +75,9 @@ resolved_specifier.get_node_version() // ← Works with resolved specifier
 
 ## Implementation Plan
 
-### Phase 1: Core Architecture
+#### Phase 1: Core Architecture
 
-#### 1.1 Update Enum Storage
+##### 1.1 Update Enum Storage
 
 ```rust
 #[derive(Debug, PartialEq)]
@@ -89,7 +89,7 @@ pub enum Specifier2 {
 }
 ```
 
-#### 1.2 Creation Method (Already Implemented)
+##### 1.2 Creation Method (Already Implemented)
 
 ```rust
 impl Specifier2 {
@@ -111,9 +111,9 @@ impl Specifier2 {
 }
 ```
 
-### Phase 2: Method Signature Analysis
+#### Phase 2: Method Signature Analysis
 
-#### 2.1 Method Categories Analysis
+##### 2.1 Method Categories Analysis
 
 All methods work with the stored specifier string directly. Workspace protocol resolution is handled externally.
 
@@ -139,7 +139,7 @@ pub fn is_older_than_by_minor(&self, other: &Self) -> Result<bool, String>
 pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 ```
 
-#### 2.2 Method Categories
+##### 2.2 Method Categories
 
 All methods are pure and work with the stored specifier string. Workspace protocol resolution happens externally before calling these methods.
 
@@ -180,7 +180,7 @@ pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 
 **Note**: `BasicSemver` could potentially be replaced by `Specifier2` entirely, with lazy caching of `node_range` and `node_version` properties.
 
-#### 2.3 Return Type Decisions
+##### 2.3 Return Type Decisions
 
 **Owned vs Borrowed Returns:**
 
@@ -194,9 +194,9 @@ pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 - Error messages include context about what failed and why
 - Workspace protocols return errors when methods can't extract version info from raw string
 
-### Phase 3: Method Implementation
+#### Phase 3: Method Implementation
 
-#### 3.1 Implementation Priority Order
+##### 3.1 Implementation Priority Order
 
 **Phase 3A: Simple Methods**
 
@@ -231,7 +231,7 @@ pub fn is_older_than_by_minor(&self, other: &Self) -> Result<bool, String>
 pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 ```
 
-#### 3.2 Error Handling for Workspace Protocols
+##### 3.2 Error Handling for Workspace Protocols
 
 ```rust
 impl Specifier2 {
@@ -249,7 +249,7 @@ impl Specifier2 {
 }
 ```
 
-#### 3.3 Final Method Signatures (Pure and Stateless)
+##### 3.3 Final Method Signatures (Pure and Stateless)
 
 **Simple methods:**
 
@@ -288,9 +288,9 @@ pub fn is_older_than_by_minor(&self, other: &Self) -> Result<bool, String>
 pub fn is_older_than_by_patch(&self, other: &Self) -> Result<bool, String>
 ```
 
-### Phase 4: Advanced Features
+#### Phase 4: Advanced Features
 
-#### 4.1 Traits Implementation
+##### 4.1 Traits Implementation
 
 ```rust
 impl Ord for Specifier2 {
@@ -306,35 +306,36 @@ impl PartialOrd for Specifier2 {
 }
 ```
 
-#### 4.2 Advanced Workspace Resolution
+##### 4.2 External Workspace Resolution
 
-Move logic from current `Specifier::from_workspace_protocol` to helper methods:
+Workspace protocol resolution will be handled externally by callers, maintaining the stateless design:
 
 ```rust
-impl Specifier2 {
-  fn resolve_workspace_protocol(&self, local_version: &BasicSemver) -> BasicSemver {
-    match self {
-      Self::WorkspaceProtocol(raw) => {
-        let without_protocol = &raw[10..]; // Skip "workspace:"
-        let sanitised = sanitise_value(without_protocol);
-        let sanitised_str = sanitised.as_deref().unwrap_or(without_protocol);
+// External helper function (not part of Specifier2)
+pub fn resolve_workspace_protocol(spec: &Specifier2, local_version: &BasicSemver) -> Specifier2 {
+  match spec {
+    Specifier2::WorkspaceProtocol(raw) => {
+      let without_protocol = &raw[10..]; // Skip "workspace:"
+      let sanitised = sanitise_value(without_protocol);
+      let sanitised_str = sanitised.as_deref().unwrap_or(without_protocol);
 
-        if parser::is_simple_semver(sanitised_str) {
-          BasicSemver::new(sanitised_str).unwrap()
-        } else if sanitised_str == "~" || sanitised_str == "^" {
-          let combined = format!("{}{}", sanitised_str, local_version.raw);
-          BasicSemver::new(&combined).unwrap()
-        } else {
-          // Handle other cases...
-        }
-      }
-      _ => panic!("resolve_workspace_protocol called on non-workspace specifier")
+      let resolved_string = if parser::is_simple_semver(sanitised_str) {
+        sanitised_str.to_string()
+      } else if sanitised_str == "~" || sanitised_str == "^" {
+        format!("{}{}", sanitised_str, local_version.raw)
+      } else {
+        // Handle other cases...
+        sanitised_str.to_string()
+      };
+
+      Specifier2::new(&resolved_string)
     }
+    _ => panic!("resolve_workspace_protocol called on non-workspace specifier")
   }
 }
 ```
 
-#### 4.3 Pure Method Implementation
+##### 4.3 Pure Method Implementation
 
 ```rust
 pub fn get_semver(&self) -> Result<BasicSemver, String> {
@@ -352,9 +353,9 @@ pub fn get_semver(&self) -> Result<BasicSemver, String> {
 }
 ```
 
-### Phase 5: Performance Optimizations
+#### Phase 5: Performance Optimizations
 
-#### 5.1 Single-Threaded Cache (Already Implemented)
+##### 5.1 Single-Threaded Cache (Already Implemented)
 
 ```rust
 thread_local! {
@@ -364,7 +365,7 @@ thread_local! {
 
 ## Performance Benefits
 
-### Real-World Impact
+#### Real-World Impact
 
 Based on fluid-framework project analysis:
 
@@ -372,7 +373,7 @@ Based on fluid-framework project analysis:
 - **153x** `prettier ~3.0.3`
 - **115x** `@fluid-tools/build-cli ^0.49.0`
 
-### Expected Performance Gains
+#### Expected Performance Gains
 
 - **31x faster** cache hits (measured)
 - **Improved single-threaded performance** with `thread_local!` caching
@@ -381,27 +382,27 @@ Based on fluid-framework project analysis:
 
 ## Migration Strategy
 
-### Phase 1: Parallel Development
+#### Phase 1: Parallel Development
 
 - Complete `Specifier2` implementation in isolation
 - Add comprehensive tests matching `specifier_test.rs`
 - Validate performance with real-world data
 
-### Phase 2: Integration Planning
+#### Phase 2: Integration Planning
 
 - Design integration strategy for replacing `Specifier` with `Specifier2`
 - Plan migration of workspace-dependent operations to use new method signatures
 - Consider whether `BasicSemver` should be replaced entirely by `Specifier2`
 
-### Phase 3: Replacement
+#### Phase 3: Replacement
 
 - Replace `Specifier` with `Specifier2` throughout codebase
 - Remove old `Specifier` and related types
 - Clean up workspace protocol handling
 
-### Error Handling Strategy
+#### Error Handling Strategy
 
-### Workspace Protocol Handling
+#### Workspace Protocol Handling
 
 ```rust
 // Workspace protocols return descriptive errors:
@@ -414,7 +415,7 @@ resolved_spec = resolve_workspace_protocol(workspace_spec, local_version);
 resolved_spec.get_semver()  // ✅ Works with resolved specifier
 ```
 
-### Validation
+#### Validation
 
 - All methods are pure and work with stored strings
 - Workspace protocols return clear error messages when version info is needed
@@ -422,7 +423,7 @@ resolved_spec.get_semver()  // ✅ Works with resolved specifier
 
 ## Testing Strategy
 
-### Unit Tests
+#### Unit Tests
 
 - Port all tests from `specifier_test.rs` to `specifier2_test.rs`
 - Add tests for new method signatures with `local_version` parameters
@@ -433,7 +434,7 @@ resolved_spec.get_semver()  // ✅ Works with resolved specifier
 
 ## Current Implementation Status
 
-### Key Architectural Decisions Made
+#### Key Architectural Decisions Made
 
 1. **Single argument constructor**: `new(value: &str)` - no `local_version` parameter
 2. **Perfect caching**: Cache key is only the raw string, enabling maximum reuse
@@ -444,7 +445,7 @@ resolved_spec.get_semver()  // ✅ Works with resolved specifier
 
 ## Current Status
 
-### ✅ Completed
+#### ✅ Completed
 
 - Basic enum structure and parsing logic in `create()`
 - Cache infrastructure with `Rc<Specifier2>` and `thread_local!`
@@ -453,7 +454,7 @@ resolved_spec.get_semver()  // ✅ Works with resolved specifier
 - Workspace protocol storage (raw string only)
 - Comprehensive parsing tests in `specifier2_test.rs`
 
-### 🚧 Next Steps
+#### 🚧 Next Steps
 
 - Add simple methods (Phase 3A): `get_raw()`, `is_workspace_protocol()`, `has_semver_range_of()`
 - Add version resolution methods (Phase 3B) that parse from stored strings
@@ -461,7 +462,7 @@ resolved_spec.get_semver()  // ✅ Works with resolved specifier
 - Implement error handling for workspace protocols (return descriptive errors)
 - Consider replacing `BasicSemver` with `Specifier2` for complete consolidation
 
-### ⏳ Pending
+#### ⏳ Pending
 
 - Port remaining tests from `specifier_test.rs` with pure method signatures
 - Performance validation with simplified architecture
