@@ -185,9 +185,8 @@ impl Specifier2 {
     }
   }
 
-  /// Returns the semver version number of the npm dependency in the format
-  /// MAJOR.MINOR.PATCH, if it exists. Only the version number is returned,
-  /// excluding any semver ranges if present.
+  /// Returns the semver version number of the specifier, if it exists. Only the
+  /// version number is returned, WITHOUT semver range characters.
   ///
   /// Examples:
   /// - "npm:lodash@^4.17.21" -> Some("4.17.21")
@@ -270,14 +269,29 @@ impl Specifier2 {
     }
   }
 
-  pub fn get_node_version(&self) -> Option<Version> {
+  /// Get or create a reference to a single `node_semver::Version` created from
+  /// the semver version number of the specifier, WITHOUT semver range
+  /// characters.
+  ///
+  /// Examples:
+  /// - "1.2.3" → "1.2.3"
+  /// - "^1.2.3" → "1.2.3"
+  pub fn get_node_version(&self) -> Option<Rc<Version>> {
     todo!()
   }
 
-  pub fn get_node_range(&self) -> Option<Range> {
+  /// Get or create a reference to a single `node_semver::Range` created from
+  /// the semver version number of the specifier, WITH semver range
+  /// characters.
+  ///
+  /// Examples:
+  /// - "1.2.3" → "1.2.3"
+  /// - "^1.2.3" → "^1.2.3"
+  pub fn get_node_range(&self) -> Option<Rc<Range>> {
     todo!()
   }
 
+  /// Returns the type of semver range used in the specifier, if it exists
   pub fn get_semver_range(&self) -> Option<SemverRange> {
     todo!()
   }
