@@ -1,5 +1,8 @@
 use {
-  crate::specifier::{parser, semver_range::SemverRange},
+  crate::{
+    cli::UpdateTarget,
+    specifier::{parser, semver_range::SemverRange},
+  },
   node_semver::{Range, Version},
   std::{cell::RefCell, collections::HashMap, rc::Rc},
 };
@@ -51,6 +54,7 @@ pub enum Specifier2 {
   WorkspaceProtocol(String), // "workspace:^"
 }
 
+// Creation Methods
 impl Specifier2 {
   pub fn new(value: &str) -> Rc<Self> {
     SPECIFIER_CACHE.with(|cache| {
@@ -114,6 +118,31 @@ impl Specifier2 {
       return Self::Url(value.to_string());
     }
     Self::Unsupported(value.to_string())
+  }
+}
+
+// Getters
+impl Specifier2 {
+  /// Get the `specifier_type` name as used in config files.
+  pub fn get_config_identifier(&self) -> &'static str {
+    match self {
+      Self::Alias(_) => ALIAS,
+      Self::ComplexSemver(_) => RANGE_COMPLEX,
+      Self::Exact(_) => EXACT,
+      Self::File(_) => FILE,
+      Self::Git(_) => GIT,
+      Self::Latest(_) => LATEST,
+      Self::Major(_) => MAJOR,
+      Self::Minor(_) => MINOR,
+      Self::None => MISSING,
+      Self::Range(_) => RANGE,
+      Self::RangeMajor(_) => RANGE_MAJOR,
+      Self::RangeMinor(_) => RANGE_MINOR,
+      Self::Tag(_) => TAG,
+      Self::Unsupported(_) => UNSUPPORTED,
+      Self::Url(_) => URL,
+      Self::WorkspaceProtocol(_) => WORKSPACE_PROTOCOL,
+    }
   }
 
   pub fn get_alias_name(&self) -> Option<&str> {
@@ -218,6 +247,21 @@ impl Specifier2 {
     }
   }
 
+  pub fn get_node_version(&self) -> Option<Version> {
+    todo!()
+  }
+
+  pub fn get_node_range(&self) -> Option<Range> {
+    todo!()
+  }
+
+  pub fn get_semver_range(&self) -> Option<SemverRange> {
+    todo!()
+  }
+}
+
+// Mapping Methods
+impl Specifier2 {
   pub fn with_range(&self, range: &SemverRange) -> Option<String> {
     let range_str = range.unwrap();
 
@@ -340,25 +384,53 @@ impl Specifier2 {
     }
   }
 
-  /// Get the `specifier_type` name as used in config files.
-  pub fn get_config_identifier(&self) -> &'static str {
-    match self {
-      Self::Alias(_) => ALIAS,
-      Self::ComplexSemver(_) => RANGE_COMPLEX,
-      Self::Exact(_) => EXACT,
-      Self::File(_) => FILE,
-      Self::Git(_) => GIT,
-      Self::Latest(_) => LATEST,
-      Self::Major(_) => MAJOR,
-      Self::Minor(_) => MINOR,
-      Self::None => MISSING,
-      Self::Range(_) => RANGE,
-      Self::RangeMajor(_) => RANGE_MAJOR,
-      Self::RangeMinor(_) => RANGE_MINOR,
-      Self::Tag(_) => TAG,
-      Self::Unsupported(_) => UNSUPPORTED,
-      Self::Url(_) => URL,
-      Self::WorkspaceProtocol(_) => WORKSPACE_PROTOCOL,
-    }
+  /// Return a new `Specifier` with the given semver version number applied to
+  /// it when it is possible to do so, otherwise the same `Specifier` is
+  /// returned. The range is also changed.
+  pub fn with_node_version(self, node_version: &Version) -> Self {
+    todo!()
+  }
+}
+
+// Comparison Methods
+impl Specifier2 {
+  pub fn has_same_release_channel_as(&self, other: &Self) -> bool {
+    todo! {}
+  }
+
+  pub fn has_same_version_number_as(&self, other: &Self) -> bool {
+    todo! {}
+  }
+
+  pub fn has_semver_range_of(&self, range: &SemverRange) -> bool {
+    todo!()
+  }
+
+  pub fn is_eligible_update_for(&self, other: &Self, target: &UpdateTarget) -> bool {
+    todo! {}
+  }
+
+  pub fn is_older_than(&self, other: &Self) -> bool {
+    todo! {}
+  }
+
+  pub fn is_older_than_by_minor(&self, other: &Self) -> bool {
+    todo! {}
+  }
+
+  pub fn is_older_than_by_patch(&self, other: &Self) -> bool {
+    todo! {}
+  }
+
+  pub fn is_workspace_protocol(&self) -> bool {
+    matches!(self, Self::WorkspaceProtocol(_))
+  }
+
+  pub fn satisfies(&self, range: &Range) -> bool {
+    todo! {}
+  }
+
+  pub fn satisfies_all(&self, ranges: &[Range]) -> bool {
+    todo! {}
   }
 }
