@@ -299,9 +299,19 @@ impl Specifier2 {
 
 // Mapping Methods
 impl Specifier2 {
-  pub fn with_range(&self, range: &SemverRange) -> Option<String> {
+  /// Get or create a reference to a single Specifier which represents the
+  /// semver version number of this Specifier with the given semver range
+  /// applied to it, if a valid semver version number is present and the given
+  /// range is compatible with the current specifier type.
+  ///
+  /// Examples:
+  /// - "^1.2.3" + "" → Some("1.2.3")
+  /// - "1.2.3" + "^" → Some("^1.2.3")
+  /// - "npm:@scope/package@1.2.3" + "^" → Some("npm:@scope/package@^1.2.3")
+  /// - "*" + "^" → None
+  /// - "npm:@scope/package@1.2.3" + "*" → Some("npm:@scope/package")
+  pub fn with_range(&self, range: &SemverRange) -> Option<Rc<Self>> {
     let range_str = range.unwrap();
-
     match self {
       Self::Alias(raw) => {
         if let Some(after_prefix) = raw.strip_prefix("npm:") {
@@ -419,12 +429,20 @@ impl Specifier2 {
       }
       _ => None,
     }
+    .map(|value| Self::new(&value))
   }
 
-  /// Return a new `Specifier` with the given semver version number applied to
-  /// it when it is possible to do so, otherwise the same `Specifier` is
-  /// returned. The range is also changed.
-  pub fn with_node_version(self, node_version: &Version) -> Self {
+  /// Get or create a reference to a single Specifier which represents the
+  /// semver range and specifier type of this Specifier with the given semver
+  /// version number applied to it, if such a combination is valid and
+  /// compatible.
+  ///
+  /// Examples:
+  /// - "workspace:^1.2.3" + "2.3.4" -> Some("workspace:^2.3.4")
+  /// - "^1.2.3" + "2.3.4" -> Some("^2.3.4")
+  /// - "*" + "1.2.3" -> None
+  /// - "npm:@scope/package@1.2.3" + "2.3.4" → Some("npm:@scope/package@2.3.4")
+  pub fn with_node_version(self, node_version: &Version) -> Option<Rc<Self>> {
     todo!()
   }
 }
