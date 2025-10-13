@@ -274,8 +274,8 @@ impl Specifier2 {
   /// characters.
   ///
   /// Examples:
-  /// - "1.2.3" → "1.2.3"
-  /// - "^1.2.3" → "1.2.3"
+  /// - "1.2.3" → Rc(Version("1.2.3"))
+  /// - "^1.2.3" → Rc(Version("1.2.3"))
   pub fn get_node_version(&self) -> Option<Rc<Version>> {
     todo!()
   }
@@ -285,13 +285,13 @@ impl Specifier2 {
   /// characters.
   ///
   /// Examples:
-  /// - "1.2.3" → "1.2.3"
-  /// - "^1.2.3" → "^1.2.3"
+  /// - "1.2.3" → Rc(Range("1.2.3"))
+  /// - "^1.2.3" → Rc(Range("^1.2.3"))
   pub fn get_node_range(&self) -> Option<Rc<Range>> {
     todo!()
   }
 
-  /// Returns the type of semver range used in the specifier, if it exists
+  /// Returns the type of semver range used in the specifier, if one exists.
   pub fn get_semver_range(&self) -> Option<SemverRange> {
     todo!()
   }
