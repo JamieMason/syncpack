@@ -56,6 +56,8 @@ pub enum Specifier2 {
 
 // Creation Methods
 impl Specifier2 {
+  /// Get or create a reference to a single Specifier which represents the given
+  /// version string
   pub fn new(value: &str) -> Rc<Self> {
     SPECIFIER_CACHE.with(|cache| {
       let mut cache = cache.borrow_mut();
@@ -70,6 +72,7 @@ impl Specifier2 {
     })
   }
 
+  /// Create a new Specifier for the given version string
   fn create(value: &str) -> Self {
     if value.is_empty() {
       return Self::None;
@@ -123,7 +126,12 @@ impl Specifier2 {
 
 // Getters
 impl Specifier2 {
-  /// Get the `specifier_type` name as used in config files.
+  /// Get the "specifier type" name as used in config files.
+  ///
+  /// Examples:
+  /// - "npm:lodash@^4.17.21" -> "alias"
+  /// - "^16.11.10" -> "range"
+  /// - ""1.2.3" -> "exact"
   pub fn get_config_identifier(&self) -> &'static str {
     match self {
       Self::Alias(_) => ALIAS,
@@ -145,6 +153,13 @@ impl Specifier2 {
     }
   }
 
+  /// If the current variant is a Specifier::Alias, returns the name of the npm
+  /// dependency which is being aliased.
+  ///
+  /// Examples:
+  /// - "npm:lodash@^4.17.21" -> Some("lodash")
+  /// - "^16.11.10" -> None
+  /// - "npm:express" -> None
   pub fn get_alias_name(&self) -> Option<&str> {
     match self {
       Self::Alias(raw) => {
@@ -170,6 +185,14 @@ impl Specifier2 {
     }
   }
 
+  /// Returns the semver version number of the npm dependency in the format
+  /// MAJOR.MINOR.PATCH, if it exists. Only the version number is returned,
+  /// excluding any semver ranges if present.
+  ///
+  /// Examples:
+  /// - "npm:lodash@^4.17.21" -> Some("4.17.21")
+  /// - ">=16.11.10" -> Some("16.11.10")
+  /// - "npm:express" -> None
   pub fn get_semver_number(&self) -> Option<&str> {
     match self {
       Self::Alias(raw) => {
