@@ -35,7 +35,7 @@ const WORKSPACE_PROTOCOL: &str = "workspace-protocol";
 
 // =============================================================================
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Exact {
   raw: String,
 }
@@ -46,7 +46,7 @@ impl Exact {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Range {
   raw: String,
 }
@@ -57,7 +57,7 @@ impl Range {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Latest {
   raw: String,
 }
@@ -68,7 +68,7 @@ impl Latest {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Major {
   raw: String,
 }
@@ -79,7 +79,7 @@ impl Major {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Minor {
   raw: String,
 }
@@ -90,7 +90,7 @@ impl Minor {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct RangeMajor {
   raw: String,
 }
@@ -101,7 +101,7 @@ impl RangeMajor {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct RangeMinor {
   raw: String,
 }
@@ -112,7 +112,7 @@ impl RangeMinor {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct ComplexSemver {
   raw: String,
 }
@@ -123,7 +123,7 @@ impl ComplexSemver {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct WorkspaceProtocol {
   raw: String,
 }
@@ -134,7 +134,7 @@ impl WorkspaceProtocol {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Tag {
   raw: String,
 }
@@ -145,10 +145,11 @@ impl Tag {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Alias {
   raw: String,
   name: String,
+  semver_string: Option<String>,
 }
 
 impl Alias {
@@ -160,18 +161,25 @@ impl Alias {
         .map(|at_pos| &after_prefix[..at_pos])
         .unwrap_or(after_prefix)
     });
+    let semver_string = raw
+      .strip_prefix("npm:")
+      .and_then(|after_prefix| after_prefix.rfind('@').map(|at_pos| (after_prefix, at_pos)))
+      .and_then(|(after_prefix, at_pos)| (at_pos > 0 && !after_prefix[..at_pos].is_empty()).then(|| &after_prefix[at_pos + 1..]))
+      .filter(|version| !version.is_empty())
+      .map(|version| version.to_string());
     name
       .map(|name| {
         Specifier2::Alias(Self {
           raw: raw.to_string(),
-          name,
+          name: name.to_string(),
+          semver_string,
         })
       })
       .unwrap_or(Specifier2::Unsupported(raw.to_string()))
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Git {
   raw: String,
 }
@@ -182,7 +190,7 @@ impl Git {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct File {
   raw: String,
 }
@@ -193,7 +201,7 @@ impl File {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Url {
   raw: String,
 }
@@ -206,7 +214,7 @@ impl Url {
 
 // =============================================================================
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Specifier2 {
   Alias(Alias),                         // "npm:foo@1.2.3"
   ComplexSemver(ComplexSemver),         // ">=1.2.3 <2.0.0"
