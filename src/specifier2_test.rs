@@ -191,23 +191,27 @@ fn basic_semver_patch() {
   for prerelease in prereleases() {
     for (range, range_variant) in ranges() {
       for git_url in git_urls() {
-        let value_without_protocol = format!("{range}1.2.3{prerelease}");
-        let value = format!("{git_url}#{value_without_protocol}");
-        // match Specifier2::new(&value, None) {
-        //   Specifier2::Git(actual) => {
-        //     assert_eq!(actual.raw, value);
-        //     assert_eq!(actual.origin, git_url);
-        //     let semver = actual.semver.unwrap();
-        //     assert_eq!(semver.raw, value_without_protocol);
-        //     assert_eq!(semver.variant, BasicSemverVariant::Patch);
-        //     assert_eq!(semver.range_variant, range_variant);
-        //     assert_eq!(semver.node_version.major, 1);
-        //     assert_eq!(semver.node_version.minor, 2);
-        //     assert_eq!(semver.node_version.patch, 3);
-        //     assert_eq!(semver.node_version.pre_release.is_empty(), prerelease.is_empty());
-        //   }
-        //   _ => panic!("Expected Git"),
-        // };
+        let semver_number = format!("1.2.3{prerelease}");
+        let with_range = format!("{range}{semver_number}");
+        let value = format!("{git_url}#{with_range}");
+        let specifier = Specifier2::new(&value);
+        match &*specifier {
+          Specifier2::Git(actual) => {
+            assert_eq!(*actual, value);
+            assert_eq!(specifier.get_semver_number(), Some(semver_number.as_str()));
+            // assert_eq!(actual.raw, value);
+            // assert_eq!(actual.origin, git_url);
+            // let semver = actual.semver.unwrap();
+            // assert_eq!(semver.raw, value_without_protocol);
+            // assert_eq!(semver.variant, BasicSemverVariant::Patch);
+            // assert_eq!(semver.range_variant, range_variant);
+            // assert_eq!(semver.node_version.major, 1);
+            // assert_eq!(semver.node_version.minor, 2);
+            // assert_eq!(semver.node_version.patch, 3);
+            // assert_eq!(semver.node_version.pre_release.is_empty(), prerelease.is_empty());
+          }
+          _ => panic!("Expected Git"),
+        };
       }
       for npm_name in npm_names() {
         let semver_number = format!("1.2.3{prerelease}");

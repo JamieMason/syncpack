@@ -3,7 +3,6 @@ use {
     cli::UpdateTarget,
     specifier::{parser, semver_range::SemverRange},
   },
-  node_semver::{Range, Version},
   std::{cell::RefCell, collections::HashMap, rc::Rc},
 };
 
@@ -13,8 +12,8 @@ mod specifier2_test;
 
 thread_local! {
   static SPECIFIER_CACHE: RefCell<HashMap<String, Rc<Specifier2>>> = RefCell::new(HashMap::new());
-  static RANGE_CACHE: RefCell<HashMap<String, Rc<Range>>> = RefCell::new(HashMap::new());
-  static VERSION_CACHE: RefCell<HashMap<String, Rc<Version>>> = RefCell::new(HashMap::new());
+  static RANGE_CACHE: RefCell<HashMap<String, Rc<node_semver::Range>>> = RefCell::new(HashMap::new());
+  static VERSION_CACHE: RefCell<HashMap<String, Rc<node_semver::Version>>> = RefCell::new(HashMap::new());
 }
 
 const ALIAS: &str = "alias";
@@ -34,24 +33,193 @@ const UNSUPPORTED: &str = "unsupported";
 const URL: &str = "url";
 const WORKSPACE_PROTOCOL: &str = "workspace-protocol";
 
-#[derive(Debug, PartialEq)]
+// =============================================================================
+
+#[derive(Debug)]
+struct Exact {
+  raw: String,
+}
+
+impl Exact {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Exact(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Range {
+  raw: String,
+}
+
+impl Range {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Range(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Latest {
+  raw: String,
+}
+
+impl Latest {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Latest(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Major {
+  raw: String,
+}
+
+impl Major {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Major(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Minor {
+  raw: String,
+}
+
+impl Minor {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Minor(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct RangeMajor {
+  raw: String,
+}
+
+impl RangeMajor {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::RangeMajor(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct RangeMinor {
+  raw: String,
+}
+
+impl RangeMinor {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::RangeMinor(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct ComplexSemver {
+  raw: String,
+}
+
+impl ComplexSemver {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::ComplexSemver(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct WorkspaceProtocol {
+  raw: String,
+}
+
+impl WorkspaceProtocol {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::WorkspaceProtocol(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Tag {
+  raw: String,
+}
+
+impl Tag {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Tag(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Alias {
+  raw: String,
+}
+
+impl Alias {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Alias(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Git {
+  raw: String,
+}
+
+impl Git {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Git(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct File {
+  raw: String,
+}
+
+impl File {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::File(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Unsupported {
+  raw: String,
+}
+
+impl Unsupported {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Unsupported(Self { raw: raw.to_string() })
+  }
+}
+
+#[derive(Debug)]
+struct Url {
+  raw: String,
+}
+
+impl Url {
+  pub fn new(raw: &str) -> Specifier2 {
+    Specifier2::Url(Self { raw: raw.to_string() })
+  }
+}
+
+// =============================================================================
+
+#[derive(Debug)]
 pub enum Specifier2 {
-  Alias(String),             // "npm:foo@1.2.3"
-  ComplexSemver(String),     // ">=1.2.3 <2.0.0"
-  Exact(String),             // "1.2.3"
-  File(String),              // "file:../path"
-  Git(String),               // "github:user/repo#v1.2.3"
-  Latest(String),            // "latest", "*"
-  Major(String),             // "1"
-  Minor(String),             // "1.2"
-  None,                      // Missing .version property
-  Range(String),             // "~1.2.3"
-  RangeMajor(String),        // "^1"
-  RangeMinor(String),        // "~1.2"
-  Tag(String),               // "alpha", "beta"
-  Unsupported(String),       // "}wat{"
-  Url(String),               // "https://example.com/package.tgz"
-  WorkspaceProtocol(String), // "workspace:^"
+  Alias(Alias),                         // "npm:foo@1.2.3"
+  ComplexSemver(ComplexSemver),         // ">=1.2.3 <2.0.0"
+  Exact(Exact),                         // "1.2.3"
+  File(File),                           // "file:../path"
+  Git(Git),                             // "github:user/repo#v1.2.3"
+  Latest(Latest),                       // "latest", "*"
+  Major(Major),                         // "1"
+  Minor(Minor),                         // "1.2"
+  None,                                 // Missing .version property
+  Range(Range),                         // "~1.2.3"
+  RangeMajor(RangeMajor),               // "^1"
+  RangeMinor(RangeMinor),               // "~1.2"
+  Tag(Tag),                             // "alpha", "beta"
+  Unsupported(Unsupported),             // "}wat{"
+  Url(Url),                             // "https://example.com/package.tgz"
+  WorkspaceProtocol(WorkspaceProtocol), // "workspace:^"
 }
 
 // Creation Methods
@@ -162,25 +330,13 @@ impl Specifier2 {
   /// - "npm:express" -> None
   pub fn get_alias_name(&self) -> Option<&str> {
     match self {
-      Self::Alias(raw) => {
-        if let Some(after_prefix) = raw.strip_prefix("npm:") {
-          if let Some(at_pos) = after_prefix.rfind('@') {
-            // Check if this @ is actually a version separator (not part of scoped name)
-            if at_pos > 0 && !after_prefix[..at_pos].is_empty() {
-              // There's a version specifier, extract name before @
-              Some(&after_prefix[..at_pos])
-            } else {
-              // The @ is part of a scoped package name, no version
-              Some(after_prefix)
-            }
-          } else {
-            // No @ found, entire string after npm: is the name
-            Some(after_prefix)
-          }
-        } else {
-          None
-        }
-      }
+      Self::Alias(raw) => raw.strip_prefix("npm:").map(|after_prefix| {
+        after_prefix
+          .rfind('@')
+          .filter(|&at_pos| at_pos > 0 && !after_prefix[..at_pos].is_empty())
+          .map(|at_pos| &after_prefix[..at_pos])
+          .unwrap_or(after_prefix)
+      }),
       _ => None,
     }
   }
@@ -224,7 +380,7 @@ impl Specifier2 {
   /// Examples:
   /// - "1.2.3" → Rc(Version("1.2.3"))
   /// - "^1.2.3" → Rc(Version("1.2.3"))
-  pub fn get_node_version(&self) -> Option<Rc<Version>> {
+  pub fn get_node_version(&self) -> Option<Rc<node_semver::Version>> {
     todo!()
   }
 
@@ -235,7 +391,7 @@ impl Specifier2 {
   /// Examples:
   /// - "1.2.3" → Rc(Range("1.2.3"))
   /// - "^1.2.3" → Rc(Range("^1.2.3"))
-  pub fn get_node_range(&self) -> Option<Rc<Range>> {
+  pub fn get_node_range(&self) -> Option<Rc<node_semver::Range>> {
     todo!()
   }
 
@@ -403,7 +559,7 @@ impl Specifier2 {
   /// - "^1.2.3" + "2.3.4" -> Some("^2.3.4")
   /// - "*" + "1.2.3" -> None
   /// - "npm:@scope/package@1.2.3" + "2.3.4" → Some("npm:@scope/package@2.3.4")
-  pub fn with_node_version(self, _node_version: &Version) -> Option<Rc<Self>> {
+  pub fn with_node_version(self, _node_version: &node_semver::Version) -> Option<Rc<Self>> {
     todo!()
   }
 }
@@ -501,7 +657,7 @@ impl Specifier2 {
   /// - "1.2.3" satisfies Range("^1.0.0") → true
   /// - "2.0.0" satisfies Range("^1.0.0") → false
   /// - "0.9.0" satisfies Range("^1.0.0") → false
-  pub fn satisfies(&self, _range: &Range) -> bool {
+  pub fn satisfies(&self, _range: &node_semver::Range) -> bool {
     todo! {}
   }
 
@@ -511,7 +667,7 @@ impl Specifier2 {
   /// - "1.2.3" satisfies [Range("^1.0.0"), Range("~1.2.0")] → true
   /// - "1.3.0" satisfies [Range("^1.0.0"), Range("~1.2.0")] → false
   /// - "2.0.0" satisfies [Range("^1.0.0"), Range("~1.2.0")] → false
-  pub fn satisfies_all(&self, _ranges: &[Range]) -> bool {
+  pub fn satisfies_all(&self, _ranges: &[node_semver::Range]) -> bool {
     todo! {}
   }
 }
