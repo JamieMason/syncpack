@@ -227,11 +227,14 @@ fn basic_semver_patch() {
       }
       for protocol in protocols() {
         let without_protocol = format!("{range}1.2.3{prerelease}");
+        let semver_number = format!("1.2.3{prerelease}");
         let value = format!("{protocol}{without_protocol}");
         // let local_version = BasicSemver::new("1.2.3");
-        match &*Specifier2::new(&value) {
+        let specifier = Specifier2::new(&value);
+        match &*specifier {
           Specifier2::Exact(actual) | Specifier2::Range(actual) | Specifier2::WorkspaceProtocol(actual) => {
             assert_eq!(*actual, value);
+            assert_eq!(specifier.get_semver_number(), Some(semver_number.as_str()), "{actual}");
             // assert_eq!(actual.variant, BasicSemverVariant::Patch);
             // assert_eq!(actual.range_variant, range_variant);
             // assert_eq!(actual.node_version.major, 1);

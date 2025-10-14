@@ -216,51 +216,18 @@ impl Specifier2 {
           None
         }
       }
-      Self::Exact(version) => Some(version),
-      Self::Range(raw) => {
-        // Extract version from range patterns like "^1.2.3", "~1.2.3", ">=1.2.3"
-        if let Some(stripped) = raw.strip_prefix('^') {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix('~') {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix(">=") {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix("<=") {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix('>') {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix('<') {
-          Some(stripped)
-        } else {
-          None
-        }
-      }
-      Self::Major(version) => Some(version),
-      Self::Minor(version) => Some(version),
-      Self::RangeMajor(raw) => {
-        // Extract version from range patterns like "^1", "~1"
-        if let Some(stripped) = raw.strip_prefix('^') {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix('~') {
-          Some(stripped)
-        } else {
-          None
-        }
-      }
-      Self::RangeMinor(raw) => {
-        // Extract version from range patterns like "^1.2", "~1.2", ">=1.2"
-        if let Some(stripped) = raw.strip_prefix('^') {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix('~') {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix(">=") {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix("<=") {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix('>') {
-          Some(stripped)
-        } else if let Some(stripped) = raw.strip_prefix('<') {
-          Some(stripped)
+      Self::Exact(raw) => Some(raw),
+      Self::Range(raw) => Some(strip_semver_range(raw)),
+      Self::Major(raw) => Some(raw),
+      Self::Minor(raw) => Some(raw),
+      Self::RangeMajor(raw) => Some(strip_semver_range(raw)),
+      Self::RangeMinor(raw) => Some(strip_semver_range(raw)),
+      Self::WorkspaceProtocol(raw) => {
+        let raw = strip_workspace_protocol(raw);
+        let specifier = Self::new(raw).clone();
+        let semver_number = specifier.get_semver_number();
+        if let Some(str) = semver_number {
+          Some(str)
         } else {
           None
         }
@@ -295,6 +262,19 @@ impl Specifier2 {
   pub fn get_semver_range(&self) -> Option<SemverRange> {
     todo!()
   }
+}
+
+/// Remove semver range characters from the start of a semver version number
+fn strip_semver_range(value: &str) -> &str {
+  ["^", "~", ">=", "<=", ">", "<"]
+    .into_iter()
+    .find_map(|prefix| value.strip_prefix(prefix))
+    .unwrap_or(value)
+}
+
+/// Remove workspace: from the start of a specifier
+fn strip_workspace_protocol(value: &str) -> &str {
+  value.strip_prefix("workspace:").unwrap_or(value)
 }
 
 // Mapping Methods
