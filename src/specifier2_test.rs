@@ -210,28 +210,32 @@ fn basic_semver_patch() {
         // };
       }
       for npm_name in npm_names() {
-        let value_without_protocol = format!("{range}1.2.3{prerelease}");
-        let value = format!("npm:{npm_name}@{value_without_protocol}");
-        // match Specifier2::new(&value) {
-        //   Specifier2::Alias(actual) => {
-        //     assert_eq!(actual.raw, value);
-        //     assert_eq!(actual.name, npm_name);
-        //     let semver = actual.semver.unwrap();
-        //     assert_eq!(semver.raw, value_without_protocol);
-        //     assert_eq!(semver.variant, BasicSemverVariant::Patch);
-        //     assert_eq!(semver.range_variant, range_variant);
-        //     assert_eq!(semver.node_version.major, 1);
-        //     assert_eq!(semver.node_version.minor, 2);
-        //     assert_eq!(semver.node_version.patch, 3);
-        //     assert_eq!(semver.node_version.pre_release.is_empty(), prerelease.is_empty());
-        //   }
-        //   _ => panic!("Expected Alias"),
-        // };
+        let semver_number = format!("1.2.3{prerelease}");
+        let with_range = format!("{range}{semver_number}");
+        let value = format!("npm:{npm_name}@{with_range}");
+        let specifier = Specifier2::new(&value);
+        match &*specifier {
+          Specifier2::Alias(actual) => {
+            assert_eq!(*actual, value);
+            assert_eq!(specifier.get_semver_number(), Some(semver_number.as_str()));
+            // assert_eq!(actual.raw, value);
+            // assert_eq!(actual.name, npm_name);
+            // let semver = actual.semver.unwrap();
+            // assert_eq!(semver.raw, value_without_protocol);
+            // assert_eq!(semver.variant, BasicSemverVariant::Patch);
+            // assert_eq!(semver.range_variant, range_variant);
+            // assert_eq!(semver.node_version.major, 1);
+            // assert_eq!(semver.node_version.minor, 2);
+            // assert_eq!(semver.node_version.patch, 3);
+            // assert_eq!(semver.node_version.pre_release.is_empty(), prerelease.is_empty());
+          }
+          _ => panic!("Expected Alias"),
+        };
       }
       for protocol in protocols() {
-        let without_protocol = format!("{range}1.2.3{prerelease}");
         let semver_number = format!("1.2.3{prerelease}");
-        let value = format!("{protocol}{without_protocol}");
+        let with_range = format!("{range}{semver_number}");
+        let value = format!("{protocol}{with_range}");
         // let local_version = BasicSemver::new("1.2.3");
         let specifier = Specifier2::new(&value);
         match &*specifier {
