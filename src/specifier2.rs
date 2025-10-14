@@ -194,45 +194,26 @@ impl Specifier2 {
   /// - "npm:express" -> None
   pub fn get_semver_number(&self) -> Option<&str> {
     match self {
-      Self::Alias(raw) => {
-        if let Some(after_prefix) = raw.strip_prefix("npm:") {
-          if let Some(at_pos) = after_prefix.rfind('@') {
-            // Check if this @ is actually a version separator (not part of scoped name)
-            if at_pos > 0 && !after_prefix[..at_pos].is_empty() {
-              // There's a version specifier after @
-              let version_part = &after_prefix[at_pos + 1..];
-              if !version_part.is_empty() {
-                Some(version_part)
-              } else {
-                None
-              }
-            } else {
-              None
-            }
-          } else {
-            None
-          }
-        } else {
-          None
-        }
-      }
-      Self::Exact(raw) => Some(raw),
-      Self::Range(raw) => Some(strip_semver_range(raw)),
-      Self::Major(raw) => Some(raw),
-      Self::Minor(raw) => Some(raw),
-      Self::RangeMajor(raw) => Some(strip_semver_range(raw)),
-      Self::RangeMinor(raw) => Some(strip_semver_range(raw)),
-      Self::WorkspaceProtocol(raw) => {
-        let raw = strip_workspace_protocol(raw);
-        let specifier = Self::new(raw).clone();
-        let semver_number = specifier.get_semver_number();
-        if let Some(str) = semver_number {
-          Some(str)
-        } else {
-          None
-        }
-      }
-      _ => None,
+      Self::Alias(raw) => raw
+        .strip_prefix("npm:")
+        .and_then(|after_prefix| after_prefix.rfind('@').map(|at_pos| (after_prefix, at_pos)))
+        .and_then(|(after_prefix, at_pos)| (at_pos > 0 && !after_prefix[..at_pos].is_empty()).then(|| &after_prefix[at_pos + 1..]))
+        .filter(|version_part| !version_part.is_empty())
+        .map(strip_semver_range),
+      Self::Exact(raw) | Self::Major(raw) | Self::Minor(raw) => Some(raw),
+      Self::Range(raw) | Self::RangeMajor(raw) | Self::RangeMinor(raw) => Some(strip_semver_range(raw)),
+      Self::WorkspaceProtocol(raw) => match strip_workspace_protocol(raw) {
+        "*" | "^" | "~" => None,
+        semver_number => Some(strip_semver_range(semver_number)),
+      },
+      Self::ComplexSemver(_)
+      | Self::File(_)
+      | Self::Git(_)
+      | Self::Latest(_)
+      | Self::None
+      | Self::Tag(_)
+      | Self::Unsupported(_)
+      | Self::Url(_) => None,
     }
   }
 

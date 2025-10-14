@@ -234,7 +234,7 @@ fn basic_semver_patch() {
         match &*specifier {
           Specifier2::Exact(actual) | Specifier2::Range(actual) | Specifier2::WorkspaceProtocol(actual) => {
             assert_eq!(*actual, value);
-            assert_eq!(specifier.get_semver_number(), Some(semver_number.as_str()), "{actual}");
+            assert_eq!(specifier.get_semver_number(), Some(semver_number.as_str()), "{value} -> {actual}");
             // assert_eq!(actual.variant, BasicSemverVariant::Patch);
             // assert_eq!(actual.range_variant, range_variant);
             // assert_eq!(actual.node_version.major, 1);
