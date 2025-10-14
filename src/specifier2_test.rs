@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{specifier::semver_range::SemverRange, specifier2::Specifier2, test::faker};
 
 #[test]
@@ -134,14 +136,14 @@ fn get_semver_number() {
 
 #[test]
 fn with_range() {
-  let cases: Vec<(&str, Option<String>)> = vec![
+  let cases: Vec<(&str, Option<Rc<Specifier2>>)> = vec![
     ("npm:foo", None),
-    ("npm:foo@1.2.3", Some("npm:foo@~1.2.3".to_string())),
-    ("npm:@foo/bar@1.2.3", Some("npm:@foo/bar@~1.2.3".to_string())),
-    ("1.2.3", Some("~1.2.3".to_string())),
-    ("^1.2.3", Some("~1.2.3".to_string())),
-    ("~1.2.3", Some("~1.2.3".to_string())),
-    ("workspace:*", Some("workspace:~".to_string())),
+    ("npm:foo@1.2.3", Some(Specifier2::new("npm:foo@~1.2.3"))),
+    ("npm:@foo/bar@1.2.3", Some(Specifier2::new("npm:@foo/bar@~1.2.3"))),
+    ("1.2.3", Some(Specifier2::new("~1.2.3"))),
+    ("^1.2.3", Some(Specifier2::new("~1.2.3"))),
+    ("~1.2.3", Some(Specifier2::new("~1.2.3"))),
+    ("workspace:*", Some(Specifier2::new("workspace:~"))),
   ];
   for (value, expected) in cases {
     assert_eq!(Specifier2::new(value).with_range(&SemverRange::Patch), expected);
