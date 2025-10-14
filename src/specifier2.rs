@@ -148,11 +148,26 @@ impl Tag {
 #[derive(Debug)]
 struct Alias {
   raw: String,
+  name: String,
 }
 
 impl Alias {
   pub fn new(raw: &str) -> Specifier2 {
-    Specifier2::Alias(Self { raw: raw.to_string() })
+    let name = raw.strip_prefix("npm:").map(|after_prefix| {
+      after_prefix
+        .rfind('@')
+        .filter(|&at_pos| at_pos > 0 && !after_prefix[..at_pos].is_empty())
+        .map(|at_pos| &after_prefix[..at_pos])
+        .unwrap_or(after_prefix)
+    });
+    name
+      .map(|name| {
+        Specifier2::Alias(Self {
+          raw: raw.to_string(),
+          name,
+        })
+      })
+      .unwrap_or(Specifier2::Unsupported(raw.to_string()))
   }
 }
 
@@ -175,17 +190,6 @@ struct File {
 impl File {
   pub fn new(raw: &str) -> Specifier2 {
     Specifier2::File(Self { raw: raw.to_string() })
-  }
-}
-
-#[derive(Debug)]
-struct Unsupported {
-  raw: String,
-}
-
-impl Unsupported {
-  pub fn new(raw: &str) -> Specifier2 {
-    Specifier2::Unsupported(Self { raw: raw.to_string() })
   }
 }
 
@@ -217,7 +221,7 @@ pub enum Specifier2 {
   RangeMajor(RangeMajor),               // "^1"
   RangeMinor(RangeMinor),               // "~1.2"
   Tag(Tag),                             // "alpha", "beta"
-  Unsupported(Unsupported),             // "}wat{"
+  Unsupported(String),                  // "}wat{"
   Url(Url),                             // "https://example.com/package.tgz"
   WorkspaceProtocol(WorkspaceProtocol), // "workspace:^"
 }
@@ -246,47 +250,47 @@ impl Specifier2 {
       return Self::None;
     }
     if parser::is_exact(value) {
-      return Self::Exact(value.to_string());
+      return Exact::new(value);
     }
     if parser::is_range(value) {
-      return Self::Range(value.to_string());
+      return Range::new(value);
     }
     if parser::is_latest(value) {
-      return Self::Latest(value.to_string());
+      return Latest::new(value);
     }
     if parser::is_major(value) {
-      return Self::Major(value.to_string());
+      return Major::new(value);
     }
     if parser::is_minor(value) {
-      return Self::Minor(value.to_string());
+      return Minor::new(value);
     }
     if parser::is_range_major(value) {
-      return Self::RangeMajor(value.to_string());
+      return RangeMajor::new(value);
     }
     if parser::is_range_minor(value) {
-      return Self::RangeMinor(value.to_string());
+      return RangeMinor::new(value);
     }
     if parser::is_complex_range(value) {
-      return Self::ComplexSemver(value.to_string());
+      return ComplexSemver::new(value);
     }
     let first_char = value.chars().next().unwrap_or('\0');
     if first_char == 'w' && value.starts_with("workspace:") {
-      return Self::WorkspaceProtocol(value.to_string());
+      return WorkspaceProtocol::new(value);
     }
     if parser::is_tag(value) {
-      return Self::Tag(value.to_string());
+      return Tag::new(value);
     }
     if first_char == 'n' && value.starts_with("npm:") {
-      return Self::Alias(value.to_string());
+      return Alias::new(value);
     }
     if parser::is_git(value) {
-      return Self::Git(value.to_string());
+      return Git::new(value);
     }
     if first_char == 'f' && value.starts_with("file:") {
-      return Self::File(value.to_string());
+      return File::new(value);
     }
     if first_char == 'h' && (value.starts_with("http://") || value.starts_with("https://")) {
-      return Self::Url(value.to_string());
+      return Url::new(value);
     }
     Self::Unsupported(value.to_string())
   }
