@@ -442,7 +442,7 @@ impl Specifier2 {
   /// - "^1.2.3" + "2.3.4" -> Some("^2.3.4")
   /// - "*" + "1.2.3" -> None
   /// - "npm:@scope/package@1.2.3" + "2.3.4" → Some("npm:@scope/package@2.3.4")
-  pub fn with_node_version(self, node_version: &Version) -> Option<Rc<Self>> {
+  pub fn with_node_version(self, _node_version: &Version) -> Option<Rc<Self>> {
     todo!()
   }
 }
@@ -455,7 +455,7 @@ impl Specifier2 {
   /// - "1.2.3-alpha.1" and "1.2.4-alpha.2" → true
   /// - "1.2.3-alpha.1" and "1.2.4-beta.1" → false
   /// - "1.2.3" and "1.2.4" → true (both stable)
-  pub fn has_same_release_channel_as(&self, other: &Self) -> bool {
+  pub fn has_same_release_channel_as(&self, _other: &Self) -> bool {
     todo! {}
   }
 
@@ -466,7 +466,7 @@ impl Specifier2 {
   /// - "^1.4.1" and "~1.4.1" → true
   /// - "1.4.1" and "^1.4.1" → true
   /// - "1.4.1" and "1.4.2" → false
-  pub fn has_same_version_number_as(&self, other: &Self) -> bool {
+  pub fn has_same_version_number_as(&self, _other: &Self) -> bool {
     todo! {}
   }
 
@@ -476,7 +476,7 @@ impl Specifier2 {
   /// - "^1.2.3" with SemverRange::Minor → true
   /// - "~1.2.3" with SemverRange::Minor → false
   /// - "1.2.3" with SemverRange::Exact → true
-  pub fn has_semver_range_of(&self, range: &SemverRange) -> bool {
+  pub fn has_semver_range_of(&self, _range: &SemverRange) -> bool {
     todo!()
   }
 
@@ -488,7 +488,7 @@ impl Specifier2 {
   /// - "1.1.0" can update "1.0.0" with UpdateTarget::Minor → true
   /// - "2.0.0" can update "1.0.0" with UpdateTarget::Minor → false
   /// - "1.2.3" can update "1.2.2" with UpdateTarget::Patch → true
-  pub fn is_eligible_update_for(&self, other: &Self, target: &UpdateTarget) -> bool {
+  pub fn is_eligible_update_for(&self, _other: &Self, _target: &UpdateTarget) -> bool {
     todo! {}
   }
 
@@ -498,7 +498,7 @@ impl Specifier2 {
   /// - "1.0.0" compared to "2.0.0" → true
   /// - "2.0.0" compared to "1.0.0" → false
   /// - "1.0.0" compared to "1.0.0" → false
-  pub fn is_older_than(&self, other: &Self) -> bool {
+  pub fn is_older_than(&self, _other: &Self) -> bool {
     todo! {}
   }
 
@@ -509,7 +509,7 @@ impl Specifier2 {
   /// - "1.0.1" compared to "1.1.0" → true
   /// - "1.0.0" compared to "2.0.0" → false
   /// - "1.1.0" compared to "1.0.0" → false
-  pub fn is_older_than_by_minor(&self, other: &Self) -> bool {
+  pub fn is_older_than_by_minor(&self, _other: &Self) -> bool {
     todo! {}
   }
 
@@ -520,7 +520,7 @@ impl Specifier2 {
   /// - "1.0.0" compared to "1.0.1" → true
   /// - "1.0.0" compared to "1.1.0" → false
   /// - "1.0.1" compared to "1.0.0" → false
-  pub fn is_older_than_by_patch(&self, other: &Self) -> bool {
+  pub fn is_older_than_by_patch(&self, _other: &Self) -> bool {
     todo! {}
   }
 
@@ -540,7 +540,7 @@ impl Specifier2 {
   /// - "1.2.3" satisfies Range("^1.0.0") → true
   /// - "2.0.0" satisfies Range("^1.0.0") → false
   /// - "0.9.0" satisfies Range("^1.0.0") → false
-  pub fn satisfies(&self, range: &Range) -> bool {
+  pub fn satisfies(&self, _range: &Range) -> bool {
     todo! {}
   }
 
@@ -550,7 +550,7 @@ impl Specifier2 {
   /// - "1.2.3" satisfies [Range("^1.0.0"), Range("~1.2.0")] → true
   /// - "1.3.0" satisfies [Range("^1.0.0"), Range("~1.2.0")] → false
   /// - "2.0.0" satisfies [Range("^1.0.0"), Range("~1.2.0")] → false
-  pub fn satisfies_all(&self, ranges: &[Range]) -> bool {
+  pub fn satisfies_all(&self, _ranges: &[Range]) -> bool {
     todo! {}
   }
 }
