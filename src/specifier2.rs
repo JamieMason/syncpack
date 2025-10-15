@@ -2,13 +2,31 @@ use {
   crate::{
     cli::UpdateTarget,
     specifier::{parser, semver_range::SemverRange},
+    specifier2::{
+      alias::Alias, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest, major::Major, minor::Minor,
+      range::Range, range_major::RangeMajor, range_minor::RangeMinor, tag::Tag, url::Url, workspace_protocol::WorkspaceProtocol,
+    },
   },
   std::{cell::RefCell, collections::HashMap, rc::Rc},
 };
 
+mod alias;
+mod complex_semver;
+mod exact;
+mod file;
+mod git;
+mod latest;
+mod major;
+mod minor;
+mod range;
+mod range_major;
+mod range_minor;
 #[cfg(test)]
 #[path = "specifier2_test.rs"]
 mod specifier2_test;
+mod tag;
+mod url;
+mod workspace_protocol;
 
 thread_local! {
   static SPECIFIER_CACHE: RefCell<HashMap<String, Rc<Specifier2>>> = RefCell::new(HashMap::new());
@@ -33,261 +51,24 @@ const UNSUPPORTED: &str = "unsupported";
 const URL: &str = "url";
 const WORKSPACE_PROTOCOL: &str = "workspace-protocol";
 
-// =============================================================================
-
-mod exact {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Exact {
-    raw: String,
-  }
-
-  impl Exact {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Exact(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod range {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Range {
-    raw: String,
-  }
-
-  impl Range {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Range(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod latest {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Latest {
-    raw: String,
-  }
-
-  impl Latest {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Latest(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod major {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Major {
-    raw: String,
-  }
-
-  impl Major {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Major(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod minor {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Minor {
-    raw: String,
-  }
-
-  impl Minor {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Minor(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod range_major {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct RangeMajor {
-    raw: String,
-  }
-
-  impl RangeMajor {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::RangeMajor(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod range_minor {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct RangeMinor {
-    raw: String,
-  }
-
-  impl RangeMinor {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::RangeMinor(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod complex_semver {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct ComplexSemver {
-    raw: String,
-  }
-
-  impl ComplexSemver {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::ComplexSemver(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod workspace_protocol {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct WorkspaceProtocol {
-    raw: String,
-  }
-
-  impl WorkspaceProtocol {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::WorkspaceProtocol(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod tag {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Tag {
-    raw: String,
-  }
-
-  impl Tag {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Tag(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod alias {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Alias {
-    raw: String,
-    name: String,
-    semver_string: Option<String>,
-  }
-
-  impl Alias {
-    pub fn new(raw: &str) -> Specifier2 {
-      let name = raw.strip_prefix("npm:").map(|after_prefix| {
-        after_prefix
-          .rfind('@')
-          .filter(|&at_pos| at_pos > 0 && !after_prefix[..at_pos].is_empty())
-          .map(|at_pos| &after_prefix[..at_pos])
-          .unwrap_or(after_prefix)
-      });
-      let semver_string = raw
-        .strip_prefix("npm:")
-        .and_then(|after_prefix| after_prefix.rfind('@').map(|at_pos| (after_prefix, at_pos)))
-        .and_then(|(after_prefix, at_pos)| (at_pos > 0 && !after_prefix[..at_pos].is_empty()).then(|| &after_prefix[at_pos + 1..]))
-        .filter(|version| !version.is_empty())
-        .map(|version| version.to_string());
-      name
-        .map(|name| {
-          Specifier2::Alias(Self {
-            raw: raw.to_string(),
-            name: name.to_string(),
-            semver_string,
-          })
-        })
-        .unwrap_or(Specifier2::Unsupported(raw.to_string()))
-    }
-  }
-}
-
-mod git {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Git {
-    raw: String,
-  }
-
-  impl Git {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Git(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod file {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct File {
-    pub(crate) raw: String,
-  }
-
-  impl File {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::File(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-mod url {
-  use super::Specifier2;
-
-  #[derive(Debug, PartialEq)]
-  pub struct Url {
-    pub(crate) raw: String,
-  }
-
-  impl Url {
-    pub fn new(raw: &str) -> Specifier2 {
-      Specifier2::Url(Self { raw: raw.to_string() })
-    }
-  }
-}
-
-// =============================================================================
-
 #[derive(Debug, PartialEq)]
 pub enum Specifier2 {
-  Alias(Alias),                         // "npm:foo@1.2.3"
-  ComplexSemver(ComplexSemver),         // ">=1.2.3 <2.0.0"
-  Exact(Exact),                         // "1.2.3"
-  File(file::File),                     // "file:../path"
-  Git(Git),                             // "github:user/repo#v1.2.3"
-  Latest(Latest),                       // "latest", "*"
-  Major(Major),                         // "1"
-  Minor(Minor),                         // "1.2"
-  None,                                 // Missing .version property
-  Range(Range),                         // "~1.2.3"
-  RangeMajor(RangeMajor),               // "^1"
-  RangeMinor(RangeMinor),               // "~1.2"
-  Tag(Tag),                             // "alpha", "beta"
-  Unsupported(String),                  // "}wat{"
-  Url(url::Url),                        // "https://example.com/package.tgz"
-  WorkspaceProtocol(WorkspaceProtocol), // "workspace:^"
+  Alias(alias::Alias),                                      // "npm:foo@1.2.3"
+  ComplexSemver(complex_semver::ComplexSemver),             // ">=1.2.3 <2.0.0"
+  Exact(exact::Exact),                                      // "1.2.3"
+  File(file::File),                                         // "file:../path"
+  Git(git::Git),                                            // "github:user/repo#v1.2.3"
+  Latest(latest::Latest),                                   // "latest", "*"
+  Major(major::Major),                                      // "1"
+  Minor(minor::Minor),                                      // "1.2"
+  None,                                                     // Missing .version property
+  Range(range::Range),                                      // "~1.2.3"
+  RangeMajor(range_major::RangeMajor),                      // "^1"
+  RangeMinor(range_minor::RangeMinor),                      // "~1.2"
+  Tag(tag::Tag),                                            // "alpha", "beta"
+  Unsupported(String),                                      // "}wat{"
+  Url(url::Url),                                            // "https://example.com/package.tgz"
+  WorkspaceProtocol(workspace_protocol::WorkspaceProtocol), // "workspace:^"
 }
 
 // Creation Methods
@@ -398,13 +179,7 @@ impl Specifier2 {
   /// - "npm:express" -> None
   pub fn get_alias_name(&self) -> Option<&str> {
     match self {
-      Self::Alias(raw) => raw.strip_prefix("npm:").map(|after_prefix| {
-        after_prefix
-          .rfind('@')
-          .filter(|&at_pos| at_pos > 0 && !after_prefix[..at_pos].is_empty())
-          .map(|at_pos| &after_prefix[..at_pos])
-          .unwrap_or(after_prefix)
-      }),
+      Self::Alias(alias) => Some(&alias.name),
       _ => None,
     }
   }
