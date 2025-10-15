@@ -56,21 +56,15 @@ impl Git {
           semver_number: None,
         })
       } else {
-        let sanitised_tag = sanitise_value(git_tag_str);
-        let tag_str = sanitised_tag.as_deref().unwrap_or(git_tag_str);
-        if Specifier2::is_valid_semver(tag_str) {
-          Specifier2::Git(Self {
-            raw: raw.to_string(),
-            origin: origin.to_string(),
-            semver_number: Some(tag_str.to_string()),
-          })
-        } else {
-          Specifier2::Git(Self {
-            raw: raw.to_string(),
-            origin: origin.to_string(),
-            semver_number: None,
-          })
-        }
+        Specifier2::Git(Self {
+          raw: raw.to_string(),
+          origin: origin.to_string(),
+          semver_number: sanitise_value(git_tag_str)
+            .as_deref()
+            .or(Some(git_tag_str))
+            .filter(|tag| Specifier2::is_valid_semver(tag))
+            .map(str::to_string),
+        })
       }
     } else {
       // No hash, just the origin
