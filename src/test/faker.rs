@@ -1,3 +1,7 @@
+use crate::specifier2::{
+  Alias, ComplexSemver, Exact, File, Git, Latest, Major, Minor, Range, RangeMajor, RangeMinor, Specifier2, Tag, Url, WorkspaceProtocol,
+};
+
 pub fn get_latest() -> Vec<&'static str> {
   vec!["latest", "*", "x"]
 }
@@ -82,11 +86,32 @@ pub fn get_range_minor() -> Vec<&'static str> {
   vec!["<5.0", "<=5.0", ">5.0", ">=5.0", "^4.1", "~1.2", "~1.2"]
 }
 
-pub fn get_alias() -> Vec<&'static str> {
+pub fn get_alias() -> Vec<(&'static str, Alias)> {
   vec![
-    "npm:@minh.nguyen/plugin-transform-destructuring@^7.5.2",
-    "npm:@types/selenium-webdriver@4.1.18",
-    "npm:foo@1.2.3",
+    (
+      "npm:@minh.nguyen/plugin-transform-destructuring@^7.5.2",
+      Alias {
+        raw: "npm:@minh.nguyen/plugin-transform-destructuring@^7.5.2",
+        name: "@minh.nguyen/plugin-transform-destructuring",
+        semver_string: Some("^7.5.2"),
+      },
+    ),
+    (
+      "npm:@types/selenium-webdriver@4.1.18",
+      Alias {
+        raw: "npm:@types/selenium-webdriver@4.1.18",
+        name: "@types/selenium-webdriver",
+        semver_string: Some("4.1.18"),
+      },
+    ),
+    (
+      "npm:foo@1.2.3",
+      Alias {
+        raw: "npm:foo@1.2.3",
+        name: "foo",
+        semver_string: Some("1.2.3"),
+      },
+    ),
   ]
 }
 

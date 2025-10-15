@@ -1,6 +1,13 @@
-use std::rc::Rc;
-
-use crate::{specifier::semver_range::SemverRange, specifier2::Specifier2, test::faker};
+use {
+  crate::{
+    specifier::semver_range::SemverRange,
+    specifier2::{
+      Alias, ComplexSemver, Exact, File, Git, Latest, Major, Minor, Range, RangeMajor, RangeMinor, Specifier2, Tag, Url, WorkspaceProtocol,
+    },
+    test::faker,
+  },
+  std::rc::Rc,
+};
 
 fn ranges() -> Vec<(&'static str, SemverRange)> {
   vec![
@@ -38,56 +45,62 @@ fn git_urls() -> Vec<&'static str> {
 #[test]
 fn valid_latest() {
   for value in faker::get_latest() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Latest(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Latest(Latest { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_tag() {
   for value in faker::get_tag() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Tag(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Tag(Tag { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_major() {
   for value in faker::get_major() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Major(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Major(Major { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_minor() {
   for value in faker::get_minor() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Minor(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Minor(Minor { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_exact() {
   for value in faker::get_exact() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Exact(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Exact(Exact { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_complex_semver() {
   for value in faker::get_complex_semver() {
-    assert_eq!(*Specifier2::new(value), Specifier2::ComplexSemver(value.to_string()));
+    assert_eq!(
+      *Specifier2::new(value),
+      Specifier2::ComplexSemver(ComplexSemver { raw: value.to_string() })
+    );
   }
 }
 
 #[test]
 fn valid_workspace_protocol() {
   for value in faker::get_workspace_protocol() {
-    assert_eq!(*Specifier2::new(value), Specifier2::WorkspaceProtocol(value.to_string()));
+    assert_eq!(
+      *Specifier2::new(value),
+      Specifier2::WorkspaceProtocol(WorkspaceProtocol { raw: value.to_string() })
+    );
   }
 }
 
 #[test]
 fn valid_range() {
   for value in faker::get_range() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Range(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Range(Range { raw: value.to_string() }));
   }
 }
 
@@ -101,42 +114,48 @@ fn valid_unsupported() {
 #[test]
 fn valid_range_major() {
   for value in faker::get_range_major() {
-    assert_eq!(*Specifier2::new(value), Specifier2::RangeMajor(value.to_string()));
+    assert_eq!(
+      *Specifier2::new(value),
+      Specifier2::RangeMajor(RangeMajor { raw: value.to_string() })
+    );
   }
 }
 
 #[test]
 fn valid_range_minor() {
   for value in faker::get_range_minor() {
-    assert_eq!(*Specifier2::new(value), Specifier2::RangeMinor(value.to_string()));
+    assert_eq!(
+      *Specifier2::new(value),
+      Specifier2::RangeMinor(RangeMinor { raw: value.to_string() })
+    );
   }
 }
 
 #[test]
 fn valid_alias() {
   for value in faker::get_alias() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Alias(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Alias(Alias { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_file() {
   for value in faker::get_file() {
-    assert_eq!(*Specifier2::new(value), Specifier2::File(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::File(File { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_git() {
   for value in faker::get_git() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Git(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Git(Git { raw: value.to_string() }));
   }
 }
 
 #[test]
 fn valid_url() {
   for value in faker::get_url() {
-    assert_eq!(*Specifier2::new(value), Specifier2::Url(value.to_string()));
+    assert_eq!(*Specifier2::new(value), Specifier2::Url(Url { raw: value.to_string() }));
   }
 }
 
