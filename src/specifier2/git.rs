@@ -41,33 +41,39 @@ pub struct Git {
 
 impl Git {
   pub fn new(raw: &str) -> Specifier2 {
-    if let Some(hash_pos) = raw.find('#') {
-      let origin = &raw[..hash_pos];
-      if origin.is_empty() {
-        Specifier2::Unsupported(raw.to_string())
-      } else {
+    raw
+      .find('#')
+      .map(|hash_pos| {
+        let origin = &raw[..hash_pos];
         let git_tag = &raw[hash_pos + 1..];
+        (origin, git_tag)
+      })
+      .map(|(origin, git_tag)| {
+        if origin.is_empty() {
+          Specifier2::Unsupported(raw.to_string())
+        } else {
+          Specifier2::Git(Self {
+            raw: raw.to_string(),
+            origin: origin.to_string(),
+            semver_number: if git_tag.is_empty() {
+              None
+            } else {
+              sanitise_value(git_tag)
+                .as_deref()
+                .or(Some(git_tag))
+                .filter(|tag| Specifier2::is_valid_semver(tag))
+                .map(str::to_string)
+            },
+          })
+        }
+      })
+      // There is no hash, just the origin
+      .unwrap_or_else(|| {
         Specifier2::Git(Self {
           raw: raw.to_string(),
-          origin: origin.to_string(),
-          semver_number: if git_tag.is_empty() {
-            None
-          } else {
-            sanitise_value(git_tag)
-              .as_deref()
-              .or(Some(git_tag))
-              .filter(|tag| Specifier2::is_valid_semver(tag))
-              .map(str::to_string)
-          },
+          origin: raw.to_string(),
+          semver_number: None,
         })
-      }
-    } else {
-      // No hash, just the origin
-      Specifier2::Git(Self {
-        raw: raw.to_string(),
-        origin: raw.to_string(),
-        semver_number: None,
       })
-    }
   }
 }
