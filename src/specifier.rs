@@ -56,7 +56,7 @@ fn determine_semver_range(value: &str) -> Option<SemverRange> {
 
 /// Normalise values which are needlessly different
 /// Returns None if no changes needed, Some(String) if modified
-fn sanitise_value(value: &str) -> Option<String> {
+pub fn sanitise_value(value: &str) -> Option<String> {
   if value == "latest" || value == "x" {
     Some("*".to_string())
   } else if value.contains(".x") || value.contains(".*") {

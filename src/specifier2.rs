@@ -89,6 +89,27 @@ impl Specifier2 {
     })
   }
 
+  /// Get or create a reference to a single Range which represents the given
+  /// version string
+  pub fn new_range(value: &str) -> Option<Rc<node_semver::Range>> {
+    RANGE_CACHE.with(|cache| {
+      let mut cache = cache.borrow_mut();
+      match cache.get(value) {
+        Some(rc) => Some(rc.clone()),
+        None => node_semver::Range::parse(value).ok().map(|range| {
+          let rc = Rc::new(range);
+          cache.insert(value.to_string(), rc.clone());
+          rc
+        }),
+      }
+    })
+  }
+
+  /// Check if the given version string is a valid semver version
+  pub fn is_valid_semver(value: &str) -> bool {
+    Self::new_range(value).is_some()
+  }
+
   /// Create a new Specifier for the given version string
   fn create(value: &str) -> Self {
     if value.is_empty() {
