@@ -43,27 +43,22 @@ impl Git {
   pub fn new(raw: &str) -> Specifier2 {
     if let Some(hash_pos) = raw.find('#') {
       let origin = &raw[..hash_pos];
-      let git_tag_str = &raw[hash_pos + 1..];
-
       if origin.is_empty() {
-        return Specifier2::Unsupported(raw.to_string());
-      }
-
-      if git_tag_str.is_empty() {
-        Specifier2::Git(Self {
-          raw: raw.to_string(),
-          origin: origin.to_string(),
-          semver_number: None,
-        })
+        Specifier2::Unsupported(raw.to_string())
       } else {
+        let git_tag = &raw[hash_pos + 1..];
         Specifier2::Git(Self {
           raw: raw.to_string(),
           origin: origin.to_string(),
-          semver_number: sanitise_value(git_tag_str)
-            .as_deref()
-            .or(Some(git_tag_str))
-            .filter(|tag| Specifier2::is_valid_semver(tag))
-            .map(str::to_string),
+          semver_number: if git_tag.is_empty() {
+            None
+          } else {
+            sanitise_value(git_tag)
+              .as_deref()
+              .or(Some(git_tag))
+              .filter(|tag| Specifier2::is_valid_semver(tag))
+              .map(str::to_string)
+          },
         })
       }
     } else {
