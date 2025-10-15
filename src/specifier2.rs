@@ -68,7 +68,7 @@ pub enum Specifier2 {
   Tag(tag::Tag),                                            // "alpha", "beta"
   Unsupported(String),                                      // "}wat{"
   Url(url::Url),                                            // "https://example.com/package.tgz"
-  WorkspaceProtocol(workspace_protocol::WorkspaceProtocol), // "workspace:^"
+  WorkspaceProtocol(workspace_protocol::WorkspaceProtocol), // "workspace:^", "workspace:*", "workspace:~", "workspace:^1.2.3"
 }
 
 // Creation Methods
@@ -193,15 +193,12 @@ impl Specifier2 {
   /// - "npm:express" -> None
   pub fn get_semver_number(&self) -> Option<&str> {
     match self {
-      Self::Alias(raw) => raw
-        .strip_prefix("npm:")
-        .and_then(|after_prefix| after_prefix.rfind('@').map(|at_pos| (after_prefix, at_pos)))
-        .and_then(|(after_prefix, at_pos)| (at_pos > 0 && !after_prefix[..at_pos].is_empty()).then(|| &after_prefix[at_pos + 1..]))
-        .filter(|version_part| !version_part.is_empty())
-        .map(strip_semver_range),
-      Self::Exact(raw) | Self::Major(raw) | Self::Minor(raw) => Some(raw),
-      Self::Range(raw) | Self::RangeMajor(raw) | Self::RangeMinor(raw) => Some(strip_semver_range(raw)),
-      Self::WorkspaceProtocol(raw) => match strip_workspace_protocol(raw) {
+      Self::Alias(alias) => alias.semver_string.as_ref().map(|s| strip_semver_range(s)),
+      Self::Exact(Exact { raw }) | Self::Major(Major { raw }) | Self::Minor(Minor { raw }) => Some(raw),
+      Self::Range(Range { raw }) | Self::RangeMajor(RangeMajor { raw }) | Self::RangeMinor(RangeMinor { raw }) => {
+        Some(strip_semver_range(raw))
+      }
+      Self::WorkspaceProtocol(WorkspaceProtocol { raw }) => match strip_workspace_protocol(raw) {
         "*" | "^" | "~" => None,
         semver_number => Some(strip_semver_range(semver_number)),
       },
@@ -245,7 +242,7 @@ impl Specifier2 {
 }
 
 /// Remove semver range characters from the start of a semver version number
-fn strip_semver_range(value: &str) -> &str {
+pub fn strip_semver_range(value: &str) -> &str {
   ["^", "~", ">=", "<=", ">", "<"]
     .into_iter()
     .find_map(|prefix| value.strip_prefix(prefix))
