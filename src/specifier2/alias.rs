@@ -1,5 +1,9 @@
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "alias_test.rs"]
+mod alias_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Alias {
   pub raw: String,

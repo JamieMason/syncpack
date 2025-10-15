@@ -1,5 +1,9 @@
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "minor_test.rs"]
+mod minor_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Minor {
   pub raw: String,

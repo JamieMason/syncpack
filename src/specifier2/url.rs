@@ -1,5 +1,9 @@
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "url_test.rs"]
+mod url_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Url {
   pub raw: String,

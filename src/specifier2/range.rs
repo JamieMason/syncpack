@@ -1,5 +1,9 @@
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "range_test.rs"]
+mod range_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Range {
   pub raw: String,

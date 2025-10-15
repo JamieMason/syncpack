@@ -2,6 +2,10 @@ use crate::{specifier::semver_range::SemverRange, specifier2::strip_semver_range
 
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "workspace_protocol_test.rs"]
+mod workspace_protocol_test;
+
 #[derive(Debug, PartialEq)]
 pub struct WorkspaceProtocol {
   /// Examples:

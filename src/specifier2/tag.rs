@@ -1,5 +1,9 @@
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "tag_test.rs"]
+mod tag_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Tag {
   pub raw: String,

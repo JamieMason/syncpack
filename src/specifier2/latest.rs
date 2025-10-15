@@ -1,5 +1,9 @@
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "latest_test.rs"]
+mod latest_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Latest {
   pub raw: String,

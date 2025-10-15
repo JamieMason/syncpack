@@ -1,5 +1,9 @@
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "major_test.rs"]
+mod major_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Major {
   pub raw: String,

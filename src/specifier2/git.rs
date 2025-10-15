@@ -2,6 +2,10 @@ use crate::specifier::sanitise_value;
 
 use super::Specifier2;
 
+#[cfg(test)]
+#[path = "git_test.rs"]
+mod git_test;
+
 #[derive(Debug, PartialEq)]
 pub struct Git {
   /// The exact version specifier as it was provided.
