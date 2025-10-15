@@ -1,3 +1,5 @@
+use crate::specifier::semver_range::SemverRange;
+
 use super::Specifier2;
 
 #[cfg(test)]
@@ -6,9 +8,14 @@ mod alias_test;
 
 #[derive(Debug, PartialEq)]
 pub struct Alias {
+  /// "npm:@fluidframework/build-tools@~0.44.0"
   pub raw: String,
+  /// "@fluidframework/build-tools"
   pub name: String,
-  pub semver_string: Option<String>,
+  /// SemverRange::Patch
+  pub semver_range: Option<SemverRange>,
+  /// "0.44.0"
+  pub semver_number: Option<String>,
 }
 
 impl Alias {

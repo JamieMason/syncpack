@@ -6,6 +6,7 @@ mod tag_test;
 
 #[derive(Debug, PartialEq)]
 pub struct Tag {
+  /// "alpha"
   pub raw: String,
 }
 

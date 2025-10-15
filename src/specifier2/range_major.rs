@@ -1,3 +1,5 @@
+use crate::specifier::semver_range::SemverRange;
+
 use super::Specifier2;
 
 #[cfg(test)]
@@ -6,7 +8,12 @@ mod range_major_test;
 
 #[derive(Debug, PartialEq)]
 pub struct RangeMajor {
+  /// "^1"
   pub raw: String,
+  /// SemverRange::Minor
+  pub semver_range: Option<SemverRange>,
+  /// "1"
+  pub semver_number: Option<String>,
 }
 
 impl RangeMajor {

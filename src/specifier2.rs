@@ -290,44 +290,48 @@ impl Specifier2 {
   pub fn with_range(&self, range: &SemverRange) -> Option<Rc<Self>> {
     let range_str = range.unwrap();
     match self {
-      Self::Alias(raw) => {
-        if let Some(after_prefix) = raw.strip_prefix("npm:") {
-          if let Some(at_pos) = after_prefix.rfind('@') {
-            // Check if this @ is actually a version separator (not part of scoped name)
-            if at_pos > 0 && !after_prefix[..at_pos].is_empty() {
-              // There's a version specifier, extract and apply range
-              let package_name = &after_prefix[..at_pos];
-              let version_part = &after_prefix[at_pos + 1..];
-              if !version_part.is_empty() {
-                // Extract the base version number from the current version
-                let base_version = if let Some(stripped) = version_part.strip_prefix('^') {
-                  stripped
-                } else if let Some(stripped) = version_part.strip_prefix('~') {
-                  stripped
-                } else if let Some(stripped) = version_part.strip_prefix(">=") {
-                  stripped
-                } else if let Some(stripped) = version_part.strip_prefix("<=") {
-                  stripped
-                } else if let Some(stripped) = version_part.strip_prefix('>') {
-                  stripped
-                } else if let Some(stripped) = version_part.strip_prefix('<') {
-                  stripped
-                } else {
-                  version_part
-                };
-                Some(format!("npm:{package_name}@{range_str}{base_version}"))
-              } else {
-                None
-              }
-            } else {
-              None
-            }
-          } else {
-            None
-          }
-        } else {
-          None
-        }
+      Self::Alias(alias) => {
+        let package_name="";
+        let range_str="";
+        let base_version="";
+        let x=format!("npm:{package_name}@{range_str}{base_version}");
+        // if let Some(after_prefix) = alias.strip_prefix("npm:") {
+        //   if let Some(at_pos) = after_prefix.rfind('@') {
+        //     // Check if this @ is actually a version separator (not part of scoped name)
+        //     if at_pos > 0 && !after_prefix[..at_pos].is_empty() {
+        //       // There's a version specifier, extract and apply range
+        //       let package_name = &after_prefix[..at_pos];
+        //       let version_part = &after_prefix[at_pos + 1..];
+        //       if !version_part.is_empty() {
+        //         // Extract the base version number from the current version
+        //         let base_version = if let Some(stripped) = version_part.strip_prefix('^') {
+        //           stripped
+        //         } else if let Some(stripped) = version_part.strip_prefix('~') {
+        //           stripped
+        //         } else if let Some(stripped) = version_part.strip_prefix(">=") {
+        //           stripped
+        //         } else if let Some(stripped) = version_part.strip_prefix("<=") {
+        //           stripped
+        //         } else if let Some(stripped) = version_part.strip_prefix('>') {
+        //           stripped
+        //         } else if let Some(stripped) = version_part.strip_prefix('<') {
+        //           stripped
+        //         } else {
+        //           version_part
+        //         };
+        //         Some(format!("npm:{package_name}@{range_str}{base_version}"))
+        //       } else {
+        //         None
+        //       }
+        //     } else {
+        //       None
+        //     }
+        //   } else {
+        //     None
+        //   }
+        // } else {
+        //   None
+        // }
       }
       Self::Exact(version) => Some(format!("{range_str}{version}")),
       Self::Range(raw) => {

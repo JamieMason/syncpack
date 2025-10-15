@@ -1,3 +1,5 @@
+use crate::specifier::semver_range::SemverRange;
+
 use super::Specifier2;
 
 #[cfg(test)]
@@ -6,7 +8,12 @@ mod range_minor_test;
 
 #[derive(Debug, PartialEq)]
 pub struct RangeMinor {
+  /// "^1.2"
   pub raw: String,
+  /// SemverRange::Minor
+  pub semver_range: Option<SemverRange>,
+  /// "1.2"
+  pub semver_number: Option<String>,
 }
 
 impl RangeMinor {
