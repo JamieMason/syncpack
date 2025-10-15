@@ -193,15 +193,14 @@ impl Specifier2 {
   /// - "npm:express" -> None
   pub fn get_semver_number(&self) -> Option<&str> {
     match self {
-      Self::Alias(alias) => alias.semver_string.as_ref().map(|s| strip_semver_range(s)),
-      Self::Exact(Exact { raw }) | Self::Major(Major { raw }) | Self::Minor(Minor { raw }) => Some(raw),
-      Self::Range(Range { raw }) | Self::RangeMajor(RangeMajor { raw }) | Self::RangeMinor(RangeMinor { raw }) => {
-        Some(strip_semver_range(raw))
-      }
-      Self::WorkspaceProtocol(WorkspaceProtocol { raw }) => match strip_workspace_protocol(raw) {
-        "*" | "^" | "~" => None,
-        semver_number => Some(strip_semver_range(semver_number)),
-      },
+      Self::Alias(s) => s.semver_string.as_ref().map(|s| strip_semver_range(s)),
+      Self::Exact(s) => Some(&s.raw),
+      Self::Major(s) => Some(&s.raw),
+      Self::Minor(s) => Some(&s.raw),
+      Self::Range(s) => Some(strip_semver_range(&s.raw)),
+      Self::RangeMajor(s) => Some(strip_semver_range(&s.raw)),
+      Self::RangeMinor(s) => Some(strip_semver_range(&s.raw)),
+      Self::WorkspaceProtocol(ws) => ws.semver_number.as_deref(),
       Self::ComplexSemver(_)
       | Self::File(_)
       | Self::Git(_)
