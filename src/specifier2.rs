@@ -36,7 +36,7 @@ const WORKSPACE_PROTOCOL: &str = "workspace-protocol";
 // =============================================================================
 
 #[derive(Debug, PartialEq)]
-struct Exact {
+pub struct Exact {
   raw: String,
 }
 
@@ -47,7 +47,7 @@ impl Exact {
 }
 
 #[derive(Debug, PartialEq)]
-struct Range {
+pub struct Range {
   raw: String,
 }
 
@@ -58,7 +58,7 @@ impl Range {
 }
 
 #[derive(Debug, PartialEq)]
-struct Latest {
+pub struct Latest {
   raw: String,
 }
 
@@ -69,7 +69,7 @@ impl Latest {
 }
 
 #[derive(Debug, PartialEq)]
-struct Major {
+pub struct Major {
   raw: String,
 }
 
@@ -80,7 +80,7 @@ impl Major {
 }
 
 #[derive(Debug, PartialEq)]
-struct Minor {
+pub struct Minor {
   raw: String,
 }
 
@@ -91,7 +91,7 @@ impl Minor {
 }
 
 #[derive(Debug, PartialEq)]
-struct RangeMajor {
+pub struct RangeMajor {
   raw: String,
 }
 
@@ -102,7 +102,7 @@ impl RangeMajor {
 }
 
 #[derive(Debug, PartialEq)]
-struct RangeMinor {
+pub struct RangeMinor {
   raw: String,
 }
 
@@ -113,7 +113,7 @@ impl RangeMinor {
 }
 
 #[derive(Debug, PartialEq)]
-struct ComplexSemver {
+pub struct ComplexSemver {
   raw: String,
 }
 
@@ -124,7 +124,7 @@ impl ComplexSemver {
 }
 
 #[derive(Debug, PartialEq)]
-struct WorkspaceProtocol {
+pub struct WorkspaceProtocol {
   raw: String,
 }
 
@@ -135,7 +135,7 @@ impl WorkspaceProtocol {
 }
 
 #[derive(Debug, PartialEq)]
-struct Tag {
+pub struct Tag {
   raw: String,
 }
 
@@ -146,7 +146,7 @@ impl Tag {
 }
 
 #[derive(Debug, PartialEq)]
-struct Alias {
+pub struct Alias {
   raw: String,
   name: String,
   semver_string: Option<String>,
@@ -180,7 +180,7 @@ impl Alias {
 }
 
 #[derive(Debug, PartialEq)]
-struct Git {
+pub struct Git {
   raw: String,
 }
 
@@ -191,7 +191,7 @@ impl Git {
 }
 
 #[derive(Debug, PartialEq)]
-struct File {
+pub struct File {
   raw: String,
 }
 
@@ -202,7 +202,7 @@ impl File {
 }
 
 #[derive(Debug, PartialEq)]
-struct Url {
+pub struct Url {
   raw: String,
 }
 
