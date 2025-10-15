@@ -1,5 +1,6 @@
 use crate::specifier2::{
-  Alias, ComplexSemver, Exact, File, Git, Latest, Major, Minor, Range, RangeMajor, RangeMinor, Specifier2, Tag, Url, WorkspaceProtocol,
+  modname::File, modname::Url, Alias, ComplexSemver, Exact, Git, Latest, Major, Minor, Range, RangeMajor, RangeMinor, Specifier2, Tag,
+  WorkspaceProtocol,
 };
 
 pub fn get_latest() -> Vec<&'static str> {

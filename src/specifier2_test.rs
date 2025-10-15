@@ -2,7 +2,8 @@ use {
   crate::{
     specifier::semver_range::SemverRange,
     specifier2::{
-      Alias, ComplexSemver, Exact, File, Git, Latest, Major, Minor, Range, RangeMajor, RangeMinor, Specifier2, Tag, Url, WorkspaceProtocol,
+      file::File, url::Url, Alias, ComplexSemver, Exact, Git, Latest, Major, Minor, Range, RangeMajor, RangeMinor, Specifier2, Tag,
+      WorkspaceProtocol,
     },
     test::faker,
   },
