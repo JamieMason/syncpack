@@ -2,7 +2,7 @@ use {
   super::indent::{L1, L2, L3, L4, L5, L6},
   crate::{
     instance_state::{FixableInstance, UnfixableInstance, ValidInstance},
-    specifier::semver_range::SemverRange,
+    semver_range::SemverRange,
   },
   log::debug,
 };
@@ -33,7 +33,7 @@ pub fn visit(dependency: &crate::dependency::Dependency) {
             debug!("{L6}its semver group allows unwanted minor versions");
             instance.mark_fixable(
               FixableInstance::SameMinorOverridesSemverRange,
-              &actual_specifier.clone().with_range(&SemverRange::Patch),
+              &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
             );
           }
         } else {
@@ -51,7 +51,7 @@ pub fn visit(dependency: &crate::dependency::Dependency) {
             debug!("{L6}its semver group allows unwanted minor versions");
             instance.mark_fixable(
               FixableInstance::SameMinorOverridesSemverRangeMismatch,
-              &actual_specifier.clone().with_range(&SemverRange::Patch),
+              &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
             );
           }
         }

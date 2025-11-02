@@ -50,7 +50,7 @@ pub struct Context {
   pub registry_client: Option<Arc<dyn RegistryClient>>,
   /// All updates from the npm registry which have been chosen either by the
   /// user via a prompt or automatically by choosing the latest version
-  pub updates_by_internal_name: HashMap<String, Vec<Specifier>>,
+  pub updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>>,
   /// All version groups, their dependencies, and their instances
   pub version_groups: Vec<VersionGroup>,
 }
@@ -128,7 +128,7 @@ impl Context {
     let semaphore = Arc::new(Semaphore::new(self.config.rcfile.max_concurrent_requests));
     let progress_bars = Arc::new(MultiProgress::new());
     let mut handles: Vec<(String, JoinHandle<Result<AllPackageVersions, RegistryError>>)> = vec![];
-    let mut all_updates_by_internal_name: HashMap<String, Vec<Specifier>> = HashMap::new();
+    let mut all_updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
     let mut failed_updates: Vec<String> = vec![];
 
     for update_url in self.get_unique_update_urls() {
@@ -159,7 +159,7 @@ impl Context {
             let all_updates = all_updates_by_internal_name.entry(internal_name.clone()).or_default();
             for version in package_meta.versions.iter() {
               if !version.contains("created") && !version.contains("modified") {
-                all_updates.push(Specifier::new(version, None));
+                all_updates.push(Specifier::new(version));
               }
             }
           }

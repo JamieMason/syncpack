@@ -275,14 +275,12 @@ pub enum FixableInstance {
   SemverRangeMismatch,
   /// - ✓ Instance has same semver number as its pinned version group
   /// - ✓ Instance matches its semver group
-  /// - ! The semver group requires a range which is different to the pinned
-  ///   version
+  /// - ! The semver group requires a range which is different to the pinned version
   /// - ! Pinned version wins
   PinOverridesSemverRange,
   /// - ✓ Instance has same semver number as its pinned version group
   /// - ✘ Instance mismatches its semver group
-  /// - ! The semver group requires a range which is different to the pinned
-  ///   version
+  /// - ! The semver group requires a range which is different to the pinned version
   /// - ! Pinned version wins
   PinOverridesSemverRangeMismatch,
   /// - ✓ Instance has same major.minor as all other instances in its group
@@ -299,8 +297,7 @@ pub enum FixableInstance {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum UnfixableInstance {
-  /// - ✘ Instance depends on a local package whose package.json version is not
-  ///   exact semver
+  /// - ✘ Instance depends on a local package whose package.json version is not exact semver
   /// - ? We can't know what the version should be
   DependsOnInvalidLocalPackage,
   /// - ✘ Instance mismatches others in its group
@@ -308,8 +305,7 @@ pub enum UnfixableInstance {
   /// - ? We can't know what's right or what isn't
   NonSemverMismatch,
   /// - ✘ Instance mismatches its same range group
-  /// - ✘ Instance's range doesn't satisfy all other ranges in its same range
-  ///   group
+  /// - ✘ Instance's range doesn't satisfy all other ranges in its same range group
   /// - ? Instance has no semver group
   /// - ? We can't know what range the user wants and have to ask them
   SameRangeMismatch,
@@ -323,67 +319,53 @@ pub enum UnfixableInstance {
 pub enum SemverGroupAndVersionConflict {
   /// - ✓ Instance has same semver number as highest/lowest semver in its group
   /// - ✓ Instance matches its semver group
-  /// - ✘ Range preferred by semver group will not satisfy the highest/lowest
-  ///   semver
-  /// - ? We can't know whether the incompatible range matters or not and have
-  ///   to ask
+  /// - ✘ Range preferred by semver group will not satisfy the highest/lowest semver
+  /// - ? We can't know whether the incompatible range matters or not and have to ask
   MatchConflictsWithHighestOrLowestSemver,
   /// - ✓ Instance has same semver number as highest/lowest semver in its group
   /// - ✘ Instance mismatches its semver group
-  /// - ✘ Range preferred by semver group will not satisfy the highest/lowest
-  ///   semver
-  /// - ? We can't know whether the incompatible range matters or not and have
-  ///   to ask
+  /// - ✘ Range preferred by semver group will not satisfy the highest/lowest semver
+  /// - ? We can't know whether the incompatible range matters or not and have to ask
   MismatchConflictsWithHighestOrLowestSemver,
   /// - ✓ Instance has same semver number as the matching snapTo instance
   /// - ✓ Instance matches its semver group
-  /// - ✘ Range preferred by semver group will not satisfy the matching snapTo
-  ///   instance
-  /// - ? We can't know whether the incompatible range matters or not and have
-  ///   to ask
+  /// - ✘ Range preferred by semver group will not satisfy the matching snapTo instance
+  /// - ? We can't know whether the incompatible range matters or not and have to ask
   MatchConflictsWithSnapTarget,
   /// - ✓ Instance has same semver number as the matching snapTo instance
   /// - ✘ Instance mismatches its semver group
-  /// - ✘ Range preferred by semver group will not satisfy the matching snapTo
-  ///   instance
-  /// - ? We can't know whether the incompatible range matters or not and have
-  ///   to ask
+  /// - ✘ Range preferred by semver group will not satisfy the matching snapTo instance
+  /// - ? We can't know whether the incompatible range matters or not and have to ask
   MismatchConflictsWithSnapTarget,
   /// - ✓ Instance has same semver number as local instance in its group
   /// - ✓ Instance matches its semver group
   /// - ✘ Range preferred by semver group will not satisfy the local instance
-  /// - ? We can't know whether the incompatible range matters or not and have
-  ///   to ask
+  /// - ? We can't know whether the incompatible range matters or not and have to ask
   MatchConflictsWithLocal,
   /// - ✓ Instance has same semver number as local instance
   /// - ✘ Instance mismatches its semver group
   /// - ✘ Range preferred by semver group will not satisfy the local instance
-  /// - ? We can't know whether the incompatible range matters or not and have
-  ///   to ask
+  /// - ? We can't know whether the incompatible range matters or not and have to ask
   MismatchConflictsWithLocal,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum SuspectInstance {
   /// - ✘ Local Instance is in a banned version group
-  /// - ✘ Misconfiguration: Syncpack refuses to change local dependency
-  ///   specifiers
+  /// - ✘ Misconfiguration: Syncpack refuses to change local dependency specifiers
   RefuseToBanLocal,
   /// - ✘ Local Instance mismatches its pinned version group
-  /// - ✘ Misconfiguration: Syncpack refuses to change local dependency
-  ///   specifiers
+  /// - ✘ Misconfiguration: Syncpack refuses to change local dependency specifiers
   RefuseToPinLocal,
   /// - ✘ Local Instance is in a snapped to version group
   /// - ✘ An Instance of this dependency was found in the snapped to package
-  /// - ✘ Misconfiguration: Syncpack refuses to change local dependency
-  ///   specifiers
+  /// - ✘ Misconfiguration: Syncpack refuses to change local dependency specifiers
   RefuseToSnapLocal,
   /// - ! Local Instance has no version property
   /// - ! Not an error on its own unless an instance of it mismatches
   InvalidLocalVersion,
   /// - ✓ Instance is in a snapped to version group
-  /// - ✘ An instance of the same dependency was not found in any of the snapped
-  ///   to packages
+  /// - ✘ An instance of the same dependency was not found in any of the snapped to packages
   /// - ! This is a misconfiguration resulting in this instance being orphaned
   DependsOnMissingSnapTarget,
 }

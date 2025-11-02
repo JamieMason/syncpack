@@ -152,7 +152,7 @@ impl GroupSelector {
   #[inline]
   fn matches_specifier_types(&self, descriptor: &InstanceDescriptor) -> bool {
     matches_identifiers(
-      &descriptor.specifier.get_config_identifier(),
+      descriptor.specifier.get_config_identifier(),
       &self.include_specifier_types,
       &self.exclude_specifier_types,
     )

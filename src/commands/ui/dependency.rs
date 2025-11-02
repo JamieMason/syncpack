@@ -177,6 +177,6 @@ fn get_raw_expected_specifier(dependency: &Dependency) -> String {
     .expected
     .borrow()
     .as_ref()
-    .map(|expected| expected.get_raw())
+    .map(|expected| expected.get_raw().to_string())
     .unwrap_or_default()
 }

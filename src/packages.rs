@@ -6,7 +6,7 @@ use {
     instance::InstanceDescriptor,
     package_json::PackageJson,
     rcfile::Rcfile,
-    specifier::{basic_semver::BasicSemver, Specifier},
+    specifier::Specifier,
   },
   glob::glob,
   log::debug,
@@ -56,15 +56,16 @@ impl Packages {
   }
 
   /// Return an index of every local package with a valid name and version
-  pub fn get_local_versions(&self) -> HashMap<String, BasicSemver> {
+  pub fn get_local_versions(&self) -> HashMap<String, Rc<Specifier>> {
     self
       .all
       .iter()
-      .filter_map(|package| -> Option<(String, BasicSemver)> {
-        let name = package.borrow().get_prop("/name");
-        let version = package.borrow().get_prop("/version");
+      .filter_map(|package| -> Option<(String, Rc<Specifier>)> {
+        let package = package.borrow();
+        let name = package.get_prop("/name");
+        let version = package.get_prop("/version");
         if let (Some(Value::String(name)), Some(Value::String(version))) = (name, version) {
-          BasicSemver::new(&version.to_string()).map(|semver| (name.to_string(), semver))
+          Some((name, Specifier::new(&version)))
         } else {
           None
         }
@@ -77,7 +78,7 @@ impl Packages {
   where
     F: FnMut(InstanceDescriptor),
   {
-    let local_versions = self.get_local_versions();
+    let _local_versions = self.get_local_versions();
     for package in self.all.iter() {
       for dependency_type in all_dependency_types {
         match dependency_type.strategy {
@@ -100,7 +101,7 @@ impl Packages {
                 matches_cli_filter: false,
                 name: name.to_string(),
                 package: Rc::clone(package),
-                specifier: Specifier::new(&raw_specifier, local_versions.get(&name)),
+                specifier: Specifier::new(&raw_specifier),
               });
             }
           }
@@ -113,7 +114,7 @@ impl Packages {
                   matches_cli_filter: false,
                   name: name.to_string(),
                   package: Rc::clone(package),
-                  specifier: Specifier::new(raw_specifier, local_versions.get(name)),
+                  specifier: Specifier::new(raw_specifier),
                 });
               }
             }
@@ -126,7 +127,7 @@ impl Packages {
                 matches_cli_filter: false,
                 name: dependency_type.name.clone(),
                 package: Rc::clone(package),
-                specifier: Specifier::new(&raw_specifier, local_versions.get(&dependency_type.name)),
+                specifier: Specifier::new(&raw_specifier),
               });
             }
           }
@@ -140,7 +141,7 @@ impl Packages {
                     matches_cli_filter: false,
                     name: name.to_string(),
                     package: Rc::clone(package),
-                    specifier: Specifier::new(&raw_specifier, local_versions.get(&name)),
+                    specifier: Specifier::new(&raw_specifier),
                   });
                 }
               }

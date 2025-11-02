@@ -1,14 +1,4 @@
-//! Syncpack entry point - implements the 3-phase pipeline.
-//!
-//! Flow:
-//! 1. Parse CLI args and read config
-//! 2. Read package.json files
-//! 3. Create Context (Phase 1)
-//! 4. Visit packages/formatting (Phase 2) - assigns InstanceState
-//! 5. Run command (Phase 3) - processes instances
-//!
-//! See CONTRIBUTING.md for high-level architecture.
-//! See .cursorrules for critical invariants.
+#![allow(dead_code)]
 
 use {
   crate::{
@@ -44,6 +34,7 @@ mod packages;
 mod rcfile;
 mod registry_client;
 mod semver_group;
+mod semver_range;
 mod specifier;
 mod version_group;
 mod visit_formatting;
