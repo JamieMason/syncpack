@@ -37,7 +37,7 @@ pub fn visit(dependency: &crate::dependency::Dependency, ctx: &Context) {
       }
       debug!("{L6}is the same as the target version");
       let range_of_snapped_to_specifier = snapped_to_specifier.get_semver_range().unwrap();
-      if instance.must_match_preferred_semver_range_which_is_not(range_of_snapped_to_specifier) {
+      if instance.must_match_preferred_semver_range_which_is_not(&range_of_snapped_to_specifier) {
         let preferred_semver_range = &instance.preferred_semver_range.clone().unwrap();
         debug!("{L7}it is in a semver group which prefers a different semver range to the target version ({preferred_semver_range:?})");
         if instance.matches_preferred_semver_range() {

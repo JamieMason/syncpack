@@ -28,6 +28,27 @@ pub enum SemverRange {
 }
 
 impl SemverRange {
+  /// Extract the SemverRange from a string known to be a valid semver specifier
+  pub fn parse(semver_string: &str) -> SemverRange {
+    if semver_string == "*" {
+      SemverRange::Any
+    } else if semver_string.starts_with("^") {
+      SemverRange::Minor
+    } else if semver_string.starts_with("~") {
+      SemverRange::Patch
+    } else if semver_string.starts_with(">=") {
+      SemverRange::Gte
+    } else if semver_string.starts_with(">") {
+      SemverRange::Gt
+    } else if semver_string.starts_with("<=") {
+      SemverRange::Lte
+    } else if semver_string.starts_with("<") {
+      SemverRange::Lt
+    } else {
+      SemverRange::Exact
+    }
+  }
+
   /// Create a SemverRange if the given string is a valid range
   pub fn new(range: &str) -> Option<SemverRange> {
     match range {

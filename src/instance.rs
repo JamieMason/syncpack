@@ -5,8 +5,7 @@
 //! that's a different Instance.
 //!
 //! Key points:
-//! - Instances are wrapped in Rc<Instance> for cheap sharing across version
-//!   groups
+//! - Instances are wrapped in Rc<Instance> for cheap sharing across version groups
 //! - state field uses RefCell for interior mutability during inspection phase
 //! - States start as Unknown and are assigned in visit_packages()
 //!
@@ -25,7 +24,8 @@ use {
       FixableInstance, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance,
     },
     package_json::PackageJson,
-    specifier::{semver_range::SemverRange, Specifier},
+    semver_range::SemverRange,
+    specifier::Specifier,
   },
   log::debug,
   serde_json::Value,
@@ -62,7 +62,7 @@ pub struct InstanceDescriptor {
   pub package: Rc<RefCell<PackageJson>>,
   /// The original version specifier, which should never be mutated,
   /// e.g., "18.0.0", "^18.0.0", "workspace:*", "git://github.com/..."
-  pub specifier: Specifier,
+  pub specifier: Rc<Specifier>,
 }
 
 /// A single occurrence of a dependency in the project.
@@ -79,7 +79,7 @@ pub struct Instance {
   /// The version specifier which syncpack has determined this instance should
   /// be set to, if it was not possible to determine without user intervention,
   /// this will be a `None`.
-  pub expected_specifier: RefCell<Option<Specifier>>,
+  pub expected_specifier: RefCell<Option<Rc<Specifier>>>,
   /// A unique identifier for this instance
   pub id: InstanceId,
   /// Whether this is a package developed in this repo
@@ -113,25 +113,26 @@ impl Instance {
 
   /// Record what syncpack has determined the state of this instance is and what
   /// its expected specifier should be
-  fn set_state(&self, state: InstanceState, expected_specifier: &Specifier) -> &Self {
+  fn set_state(&self, state: InstanceState, expected_specifier: &Rc<Specifier>) -> &Self {
     *self.state.borrow_mut() = state;
-    *self.expected_specifier.borrow_mut() = Some(expected_specifier.clone());
+    *self.expected_specifier.borrow_mut() = Some(Rc::clone(expected_specifier));
     self
   }
 
   /// Mark this instance as already having a valid specifier
-  pub fn mark_valid(&self, state: ValidInstance, expected_specifier: &Specifier) -> &Self {
+  pub fn mark_valid(&self, state: ValidInstance, expected_specifier: &Rc<Specifier>) -> &Self {
     self.set_state(InstanceState::Valid(state), expected_specifier)
   }
 
   /// Mark this instance as having something which doesn't look quite right, but
   /// for the moment is not yet resulting in an issue
   pub fn mark_suspect(&self, state: SuspectInstance) -> &Self {
-    self.set_state(InstanceState::Suspect(state), &self.descriptor.specifier)
+    let specifier = Rc::clone(&self.descriptor.specifier);
+    self.set_state(InstanceState::Suspect(state), &specifier)
   }
 
   /// Mark this instance as having a mismatch which can be auto-fixed
-  pub fn mark_fixable(&self, state: FixableInstance, expected_specifier: &Specifier) -> &Self {
+  pub fn mark_fixable(&self, state: FixableInstance, expected_specifier: &Rc<Specifier>) -> &Self {
     self.set_state(InstanceState::Invalid(InvalidInstance::Fixable(state)), expected_specifier)
   }
 
@@ -139,16 +140,15 @@ impl Instance {
   /// group and version group config are in conflict with one another, asking
   /// for mutually exclusive versions
   pub fn mark_conflict(&self, state: SemverGroupAndVersionConflict) -> &Self {
-    self.set_state(InstanceState::Invalid(InvalidInstance::Conflict(state)), &self.descriptor.specifier)
+    let specifier = Rc::clone(&self.descriptor.specifier);
+    self.set_state(InstanceState::Invalid(InvalidInstance::Conflict(state)), &specifier)
   }
 
   /// Mark this instance as a mismatch which can't be auto-fixed without user
   /// input
   pub fn mark_unfixable(&self, state: UnfixableInstance) -> &Self {
-    self.set_state(
-      InstanceState::Invalid(InvalidInstance::Unfixable(state)),
-      &self.descriptor.specifier,
-    )
+    let specifier = Rc::clone(&self.descriptor.specifier);
+    self.set_state(InstanceState::Invalid(InvalidInstance::Unfixable(state)), &specifier)
   }
 
   pub fn is_valid(&self) -> bool {
@@ -180,12 +180,12 @@ impl Instance {
   }
 
   pub fn has_missing_specifier(&self) -> bool {
-    matches!(self.descriptor.specifier, Specifier::None)
+    matches!(&*self.descriptor.specifier, Specifier::None)
   }
 
   /// Does this instance's actual specifier match the expected specifier?
-  pub fn already_equals(&self, expected: &Specifier) -> bool {
-    self.descriptor.specifier.get_raw() == *expected.get_raw()
+  pub fn already_equals(&self, expected: &Rc<Specifier>) -> bool {
+    self.descriptor.specifier.get_raw() == expected.get_raw()
   }
 
   /// Does this instance belong to a `WithRange` semver group?
@@ -205,10 +205,10 @@ impl Instance {
 
   /// Does this instance belong to a `WithRange` semver group and which prefers
   /// a semver range other than that used by the given specifier?
-  pub fn must_match_preferred_semver_range_which_differs_to(&self, other_specifier: &Specifier) -> bool {
+  pub fn must_match_preferred_semver_range_which_differs_to(&self, other_specifier: &Rc<Specifier>) -> bool {
     other_specifier
       .get_semver_range()
-      .is_some_and(|range_of_other_specifier| self.must_match_preferred_semver_range_which_is_not(range_of_other_specifier))
+      .is_some_and(|range_of_other_specifier| self.must_match_preferred_semver_range_which_is_not(&range_of_other_specifier))
   }
 
   /// Is the given semver range the preferred semver range for this instance?
@@ -222,17 +222,17 @@ impl Instance {
     self
       .preferred_semver_range
       .as_ref()
-      .map(|preferred_semver_range| self.descriptor.specifier.has_semver_range_of(preferred_semver_range))
+      .map(|preferred_semver_range| self.descriptor.specifier.get_semver_range().as_ref() == Some(preferred_semver_range))
       .unwrap_or(false)
   }
 
   /// Get the expected version specifier for this instance with the semver
   /// group's preferred range applied
-  pub fn get_specifier_with_preferred_semver_range(&self) -> Option<Specifier> {
+  pub fn get_specifier_with_preferred_semver_range(&self) -> Option<Rc<Specifier>> {
     self
       .preferred_semver_range
       .as_ref()
-      .map(|preferred_semver_range| self.descriptor.specifier.clone().with_range(preferred_semver_range))
+      .and_then(|preferred_semver_range| self.descriptor.specifier.with_range(preferred_semver_range))
   }
 
   pub fn get_update_url(&self) -> Option<UpdateUrl> {
@@ -240,15 +240,16 @@ impl Instance {
       let internal_name = &self.descriptor.internal_name;
       let actual_name = &self.descriptor.name;
       let raw = self.descriptor.specifier.get_raw();
-      match &self.descriptor.specifier {
+      match &*self.descriptor.specifier {
         Specifier::Alias(alias) => {
-          if let Some(aliased_name) = alias.extract_package_name() {
+          let aliased_name = &alias.name;
+          if !aliased_name.is_empty() {
             if aliased_name.starts_with("@jsr/") {
               Some(UpdateUrl {
                 internal_name: internal_name.clone(),
                 url: format!("https://npm.jsr.io/{aliased_name}"),
               })
-            } else if &aliased_name == actual_name {
+            } else if aliased_name == actual_name {
               Some(UpdateUrl {
                 internal_name: internal_name.clone(),
                 url: format!("https://registry.npmjs.org/{actual_name}"),
@@ -261,7 +262,7 @@ impl Instance {
             None
           }
         }
-        Specifier::BasicSemver(_) => {
+        Specifier::Exact(_) | Specifier::Range(_) | Specifier::Major(_) | Specifier::Minor(_) | Specifier::Latest(_) => {
           if actual_name.starts_with("@jsr/") {
             Some(UpdateUrl {
               internal_name: internal_name.clone(),
@@ -284,28 +285,28 @@ impl Instance {
   /// Does this instance's specifier match the specifier of every one of the
   /// given instances?
   pub fn already_satisfies_all(&self, instances: &[Rc<Instance>]) -> bool {
-    !matches!(self.descriptor.specifier, Specifier::None)
+    !matches!(&*self.descriptor.specifier, Specifier::None)
       && self
         .descriptor
         .specifier
-        .satisfies_all(instances.iter().map(|i| &i.descriptor.specifier).collect())
+        .satisfies_all(&instances.iter().map(|i| Rc::clone(&i.descriptor.specifier)).collect::<Vec<_>>())
   }
 
   /// Does this instance have the same major.minor version as all other
   /// instances? Semver ranges are not taken into account.
   pub fn already_has_same_minor_number_as_all(&self, instances: &[Rc<Instance>]) -> bool {
-    if matches!(self.descriptor.specifier, Specifier::None) {
+    if matches!(&*self.descriptor.specifier, Specifier::None) {
       return false;
     }
-    match self.descriptor.specifier.get_semver() {
+    match self.descriptor.specifier.get_node_version() {
       None => false,
       Some(a) => instances.iter().all(|other_instance| {
-        if matches!(other_instance.descriptor.specifier, Specifier::None) {
+        if matches!(&*other_instance.descriptor.specifier, Specifier::None) {
           return false;
         }
-        match other_instance.descriptor.specifier.get_semver() {
+        match other_instance.descriptor.specifier.get_node_version() {
           None => false,
-          Some(b) => a.node_version.major == b.node_version.major && a.node_version.minor == b.node_version.minor,
+          Some(b) => a.major == b.major && a.minor == b.minor,
         }
       }),
     }
@@ -313,10 +314,16 @@ impl Instance {
 
   /// Will this instance's specifier, once fixed to match its semver group,
   /// satisfy the given specifier?
-  pub fn specifier_with_preferred_semver_range_will_satisfy(&self, other: &Specifier) -> bool {
+  pub fn specifier_with_preferred_semver_range_will_satisfy(&self, other: &Rc<Specifier>) -> bool {
     self
       .get_specifier_with_preferred_semver_range()
-      .map(|specifier| specifier.satisfies(other))
+      .map(|specifier| {
+        if let (Some(spec_range), Some(other_range)) = (specifier.get_node_range(), other.get_node_range()) {
+          spec_range.allows_any(&other_range)
+        } else {
+          false
+        }
+      })
       .unwrap_or(false)
   }
 

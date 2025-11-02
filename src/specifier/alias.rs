@@ -1,60 +1,50 @@
-use {
-  super::{basic_semver::BasicSemver, semver_range::SemverRange},
-  crate::specifier::regexes::NAME_WITHIN_NPM_ALIAS,
-  log::debug,
-};
+use {crate::specifier::Specifier, std::rc::Rc};
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Alias {
-  /// The exact version specifier as it was provided
+  /// "npm:@fluidframework/build-tools@~0.44.0"
   pub raw: String,
-  /// The name of the dependency being aliased, for example:
-  ///
-  /// - "npm:foo" → "foo"
-  /// - "npm:foo@1.2.3" → "foo"
-  /// - "npm:@foo/bar@1.2.3" → "@foo/bar"
+  /// "@fluidframework/build-tools"
   pub name: String,
-  /// The version of the dependency being aliased if set, for example:
-  ///
-  /// - "npm:foo" → None
-  /// - "npm:foo@1.2.3" → Some("1.2.3")
-  /// - "npm:@foo/bar@1.2.3" → Some("1.2.3")
-  pub semver: Option<BasicSemver>,
+  /// The version part of the alias (e.g., "^1.2.3" or "*" if none specified)
+  pub version_str: String,
+  /// Cached inner specifier for delegation
+  pub inner_specifier: Rc<Specifier>,
 }
 
 impl Alias {
-  pub fn with_range(self, range: &SemverRange) -> Self {
-    if let Some(semver) = self.semver {
-      let semver = semver.with_range(range);
-      Self {
-        raw: format!("npm:{}@{}", self.name, semver.raw),
-        name: self.name,
-        semver: Some(semver),
-      }
-    } else {
-      debug!("Cannot apply semver range '{:?}' to specifier '{}'", range, self.raw);
-      self
-    }
-  }
+  pub fn create(raw: &str) -> Specifier {
+    let name = raw.strip_prefix("npm:").map(|after_prefix| {
+      after_prefix
+        .rfind('@')
+        .filter(|&at_pos| at_pos > 0 && !after_prefix[..at_pos].is_empty())
+        .map(|at_pos| &after_prefix[..at_pos])
+        .unwrap_or(after_prefix)
+    });
 
-  pub fn with_semver(self, semver: &BasicSemver) -> Self {
-    Self {
-      raw: format!("npm:{}@{}", self.name, semver.raw),
-      name: self.name,
-      semver: Some(semver.clone()),
-    }
-  }
+    let version_part = raw
+      .strip_prefix("npm:")
+      .and_then(|after_prefix| after_prefix.rfind('@').map(|at_pos| (after_prefix, at_pos)))
+      .and_then(|(after_prefix, at_pos)| (at_pos > 0 && !after_prefix[..at_pos].is_empty()).then(|| &after_prefix[at_pos + 1..]))
+      .filter(|version| !version.is_empty());
 
-  /// Match a package name inside an npm alias specifier
-  /// "npm:@lit-labs/ssr@3.3.0" -> "@lit-labs/ssr"
-  /// "npm:@jsr/luca__cases@1" -> "@jsr/luca__cases"
-  /// "npm:@jsr/std__fmt@^1.0.3" -> "@jsr/std__fmt"
-  /// "npm:@jsr/std__yaml" -> "@jsr/std__yaml"
-  /// "npm:lit@3.2.1" -> "lit"
-  pub fn extract_package_name(&self) -> Option<String> {
-    NAME_WITHIN_NPM_ALIAS
-      .captures(&self.raw)
-      .and_then(|caps| caps.get(1))
-      .map(|m| m.as_str().to_string())
+    name
+      .map(|name| {
+        // Default to "*" if no version specified
+        let version_str = version_part.unwrap_or("*");
+
+        // Create inner specifier by parsing the version string directly
+        // This bypasses the cache to avoid re-borrowing issues
+        let inner = Specifier::create(version_str);
+        let inner_specifier = Rc::new(inner);
+
+        Specifier::Alias(Self {
+          raw: raw.to_string(),
+          name: name.to_string(),
+          version_str: version_str.to_string(),
+          inner_specifier,
+        })
+      })
+      .unwrap_or(Specifier::Unsupported(raw.to_string()))
   }
 }

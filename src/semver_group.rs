@@ -1,5 +1,5 @@
 use {
-  crate::{dependency_type::DependencyType, group_selector::GroupSelector, packages::Packages, specifier::semver_range::SemverRange},
+  crate::{dependency_type::DependencyType, group_selector::GroupSelector, packages::Packages, semver_range::SemverRange},
   serde::Deserialize,
 };
 

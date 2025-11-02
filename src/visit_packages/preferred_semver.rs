@@ -4,7 +4,7 @@ use {
     context::Context,
     dependency::Dependency,
     instance_state::{FixableInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance},
-    specifier::semver_range::SemverRange,
+    semver_range::SemverRange,
   },
   log::debug,
 };
@@ -115,17 +115,23 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
       let actual_specifier = &instance.descriptor.specifier;
       debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
       specifiers_by_eligible_update.iter().for_each(|(update, affected_specifiers)| {
-        if affected_specifiers.contains(actual_specifier) {
+        if affected_specifiers.iter().any(|s| s.get_raw() == actual_specifier.get_raw()) {
           debug!("{L4}an eligible update {update:?} is available");
           let range = &instance
             .preferred_semver_range
             .clone()
-            .or_else(|| actual_specifier.get_semver_range().cloned())
+            .or_else(|| actual_specifier.get_semver_range())
             .unwrap_or(SemverRange::Exact);
-          let with_updated_version = actual_specifier.clone().with_semver(update.get_semver().unwrap());
-          let with_preferred_range = &with_updated_version.with_range(range);
-          debug!("{L4}with semver group applied update becomes {with_preferred_range:?}");
-          instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, with_preferred_range);
+          // The HashMap key 'update' is the String representation of the update version
+          let update_specifier = crate::specifier::Specifier::new(update);
+          if let Some(update_version) = update_specifier.get_node_version() {
+            if let Some(with_updated_version) = actual_specifier.with_node_version(&update_version) {
+              if let Some(with_preferred_range) = with_updated_version.with_range(range) {
+                debug!("{L4}with semver group applied update becomes {with_preferred_range:?}");
+                instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, &with_preferred_range);
+              }
+            }
+          }
         }
       });
     });
@@ -144,7 +150,7 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
       }
       debug!("{L5}is the same as the highest semver version");
       let range_of_highest_specifier = highest_specifier.get_semver_range().unwrap();
-      if instance.must_match_preferred_semver_range_which_is_not(range_of_highest_specifier) {
+      if instance.must_match_preferred_semver_range_which_is_not(&range_of_highest_specifier) {
         let preferred_semver_range = &instance.preferred_semver_range.clone().unwrap();
         debug!(
           "{L6}it is in a semver group which prefers a different semver range to the highest semver version ({preferred_semver_range:?})"

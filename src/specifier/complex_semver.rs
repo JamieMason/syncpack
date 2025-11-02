@@ -1,29 +1,29 @@
-use {
-  super::{basic_semver::BasicSemver, semver_range::SemverRange},
-  log::debug,
-  node_semver::Range,
-};
+use {crate::specifier::Specifier, std::rc::Rc};
 
-/// A specifier containing multiple ranges and/or versions
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct ComplexSemver {
-  /// The exact version specifier as it was provided
+  /// "1.3.0 || <1.0.0 >2.0.0"
+  /// "<1.0.0 >2.0.0"
+  /// "<1.0.0 >=2.0.0"
+  /// "<1.5.0 || >=1.6.0"
+  /// "<1.6.16 || >=1.7.0 <1.7.11 || >=1.8.0 <1.8.2"
+  /// "<=1.6.16 || >=1.7.0 <1.7.11 || >=1.8.0 <1.8.2"
+  /// ">1.0.0 <1.0.0"
+  /// ">1.0.0 <=2.0.0"
+  /// ">=2.3.4 || <=1.2.3"
   pub raw: String,
-  /// A `node_semver::Range` created from the semver portion of the specifier,
-  /// WITH any semver range characters, for example:
-  ///
-  /// - "<1.5.0 || >=1.6.0" → "<1.5.0 || >=1.6.0"
-  pub node_range: Range,
+  /// Used when checking if specifiers satisfy each other
+  pub node_range: Rc<node_semver::Range>,
 }
 
 impl ComplexSemver {
-  pub fn with_range(self, range: &SemverRange) -> Self {
-    debug!("Cannot apply semver range '{:?}' to specifier '{}'", range, self.raw);
-    self
-  }
-
-  pub fn with_semver(self, semver: &BasicSemver) -> Self {
-    debug!("Cannot apply semver '{:?}' to specifier '{}'", semver, self.raw);
-    self
+  pub fn create(raw: &str) -> Specifier {
+    match Specifier::new_node_range(raw) {
+      Some(node_range) => Specifier::ComplexSemver(Self {
+        raw: raw.to_string(),
+        node_range,
+      }),
+      None => Specifier::Unsupported(raw.to_string()),
+    }
   }
 }

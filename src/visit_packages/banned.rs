@@ -25,7 +25,7 @@ pub fn visit(dependency: &crate::dependency::Dependency) {
     } else {
       debug!("{L3}it should be removed");
       debug!("{L4}mark as error");
-      instance.mark_fixable(FixableInstance::IsBanned, &Specifier::None);
+      instance.mark_fixable(FixableInstance::IsBanned, &Specifier::new(""));
     }
   });
 }

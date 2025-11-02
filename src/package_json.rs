@@ -103,7 +103,7 @@ impl PackageJson {
   /// Update this package in-memory with the given instance's specifier
   pub fn copy_expected_specifier(&self, instance: &Instance) {
     let path_to_prop_str = &instance.descriptor.dependency_type.path.as_str();
-    let raw_specifier = instance.expected_specifier.borrow().as_ref().unwrap().get_raw().clone();
+    let raw_specifier = instance.expected_specifier.borrow().as_ref().unwrap().get_raw().to_string();
     match instance.descriptor.dependency_type.strategy {
       Strategy::NameAndVersionProps => {
         self.set_prop(path_to_prop_str, Value::String(raw_specifier));

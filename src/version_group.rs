@@ -61,7 +61,7 @@ pub struct VersionGroup {
   /// Does every instance match the filter options provided via the CLI?
   pub matches_cli_filter: bool,
   /// The version to pin all instances to when variant is `Pinned`
-  pub pin_version: Option<Specifier>,
+  pub pin_version: Option<Rc<Specifier>>,
   /// Data to determine which instances should be added to this group
   pub selector: GroupSelector,
   /// package.json files whose names match the `snapTo` config when variant is
@@ -150,7 +150,7 @@ impl VersionGroup {
       return VersionGroup {
         dependencies: BTreeMap::new(),
         matches_cli_filter: false,
-        pin_version: Some(Specifier::new(pin_version, None)),
+        pin_version: Some(Specifier::new(pin_version)),
         selector,
         snap_to: None,
         variant: VersionGroupVariant::Pinned,

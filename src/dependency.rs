@@ -12,11 +12,7 @@
 
 use {
   crate::{
-    context::Context,
-    instance::Instance,
-    instance_state::InstanceState,
-    package_json::PackageJson,
-    specifier::{semver_range::SemverRange, Specifier},
+    context::Context, instance::Instance, instance_state::InstanceState, package_json::PackageJson, specifier::Specifier,
     version_group::VersionGroupVariant,
   },
   itertools::Itertools,
@@ -49,7 +45,7 @@ pub struct Dependency {
   /// The expected version specifier which all instances of this dependency
   /// should be set to, in the event that they should all use the same version.
   /// RefCell allows mutation during inspection without &mut Context.
-  pub expected: RefCell<Option<Specifier>>,
+  pub expected: RefCell<Option<Rc<Specifier>>>,
   /// Whether the internal name for this dependency is an alias.
   pub has_alias: bool,
   /// Every instance of this dependency in this version group.
@@ -63,7 +59,7 @@ pub struct Dependency {
   /// The name of the dependency, e.g., "react", "@types/node"
   pub internal_name: String,
   /// The version to pin all instances to when variant is `Pinned`
-  pub pinned_specifier: Option<Specifier>,
+  pub pinned_specifier: Option<Rc<Specifier>>,
   /// package.json files developed in the monorepo when variant is `SnappedTo`.
   /// Rc<RefCell<T>> for shared ownership with interior mutability.
   pub snapped_to_packages: Option<Vec<Rc<RefCell<PackageJson>>>>,
@@ -76,7 +72,7 @@ impl Dependency {
   pub fn new(
     internal_name: String,
     variant: VersionGroupVariant,
-    pinned_specifier: Option<Specifier>,
+    pinned_specifier: Option<Rc<Specifier>>,
     snapped_to_packages: Option<Vec<Rc<RefCell<PackageJson>>>>,
   ) -> Dependency {
     Dependency {
@@ -125,18 +121,18 @@ impl Dependency {
   }
 
   /// Set the expected version specifier to the given value
-  pub fn set_expected_specifier(&self, specifier: &Specifier) -> &Self {
-    *self.expected.borrow_mut() = Some(specifier.clone());
+  pub fn set_expected_specifier(&self, specifier: &Rc<Specifier>) -> &Self {
+    *self.expected.borrow_mut() = Some(Rc::clone(specifier));
     self
   }
 
   /// Return the local instance's version specifier, if it exists
-  pub fn get_local_specifier(&self) -> Option<Specifier> {
+  pub fn get_local_specifier(&self) -> Option<Rc<Specifier>> {
     self
       .local_instance
       .borrow()
       .as_ref()
-      .map(|instance| instance.descriptor.specifier.clone())
+      .map(|instance| Rc::clone(&instance.descriptor.specifier))
   }
 
   /// Whether the dependency name is a valid npm package name, is invalid, or
@@ -157,43 +153,42 @@ impl Dependency {
   /// Is this dependency a package developed in this repository, which has a
   /// missing or invalid .version property?
   pub fn has_local_instance_with_invalid_specifier(&self) -> bool {
-    self.get_local_specifier().is_some_and(|local| {
-      if let Specifier::BasicSemver(semver) = local {
-        !matches!(semver.range_variant, SemverRange::Exact)
-      } else {
-        true
-      }
-    })
+    self
+      .get_local_specifier()
+      .is_some_and(|local| !matches!(&*local, Specifier::Exact(_)))
   }
 
   /// Does every instance in this group have a specifier which is exactly the
   /// same?
   pub fn every_specifier_is_already_identical(&self) -> bool {
     if let Some(first_actual) = self.instances.first().map(|instance| &instance.descriptor.specifier) {
-      self.instances.iter().all(|instance| instance.descriptor.specifier == *first_actual)
+      self.instances.iter().all(|instance| {
+        Rc::ptr_eq(&instance.descriptor.specifier, first_actual) || instance.descriptor.specifier.get_raw() == first_actual.get_raw()
+      })
     } else {
       false
     }
   }
 
-  pub fn get_unique_specifiers(&self) -> Vec<Specifier> {
+  pub fn get_unique_specifiers(&self) -> Vec<Rc<Specifier>> {
     let mut unique_specifiers = Vec::new();
     for instance in self.instances.iter() {
-      if !unique_specifiers.contains(&instance.descriptor.specifier) {
-        unique_specifiers.push(instance.descriptor.specifier.clone());
+      let spec = &instance.descriptor.specifier;
+      if !unique_specifiers.iter().any(|s: &Rc<Specifier>| s.get_raw() == spec.get_raw()) {
+        unique_specifiers.push(Rc::clone(spec));
       }
     }
     unique_specifiers
   }
 
   /// Get the highest (or lowest) semver specifier in this group.
-  pub fn get_highest_or_lowest_specifier(&self) -> Option<Specifier> {
+  pub fn get_highest_or_lowest_specifier(&self) -> Option<Rc<Specifier>> {
     let prefer_highest = matches!(self.variant, VersionGroupVariant::HighestSemver);
     let preferred_order = if prefer_highest { Ordering::Greater } else { Ordering::Less };
     self
       .get_instances()
       .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
-      .map(|instance| instance.descriptor.specifier.clone())
+      .map(|instance| Rc::clone(&instance.descriptor.specifier))
       .fold(None, |preferred, specifier| match preferred {
         None => Some(specifier),
         Some(preferred) => {
@@ -214,9 +209,9 @@ impl Dependency {
   ///
   /// When only applying eg. patch updates, some specifiers will be assigned to
   /// different updates if they are not on the same minor version.
-  pub fn get_eligible_registry_updates(&self, ctx: &Context) -> Option<HashMap<Specifier, Vec<Specifier>>> {
+  pub fn get_eligible_registry_updates(&self, ctx: &Context) -> Option<HashMap<String, Vec<Rc<Specifier>>>> {
     ctx.updates_by_internal_name.get(&self.internal_name).map(|updates| {
-      let mut specifiers_by_eligible_update: HashMap<Specifier, Vec<Specifier>> = HashMap::new();
+      let mut specifiers_by_eligible_update: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
       self.get_unique_specifiers().iter().for_each(|installed| {
         updates
           .iter()
@@ -234,8 +229,9 @@ impl Dependency {
             }
           })
           .inspect(|highest_update| {
-            let affected = specifiers_by_eligible_update.entry((*highest_update).clone()).or_default();
-            affected.push(installed.clone());
+            let key = highest_update.get_raw().to_string();
+            let affected = specifiers_by_eligible_update.entry(key).or_default();
+            affected.push(Rc::clone(installed));
           });
       });
       specifiers_by_eligible_update
@@ -250,13 +246,13 @@ impl Dependency {
   ///
   /// Even though the actual specifiers on disk might currently match, we should
   /// suggest it match what we the snapped to specifier should be once fixed
-  pub fn get_snapped_to_specifier(&self, every_instance_in_the_project: &[Rc<Instance>]) -> Option<Specifier> {
+  pub fn get_snapped_to_specifier(&self, every_instance_in_the_project: &[Rc<Instance>]) -> Option<Rc<Specifier>> {
     if let Some(snapped_to_packages) = &self.snapped_to_packages {
       for instance in every_instance_in_the_project {
         if *instance.descriptor.internal_name == *self.internal_name {
           for snapped_to_package in snapped_to_packages {
             if instance.descriptor.package.borrow().name == snapped_to_package.borrow().name {
-              return Some(instance.descriptor.specifier.clone());
+              return Some(Rc::clone(&instance.descriptor.specifier));
             }
           }
         }

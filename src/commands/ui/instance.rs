@@ -117,7 +117,7 @@ pub fn get_actual(instance: &Instance) -> String {
   if actual.is_empty() {
     "VERSION_IS_MISSING".yellow().to_string()
   } else {
-    actual
+    actual.to_string()
   }
 }
 
@@ -130,7 +130,7 @@ fn get_local_hint(ctx: &Context, instance: &Instance) -> String {
 }
 
 pub fn get_expected(instance: &Instance) -> String {
-  instance.expected_specifier.borrow().as_ref().unwrap().get_raw()
+  instance.expected_specifier.borrow().as_ref().unwrap().get_raw().to_string()
 }
 
 pub fn get_location(ctx: &Context, instance: &Instance) -> String {

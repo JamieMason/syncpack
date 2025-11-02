@@ -1,40 +1,86 @@
-use super::{basic_semver::BasicSemver, semver_range::SemverRange};
+use {
+  crate::{
+    semver_range::SemverRange,
+    specifier::{workspace_specifier::WorkspaceSpecifier, Specifier},
+  },
+  std::rc::Rc,
+};
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct WorkspaceProtocol {
-  /// The exact version specifier as it was provided
-  pub raw: String,
-  /// The "workspace:" protocol is stateful and incomplete on its own, it
-  /// depends on knowledge held elsewhere by the package manager in order to be
-  /// useful. For this reason we need to know the local version of the package
-  pub local_version: BasicSemver,
-  /// The version portion of the specifier completed using the local version,
-  /// for example:
+  /// The complete raw string
   ///
-  /// - "workspace:*" → "1.2.3"
-  /// - "workspace:1.2.3" → "1.2.3"
-  /// - "workspace:^" → "^1.2.3"
-  /// - "workspace:^1.2.3" → "^1.2.3"
-  /// - "workspace:~" → "~1.2.3"
-  /// - "workspace:~1.2.3" → "~1.2.3"
-  pub semver: BasicSemver,
+  /// Examples:
+  /// - "workspace:^"
+  /// - "workspace:*"
+  /// - "workspace:1.2.3"
+  pub raw: String,
+
+  /// The version part after "workspace:"
+  ///
+  /// Examples:
+  /// - "^"
+  /// - "*"
+  /// - "1.2.3"
+  pub version_str: String,
+
+  /// Cached inner specifier for delegation
+  ///
+  /// Examples:
+  /// - "workspace:^" -> RangeOnly(SemverRange::Minor)
+  /// - "workspace:~" -> RangeOnly(SemverRange::Patch)
+  /// - "workspace:*" -> RangeOnly(SemverRange::Any)
+  /// - "workspace:1.2.3" -> Resolved(Exact("1.2.3"))
+  pub inner_specifier: WorkspaceSpecifier,
 }
 
 impl WorkspaceProtocol {
-  pub fn with_range(self, range: &SemverRange) -> Self {
-    let semver = self.semver.with_range(range);
-    Self {
-      raw: format!("workspace:{}", semver.raw),
-      local_version: self.local_version,
-      semver,
+  /// Create a new WorkspaceProtocol from a raw string
+  pub fn new(raw: String) -> Option<Self> {
+    let version_str = raw.strip_prefix("workspace:")?.to_string();
+
+    // Check for symbolic workspace references that need resolution
+    let inner_specifier = match version_str.as_str() {
+      "*" => WorkspaceSpecifier::RangeOnly(SemverRange::Any),
+      "^" => WorkspaceSpecifier::RangeOnly(SemverRange::Minor),
+      "~" => WorkspaceSpecifier::RangeOnly(SemverRange::Patch),
+      _ => {
+        // Try to parse as complete specifier (e.g., "1.2.3", "^1.2.3")
+        // Use create() instead of new() to avoid nested RefCell borrow
+        let spec = Rc::new(Specifier::create(&version_str));
+        WorkspaceSpecifier::Resolved(spec)
+      }
+    };
+
+    Some(Self {
+      raw,
+      version_str,
+      inner_specifier,
+    })
+  }
+
+  /// Create a WorkspaceProtocol as Specifier variant (for compatibility)
+  pub fn create(raw: &str) -> Specifier {
+    // This is the old API - just delegate to new and wrap
+    match Self::new(raw.to_string()) {
+      Some(wp) => Specifier::WorkspaceProtocol(wp),
+      None => Specifier::Unsupported(raw.to_string()),
     }
   }
 
-  pub fn with_semver(self, semver: &BasicSemver) -> Self {
-    Self {
-      raw: format!("workspace:{}", semver.raw),
-      local_version: self.local_version,
-      semver: semver.clone(),
-    }
+  /// Check if this workspace protocol needs resolution
+  pub fn needs_resolution(&self) -> bool {
+    self.inner_specifier.needs_resolution()
+  }
+
+  /// Resolve range prefix with local package version
+  /// Returns None if already resolved or resolution fails
+  pub fn resolve_with(&self, local_version: &str) -> Option<Rc<Specifier>> {
+    self.inner_specifier.resolve_with(local_version)
+  }
+
+  /// Get the resolved specifier if available
+  pub fn as_resolved(&self) -> Option<&Rc<Specifier>> {
+    self.inner_specifier.as_resolved()
   }
 }
