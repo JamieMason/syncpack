@@ -25,13 +25,13 @@
   },
   {
     "NAME": "darwin-x64",
-    "OS": "macos-13",
+    "OS": "macos-15-intel",
     "RUN_LOCALLY": false,
     "TARGET": "x86_64-apple-darwin"
   },
   {
     "NAME": "darwin-arm64",
-    "OS": "macos-13",
+    "OS": "macos-latest",
     "RUN_LOCALLY": false,
     "TARGET": "aarch64-apple-darwin"
   }
