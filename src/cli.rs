@@ -409,7 +409,7 @@ fn dependency_types_option(command: &str) -> Arg {
     .long_help(cformat!(
       r#"{short_help}
 
-<bold><underline>Default Values:</underline></bold>
+<bold><underline>Built-in Types:</underline></bold>
 <blue>dev</>            devDependencies
 <blue>local</>          version
 <blue>overrides</>      overrides
@@ -418,7 +418,7 @@ fn dependency_types_option(command: &str) -> Arg {
 <blue>prod</>           dependencies
 <blue>resolutions</>    resolutions
 
-<bold><underline>Custom Values:</underline></bold>
+<bold><underline>Custom Types:</underline></bold>
 See <blue>https://jamiemason.github.io/syncpack/config/custom-types/</>
 
 <bold><underline>Examples:</underline></bold>
@@ -429,7 +429,6 @@ See <blue>https://jamiemason.github.io/syncpack/config/custom-types/</>
     ))
     .value_delimiter(',')
     .value_name("comma-separated-dependency-type-names")
-    .default_value("dev,local,overrides,peer,pnpmOverrides,prod,resolutions")
 }
 
 fn dry_run_option(command: &str) -> Arg {

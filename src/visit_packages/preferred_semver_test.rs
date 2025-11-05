@@ -1959,3 +1959,73 @@ mod registry_updates {
     }
   }
 }
+
+mod custom_types {
+  use super::*;
+
+  #[test]
+  fn custom_engines_type_visible_in_catch_all_group_without_cli_filter() {
+    let ctx = TestBuilder::new()
+      .with_config(json!({
+        "customTypes": {
+          "engines": {
+            "strategy": "versionsByName",
+            "path": "engines"
+          }
+        },
+        "versionGroups": [
+          {
+            "dependencies": ["react"],
+            "dependencyTypes": ["prod", "dev", "peer"]
+          }
+        ]
+      }))
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "dependencies": {
+          "react": "18.0.0"
+        },
+        "engines": {
+          "node": ">=16.0.0",
+          "yarn": "^1.22.5"
+        }
+      })])
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /dependencies of package-a",
+        actual: "18.0.0",
+        expected: Some("18.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "node",
+        id: "node in /engines of package-a",
+        actual: ">=16.0.0",
+        expected: Some(">=16.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "yarn",
+        id: "yarn in /engines of package-a",
+        actual: "^1.22.5",
+        expected: Some("^1.22.5"),
+        overridden: None,
+      },
+    ]);
+  }
+}
