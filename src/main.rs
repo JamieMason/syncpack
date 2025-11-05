@@ -31,6 +31,8 @@ mod instance_state;
 mod logger;
 mod package_json;
 mod packages;
+#[cfg(test)]
+mod packages_test;
 mod rcfile;
 #[cfg(test)]
 mod rcfile_test;

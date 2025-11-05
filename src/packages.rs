@@ -156,6 +156,24 @@ impl Packages {
   }
 }
 
+/// Normalize a source pattern by:
+/// 1. Converting Windows backslashes to forward slashes for glob compatibility
+/// 2. Ensuring pattern ends with /package.json
+///
+/// Examples:
+/// - "projects\\apps\\*" -> "projects/apps/*/package.json"
+/// - "projects/libs/*" -> "projects/libs/*/package.json"
+/// - "package.json" -> "package.json"
+/// - "apps\\*/package.json" -> "apps/*/package.json"
+pub fn normalize_pattern(pattern: String) -> String {
+  let normalized = pattern.replace('\\', "/");
+  if normalized.contains("package.json") {
+    normalized
+  } else {
+    format!("{normalized}/package.json")
+  }
+}
+
 /// Resolve every source glob pattern into their absolute file paths of
 /// package.json files
 fn get_file_paths(config: &Config) -> Vec<PathBuf> {
@@ -214,18 +232,7 @@ fn get_source_patterns(config: &Config) -> Vec<String> {
           patterns
         })
     })
-    .map(|patterns| {
-      patterns
-        .into_iter()
-        .map(|pattern| {
-          if pattern.contains("package.json") {
-            pattern
-          } else {
-            format!("{pattern}/package.json")
-          }
-        })
-        .collect()
-    })
+    .map(|patterns| patterns.into_iter().map(normalize_pattern).collect())
     .or_else(get_default_patterns)
     .unwrap()
 }
