@@ -91,9 +91,24 @@ fn with_workspace_protocol() {
     );
   }
 
-  // workspace with range-only (no embedded version) have no node_version
+  // Identical unresolved workspace protocols SHOULD match (after fix)
+  let cases_identical_unresolved: Vec<(&str, &str)> = vec![
+    ("workspace:*", "workspace:*"),
+    ("workspace:^", "workspace:^"),
+    ("workspace:~", "workspace:~"),
+  ];
+  for (a, b) in cases_identical_unresolved {
+    assert!(
+      Specifier::new(a).has_same_version_number_as(&Specifier::new(b)),
+      "Expected {a} and {b} to have same version number (identical unresolved workspace protocols)"
+    );
+  }
+
+  // Different unresolved workspace protocols should NOT match
   let cases_false: Vec<(&str, &str)> = vec![
     ("workspace:*", "workspace:^"),
+    ("workspace:*", "workspace:~"),
+    ("workspace:^", "workspace:~"),
     ("workspace:*", "1.4.1"),
     ("workspace:^", "^1.4.1"),
     ("workspace:~", "~1.4.1"),
@@ -101,7 +116,7 @@ fn with_workspace_protocol() {
   for (a, b) in cases_false {
     assert!(
       !Specifier::new(a).has_same_version_number_as(&Specifier::new(b)),
-      "Expected {a} and {b} to return false (range-only workspace protocol has no node_version)"
+      "Expected {a} and {b} to return false (different or incomparable)"
     );
   }
 }

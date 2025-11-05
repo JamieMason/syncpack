@@ -701,6 +701,14 @@ impl Specifier {
   /// - "1.4.1" and "^1.4.1" → true
   /// - "1.4.1" and "1.4.2" → false
   pub fn has_same_version_number_as(&self, other: &Self) -> bool {
+    // Special case: unresolved workspace protocols with identical raw strings
+    // should be considered equal (e.g., "workspace:*" == "workspace:*")
+    if let (Self::WorkspaceProtocol(left), Self::WorkspaceProtocol(right)) = (self, other) {
+      if left.needs_resolution() && right.needs_resolution() {
+        return left.raw == right.raw;
+      }
+    }
+
     if !self.has_comparable_version() || !other.has_comparable_version() {
       return false;
     }

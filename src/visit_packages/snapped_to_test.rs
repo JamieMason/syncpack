@@ -625,3 +625,251 @@ fn refuses_to_snap_local_version_to_another_target() {
     },
   ]);
 }
+
+#[test]
+fn workspace_star_identical_to_snapped_to_target() {
+  let config = test::mock::config_from_mock(json!({
+    "versionGroups": [{
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![
+    json!({
+      "name": "leader",
+      "dependencies": {
+        "localpkg": "workspace:*"
+      }
+    }),
+    json!({
+      "name": "follower",
+      "peerDependencies": {
+        "localpkg": "workspace:*"
+      }
+    }),
+  ]);
+  let registry_client = None;
+  let ctx = Context::create(config, packages, registry_client);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "follower",
+      id: "follower in /version of follower",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsNonSemverButIdentical),
+      dependency_name: "localpkg",
+      id: "localpkg in /dependencies of leader",
+      actual: "workspace:*",
+      expected: Some("workspace:*"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "localpkg",
+      id: "localpkg in /peerDependencies of follower",
+      actual: "workspace:*",
+      expected: Some("workspace:*"),
+      overridden: None,
+    },
+  ]);
+}
+
+#[test]
+fn workspace_star_differs_from_workspace_with_embedded_version() {
+  let config = test::mock::config_from_mock(json!({
+    "versionGroups": [{
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![
+    json!({
+      "name": "leader",
+      "dependencies": {
+        "localpkg": "workspace:^1.0.0"
+      }
+    }),
+    json!({
+      "name": "follower",
+      "peerDependencies": {
+        "localpkg": "workspace:*"
+      }
+    }),
+  ]);
+  let registry_client = None;
+  let ctx = Context::create(config, packages, registry_client);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "follower",
+      id: "follower in /version of follower",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsHighestOrLowestSemver),
+      dependency_name: "localpkg",
+      id: "localpkg in /dependencies of leader",
+      actual: "workspace:^1.0.0",
+      expected: Some("workspace:^1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToSnapTarget),
+      dependency_name: "localpkg",
+      id: "localpkg in /peerDependencies of follower",
+      actual: "workspace:*",
+      expected: Some("workspace:^1.0.0"),
+      overridden: None,
+    },
+  ]);
+}
+
+#[test]
+fn workspace_caret_identical_to_snapped_to_target() {
+  let config = test::mock::config_from_mock(json!({
+    "versionGroups": [{
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![
+    json!({
+      "name": "leader",
+      "dependencies": {
+        "localpkg": "workspace:^"
+      }
+    }),
+    json!({
+      "name": "follower",
+      "dependencies": {
+        "localpkg": "workspace:^"
+      }
+    }),
+  ]);
+  let registry_client = None;
+  let ctx = Context::create(config, packages, registry_client);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "follower",
+      id: "follower in /version of follower",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsNonSemverButIdentical),
+      dependency_name: "localpkg",
+      id: "localpkg in /dependencies of leader",
+      actual: "workspace:^",
+      expected: Some("workspace:^"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "localpkg",
+      id: "localpkg in /dependencies of follower",
+      actual: "workspace:^",
+      expected: Some("workspace:^"),
+      overridden: None,
+    },
+  ]);
+}
+
+#[test]
+fn workspace_tilde_identical_to_snapped_to_target() {
+  let config = test::mock::config_from_mock(json!({
+    "versionGroups": [{
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![
+    json!({
+      "name": "leader",
+      "dependencies": {
+        "localpkg": "workspace:~"
+      }
+    }),
+    json!({
+      "name": "follower",
+      "dependencies": {
+        "localpkg": "workspace:~"
+      }
+    }),
+  ]);
+  let registry_client = None;
+  let ctx = Context::create(config, packages, registry_client);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "follower",
+      id: "follower in /version of follower",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsNonSemverButIdentical),
+      dependency_name: "localpkg",
+      id: "localpkg in /dependencies of leader",
+      actual: "workspace:~",
+      expected: Some("workspace:~"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "localpkg",
+      id: "localpkg in /dependencies of follower",
+      actual: "workspace:~",
+      expected: Some("workspace:~"),
+      overridden: None,
+    },
+  ]);
+}
