@@ -109,9 +109,9 @@ pub struct Rcfile {
   pub custom_types: HashMap<String, CustomType>,
   #[serde(default)]
   pub dependency_groups: Vec<DependencyGroup>,
-  #[serde(default = "default_true")]
+  #[serde(default = "default_false")]
   pub format_bugs: bool,
-  #[serde(default = "default_true")]
+  #[serde(default = "default_false")]
   pub format_repository: bool,
   #[serde(default = "default_indent")]
   pub indent: String,

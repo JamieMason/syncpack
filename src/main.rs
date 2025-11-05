@@ -32,6 +32,8 @@ mod logger;
 mod package_json;
 mod packages;
 mod rcfile;
+#[cfg(test)]
+mod rcfile_test;
 mod registry_client;
 #[cfg(test)]
 mod registry_client_test;
