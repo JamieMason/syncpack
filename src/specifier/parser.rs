@@ -5,7 +5,10 @@ pub fn is_simple_semver(str: &str) -> bool {
 }
 
 pub fn is_exact(str: &str) -> bool {
-  regexes::EXACT.is_match(str) || regexes::EXACT_TAG.is_match(str)
+  regexes::EXACT.is_match(str)
+    || regexes::EXACT_TAG.is_match(str)
+    || regexes::EXACT_EQUALS.is_match(str)
+    || regexes::EXACT_EQUALS_TAG.is_match(str)
 }
 
 pub fn is_latest(str: &str) -> bool {

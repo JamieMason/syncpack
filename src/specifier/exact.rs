@@ -16,11 +16,14 @@ pub struct Exact {
 
 impl Exact {
   pub fn create(raw: &str) -> Specifier {
-    match Specifier::new_node_version(raw) {
+    // Strip leading = if present (npm allows =1.2.3 as equivalent to 1.2.3)
+    let version_without_equals = raw.strip_prefix('=').unwrap_or(raw);
+
+    match Specifier::new_node_version(version_without_equals) {
       Some(node_version) => {
-        let node_range = Specifier::new_node_range(raw).unwrap_or_else(|| {
+        let node_range = Specifier::new_node_range(version_without_equals).unwrap_or_else(|| {
           // Fallback: should never happen if node_version parses
-          Rc::new(node_semver::Range::parse(raw).unwrap())
+          Rc::new(node_semver::Range::parse(version_without_equals).unwrap())
         });
         Specifier::Exact(Self {
           raw: raw.to_string(),

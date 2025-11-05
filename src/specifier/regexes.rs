@@ -7,6 +7,10 @@ lazy_static! {
   pub static ref EXACT: Regex = Regex::new(r"^[0-9]+\.[0-9]+\.[0-9]+$").unwrap();
   /// "1.2.3-alpha" || "1.2.3-rc.1"
   pub static ref EXACT_TAG: Regex = Regex::new(r"^[0-9]+\.[0-9]+\.[0-9]+\-[a-z0-9.-_]+$").unwrap();
+  /// "=1.2.3"
+  pub static ref EXACT_EQUALS: Regex = Regex::new(r"^=([0-9]+\.[0-9]+\.[0-9]+)$").unwrap();
+  /// "=1.2.3-alpha" || "=1.2.3-rc.1"
+  pub static ref EXACT_EQUALS_TAG: Regex = Regex::new(r"^=([0-9]+\.[0-9]+\.[0-9]+)\-[a-z0-9.-_]+$").unwrap();
   /// "^1.2.3"
   pub static ref CARET: Regex = Regex::new(r"^\^([0-9]+\.[0-9]+\.[0-9]+)$").unwrap();
   /// "^1.2.3-alpha" || "^1.2.3-rc.1"

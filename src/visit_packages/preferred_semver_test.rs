@@ -2028,4 +2028,83 @@ mod custom_types {
       },
     ]);
   }
+
+  #[test]
+  fn exact_version_with_equals_prefix_should_be_fixable_when_semver_group_requires_caret() {
+    // Reproduces issue #239
+    // User has semverGroups with range "^" but dependency uses =9.0.0 (npm's equals prefix)
+    // This should be marked as fixable (needs ^ prefix added)
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "pkg-a",
+        "version": "1.0.0",
+        "dependencies": {
+          "react": "=9.0.0"
+        }
+      })])
+      .with_config(json!({
+        "semverGroups": [{
+          "range": "^"
+        }]
+      }))
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-a",
+        actual: "=9.0.0",
+        expected: Some("^9.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
+  fn exact_version_without_prefix_should_be_fixable_when_semver_group_requires_caret() {
+    // Also test plain exact versions like "9.0.0" (without =)
+    // These should also be flagged when semver group requires ^
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "pkg-a",
+        "version": "1.0.0",
+        "dependencies": {
+          "react": "9.0.0"
+        }
+      })])
+      .with_config(json!({
+        "semverGroups": [{
+          "range": "^"
+        }]
+      }))
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-a",
+        actual: "9.0.0",
+        expected: Some("^9.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
 }

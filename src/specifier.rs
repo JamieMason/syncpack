@@ -484,7 +484,8 @@ impl Specifier {
 
     match self {
       Self::Exact(s) => {
-        let new_specifier = format!("{}{}", range_str, s.raw);
+        // Use node_version to get clean version without = prefix
+        let new_specifier = format!("{}{}", range_str, s.node_version);
         Some(Self::new(&new_specifier))
       }
       Self::Major(s) => {

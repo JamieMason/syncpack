@@ -822,3 +822,35 @@ fn issue_213_git_tags_starting_with_v() {
     _ => panic!("Expected Git"),
   };
 }
+
+#[test]
+fn parses_equals_prefix_as_exact_version() {
+  // Test issue #239 - npm allows =X.Y.Z as equivalent to X.Y.Z
+  let spec = Specifier::new("=9.0.0");
+  match spec.as_ref() {
+    Specifier::Exact(actual) => {
+      assert_eq!(actual.raw, "=9.0.0");
+      assert_eq!(actual.node_version.major, 9);
+      assert_eq!(actual.node_version.minor, 0);
+      assert_eq!(actual.node_version.patch, 0);
+      assert_eq!(spec.get_semver_range(), Some(SemverRange::Exact));
+      assert_eq!(spec.get_node_version().unwrap().to_string(), "9.0.0");
+    }
+    _ => panic!("Expected Exact, got {:?}", spec),
+  }
+}
+
+#[test]
+fn parses_equals_prefix_with_prerelease() {
+  let spec = Specifier::new("=1.2.3-alpha.1");
+  match spec.as_ref() {
+    Specifier::Exact(actual) => {
+      assert_eq!(actual.raw, "=1.2.3-alpha.1");
+      assert_eq!(actual.node_version.major, 1);
+      assert_eq!(actual.node_version.minor, 2);
+      assert_eq!(actual.node_version.patch, 3);
+      assert_eq!(spec.get_semver_range(), Some(SemverRange::Exact));
+    }
+    _ => panic!("Expected Exact, got {:?}", spec),
+  }
+}
