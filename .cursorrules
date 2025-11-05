@@ -394,8 +394,10 @@ Prefer clarity over brevity - rust lacks describe/it blocks, so function names m
 ### File Organization
 
 - New command → `src/commands/{name}.rs`
-- New test file → same dir as impl, suffix `_test.rs`
+- **New test file → ALWAYS create sibling `_test.rs` file** (e.g., `src/foo.rs` → `src/foo_test.rs`)
+- **NEVER use `#[cfg(test)]` modules inside implementation files**
 - Integration tests → `src/visit_packages/{feature}_test.rs`
+- Test module must be declared in `src/main.rs` with `#[cfg(test)]`
 - **Never create new top-level modules without discussion**
 
 <import_style>

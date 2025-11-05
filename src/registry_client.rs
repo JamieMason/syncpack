@@ -57,10 +57,21 @@ impl RegistryClient for LiveRegistryClient {
     match req.send().await {
       Ok(res) => match res.status() {
         StatusCode::OK => match res.json::<PackageMeta>().await {
-          Ok(package_meta) => Ok(AllPackageVersions {
-            name: package_meta.name,
-            versions: package_meta.versions.into_keys().collect(),
-          }),
+          Ok(package_meta) => {
+            let versions = package_meta
+              .versions
+              .into_iter()
+              .filter(|(_, metadata)| {
+                // Filter out deprecated versions by checking if "deprecated" field exists
+                metadata.get("deprecated").is_none()
+              })
+              .map(|(version, _)| version)
+              .collect();
+            Ok(AllPackageVersions {
+              name: package_meta.name,
+              versions,
+            })
+          }
           Err(err) => Err(RegistryError::FetchError {
             url: update_url.url.to_string(),
             source: Box::new(err),

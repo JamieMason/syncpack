@@ -33,6 +33,8 @@ mod package_json;
 mod packages;
 mod rcfile;
 mod registry_client;
+#[cfg(test)]
+mod registry_client_test;
 mod semver_group;
 mod semver_range;
 mod specifier;
