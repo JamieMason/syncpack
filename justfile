@@ -88,7 +88,7 @@ run-ci-action:
 
 # Build release version with debug symbols for profiling
 build-profile-release:
-    cargo build --release
+    CARGO_PROFILE_RELEASE_DEBUG=true CARGO_PROFILE_RELEASE_STRIP=false cargo build --release
 
 # Benchmark the current release build with hyperfine
 benchmark:
