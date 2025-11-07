@@ -1,825 +1,224 @@
 # Syncpack Development Rules
 
-You are working on Syncpack, a Rust CLI tool that synchronizes npm dependency versions across monorepos.
+Rust CLI tool for synchronizing npm dependency versions across monorepos.
 
-## Essential Reading (Read These First!)
+## Critical Reading
 
-<critical_docs>
+Before any work, read:
 
-Before starting any work, ALWAYS read:
-
-1. `.notes/context.md` - Core concepts and mental model
-2. `.notes/index.md` - Central navigation hub for all documentation
-
-When working on plans, ALSO read:
-
-3. `.notes/plan-maintenance.md` - Guidelines for keeping plans forward-looking
-
-</critical_docs>
+1. `.notes/context.md` - Core concepts
+2. `.notes/index.md` - Navigation hub
+3. `.notes/plan-maintenance.md` - When working on plans
+4. `.notes/documentation-website.md` - When contributing to docs site
 
 ## When to Ask vs Proceed
 
-<decision_rules>
+### Ask when
 
-Ask the user when:
+- User intent unclear or multiple valid approaches exist
+- Breaking changes or core architecture modifications
+- Creating ANY new files/modules not explicitly requested (including docs, notes, examples)
+- Large refactors (ALWAYS ask strategy questions first)
+- Architectural decisions: HashMap keys, error handling, etc.
 
-- User intent unclear or ambiguous
-- Multiple valid approaches exist
-- Change would be breaking
-- Creating new top-level modules
-- Modifying core architecture patterns
-- Want to create new files (summaries, changelogs, reports, guides) - NEVER create unsolicited files
-- Implementing large refactors or migrations (ALWAYS ask strategy questions first)
-- API changes have semantic differences (not just syntax)
-- Architectural decisions needed (HashMap keys, error handling, etc.)
-- Multiple implementation strategies exist with trade-offs
-
-Proceed without asking when:
+### Proceed when
 
 - Pattern clearly exists in codebase
 - Following established convention
-- Change is non-breaking
-- Adding tests for new code
-- Fixing obvious bugs
-- Writing comments/docs for complex logic that's difficult to understand
+- Non-breaking changes
+- Adding tests, fixing obvious bugs
 
-</decision_rules>
+### Large refactor rule
 
-<uncertainty_handling>
+Before implementing, identify ALL decision points, document trade-offs, ask user to choose strategy. WAIT for answers.
 
-### Critical Rule: Large Refactors Require Upfront Questions
+## Core Architecture (NEVER BREAK)
 
-Before implementing any large refactor, migration, or API change:
+### 3-Phase Pattern
 
-1. Identify all decision points where multiple approaches exist
-2. Document trade-offs for each approach
-3. Ask user to choose strategy
-4. Wait for answers - do NOT proceed with assumptions
+Every command: Create Context → Inspect Context → Run Command
 
-Red flags that you MUST ask questions:
+- Phase 1: Read CLI args → config → package.json → collect dependencies
+- Phase 2: Assign InstanceState via visit_packages/visit_formatting
+- Phase 3: Process instances, return exit code
 
-- "This could be done multiple ways..."
-- "The old code did X, but new code could do Y..."
-- "I'll implement this way and we can change it later..."
-- Making architectural decisions without discussing trade-offs
+### Ownership Rules
 
-If you catch yourself making assumptions about implementation strategy, STOP and ask the user.
+- Context owns all data (config, packages, instances, version_groups)
+- Created once, passed through pipeline
+- Each phase takes ownership, returns Context
+- Commands consume Context, return exit code
 
-### When Uncertain About Codebase Facts
+### Key Invariants
 
-**ALWAYS verify before claiming:**
+1. **InstanceState assigned during inspection, NOT Context creation**
+2. **Commands registered in 3 places:** Subcommand enum (cli.rs), match arm (main.rs), implementation (commands/\*.rs)
+3. **Inspection is read-only:** visit_packages() tags only, file writes in command run()
+4. **Use Rc for single-thread sharing:** `Rc::clone(&rc)` not `rc.clone()`. Arc only for cross-thread (RegistryClient)
 
-- "Function X exists in module Y" → Search first with ast-grep
-- "The codebase follows pattern Z" → Find examples before asserting
-- "This is how feature W works" → Read the actual implementation
+### Wrong Patterns
 
-**Explicitly state uncertainty:**
+❌ Assign InstanceState in Context::create | ✅ Assign in visit_packages
+❌ Side effects in visit_packages | ✅ Side effects in command run()
+❌ `rc.clone()` | ✅ `Rc::clone(&rc)`
+❌ Chain `?` with intermediate vars | ✅ Fluent pipelines with .and_then()
 
-- ✅ "I need to search for existing implementations before recommending"
-- ✅ "Let me verify this pattern exists in the codebase"
-- ✅ "I should check the actual code before assuming"
-- ❌ Don't make confident claims about code you haven't verified
+## Communication Style
 
-</uncertainty_handling>
+**Signal over noise** - applies to responses, plans, docs, comments:
 
-## Core Architecture
+- Extremely concise, fragments over sentences
+- Action-oriented: what to DO
+- Ground in facts: cite code/docs
+- Remove: "basically", "essentially", "in order to"
 
-<system_invariants>
+## Code Style
 
-### 3-Phase Pattern (Never Break This!)
-
-Every command follows this pattern:
-
-1. **Create Context** - Read CLI args → config file → package.json files → collect dependencies
-2. **Inspect Context** - Assign InstanceState to each dependency (via visit_packages or visit_formatting)
-3. **Run Command** - Process instances based on their states, return exit code (0 or 1)
-
-### Ownership Rules (Never Violate These!)
-
-- Context owns all project data (config, packages, instances, version_groups)
-- Context is created once and passed through the pipeline
-- Each phase takes ownership of Context and returns it
-- Commands consume Context and return an exit code
-
-### Key Invariants (Breaking These Will Break The System!)
-
-1. **InstanceState is assigned during inspection, NOT during Context creation**
-   - WRONG: Assigning state in Context::create()
-   - RIGHT: Assigning state in visit_packages()
-
-2. **Commands must be registered in three places**
-   - Subcommand enum in src/cli.rs
-   - Match arm in src/main.rs
-   - Implementation in src/commands/\*.rs
-
-3. **Inspection phase is read-only**
-   - visit_packages() and visit_formatting() only TAG instances
-   - They never modify package.json files
-   - File modifications happen in command run() functions
-
-4. **Context fields use Rc for cheap cloning**
-   - Use Rc<Instance> for single-threaded sharing
-   - Use Arc only for cross-thread data (like RegistryClient)
-   - **Always use `Rc::clone(&rc)` instead of `rc.clone()`** - Makes it explicit we're cloning the pointer, not the data
-
-</system_invariants>
-
-<wrong_patterns>
-
-❌ Don't assign InstanceState during Context::create
-✅ Do assign it in visit_packages
-
-❌ Don't implement side effects (file writes) in visit_packages
-✅ Do implement them in command run() functions
-
-❌ Don't forget to update all three places when adding commands
-✅ Do update enum, main.rs match, and create command file
-
-❌ Don't use Arc unless data crosses threads
-✅ Do use Rc for single-threaded sharing
-
-❌ Don't use `.clone()` on Rc types: `let copy = rc.clone();`
-✅ Do use `Rc::clone()`: `let copy = Rc::clone(&rc);`
-
-❌ Don't chain `?` operators with intermediate variables:
-
-```
-let with_range = spec.with_range(&SemverRange::Caret)?;
-let result = with_range.with_node_version(&version)?;
-```
-
-✅ Do use fluent pipelines:
-
-```
-spec.with_range(&SemverRange::Caret)
-    .and_then(|s| s.with_node_version(&version))
-```
-
-</wrong_patterns>
-
-## Development Guidelines
-
-<communication_requirements>
-
-**Core principle: Signal over noise** - Be useful, direct, crystal clear
-
-**Applies to all communication: responses, plans, documentation, comments**
-
-- **Be extremely concise** - Sacrifice grammar for brevity
-- **No fluff** - Get straight to the point
-- **Short sentences** - Prefer fragments over full sentences when clear
-- **Ground in facts** - Cite code/docs when making architectural claims
-- **Action-oriented** - What to DO, not what to think about
-- **Remove hedging** - "basically", "essentially", "generally" → delete
-
-</communication_requirements>
-
-<plan_writing>
-
-### Plan Writing Style - Signal Over Noise
-
-**Core principle**: Ruthlessly prioritize signal over noise. Be useful, direct, crystal clear.
-
-<rules>
-
-**Format:**
-
-- Bullet points, not paragraphs
-- Fragments over full sentences
-- No filler words: "in order to" → "to", "it is important to note that" → (delete)
-- No repeated context - state it once
-
-**Content:**
-
-- Action-oriented: what to DO, not what to think about
-- Concrete examples over abstract descriptions
-- Code references over explanations: "See src/instance.rs:45" not "The instance module handles..."
-- Remove hedging: "basically", "essentially", "generally" → (delete)
-
-**Clarity:**
-
-- One idea per bullet
-- Specific over vague: "Add InstanceState::Valid" not "Update the state logic"
-- Direct commands: "Use Rc::clone(&rc)" not "It would be good to consider using Rc::clone"
-
-</rules>
-
-<examples>
-
-❌ **Verbose (noise)**:
-
-```
-In order to properly handle the validation of dependencies, we need to
-make sure that we're assigning the appropriate InstanceState to each
-dependency instance. This is important because it allows the system to
-understand which dependencies are valid and which ones need to be fixed.
-```
-
-✅ **Concise (signal)**:
-
-```
-Assign InstanceState to each Instance in visit_packages():
-
-- Valid = follows version group rules
-- Invalid = fixable/unfixable violations
-- Suspect = misconfiguration
-```
-
----
-
-❌ **Verbose**:
-
-```
-When writing tests, it's generally considered best practice to use the
-TestBuilder pattern that has been established in the codebase, as this
-ensures consistency and makes the tests more maintainable.
-```
-
-✅ **Concise**:
-
-```
-Use TestBuilder for tests (see src/visit_packages/*_test.rs)
-```
-
----
-
-❌ **Verbose**:
-
-```
-Implementation Steps:
-1. First, we should read through the existing code to understand how it works
-2. Then, we need to think about the best approach for implementing this feature
-3. After that, we can start writing the actual code
-4. Finally, we'll need to test everything to make sure it works correctly
-```
-
-✅ **Concise**:
-
-```
-Steps:
-1. Check similar impl in src/commands/lint.rs
-2. Add validation logic to src/visit_packages/banned.rs
-3. Assign InstanceState::Invalid(Fixable::IsBanned)
-4. Test with TestBuilder - banned package should fail
-```
-
-</examples>
-
-<apply_to>
-
-This style applies to:
-
-- Plans and implementation guides
-- Task documentation
-- Code review comments
-- Architectural decisions
-- **NOT to**: Code variable names (use descriptive names), public API docs (use clear summaries)
-
-</apply_to>
-
-</plan_writing>
-
-<plan_maintenance>
-
-### Maintaining Plans and Documentation
-
-**When working on plans, implementation guides, or task documentation:**
-
-**ALWAYS read `.notes/plan-maintenance.md` first** - Contains detailed guidelines for keeping plans forward-looking and actionable.
-
-**Quick rule**: Remove historical commentary ("we changed from X to Y"), keep actionable instructions and rationale (WHY we do things).
-
-</plan_maintenance>
-
-### Code Style Requirements
-
-- **Functional style preferred** - Use pipelines (.map, .filter, .and_then, etc.) when appropriate
-- **Avoid `?` operator chains** - Prefer fluent pipelines with .and_then, .map, .or_else over intermediate variable bindings with `?`
-- **Prioritise readability** - Ensure code is easy to understand and maintain, functional programming tends to be more readable than imperative programming.
-- **Use descriptive variable and function names** - Choose names that clearly convey the purpose of the variable
-
-<tdd_workflow>
+- **Functional style preferred:** pipelines over loops
+- **Avoid `?` chains:** use .and_then(), .map(), .or_else()
+- **Descriptive names:** clarity over brevity in code
+- **Single use statement:** group all imports in braces
+- **Never use `super::`:** always `crate::` for internal imports
+- **Named placeholders:** `println!("{var}")` not `println!("{}", var)`
 
 ### TDD Workflow (Mandatory)
 
-1. **Write failing test first** - Always ensure test fails before implementation
-2. **Run test to verify failure** - Confirm test actually detects the missing feature
-3. **Implement minimal code** - Make test pass with simplest solution
-4. **Check cargo/clippy** - Fix all errors and warnings after implementation
-5. **Refactor** - Once tests are passing, refactor code to improve readability and maintainability
-6. **Exception**: Known-incomplete code during TDD cycle can have errors until implementation done
+1. Write failing test, verify it fails
+2. Implement minimal code to pass
+3. Check cargo/clippy
+4. Refactor
 
-</tdd_workflow>
+### Code Quality
 
-### Code Quality Standards
-
-- Keep functions under 50 lines when possible
-- Commands should be 100-300 lines (stay focused)
-- Use descriptive variable names (prefer clarity over brevity in CODE, not in plans/docs)
-- **TDD mandatory** - Test must fail before writing implementation
-- **Zero warnings** - Fix all cargo and clippy warnings (except during TDD red phase)
-- Follow Rust naming conventions (see `.notes/index.md` for specifics)
-- Prefer functional/pipeline style over imperative loops
-- **No comments by default** - Only write docs/comments for complex logic that's difficult to understand
-- **Scientific debugging** - Don't rush to fix errors; form hypotheses and test them through experiments before attempting fixes
-- **Method documentation style** - For public methods, write doc comments with: (1) concise paragraph description, (2) pseudo-code examples showing typical inputs → outputs (see `src/specifier2.rs` for examples)
+- Functions <50 lines, commands 100-300 lines
+- Zero warnings (except during TDD red phase)
+- No comments by default (only for complex logic)
+- Scientific debugging: form hypotheses, test before fixing
 
 ### Testing
 
-<test_guidelines>
-
-**Integration tests** - Located in `src/visit_packages/`, always use TestBuilder
-
-<wrong>
-Manually constructing Context
-</wrong>
-
-<correct>
-TestBuilder::new().with_package(...).build_and_visit_packages()
-</correct>
-
-**Unit tests** - Use vec of test scenarios, iterate and assert (see `src/specifier2/*_test.rs`)
-
-<wrong>
-Repeating implementation multiple times in a test function
-</wrong>
-
-<correct>
-Use vec of test cases, iterate and assert
-</correct>
-
-</test_guidelines>
-
-<test_naming>
-
-### Test Naming Conventions
-
-**Unit tests**: `fn {behavior}_{condition}()` - Describe what happens under what condition
-
-<good_examples>
-
-- `fn returns_none_when_invalid()`
-- `fn extracts_version_from_npm_alias()`
-- `fn self_comparison_always_returns_false()`
-
-</good_examples>
-
-<bad_examples>
-
-- `fn with_git_urls()` - missing behavior/outcome
-- `fn edge_cases()` - too vague, be specific
-- `fn comprehensive_check()` - what is being checked?
-
-</bad_examples>
-
-**Integration tests**: `fn {feature}_{scenario}()` - Descriptive names that explain intent and behavior
-
-<good_examples>
-
-- `fn refuses_to_ban_local_version()`
-- `fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_compatible_semver_group()`
-
-</good_examples>
-
-Prefer clarity over brevity - rust lacks describe/it blocks, so function names must convey full context
-
-**General rules**:
-
-- Include the outcome: `returns_none_when_*`, `extracts_*_from_*`, `is_older_when_*`
-- Avoid generic names: `edge_cases`, `comprehensive_*`, `original_*`
-- Be specific about conditions: instead of `with_prerelease` use `prerelease_versions_sort_before_stable`
-
-</test_naming>
+- **Integration tests:** Use TestBuilder in src/visit_packages/\*\_test.rs
+- **Unit tests:** Vec of test scenarios, iterate and assert (see src/specifier2/\*\_test.rs)
+- **Test naming:** `{behavior}_{condition}` or `{feature}_{scenario}`
 
 ### File Organization
 
-- New command → `src/commands/{name}.rs`
-- **New test file → ALWAYS create sibling `_test.rs` file** (e.g., `src/foo.rs` → `src/foo_test.rs`)
-- **NEVER use `#[cfg(test)]` modules inside implementation files**
-- Integration tests → `src/visit_packages/{feature}_test.rs`
-- Test module must be declared in `src/main.rs` with `#[cfg(test)]`
-- **Never create new top-level modules without discussion**
-
-<import_style>
+- New command: src/commands/{name}.rs
+- **New test: ALWAYS sibling \_test.rs file** (src/foo.rs → src/foo_test.rs)
+- **NEVER use #[cfg(test)] modules inside implementation files**
 
 ### Import Style
 
-- **Single `use` statement** with all imports in braces
-- **Never use `super::`** - always use `crate::` for internal imports
-- **Order**: Run `just format` to autofix
-
-<example>
-
 ```rust
 use {
-  crate::{
-    cli::{Cli, Subcommand},
-    config::Config,
-  },
+  crate::{cli::Cli, config::Config},
   log::{debug, error},
   std::{process::exit, sync::Arc},
 };
 ```
 
-</example>
-
-</import_style>
-
-<documentation_style>
-
-### Documentation Style
-
-For public methods, follow this pattern (see `src/specifier2.rs` for reference):
-
-<template>
+### Documentation (Public Methods)
 
 ```rust
-/// Brief description of what the method does.
+/// Brief description.
 ///
 /// Examples:
 /// - "input1" -> output1
-/// - "input2" -> output2
-/// - "input3" -> None
-pub fn method_name(&self) -> ReturnType {
-  // implementation
-}
+/// - "input2" -> None
+pub fn method_name(&self) -> ReturnType {}
 ```
 
-</template>
+## AI-Specific Rules
 
-<structure>
+### Pre-Implementation Checklist
 
-1. First line: Concise summary (one sentence)
-2. Blank line with `///`
-3. `Examples:` section with bullet points
-4. Each example: `"input"` → `output` (use actual values, not descriptions)
+Before large changes:
 
-</structure>
-
-<reference_examples>
-
-Examples from codebase:
-
-- `Specifier2::get_config_identifier` - Shows input specifiers → config type strings
-- `Specifier2::get_alias_name` - Shows various inputs → Some(name) or None
-- `Specifier2::get_semver_number` - Shows how semver range chars are stripped
-- `Specifier2::get_node_version` - Shows version extraction with/without ranges
-- `Specifier2::get_node_range` - Shows range preservation
-
-</reference_examples>
-
-</documentation_style>
-
-<common_mistakes>
-
-### Common Style Mistakes
-
-❌ Don't use `super::` in imports
-✅ Do use `crate::` for internal imports
-
-❌ Don't create multiple `use` statements
-✅ Do group all imports in single `use` with braces
-
-❌ Don't use empty placeholders: `println!("Value: {}", var)`
-✅ Do use named placeholders: `println!("Value: {var}")`
-
-❌ Don't write verbose doc comments explaining what code does
-✅ Do write concise summaries with input→output examples
-
-❌ Don't use generic examples in docs: `method(value) -> result`
-✅ Do use concrete examples: `"^1.2.3" -> Some("1.2.3")`
-
-</common_mistakes>
-
-### Error Messages
-
-- Start with what failed: "Failed to parse X"
-- Include context: "in file Y"
-- Suggest fix when possible: "Did you mean Z?"
-
-### Performance vs Readability
-
-- **Readability first** unless proven bottleneck
-- Profile before optimizing
-- Clone is fine for Rc types
-- Functional style usually more readable than loops
-
-## AI-Specific Guidance
-
-<instructions>
-
-### STOP: Pre-Implementation Checklist (READ THIS FIRST)
-
-Before writing ANY code for large changes, check:
-
-- Have I identified ALL decision points where multiple approaches exist?
-- Have I listed the trade-offs for each approach?
-- Have I asked the user which strategy to use?
-- Have I waited for user's answers before proceeding?
+- Have I identified ALL decision points?
+- Have I listed trade-offs for each approach?
+- Have I asked user which strategy to use?
 - Am I making ANY architectural assumptions?
-- Am I creating ANY files the user didn't explicitly request?
+- Am I creating files user didn't request?
 
-If you answered "no" to ANY of these, STOP and ask the user.
+If "no" to ANY, STOP and ask.
 
-Important: "Update X" means ONLY modify X. Don't create summaries, changelogs, or supporting docs without asking.
+### Recognizing Assumption Mode
 
-### Self-Awareness: Recognizing Assumption Mode
-
-You are in "assumption mode" if you think:
+STOP if you think:
 
 - "I'll use approach X because it seems reasonable"
-- "This is probably what the user wants"
-- "The old code did it this way, so I should too"
-- "I can always refactor later if wrong"
-- "This is a minor detail, doesn't need discussion"
-- "I'll create a summary/changelog to help the user"
-- "This supporting documentation would be useful"
+- "I can refactor later if wrong"
+- "This is a minor detail"
+- "I'll create helpful documentation"
+- "I'll write a summary file"
+- "Let me document this implementation"
 
-STOP immediately if you catch yourself:
+Self-check: "Could this be done differently?" → Ask user
+Self-check: "Am I creating a file user didn't request?" → STOP
 
-- Implementing without considering alternatives
-- Choosing data structures (HashMap, Vec, etc.) without asking
-- Deciding error handling strategy (panic vs graceful)
-- Making semantic API changes without verifying behavior
-- Assuming two APIs are equivalent because names are similar
-- Creating files the user didn't explicitly request
-- Thinking "I'll just add this helpful documentation"
+### Code Search: MUST use ast-grep for .rs files
 
-Self-check questions:
-
-- "Could this be done a different way?" → If yes, ask user
-- "Am I choosing between trade-offs?" → If yes, ask user
-- "Would the user want to know about this decision?" → If yes, ask user
-- "Is this an architectural choice?" → If yes, ask user
-- "Am I creating a file the user didn't ask for?" → STOP, ask first
-
-Remember: Your goal is to implement what the user wants, not what seems reasonable to you. When in doubt, ASK.
-
-### Behavioral Guidelines
-
-1. **Always check `.notes/index.md` first** - Find the right documentation for your task
-2. **Follow existing patterns** - Look at similar code before creating new approaches
-3. **Use the established file organization** - Don't create new locations for similar functionality
-4. **Prefer integration tests** - Use TestBuilder in src/visit_packages/\*\_test.rs
-5. **Maintain type safety** - Leverage Rust's ownership system, don't fight it
-6. **Ground recommendations in actual code** - When suggesting patterns, cite specific files/functions that demonstrate them
-7. **Quote relevant documentation** - When referencing .notes files, extract specific quotes rather than paraphrasing
-8. **Never create unsolicited files** - "Update X" means modify ONLY X, not X plus summaries/changelogs/reports
-
-</instructions>
-
-<tool_requirements>
-
-### Code Search: MUST use ast-grep for Rust files
-
-**REQUIREMENT**: Use `ast-grep` instead of `grep`/`rg` when searching `.rs` files.
-
-**Why**: ast-grep understands Rust syntax and filters out comments, strings, and documentation, preventing false positives.
-
-<ast_grep_usage>
-
-ast-grep works for both literal code AND patterns:
+**Requirement:** Use `ast-grep` not `grep`/`rg` for Rust files (filters comments/strings/docs)
 
 ```bash
-# Literal code search (filters out comments/strings/docs)
-ast-grep -p 'Specifier::new' src/           # Only finds ACTUAL function calls
-ast-grep -p 'get_raw()' src/                # Only finds ACTUAL method calls
-ast-grep -p 'impl Context' src/             # Only finds ACTUAL impl blocks
+# Literal search
+ast-grep -p 'Specifier::new' src/
 
-# Pattern search with metavariables
-ast-grep -p 'pub struct $NAME' src/         # Any struct definition
-ast-grep -p 'impl $TYPE' src/               # Any impl block
-ast-grep -p 'pub fn $NAME($$$)' src/        # Any public function
-ast-grep -p '$OBJ.$METHOD($$$)' src/        # Any method call
-ast-grep -p 'Specifier::new($$$)' src/      # Specifier::new with any args
+# Pattern search
+ast-grep -p 'pub struct $NAME' src/
+ast-grep -p '$OBJ.$METHOD($$$)' src/
 ```
 
-</ast_grep_usage>
+Use grep/rg ONLY for: multiple file types, intentionally searching comments, non-Rust files
 
-<comparison>
+### Before Making Claims
 
-**Why ast-grep prevents false positives:**
+1. Search with ast-grep to verify
+2. Read actual implementation
+3. Base advice on verified facts
 
-```bash
-# WRONG: Using grep/rg finds non-code occurrences
-$ rg 'Specifier::new' src/
-src/instance.rs:  // Don't use Specifier::new here
-src/instance.rs:  let spec = Specifier::new("^1.2.3");
-CLAUDE.md:        Example: Specifier::new("1.0.0")
-# ❌ 3 results: 1 comment, 1 real code, 1 markdown doc
+### Scope Boundaries (Off-Limits)
 
-# CORRECT: Using ast-grep finds only real code
-$ ast-grep -p 'Specifier::new' src/
-src/instance.rs:  let spec = Specifier::new("^1.2.3");
-# ✅ 1 result: only the actual function call
-```
+- Don't modify: Context creation, 3-phase pattern
+- Don't refactor: Working commands unless requested
+- Don't change: Public APIs (breaking)
+- Don't add: Dependencies without discussion
+- Don't remove: Tests
+- Don't create: Files unless explicitly requested (NO docs, notes, examples, summaries)
 
-</comparison>
+## Design Rationale
 
-<when_to_use_grep>
+**Why InstanceState in visit_packages?** Allows testing independently, enables Context reuse, clear phase separation
 
-Only use grep/rg when:
+**Why Rc not Arc?** Single-threaded, Rc cheaper (no atomic ops). Arc only for RegistryClient (crosses threads)
 
-- Searching across multiple file types: `rg 'pattern' --type md --type toml`
-- Intentionally searching comments/docs: `rg 'TODO' src/`
-- Searching non-Rust files: `rg 'version' Cargo.toml`
-- **Never use grep/rg for finding Rust code in .rs files**
-
-</when_to_use_grep>
-
-**For complex ast-grep patterns**: Use Context7 MCP to get up-to-date documentation (see `.notes/context7-guide.md`)
-
-**For external library docs**: Use Context7 MCP when working with external Rust crates or npm packages (see `.notes/context7-guide.md`)
-
-<code_verification_workflow>
-
-### Before Making Claims About Code
-
-1. **Search first**: Use ast-grep to verify function/pattern exists
-2. **Read the code**: Use read_file to see actual implementation
-3. **Then advise**: Base recommendations on verified facts
-
-<wrong>
-"The codebase uses Specifier::new() to create instances"
-(without verifying this is true)
-</wrong>
-
-<correct>
-*searches with ast-grep*
-*finds actual usage*
-"The codebase uses Specifier::new() in 3 places (src/instance.rs:45, ...)"
-</correct>
-
-</code_verification_workflow>
-
-</tool_requirements>
-
-<boundaries>
-
-### Scope Boundaries (Off-Limits Without Approval)
-
-- **Don't modify**: Context creation logic, 3-phase pattern structure
-- **Don't refactor**: Working commands unless fixing bugs or explicitly requested
-- **Don't change**: Public API signatures (would be breaking changes)
-- **Don't add**: New dependencies without discussion
-- **Don't remove**: Tests, even if they seem redundant
-- **Don't implement**: Large refactors without asking strategy questions first
-- **Don't assume**: API equivalence when migrating between similar types
-- **Don't choose**: Between multiple valid approaches without user input
-- **Don't create**: New files unless explicitly requested (especially summaries, changelogs, reports, guides)
-
-</boundaries>
-
-<large_refactor_protocol>
-
-### Protocol for Large Refactors and Migrations
-
-Definition: Large refactor = touches 10+ files OR changes core types OR has architectural implications
-
-Mandatory steps:
-
-1. Analysis Phase (Ask, don't assume)
-   - Identify ALL decision points where multiple approaches exist
-   - List files that will be modified
-   - Estimate time (be realistic)
-   - Note any semantic API differences
-
-2. Question Phase (REQUIRED before coding)
-   - Present each decision point with trade-offs
-   - Ask user to choose strategy
-   - Confirm acceptable success criteria (100% tests? 95%?)
-   - Get explicit approval to proceed
-
-3. Implementation Phase (Only after answers)
-   - Follow TDD strictly
-   - Test after each major change
-   - Document issues as you encounter them
-   - Ask follow-up questions if new issues arise
-
-4. Validation Phase
-   - All tests passing (or agreed threshold)
-   - Zero clippy warnings
-   - User approves approach
-
-Example from Specifier2 migration:
-
-- ❌ WRONG: "I'll use String keys for HashMap and implement range intersection this way"
-- ✅ RIGHT: "Type X can't derive Hash due to circular reference. Should I: A) Use String keys, B) Implement Hash manually, or C) Refactor structure? Here are the trade-offs..."
-
-Remember: It's better to ask 6 questions upfront than to implement 97% and have it reverted because you chose the wrong strategy.
-
-</large_refactor_protocol>
-
-<breaking_changes>
-
-### Breaking Change Indicators
-
-Watch for these - they require careful consideration:
-
-- Changing public struct fields
-- Modifying CLI arguments/flags
-- Altering config file schema
-- Changing command behavior/output
-- Renaming public functions/types
-
-</breaking_changes>
-
-<design_rationale>
-
-### Understanding the "Why"
-
-**Why assign InstanceState in visit_packages, not Context::create?**
-
-- Allows testing state assignment independently
-- Enables reusing Context across multiple inspections
-- Clear separation: creation vs inspection vs action
-
-**Why use Rc instead of Arc?**
-
-- Syncpack is single-threaded
-- Rc is cheaper (no atomic operations)
-- Arc only needed for RegistryClient (crosses into tokio runtime)
-
-**Why TestBuilder for tests?**
-
-- Ensures Context is properly constructed
-- Prevents test-specific shortcuts that diverge from real usage
-- Makes tests more maintainable when Context changes
-
-</design_rationale>
-
-<pre_commit_checklist>
-
-### Before Committing Code
-
-Quick sanity checks:
-
-1. ✅ All tests pass (`cargo test`)
-2. ✅ Zero clippy warnings (`cargo clippy`)
-3. ✅ No TODO comments (create issues instead)
-4. ✅ Existing patterns followed
-5. ✅ Only changed what was necessary
-
-</pre_commit_checklist>
+**Why TestBuilder?** Ensures proper Context construction, prevents test shortcuts, maintainable
 
 ## Troubleshooting
 
-<when_stuck>
+### When stuck
 
-### When You're Stuck
+1. Check `.notes/index.md` for right doc
+2. Find similar code with ast-grep
+3. Trace 3-phase pattern
+4. Check test examples in src/visit_packages/\*\_test.rs
 
-1. **Start with `.notes/index.md`** - Find the right document for your task
-2. **Check existing similar code** - Use `ast-grep -p "pattern"` or look at comparable implementations
-3. **Follow the 3-phase pattern** - Trace Context creation → inspection → command execution
-4. **Look at test examples** - Check src/visit_packages/\*\_test.rs for patterns
+### Scientific debugging
 
-</when_stuck>
+1. Observe error carefully
+2. Hypothesize root cause
+3. Experiment with targeted changes, verify with ast-grep
+4. Validate hypothesis
+5. Fix and verify with tests
 
-<debugging_method>
+## Quick Reference
 
-### Debugging Errors (Scientific Method)
+Before committing:
 
-When encountering errors, don't rush to fix. Use scientific method:
+- ✅ Tests pass
+- ✅ Zero clippy warnings
+- ✅ No TODOs
+- ✅ Patterns followed
+- ✅ Only necessary changes
 
-<steps>
-
-1. **Observe** - Read error message carefully, note line numbers and context
-2. **Hypothesize** - Form theory about root cause (not symptoms)
-3. **Experiment** - Test hypothesis with targeted changes:
-   - Add logging statements to trace values
-   - Isolate problem with minimal reproduction
-   - **Verify assumptions by checking actual code with ast-grep**
-   - Check assumptions one at a time
-4. **Validate** - Only fix once hypothesis confirmed
-5. **Verify** - Run tests to ensure fix works and doesn't break other things
-
-</steps>
-
-<example_workflow>
-
-Example workflow:
-
-- Error: "borrow checker violation"
-- Hypothesis: Multiple mutable references to same data
-- Experiment: Add debug prints showing where borrows occur
-- Validate: Confirm overlap in borrow scopes
-- Fix: Restructure to use single mutable reference
-- Verify: `cargo test` passes
-
-</example_workflow>
-
-</debugging_method>
-
-## Documentation Navigation
-
-<doc_index>
-
-- **`.notes/index.md`** - Central hub for finding all documentation
-- **`.notes/context.md`** - Essential mental model and concepts
-- **`.notes/plan-maintenance.md`** - Guidelines for keeping plans forward-looking and actionable
-- **`.notes/context7-guide.md`** - Using Context7 MCP for external library documentation
-- **`.notes/quick-reference.md`** - Fast syntax lookup
-- **`.notes/decision-trees.md`** - Flowcharts for choosing approaches
-- **`.notes/examples/`** - Step-by-step implementation guides
-
-</doc_index>
+External docs: Use Context7 MCP (see `.notes/context7-guide.md`)
