@@ -1,0 +1,350 @@
+---
+title: Migrate to 14
+sidebar:
+  badge: New
+---
+
+```bash
+npm install --save-dev syncpack@alpha
+```
+
+## Command Changes
+
+### `list-mismatches` → `lint`
+
+`list-mismatches` and `lint-semver-ranges` have been merged into a single `lint` command which checks whether every specifier matches the semver group and version group they belong to. The `lint` command no longer checks formatting, which is now handled by `syncpack format ––check`.
+
+```bash
+# v13
+syncpack list-mismatches --types prod,dev
+# v14
+syncpack lint --dependency-types prod,dev
+```
+
+### `lint-semver-ranges` → `lint`
+
+`list-mismatches` and `lint-semver-ranges` have been merged into a single `lint` command which checks whether every specifier matches the semver group and version group they belong to. The `lint` command no longer checks formatting, which is now handled by `syncpack format ––check`. It's no longer possible to manage semver ranges without also checking version mismatches, because the two things are so closely linked. Changes to semver ranges affect which versions are considered valid and can indirectly cause version mismatches, so they are now always checked and changed together via the `lint` and `fix` commands.
+
+```bash
+# v13
+syncpack lint-semver-ranges
+# v14
+syncpack lint
+```
+
+### `fix-mismatches` → `fix`
+
+`fix-mismatches` and `set-semver-ranges` have been merged into a single `fix` command which autofixes issue found by `syncpack lint`. The `fix` command no longer fixes formatting, which is now handled by `syncpack format`.
+
+```bash
+# v13
+syncpack fix-mismatches
+# v14
+syncpack fix
+```
+
+### `set-semver-ranges` → `fix`
+
+`fix-mismatches` and `set-semver-ranges` have been merged into a single `fix` command which autofixes issue found by `syncpack lint`. The `fix` command no longer fixes formatting, which is now handled by `syncpack format`. It's no longer possible to manage semver ranges without also checking version mismatches, because the two things are so closely linked. Changes to semver ranges affect which versions are considered valid and can indirectly cause version mismatches, so they are now always checked and changed together via the `lint` and `fix` commands.
+
+```bash
+# v13
+syncpack set-semver-ranges
+# v14
+syncpack fix
+```
+
+### `prompt` → Removed
+
+The `prompt` command is an interactive prompt which lists all current issues which syncpack can't fix automatically. It is not yet available in v14 and will be added at a later date. Syncpack can't automatically fix mismatches between specifiers it does not support, which are usually specifiers which are not semver, such as pnpm overrides, or complex semver specifiers like `^1.2.3 || ^2.0.0`.
+
+```bash
+# v13
+syncpack prompt
+# v14
+# Not yet implemented
+```
+
+## CLI Option Changes
+
+### `--types` → `--dependency-types`
+
+Renamed for consistency and also to differentiate it from other types such as specifier types.
+
+```bash
+# v13
+syncpack list-mismatches --types prod,dev
+# v14
+syncpack lint --dependency-types prod,dev
+```
+
+### `--specs` → `--specifier-types`
+
+Renamed for consistency.
+
+```bash
+# v13
+syncpack format --specs exact,range
+# v14
+syncpack format --specifier-types exact,range
+```
+
+### `--filter` → `--dependencies`
+
+This has been renamed to `dependencies` to match the equivalent property of version groups and semver groups. Regular expressions are no longer supported and instead a glob pattern should be provided in the same way as they are for version groups and semver groups.
+
+```bash
+# v13
+syncpack list-mismatches --filter "^@types\/.+"
+# v14
+syncpack lint --dependencies "@types/**"
+```
+
+## Config Changes
+
+### `dependencyTypes` removed
+
+The `dependencyTypes` config has been removed in favour of using `versionGroups` config, which achieves the same result:
+
+```jsonc
+{
+  // Removed in v14
+  "dependencyTypes": ["prod", "dev", "peer"],
+  // Use instead
+  "versionGroups": [
+    {
+      "label": "Ignore everything except dependencies, devDependencies, and peerDependencies",
+      "dependencies": ["!prod", "!dev", "!peer"],
+      "isIgnored": true,
+    },
+  ],
+}
+```
+
+Or use the `--dependency-types` CLI option to filter on an ad hoc basis:
+
+```bash
+syncpack lint --dependency-types prod,dev,peer
+```
+
+### `specifierTypes` removed
+
+The `specifierTypes` config has been removed in favour of using `versionGroups` config, which achieves the same result:
+
+```jsonc
+{
+  // Removed in v14
+  "specifierTypes": ["exact", "range"]
+  // Use instead
+  "versionGroups": [
+    {
+      "label": "Ignore everything except exact (1.2.3) or range (>=1.2.3, ~1.2.3 etc) specifier types",
+      "specifierTypes": ["!exact", "!range"]
+      "isIgnored": true,
+    },
+  ],
+}
+```
+
+Or use the `--specifier-types` CLI option to filter on an ad hoc basis:
+
+```bash
+syncpack format --specifier-types exact,range
+```
+
+### `lintFormatting` removed
+
+The `lint` command no longer checks formatting, only version mismatches, so the `lintFormatting` option is no longer needed. If you don't want to lint or fix formatting, you can just not use `syncpack format` or `syncpack format --check`.
+
+`format` handles formatting, `lint` and `fix` handle version issues.
+
+```jsonc
+{
+  // Removed in v14
+  "lintFormatting": false,
+}
+```
+
+```bash
+# Check if formatting needed (exit 1 if needed)
+syncpack format --check
+# Safely see what formatting fixes would look like
+syncpack format --dry-run
+# Write formatting fixes to disk
+syncpack format
+```
+
+### `lintSemverRanges` removed
+
+It's no longer possible to manage semver ranges without also checking version mismatches, because the two things are so closely linked. Changes to semver ranges affect which versions are considered valid and can indirectly cause version mismatches, so they are now always checked and changed together via the `lint` and `fix` commands.
+
+V14 will always lint semver ranges when checking for version mismatches, but this will only apply to you if you have `semverGroups` defined. Let's say your project has `react` installed in three places: two of them use exact versions (`19.1.0` and `19.1.1`) and one of them belongs to a Semver Group which requires a `^` range so has a version of `^19.1.0`. Syncpack will synchronise these versions so that the highest version of `19.1.1` is used everywhere, while respecting the Semver Group requirement of `^19.1.1` being used for the member of that group.
+
+```jsonc
+{
+  // Removed in v14
+  "lintSemverRanges": false,
+}
+```
+
+### `lintVersions` → Always enabled
+
+It's no longer possible to manage semver ranges without also checking version mismatches, because the two things are so closely linked. Changes to semver ranges affect which versions are considered valid and can indirectly cause version mismatches, so they are now always checked and changed together via the `lint` and `fix` commands.
+
+This option is redundant in V14.
+
+```jsonc
+{
+  // Removed in v14
+  "lintVersions": false,
+}
+```
+
+## Migrating from older versions
+
+### Version 11.2.1
+
+#### `workspace` dependency type renamed to `local`
+
+The `workspace` dependency type has been renamed to `local` for clarity.
+
+```bash
+# v11.2.0 and earlier
+syncpack list --types prod,workspace
+# v14
+syncpack lint --dependency-types prod,local
+```
+
+### Version 9.0.0
+
+#### CLI Options Replaced
+
+Individual boolean flags replaced with `--dependency-types` option:
+
+```bash
+# v8
+syncpack list --prod --dev --peer
+# v14
+syncpack lint --dependency-types prod,dev,peer
+```
+
+The following flags were removed:
+
+- `-p, --prod`
+- `-d, --dev`
+- `-P, --peer`
+- `-R, --resolutions`
+- `-o, --overrides`
+- `-O, --pnpmOverrides`
+- `-w, --workspace`
+
+#### Config Changes
+
+Individual boolean properties replaced with `versionGroups` configuration:
+
+```jsonc
+// v8
+{
+  "dev": true,
+  "overrides": false,
+  "peer": true,
+  "pnpmOverrides": false,
+  "prod": true,
+  "resolutions": false,
+  "workspace": true
+}
+// v14 (use versionGroups instead)
+{
+  "versionGroups": [
+    {
+      "label": "Ignore overrides",
+      "dependencyTypes": ["overrides", "pnpmOverrides", "resolutions"],
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+### Version 8.0.0
+
+#### pnpm overrides renamed
+
+The `--overrides` option now refers to npm overrides. pnpm users must use `--pnpmOverrides` instead.
+
+```bash
+# v7 (pnpm users)
+syncpack list --overrides
+# v14 (pnpm users)
+syncpack list --dependency-types pnpmOverrides
+# v14 (npm users)
+syncpack list --dependency-types overrides
+```
+
+**Context:** v6.0.0 originally added `--overrides` for pnpm but read from the wrong property. npm later added their own `.overrides` property, so v8 split these into separate options.
+
+### Version 7.0.0
+
+#### Workspace dependency syncing enabled by default
+
+Syncpack now syncs versions of locally developed packages by default. If package A depends on package B (both in your monorepo), syncpack will fix A's dependency to match B's actual version.
+
+In v14, disable this behavior using `versionGroups`:
+
+```jsonc
+{
+  "versionGroups": [
+    {
+      "label": "Ignore .version properties of local packages",
+      "dependencyTypes": ["local"],
+      "isIgnored": true,
+    },
+  ],
+}
+```
+
+Or exclude `local` when using CLI flags:
+
+```bash
+# v14
+syncpack lint --dependency-types '!local'
+```
+
+### Version 6.0.0
+
+#### `resolutions` and `overrides` enabled by default
+
+Yarn's `resolutions` and pnpm's `overrides` fields are now processed by default.
+
+In v14, exclude them using `versionGroups`:
+
+```jsonc
+{
+  "versionGroups": [
+    {
+      "label": "Ignore overrides",
+      "dependencyTypes": ["resolutions", "overrides", "pnpmOverrides"],
+      "isIgnored": true,
+    },
+  ],
+}
+```
+
+Or via CLI:
+
+```bash
+# v14
+syncpack lint --dependency-types dev,peer,prod
+```
+
+### Version 3.0.0
+
+#### `--source` option changed
+
+Package locations now specified with repeatable `--source` option instead of positional arguments:
+
+```bash
+# v2
+syncpack list './package.json' './packages/*/package.json'
+# v14
+syncpack list --source './package.json' --source './packages/*/package.json'
+```
