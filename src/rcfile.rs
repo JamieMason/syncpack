@@ -6,7 +6,9 @@ use {
     semver_group::{AnySemverGroup, SemverGroup},
     version_group::{AnyVersionGroup, VersionGroup},
   },
+  log::warn,
   serde::Deserialize,
+  serde_json::Value,
   std::collections::HashMap,
 };
 
@@ -133,6 +135,8 @@ pub struct Rcfile {
   pub strict: bool,
   #[serde(default)]
   pub version_groups: Vec<AnyVersionGroup>,
+  #[serde(flatten)]
+  pub unknown_fields: HashMap<String, Value>,
 }
 
 impl Default for Rcfile {
@@ -142,6 +146,30 @@ impl Default for Rcfile {
 }
 
 impl Rcfile {
+  /// Log warnings for v13 config options that are no longer supported.
+  pub fn warn_deprecated_v13_config(&self) {
+    if self.unknown_fields.contains_key("dependencyTypes") {
+      warn!("Config property 'dependencyTypes' is deprecated in v14.");
+      warn!("Use CLI flag instead: --dependency-types prod,dev,peer");
+    }
+    if self.unknown_fields.contains_key("specifierTypes") {
+      warn!("Config property 'specifierTypes' is deprecated in v14.");
+      warn!("Use CLI flag instead: --specifier-types exact,range");
+    }
+    if self.unknown_fields.contains_key("lintFormatting") {
+      warn!("Config property 'lintFormatting' is deprecated in v14.");
+      warn!("Use 'syncpack format --check' to validate formatting.");
+    }
+    if self.unknown_fields.contains_key("lintSemverRanges") {
+      warn!("Config property 'lintSemverRanges' is deprecated in v14.");
+      warn!("Semver range checking is always enabled in 'syncpack lint'.");
+    }
+    if self.unknown_fields.contains_key("lintVersions") {
+      warn!("Config property 'lintVersions' is deprecated in v14.");
+      warn!("Version checking is always enabled in 'syncpack lint'.");
+    }
+  }
+
   /// Create every alias defined in the rcfile.
   pub fn get_dependency_groups(&self, packages: &Packages, all_dependency_types: &[DependencyType]) -> Vec<GroupSelector> {
     self

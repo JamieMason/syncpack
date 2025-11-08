@@ -34,6 +34,7 @@ impl Rcfile {
         Rcfile::default()
       });
     debug!("Config discovery completed in {:?}", start.elapsed());
+    rcfile.warn_deprecated_v13_config();
     rcfile
   }
 
