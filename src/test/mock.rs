@@ -17,6 +17,7 @@ use {
 pub fn cli() -> Cli {
   Cli {
     check: true,
+    config_path: None,
     cwd: env::current_dir().unwrap(),
     dependencies: vec![],
     dependency_types: vec![],

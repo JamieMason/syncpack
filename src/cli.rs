@@ -37,6 +37,8 @@ pub enum UpdateTarget {
 pub struct Cli {
   /// Whether to check formatting instead of fixing it
   pub check: bool,
+  /// Path to a specific config file to use
+  pub config_path: Option<String>,
   /// The path to the root of the project
   pub cwd: PathBuf,
   /// Whether to disable ANSI color codes in terminal output
@@ -81,6 +83,7 @@ impl Cli {
     fn from_arg_matches(subcommand: Subcommand, matches: &ArgMatches) -> Cli {
       Cli {
         check: (matches!(&subcommand, Subcommand::Format | Subcommand::Update)) && matches.get_flag("check"),
+        config_path: matches.get_one::<String>("config").cloned(),
         cwd: env::current_dir().unwrap(),
         dependencies: get_patterns(matches, "dependencies"),
         dependency_types: get_patterns(matches, "dependency-types"),
@@ -144,6 +147,7 @@ fn create() -> Command {
       Command::new("lint")
         .about("Lint all versions and ranges and exit with 0 or 1 based on whether all files match your Syncpack configuration file")
         .after_long_help(additional_help())
+        .arg(config_option("lint"))
         .arg(dependencies_option("lint"))
         .arg(dependency_types_option("lint"))
         .arg(log_levels_option("lint"))
@@ -157,6 +161,7 @@ fn create() -> Command {
       Command::new("fix")
         .about("Ensure that multiple packages requiring the same dependency use the same version")
         .after_long_help(additional_help())
+        .arg(config_option("fix"))
         .arg(dependencies_option("fix"))
         .arg(dependency_types_option("fix"))
         .arg(dry_run_option("fix"))
@@ -177,6 +182,7 @@ fn create() -> Command {
             .long_help(cformat!(r#"Lint formatting instead of fixing it"#))
             .action(clap::ArgAction::SetTrue),
         )
+        .arg(config_option("format"))
         .arg(dry_run_option("format"))
         .arg(log_levels_option("format"))
         .arg(no_ansi_option("format"))
@@ -192,6 +198,7 @@ fn create() -> Command {
             .long_help(cformat!(r#"Check versions are up to date instead of updating them"#))
             .action(clap::ArgAction::SetTrue),
         )
+        .arg(config_option("update"))
         .arg(dependencies_option("update"))
         .arg(dependency_types_option("update"))
         .arg(dry_run_option("update"))
@@ -205,6 +212,7 @@ fn create() -> Command {
       Command::new("list")
         .about("Query and inspect all dependencies in your project, both valid and invalid")
         .after_long_help(additional_help())
+        .arg(config_option("list"))
         .arg(dependencies_option("list"))
         .arg(dependency_types_option("list"))
         .arg(log_levels_option("list"))
@@ -218,6 +226,7 @@ fn create() -> Command {
       Command::new("json")
         .about("Output all dependencies as flattened JSON objects")
         .after_long_help(additional_help())
+        .arg(config_option("json"))
         .arg(dependencies_option("json"))
         .arg(dependency_types_option("json"))
         .arg(log_levels_option("json"))
@@ -226,6 +235,12 @@ fn create() -> Command {
         .arg(source_option("json"))
         .arg(specifier_types_option("json")),
     )
+}
+
+fn config_option(_command: &str) -> Arg {
+  Arg::new("config").long("config").value_name("PATH").long_help(cformat!(
+    r#"Path to a specific config file to use. When set, config file discovery is skipped."#
+  ))
 }
 
 fn dependencies_option(command: &str) -> Arg {
