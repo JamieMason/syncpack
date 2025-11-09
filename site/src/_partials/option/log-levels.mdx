@@ -10,13 +10,19 @@ Control how detailed the log output should be
 | debug | Extremely verbose detail on why syncpack assigns each status code        |
 
 <Code
-  code={`
+code={`
+
 # Turn off logging completely
+
 syncpack ${props.command} --log-levels off
+
 # Only show verbose debugging logs
+
 syncpack ${props.command} --log-levels debug
+
 # Show everything
+
 syncpack ${props.command} --log-levels error,warn,info,debug
 `.trim()}
-  lang="bash"
+lang="bash"
 />
