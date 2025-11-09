@@ -99,6 +99,35 @@ benchmark:
     cd fixtures/fluid-framework
     hyperfine --warmup 2 --runs 4 --ignore-failure "../../target/release/syncpack list"
 
+benchmark-compare:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    # build the previous release version with debug symbols for profiling
+    git checkout main
+    rm -rf target
+    just build-profile-release
+    mkdir -p target/main
+    cp target/release/syncpack target/main/syncpack
+    rm -rf target/release
+    # build the current version
+    git checkout -
+    just build-profile-release
+    # compare the two versions
+    cd fixtures/fluid-framework
+    hyperfine \
+        --warmup 4 \
+        --runs 10 \
+        --ignore-failure \
+        --export-markdown ../../target/benchmark-results.md \
+        --command-name "main" "../../target/main/syncpack list" \
+        --command-name "current" "../../target/release/syncpack list"
+    echo ""
+    echo "Results saved to benchmark-results.md"
+    prettier --write benchmark-results.md
+    cat ../../target/benchmark-results.md
+
+
 flamegraph:
     #!/usr/bin/env bash
     set -euxo pipefail
