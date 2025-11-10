@@ -15,6 +15,11 @@
 npm install --save-dev syncpack@alpha
 ```
 
+## Guides
+
+- [Getting Started](https://jamiemason.github.io/syncpack/)
+- [Migrate to 14](https://jamiemason.github.io/syncpack/guide/migrate-v14/)
+
 ## Commands
 
 > All command line options can be combined to target packages and dependencies in multiple ways.
