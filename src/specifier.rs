@@ -3,14 +3,15 @@ use {
     cli::UpdateTarget,
     semver_range::SemverRange,
     specifier::{
-      alias::Alias, complex_semver::ComplexSemver, exact::Exact, git::Git, latest::Latest, major::Major, minor::Minor, range::Range,
-      range_major::RangeMajor, range_minor::RangeMinor, tag::Tag, workspace_protocol::WorkspaceProtocol,
+      alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, git::Git, latest::Latest, major::Major, minor::Minor,
+      range::Range, range_major::RangeMajor, range_minor::RangeMinor, tag::Tag, workspace_protocol::WorkspaceProtocol,
     },
   },
   std::{cell::RefCell, collections::HashMap, rc::Rc},
 };
 
 pub mod alias;
+pub mod catalog;
 pub mod complex_semver;
 pub mod exact;
 pub mod file;
@@ -92,6 +93,7 @@ thread_local! {
 }
 
 const ALIAS: &str = "alias";
+const CATALOG: &str = "catalog";
 const RANGE_COMPLEX: &str = "range-complex";
 const EXACT: &str = "exact";
 const FILE: &str = "file";
@@ -132,6 +134,7 @@ fn strip_workspace_protocol(value: &str) -> &str {
 #[derive(Debug, PartialEq)]
 pub enum Specifier {
   Alias(alias::Alias),                                      // "npm:foo@1.2.3"
+  Catalog(catalog::Catalog),                                // "catalog:", "catalog:react18"
   ComplexSemver(complex_semver::ComplexSemver),             // ">=1.2.3 <2.0.0"
   Exact(exact::Exact),                                      // "1.2.3"
   File(file::File),                                         // "file:../path"
@@ -234,6 +237,9 @@ impl Specifier {
       return ComplexSemver::create(value);
     }
     let first_char = value.chars().next().unwrap_or('\0');
+    if first_char == 'c' && value.starts_with("catalog:") {
+      return Catalog::create(value);
+    }
     if first_char == 'w' && value.starts_with("workspace:") {
       return WorkspaceProtocol::create(value);
     }
@@ -267,6 +273,7 @@ impl Specifier {
   pub fn get_config_identifier(&self) -> &'static str {
     match self {
       Self::Alias(_) => ALIAS,
+      Self::Catalog(_) => CATALOG,
       Self::ComplexSemver(_) => RANGE_COMPLEX,
       Self::Exact(_) => EXACT,
       Self::File(_) => FILE,
@@ -317,7 +324,14 @@ impl Specifier {
       Self::RangeMinor(s) => Some(strip_semver_range(&s.raw)),
       Self::WorkspaceProtocol(s) => s.as_resolved().and_then(|spec| spec.get_semver_number()),
       Self::Git(s) => s.semver_number.as_deref(),
-      Self::ComplexSemver(_) | Self::File(_) | Self::Latest(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
+      Self::Catalog(_)
+      | Self::ComplexSemver(_)
+      | Self::File(_)
+      | Self::Latest(_)
+      | Self::None
+      | Self::Tag(_)
+      | Self::Unsupported(_)
+      | Self::Url(_) => None,
     }
   }
 
@@ -340,7 +354,7 @@ impl Specifier {
       Self::RangeMajor(s) => Some(s.node_version.clone()),
       Self::RangeMinor(s) => Some(s.node_version.clone()),
       Self::WorkspaceProtocol(s) => s.as_resolved().and_then(|spec| spec.get_node_version()),
-      Self::ComplexSemver(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
+      Self::Catalog(_) | Self::ComplexSemver(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
     }
   }
 
@@ -397,7 +411,7 @@ impl Specifier {
         let range_str = format!(">={}.0 <{}.{}.0", m.raw, major, minor + 1);
         Self::new_node_range(&range_str)
       }
-      Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
+      Self::Catalog(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
     }
   }
 
@@ -417,7 +431,7 @@ impl Specifier {
       Self::Exact(_) => Some(SemverRange::Exact),
       Self::Major(_) => Some(SemverRange::Exact),
       Self::Minor(_) => Some(SemverRange::Exact),
-      Self::ComplexSemver(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
+      Self::Catalog(_) | Self::ComplexSemver(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
     }
   }
 
@@ -425,6 +439,7 @@ impl Specifier {
   pub fn get_raw(&self) -> &str {
     match self {
       Self::Alias(s) => &s.raw,
+      Self::Catalog(s) => &s.raw,
       Self::ComplexSemver(s) => &s.raw,
       Self::Exact(s) => &s.raw,
       Self::File(s) => &s.raw,
@@ -432,6 +447,7 @@ impl Specifier {
       Self::Latest(s) => &s.raw,
       Self::Major(s) => &s.raw,
       Self::Minor(s) => &s.raw,
+      Self::None => "",
       Self::Range(s) => &s.raw,
       Self::RangeMajor(s) => &s.raw,
       Self::RangeMinor(s) => &s.raw,
@@ -439,7 +455,6 @@ impl Specifier {
       Self::Url(s) => &s.raw,
       Self::WorkspaceProtocol(s) => &s.raw,
       Self::Unsupported(s) => s,
-      Self::None => "",
     }
   }
 }
@@ -476,7 +491,14 @@ impl Specifier {
           }
         }
         Self::Git(s) => s.semver_number.as_ref().map(|_| Self::new(&s.origin)),
-        Self::ComplexSemver(_) | Self::File(_) | Self::Latest(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
+        Self::Catalog(_)
+        | Self::ComplexSemver(_)
+        | Self::File(_)
+        | Self::Latest(_)
+        | Self::None
+        | Self::Tag(_)
+        | Self::Unsupported(_)
+        | Self::Url(_) => None,
       };
     }
 
@@ -535,7 +557,14 @@ impl Specifier {
           Self::new(&format!("{}#semver:{}{}", s.origin, range_str, semver_number))
         }
       }),
-      Self::ComplexSemver(_) | Self::File(_) | Self::Latest(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
+      Self::Catalog(_)
+      | Self::ComplexSemver(_)
+      | Self::File(_)
+      | Self::Latest(_)
+      | Self::None
+      | Self::Tag(_)
+      | Self::Unsupported(_)
+      | Self::Url(_) => None,
     }
   }
 
@@ -636,7 +665,14 @@ impl Specifier {
       }
 
       // These types don't have semver versions, return None
-      Self::ComplexSemver(_) | Self::File(_) | Self::Latest(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => None,
+      Self::Catalog(_)
+      | Self::ComplexSemver(_)
+      | Self::File(_)
+      | Self::Latest(_)
+      | Self::None
+      | Self::Tag(_)
+      | Self::Unsupported(_)
+      | Self::Url(_) => None,
     }
   }
 }
@@ -747,7 +783,7 @@ impl Specifier {
       Self::Latest(s) => s.raw == "*" && range == &SemverRange::Any,
 
       // All other variants have no semver range
-      Self::ComplexSemver(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => false,
+      Self::Catalog(_) | Self::ComplexSemver(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => false,
     }
   }
 
@@ -850,6 +886,11 @@ impl Specifier {
     matches!(self, Self::WorkspaceProtocol(_))
   }
 
+  /// Check if this specifier is a catalog protocol
+  pub fn is_catalog(&self) -> bool {
+    matches!(self, Self::Catalog(_))
+  }
+
   /// Does this specifier match the given range?
   ///
   /// Examples:
@@ -947,20 +988,21 @@ impl Specifier {
     let Self::WorkspaceProtocol(ws) = self else {
       let raw = match self {
         Self::Alias(a) => &a.raw,
-        Self::ComplexSemver(c) => &c.raw,
+        Self::Catalog(c) => &c.raw,
+        Self::ComplexSemver(s) => &s.raw,
         Self::Exact(e) => &e.raw,
         Self::File(f) => &f.raw,
         Self::Git(g) => &g.raw,
         Self::Latest(l) => &l.raw,
         Self::Major(m) => &m.raw,
         Self::Minor(m) => &m.raw,
-        Self::None => "",
         Self::Range(r) => &r.raw,
         Self::RangeMajor(r) => &r.raw,
         Self::RangeMinor(r) => &r.raw,
         Self::Tag(t) => &t.raw,
-        Self::Unsupported(s) => s,
         Self::Url(u) => &u.raw,
+        Self::Unsupported(u) => u,
+        Self::None => "",
         Self::WorkspaceProtocol(w) => &w.raw,
       };
       return Some(Self::new(raw));

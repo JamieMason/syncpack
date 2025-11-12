@@ -823,7 +823,8 @@ mod highest_or_lowest {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -879,7 +880,8 @@ mod highest_or_lowest {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -940,7 +942,8 @@ mod highest_or_lowest {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1001,7 +1004,8 @@ mod highest_or_lowest {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1062,7 +1066,8 @@ mod highest_or_lowest {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1123,7 +1128,8 @@ mod highest_or_lowest {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1183,7 +1189,8 @@ mod non_semver {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1239,7 +1246,8 @@ mod non_semver {
       }),
     ]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1290,7 +1298,8 @@ mod non_semver {
       }
     })]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1323,7 +1332,8 @@ mod non_semver {
       }
     })]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1340,6 +1350,50 @@ mod non_semver {
         id: "package-a in /devDependencies of package-a",
         actual: "workspace:*",
         expected: Some("workspace:*"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
+  fn non_semver_and_semver_mismatch() {
+    let config = mock::config_from_mock(json!({}));
+    let packages = mock::packages_from_mocks(vec![json!({
+      "name": "package-a",
+      "dependencies": {
+        "mix": "1.2.3"
+      },
+      "devDependencies": {
+        "mix": "file:./mix"
+      }
+    })]);
+    let registry_client = None;
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
+    let ctx = visit_packages(ctx);
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "mix",
+        id: "mix in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("1.2.3"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "mix",
+        id: "mix in /devDependencies of package-a",
+        actual: "file:./mix",
+        expected: Some("1.2.3"),
         overridden: None,
       },
     ]);
@@ -1368,7 +1422,8 @@ mod dependency_groups {
       }
     })]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1421,7 +1476,8 @@ mod dependency_groups {
       }
     })]);
     let registry_client = None;
-    let ctx = Context::create(config, packages, registry_client);
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
     let ctx = visit_packages(ctx);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -2103,6 +2159,54 @@ mod custom_types {
         id: "react in /dependencies of pkg-a",
         actual: "9.0.0",
         expected: Some("^9.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+}
+
+mod catalogs {
+  use super::*;
+
+  #[test]
+  fn catalog_and_semver_mismatch() {
+    let config = mock::config_from_mock(json!({}));
+    let packages = mock::packages_from_mocks(vec![json!({
+      "name": "package-a",
+      "dependencies": {
+        "mix": "1.2.3"
+      },
+      "devDependencies": {
+        "mix": "catalog:"
+      }
+    })]);
+    let registry_client = None;
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
+    let ctx = visit_packages(ctx);
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToCatalog),
+        dependency_name: "mix",
+        id: "mix in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("catalog:"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalog),
+        dependency_name: "mix",
+        id: "mix in /devDependencies of package-a",
+        actual: "catalog:",
+        expected: Some("catalog:"),
         overridden: None,
       },
     ]);

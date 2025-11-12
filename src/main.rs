@@ -19,6 +19,7 @@ use {
 #[path = "test/test.rs"]
 mod test;
 
+mod catalogs;
 mod cli;
 mod commands;
 mod config;
@@ -60,6 +61,7 @@ async fn main() {
   debug!("{:#?}", config.rcfile);
 
   let packages = Packages::from_config(&config);
+  let catalogs = None; // catalogs::from_config(&config);
 
   match packages.all.len() {
     0 => {
@@ -81,6 +83,7 @@ async fn main() {
     } else {
       None
     },
+    catalogs,
   );
 
   // PHASE 2 & 3: Inspect and Run

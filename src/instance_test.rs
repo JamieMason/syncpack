@@ -22,8 +22,10 @@ fn returns_correct_registry_update_url() {
       "lit": "npm:lit@3.2.1",
     }
   })]);
+
+  let catalogs = None;
   let registry_client = None;
-  let ctx = Context::create(config, packages, registry_client);
+  let ctx = Context::create(config, packages, registry_client, catalogs);
 
   let get_update_url_by_name = |name: &str| {
     ctx

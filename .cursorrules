@@ -177,6 +177,13 @@ Use grep/rg ONLY for: multiple file types, intentionally searching comments, non
 2. Read actual implementation
 3. Base advice on verified facts
 
+### Before Writing Tests
+
+1. Read 2-3 existing tests in same file
+2. Identify the pattern (TestBuilder methods, assertion style)
+3. Match that pattern exactly
+4. Never invent APIs - only use what exists
+
 ### Scope Boundaries (Off-Limits)
 
 - Don't modify: Context creation, 3-phase pattern

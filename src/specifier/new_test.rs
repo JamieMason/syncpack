@@ -18,6 +18,13 @@ fn valid_tag() {
 }
 
 #[test]
+fn valid_catalog() {
+  for (value, expected) in faker::get_catalog() {
+    assert_eq!(*Specifier::new(value), Specifier::Catalog(expected));
+  }
+}
+
+#[test]
 fn valid_major() {
   for (value, expected) in faker::get_major() {
     assert_eq!(*Specifier::new(value), Specifier::Major(expected));

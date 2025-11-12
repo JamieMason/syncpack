@@ -206,6 +206,8 @@ impl Ord for InstanceState {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum ValidInstance {
+  /// - ✓ Instance uses the catalog: protocol and wins out
+  IsCatalog,
   /// - ✓ Instance is configured to be ignored by Syncpack
   IsIgnored,
   /// - ✓ Instance is a local package and its version is valid
@@ -258,6 +260,11 @@ pub enum InvalidInstance {
 pub enum FixableInstance {
   /// - ✘ Instance is in a banned version group
   IsBanned,
+  /// - ✓ Instance is in a highest/lowest semver group
+  /// - ✓ One or more other instances use the catalog: protocol
+  /// - ✘ Instance does not use the catalog: protocol
+  /// - ! catalog: protocol wins
+  DiffersToCatalog,
   /// - ✘ Instance mismatches the version of its locally-developed package
   DiffersToLocal,
   /// - ✘ Instance mismatches highest/lowest semver in its group

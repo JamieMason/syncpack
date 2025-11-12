@@ -2,9 +2,9 @@ use {
   crate::{
     semver_range::SemverRange,
     specifier::{
-      alias::Alias, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest, major::Major, minor::Minor,
-      range::Range, range_major::RangeMajor, range_minor::RangeMinor, tag::Tag, url::Url, workspace_protocol::WorkspaceProtocol,
-      workspace_specifier::WorkspaceSpecifier, Specifier,
+      alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest, major::Major,
+      minor::Minor, range::Range, range_major::RangeMajor, range_minor::RangeMinor, tag::Tag, url::Url,
+      workspace_protocol::WorkspaceProtocol, workspace_specifier::WorkspaceSpecifier, Specifier,
     },
   },
   std::rc::Rc,
@@ -47,6 +47,32 @@ pub fn get_tag() -> Vec<(&'static str, Tag)> {
   vec![
     ("alpha", Tag { raw: "alpha".to_string() }),
     ("beta", Tag { raw: "beta".to_string() }),
+  ]
+}
+
+pub fn get_catalog() -> Vec<(&'static str, Catalog)> {
+  vec![
+    (
+      "catalog:",
+      Catalog {
+        raw: "catalog:".to_string(),
+        name: None,
+      },
+    ),
+    (
+      "catalog:react18",
+      Catalog {
+        raw: "catalog:react18".to_string(),
+        name: Some("react18".to_string()),
+      },
+    ),
+    (
+      "catalog:testing",
+      Catalog {
+        raw: "catalog:testing".to_string(),
+        name: Some("testing".to_string()),
+      },
+    ),
   ]
 }
 

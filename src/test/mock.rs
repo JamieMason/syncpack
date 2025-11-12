@@ -1,6 +1,7 @@
 use {
   super::registry_client::MockRegistryClient,
   crate::{
+    catalogs::{Catalog, CatalogsByName},
     cli::{Cli, SortBy, Subcommand, UpdateTarget},
     config::Config,
     context::Context,
@@ -8,10 +9,11 @@ use {
     packages::Packages,
     rcfile::Rcfile,
     registry_client::RegistryClient,
+    specifier::Specifier,
   },
   log::LevelFilter,
   serde_json::Value,
-  std::{cell::RefCell, env, path::PathBuf, sync::Arc},
+  std::{cell::RefCell, collections::HashMap, env, path::PathBuf, sync::Arc},
 };
 
 pub fn cli() -> Cli {
@@ -93,10 +95,38 @@ fn registry_client_from_mocks(mock_updates: serde_json::Value) -> Option<Arc<dyn
   Some(Arc::new(MockRegistryClient::from_json(mock_updates)))
 }
 
+/// Create a CatalogsByName from mocked catalog data
+///
+/// Examples:
+/// - json!({"default": {"react": "^17.0.2"}}) -> one catalog
+/// - json!({"default": {...}, "react18": {...}}) -> multiple catalogs
+pub fn catalogs_from_mocks(value: serde_json::Value) -> CatalogsByName {
+  let mut catalogs = HashMap::new();
+  if let Some(obj) = value.as_object() {
+    for (catalog_name, catalog_value) in obj {
+      let mut catalog = Catalog::new();
+      if let Some(deps) = catalog_value.as_object() {
+        for (dep_name, version) in deps {
+          if let Some(version_str) = version.as_str() {
+            catalog.insert(dep_name.clone(), Specifier::new(version_str));
+          }
+        }
+      }
+      catalogs.insert(catalog_name.clone(), catalog);
+    }
+  }
+  catalogs
+}
+
 /// Create a Context struct with mocked npm registry updates applied to it
-pub async fn context_with_registry_updates(config: Config, packages: Packages, mock_updates: serde_json::Value) -> Context {
+pub async fn context_with_registry_updates(
+  config: Config,
+  packages: Packages,
+  mock_updates: serde_json::Value,
+  catalogs: Option<CatalogsByName>,
+) -> Context {
   let registry_client = registry_client_from_mocks(mock_updates);
-  let mut ctx = Context::create(config, packages, registry_client);
+  let mut ctx = Context::create(config, packages, registry_client, catalogs);
   ctx.fetch_all_updates().await;
   ctx
 }

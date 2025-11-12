@@ -1,5 +1,6 @@
 use {
   crate::{
+    catalogs::CatalogsByName,
     config::Config,
     dependency::UpdateUrl,
     instance::Instance,
@@ -33,6 +34,12 @@ use {
 /// See PATTERNS.md "Ownership and Borrowing" section for details.
 #[derive(Debug)]
 pub struct Context {
+  /// If present, the contents of each bun or pnpm catalog. The default catalog
+  /// is keyed under "default" and named by their names.
+  ///
+  /// - https://pnpm.io/catalogs
+  /// - https://bun.sh/docs/pm/catalogs
+  pub catalogs: Option<CatalogsByName>,
   /// All default configuration with user config applied
   pub config: Config,
   /// The internal names of all failed updates
@@ -67,7 +74,12 @@ impl Context {
   /// Called from: src/main.rs
   /// Next step: visit_packages() in src/visit_packages.rs
   /// See also: .cursorrules for critical invariants
-  pub fn create(config: Config, packages: Packages, registry_client: Option<Arc<dyn RegistryClient>>) -> Self {
+  pub fn create(
+    config: Config,
+    packages: Packages,
+    registry_client: Option<Arc<dyn RegistryClient>>,
+    catalogs: Option<CatalogsByName>,
+  ) -> Self {
     let mut instances = vec![];
     let updates_by_internal_name = HashMap::new();
     let all_dependency_types = config.rcfile.get_all_dependency_types();
@@ -107,6 +119,7 @@ impl Context {
     });
 
     Self {
+      catalogs,
       config,
       failed_updates,
       instances,

@@ -109,6 +109,27 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
         instance.mark_fixable(FixableInstance::DiffersToLocal, &local_specifier);
       }
     });
+  } else if let Some(catalog_specifier) = dependency
+    .instances
+    .iter()
+    .find(|i| i.descriptor.specifier.is_catalog())
+    .map(|i| &i.descriptor.specifier)
+  {
+    debug!("{L2}one or more instances use the catalog: protocol which wins over semver");
+    dependency.set_expected_specifier(catalog_specifier);
+    dependency.instances.iter().for_each(|instance| {
+      let actual_specifier = &instance.descriptor.specifier;
+      debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
+      if instance.descriptor.specifier.is_catalog() {
+        debug!("{L4}it uses the catalog: protocol");
+        debug!("{L5}mark as valid");
+        instance.mark_valid(ValidInstance::IsCatalog, catalog_specifier);
+      } else {
+        debug!("{L4}it does not use the catalog: protocol");
+        debug!("{L5}mark as error");
+        instance.mark_fixable(FixableInstance::DiffersToCatalog, catalog_specifier);
+      }
+    });
   } else if let Some(specifiers_by_eligible_update) = dependency.get_eligible_registry_updates(ctx) {
     debug!("{L2}eligible updates were found on the npm registry ({specifiers_by_eligible_update:?})");
     dependency.instances.iter().for_each(|instance| {
