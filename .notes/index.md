@@ -293,7 +293,7 @@ Defines versioning policies:
 pub fn run(ctx: Context) -> i32 {
     let mut has_issues = false;
 
-    ctx.get_version_groups().for_each(|group| {
+    ctx.version_groups.iter().for_each(|group| {
         group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
             dependency.get_sorted_instances()
                 .filter(|instance| instance.is_invalid())
@@ -341,7 +341,7 @@ fn test_descriptive_name() {
 Most commands iterate: version groups → dependencies → instances
 
 ```rust
-ctx.get_version_groups()
+ctx.version_groups.iter()
     .for_each(|group| {
         group.get_sorted_dependencies(&sort_by)
             .for_each(|dependency| {

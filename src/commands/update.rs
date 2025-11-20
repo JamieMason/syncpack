@@ -13,7 +13,7 @@ pub fn run(ctx: Context) -> i32 {
   ctx
     .version_groups
     .iter()
-    .filter(|group| group.matches_cli_filter && matches!(group.variant, VersionGroupVariant::HighestSemver))
+    .filter(|group| matches!(group.variant, VersionGroupVariant::HighestSemver))
     .for_each(|group| {
       let mut has_printed_group = false;
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {

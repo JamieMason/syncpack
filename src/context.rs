@@ -102,6 +102,10 @@ impl Context {
         None => true,
       };
 
+      if !descriptor.matches_cli_filter {
+        return;
+      }
+
       let preferred_semver_range = semver_groups
         .iter()
         .find(|group| group.selector.can_add(&descriptor))
@@ -128,10 +132,6 @@ impl Context {
       updates_by_internal_name,
       version_groups,
     }
-  }
-
-  pub fn get_version_groups(&self) -> impl Iterator<Item = &VersionGroup> {
-    self.version_groups.iter().filter(|group| group.matches_cli_filter)
   }
 
   /// Fetch every version specifier ever published for all updateable
@@ -196,17 +196,13 @@ impl Context {
   /// updates. We use internal names in order to support dependency groups,
   /// where many dependencies can be aliased as one.
   fn get_unique_update_urls(&self) -> HashSet<UpdateUrl> {
-    self
-      .version_groups
-      .iter()
-      .filter(|group| group.matches_cli_filter)
-      .fold(HashSet::new(), |mut unique_update_urls, group| {
-        group.get_update_urls().inspect(|update_urls| {
-          update_urls.iter().for_each(|url| {
-            unique_update_urls.insert(url.clone());
-          });
+    self.version_groups.iter().fold(HashSet::new(), |mut unique_update_urls, group| {
+      group.get_update_urls().inspect(|update_urls| {
+        update_urls.iter().for_each(|url| {
+          unique_update_urls.insert(url.clone());
         });
-        unique_update_urls
-      })
+      });
+      unique_update_urls
+    })
   }
 }

@@ -8,7 +8,8 @@ pub fn run(ctx: Context) -> i32 {
   let mut was_invalid = false;
 
   ctx
-    .get_version_groups()
+    .version_groups
+    .iter()
     .filter(|group| !group.dependencies.is_empty() && !group.has_ignored_variant())
     .for_each(|group| {
       let mut has_printed_group = false;

@@ -4,7 +4,7 @@ use crate::{commands::ui, context::Context};
 pub fn run(ctx: Context) -> i32 {
   let mut is_invalid = false;
 
-  ctx.get_version_groups().for_each(|group| {
+  ctx.version_groups.iter().for_each(|group| {
     let mut has_printed_group = false;
     group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
       let mut has_printed_dependency = false;

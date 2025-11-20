@@ -150,7 +150,7 @@ SemverRange::Patch    // ~1.4.2
 ### Basic iteration over all instances
 
 ```rust
-ctx.get_version_groups().for_each(|group| {
+ctx.version_groups.iter().for_each(|group| {
     group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
         dependency.get_sorted_instances().for_each(|instance| {
             // Process each instance
@@ -166,7 +166,7 @@ ctx.get_version_groups().for_each(|group| {
 ### Filter and process invalid instances
 
 ```rust
-ctx.get_version_groups().for_each(|group| {
+ctx.version_groups.iter().for_each(|group| {
     group.get_sorted_dependencies(&sort_by).for_each(|dependency| {
         dependency.get_sorted_instances()
             .filter(|instance| instance.is_invalid())
@@ -344,7 +344,7 @@ use crate::{commands::ui, context::Context};
 pub fn run(ctx: Context) -> i32 {
     let mut has_issues = false;
 
-    ctx.get_version_groups().for_each(|group| {
+    ctx.version_groups.iter().for_each(|group| {
         let mut has_printed_group = false;
 
         group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
@@ -389,7 +389,7 @@ pub fn run(ctx: Context) -> i32 {
 pub fn run(mut ctx: Context) -> i32 {
     let mut changed_count = 0;
 
-    ctx.get_version_groups().for_each(|group| {
+    ctx.version_groups.iter().for_each(|group| {
         group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
             dependency.get_sorted_instances()
                 .filter(|instance| instance.is_fixable())
