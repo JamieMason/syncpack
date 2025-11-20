@@ -39,10 +39,10 @@
     "tsx": "^4.20.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.2",
-    "@release-it/conventional-changelog": "^10.0.1",
+    "@biomejs/biome": "^2.3.7",
+    "@release-it/conventional-changelog": "^10.0.2",
     "auto-changelog": "^2.5.0",
-    "release-it": "^19.0.5",
+    "release-it": "^19.0.6",
     "ts-json-schema-generator": "^2.4.0",
     "typescript": "^5.9.3"
   },
