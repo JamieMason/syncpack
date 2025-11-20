@@ -4,7 +4,8 @@ pub fn run(ctx: Context) -> i32 {
   let mut is_invalid = false;
 
   ctx
-    .get_version_groups()
+    .version_groups
+    .iter()
     .filter(|group| !group.has_ignored_variant() || ctx.config.cli.show_ignored)
     .for_each(|group| {
       ui::group::print_header(&ctx, group);
