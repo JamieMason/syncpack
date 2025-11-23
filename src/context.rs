@@ -39,6 +39,7 @@ pub struct Context {
   ///
   /// - https://pnpm.io/catalogs
   /// - https://bun.sh/docs/pm/catalogs
+  #[allow(dead_code)]
   pub catalogs: Option<CatalogsByName>,
   /// All default configuration with user config applied
   pub config: Config,

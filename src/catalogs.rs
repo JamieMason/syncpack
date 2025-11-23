@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use {
   crate::{config::Config, specifier::Specifier},
   log::debug,

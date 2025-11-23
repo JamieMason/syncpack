@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use {
   super::{mock, registry_client::MockRegistryClient},
   crate::{catalogs::CatalogsByName, cli::UpdateTarget, context::Context, registry_client::RegistryClient, visit_packages::visit_packages},

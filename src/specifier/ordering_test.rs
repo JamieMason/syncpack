@@ -261,20 +261,6 @@ fn workspace_protocol_with_embedded_version_sorts_normally() {
   assert_eq!(workspace.cmp(&exact), Ordering::Greater);
 }
 
-#[test]
-fn resolved_workspace_protocol_sorts_by_result() {
-  let workspace = Specifier::new("workspace:^");
-  let local_version = Specifier::new("1.2.3");
-  let resolved = workspace.resolve_workspace_protocol(&local_version).unwrap();
-
-  // Resolved should be "^1.2.3"
-  assert_eq!(resolved, Specifier::new("^1.2.3"));
-
-  // Should sort normally now
-  let exact = Specifier::new("1.2.3");
-  assert_eq!(resolved.cmp(&exact), Ordering::Greater); // ^ > exact
-}
-
 // =============================================================================
 // Shorthand Versions (Major, Minor) with HUGE padding
 // =============================================================================

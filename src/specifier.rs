@@ -15,9 +15,7 @@ pub mod catalog;
 pub mod complex_semver;
 pub mod exact;
 pub mod file;
-#[cfg(test)]
-#[path = "specifier/get_alias_name_test.rs"]
-mod get_alias_name_test;
+
 #[cfg(test)]
 #[path = "specifier/get_node_range_test.rs"]
 mod get_node_range_test;
@@ -31,21 +29,11 @@ mod has_same_release_channel_as_test;
 #[cfg(test)]
 #[path = "specifier/has_same_version_number_as_test.rs"]
 mod has_same_version_number_as_test;
-#[cfg(test)]
-#[path = "specifier/has_semver_range_of_test.rs"]
-mod has_semver_range_of_test;
+
 #[cfg(test)]
 #[path = "specifier/is_eligible_update_for_test.rs"]
 mod is_eligible_update_for_test;
-#[cfg(test)]
-#[path = "specifier/is_older_than_by_minor_test.rs"]
-mod is_older_than_by_minor_test;
-#[cfg(test)]
-#[path = "specifier/is_older_than_by_patch_test.rs"]
-mod is_older_than_by_patch_test;
-#[cfg(test)]
-#[path = "specifier/is_older_than_test.rs"]
-mod is_older_than_test;
+
 pub mod latest;
 pub mod major;
 pub mod minor;
@@ -60,15 +48,11 @@ pub mod range;
 pub mod range_major;
 pub mod range_minor;
 pub mod regexes;
-#[cfg(test)]
-#[path = "specifier/resolve_workspace_protocol_test.rs"]
-mod resolve_workspace_protocol_test;
+
 #[cfg(test)]
 #[path = "specifier/satisfies_all_test.rs"]
 mod satisfies_all_test;
-#[cfg(test)]
-#[path = "specifier/satisfies_test.rs"]
-mod satisfies_test;
+
 pub mod tag;
 pub mod url;
 #[cfg(test)]
@@ -78,13 +62,8 @@ mod with_node_version_test;
 #[path = "specifier/with_range_test.rs"]
 mod with_range_test;
 pub mod workspace_protocol;
-#[cfg(test)]
-#[path = "specifier/workspace_protocol_test.rs"]
-mod workspace_protocol_test;
+
 pub mod workspace_specifier;
-#[cfg(test)]
-#[path = "specifier/workspace_specifier_test.rs"]
-mod workspace_specifier_test;
 
 thread_local! {
   static SPECIFIER_CACHE: RefCell<HashMap<String, Rc<Specifier>>> = RefCell::new(HashMap::new());
@@ -124,11 +103,6 @@ pub fn strip_semver_range(value: &str) -> &str {
     .into_iter()
     .find_map(|prefix| value.strip_prefix(prefix))
     .unwrap_or(value)
-}
-
-/// Remove workspace: from the start of a specifier
-fn strip_workspace_protocol(value: &str) -> &str {
-  value.strip_prefix("workspace:").unwrap_or(value)
 }
 
 #[derive(Debug, PartialEq)]
@@ -200,11 +174,6 @@ impl Specifier {
         }),
       }
     })
-  }
-
-  /// Check if the given version string is a valid semver version
-  pub fn is_valid_semver(value: &str) -> bool {
-    Self::new_node_range(value).is_some()
   }
 
   /// Create a new Specifier for the given version string
@@ -289,20 +258,6 @@ impl Specifier {
       Self::Unsupported(_) => UNSUPPORTED,
       Self::Url(_) => URL,
       Self::WorkspaceProtocol(_) => WORKSPACE_PROTOCOL,
-    }
-  }
-
-  /// If the current variant is a Specifier::Alias, returns the name of the npm
-  /// dependency which is being aliased.
-  ///
-  /// Examples:
-  /// - "npm:lodash@^4.17.21" -> Some("lodash")
-  /// - "^16.11.10" -> None
-  /// - "npm:express" -> None
-  pub fn get_alias_name(&self) -> Option<&str> {
-    match self {
-      Self::Alias(alias) => Some(&alias.name),
-      _ => None,
     }
   }
 
@@ -755,38 +710,6 @@ impl Specifier {
     }
   }
 
-  /// Check if this specifier uses the given semver range type.
-  ///
-  /// Examples:
-  /// - "^1.2.3" with SemverRange::Minor → true
-  /// - "~1.2.3" with SemverRange::Minor → false
-  /// - "1.2.3" with SemverRange::Exact → true
-  pub fn has_semver_range_of(&self, range: &SemverRange) -> bool {
-    match self {
-      // Exact variants (no range prefix) → SemverRange::Exact
-      Self::Exact(_) | Self::Major(_) | Self::Minor(_) => range == &SemverRange::Exact,
-
-      // Range variants with explicit semver_range field
-      Self::Range(s) => &s.semver_range == range,
-      Self::RangeMajor(s) => &s.semver_range == range,
-      Self::RangeMinor(s) => &s.semver_range == range,
-
-      // Variants that may contain a semver_range (Option)
-      Self::Alias(s) => s.inner_specifier.get_semver_range().as_ref() == Some(range),
-      Self::Git(s) => s.semver_range.as_ref() == Some(range),
-      Self::WorkspaceProtocol(s) => match &s.inner_specifier {
-        workspace_specifier::WorkspaceSpecifier::RangeOnly(r) => r == range,
-        workspace_specifier::WorkspaceSpecifier::Resolved(spec) => spec.get_semver_range().as_ref() == Some(range),
-      },
-
-      // Latest("*") maps to SemverRange::Any
-      Self::Latest(s) => s.raw == "*" && range == &SemverRange::Any,
-
-      // All other variants have no semver range
-      Self::Catalog(_) | Self::ComplexSemver(_) | Self::File(_) | Self::None | Self::Tag(_) | Self::Unsupported(_) | Self::Url(_) => false,
-    }
-  }
-
   /// Is this specifier eligible to update the given specifier based on the
   /// given target constraint?
   ///
@@ -824,58 +747,6 @@ impl Specifier {
     }
   }
 
-  /// Check if this specifier represents an older version than the other.
-  ///
-  /// Examples:
-  /// - "1.0.0" compared to "2.0.0" → true
-  /// - "2.0.0" compared to "1.0.0" → false
-  /// - "1.0.0" compared to "1.0.0" → false
-  pub fn is_older_than(&self, other: &Self) -> bool {
-    if !self.has_comparable_version() || !other.has_comparable_version() {
-      return false;
-    }
-    match (self.get_node_version(), other.get_node_version()) {
-      (Some(self_version), Some(other_version)) => self_version < other_version,
-      _ => false,
-    }
-  }
-
-  /// Is this specifier on the same major version, but otherwise older?
-  ///
-  /// Examples:
-  /// - "1.0.0" compared to "1.1.0" → true
-  /// - "1.0.1" compared to "1.1.0" → true
-  /// - "1.0.0" compared to "2.0.0" → false
-  /// - "1.1.0" compared to "1.0.0" → false
-  pub fn is_older_than_by_minor(&self, other: &Self) -> bool {
-    if !self.has_comparable_version() || !other.has_comparable_version() {
-      return false;
-    }
-    match (self.get_node_version(), other.get_node_version()) {
-      (Some(self_version), Some(other_version)) => self_version.major == other_version.major && self_version < other_version,
-      _ => false,
-    }
-  }
-
-  /// Is this specifier on the same major and minor version, but otherwise
-  /// older?
-  ///
-  /// Examples:
-  /// - "1.0.0" compared to "1.0.1" → true
-  /// - "1.0.0" compared to "1.1.0" → false
-  /// - "1.0.1" compared to "1.0.0" → false
-  pub fn is_older_than_by_patch(&self, other: &Self) -> bool {
-    if !self.has_comparable_version() || !other.has_comparable_version() {
-      return false;
-    }
-    match (self.get_node_version(), other.get_node_version()) {
-      (Some(self_version), Some(other_version)) => {
-        self_version.major == other_version.major && self_version.minor == other_version.minor && self_version < other_version
-      }
-      _ => false,
-    }
-  }
-
   /// Check if this specifier uses the workspace protocol.
   ///
   /// Examples:
@@ -889,34 +760,6 @@ impl Specifier {
   /// Check if this specifier is a catalog protocol
   pub fn is_catalog(&self) -> bool {
     matches!(self, Self::Catalog(_))
-  }
-
-  /// Does this specifier match the given range?
-  ///
-  /// Examples:
-  /// - "1.2.3" satisfies Range("^1.0.0") → true
-  /// - "2.0.0" satisfies Range("^1.0.0") → false
-  /// - "0.9.0" satisfies Range("^1.0.0") → false
-  pub fn satisfies(&self, range: &node_semver::Range) -> bool {
-    // Workspace protocols with embedded versions should return false
-    // because they need to be resolved first
-    if matches!(self, Self::WorkspaceProtocol(_)) {
-      return false;
-    }
-
-    // Try to get a node_range from self for range-to-range comparison
-    // Use allows_any to check if self's range overlaps with target range
-    if let Some(self_range) = self.get_node_range() {
-      return self_range.allows_any(range);
-    }
-
-    // If self has a version (not a range), check if it satisfies the target range
-    if let Some(self_version) = self.get_node_version() {
-      return range.satisfies(&self_version);
-    }
-
-    // No version or range to compare
-    false
   }
 
   /// Check if this specifier satisfies all other specifiers.
@@ -961,74 +804,6 @@ impl Specifier {
         false
       }
     }
-  }
-
-  /// Resolve a workspace protocol specifier using the given local version.
-  ///
-  /// If the specifier is a workspace protocol (e.g., "workspace:^"), this
-  /// method combines the protocol with the local version to produce a regular
-  /// specifier (e.g., "^1.2.3").
-  ///
-  /// If the specifier is not a workspace protocol, it returns itself unchanged
-  /// (the same cached Rc).
-  ///
-  /// Examples:
-  /// - "workspace:^" + Exact("1.2.3") → "^1.2.3"
-  /// - "workspace:~" + Exact("1.2.3") → "~1.2.3"
-  /// - "workspace:*" + Exact("1.2.3") → "*"
-  /// - "workspace:^1.2.3" + Exact("2.0.0") → "^1.2.3" (version already embedded)
-  /// - "^1.2.3" + Exact("2.0.0") → "^1.2.3" (not a workspace protocol, returns self)
-  pub fn resolve_workspace_protocol(&self, local_version: &Self) -> Option<Rc<Self>> {
-    // Validate that local_version is an Exact variant
-    if !matches!(local_version, Self::Exact(_)) {
-      return None;
-    }
-
-    // If not a workspace protocol, return self unchanged by looking it up in cache
-    let Self::WorkspaceProtocol(ws) = self else {
-      let raw = match self {
-        Self::Alias(a) => &a.raw,
-        Self::Catalog(c) => &c.raw,
-        Self::ComplexSemver(s) => &s.raw,
-        Self::Exact(e) => &e.raw,
-        Self::File(f) => &f.raw,
-        Self::Git(g) => &g.raw,
-        Self::Latest(l) => &l.raw,
-        Self::Major(m) => &m.raw,
-        Self::Minor(m) => &m.raw,
-        Self::Range(r) => &r.raw,
-        Self::RangeMajor(r) => &r.raw,
-        Self::RangeMinor(r) => &r.raw,
-        Self::Tag(t) => &t.raw,
-        Self::Url(u) => &u.raw,
-        Self::Unsupported(u) => u,
-        Self::None => "",
-        Self::WorkspaceProtocol(w) => &w.raw,
-      };
-      return Some(Self::new(raw));
-    };
-
-    // If workspace protocol has resolved specifier, strip "workspace:" and create new specifier
-    if ws.as_resolved().is_some() {
-      let resolved_str = strip_workspace_protocol(&ws.raw);
-      return Some(Self::new(resolved_str));
-    }
-
-    // Otherwise, combine the semver range with local_version's number
-    let local_number = local_version.get_semver_number().expect("Exact should have semver_number");
-
-    // Get the range/operator from workspace protocol
-    let range_or_op = strip_workspace_protocol(&ws.raw);
-
-    // Handle special case: "*" stays as "*"
-    if range_or_op == "*" {
-      return Some(Self::new("*"));
-    }
-
-    // Combine operator/range character with local version number
-    // For multi-char operators like >=, >, <=, < this preserves them correctly
-    let resolved_str = format!("{range_or_op}{local_number}");
-    Some(Self::new(&resolved_str))
   }
 }
 

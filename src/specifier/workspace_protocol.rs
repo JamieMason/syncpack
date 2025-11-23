@@ -73,12 +73,6 @@ impl WorkspaceProtocol {
     self.inner_specifier.needs_resolution()
   }
 
-  /// Resolve range prefix with local package version
-  /// Returns None if already resolved or resolution fails
-  pub fn resolve_with(&self, local_version: &str) -> Option<Rc<Specifier>> {
-    self.inner_specifier.resolve_with(local_version)
-  }
-
   /// Get the resolved specifier if available
   pub fn as_resolved(&self) -> Option<&Rc<Specifier>> {
     self.inner_specifier.as_resolved()
