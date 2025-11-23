@@ -88,31 +88,36 @@ run-ci-action:
 
 # Build release version with debug symbols for profiling
 build-profile-release:
-    CARGO_PROFILE_RELEASE_DEBUG=true CARGO_PROFILE_RELEASE_STRIP=false cargo build --release
+    CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 \
+    CARGO_PROFILE_RELEASE_DEBUG=true \
+    CARGO_PROFILE_RELEASE_LTO=true \
+    CARGO_PROFILE_RELEASE_OPT_LEVEL=3 \
+    CARGO_PROFILE_RELEASE_PANIC=abort \
+    CARGO_PROFILE_RELEASE_STRIP=false \
+    cargo build --release
 
 # Benchmark the current release build with hyperfine
 benchmark:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    just build-profile-release
+    cargo build --release
     cd fixtures/fluid-framework
     hyperfine --warmup 2 --runs 4 --ignore-failure "../../target/release/syncpack list"
 
 benchmark-compare:
     #!/usr/bin/env bash
-    set -euxo pipefail
 
     # build the previous release version with debug symbols for profiling
     git checkout main
     rm -rf target
-    just build-profile-release
+    cargo build
     mkdir -p target/main
-    cp target/release/syncpack target/main/syncpack
-    rm -rf target/release
+    cp target/debug/syncpack target/main/syncpack
+    rm -rf target/debug
     # build the current version
     git checkout -
-    just build-profile-release
+    cargo build
     # compare the two versions
     cd fixtures/fluid-framework
     hyperfine \
@@ -121,20 +126,18 @@ benchmark-compare:
         --ignore-failure \
         --export-markdown ../../target/benchmark-results.md \
         --command-name "main" "../../target/main/syncpack list" \
-        --command-name "current" "../../target/release/syncpack list"
+        --command-name "current" "../../target/debug/syncpack list"
     echo ""
     echo "Results saved to benchmark-results.md"
-    prettier --write benchmark-results.md
+    prettier --write target/benchmark-results.md
     cat ../../target/benchmark-results.md
-
 
 flamegraph:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    just build-profile-release
     cd fixtures/fluid-framework
-    CARGO_PROFILE_RELEASE_DEBUG=true cargo flamegraph -- list
+    cargo flamegraph --dev --palette rust --output ../../target/flamegraph-$(git rev-parse --abbrev-ref HEAD).svg -- list
 
 # ==============================================================================
 # Test
