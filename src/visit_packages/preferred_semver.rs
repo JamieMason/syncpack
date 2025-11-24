@@ -44,6 +44,22 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
         return;
       }
       debug!("{L4}it depends on the local instance");
+      if instance.descriptor.specifier.is_link() {
+        debug!("{L5}it is using the link specifier");
+        if let Some(local_instance) = dependency.local_instance.borrow().as_ref() {
+          if instance.link_resolves_to_local_package(local_instance) {
+            debug!("{L6}link resolves to local package directory");
+            debug!("{L7}mark as satisfying local");
+            instance.mark_valid(ValidInstance::SatisfiesLocal, &instance.descriptor.specifier);
+            return;
+          } else {
+            debug!("{L6}link resolves to a different directory");
+            debug!("{L7}mark as differs to local");
+            instance.mark_fixable(FixableInstance::DiffersToLocal, &local_specifier);
+            return;
+          }
+        }
+      }
       if instance.descriptor.specifier.is_workspace_protocol() {
         debug!("{L5}it is using the workspace protocol");
         if !ctx.config.rcfile.strict {

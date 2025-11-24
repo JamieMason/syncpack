@@ -81,3 +81,7 @@ pub fn is_tag(str: &str) -> bool {
 pub fn is_git(str: &str) -> bool {
   regexes::GIT.is_match(str)
 }
+
+pub fn is_link(str: &str) -> bool {
+  regexes::LINK.is_match(str)
+}

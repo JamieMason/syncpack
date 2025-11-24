@@ -29,7 +29,11 @@ use {
   },
   log::debug,
   serde_json::Value,
-  std::{cell::RefCell, rc::Rc},
+  std::{
+    cell::RefCell,
+    path::{Path, PathBuf},
+    rc::Rc,
+  },
 };
 
 /// Unique identifier for an instance, format: "{dep} in {location} of
@@ -109,6 +113,59 @@ impl Instance {
       preferred_semver_range,
       state: RefCell::new(InstanceState::Unknown),
     }
+  }
+
+  /// Check if a link: specifier resolves to the given local package's directory.
+  ///
+  /// Examples:
+  /// - "link:../package-a" from /packages/package-b/package.json -> /packages/package-a
+  /// - "link:../../elsewhere/package-a" from /packages/package-b/package.json -> /elsewhere/package-a
+  pub fn link_resolves_to_local_package(&self, local_instance: &Instance) -> bool {
+    if let Specifier::Link(link) = &*self.descriptor.specifier {
+      // Get the directory of the consuming package
+      let consuming_package_path = &self.descriptor.package.borrow().file_path;
+      let consuming_package_dir = consuming_package_path.parent().unwrap_or_else(|| Path::new(""));
+
+      // Extract the path from "link:../path/to/package"
+      let link_path = link.raw.strip_prefix("link:").unwrap_or(&link.raw);
+
+      // Resolve the link path relative to the consuming package directory
+      let resolved_link_path = consuming_package_dir.join(link_path);
+
+      // Get the local package's directory
+      let local_package_path = &local_instance.descriptor.package.borrow().file_path;
+      let local_package_dir = local_package_path.parent().unwrap_or_else(|| Path::new(""));
+
+      // Try to canonicalize both paths if they exist (real filesystem)
+      // Otherwise compare the normalized paths (test environment)
+      if let (Ok(resolved_canonical), Ok(local_canonical)) = (resolved_link_path.canonicalize(), local_package_dir.canonicalize()) {
+        resolved_canonical == local_canonical
+      } else {
+        // For test paths that don't exist on disk, normalize and compare
+        // This normalizes . and .. components without requiring filesystem access
+        let normalized_resolved = Self::normalize_path(&resolved_link_path);
+        let normalized_local = Self::normalize_path(local_package_dir);
+        normalized_resolved == normalized_local
+      }
+    } else {
+      false
+    }
+  }
+
+  /// Normalize a path by resolving . and .. components.
+  /// Does not require the path to exist on the filesystem.
+  fn normalize_path(path: &Path) -> PathBuf {
+    let mut components = Vec::new();
+    for component in path.components() {
+      match component {
+        std::path::Component::ParentDir => {
+          components.pop();
+        }
+        std::path::Component::CurDir => {}
+        _ => components.push(component),
+      }
+    }
+    components.iter().collect()
   }
 
   /// Record what syncpack has determined the state of this instance is and what

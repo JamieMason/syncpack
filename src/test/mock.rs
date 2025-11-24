@@ -68,13 +68,19 @@ pub fn rcfile_from_mock(value: serde_json::Value) -> Rcfile {
 
 /// Parse a package.json string
 pub fn package_json_from_value(contents: Value) -> PackageJson {
+  let name = contents
+    .pointer("/name")
+    .and_then(|name| name.as_str())
+    .unwrap_or("NAME_IS_MISSING")
+    .to_string();
+
+  // Create a realistic file path based on package name
+  // e.g., "package-a" -> "/packages/package-a/package.json"
+  let file_path = PathBuf::from(format!("/packages/{name}/package.json"));
+
   PackageJson {
-    name: contents
-      .pointer("/name")
-      .and_then(|name| name.as_str())
-      .unwrap_or("NAME_IS_MISSING")
-      .to_string(),
-    file_path: PathBuf::new(),
+    name,
+    file_path,
     formatting_mismatches: RefCell::new(vec![]),
     json: RefCell::new(contents.to_string()),
     contents: RefCell::new(contents),

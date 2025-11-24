@@ -2,8 +2,8 @@ use {
   crate::{
     semver_range::SemverRange,
     specifier::{
-      alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest, major::Major,
-      minor::Minor, range::Range, range_major::RangeMajor, range_minor::RangeMinor, tag::Tag, url::Url,
+      alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest, link::Link,
+      major::Major, minor::Minor, range::Range, range_major::RangeMajor, range_minor::RangeMinor, tag::Tag, url::Url,
       workspace_protocol::WorkspaceProtocol, workspace_specifier::WorkspaceSpecifier, Specifier,
     },
   },
@@ -598,6 +598,41 @@ pub fn get_file() -> Vec<(&'static str, File)> {
       "file:path/to/foo.tgz",
       File {
         raw: "file:path/to/foo.tgz".to_string(),
+      },
+    ),
+  ]
+}
+
+pub fn get_link() -> Vec<(&'static str, Link)> {
+  vec![
+    (
+      "link:../path/to/workspace",
+      Link {
+        raw: "link:../path/to/workspace".to_string(),
+      },
+    ),
+    (
+      "link:./relative/package",
+      Link {
+        raw: "link:./relative/package".to_string(),
+      },
+    ),
+    (
+      "link:/absolute/package",
+      Link {
+        raw: "link:/absolute/package".to_string(),
+      },
+    ),
+    (
+      "link:../package-a",
+      Link {
+        raw: "link:../package-a".to_string(),
+      },
+    ),
+    (
+      "link:./package-b",
+      Link {
+        raw: "link:./package-b".to_string(),
       },
     ),
   ]

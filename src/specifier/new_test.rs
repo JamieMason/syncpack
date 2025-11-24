@@ -102,6 +102,13 @@ fn valid_file() {
 }
 
 #[test]
+fn valid_link() {
+  for (value, expected) in faker::get_link() {
+    assert_eq!(*Specifier::new(value), Specifier::Link(expected));
+  }
+}
+
+#[test]
 fn valid_git() {
   for (value, expected) in faker::get_git() {
     assert_eq!(*Specifier::new(value), Specifier::Git(expected));

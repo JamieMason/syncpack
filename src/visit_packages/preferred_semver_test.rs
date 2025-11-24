@@ -327,6 +327,96 @@ mod local {
   }
 
   #[test]
+  fn instance_is_linked_to_local_package() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "version": "1.0.0"
+        }),
+        json!({
+          "name": "package-b",
+          "version": "2.0.0",
+          "dependencies": {
+            "package-a": "link:../package-a"
+          }
+        }),
+      ])
+      .build_and_visit_packages();
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "2.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(SatisfiesLocal),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "link:../package-a",
+        expected: Some("link:../package-a"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
+  fn instance_is_linked_to_wrong_directory() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "version": "1.0.0"
+        }),
+        json!({
+          "name": "package-b",
+          "version": "2.0.0",
+          "dependencies": {
+            "package-a": "link:../../elsewhere/package-a"
+          }
+        }),
+      ])
+      .build_and_visit_packages();
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "2.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToLocal),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "link:../../elsewhere/package-a",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
   fn instance_has_same_version_number_as_local_package_but_mismatches_a_different_but_compatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
@@ -1350,6 +1440,120 @@ mod non_semver {
         id: "package-a in /devDependencies of package-a",
         actual: "workspace:*",
         expected: Some("workspace:*"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
+  fn link_specifiers_without_local_instance_are_identical() {
+    let config = mock::config();
+    let packages = mock::packages_from_mocks(vec![
+      json!({
+        "name": "package-a",
+        "dependencies": {
+          "external-package": "link:../../external/external-package"
+        }
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {
+          "external-package": "link:../../external/external-package"
+        }
+      }),
+    ]);
+    let registry_client = None;
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
+    let ctx = visit_packages(ctx);
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsNonSemverButIdentical),
+        dependency_name: "external-package",
+        id: "external-package in /dependencies of package-a",
+        actual: "link:../../external/external-package",
+        expected: Some("link:../../external/external-package"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsNonSemverButIdentical),
+        dependency_name: "external-package",
+        id: "external-package in /dependencies of package-b",
+        actual: "link:../../external/external-package",
+        expected: Some("link:../../external/external-package"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
+  fn link_specifiers_without_local_instance_differ() {
+    let config = mock::config();
+    let packages = mock::packages_from_mocks(vec![
+      json!({
+        "name": "package-a",
+        "dependencies": {
+          "external-package": "link:../../external/external-package"
+        }
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {
+          "external-package": "link:../../elsewhere/external-package"
+        }
+      }),
+    ]);
+    let registry_client = None;
+    let catalogs = None;
+    let ctx = Context::create(config, packages, registry_client, catalogs);
+    let ctx = visit_packages(ctx);
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::unfixable(NonSemverMismatch),
+        dependency_name: "external-package",
+        id: "external-package in /dependencies of package-a",
+        actual: "link:../../external/external-package",
+        expected: Some("link:../../external/external-package"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::unfixable(NonSemverMismatch),
+        dependency_name: "external-package",
+        id: "external-package in /dependencies of package-b",
+        actual: "link:../../elsewhere/external-package",
+        expected: Some("link:../../elsewhere/external-package"),
         overridden: None,
       },
     ]);
