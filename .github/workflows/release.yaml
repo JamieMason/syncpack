@@ -54,6 +54,8 @@ jobs:
         with:
           node-version: 24
           registry-url: "https://registry.npmjs.org"
+      - name: Update npm
+        run: npm install -g npm@latest
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -79,8 +81,6 @@ jobs:
         run: |
           just --dotenv-filename .env.${{ matrix.build.NAME }} create-npm-binary-package
           just --dotenv-filename .env.${{ matrix.build.NAME }} publish-npm-binary-package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -99,6 +99,8 @@ jobs:
         with:
           node-version: 24
           registry-url: "https://registry.npmjs.org"
+      - name: Update npm
+        run: npm install -g npm@latest
       - name: Install just
         uses: extractions/setup-just@v1
         with:
@@ -109,5 +111,3 @@ jobs:
           npm install
           just --dotenv-filename .env.linux-x64-glibc create-npm-root-package
           just --dotenv-filename .env.linux-x64-glibc publish-npm-root-package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
