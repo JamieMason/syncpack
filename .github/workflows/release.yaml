@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write # Required for OIDC
 
 jobs:
   build-matrix:
