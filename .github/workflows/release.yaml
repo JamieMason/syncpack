@@ -51,7 +51,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
@@ -96,7 +96,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
       - name: Install just
         uses: extractions/setup-just@v1
