@@ -12,7 +12,7 @@ readme = "./README.md"
 include = ["src/**/*.rs"]
 
 [dev-dependencies]
-ctor = "0.6.1"
+ctor = "0.6.3"
 
 [dependencies]
 async-trait = "0.1.89"
@@ -25,7 +25,7 @@ globset = "0.4.18"
 indicatif = "0.18.3"
 itertools = "0.14.0"
 lazy_static = "1.5.0"
-log = "0.4.28"
+log = "0.4.29"
 node-semver = "2.2.0"
 regex = { version = "1.12.2", default-features = false, features = ["std"] }
 reqwest = { version = "0.12", features = [
