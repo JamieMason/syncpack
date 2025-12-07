@@ -351,7 +351,9 @@ create-npm-root-package-json:
         },
         optionalDependencies: {
           "syncpack-linux-x64": pkg.version,
+          "syncpack-linux-x64-musl": pkg.version,
           "syncpack-linux-arm64": pkg.version,
+          "syncpack-linux-arm64-musl": pkg.version,
           "syncpack-darwin-x64": pkg.version,
           "syncpack-darwin-arm64": pkg.version,
           "syncpack-windows-x64": pkg.version,

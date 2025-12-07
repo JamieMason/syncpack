@@ -6,10 +6,22 @@
     "TARGET": "x86_64-unknown-linux-gnu"
   },
   {
+    "NAME": "linux-x64-musl",
+    "OS": "ubuntu-22.04",
+    "RUN_LOCALLY": false,
+    "TARGET": "x86_64-unknown-linux-musl"
+  },
+  {
     "NAME": "linux-arm64-glibc",
     "OS": "ubuntu-22.04",
     "RUN_LOCALLY": false,
     "TARGET": "aarch64-unknown-linux-gnu"
+  },
+  {
+    "NAME": "linux-arm64-musl",
+    "OS": "ubuntu-22.04",
+    "RUN_LOCALLY": false,
+    "TARGET": "aarch64-unknown-linux-musl"
   },
   {
     "NAME": "win32-x64-msvc",
