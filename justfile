@@ -374,7 +374,7 @@ create-release-commit:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    npm exec release-it --increment pre
+    npm exec release-it -- --increment pre
 
 # Publish the npm package for a specific target
 publish-npm-binary-package:
