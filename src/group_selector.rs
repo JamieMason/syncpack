@@ -1,18 +1,17 @@
 use {
-  crate::{dependency_type::DependencyType, instance::InstanceDescriptor, packages::Packages},
-  globset::{Glob, GlobMatcher},
+  crate::{dependency_type::DependencyType, instance::InstanceDescriptor, packages::Packages, pattern_matcher::PatternMatcher},
   log::error,
   std::process,
 };
 
 #[derive(Clone, Debug)]
 pub struct GroupSelector {
-  /// Glob patterns to match against the installed dependency name.
+  /// Patterns to match against the installed dependency name.
   ///
   /// The keyword "$LOCAL" can also be used to match every locally-developed
   /// package used as a dependency.
-  pub include_dependencies: Vec<GlobMatcher>,
-  pub exclude_dependencies: Vec<GlobMatcher>,
+  pub include_dependencies: Vec<PatternMatcher>,
+  pub exclude_dependencies: Vec<PatternMatcher>,
   /// Named locations where dependencies should be found.
   ///
   /// Possible values:
@@ -27,10 +26,9 @@ pub struct GroupSelector {
   pub exclude_dependency_types: Vec<String>,
   /// Optional label to describe the group.
   pub label: String,
-  /// Glob patterns to match against the package name the dependency is located
-  /// in.
-  pub include_packages: Vec<GlobMatcher>,
-  pub exclude_packages: Vec<GlobMatcher>,
+  /// Patterns to match against the package name the dependency is located in.
+  pub include_packages: Vec<PatternMatcher>,
+  pub exclude_packages: Vec<PatternMatcher>,
   /// Types of version specifier the installed dependency should have.
   ///
   /// Possible values:
@@ -66,12 +64,12 @@ impl GroupSelector {
   ) -> GroupSelector {
     let dependencies = with_resolved_keywords(&dependencies, all_packages);
 
-    let include_dependencies = create_globs(true, &dependencies);
-    let exclude_dependencies = create_globs(false, &dependencies);
+    let include_dependencies = create_patterns(true, &dependencies);
+    let exclude_dependencies = create_patterns(false, &dependencies);
     let include_dependency_types = create_identifiers(true, &dependency_types);
     let exclude_dependency_types = create_identifiers(false, &dependency_types);
-    let include_packages = create_globs(true, &packages);
-    let exclude_packages = create_globs(false, &packages);
+    let include_packages = create_patterns(true, &packages);
+    let exclude_packages = create_patterns(false, &packages);
     let include_specifier_types = create_identifiers(true, &specifier_types);
     let exclude_specifier_types = create_identifiers(false, &specifier_types);
 
@@ -115,12 +113,12 @@ impl GroupSelector {
       return false;
     }
 
-    // 3. Dependencies (glob matching, more expensive)
+    // 3. Dependencies (pattern matching, optimized for common cases)
     if self.has_dependency_filters && !self.matches_dependencies(descriptor) {
       return false;
     }
 
-    // 4. Packages (glob matching + borrow, most expensive)
+    // 4. Packages (pattern matching + borrow, most expensive)
     if self.has_package_filters && !self.matches_packages(descriptor) {
       return false;
     }
@@ -141,12 +139,12 @@ impl GroupSelector {
   fn matches_packages(&self, descriptor: &InstanceDescriptor) -> bool {
     // Cache the borrow result to avoid repeated borrow checks
     let package_name = &descriptor.package.borrow().name;
-    matches_globs(package_name, &self.include_packages, &self.exclude_packages)
+    matches_patterns(package_name, &self.include_packages, &self.exclude_packages)
   }
 
   #[inline]
   fn matches_dependencies(&self, descriptor: &InstanceDescriptor) -> bool {
-    matches_globs(&descriptor.internal_name, &self.include_dependencies, &self.exclude_dependencies)
+    matches_patterns(&descriptor.internal_name, &self.include_dependencies, &self.exclude_dependencies)
   }
 
   #[inline]
@@ -159,26 +157,25 @@ impl GroupSelector {
   }
 }
 
-fn create_globs(is_include: bool, patterns: &[String]) -> Vec<GlobMatcher> {
+fn create_patterns(is_include: bool, patterns: &[String]) -> Vec<PatternMatcher> {
   patterns
     .iter()
     .filter(|pattern| *pattern != "**" && pattern.starts_with('!') != is_include)
     .map(|pattern| {
-      Glob::new(&pattern.replace('!', ""))
-        .expect("invalid glob pattern")
-        .compile_matcher()
+      let pattern = pattern.replace('!', "");
+      PatternMatcher::from_pattern(&pattern)
     })
     .collect()
 }
 
-fn matches_globs(value: &str, includes: &[GlobMatcher], excludes: &[GlobMatcher]) -> bool {
-  let is_included = includes.is_empty() || matches_any_glob(value, includes);
-  let is_excluded = !excludes.is_empty() && matches_any_glob(value, excludes);
+fn matches_patterns(value: &str, includes: &[PatternMatcher], excludes: &[PatternMatcher]) -> bool {
+  let is_included = includes.is_empty() || matches_any_pattern(value, includes);
+  let is_excluded = !excludes.is_empty() && matches_any_pattern(value, excludes);
   is_included && !is_excluded
 }
 
-fn matches_any_glob(value: &str, globs: &[GlobMatcher]) -> bool {
-  globs.iter().any(|glob| glob.is_match(value))
+fn matches_any_pattern(value: &str, patterns: &[PatternMatcher]) -> bool {
+  patterns.iter().any(|pattern| pattern.is_match(value))
 }
 
 fn create_identifiers(is_include: bool, patterns: &[String]) -> Vec<String> {

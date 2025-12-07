@@ -32,6 +32,7 @@ mod package_json;
 mod packages;
 #[cfg(test)]
 mod packages_test;
+mod pattern_matcher;
 mod rcfile;
 #[cfg(test)]
 mod rcfile_test;
