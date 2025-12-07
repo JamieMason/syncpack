@@ -1,6 +1,6 @@
 //! Fast pattern matching for dependency and package names.
 //!
-//! Optimizes common glob patterns into faster string operations:
+//! Optimises common glob patterns into faster string operations:
 //! - "react" → exact match (==)
 //! - "@aws-sdk/**" → prefix match (starts_with)
 //! - "**-loader" → suffix match (ends_with)
@@ -11,7 +11,7 @@ use {
   std::fmt,
 };
 
-/// Pattern matcher optimized for common npm package name patterns.
+/// Pattern matcher optimised for common npm package name patterns.
 #[derive(Clone)]
 pub enum PatternMatcher {
   /// Exact string match: "react" → value == "react"

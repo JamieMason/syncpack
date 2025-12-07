@@ -342,7 +342,7 @@ Is this a fundamentally new type of version specifier?
 1. **New command** → Follow checklist above
 2. **New config option** → Rcfile or Cli struct + merge logic
 3. **New version group type** → New VersionGroupVariant + validation logic
-4. **Performance optimization** → Run benchmarks before and after
+4. **Performance optimisation** → Run benchmarks before and after
 
 ### When Stuck
 

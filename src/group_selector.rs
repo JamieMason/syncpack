@@ -113,7 +113,7 @@ impl GroupSelector {
       return false;
     }
 
-    // 3. Dependencies (pattern matching, optimized for common cases)
+    // 3. Dependencies (pattern matching, optimised for common cases)
     if self.has_dependency_filters && !self.matches_dependencies(descriptor) {
       return false;
     }

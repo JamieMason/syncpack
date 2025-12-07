@@ -42,9 +42,9 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
 default = []
 
 [profile.release]
-codegen-units = 1 # Reduce number of codegen units to increase optimizations
+codegen-units = 1 # Reduce number of codegen units to increase optimisations
 debug = false     # Remove debug information
-lto = true        # Enable Link Time Optimization
-opt-level = "z"   # Optimize for size rather than speed
+lto = true        # Enable Link Time Optimisation
+opt-level = "z"   # Optimise for size rather than speed
 panic = "abort"   # Abort on panic rather than unwinding
 strip = true      # Strip symbols from binary
