@@ -54,7 +54,7 @@ impl ActualInstance {
   }
 }
 
-pub fn expect(ctx: &Context) -> Expects {
+pub fn expect(ctx: &Context) -> Expects<'_> {
   Expects::new(ctx)
 }
 

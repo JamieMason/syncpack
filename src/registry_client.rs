@@ -1,6 +1,6 @@
 use {
   crate::dependency::UpdateUrl,
-  log::{debug, error},
+  log::debug,
   reqwest::{header::ACCEPT, Client, StatusCode},
   serde::{Deserialize, Serialize},
   serde_json::Value,
