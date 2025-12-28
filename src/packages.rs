@@ -8,7 +8,7 @@ use {
     rcfile::Rcfile,
     specifier::Specifier,
   },
-  glob::glob,
+  ignore::{overrides::OverrideBuilder, WalkBuilder},
   log::debug,
   serde::Deserialize,
   serde_json::Value,
@@ -35,6 +35,7 @@ impl Packages {
   /// Get every package.json file matched by the user's source patterns
   pub fn from_config(config: &Config) -> Self {
     let file_paths = get_file_paths(config);
+    debug!("Found file paths: {file_paths:?}");
     let mut packages = Self::new();
     file_paths.iter().for_each(|file_path| {
       if let Some(package_json) = PackageJson::from_file(file_path) {
@@ -177,22 +178,18 @@ pub fn normalize_pattern(pattern: String) -> String {
 /// Resolve every source glob pattern into their absolute file paths of
 /// package.json files
 fn get_file_paths(config: &Config) -> Vec<PathBuf> {
-  get_source_patterns(config)
-    .iter()
-    .map(|pattern| {
-      if PathBuf::from(pattern).is_absolute() {
-        pattern.clone()
-      } else {
-        config.cli.cwd.join(pattern).to_str().unwrap().to_string()
-      }
-    })
-    .flat_map(|pattern| glob(&pattern).ok())
-    .flat_map(|paths| {
-      paths.filter_map(Result::ok).fold(vec![], |mut paths, path| {
-        paths.push(path.clone());
-        paths
-      })
-    })
+  let cwd = &config.cli.cwd;
+  let source_patterns = get_source_patterns(config);
+  let mut glob_filters = OverrideBuilder::new(cwd);
+  for source_pattern in source_patterns {
+    glob_filters.add(&source_pattern).unwrap();
+  }
+  WalkBuilder::new(cwd)
+    .overrides(glob_filters.build().unwrap())
+    .build()
+    .filter_map(Result::ok)
+    .filter(|entry| entry.file_type().is_some_and(|ft| ft.is_file()))
+    .map(|entry| entry.into_path())
     .collect()
 }
 
@@ -233,6 +230,10 @@ fn get_source_patterns(config: &Config) -> Vec<String> {
         })
     })
     .map(|patterns| patterns.into_iter().map(normalize_pattern).collect())
+    .map(|patterns| {
+      debug!("Found patterns: {patterns:?}");
+      patterns
+    })
     .or_else(get_default_patterns)
     .unwrap()
 }
