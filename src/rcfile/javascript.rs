@@ -69,13 +69,27 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
       "#
   );
 
-  // Prefer bunx if a Bun lockfile exists in the same directory as the config
   let dir = file_path.parent().unwrap_or_else(|| Path::new("."));
-  let use_bunx = dir.join("bun.lock").exists() || dir.join("bun.lockb").exists();
-  let runner = if use_bunx { "bunx" } else { "npx" };
+  let runner = if dir.join("pnpm-lock.yaml").exists() || dir.join("pnpm-workspace.yaml").exists() {
+    "pnpm"
+  } else if dir.join("bun.lock").exists() || dir.join("bun.lockb").exists() {
+    "bunx"
+  } else {
+    "npx"
+  };
+
+  let mut args = vec![];
+
+  if runner == "pnpm" {
+    args.push("dlx");
+  }
+
+  args.push("tsx");
+  args.push("-e");
+  args.push(&nodejs_script);
 
   Command::new(runner)
-    .args(["tsx", "-e", &nodejs_script])
+    .args(args)
     .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
     .output()
     .map_err(RcfileError::NodeJsExecutionFailed)
