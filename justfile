@@ -156,9 +156,20 @@ serve-coverage:
 test:
     cargo test -- --nocapture --color=always
 
+test-glob-matching:
+    #!/usr/bin/env bash
+    cargo build && cd fixtures/issue-311 && pnpm install
+    if ../../target/debug/syncpack json | jq '.package' | grep -q "do-not-include"; then
+        echo "Error: 'do-not-include' found in output!"
+        exit 1
+    else
+        echo "Success: 'do-not-include' not found in output!"
+        exit 0
+    fi
+
 # Run test in watch mode
 watch pattern=no_pattern:
-    tput rmam && cargo watch --clear --exec 'test -- --nocapture --color=always {{pattern}}'
+    tput rmam && cargo watch --clear --exec 'test -- --nocapture --color=always {{ pattern }}'
 
 # Run test in watch mode with coverage
 watch-coverage:

@@ -1,0 +1,6 @@
+{
+  "name": "p2",
+  "devDependencies": {
+    "expect-more": "1.3.0"
+  }
+}

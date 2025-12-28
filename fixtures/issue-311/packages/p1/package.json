@@ -1,0 +1,6 @@
+{
+  "name": "p1",
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

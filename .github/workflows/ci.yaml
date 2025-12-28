@@ -43,6 +43,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
       - name: Install rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -61,4 +68,6 @@ jobs:
       - name: Lint clippy
         run: just check-clippy
       - name: Cargo test
-        run: just test
+        run: |
+          just test
+          just test-glob-matching

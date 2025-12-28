@@ -1,0 +1,7 @@
+{
+  "name": "syncpack-issue",
+  "devDependencies": {
+    "syncpack": "alpha"
+  },
+  "packageManager": "pnpm@10.26.0"
+}
