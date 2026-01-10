@@ -310,7 +310,9 @@ create-npm-binary-package-json:
     const pkg = require(srcPath);
     const nextPkg = {
         ...pkg,
-        bin: undefined,
+        bin: {
+          syncpack: "./bin/syncpack",
+        },
         contributors: undefined,
         dependencies: undefined,
         devDependencies: undefined,
@@ -334,7 +336,6 @@ create-npm-root-package:
     rm -rf "$NODE_ROOT_PKG_DIR_PATH"
     mkdir -p "$NODE_ROOT_PKG_DIR_PATH"
     cp README.md "$NODE_ROOT_PKG_DIR_PATH/README.md"
-    cp npm/index.cjs "$NODE_ROOT_PKG_DIR_PATH/index.cjs"
     just build-npm-types
     just create-npm-root-package-json
 
@@ -356,10 +357,8 @@ create-npm-root-package-json:
     const pkg = require(srcPath);
     const nextPkg = {
         ...pkg,
+        bin: undefined,
         devDependencies: undefined,
-        bin: {
-          syncpack: "./index.cjs",
-        },
         optionalDependencies: {
           "syncpack-linux-x64": pkg.version,
           "syncpack-linux-x64-musl": pkg.version,
@@ -393,7 +392,7 @@ publish-npm-binary-package:
     set -euxo pipefail
 
     cd "$NODE_PKG_DIR_PATH"
-    npm publish --access public --tag alpha
+    npm publish --access public --tag canary
 
 # Publish the parent npm package
 publish-npm-root-package:
@@ -401,4 +400,4 @@ publish-npm-root-package:
     set -euxo pipefail
 
     cd "$NODE_ROOT_PKG_DIR_PATH"
-    npm publish --access public --tag alpha
+    npm publish --access public --tag canary
