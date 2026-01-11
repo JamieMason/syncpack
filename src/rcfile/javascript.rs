@@ -14,9 +14,9 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
   let escaped_file_path_for_nodejs = file_path.to_string_lossy().replace('\\', "\\\\");
   let nodejs_script = format!(
     r#"
-    import 'tsx'
-
-    import('{escaped_file_path_for_nodejs}')
+    import('tsx')
+      .catch(() => null)
+      .then(() => import('{escaped_file_path_for_nodejs}'))
       .then(findConfig)
       .then((value) => {{
         if (isNonEmptyObject(value)) {{
