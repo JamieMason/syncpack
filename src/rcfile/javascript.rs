@@ -14,82 +14,65 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
   let escaped_file_path_for_nodejs = file_path.to_string_lossy().replace('\\', "\\\\");
   let nodejs_script = format!(
     r#"
-        import('{escaped_file_path_for_nodejs}')
-          .then(findConfig)
-          .then((value) => {{
-            if (isNonEmptyObject(value)) {{
-              console.log(JSON.stringify({{
-                _tag: 'Ok',
-                value: JSON.stringify(value),
-                source: 'import',
-              }}));
-            }} else {{
-              tryRequire('Config expected at default export');
-            }}
-          }})
-          .catch((err) => {{
-            tryRequire(err.stack || err.message || 'Unknown error in import()');
-          }});
+    import 'tsx'
 
-        function tryRequire(importError) {{
-          Promise.resolve(null)
-            .then(() => require('{escaped_file_path_for_nodejs}'))
-            .then(findConfig)
-            .then((value) => {{
-              if (isNonEmptyObject(value)) {{
-                console.log(JSON.stringify({{
-                  _tag: 'Ok',
-                  value: JSON.stringify(value),
-                  source: 'require',
-                }}));
-              }} else {{
-                console.log(JSON.stringify({{
-                  _tag: 'Err',
-                  importError,
-                  requireError: 'Config expected at module.exports',
-                }}));
-              }}
-            }})
-            .catch((err) => {{
-              console.log(JSON.stringify({{
-                _tag: 'Err',
-                importError,
-                requireError: err.stack || err.message || 'Unknown require error'
-              }}));
-            }});
-        }};
-
-        function isNonEmptyObject(value) {{
-          return value && typeof value === 'object' && value.constructor === Object && Object.keys(value).length > 0;
+    import('{escaped_file_path_for_nodejs}')
+      .then(findConfig)
+      .then((value) => {{
+        if (isNonEmptyObject(value)) {{
+          console.log(JSON.stringify({{
+            _tag: 'Ok',
+            value: JSON.stringify(value),
+            source: 'import',
+          }}));
+        }} else {{
+          tryRequire('Config expected at default export');
         }}
+      }})
+      .catch((err) => {{
+        tryRequire(err.stack || err.message || 'Unknown error in import()');
+      }});
 
-        function findConfig(mod) {{
-          return mod.default && mod.default.default ? mod.default.default : mod.default;
-        }}
-      "#
+    function tryRequire(importError) {{
+      Promise.resolve(null)
+        .then(() => require('{escaped_file_path_for_nodejs}'))
+        .then(findConfig)
+        .then((value) => {{
+          if (isNonEmptyObject(value)) {{
+            console.log(JSON.stringify({{
+              _tag: 'Ok',
+              value: JSON.stringify(value),
+              source: 'require',
+            }}));
+          }} else {{
+            console.log(JSON.stringify({{
+              _tag: 'Err',
+              importError,
+              requireError: 'Config expected at module.exports',
+            }}));
+          }}
+        }})
+        .catch((err) => {{
+          console.log(JSON.stringify({{
+            _tag: 'Err',
+            importError,
+            requireError: err.stack || err.message || 'Unknown require error'
+          }}));
+        }});
+    }};
+
+    function isNonEmptyObject(value) {{
+      return value && typeof value === 'object' && value.constructor === Object && Object.keys(value).length > 0;
+    }}
+
+    function findConfig(mod) {{
+      return mod.default && mod.default.default ? mod.default.default : mod.default;
+    }}
+    "#
   );
 
-  let dir = file_path.parent().unwrap_or_else(|| Path::new("."));
-  let runner = if dir.join("pnpm-lock.yaml").exists() || dir.join("pnpm-workspace.yaml").exists() {
-    "pnpm"
-  } else if dir.join("bun.lock").exists() || dir.join("bun.lockb").exists() {
-    "bunx"
-  } else {
-    "npx"
-  };
-
-  let mut args = vec![];
-
-  if runner == "pnpm" {
-    args.push("dlx");
-  }
-
-  args.push("tsx");
-  args.push("-e");
-  args.push(&nodejs_script);
-
-  Command::new(runner)
-    .args(args)
+  Command::new("node")
+    .args(vec!["-e", &nodejs_script])
     .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
     .output()
     .map_err(RcfileError::NodeJsExecutionFailed)
