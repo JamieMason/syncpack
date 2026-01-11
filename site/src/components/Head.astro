@@ -1,0 +1,32 @@
+---
+import StarlightHead from '@astrojs/starlight/components/Head.astro';
+
+const siteUrl = 'https://jamiemason.github.io';
+
+// Access the page ID from Starlight's route data
+const pageId = Astro.locals.starlightRoute?.id || '';
+
+// Use dynamic OG image for docs pages, fallback to static for FAQ pages
+let ogImagePath = '/syncpack/social-card.jpg';
+if (pageId === '') {
+  // Homepage - use index.png
+  ogImagePath = '/syncpack/og/index.png';
+} else if (pageId && !pageId.startsWith('faq')) {
+  // Other docs pages
+  ogImagePath = `/syncpack/og/${pageId}.png`;
+}
+
+const fullOgUrl = `${siteUrl}${ogImagePath}`;
+---
+
+<StarlightHead {...Astro.props}>
+  <slot />
+</StarlightHead>
+
+<!-- Override OG images with dynamic ones -->
+<meta property="og:image" content={fullOgUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta name="twitter:image" content={fullOgUrl} />
+<meta name="twitter:card" content="summary_large_image" />

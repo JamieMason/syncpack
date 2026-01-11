@@ -210,49 +210,10 @@ export default defineConfig({
           autogenerate: { directory: 'reference' },
         },
       ],
+      components: {
+        Head: './src/components/Head.astro',
+      },
       head: [
-        {
-          tag: 'meta',
-          attrs: {
-            name: 'twitter:image',
-            content: '/syncpack/social-card.jpg',
-          },
-        },
-        {
-          tag: 'meta',
-          attrs: {
-            property: 'og:image',
-            content: '/syncpack/social-card.jpg',
-          },
-        },
-        {
-          tag: 'meta',
-          attrs: {
-            property: 'og:image:width',
-            content: '1200',
-          },
-        },
-        {
-          tag: 'meta',
-          attrs: {
-            property: 'og:image:height',
-            content: '675',
-          },
-        },
-        {
-          tag: 'meta',
-          attrs: {
-            name: 'twitter:creator',
-            content: '@fold_left',
-          },
-        },
-        {
-          tag: 'meta',
-          attrs: {
-            name: 'twitter:site',
-            content: '@fold_left',
-          },
-        },
         {
           tag: 'script',
           attrs: {
