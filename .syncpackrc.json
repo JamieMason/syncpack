@@ -1,5 +1,5 @@
 {
-  "$schema": "dist/schema.json",
+  "$schema": "npm/packages/syncpack/schema.json",
   "semverGroups": [
     {
       "dependencyTypes": ["prod", "dev"],
