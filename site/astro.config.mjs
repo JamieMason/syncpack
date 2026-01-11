@@ -256,10 +256,18 @@ export default defineConfig({
         {
           tag: 'script',
           attrs: {
-            src: 'https://app.rybbit.io/api/script.js',
-            'data-site-id': '619',
-            defer: true,
+            async: true,
+            src: 'https://www.googletagmanager.com/gtag/js?id=G-DXPH5LLJ0N',
           },
+        },
+        {
+          tag: 'script',
+          content: [
+            'window.dataLayer=window.dataLayer||[];',
+            'function gtag(){dataLayer.push(arguments);}',
+            `gtag('js', new Date());`,
+            `gtag('config', 'G-DXPH5LLJ0N');`,
+          ].join(''),
         },
       ],
     }),
