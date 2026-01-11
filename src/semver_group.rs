@@ -1,6 +1,8 @@
 use {
   crate::{dependency_type::DependencyType, group_selector::GroupSelector, packages::Packages, semver_range::SemverRange},
   serde::Deserialize,
+  serde_json::Value,
+  std::collections::HashMap,
 };
 
 #[derive(Debug)]
@@ -88,4 +90,6 @@ pub struct AnySemverGroup {
   pub is_disabled: Option<bool>,
   pub is_ignored: Option<bool>,
   pub range: Option<String>,
+  #[serde(flatten)]
+  pub unknown_fields: HashMap<String, Value>,
 }

@@ -25,7 +25,14 @@ use {
   itertools::Itertools,
   log::warn,
   serde::Deserialize,
-  std::{cell::RefCell, cmp::Ordering, collections::BTreeMap, rc::Rc, vec},
+  serde_json::Value,
+  std::{
+    cell::RefCell,
+    cmp::Ordering,
+    collections::{BTreeMap, HashMap},
+    rc::Rc,
+    vec,
+  },
 };
 
 /// What behaviour has this group been configured to exhibit?
@@ -272,4 +279,6 @@ pub struct AnyVersionGroup {
   pub policy: Option<String>,
   pub snap_to: Option<Vec<String>>,
   pub prefer_version: Option<String>,
+  #[serde(flatten)]
+  pub unknown_fields: HashMap<String, Value>,
 }

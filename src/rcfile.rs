@@ -6,10 +6,10 @@ use {
     semver_group::{AnySemverGroup, SemverGroup},
     version_group::{AnyVersionGroup, VersionGroup},
   },
-  log::warn,
+  log::error,
   serde::Deserialize,
   serde_json::Value,
-  std::collections::HashMap,
+  std::{collections::HashMap, process::exit},
 };
 
 mod discovery;
@@ -88,6 +88,8 @@ pub struct CustomType {
   pub strategy: String,
   pub name_path: Option<String>,
   pub path: String,
+  #[serde(flatten)]
+  pub unknown_fields: HashMap<String, Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -102,11 +104,15 @@ pub struct DependencyGroup {
   pub packages: Vec<String>,
   #[serde(default)]
   pub specifier_types: Vec<String>,
+  #[serde(flatten)]
+  pub unknown_fields: HashMap<String, Value>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rcfile {
+  #[serde(rename = "$schema", skip_serializing)]
+  _schema: Option<serde::de::IgnoredAny>,
   #[serde(default = "empty_custom_types")]
   pub custom_types: HashMap<String, CustomType>,
   #[serde(default)]
@@ -146,27 +152,67 @@ impl Default for Rcfile {
 }
 
 impl Rcfile {
-  /// Log warnings for v13 config options that are no longer supported.
-  pub fn warn_deprecated_v13_config(&self) {
-    if self.unknown_fields.contains_key("dependencyTypes") {
-      warn!("Config property 'dependencyTypes' is deprecated in v14.");
-      warn!("Use CLI flag instead: --dependency-types prod,dev,peer");
-    }
-    if self.unknown_fields.contains_key("specifierTypes") {
-      warn!("Config property 'specifierTypes' is deprecated in v14.");
-      warn!("Use CLI flag instead: --specifier-types exact,range");
-    }
-    if self.unknown_fields.contains_key("lintFormatting") {
-      warn!("Config property 'lintFormatting' is deprecated in v14.");
-      warn!("Use 'syncpack format --check' to validate formatting.");
-    }
-    if self.unknown_fields.contains_key("lintSemverRanges") {
-      warn!("Config property 'lintSemverRanges' is deprecated in v14.");
-      warn!("Semver range checking is always enabled in 'syncpack lint'.");
-    }
-    if self.unknown_fields.contains_key("lintVersions") {
-      warn!("Config property 'lintVersions' is deprecated in v14.");
-      warn!("Version checking is always enabled in 'syncpack lint'.");
+  /// Handle config that is no longer supported or was hallucinated by an LLM
+  pub fn visit_unknown_rcfile_fields(&self) {
+    let mut is_valid = true;
+    self.unknown_fields.iter().for_each(|(key, _)| match key.as_str() {
+      "dependencyTypes" => {
+        error!("Config property 'dependencyTypes' is deprecated");
+        error!("Use CLI flag instead: --dependency-types prod,dev,peer");
+        is_valid = false;
+      }
+      "specifierTypes" => {
+        error!("Config property 'specifierTypes' is deprecated");
+        error!("Use CLI flag instead: --specifier-types exact,range");
+        is_valid = false;
+      }
+      "lintFormatting" => {
+        error!("Config property 'lintFormatting' is deprecated");
+        error!("Use 'syncpack format --check' to validate formatting");
+        is_valid = false;
+      }
+      "lintSemverRanges" => {
+        error!("Config property 'lintSemverRanges' is deprecated");
+        error!("Semver range checking is always enabled in 'syncpack lint'");
+        is_valid = false;
+      }
+      "lintVersions" => {
+        error!("Config property 'lintVersions' is deprecated");
+        error!("Version checking is always enabled in 'syncpack lint'");
+        is_valid = false;
+      }
+      _ => {
+        error!("Config property '{key}' is not recognised");
+        is_valid = false;
+      }
+    });
+    self.custom_types.iter().for_each(|(custom_type_name, value)| {
+      value.unknown_fields.iter().for_each(|(field_name, _)| {
+        error!("Config property 'customTypes.{custom_type_name}.{field_name}' is not recognised");
+        is_valid = false;
+      });
+    });
+    self.dependency_groups.iter().enumerate().for_each(|(index, value)| {
+      value.unknown_fields.iter().for_each(|(key, _)| {
+        error!("Config property 'dependencyGroups[{index}].{key}' is not recognised");
+        is_valid = false;
+      });
+    });
+    self.semver_groups.iter().enumerate().for_each(|(index, value)| {
+      value.unknown_fields.iter().for_each(|(key, _)| {
+        error!("Config property 'semverGroups[{index}].{key}' is not recognised");
+        is_valid = false;
+      });
+    });
+    self.version_groups.iter().enumerate().for_each(|(index, value)| {
+      value.unknown_fields.iter().for_each(|(key, _)| {
+        error!("Config property 'versionGroups[{index}].{key}' is not recognised");
+        is_valid = false;
+      });
+    });
+    if !is_valid {
+      error!("syncpack will exit due to an invalid config file, see https://jamiemason.github.io/syncpack for documentation");
+      exit(1);
     }
   }
 
@@ -224,6 +270,7 @@ impl Rcfile {
           strategy: String::from("versionsByName"),
           name_path: None,
           path: String::from("devDependencies"),
+          unknown_fields: HashMap::new(),
         },
       ),
       (
@@ -232,6 +279,7 @@ impl Rcfile {
           strategy: String::from("name~version"),
           name_path: Some(String::from("name")),
           path: String::from("version"),
+          unknown_fields: HashMap::new(),
         },
       ),
       (
@@ -240,6 +288,7 @@ impl Rcfile {
           strategy: String::from("versionsByName"),
           name_path: None,
           path: String::from("overrides"),
+          unknown_fields: HashMap::new(),
         },
       ),
       (
@@ -248,6 +297,7 @@ impl Rcfile {
           strategy: String::from("versionsByName"),
           name_path: None,
           path: String::from("peerDependencies"),
+          unknown_fields: HashMap::new(),
         },
       ),
       (
@@ -256,6 +306,7 @@ impl Rcfile {
           strategy: String::from("versionsByName"),
           name_path: None,
           path: String::from("pnpm.overrides"),
+          unknown_fields: HashMap::new(),
         },
       ),
       (
@@ -264,6 +315,7 @@ impl Rcfile {
           strategy: String::from("versionsByName"),
           name_path: None,
           path: String::from("dependencies"),
+          unknown_fields: HashMap::new(),
         },
       ),
       (
@@ -272,6 +324,7 @@ impl Rcfile {
           strategy: String::from("versionsByName"),
           name_path: None,
           path: String::from("resolutions"),
+          unknown_fields: HashMap::new(),
         },
       ),
     ]);
