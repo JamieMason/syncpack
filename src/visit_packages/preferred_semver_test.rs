@@ -1256,6 +1256,220 @@ mod highest_or_lowest {
       },
     ]);
   }
+
+  #[test]
+  fn highest_semver_with_prerelease_versions_prefers_most_greedy() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "pkg-a",
+          "devDependencies": {
+            "@typescript/native-preview": "7.0.0-dev.20260117.1"
+          }
+        }),
+        json!({
+          "name": "pkg-b",
+          "devDependencies": {
+            "@typescript/native-preview": "^7.0.0-dev.20260117.1"
+          }
+        }),
+      ])
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-b",
+        id: "pkg-b in /version of pkg-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "@typescript/native-preview",
+        id: "@typescript/native-preview in /devDependencies of pkg-a",
+        actual: "7.0.0-dev.20260117.1",
+        expected: Some("^7.0.0-dev.20260117.1"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "@typescript/native-preview",
+        id: "@typescript/native-preview in /devDependencies of pkg-b",
+        actual: "^7.0.0-dev.20260117.1",
+        expected: Some("^7.0.0-dev.20260117.1"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
+  fn lowest_semver_prefers_least_greedy_range_when_versions_equal() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "pkg-a",
+          "devDependencies": {
+            "react": "^18.0.0"
+          }
+        }),
+        json!({
+          "name": "pkg-b",
+          "devDependencies": {
+            "react": "18.0.0"
+          }
+        }),
+        json!({
+          "name": "pkg-c",
+          "devDependencies": {
+            "react": "~18.0.0"
+          }
+        }),
+      ])
+      .with_version_group(json!({
+        "preferVersion": "lowestSemver"
+      }))
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /devDependencies of pkg-a",
+        actual: "^18.0.0",
+        expected: Some("18.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-b",
+        id: "pkg-b in /version of pkg-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /devDependencies of pkg-b",
+        actual: "18.0.0",
+        expected: Some("18.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-c",
+        id: "pkg-c in /version of pkg-c",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /devDependencies of pkg-c",
+        actual: "~18.0.0",
+        expected: Some("18.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[test]
+  fn regression_test_for_issue_314() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "pkg-a",
+          "devDependencies": {
+            "lodash": "4.17.21",
+            "@typescript/native-preview": "7.0.0-dev.20260117.1"
+          }
+        }),
+        json!({
+          "name": "pkg-b",
+          "devDependencies": {
+            "lodash": "^4.17.21",
+            "@typescript/native-preview": "^7.0.0-dev.20260117.1"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
+        "label": "pin all ranges",
+        "range": "",
+        "packages": ["**"],
+        "dependencies": ["**"]
+      }))
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(SatisfiesHighestOrLowestSemver),
+        dependency_name: "@typescript/native-preview",
+        id: "@typescript/native-preview in /devDependencies of pkg-a",
+        actual: "7.0.0-dev.20260117.1",
+        expected: Some("7.0.0-dev.20260117.1"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(SatisfiesHighestOrLowestSemver),
+        dependency_name: "lodash",
+        id: "lodash in /devDependencies of pkg-a",
+        actual: "4.17.21",
+        expected: Some("4.17.21"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-b",
+        id: "pkg-b in /version of pkg-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "@typescript/native-preview",
+        id: "@typescript/native-preview in /devDependencies of pkg-b",
+        actual: "^7.0.0-dev.20260117.1",
+        expected: Some("7.0.0-dev.20260117.1"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "lodash",
+        id: "lodash in /devDependencies of pkg-b",
+        actual: "^4.17.21",
+        expected: Some("4.17.21"),
+        overridden: None,
+      },
+    ]);
+  }
 }
 
 mod non_semver {

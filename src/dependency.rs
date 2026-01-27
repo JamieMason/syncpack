@@ -184,21 +184,16 @@ impl Dependency {
   /// Get the highest (or lowest) semver specifier in this group.
   pub fn get_highest_or_lowest_specifier(&self) -> Option<Rc<Specifier>> {
     let prefer_highest = matches!(self.variant, VersionGroupVariant::HighestSemver);
-    let preferred_order = if prefer_highest { Ordering::Greater } else { Ordering::Less };
-    self
+    let specifiers = self
       .get_instances()
       .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
-      .map(|instance| Rc::clone(&instance.descriptor.specifier))
-      .fold(None, |preferred, specifier| match preferred {
-        None => Some(specifier),
-        Some(preferred) => {
-          if specifier.get_node_version().cmp(&preferred.get_node_version()) == preferred_order {
-            Some(specifier)
-          } else {
-            Some(preferred)
-          }
-        }
-      })
+      .map(|instance| Rc::clone(&instance.descriptor.specifier));
+
+    if prefer_highest {
+      specifiers.max()
+    } else {
+      specifiers.min()
+    }
   }
 
   /// Given a list of every available update, returns a map of each chosen
