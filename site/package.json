@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "dependencies": {
     "@astrojs/check": "^0.9.6",
-    "@astrojs/starlight": "^0.37.2",
-    "astro": "^5.16.8",
+    "@astrojs/starlight": "^0.37.4",
+    "astro": "^5.16.16",
     "satori-astro": "^0.3.3",
     "satori-html": "^0.3.2",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.1.0"
   },
   "private": true,
   "scripts": {
