@@ -16,9 +16,9 @@ ctor = "0.6.3"
 
 [dependencies]
 async-trait = "0.1.89"
-clap = { version = "4.5.54", features = ["cargo"] }
+clap = { version = "4.5.55", features = ["cargo"] }
 color-print = "0.3.7"
-colored = "3.0.0"
+colored = "3.1.1"
 env_logger = "0.11.8"
 glob = "0.3.3"
 globset = "0.4.18"
@@ -35,7 +35,7 @@ reqwest = { version = "0.12", features = [
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 serde_yaml = "0.9"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
 
 [features]
