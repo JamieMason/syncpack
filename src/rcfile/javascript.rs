@@ -14,9 +14,7 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
   let escaped_file_path_for_nodejs = file_path.to_string_lossy().replace('\\', "\\\\");
   let nodejs_script = format!(
     r#"
-    import('tsx')
-      .catch(() => null)
-      .then(() => import('{escaped_file_path_for_nodejs}'))
+    import('{escaped_file_path_for_nodejs}')
       .then(findConfig)
       .then((value) => {{
         if (isNonEmptyObject(value)) {{
@@ -71,8 +69,18 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
     "#
   );
 
+  let is_typescript = file_path.to_string_lossy().ends_with("ts");
+  let mut args = vec![];
+
+  if is_typescript {
+    args.push("--experimental-strip-types");
+  }
+
+  args.push("--eval");
+  args.push(&nodejs_script);
+
   Command::new("node")
-    .args(vec!["-e", &nodejs_script])
+    .args(args)
     .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
     .output()
     .map_err(RcfileError::NodeJsExecutionFailed)
@@ -80,9 +88,12 @@ pub fn from_javascript_path(file_path: &Path) -> Result<Rcfile, RcfileError> {
       if output.status.success() {
         Ok(output.stdout)
       } else {
-        Err(RcfileError::ProcessFailed {
-          stderr: String::from_utf8_lossy(&output.stderr).to_string(),
-        })
+        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+        if stderr.contains("experimental-strip-types") {
+          Err(RcfileError::NodeJsCannotStripTypes { stderr })
+        } else {
+          Err(RcfileError::ProcessFailed { stderr })
+        }
       }
     })
     .and_then(|stdout| String::from_utf8(stdout).map_err(RcfileError::InvalidUtf8))
