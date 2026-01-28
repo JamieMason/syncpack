@@ -6,6 +6,8 @@
   <br><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a>
 </p>
 
+Syncpack is used by [AWS](https://github.com/aws/aws-pdk), [Cloudflare](https://github.com/cloudflare/mcp-server-cloudflare), [DataDog](https://github.com/DataDog/datadog-ci), [Electron](https://github.com/electron/forge), [GoDaddy](https://github.com/godaddy/gasket), [LiveStore](https://github.com/livestorejs/livestore), [Lottie](https://github.com/LottieFiles/dotlottie-web), [Microsoft](https://github.com/microsoft/fluentui), [PostHog](https://github.com/PostHog/posthog), [Qwik](https://github.com/QwikDev/qwik), [Raycast](https://github.com/raycast/extensions), [Salesforce](https://github.com/SalesforceCommerceCloud/pwa-kit), [TopTal](https://github.com/toptal/picasso), [Vercel](https://github.com/vercel/vercel), [VoltAgent](https://github.com/VoltAgent/voltagent), [WooCommerce](https://github.com/woocommerce/woocommerce) and others.
+
 > [!NOTE]
 > This is the README for v14-alpha, a Rust rewrite which is due to replace [`v13.x.x`](https://github.com/JamieMason/syncpack/tree/13.x.x?tab=readme-ov-file#syncpack)
 
