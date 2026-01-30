@@ -1,7 +1,7 @@
 use {
   crate::{
     cli::{Cli, Subcommand},
-    commands::{fix, format, json, lint, list, update},
+    commands::{fix, fix_mismatches, format, json, lint, lint_semver_ranges, list, list_mismatches, prompt, set_semver_ranges, update},
     config::Config,
     context::Context,
     packages::Packages,
@@ -120,6 +120,11 @@ async fn main() {
       let ctx = visit_packages(ctx); // Phase 2: Tag instances
       json::run(ctx) // Phase 3: JSON output
     }
+    Subcommand::ListMismatches => list_mismatches::run(),
+    Subcommand::LintSemverRanges => lint_semver_ranges::run(),
+    Subcommand::FixMismatches => fix_mismatches::run(),
+    Subcommand::SetSemverRanges => set_semver_ranges::run(),
+    Subcommand::Prompt => prompt::run(),
   };
 
   exit(_exit_code);

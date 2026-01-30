@@ -15,6 +15,11 @@ pub enum Subcommand {
   Update,
   List,
   Json,
+  ListMismatches,
+  LintSemverRanges,
+  FixMismatches,
+  SetSemverRanges,
+  Prompt,
 }
 
 #[derive(Debug)]
@@ -110,6 +115,106 @@ impl Cli {
       Some(("update", matches)) => from_arg_matches(Subcommand::Update, matches),
       Some(("list", matches)) => from_arg_matches(Subcommand::List, matches),
       Some(("json", matches)) => from_arg_matches(Subcommand::Json, matches),
+      Some(("list-mismatches", _)) => Cli {
+        check: false,
+        config_path: None,
+        cwd: env::current_dir().unwrap(),
+        dependencies: vec![],
+        dependency_types: vec![],
+        disable_ansi: false,
+        dry_run: false,
+        log_levels: vec![],
+        packages: vec![],
+        show_hints: false,
+        show_ignored: false,
+        show_instances: false,
+        show_status_codes: false,
+        sort: SortBy::Name,
+        source_patterns: vec![],
+        specifier_types: vec![],
+        subcommand: Subcommand::ListMismatches,
+        target: UpdateTarget::Latest,
+      },
+      Some(("lint-semver-ranges", _)) => Cli {
+        check: false,
+        config_path: None,
+        cwd: env::current_dir().unwrap(),
+        dependencies: vec![],
+        dependency_types: vec![],
+        disable_ansi: false,
+        dry_run: false,
+        log_levels: vec![],
+        packages: vec![],
+        show_hints: false,
+        show_ignored: false,
+        show_instances: false,
+        show_status_codes: false,
+        sort: SortBy::Name,
+        source_patterns: vec![],
+        specifier_types: vec![],
+        subcommand: Subcommand::LintSemverRanges,
+        target: UpdateTarget::Latest,
+      },
+      Some(("fix-mismatches", _)) => Cli {
+        check: false,
+        config_path: None,
+        cwd: env::current_dir().unwrap(),
+        dependencies: vec![],
+        dependency_types: vec![],
+        disable_ansi: false,
+        dry_run: false,
+        log_levels: vec![],
+        packages: vec![],
+        show_hints: false,
+        show_ignored: false,
+        show_instances: false,
+        show_status_codes: false,
+        sort: SortBy::Name,
+        source_patterns: vec![],
+        specifier_types: vec![],
+        subcommand: Subcommand::FixMismatches,
+        target: UpdateTarget::Latest,
+      },
+      Some(("set-semver-ranges", _)) => Cli {
+        check: false,
+        config_path: None,
+        cwd: env::current_dir().unwrap(),
+        dependencies: vec![],
+        dependency_types: vec![],
+        disable_ansi: false,
+        dry_run: false,
+        log_levels: vec![],
+        packages: vec![],
+        show_hints: false,
+        show_ignored: false,
+        show_instances: false,
+        show_status_codes: false,
+        sort: SortBy::Name,
+        source_patterns: vec![],
+        specifier_types: vec![],
+        subcommand: Subcommand::SetSemverRanges,
+        target: UpdateTarget::Latest,
+      },
+      Some(("prompt", _)) => Cli {
+        check: false,
+        config_path: None,
+        cwd: env::current_dir().unwrap(),
+        dependencies: vec![],
+        dependency_types: vec![],
+        disable_ansi: false,
+        dry_run: false,
+        log_levels: vec![],
+        packages: vec![],
+        show_hints: false,
+        show_ignored: false,
+        show_instances: false,
+        show_status_codes: false,
+        sort: SortBy::Name,
+        source_patterns: vec![],
+        specifier_types: vec![],
+        subcommand: Subcommand::Prompt,
+        target: UpdateTarget::Latest,
+      },
       _ => {
         std::process::exit(1);
       }
@@ -234,6 +339,41 @@ fn create() -> Command {
         .arg(sort_option("json"))
         .arg(source_option("json"))
         .arg(specifier_types_option("json")),
+    )
+    .subcommand(
+      Command::new("list-mismatches")
+        .about("DEPRECATED: Use 'syncpack lint' instead")
+        .hide(true)
+        .disable_help_flag(true)
+        .disable_version_flag(true),
+    )
+    .subcommand(
+      Command::new("lint-semver-ranges")
+        .about("DEPRECATED: Use 'syncpack lint' instead")
+        .hide(true)
+        .disable_help_flag(true)
+        .disable_version_flag(true),
+    )
+    .subcommand(
+      Command::new("fix-mismatches")
+        .about("DEPRECATED: Use 'syncpack fix' instead")
+        .hide(true)
+        .disable_help_flag(true)
+        .disable_version_flag(true),
+    )
+    .subcommand(
+      Command::new("set-semver-ranges")
+        .about("DEPRECATED: Use 'syncpack fix' instead")
+        .hide(true)
+        .disable_help_flag(true)
+        .disable_version_flag(true),
+    )
+    .subcommand(
+      Command::new("prompt")
+        .about("MISSING: Not yet implemented in v14")
+        .hide(true)
+        .disable_help_flag(true)
+        .disable_version_flag(true),
     )
 }
 
