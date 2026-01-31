@@ -70,10 +70,6 @@ async fn main() {
     len => debug!("Found {len} package.json files"),
   }
 
-  // PHASE 1: Create Context
-  // Read all data, collect dependencies, assign to version groups.
-  // At this point all instances have InstanceState::Unknown.
-  // See src/context.rs for implementation.
   let ctx = Context::create(
     config,
     packages,
@@ -85,40 +81,32 @@ async fn main() {
     catalogs,
   );
 
-  // PHASE 2 & 3: Inspect and Run
-  // Each command chooses a visitor (visit_packages or visit_formatting) to
-  // assign InstanceState, then processes instances based on those states.
-  //
-  // Pattern: visitor takes ownership of Context, tags instances, returns Context.
-  // Command consumes Context and returns exit code (0 or 1).
-  //
-  // See src/visit_packages.rs and src/commands/*.rs for implementations.
   let _exit_code = match ctx.config.cli.subcommand {
     Subcommand::Fix => {
-      let ctx = visit_packages(ctx); // Phase 2: Tag instances
-      fix::run(ctx) // Phase 3: Fix and write files
+      let ctx = visit_packages(ctx);
+      fix::run(ctx)
     }
     Subcommand::Format => {
-      let ctx = visit_formatting(ctx); // Phase 2: Check formatting
-      format::run(ctx) // Phase 3: Fix formatting
+      let ctx = visit_formatting(ctx);
+      format::run(ctx)
     }
     Subcommand::Lint => {
-      let ctx = visit_packages(ctx); // Phase 2: Tag instances
-      lint::run(ctx) // Phase 3: Report issues
+      let ctx = visit_packages(ctx);
+      lint::run(ctx)
     }
     Subcommand::Update => {
       let mut ctx = ctx;
-      ctx.fetch_all_updates().await; // Fetch from npm registry
-      let ctx = visit_packages(ctx); // Phase 2: Tag instances
-      update::run(ctx) // Phase 3: Update versions
+      ctx.fetch_all_updates().await;
+      let ctx = visit_packages(ctx);
+      update::run(ctx)
     }
     Subcommand::List => {
-      let ctx = visit_packages(ctx); // Phase 2: Tag instances
-      list::run(ctx) // Phase 3: List dependencies
+      let ctx = visit_packages(ctx);
+      list::run(ctx)
     }
     Subcommand::Json => {
-      let ctx = visit_packages(ctx); // Phase 2: Tag instances
-      json::run(ctx) // Phase 3: JSON output
+      let ctx = visit_packages(ctx);
+      json::run(ctx)
     }
     Subcommand::ListMismatches => list_mismatches::run(),
     Subcommand::LintSemverRanges => lint_semver_ranges::run(),
