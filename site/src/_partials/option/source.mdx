@@ -8,13 +8,9 @@ Only run <code>{`syncpack ${props.command}`}</code> on package.json files matchi
 <Code
 code={`# only the root package
 syncpack ${props.command} --source 'package.json'
-
 # only packages matching a glob
-
 syncpack ${props.command} --source 'packages/beta-\*'
-
 # multiple values can be provided
-
 syncpack ${props.command} --source 'package.json' --source 'packages/beta-\*'`}
 lang="bash"
 />

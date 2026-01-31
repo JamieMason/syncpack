@@ -6,17 +6,11 @@ To exclude, put a `!` at the start of your query.
 
 <Code
 code={`
-
 # devDependencies only
-
 syncpack ${props.command} --dependency-types dev
-
 # dependencies and devDependencies only
-
 syncpack ${props.command} --dependency-types dev,prod
-
 # everything except peerDependencies
-
 syncpack ${props.command} --dependency-types '!peer'
 `.trim()}
 lang="bash"

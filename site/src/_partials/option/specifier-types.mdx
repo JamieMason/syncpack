@@ -6,17 +6,11 @@ To exclude, put a `!` at the start of your query.
 
 <Code
 code={`
-
 # Exact versions only
-
 syncpack ${props.command} --show instances --specifier-types exact
-
 # Missing or unsupported versions
-
 syncpack ${props.command} --show instances --specifier-types missing,unsupported
-
 # Latest or workspace protocol only
-
 syncpack ${props.command} --show instances --specifier-types latest,workspace-protocol
 `.trim()}
 lang="bash"
