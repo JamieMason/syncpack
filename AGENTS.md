@@ -11,10 +11,10 @@ Rust CLI tool for synchronising npm dependency versions across JavaScript monore
 ## Communication Style
 
 - Signal over noise
-- Be extremely concise. Sacrifice grammar for the sake of concision
+- Extremely concise. Sacrifice grammar for brevity
 - Action-oriented: what to DO
 - Grounded in facts: cite code/docs
-- Remove: "basically", "essentially", "in order to", "comprehensive"
+- BANNED WORDS: basically, essentially, in order to, comprehensive
 
 ## Pre-Implementation Checklist
 
@@ -26,26 +26,23 @@ Before large changes, answer YES to all:
 - Am I NOT making architectural assumptions?
 - Am I NOT creating files user didn't request?
 
-STOP if you think:
+## Hard Rules: Ask First
 
-- "I'll use approach X because it seems reasonable"
-- "I can refactor later if wrong"
-- "This is a minor detail"
-- "I'll create helpful documentation"
-
-Self-check: "Could this be done differently?" → Ask user
-
-## When to Ask vs Proceed
-
-### Ask when
+MUST ask when:
 
 - User intent unclear or multiple valid approaches exist
 - Breaking changes or core architecture modifications
 - Creating ANY new files/modules not explicitly requested
 - Large refactors (identify ALL decision points first)
-- Architectural decisions: HashMap keys, error handling, etc.
 
-### Proceed when
+MUST NOT:
+
+- Use banned words
+- Assume user wants plan or summary documentation
+- Refactor without asking
+- Make architectural decisions unilaterally
+
+## Proceed Without Asking
 
 - Pattern clearly exists in codebase
 - Following established convention
