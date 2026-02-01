@@ -33,6 +33,10 @@ function getCustomTitle(route: any): string {
   if (parts.length >= 1) {
     const category = categoryMap[parts[0]];
     if (category) {
+      // Skip category if it matches the page title (for index pages)
+      if (category === pageTitle) {
+        return `${pageTitle} | Syncpack`;
+      }
       return `${pageTitle} | ${category} | Syncpack`;
     }
   }

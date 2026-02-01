@@ -1,0 +1,24 @@
+---
+title: Commands
+description: CLI commands for managing dependency versions across your monorepo
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { getCollection } from 'astro:content';
+
+export const allDocs = await getCollection('docs');
+export const pages = allDocs
+  .filter((doc) => doc.id.startsWith('command/') && doc.id !== 'command')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+Syncpack provides several commands to lint, fix, format, and update dependencies in your monorepo.
+
+<CardGrid>
+  {pages.map((page) => (
+    <LinkCard
+      title={page.data.title}
+      href={`/syncpack/${page.id.replace(/\.mdx?$/, '')}/`}
+      description={page.data.description}
+    />
+  ))}
+</CardGrid>

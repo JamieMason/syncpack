@@ -1,10 +1,16 @@
 ---
-title: versionGroups
-slug: version-groups
-description: Split your monorepo into isolated sections with separate versioning policies for each
+title: Version Groups
+description: Control how dependency versions are managed across your monorepo
 ---
 
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { getCollection } from 'astro:content';
+
+export const allDocs = await getCollection('docs');
+export const pages = allDocs
+  .filter((doc) => doc.id.startsWith('version-groups/') && doc.id !== 'version-groups')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
 
 Version groups split your project into isolated sections, each with their own policy for how versions should be managed.
 
@@ -78,3 +84,15 @@ Any properties of a version group that are omitted will match-all by default, so
 
   </TabItem>
 </Tabs>
+
+## Variants
+
+<CardGrid>
+  {pages.map((page) => (
+    <LinkCard
+      title={page.data.title}
+      href={`/syncpack/${page.id.replace(/\.mdx?$/, '')}/`}
+      description={page.data.description}
+    />
+  ))}
+</CardGrid>

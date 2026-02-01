@@ -1,0 +1,24 @@
+---
+title: Configuration File
+description: Configure syncpack behavior through .syncpackrc files and command-line options
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { getCollection } from 'astro:content';
+
+export const allDocs = await getCollection('docs');
+export const pages = allDocs
+  .filter((doc) => doc.id.startsWith('config/') && doc.id !== 'config')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+Configure syncpack's behavior using a `.syncpackrc` file in your project root. These options control formatting, sorting, dependency management, and version constraints.
+
+<CardGrid>
+  {pages.map((page) => (
+    <LinkCard
+      title={page.data.title}
+      href={`/syncpack/${page.id.replace(/\.mdx?$/, '')}/`}
+      description={page.data.description}
+    />
+  ))}
+</CardGrid>
