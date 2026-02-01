@@ -101,6 +101,9 @@ function buildArticleSchema(route: StarlightRouteData) {
   const dateModified =
     data.lastUpdated?.toISOString() || new Date().toISOString();
 
+  // Use the OG image for this specific page
+  const ogImageUrl = `${siteConfig.siteUrl}/og/${route.id}.png`;
+
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -119,7 +122,7 @@ function buildArticleSchema(route: StarlightRouteData) {
       url: siteConfig.authorUrl,
       image: siteConfig.authorImage,
     },
-    image: siteConfig.logoUrl,
+    image: ogImageUrl,
     inLanguage: "en",
   };
 }
