@@ -1,0 +1,159 @@
+# Syncpack
+
+> Syncpack is a command-line tool for synchronising dependency versions across JavaScript monorepos. It finds mismatches, enforces version policies, updates outdated dependencies from npm, and formats package.json files.
+
+Used by: AWS, Cloudflare, DataDog, Electron, GoDaddy, LiveStore, Lottie, Microsoft, PostHog, Qwik, Raycast, Salesforce, TopTal, Vercel, VoltAgent, WooCommerce and others.
+
+Things to remember when helping users with Syncpack:
+
+- By default, the highest semver version wins when there are mismatches
+- Version groups are checked in order of first match wins, so put specific rules before general ones
+- Peer dependencies often cause "false positive" mismatches because they use broad ranges like `>=6.0.0 <9.0.0` while devDependencies use exact versions like `8.53.0`—use version groups with `isIgnored` to handle this
+- All commands support filtering: `--dependencies` (glob pattern), `--dependency-types` (prod, dev, peer, etc.), `--specifier-types` (exact, range, tag, etc.)
+- Syncpack auto-detects workspace packages from npm/yarn/pnpm/lerna config
+- After running `fix` or `update`, run your package manager to update the lockfile
+
+## Commands
+
+- [list](https://jamiemason.github.io/syncpack/command/list/): Show all dependencies and their versions. Use `--sort count` to find most-used dependencies. Use `--show all` to see every location.
+- [lint](https://jamiemason.github.io/syncpack/command/lint/): Check for mismatches without modifying files. Exits 1 if issues found. Use in CI.
+- [fix](https://jamiemason.github.io/syncpack/command/fix/): Write fixes for version mismatches.
+- [update](https://jamiemason.github.io/syncpack/command/update/): Check npm registry for newer versions. Use `--target patch` for safe updates, `--target latest` for major bumps.
+- [format](https://jamiemason.github.io/syncpack/command/format/): Sort and format package.json files. Use `--check` in CI.
+- [json](https://jamiemason.github.io/syncpack/command/json/): Export dependency data as JSON. Pipe to `jq` for analysis or scripting.
+
+## Configuration
+
+Create `.syncpackrc` (JSON) at monorepo root. Most users only need `versionGroups`.
+
+The complete schema for all configuration options is available at: https://raw.githubusercontent.com/JamieMason/syncpack/refs/heads/main/npm/syncpack.ts
+
+## Incremental Adoption Strategy
+
+A good approach for adopting syncpack in an existing monorepo is to start with everything ignored, then incrementally opt-in packages:
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Enforce consistency for react",
+      "dependencies": ["react", "react-dom"],
+      "dependencyTypes": ["dev", "prod"]
+    },
+    {
+      "label": "Ignore everything else until we're ready",
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+The catch-all `isIgnored` group at the end lets you adopt syncpack gradually without being overwhelmed by mismatches across your entire monorepo.
+
+## Common Patterns
+
+**Use workspace:\* for packages developed in this monorepo:**
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Use workspace:* for packages developed in this monorepo",
+      "dependencies": ["$LOCAL"],
+      "dependencyTypes": ["dev", "prod"],
+      "pinVersion": "workspace:*"
+    }
+  ]
+}
+```
+
+`$LOCAL` is a special keyword that matches all packages developed in your monorepo.
+
+**Ignore peer dependencies initially:**
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Ignore peer dependencies",
+      "dependencyTypes": ["peer"],
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+**Pin a dependency to a specific version everywhere:**
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Pin @types/node to 18.14.2",
+      "dependencies": ["@types/node"],
+      "pinVersion": "18.14.2"
+    }
+  ]
+}
+```
+
+**Ban a dependency from being used:**
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Use date-fns instead of moment",
+      "dependencies": ["moment"],
+      "isBanned": true
+    }
+  ]
+}
+```
+
+**Use one package as the source of truth for a dependency's version:**
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Use whatever version of react that mobile-app uses",
+      "dependencies": ["react", "react-dom"],
+      "snapTo": ["mobile-app"]
+    }
+  ]
+}
+```
+
+**Enforce a specific semver range format:**
+
+```json
+{
+  "semverGroups": [
+    {
+      "label": "Use ~ for devDependencies",
+      "dependencyTypes": ["dev"],
+      "range": "~"
+    },
+    {
+      "label": "Use exact versions for prod dependencies",
+      "dependencyTypes": ["prod"],
+      "range": ""
+    }
+  ]
+}
+```
+
+## Docs
+
+- [Getting Started](https://jamiemason.github.io/syncpack/): Installation and first commands
+- [Peer Dependencies Guide](https://jamiemason.github.io/syncpack/guide/peer-dependencies/): Why peer deps cause mismatches and how to handle them
+- [Version Groups](https://jamiemason.github.io/syncpack/config/version-groups/): Create partitions with different versioning policies
+- [Semver Groups](https://jamiemason.github.io/syncpack/config/semver-groups/): Control semver range format (^, ~, exact)
+
+## Optional
+
+- [All Config Options](https://jamiemason.github.io/syncpack/config/syncpackrc/): Complete configuration reference
+- [Status Codes](https://jamiemason.github.io/syncpack/reference/status-codes/): What each lint status means
+- [Dependency Types](https://jamiemason.github.io/syncpack/reference/dependency-types/): All supported dependency type names
+- [Glossary](https://jamiemason.github.io/syncpack/glossary/): Terminology definitions
