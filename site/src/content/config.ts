@@ -13,6 +13,7 @@ const schema = docsSchema({
     banner: z.object({ content: z.string() }).default({
       content: banner,
     }),
+    schemaOverride: z.enum(['article', 'faq', 'howto']).optional(),
   }),
 });
 

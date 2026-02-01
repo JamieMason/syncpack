@@ -1,11 +1,11 @@
 ---
-import { getCollection, render } from 'astro:content';
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import Question from '@components/question.astro';
+import { getCollection, render } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import Question from "@components/question.astro";
 
-const files = await getCollection('faq');
+const files = await getCollection("faq");
 const faqs = await Promise.all(
-  files.map(async faq => ({
+  files.map(async (faq) => ({
     Answer: (await render(faq)).Content,
     faq,
     slug: faq.id,
@@ -25,11 +25,13 @@ const faqs = await Promise.all(
     slug: faq.slug,
   }))}
 >
-  {
-    faqs.map(({ Answer, slug, title }) => (
-      <Question slug={slug} title={title}>
-        <Answer />
-      </Question>
-    ))
-  }
+  <div itemscope itemtype="https://schema.org/FAQPage">
+    {
+      faqs.map(({ Answer, slug, title }) => (
+        <Question slug={slug} title={title}>
+          <Answer />
+        </Question>
+      ))
+    }
+  </div>
 </StarlightPage>

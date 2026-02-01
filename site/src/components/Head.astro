@@ -1,5 +1,6 @@
 ---
 import StarlightHead from '@astrojs/starlight/components/Head.astro';
+import { buildSchemas } from '../lib/schema';
 
 const siteUrl = 'https://jamiemason.github.io';
 
@@ -17,11 +18,21 @@ if (pageId === '') {
 }
 
 const fullOgUrl = `${siteUrl}${ogImagePath}`;
+
+// Build structured data schemas for this page
+const route = Astro.locals.starlightRoute;
+const schemas = route ? buildSchemas(route) : [];
 ---
 
 <StarlightHead {...Astro.props}>
   <slot />
 </StarlightHead>
+
+{
+  schemas.map((schema) => (
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  ))
+}
 
 <!-- Override OG images with dynamic ones -->
 <meta property="og:image" content={fullOgUrl} />

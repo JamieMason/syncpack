@@ -149,6 +149,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Syncpack',
+      lastUpdated: true,
       routeMiddleware: './src/route-data.ts',
       social: [
         {
