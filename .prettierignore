@@ -1,2 +1,4 @@
 CHANGELOG.md
 site/src/_partials/option/
+fixtures/**/package.json
+pnpm-lock.yaml

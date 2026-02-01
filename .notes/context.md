@@ -55,6 +55,7 @@ InstanceState
 ```
 
 To see all variants:
+
 ```bash
 ast-grep -p 'pub enum ValidInstance' src/
 ast-grep -p 'pub enum FixableInstance' src/
@@ -65,6 +66,7 @@ ast-grep -p 'pub enum SuspectInstance' src/
 ### VersionGroup (`src/version_group.rs`)
 
 Versioning policies. To see variants:
+
 ```bash
 ast-grep -p 'pub enum VersionGroupVariant' src/
 ```
@@ -73,14 +75,14 @@ ast-grep -p 'pub enum VersionGroupVariant' src/
 
 Use `find_path` or `ast-grep` to locate files. Key entry points:
 
-| Purpose | File |
-|---------|------|
-| Entry & dispatch | `src/main.rs` |
-| Central data | `src/context.rs` |
-| State assignment | `src/visit_packages.rs` |
-| Validation logic | `src/visit_packages/*.rs` |
-| Commands | `src/commands/*.rs` |
-| Tests | `src/visit_packages/*_test.rs` |
+| Purpose          | File                           |
+| ---------------- | ------------------------------ |
+| Entry & dispatch | `src/main.rs`                  |
+| Central data     | `src/context.rs`               |
+| State assignment | `src/visit_packages.rs`        |
+| Validation logic | `src/visit_packages/*.rs`      |
+| Commands         | `src/commands/*.rs`            |
+| Tests            | `src/visit_packages/*_test.rs` |
 
 ## Key Patterns
 
@@ -113,11 +115,13 @@ pub fn run(ctx: Context) -> i32 {
 ## Location String Format
 
 Instance IDs follow this pattern:
+
 ```
 {dependency} in {location} of {package}
 ```
 
 Examples:
+
 - `react in /dependencies of pkg-a`
 - `lodash in /devDependencies of pkg-b`
 - `pnpm in /packageManager of pkg-c`
