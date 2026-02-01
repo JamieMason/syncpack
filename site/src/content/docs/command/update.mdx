@@ -18,7 +18,7 @@ import SourceOption from "@partials/option/source.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 import TargetOption from "@partials/option/target.mdx";
 
-Update to the latest versions on the npm registry.
+Update dependencies in your monorepo to newer versions from the npm registry. Checks for available updates and modifies package.json files to use them. Unlike `fix` which synchronises versions across packages, `update` fetches the latest published versions. Use `--target` to control update strategy (latest, minor, patch).
 
 ## Examples
 

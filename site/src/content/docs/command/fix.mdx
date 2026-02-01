@@ -6,6 +6,7 @@ import { Badge } from "@astrojs/starlight/components";
 import ConfigOption from "@partials/option/config.mdx";
 import DependenciesOption from "@partials/option/dependencies.mdx";
 import DependencyTypesOption from "@partials/option/dependency-types.mdx";
+import DryRunOption from "@partials/option/dry-run.mdx";
 import HelpOption from "@partials/option/help.mdx";
 import LogLevelsOption from "@partials/option/log-levels.mdx";
 import NoAnsiOption from "@partials/option/no-ansi.mdx";
@@ -16,17 +17,21 @@ import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
 import QuoteFilters from "@partials/tips/quote-filters.mdx";
 
-Fix every autofixable issue found by `syncpack lint`.
+Fix version mismatches in your monorepo. When the same dependency has different versions across packages, `fix` updates them to match your configuration rules. Use this to resolve issues reported by `lint`. Does not fix formatting—use `format` for that.
 
 ## Examples
 
 ```bash
-# Only fix issues in dependencies and devDependencies
+# Preview changes without modifying files
+syncpack fix --dry-run
+# Fix only dependencies and devDependencies (exclude peer, optional)
 syncpack fix --dependency-types prod,dev
-# Only fix inconsistencies with exact versions (eg "1.2.3")
+# Fix inconsistencies with exact versions only (eg "1.2.3", not "^1.2.3")
 syncpack fix --specifier-types exact
-# Only fix issues in "react" specifically
+# Fix issues in "react" across all packages
 syncpack fix --dependencies react
+# Fix scoped packages like @types/* but exclude others
+syncpack fix --dependencies '@types/**'
 # See more examples
 syncpack fix --help
 # See a short summary of options
@@ -48,6 +53,10 @@ syncpack fix -h
 ### --dependency-types <Badge text="<comma-separated-dependency-type-names>" />
 
 <DependencyTypesOption command="fix" />
+
+### --dry-run
+
+<DryRunOption command="fix" />
 
 ### --log-levels <Badge text="<comma-separated-log-level-names>" />
 

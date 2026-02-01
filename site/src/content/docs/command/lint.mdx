@@ -15,7 +15,7 @@ import SortOption from "@partials/option/sort.mdx";
 import SourceOption from "@partials/option/source.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
-Lint all versions and ranges and exit with 0 or 1 based on whether all files match your Syncpack configuration file.
+Check for version mismatches in your monorepo. Reports dependencies that don't match your configuration rules and exits with status code 1 if issues are found. Use `fix` to resolve reported issues. Does not check formatting—use `format --check` for that.
 
 ## Examples
 

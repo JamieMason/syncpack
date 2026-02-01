@@ -17,11 +17,7 @@ import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
 import QuoteFilters from "@partials/tips/quote-filters.mdx";
 
-Output the state of every instance of every dependency as a JSON object, one per line. This command is best used with tools like [`jq`](https://jqlang.org/) for filtering and processing.
-
-## TypeScript
-
-Each instance printed by `syncpack json` has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
+Export dependency data from your monorepo as JSON. Outputs one line per dependency instance with version, location, and status information. Use with tools like [`jq`](https://jqlang.org/) to analyse, filter, or pipe into other commands.
 
 ## Examples
 
@@ -36,6 +32,33 @@ syncpack json | jq -r '.dependencyType' | sort | uniq -c
 syncpack json --help
 # See a short summary of options
 syncpack json -h
+```
+
+## TypeScript
+
+Each instance printed by `syncpack json` has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
+
+```ts
+/** Each Instance printed by `syncpack json` */
+export type JsonOutput = {
+  dependency: string;
+  dependencyGroup: string;
+  dependencyType: DependencyType;
+  package: string;
+  property: ["dependencies"];
+  strategy: CustomType.Any["strategy"];
+  versionGroup: VersionGroupVariant;
+  preferredSemverRange: SemverRange | null;
+  statusCode: StatusCode;
+  actual: {
+    raw: string;
+    type: SpecifierType;
+  };
+  expected: {
+    raw: string;
+    type: SpecifierType;
+  } | null;
+};
 ```
 
 ## Options
