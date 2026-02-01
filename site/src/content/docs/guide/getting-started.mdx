@@ -23,13 +23,13 @@ Some of the things it can do are:
 
 The fastest way to try syncpack is via [npx](HREF_NPX).
 
-Run this command from the root directory of a monorepo and it will list every dependency installed under a [`dependencies`](HREF_DEPENDENCIES) property of a package.json file in the project.
-
-Syncpack uses your package manager's workspace configuration to locate your package.json files, or you can target specific files using the [`source`](CONFIG_SOURCE) configuration or `--source` option.
-
 ```bash
 npx syncpack@alpha list --dependency-types prod
 ```
+
+Run this command from the root directory of a monorepo and it will list every dependency installed under a [`dependencies`](HREF_DEPENDENCIES) property of a package.json file in the project.
+
+Syncpack uses your package manager's workspace configuration to locate your package.json files, or you can target specific files using the [`source`](CONFIG_SOURCE) configuration or `--source` option.
 
 For any given command, browse a summary of its options with `-h`
 
@@ -60,16 +60,8 @@ npm exec syncpack -- list
 ## Introduction
 
 :::note
-
-For the rest of this guide I will run syncpack as if it was installed globally
-
-```
-npm install -g syncpack@alpha
-```
-
+The examples below assume syncpack is installed globally. Replace `syncpack` with `npx syncpack@alpha` if you haven't installed it or `npm exec syncpack` if you have installed it locally.
 :::
-
-We're going to run a few commands to better understand not only syncpack, but our own project as well. Monorepos can be _huge_, it's not easy to drill down and see all of the many dependencies we might be using, and harder still to know where any inconsistencies are.
 
 Let's see which dependencies we use the most.
 
@@ -77,7 +69,7 @@ Let's see which dependencies we use the most.
 syncpack list --dependency-types prod --sort count
 ```
 
-Some of our dependencies might have errors next to them, if our Terminal supports it we can command + click each error to view its documentation, or each filename to open the file.
+Some of our dependencies might have [status codes](REF_STATUS_CODES) next to them, if our Terminal supports it we can command + click each error to view its documentation, or each filename to open the file.
 
 To focus only on dependencies with errors, use `lint` instead of `list`.
 
@@ -90,6 +82,10 @@ If the suggested changes look ok, we can autofix them.
 ```bash
 syncpack fix --dependency-types prod
 ```
+
+:::tip
+After running `fix` or `update`, run your package manager (`npm install`, `pnpm install`, etc.) to update your lockfile.
+:::
 
 Or we could choose to only autofix one of them, for this example I've chosen `react`.
 
@@ -133,11 +129,15 @@ And by removing the `--check` option we can write the newer versions to our file
 syncpack update --dependencies react
 ```
 
-I'm hoping by this point that you're starting to develop an intuition for how syncpack works and how its options can be combined. Take a look at the `--help` documentation of each command to see examples and what options are available.
+Each command supports `--help` for examples and available options.
 
 ```bash
 syncpack list --help
 ```
+
+## Configuration
+
+Create a `.syncpackrc` file in your repo root to customise behaviour. See [Configuration](CONFIG_SYNCPACKRC) for all options.
 
 ## Further reading
 
