@@ -1,10 +1,69 @@
-import { defineRouteMiddleware } from '@astrojs/starlight/route-data';
+import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
 
-export const onRequest = defineRouteMiddleware(context => {
-  context.locals.starlightRoute.head.some(item => {
-    if (item.attrs?.rel === 'sitemap') {
-      item.attrs.href = '/syncpack/sitemap.xml';
+// Build custom title with breadcrumb structure
+function getCustomTitle(route: any): string {
+  if (!route) return "Syncpack";
+
+  // Homepage special case
+  if (route.id === "") {
+    return "Consistent dependency versions in JavaScript Monorepos | Syncpack";
+  }
+
+  const pageTitle = route.entry.data.title;
+
+  // Special case: Status Codes overview page (reference/status-codes with slug: status)
+  // Title is "Status Codes" so avoid duplicate
+  if (
+    route.id === "reference/status-codes" ||
+    (route.slug === "status" && pageTitle === "Status Codes")
+  ) {
+    return `${pageTitle} | Syncpack`;
+  }
+
+  // Map directory to sidebar label
+  const categoryMap: Record<string, string> = {
+    command: "Commands",
+    "version-groups": "Version Groups",
+    "semver-groups": "Semver Groups",
+    config: "Configuration File",
+    reference: "Reference",
+    guide: "Guides",
+    status: "Status Codes",
+  };
+
+  const parts = route.id.split("/");
+
+  if (parts.length >= 1) {
+    const category = categoryMap[parts[0]];
+    if (category) {
+      return `${pageTitle} | ${category} | Syncpack`;
+    }
+  }
+
+  return `${pageTitle} | Syncpack`;
+}
+
+export const onRequest = defineRouteMiddleware((context) => {
+  const route = context.locals.starlightRoute;
+
+  // Update sitemap href
+  route.head.some((item) => {
+    if (item.attrs?.rel === "sitemap") {
+      item.attrs.href = "/syncpack/sitemap.xml";
       return true;
     }
+    return false;
+  });
+
+  // Add custom title tag
+  const customTitle = getCustomTitle(route);
+
+  // Remove existing title tag(s) from head
+  route.head = route.head.filter((item) => item.tag !== "title");
+
+  // Add our custom title tag
+  route.head.push({
+    tag: "title",
+    content: customTitle,
   });
 });

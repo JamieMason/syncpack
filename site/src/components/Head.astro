@@ -1,18 +1,18 @@
 ---
-import StarlightHead from '@astrojs/starlight/components/Head.astro';
-import { buildSchemas } from '../lib/schema';
+import StarlightHead from "@astrojs/starlight/components/Head.astro";
+import { buildSchemas } from "../lib/schema";
 
-const siteUrl = 'https://jamiemason.github.io';
+const siteUrl = "https://jamiemason.github.io";
 
 // Access the page ID from Starlight's route data
-const pageId = Astro.locals.starlightRoute?.id || '';
+const pageId = Astro.locals.starlightRoute?.id || "";
 
 // Use dynamic OG image for docs pages, fallback to static for FAQ pages
-let ogImagePath = '/syncpack/social-card.jpg';
-if (pageId === '') {
+let ogImagePath = "/syncpack/social-card.jpg";
+if (pageId === "") {
   // Homepage - use index.png
-  ogImagePath = '/syncpack/og/index.png';
-} else if (pageId && !pageId.startsWith('faq')) {
+  ogImagePath = "/syncpack/og/index.png";
+} else if (pageId && !pageId.startsWith("faq")) {
   // Other docs pages
   ogImagePath = `/syncpack/og/${pageId}.png`;
 }
