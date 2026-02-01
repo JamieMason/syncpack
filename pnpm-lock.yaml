@@ -38,6 +38,9 @@ importers:
       astro:
         specifier: ^5.16.16
         version: 5.16.16(@types/node@22.19.1)(jiti@2.6.1)(rollup@4.40.2)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.7.1)
+      rehype-external-links:
+        specifier: ^3.0.0
+        version: 3.0.0
       satori-astro:
         specifier: ^0.3.3
         version: 0.3.3(astro@5.16.16(@types/node@22.19.1)(jiti@2.6.1)(rollup@4.40.2)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.7.1))(sharp@0.34.5)
@@ -2027,6 +2030,10 @@ packages:
   iron-webcrypto@1.2.1:
     resolution: {integrity: sha512-feOM6FaSr6rEABp/eDfVseKyTMDt+KGpeB35SkVn9Tyn0CqvVsY3EwI0v5i8nMHyJnzCIQf7nsy3p41TPkJZhg==}
 
+  is-absolute-url@4.0.1:
+    resolution: {integrity: sha512-/51/TKE88Lmm7Gc4/8btclNXWS+g50wXhYJq8HWIBAGUBnoAdRu1aXeh364t/O7wXDAcTJDP8PNuNKWUDWie+A==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   is-alphabetical@2.0.1:
     resolution: {integrity: sha512-FWyyY60MeTNyeSRpkM2Iry0G9hpr7/9kD40mD/cGQEuilcZYS4okz8SN2Q6rLCJ8gbCt6fN+rC+6tMGS99LaxQ==}
 
@@ -2698,6 +2705,9 @@ packages:
 
   rehype-expressive-code@0.41.2:
     resolution: {integrity: sha512-vHYfWO9WxAw6kHHctddOt+P4266BtyT1mrOIuxJD+1ELuvuJAa5uBIhYt0OVMyOhlvf57hzWOXJkHnMhpaHyxw==}
+
+  rehype-external-links@3.0.0:
+    resolution: {integrity: sha512-yp+e5N9V3C6bwBeAC4n796kc86M4gJCdlVhiMTxIrJG5UHDMh+PJANf9heqORJbt1nrCbDwIlAZKjANIaVBbvw==}
 
   rehype-format@5.0.1:
     resolution: {integrity: sha512-zvmVru9uB0josBVpr946OR8ui7nJEdzZobwLOOqHb/OOD88W0Vk2SqLwoVOj0fM6IPCCO6TaV9CvQvJMWwukFQ==}
@@ -5593,6 +5603,8 @@ snapshots:
 
   iron-webcrypto@1.2.1: {}
 
+  is-absolute-url@4.0.1: {}
+
   is-alphabetical@2.0.1: {}
 
   is-alphanumerical@2.0.1:
@@ -6539,6 +6551,15 @@ snapshots:
   rehype-expressive-code@0.41.2:
     dependencies:
       expressive-code: 0.41.2
+
+  rehype-external-links@3.0.0:
+    dependencies:
+      '@types/hast': 3.0.4
+      '@ungap/structured-clone': 1.2.0
+      hast-util-is-element: 3.0.0
+      is-absolute-url: 4.0.1
+      space-separated-tokens: 2.0.2
+      unist-util-visit: 5.1.0
 
   rehype-format@5.0.1:
     dependencies:

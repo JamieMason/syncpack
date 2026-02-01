@@ -5,6 +5,7 @@
     "@astrojs/check": "^0.9.6",
     "@astrojs/starlight": "^0.37.4",
     "astro": "^5.16.16",
+    "rehype-external-links": "^3.0.0",
     "satori-astro": "^0.3.3",
     "satori-html": "^0.3.2",
     "sharp": "^0.34.5",

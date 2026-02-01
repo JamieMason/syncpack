@@ -1,4 +1,4 @@
-import { siteConfig } from "./siteConfig";
+import { siteConfig } from './siteConfig';
 
 type StarlightRouteData = any;
 
@@ -10,7 +10,7 @@ type StarlightRouteData = any;
 export function buildSchemas(route: StarlightRouteData) {
   const schemas: Record<string, any>[] = [];
 
-  const isHomepage = route.id === "";
+  const isHomepage = route.id === '';
   const isDocPage = !isHomepage;
 
   if (isHomepage) {
@@ -34,8 +34,8 @@ export function buildSchemas(route: StarlightRouteData) {
  */
 function buildWebSiteSchema() {
   return {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
     name: siteConfig.siteName,
     url: siteConfig.siteUrl,
   };
@@ -47,14 +47,14 @@ function buildWebSiteSchema() {
  */
 function buildPersonSchema() {
   return {
-    "@context": "https://schema.org",
-    "@type": "Person",
+    '@context': 'https://schema.org',
+    '@type': 'Person',
     name: siteConfig.authorName,
     url: siteConfig.authorUrl,
     image: siteConfig.authorImage,
     sameAs: siteConfig.authorSocial,
     funding: {
-      "@type": "MonetaryGrant",
+      '@type': 'MonetaryGrant',
       url: siteConfig.sponsorUrl,
     },
   };
@@ -66,16 +66,16 @@ function buildPersonSchema() {
  */
 function buildSoftwareApplicationSchema() {
   return {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
     name: siteConfig.siteName,
     description: siteConfig.softwareDescription,
     url: siteConfig.siteUrl,
     image: siteConfig.logoUrl,
-    applicationCategory: "DeveloperApplication",
-    operatingSystem: ["Linux", "macOS", "Windows"],
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: ['Linux', 'macOS', 'Windows'],
     author: {
-      "@type": "Person",
+      '@type': 'Person',
       name: siteConfig.authorName,
       url: siteConfig.authorUrl,
     },
@@ -92,10 +92,10 @@ function buildBreadcrumbSchema(route: StarlightRouteData) {
   const breadcrumbs = generateBreadcrumbs(route.slug);
 
   return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
     itemListElement: breadcrumbs.map((item, i) => ({
-      "@type": "ListItem",
+      '@type': 'ListItem',
       position: i + 1,
       name: item.name,
       item: `${siteConfig.siteUrl}${item.url}`,
@@ -109,36 +109,35 @@ function buildBreadcrumbSchema(route: StarlightRouteData) {
  */
 function buildArticleSchema(route: StarlightRouteData) {
   const { data } = route.entry;
-  const title = data.title || "Syncpack Documentation";
+  const title = data.title || 'Syncpack Documentation';
   const description = data.description || siteConfig.description;
 
   // Starlight provides lastUpdated from Git when lastUpdated: true in config
-  const dateModified =
-    data.lastUpdated?.toISOString() || new Date().toISOString();
+  const dateModified = data.lastUpdated?.toISOString() || new Date().toISOString();
 
   // Use the OG image for this specific page
   const ogImageUrl = `${siteConfig.siteUrl}/og/${route.id}.png`;
 
   return {
-    "@context": "https://schema.org",
-    "@type": "Article",
+    '@context': 'https://schema.org',
+    '@type': 'Article',
     headline: title,
     description: description,
     datePublished: dateModified, // Use same as modified for docs
     dateModified: dateModified,
     author: {
-      "@type": "Person",
+      '@type': 'Person',
       name: siteConfig.authorName,
       url: siteConfig.authorUrl,
     },
     publisher: {
-      "@type": "Person",
+      '@type': 'Person',
       name: siteConfig.authorName,
       url: siteConfig.authorUrl,
       image: siteConfig.authorImage,
     },
     image: ogImageUrl,
-    inLanguage: "en",
+    inLanguage: 'en',
   };
 }
 
@@ -151,12 +150,12 @@ function buildArticleSchema(route: StarlightRouteData) {
  * - Getting Started → /syncpack/guide/getting-started/
  */
 function generateBreadcrumbs(slug: string) {
-  const breadcrumbs = [{ name: "Docs", url: "/" }];
+  const breadcrumbs = [{ name: 'Docs', url: '/' }];
 
-  const parts = slug.split("/").filter(Boolean);
-  let currentPath = "";
+  const parts = slug.split('/').filter(Boolean);
+  let currentPath = '';
 
-  parts.forEach((part) => {
+  parts.forEach(part => {
     currentPath += `/${part}`;
     breadcrumbs.push({
       name: titleCase(part),
@@ -174,7 +173,7 @@ function generateBreadcrumbs(slug: string) {
  */
 function titleCase(str: string) {
   return str
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
