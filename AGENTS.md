@@ -48,3 +48,24 @@ MUST NOT:
 - Following established convention
 - Non-breaking changes
 - Adding tests, fixing obvious bugs
+
+## Documentation Rules: MANDATORY
+
+**NEVER create new documentation files unless explicitly requested.**
+
+Examples of BANNED actions:
+
+- ❌ Creating "status" docs, "validation" docs, "current-status" files
+- ❌ Creating "summary" docs, "guide" docs, "checklist" files
+- ❌ Splitting existing docs into multiple files
+- ❌ Creating "handoff" docs, "next steps" docs
+
+**ONLY update existing docs:**
+
+- ✅ Update the original document in place
+- ✅ Add sections/checkboxes to existing files
+- ✅ Mark tasks complete where they already exist
+
+**If user has ONE plan file → keep ONE plan file.**
+
+Do NOT proliferate documentation. Update existing files only.
