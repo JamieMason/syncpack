@@ -14,6 +14,7 @@ export function buildSchemas(route: StarlightRouteData) {
   const isDocPage = !isHomepage;
 
   if (isHomepage) {
+    schemas.push(buildWebSiteSchema());
     schemas.push(buildPersonSchema());
     schemas.push(buildSoftwareApplicationSchema());
   }
@@ -24,6 +25,20 @@ export function buildSchemas(route: StarlightRouteData) {
   }
 
   return schemas;
+}
+
+/**
+ * WebSite schema for homepage (for Google site name feature).
+ * https://schema.org/WebSite
+ * https://developers.google.com/search/docs/appearance/site-names
+ */
+function buildWebSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.siteName,
+    url: siteConfig.siteUrl,
+  };
 }
 
 /**
