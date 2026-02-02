@@ -70,16 +70,19 @@ async fn main() {
     len => debug!("Found {len} package.json files"),
   }
 
-  let ctx = Context::create(
-    config,
-    packages,
-    if is_update_command {
-      Some(Arc::new(LiveRegistryClient::new()))
-    } else {
-      None
-    },
-    catalogs,
-  );
+  let registry_client = if is_update_command {
+    match LiveRegistryClient::new() {
+      Ok(client) => Some(Arc::new(client) as Arc<dyn crate::registry_client::RegistryClient>),
+      Err(e) => {
+        error!("Failed to initialize registry client: {e}");
+        exit(1);
+      }
+    }
+  } else {
+    None
+  };
+
+  let ctx = Context::create(config, packages, registry_client, catalogs);
 
   let _exit_code = match ctx.config.cli.subcommand {
     Subcommand::Fix => {
