@@ -173,7 +173,7 @@ export default defineConfig({
       editLink: {
         baseUrl: 'https://github.com/JamieMason/syncpack/edit/main/site/',
       },
-      favicon: '/favicon.ico',
+      favicon: '/logo.svg',
       logo: {
         src: './src/assets/logo.svg',
       },
@@ -233,6 +233,13 @@ export default defineConfig({
         Head: './src/components/Head.astro',
       },
       head: [
+        {
+          tag: 'link',
+          attrs: {
+            rel: 'apple-touch-icon',
+            href: '/syncpack/apple-touch-icon-180x180.png',
+          },
+        },
         {
           tag: 'script',
           attrs: {
