@@ -6,9 +6,9 @@ function patch_sitemap() {
   mv dist/sitemap-0.xml dist/sitemap.xml
   # create sitemap.txt
   node scripts/patch.js
-  # replace sitemap.xml with sitemap.txt
   find dist -name "*.html" | while read -r file; do
-    sed "s|sitemap.xml|sitemap.txt|g" "$file" > "$file.tmp"
+    # replace sitemap.xml with sitemap.txt and 'alt ' with 'alt="" '
+    sed -e "s|sitemap.xml|sitemap.txt|g" -e "s|alt |alt=\"\" |g" "$file" > "$file.tmp"
     mv "$file.tmp" "$file"
   done
 }
