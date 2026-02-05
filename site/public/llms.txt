@@ -148,12 +148,12 @@ The catch-all `isIgnored` group at the end lets you adopt syncpack gradually wit
 
 - [Getting Started](https://jamiemason.github.io/syncpack/): Installation and first commands
 - [Peer Dependencies Guide](https://jamiemason.github.io/syncpack/guide/peer-dependencies/): Why peer deps cause mismatches and how to handle them
-- [Version Groups](https://jamiemason.github.io/syncpack/config/version-groups/): Create partitions with different versioning policies
-- [Semver Groups](https://jamiemason.github.io/syncpack/config/semver-groups/): Control semver range format (^, ~, exact)
+- [Version Groups](https://jamiemason.github.io/syncpack/version-groups/): Create partitions with different versioning policies
+- [Semver Groups](https://jamiemason.github.io/syncpack/semver-groups/): Control semver range format (^, ~, exact)
 
 ## Optional
 
 - [All Config Options](https://jamiemason.github.io/syncpack/config/syncpackrc/): Complete configuration reference
-- [Status Codes](https://jamiemason.github.io/syncpack/reference/status-codes/): What each lint status means
+- [Status Codes](https://jamiemason.github.io/syncpack/status/): What each lint status means
 - [Dependency Types](https://jamiemason.github.io/syncpack/reference/dependency-types/): All supported dependency type names
 - [Glossary](https://jamiemason.github.io/syncpack/glossary/): Terminology definitions

@@ -22,6 +22,7 @@ export default defineConfig({
     // Moved docs
     '/guide/semver-groups/': '/semver-groups/',
     '/guide/version-groups/': '/version-groups/',
+    '/examples/pnpm-workspace-protocol/': '/faq/pnpm-workspace-protocol/',
     // Removed docs
     '/integrations/github-actions': '/syncpack/',
     '/integrations/intellisense': '/syncpack/',
