@@ -50,9 +50,6 @@ pub fn run(ctx: Context) -> i32 {
     ctx.failed_updates.iter().for_each(|name| {
       error!("Failed to fetch {name}");
     });
-    warn!(
-      "Syncpack does not yet support custom npm registries{LINE_ENDING}  Subscribe to https://github.com/JamieMason/syncpack/issues/220"
-    );
   } else if !was_outdated {
     ui::util::print_no_issues_found();
   }

@@ -1,4 +1,8 @@
-use {crate::registry_client::PackageMeta, serde_json::json, std::collections::BTreeMap};
+use {
+  crate::registry_client::{LiveRegistryClient, PackageMeta},
+  serde_json::json,
+  std::collections::BTreeMap,
+};
 
 #[test]
 fn filters_out_deprecated_versions() {
@@ -59,4 +63,38 @@ fn includes_all_versions_when_none_deprecated() {
   assert!(versions.contains(&"1.0.0".to_string()));
   assert!(versions.contains(&"2.0.0".to_string()));
   assert!(versions.contains(&"3.0.0".to_string()));
+}
+
+#[test]
+fn registry_client_can_be_created() {
+  // Verifies that LiveRegistryClient::new() succeeds
+  // This loads .npmrc from standard locations (may be empty)
+  let result = LiveRegistryClient::new();
+  assert!(result.is_ok(), "Failed to create registry client: {:?}", result.err());
+}
+
+#[test]
+fn registry_url_returns_default_for_regular_packages() {
+  let client = LiveRegistryClient::new().unwrap();
+  let url = client.registry_url("react");
+  // Should use default npm registry (or user's configured default)
+  // We can't assert exact URL since user might have custom config,
+  // but we can verify it's a valid URL
+  assert!(url.scheme() == "https" || url.scheme() == "http");
+  assert!(url.host_str().is_some());
+}
+
+#[test]
+fn registry_url_uses_jsr_fallback_for_jsr_packages() {
+  let client = LiveRegistryClient::new().unwrap();
+  let url = client.registry_url("@jsr/luca__cases");
+  // JSR packages should use npm.jsr.io when not explicitly configured
+  // If user has @jsr:registry configured, this will use that instead
+  let host = url.host_str().unwrap();
+  // Either npm.jsr.io (fallback) or user's configured JSR registry
+  assert!(
+    host == "npm.jsr.io" || host != "registry.npmjs.org",
+    "Expected JSR package to NOT use registry.npmjs.org, got: {}",
+    url
+  );
 }
