@@ -1,30 +1,233 @@
-/* Dark mode colors. */
-:root {
-  --sl-color-accent-low: #072d00;
-  --sl-color-accent: #247f00;
-  --sl-color-accent-high: #aad7a0;
-  --sl-color-white: #ffffff;
-  --sl-color-gray-1: #eaf0e8;
-  --sl-color-gray-2: #bdc4bb;
-  --sl-color-gray-3: #82907f;
-  --sl-color-gray-4: #4f5c4d;
-  --sl-color-gray-5: #303c2d;
-  --sl-color-gray-6: #1f2a1c;
-  --sl-color-black: #151a13;
+@font-face {
+  font-family: "Inter Display";
+  src: url("../../public/InterDisplay-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
-/* Light mode colors. */
+@font-face {
+  font-family: "Inter Display";
+  src: url("../../public/InterDisplay-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Dark mode (default) */
+:root {
+  /* Accent colors (green theme) */
+  --sl-color-accent-low: #0a2a08;
+  --sl-color-accent: #3fb93f;
+  --sl-color-accent-high: #8edb8e;
+
+  /* Background colors */
+  --sl-color-bg-sidebar: transparent;
+  --sl-color-bg-nav: var(--sl-color-black);
+
+  /* Gray scale */
+  --sl-color-white: #f4f4f7;
+  --sl-color-gray-1: #e2e2e8;
+  --sl-color-gray-2: #a8a8b3;
+  --sl-color-gray-3: #71717a;
+  --sl-color-gray-4: #4a4a52;
+  --sl-color-gray-5: #27272a;
+  --sl-color-gray-6: #131316;
+  --sl-color-black: #0e0e10;
+
+  /* Typography */
+  --sl-font: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --sl-font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --sl-font-system-mono: var(--sl-font-mono);
+
+  --sl-text-body: 1rem; /* 16px base */
+  --sl-text-code: 0.8rem; /* 12.8px */
+  --sl-text-code-sm: 0.875rem; /* 14px */
+  --sl-line-height: 1.75; /* 28px at 16px base */
+  --sl-line-height-headings: 1.2;
+  --sl-text-h1: 1.875rem; /* 30px */
+  --sl-text-h2: 1.5rem; /* 24px */
+  --sl-text-h3: 1.25rem; /* 20px */
+  --sl-text-h4: var(--sl-text-lg);
+  --sl-text-h5: 0.75rem; /* 12px */
+
+  /* Spacing */
+  --sl-content-gap-y: 1.5rem;
+}
+
+/* Light mode */
 :root[data-theme="light"] {
-  --sl-color-accent-low: #c0e2b8;
-  --sl-color-accent: #258100;
-  --sl-color-accent-high: #0d3e00;
-  --sl-color-white: #151a13;
-  --sl-color-gray-1: #1f2a1c;
-  --sl-color-gray-2: #303c2d;
-  --sl-color-gray-3: #4f5c4d;
-  --sl-color-gray-4: #82907f;
-  --sl-color-gray-5: #bdc4bb;
-  --sl-color-gray-6: #eaf0e8;
-  --sl-color-gray-7: #f4f7f3;
+  --sl-color-accent-low: #d4f0d0;
+  --sl-color-accent: #1a8a1a;
+  --sl-color-accent-high: #0d4d0d;
+  --sl-color-white: #141418;
+  --sl-color-gray-1: #1e1e22;
+  --sl-color-gray-2: #333338;
+  --sl-color-gray-3: #52525a;
+  --sl-color-gray-4: #8b8b96;
+  --sl-color-gray-5: #d0d0d6;
+  --sl-color-gray-6: #f0f0f3;
+  --sl-color-gray-7: #f8f8fa;
   --sl-color-black: #ffffff;
+}
+
+/* Inter character variants */
+body {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Headings: Inter Display font family */
+.site-title,
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+.content-panel h1 {
+  font-family: "Inter Display", -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-optical-sizing: auto;
+}
+
+.sl-banner {
+  margin-top: 0.5rem;
+}
+
+.sl-banner,
+.sl-banner a {
+  background: var(--sl-color-green-low);
+  box-shadow: none;
+  margin: 0.5rem;
+  color: var(--sl-color-white);
+  border-radius: 4px;
+  font-size: var(--sl-text-code);
+  font-family: var(--sl-font-mono);
+}
+
+.sidebar-pane,
+.right-sidebar {
+  border: none;
+}
+
+.sidebar-content a[aria-current="page"] {
+  background: none;
+  color: var(--sl-color-accent-high);
+}
+
+.sidebar-content li {
+  border: none;
+  padding: 0;
+}
+
+.sidebar-content details > ul {
+  margin: 1rem 0;
+
+  & li {
+    margin-left: 0;
+  }
+}
+
+.sidebar-content > .md\:sl-hidden {
+  order: -1;
+}
+
+.mobile-preferences {
+  padding: 0;
+  align-items: center;
+
+  & .social-icons {
+    padding: 0;
+  }
+  & select {
+    padding-block: 0;
+    font-size: var(--sl-text-code);
+  }
+}
+
+site-search button {
+  margin: auto;
+}
+
+/* Page title (outside markdown content) */
+.site-title,
+.content-panel h1 {
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.75px;
+  margin: 0;
+}
+
+/* Content headings */
+.sl-markdown-content h1 {
+  font-weight: 700;
+  letter-spacing: -0.75px;
+}
+
+.sl-markdown-content h2 {
+  letter-spacing: -0.6px;
+  line-height: 1.33; /* 32px at 24px */
+}
+
+.sl-markdown-content h3 {
+  letter-spacing: -0.5px;
+  line-height: 1.4; /* 28px at 20px */
+}
+
+.sl-markdown-content h4 {
+  letter-spacing: -0.025em;
+}
+
+.sl-markdown-content h5 {
+  line-height: 1.33; /* 16px at 12px */
+}
+
+/* Social icons */
+.social-icons > a {
+  color: var(--sl-color-white);
+}
+
+/* Table of contents */
+starlight-toc nav a:hover {
+  color: var(--sl-color-white);
+}
+
+starlight-toc nav a[aria-current="true"],
+starlight-toc nav a[aria-current="page"] {
+  color: var(--sl-color-accent);
+  font-weight: 500;
+  border-left-color: var(--sl-color-accent);
+}
+
+starlight-toc nav a {
+  display: block;
+  font-size: var(--sl-text-code);
+  font-weight: 400;
+  border-radius: 0;
+  padding-block: 0.35rem;
+  border-left: 2px solid transparent;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+  color: var(--sl-color-gray-2);
+}
+
+starlight-toc nav h2 {
+  font-size: var(--sl-text-h4);
+}
+
+starlight-toc nav ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+/* Footer text color contrast */
+.meta,
+.meta a {
+  color: var(--sl-color-gray-2);
+}
+
+/* Target low-contrast comment colors and apply filter for WCAG AA compliance */
+pre code span[style*="6A737D"],
+pre code span[style*="7D8590"],
+pre code span[style*="57606A"] {
+  filter: brightness(1.65);
 }

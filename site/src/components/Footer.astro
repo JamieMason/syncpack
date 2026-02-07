@@ -1,0 +1,46 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+import SponsorButton from './SponsorButton.astro';
+---
+
+<Default />
+
+<aside>
+  <SponsorButton />
+  <a href="https://www.npmjs.com/package/syncpack" rel="external nofollow">
+    <img
+      alt="NPM downloads"
+      src="http://img.shields.io/npm/dm/syncpack.svg?style=flat-square"
+      loading="lazy"
+    />
+  </a>
+  <a
+    href="https://github.com/JamieMason/syncpack/actions"
+    rel="external nofollow"
+  >
+    <img
+      alt="Build Status"
+      src="https://img.shields.io/github/actions/workflow/status/JamieMason/syncpack/ci.yaml?branch=main"
+      loading="lazy"
+    />
+  </a>
+</aside>
+
+<style>
+  a {
+    font-size: 0;
+  }
+
+  img {
+    border-radius: 4px;
+  }
+
+  aside {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    gap: 1rem;
+    justify-content: center;
+    justify-items: center;
+  }
+</style>

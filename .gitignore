@@ -6,11 +6,8 @@
 .idea
 coverage/
 dist/
-node_modules/
-target/
-
-# Generated packages published to npm
-npm/packages
-
-# Benchmarks
 flamegraph.svg
+lcp_trace.json
+node_modules/
+npm/packages/
+target/

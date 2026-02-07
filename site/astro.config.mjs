@@ -160,14 +160,14 @@ export default defineConfig({
           href: 'https://github.com/JamieMason/syncpack',
         },
         {
+          icon: 'npm',
+          label: 'npm',
+          href: 'https://npmx.dev/package/syncpack',
+        },
+        {
           icon: 'blueSky',
           label: 'Bluesky',
           href: 'https://bsky.app/profile/foldleft.bsky.social',
-        },
-        {
-          icon: 'x.com',
-          label: 'X',
-          href: 'https://x.com/fold_left',
         },
       ],
       editLink: {
@@ -177,17 +177,36 @@ export default defineConfig({
       logo: {
         src: './src/assets/logo.svg',
       },
-      expressiveCode: {
-        themes: ['github-light-default', 'github-dark-default'],
-        removeUnusedThemes: false,
+      tableOfContents: {
+        minHeadingLevel: 2,
+        maxHeadingLevel: 4,
       },
-      customCss: ['./src/styles/custom.css'],
+      expressiveCode: {
+        themes: ['everforest-dark', 'everforest-light'],
+        removeUnusedThemes: false,
+        frames: false,
+        styleOverrides: {
+          // Borders and spacing
+          borderRadius: '6px',
+          borderWidth: '1px',
+          borderColor: 'var(--sl-color-gray-5)',
+
+          // Code area
+          codeBackground: 'var(--sl-color-gray-6)',
+          codeFontFamily: 'var(--sl-font-mono)',
+          codeFontSize: '0.8rem',
+          codeLineHeight: '1.65',
+          codePaddingBlock: '1rem',
+          codePaddingInline: '1.35rem',
+          codeForeground: 'var(--sl-color-gray-2)',
+
+          // Accent color for highlights
+          focusBorder: 'var(--sl-color-accent)',
+        },
+      },
+      customCss: ['@fontsource-variable/inter', '@fontsource-variable/jetbrains-mono', './src/styles/custom.css'],
       pagination: false,
       sidebar: [
-        {
-          label: 'Github',
-          link: 'https://github.com/JamieMason/syncpack',
-        },
         {
           label: 'Guides',
           autogenerate: { directory: 'guide' },
@@ -230,7 +249,9 @@ export default defineConfig({
         },
       ],
       components: {
+        Footer: './src/components/Footer.astro',
         Head: './src/components/Head.astro',
+        SocialIcons: './src/components/SocialIcons.astro',
       },
       head: [
         {
