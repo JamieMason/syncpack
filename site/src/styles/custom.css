@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Inter Display";
-  src: url("../../public/InterDisplay-Bold.woff2") format("woff2");
+  src: url("/syncpack/InterDisplay-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: "Inter Display";
-  src: url("../../public/InterDisplay-SemiBold.woff2") format("woff2");
+  src: url("/syncpack/InterDisplay-SemiBold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -86,6 +86,10 @@ body {
   font-optical-sizing: auto;
 }
 
+.site-title {
+  font-size: var(--sl-text-h3);
+}
+
 .sl-banner {
   margin-top: 0.5rem;
 }
@@ -94,7 +98,6 @@ body {
 .sl-banner a {
   background: var(--sl-color-green-low);
   box-shadow: none;
-  margin: 0.5rem;
   color: var(--sl-color-white);
   border-radius: 4px;
   font-size: var(--sl-text-code);
@@ -146,7 +149,6 @@ site-search button {
 }
 
 /* Page title (outside markdown content) */
-.site-title,
 .content-panel h1 {
   font-weight: 700;
   font-size: 30px;
