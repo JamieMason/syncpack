@@ -182,12 +182,23 @@ impl Dependency {
   }
 
   /// Get the highest (or lowest) semver specifier in this group.
+  ///
+  /// When an instance belongs to a semver group, its preferred range is applied
+  /// to produce an adjusted specifier before comparison. This means a semver
+  /// group that widens a range (e.g. exact → caret) can promote that instance
+  /// to become the highest via the range-greediness tiebreaker.
   pub fn get_highest_or_lowest_specifier(&self) -> Option<Rc<Specifier>> {
     let prefer_highest = matches!(self.variant, VersionGroupVariant::HighestSemver);
     let specifiers = self
       .get_instances()
       .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
-      .map(|instance| Rc::clone(&instance.descriptor.specifier));
+      .map(|instance| {
+        instance
+          .preferred_semver_range
+          .as_ref()
+          .and_then(|range| instance.descriptor.specifier.with_range(range))
+          .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier))
+      });
 
     if prefer_highest {
       specifiers.max()

@@ -1429,7 +1429,7 @@ mod highest_or_lowest {
         overridden: None,
       },
       ExpectedInstance {
-        state: InstanceState::valid(SatisfiesHighestOrLowestSemver),
+        state: InstanceState::valid(IsHighestOrLowestSemver),
         dependency_name: "@typescript/native-preview",
         id: "@typescript/native-preview in /devDependencies of pkg-a",
         actual: "7.0.0-dev.20260117.1",
@@ -1437,7 +1437,7 @@ mod highest_or_lowest {
         overridden: None,
       },
       ExpectedInstance {
-        state: InstanceState::valid(SatisfiesHighestOrLowestSemver),
+        state: InstanceState::valid(IsHighestOrLowestSemver),
         dependency_name: "lodash",
         id: "lodash in /devDependencies of pkg-a",
         actual: "4.17.21",
@@ -1466,6 +1466,187 @@ mod highest_or_lowest {
         id: "lodash in /devDependencies of pkg-b",
         actual: "^4.17.21",
         expected: Some("4.17.21"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// https://github.com/JamieMason/syncpack/issues/314#issuecomment-3848268945
+  /// When versions differ AND a semver group exists, the fix target for
+  /// DiffersToHighestOrLowestSemver should apply the semver group's preferred
+  /// range — not inherit the range from the highest specifier.
+  #[test]
+  fn differs_to_highest_semver_should_apply_semver_group_range() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "pkg-a",
+          "devDependencies": {
+            "react": "^18.0.0"
+          }
+        }),
+        json!({
+          "name": "pkg-b",
+          "devDependencies": {
+            "react": "17.0.0"
+          }
+        }),
+        json!({
+          "name": "pkg-c",
+          "devDependencies": {
+            "react": "17.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
+        "label": "pin all ranges",
+        "range": "",
+        "packages": ["**"],
+        "dependencies": ["**"]
+      }))
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      // pkg-a has the highest version but wrong range (^ instead of pinned)
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "react",
+        id: "react in /devDependencies of pkg-a",
+        actual: "^18.0.0",
+        expected: Some("18.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-b",
+        id: "pkg-b in /version of pkg-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      // pkg-b has a lower version — fix should update version AND apply pinned range
+      // BUG: currently suggests ^18.0.0 (inherits ^ from highest)
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /devDependencies of pkg-b",
+        actual: "17.0.0",
+        expected: Some("18.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-c",
+        id: "pkg-c in /version of pkg-c",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      // pkg-c same as pkg-b
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /devDependencies of pkg-c",
+        actual: "17.0.0",
+        expected: Some("18.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// Exploratory: when a semver group makes one instance greedier (e.g. exact
+  /// → ^), that adjusted specifier becomes the highest via the range tiebreaker.
+  /// Other instances (not in a semver group) should follow the new highest.
+  #[test]
+  fn semver_group_greedier_range_becomes_highest() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "pkg-a",
+          "dependencies": {
+            "react": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "pkg-b",
+          "dependencies": {
+            "react": "~1.0.0"
+          }
+        }),
+        json!({
+          "name": "pkg-c",
+          "dependencies": {
+            "react": "~1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
+        "label": "use caret for pkg-a",
+        "range": "^",
+        "packages": ["pkg-a"]
+      }))
+      .build_and_visit_packages();
+
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      // pkg-a has exact 1.0.0 but semver group wants ^ → adjusted to ^1.0.0
+      // ^1.0.0 is greedier than ~1.0.0, making it the highest
+      // pkg-a's actual range (exact) doesn't match its preferred range (^)
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-a",
+        actual: "1.0.0",
+        expected: Some("^1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-b",
+        id: "pkg-b in /version of pkg-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      // pkg-b has ~1.0.0, no semver group — follows adjusted highest ^1.0.0
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-b",
+        actual: "~1.0.0",
+        expected: Some("^1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-c",
+        id: "pkg-c in /version of pkg-c",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      // pkg-c same as pkg-b
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-c",
+        actual: "~1.0.0",
+        expected: Some("^1.0.0"),
         overridden: None,
       },
     ]);

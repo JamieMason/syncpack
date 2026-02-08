@@ -5,6 +5,7 @@ use {
     instance_state::{FixableInstance, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance},
   },
   log::debug,
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -32,7 +33,12 @@ pub fn visit(dependency: &crate::dependency::Dependency, ctx: &Context) {
       if !instance.descriptor.specifier.has_same_version_number_as(&snapped_to_specifier) {
         debug!("{L6}differs to the target version");
         debug!("{L7}mark as error");
-        instance.mark_fixable(FixableInstance::DiffersToSnapTarget, &snapped_to_specifier);
+        let fix_target = instance
+          .preferred_semver_range
+          .as_ref()
+          .and_then(|range| snapped_to_specifier.with_range(range))
+          .unwrap_or_else(|| Rc::clone(&snapped_to_specifier));
+        instance.mark_fixable(FixableInstance::DiffersToSnapTarget, &fix_target);
         return;
       }
       debug!("{L6}is the same as the target version");

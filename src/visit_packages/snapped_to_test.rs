@@ -887,3 +887,74 @@ fn workspace_tilde_identical_to_snapped_to_target() {
     },
   ]);
 }
+
+/// Same bug as preferred_semver: when version differs from snap target AND a
+/// semver group exists, the fix target should apply the semver group's range
+/// instead of inheriting the snap target's range.
+#[test]
+fn differs_to_snap_target_should_apply_semver_group_range() {
+  let config = test::mock::config_from_mock(json!({
+    "semverGroups": [{
+      "packages": ["follower"],
+      "range": ""
+    }],
+    "versionGroups": [{
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }]
+  }));
+  let packages = test::mock::packages_from_mocks(vec![
+    json!({
+      "name": "leader",
+      "dependencies": {
+        "foo": "^2.0.0"
+      }
+    }),
+    json!({
+      "name": "follower",
+      "dependencies": {
+        "foo": "1.0.0"
+      }
+    }),
+  ]);
+  let registry_client = None;
+  let catalogs = None;
+  let ctx = Context::create(config, packages, registry_client, catalogs);
+  let ctx = visit_packages(ctx);
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "follower",
+      id: "follower in /version of follower",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsHighestOrLowestSemver),
+      dependency_name: "foo",
+      id: "foo in /dependencies of leader",
+      actual: "^2.0.0",
+      expected: Some("^2.0.0"),
+      overridden: None,
+    },
+    // BUG: currently suggests ^2.0.0 (inherits ^ from snap target)
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of follower",
+      actual: "1.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+    },
+  ]);
+}

@@ -7,6 +7,7 @@ use {
     semver_range::SemverRange,
   },
   log::debug,
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -182,7 +183,12 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
       if !instance.descriptor.specifier.has_same_version_number_as(&highest_specifier) {
         debug!("{L5}differs to the highest semver version");
         debug!("{L6}mark as error");
-        instance.mark_fixable(FixableInstance::DiffersToHighestOrLowestSemver, &highest_specifier);
+        let fix_target = instance
+          .preferred_semver_range
+          .as_ref()
+          .and_then(|range| highest_specifier.with_range(range))
+          .unwrap_or_else(|| Rc::clone(&highest_specifier));
+        instance.mark_fixable(FixableInstance::DiffersToHighestOrLowestSemver, &fix_target);
         return;
       }
       debug!("{L5}is the same as the highest semver version");
@@ -220,7 +226,22 @@ pub fn visit(dependency: &Dependency, ctx: &Context) {
         }
       } else {
         debug!("{L4}it is not in a semver group which prefers a different semver range to the highest semver version");
-        if instance.already_equals(&highest_specifier) {
+        if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
+          let preferred_semver_range = &instance.preferred_semver_range.clone().unwrap();
+          debug!("{L5}but its actual range does not match its semver group's preferred range ({preferred_semver_range:?})");
+          if instance.specifier_with_preferred_semver_range_will_satisfy(&highest_specifier) {
+            debug!("{L6}the preferred semver range will satisfy the highest semver version");
+            debug!("{L7}mark as fixable error");
+            instance.mark_fixable(
+              FixableInstance::SemverRangeMismatch,
+              &instance.get_specifier_with_preferred_semver_range().unwrap(),
+            );
+          } else {
+            debug!("{L6}the preferred semver range will not satisfy the highest semver version");
+            debug!("{L7}mark as unfixable error");
+            instance.mark_conflict(SemverGroupAndVersionConflict::MismatchConflictsWithHighestOrLowestSemver);
+          }
+        } else if instance.already_equals(&highest_specifier) {
           debug!("{L5}it is identical to the highest semver version");
           debug!("{L6}mark as valid");
           instance.mark_valid(ValidInstance::IsHighestOrLowestSemver, &highest_specifier);
