@@ -16,7 +16,7 @@ ctor = "0.6.3"
 
 [dependencies]
 async-trait = "0.1.89"
-clap = { version = "4.5.55", features = ["cargo"] }
+clap = { version = "4.5.57", features = ["cargo"] }
 color-print = "0.3.7"
 colored = "3.1.1"
 env_logger = "0.11.8"
@@ -27,7 +27,7 @@ itertools = "0.14.0"
 lazy_static = "1.5.0"
 log = "0.4.29"
 node-semver = "2.2.0"
-regex = { version = "1.12.2", default-features = false, features = ["std"] }
+regex = { version = "1.12.3", default-features = false, features = ["std"] }
 reqwest = { version = "0.12", features = [
   "json",
   "rustls-tls",
