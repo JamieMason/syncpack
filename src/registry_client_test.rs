@@ -8,20 +8,25 @@ use {
 
 #[test]
 fn filters_out_deprecated_versions() {
+  // Simulate npm registry response with deprecated versions
   let package_meta = PackageMeta {
     name: "@eslint/js".to_string(),
     versions: {
       let mut versions = BTreeMap::new();
+      // Regular version
       versions.insert("9.38.0".to_string(), json!({"version": "9.38.0"}));
+      // Deprecated version
       versions.insert(
         "10.0.0".to_string(),
         json!({"version": "10.0.0", "deprecated": "This version should not be used."}),
       );
+      // Another regular version
       versions.insert("9.39.0".to_string(), json!({"version": "9.39.0"}));
       versions
     },
   };
 
+  // Extract versions using the filtering logic
   let versions: Vec<String> = package_meta
     .versions
     .into_iter()
@@ -29,6 +34,7 @@ fn filters_out_deprecated_versions() {
     .map(|(version, _)| version)
     .collect();
 
+  // Should only include non-deprecated versions
   assert_eq!(versions.len(), 2);
   assert!(versions.contains(&"9.38.0".to_string()));
   assert!(versions.contains(&"9.39.0".to_string()));

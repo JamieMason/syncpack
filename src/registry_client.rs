@@ -46,7 +46,8 @@ pub trait RegistryClient: std::fmt::Debug + Send + Sync {
   async fn fetch(&self, update_url: &UpdateUrl) -> Result<AllPackageVersions, RegistryError>;
 }
 
-/// Production registry client that makes actual HTTP requests
+/// The real implementation of RegistryClientTrait which makes actual network
+/// requests
 #[derive(Debug)]
 pub struct LiveRegistryClient {
   pub client: Client,
