@@ -1,10 +1,6 @@
 use {
-  crate::{
-    commands::{ui, ui::LINE_ENDING},
-    context::Context,
-    version_group::VersionGroupVariant,
-  },
-  log::{error, warn},
+  crate::{commands::ui, context::Context, version_group::VersionGroupVariant},
+  log::error,
 };
 
 pub fn run(ctx: Context) -> i32 {
@@ -50,9 +46,6 @@ pub fn run(ctx: Context) -> i32 {
     ctx.failed_updates.iter().for_each(|name| {
       error!("Failed to fetch {name}");
     });
-    warn!(
-      "Syncpack does not yet support custom npm registries{LINE_ENDING}  Subscribe to https://github.com/JamieMason/syncpack/issues/220"
-    );
   } else if !was_outdated {
     ui::util::print_no_issues_found();
   }

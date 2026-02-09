@@ -1,7 +1,11 @@
 use {
   crate::dependency::UpdateUrl,
   log::debug,
-  reqwest::{header::ACCEPT, Client, StatusCode},
+  npmrc_config_rs::{Credentials, NpmrcConfig},
+  reqwest::{
+    header::{ACCEPT, AUTHORIZATION},
+    Client, StatusCode, Url,
+  },
   serde::{Deserialize, Serialize},
   serde_json::Value,
   std::{collections::BTreeMap, time::Duration},
@@ -42,18 +46,35 @@ pub trait RegistryClient: std::fmt::Debug + Send + Sync {
   async fn fetch(&self, update_url: &UpdateUrl) -> Result<AllPackageVersions, RegistryError>;
 }
 
-/// The real implementation of RegistryClientTrait which makes actual network
-/// requests
+/// Production registry client that makes actual HTTP requests
 #[derive(Debug)]
 pub struct LiveRegistryClient {
   pub client: Client,
+  pub npmrc: NpmrcConfig,
 }
 
 #[async_trait::async_trait]
 impl RegistryClient for LiveRegistryClient {
   async fn fetch(&self, update_url: &UpdateUrl) -> Result<AllPackageVersions, RegistryError> {
-    let req = self.client.get(&update_url.url).header(ACCEPT, "application/json");
-    debug!("GET {update_url:?}");
+    let (full_url, registry_base) = self.resolve_url(&update_url.package_name)?;
+    let url_str = full_url.to_string();
+
+    let mut req = self.client.get(full_url).header(ACCEPT, "application/json");
+    if let Some(creds) = self.npmrc.credentials_for(&registry_base) {
+      req = match &creds {
+        Credentials::Token { token, .. } => req.bearer_auth(token),
+        Credentials::BasicAuth { .. } | Credentials::LegacyAuth { .. } => {
+          if let Some(header) = creds.basic_auth_header() {
+            req.header(AUTHORIZATION, format!("Basic {header}"))
+          } else {
+            req
+          }
+        }
+        Credentials::ClientCertOnly(_) => req,
+      };
+    }
+
+    debug!("GET {url_str}");
     match req.send().await {
       Ok(res) => match res.status() {
         StatusCode::OK => match res.json::<PackageMeta>().await {
@@ -61,10 +82,7 @@ impl RegistryClient for LiveRegistryClient {
             let versions = package_meta
               .versions
               .into_iter()
-              .filter(|(_, metadata)| {
-                // Filter out deprecated versions by checking if "deprecated" field exists
-                metadata.get("deprecated").is_none()
-              })
+              .filter(|(_, metadata)| metadata.get("deprecated").is_none())
               .map(|(version, _)| version)
               .collect();
             Ok(AllPackageVersions {
@@ -73,17 +91,14 @@ impl RegistryClient for LiveRegistryClient {
             })
           }
           Err(err) => Err(RegistryError::FetchError {
-            url: update_url.url.to_string(),
+            url: url_str,
             source: Box::new(err),
           }),
         },
-        status => Err(RegistryError::HttpError {
-          url: update_url.url.to_string(),
-          status,
-        }),
+        status => Err(RegistryError::HttpError { url: url_str, status }),
       },
       Err(err) => Err(RegistryError::FetchError {
-        url: update_url.url.to_string(),
+        url: url_str,
         source: Box::new(err),
       }),
     }
@@ -91,13 +106,31 @@ impl RegistryClient for LiveRegistryClient {
 }
 
 impl LiveRegistryClient {
-  pub fn new() -> Self {
-    LiveRegistryClient {
+  pub fn new(npmrc: NpmrcConfig) -> Self {
+    Self {
       client: Client::builder()
         .connect_timeout(Duration::from_secs(5))
         .timeout(Duration::from_secs(30))
         .build()
         .expect("Failed to build reqwest client"),
+      npmrc,
     }
+  }
+
+  /// Resolve the full registry URL for a package name.
+  ///
+  /// Uses .npmrc scoped registry config, with a fallback to npm.jsr.io
+  /// for @jsr/* packages that have no explicit registry configured.
+  /// Returns (full_url, registry_base) so callers can look up credentials.
+  pub fn resolve_url(&self, package_name: &str) -> Result<(Url, Url), RegistryError> {
+    let mut registry_base = self.npmrc.registry_for(package_name);
+    if package_name.starts_with("@jsr/") && registry_base.host_str() == Some("registry.npmjs.org") {
+      registry_base = Url::parse("https://npm.jsr.io/").unwrap();
+    }
+    let full_url = registry_base.join(package_name).map_err(|e| RegistryError::FetchError {
+      url: package_name.to_string(),
+      source: Box::new(e),
+    })?;
+    Ok((full_url, registry_base))
   }
 }

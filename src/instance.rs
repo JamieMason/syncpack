@@ -301,15 +301,10 @@ impl Instance {
         Specifier::Alias(alias) => {
           let aliased_name = &alias.name;
           if !aliased_name.is_empty() {
-            if aliased_name.starts_with("@jsr/") {
+            if aliased_name.starts_with("@jsr/") || aliased_name == actual_name {
               Some(UpdateUrl {
                 internal_name: internal_name.clone(),
-                url: format!("https://npm.jsr.io/{aliased_name}"),
-              })
-            } else if aliased_name == actual_name {
-              Some(UpdateUrl {
-                internal_name: internal_name.clone(),
-                url: format!("https://registry.npmjs.org/{actual_name}"),
+                package_name: aliased_name.clone(),
               })
             } else {
               debug!("'{aliased_name}' in '{raw}' does not equal the instance name '{actual_name}', skipping update as this might create mismatches");
@@ -320,17 +315,10 @@ impl Instance {
           }
         }
         Specifier::Exact(_) | Specifier::Range(_) | Specifier::Major(_) | Specifier::Minor(_) | Specifier::Latest(_) => {
-          if actual_name.starts_with("@jsr/") {
-            Some(UpdateUrl {
-              internal_name: internal_name.clone(),
-              url: format!("https://npm.jsr.io/{actual_name}"),
-            })
-          } else {
-            Some(UpdateUrl {
-              internal_name: internal_name.clone(),
-              url: format!("https://registry.npmjs.org/{actual_name}"),
-            })
-          }
+          Some(UpdateUrl {
+            internal_name: internal_name.clone(),
+            package_name: actual_name.clone(),
+          })
         }
         _ => None,
       }

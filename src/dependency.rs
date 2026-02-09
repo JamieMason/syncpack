@@ -23,14 +23,14 @@ use {
 #[path = "dependency_test.rs"]
 mod dependency_test;
 
-/// URL information for fetching package metadata from npm registry.
+/// Information for fetching package metadata from npm registry.
 /// Used by the update command to fetch available versions.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct UpdateUrl {
-  /// The name of the dependency
+  /// The name of the dependency as used in package.json
   pub internal_name: String,
-  /// Registry URL, e.g., "https://registry.npmjs.org/react"
-  pub url: String,
+  /// The actual npm package name (may differ from internal_name for aliases)
+  pub package_name: String,
 }
 
 /// All instances of a single dependency name within a version group.
