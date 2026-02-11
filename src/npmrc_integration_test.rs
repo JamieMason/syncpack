@@ -25,11 +25,7 @@ fn make_client(npmrc_content: &str) -> (TempDir, LiveRegistryClient) {
 }
 
 /// Returns (global_dir, user_dir, project_dir, config).
-fn setup_multi_layer(
-  global_npmrc: &str,
-  user_npmrc: &str,
-  project_npmrc: &str,
-) -> (TempDir, TempDir, TempDir, NpmrcConfig) {
+fn setup_multi_layer(global_npmrc: &str, user_npmrc: &str, project_npmrc: &str) -> (TempDir, TempDir, TempDir, NpmrcConfig) {
   let global_dir = TempDir::new().expect("global temp dir");
   let user_dir = TempDir::new().expect("user temp dir");
   let project_dir = TempDir::new().expect("project temp dir");
@@ -232,11 +228,7 @@ fn credentials_per_registry_isolation() {
 
 #[test]
 fn config_project_overrides_user_registry() {
-  let (_g, _u, _p, config) = setup_multi_layer(
-    "",
-    "registry=https://user.example.com/",
-    "registry=https://project.example.com/",
-  );
+  let (_g, _u, _p, config) = setup_multi_layer("", "registry=https://user.example.com/", "registry=https://project.example.com/");
   assert_eq!(config.default_registry().host_str().unwrap(), "project.example.com");
 }
 

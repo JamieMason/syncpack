@@ -314,12 +314,10 @@ impl Instance {
             None
           }
         }
-        Specifier::Exact(_) | Specifier::Range(_) | Specifier::Major(_) | Specifier::Minor(_) | Specifier::Latest(_) => {
-          Some(UpdateUrl {
-            internal_name: internal_name.clone(),
-            package_name: actual_name.clone(),
-          })
-        }
+        Specifier::Exact(_) | Specifier::Range(_) | Specifier::Major(_) | Specifier::Minor(_) | Specifier::Latest(_) => Some(UpdateUrl {
+          internal_name: internal_name.clone(),
+          package_name: actual_name.clone(),
+        }),
         _ => None,
       }
     } else {
