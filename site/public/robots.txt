@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jamiemason.github.io/syncpack/sitemap.xml
+Sitemap: https://syncpack.dev/sitemap-index.xml

@@ -574,7 +574,7 @@ fn dependency_types_option(command: &str) -> Arg {
 <blue>resolutions</>    resolutions
 
 <bold><underline>Custom Types:</underline></bold>
-See <blue>https://jamiemason.github.io/syncpack/config/custom-types/</>
+See <blue>https://syncpack.dev/config/custom-types/</>
 
 <bold><underline>Examples:</underline></bold>
 <dim>devDependencies only</>
@@ -688,7 +688,7 @@ fn target_option(command: &str) -> Arg {
 fn additional_help() -> String {
   cformat!(
     r#"<bold><underline>References:</underline></bold>
-- Documentation: <blue><underline>https://jamiemason.github.io/syncpack</></>"#
+- Documentation: <blue><underline>https://syncpack.dev</></>"#
   )
 }
 

@@ -1,9 +1,9 @@
 # syncpack
 
 <p align="center">
-  <img src="https://jamiemason.github.io/syncpack/logo.svg" width="134" height="120" alt="">
+  <img src="https://syncpack.dev/logo.svg" width="134" height="120" alt="">
   <br>Consistent dependency versions in large JavaScript Monorepos.
-  <br><a href="https://jamiemason.github.io/syncpack">https://jamiemason.github.io/syncpack</a>
+  <br><a href="https://syncpack.dev">https://syncpack.dev</a>
 </p>
 
 Syncpack is used by [AWS](https://github.com/aws/aws-pdk), [Cloudflare](https://github.com/cloudflare/mcp-server-cloudflare), [DataDog](https://github.com/DataDog/datadog-ci), [Electron](https://github.com/electron/forge), [GoDaddy](https://github.com/godaddy/gasket), [LiveStore](https://github.com/livestorejs/livestore), [Lottie](https://github.com/LottieFiles/dotlottie-web), [Microsoft](https://github.com/microsoft/fluentui), [PostHog](https://github.com/PostHog/posthog), [Qwik](https://github.com/QwikDev/qwik), [Raycast](https://github.com/raycast/extensions), [Salesforce](https://github.com/SalesforceCommerceCloud/pwa-kit), [TopTal](https://github.com/toptal/picasso), [Vercel](https://github.com/vercel/vercel), [VoltAgent](https://github.com/VoltAgent/voltagent), [WooCommerce](https://github.com/woocommerce/woocommerce) and others.
@@ -19,14 +19,14 @@ npm install --save-dev syncpack@alpha
 
 ## Guides
 
-- [Getting Started](https://jamiemason.github.io/syncpack/)
-- [Migrate to 14](https://jamiemason.github.io/syncpack/guide/migrate-v14/)
+- [Getting Started](https://syncpack.dev/)
+- [Migrate to 14](https://syncpack.dev/guide/migrate-v14/)
 
 ## Commands
 
 > All command line options can be combined to target packages and dependencies in multiple ways.
 
-### [lint](https://jamiemason.github.io/syncpack/command/lint)
+### [lint](https://syncpack.dev/command/lint)
 
 Ensure that multiple packages requiring the same dependency define the same version, so that every package requires eg. `react@17.0.2`, instead of a combination of `react@17.0.2`, `react@16.8.3`, and `react@16.14.0`.
 
@@ -53,7 +53,7 @@ syncpack lint --help
 syncpack lint -h
 ```
 
-### [fix](https://jamiemason.github.io/syncpack/command/fix)
+### [fix](https://syncpack.dev/command/fix)
 
 Fix every autofixable issue found by `syncpack lint`.
 
@@ -72,7 +72,7 @@ syncpack fix --help
 syncpack fix -h
 ```
 
-### [update](https://jamiemason.github.io/syncpack/command/update)
+### [update](https://syncpack.dev/command/update)
 
 Update packages to the latest versions from the npm registry, wherever they are in your monorepo.<br/>Semver range preferences are preserved when updating.
 
@@ -103,7 +103,7 @@ syncpack update --help
 syncpack update -h
 ```
 
-### [format](https://jamiemason.github.io/syncpack/command/format)
+### [format](https://syncpack.dev/command/format)
 
 Organise package.json files according to a conventional format, where fields appear in a predictable order and nested fields are ordered alphabetically. Shorthand properties are used where available, such as the `"repository"` and `"bugs"` fields.
 
@@ -122,7 +122,7 @@ syncpack format --help
 syncpack format -h
 ```
 
-### [list](https://jamiemason.github.io/syncpack/command/list)
+### [list](https://syncpack.dev/command/list)
 
 Query and inspect all dependencies in your project, both valid and invalid.
 
@@ -151,7 +151,7 @@ syncpack list --help
 syncpack list -h
 ```
 
-### [json](https://jamiemason.github.io/syncpack/command/json)
+### [json](https://syncpack.dev/command/json)
 
 Output the state of every instance of every dependency as a JSON object, one per line. This command is best used with tools like [`jq`](https://jqlang.org/) for filtering and processing.
 

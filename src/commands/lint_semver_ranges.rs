@@ -38,9 +38,7 @@ pub fn run() -> i32 {
   eprintln!();
   eprintln!(
     "{}",
-    "https://jamiemason.github.io/syncpack/guide/migrate-v14#lint-semver-ranges-lint"
-      .blue()
-      .underline()
+    "https://syncpack.dev/guide/migrate-v14#lint-semver-ranges-lint".blue().underline()
   );
   eprintln!();
   1

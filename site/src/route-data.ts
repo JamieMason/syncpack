@@ -47,15 +47,6 @@ function getCustomTitle(route: any): string {
 export const onRequest = defineRouteMiddleware(context => {
   const route = context.locals.starlightRoute;
 
-  // Update sitemap href
-  route.head.some(item => {
-    if (item.attrs?.rel === 'sitemap') {
-      item.attrs.href = '/syncpack/sitemap.xml';
-      return true;
-    }
-    return false;
-  });
-
   // Add custom title tag
   const customTitle = getCustomTitle(route);
 

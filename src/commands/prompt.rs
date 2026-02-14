@@ -24,12 +24,7 @@ pub fn run() -> i32 {
   eprintln!("  {}", "# v14".dimmed());
   eprintln!("  {}", "# Not yet implemented".red());
   eprintln!();
-  eprintln!(
-    "{}",
-    "https://jamiemason.github.io/syncpack/guide/migrate-v14#prompt-removed"
-      .blue()
-      .underline()
-  );
+  eprintln!("{}", "https://syncpack.dev/guide/migrate-v14#prompt-removed".blue().underline());
   eprintln!();
   1
 }

@@ -1,35 +1,35 @@
 export interface RcFile {
-  /** @see https://jamiemason.github.io/syncpack/config/syncpackrc/#json */
+  /** @see https://syncpack.dev/config/syncpackrc/#json */
   $schema?: string;
-  /** @see https://jamiemason.github.io/syncpack/config/custom-types */
+  /** @see https://syncpack.dev/config/custom-types */
   customTypes?: {
     [name: string]: CustomType.Any;
   };
-  /** @see https://jamiemason.github.io/syncpack/config/dependency-groups */
+  /** @see https://syncpack.dev/config/dependency-groups */
   dependencyGroups?: DependencyGroup[];
-  /** @see https://jamiemason.github.io/syncpack/config/format-bugs */
+  /** @see https://syncpack.dev/config/format-bugs */
   formatBugs?: boolean;
-  /** @see https://jamiemason.github.io/syncpack/config/format-repository */
+  /** @see https://syncpack.dev/config/format-repository */
   formatRepository?: boolean;
-  /** @see https://jamiemason.github.io/syncpack/config/indent */
+  /** @see https://syncpack.dev/config/indent */
   indent?: string;
-  /** @see https://jamiemason.github.io/syncpack/config/max-concurrent-requests */
+  /** @see https://syncpack.dev/config/max-concurrent-requests */
   maxConcurrentRequests?: number;
-  /** @see https://jamiemason.github.io/syncpack/semver-groups */
+  /** @see https://syncpack.dev/semver-groups */
   semverGroups?: SemverGroup.Any[];
-  /** @see https://jamiemason.github.io/syncpack/config/sort-az */
+  /** @see https://syncpack.dev/config/sort-az */
   sortAz?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/sort-exports */
+  /** @see https://syncpack.dev/config/sort-exports */
   sortExports?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/sort-first */
+  /** @see https://syncpack.dev/config/sort-first */
   sortFirst?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/sort-packages */
+  /** @see https://syncpack.dev/config/sort-packages */
   sortPackages?: boolean;
-  /** @see https://jamiemason.github.io/syncpack/config/source */
+  /** @see https://syncpack.dev/config/source */
   source?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/strict */
+  /** @see https://syncpack.dev/config/strict */
   strict?: boolean;
-  /** @see https://jamiemason.github.io/syncpack/version-groups */
+  /** @see https://syncpack.dev/version-groups */
   versionGroups?: VersionGroup.Any[];
 
   /** @deprecated */
@@ -47,38 +47,38 @@ export interface RcFile {
 }
 
 export interface GroupSelector {
-  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#dependencies */
+  /** @see https://syncpack.dev/version-groups/highest-semver/#dependencies */
   dependencies?: string[];
-  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#dependencytypes */
+  /** @see https://syncpack.dev/version-groups/highest-semver/#dependencytypes */
   dependencyTypes?: DependencyType[];
-  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#label */
+  /** @see https://syncpack.dev/version-groups/highest-semver/#label */
   label?: string;
-  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#packages */
+  /** @see https://syncpack.dev/version-groups/highest-semver/#packages */
   packages?: string[];
-  /** @see https://jamiemason.github.io/syncpack/version-groups/highest-semver/#specifiertypes */
+  /** @see https://syncpack.dev/version-groups/highest-semver/#specifiertypes */
   specifierTypes?: SpecifierType[];
 }
 
 export interface DependencyGroup {
-  /** @see https://jamiemason.github.io/syncpack/config/dependency-groups/#aliasname */
+  /** @see https://syncpack.dev/config/dependency-groups/#aliasname */
   aliasName: string;
-  /** @see https://jamiemason.github.io/syncpack/config/dependency-groups/#dependencies */
+  /** @see https://syncpack.dev/config/dependency-groups/#dependencies */
   dependencies?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/dependency-groups/#dependencytypes */
+  /** @see https://syncpack.dev/config/dependency-groups/#dependencytypes */
   dependencyTypes?: DependencyType[];
-  /** @see https://jamiemason.github.io/syncpack/config/dependency-groups/#packages */
+  /** @see https://syncpack.dev/config/dependency-groups/#packages */
   packages?: string[];
-  /** @see https://jamiemason.github.io/syncpack/config/dependency-groups/#specifiertypes */
+  /** @see https://syncpack.dev/config/dependency-groups/#specifiertypes */
   specifierTypes?: SpecifierType[];
 }
 
 namespace SemverGroup {
   export interface Ignored extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/semver-groups/ignored/#isignored */
+    /** @see https://syncpack.dev/semver-groups/ignored/#isignored */
     isIgnored: true;
   }
   export interface WithRange extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/semver-groups/with-range/#range */
+    /** @see https://syncpack.dev/semver-groups/with-range/#range */
     range: SemverRange;
   }
   export type Any = Ignored | WithRange;
@@ -86,31 +86,31 @@ namespace SemverGroup {
 
 namespace VersionGroup {
   export interface Banned extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/version-groups/banned/#isbanned */
+    /** @see https://syncpack.dev/version-groups/banned/#isbanned */
     isBanned: true;
   }
   export interface Ignored extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/version-groups/ignored/#isignored */
+    /** @see https://syncpack.dev/version-groups/ignored/#isignored */
     isIgnored: true;
   }
   export interface Pinned extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/version-groups/pinned/#pinversion */
+    /** @see https://syncpack.dev/version-groups/pinned/#pinversion */
     pinVersion: string;
   }
   export interface SnappedTo extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/version-groups/snapped-to/#snapto */
+    /** @see https://syncpack.dev/version-groups/snapped-to/#snapto */
     snapTo: string[];
   }
   export interface SameRange extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/version-groups/same-range/#policy */
+    /** @see https://syncpack.dev/version-groups/same-range/#policy */
     policy: 'sameRange';
   }
   export interface SameMinor extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/version-groups/same-minor/#policy */
+    /** @see https://syncpack.dev/version-groups/same-minor/#policy */
     policy: 'sameMinor';
   }
   export interface Standard extends GroupSelector {
-    /** @see https://jamiemason.github.io/syncpack/version-groups/lowest-semver/#preferversion */
+    /** @see https://syncpack.dev/version-groups/lowest-semver/#preferversion */
     preferVersion?: 'highestSemver' | 'lowestSemver';
   }
   export type Any = Banned | Ignored | Pinned | SameRange | SameMinor | SnappedTo | Standard;
@@ -118,29 +118,29 @@ namespace VersionGroup {
 
 namespace CustomType {
   export interface NameAndVersionProps {
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#namepath */
+    /** @see https://syncpack.dev/config/custom-types/#namepath */
     namePath: string;
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#name */
+    /** @see https://syncpack.dev/config/custom-types/#name */
     path: string;
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#namestrategy */
+    /** @see https://syncpack.dev/config/custom-types/#namestrategy */
     strategy: 'name~version';
   }
   export interface NamedVersionString {
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#name */
+    /** @see https://syncpack.dev/config/custom-types/#name */
     path: string;
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#namestrategy */
+    /** @see https://syncpack.dev/config/custom-types/#namestrategy */
     strategy: 'name@version';
   }
   export interface UnnamedVersionString {
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#name */
+    /** @see https://syncpack.dev/config/custom-types/#name */
     path: string;
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#namestrategy */
+    /** @see https://syncpack.dev/config/custom-types/#namestrategy */
     strategy: 'version';
   }
   export interface VersionsByName {
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#name */
+    /** @see https://syncpack.dev/config/custom-types/#name */
     path: string;
-    /** @see https://jamiemason.github.io/syncpack/config/custom-types/#namestrategy */
+    /** @see https://syncpack.dev/config/custom-types/#namestrategy */
     strategy: 'versionsByName';
   }
   export type Any = NameAndVersionProps | NamedVersionString | UnnamedVersionString | VersionsByName;

@@ -110,7 +110,7 @@ export const GET: APIRoute = async ({ props }) => {
             color: #82907f;
           "
         >
-          jamiemason.github.io/syncpack
+          syncpack.dev
         </div>
       </div>
     `,

@@ -7,7 +7,7 @@ module.exports = {
   indent: "\t",
 
   // Custom types are used to define additional fields in package.json that contain versions that should be
-  // checked/synced. See https://jamiemason.github.io/syncpack/config/custom-types for more details.
+  // checked/synced. See https://syncpack.dev/config/custom-types for more details.
   customTypes: {
     engines: {
       path: "engines",

@@ -29,7 +29,7 @@ pub fn count_column(count: usize) -> String {
 
 /// Render the reason code as a clickable link
 pub fn get_status_code_link(ctx: &Context, pascal_case: &str) -> String {
-  let base_url = "https://jamiemason.github.io/syncpack/status";
+  let base_url = "https://syncpack.dev/status";
   let kebab_case = pascal_case
     .chars()
     .enumerate()

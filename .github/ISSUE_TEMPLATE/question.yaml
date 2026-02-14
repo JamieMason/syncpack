@@ -9,9 +9,9 @@ body:
         ### Useful links
         You're welcome to ask questions, but have a look at these resources as it's possible your question has already been answered:
         - [Most upvoted questions](https://github.com/JamieMason/syncpack/issues?q=label%3A%22Type%3A+Question%22+sort%3Areactions-%2B1-desc)
-        - [Getting started](https://jamiemason.github.io/syncpack/guide/getting-started/)
-        - [Examples](https://jamiemason.github.io/syncpack/examples/)
-        - [Documentation](https://jamiemason.github.io/syncpack/config/syncpackrc/)
+        - [Getting started](https://syncpack.dev/guide/getting-started/)
+        - [Examples](https://syncpack.dev/examples/)
+        - [Documentation](https://syncpack.dev/config/syncpackrc/)
   - type: textarea
     validations:
       required: true

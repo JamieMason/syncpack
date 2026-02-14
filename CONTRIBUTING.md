@@ -33,7 +33,7 @@ This document (CONTRIBUTING.md) provides the high-level architecture and workflo
 
 ## Documentation website
 
-The source code for the documentation website is located in `./site/src/**`, the sitemap for the published website is located at https://jamiemason.github.io/syncpack/sitemap.xml. Read this sitemap to find what documentation is available to help you with a given topic.
+The source code for the documentation website is located in `./site/src/**`, the sitemap for the published website is located at https://syncpack.dev/sitemap-index.xml. Read this sitemap to find what documentation is available to help you with a given topic.
 
 ## Development scripts
 

@@ -27,12 +27,7 @@ pub fn run() -> i32 {
   eprintln!("  {}", "# v14".dimmed());
   eprintln!("  {}", "syncpack fix".cyan());
   eprintln!();
-  eprintln!(
-    "{}",
-    "https://jamiemason.github.io/syncpack/guide/migrate-v14#fix-mismatches-fix"
-      .blue()
-      .underline()
-  );
+  eprintln!("{}", "https://syncpack.dev/guide/migrate-v14#fix-mismatches-fix".blue().underline());
   eprintln!();
   1
 }

@@ -5,11 +5,11 @@
  */
 export const siteConfig = {
   siteName: 'Syncpack',
-  siteUrl: 'https://jamiemason.github.io/syncpack',
+  siteUrl: 'https://syncpack.dev',
   description: 'Consistent dependency versions in large JavaScript Monorepos',
   softwareDescription:
     'CLI for managing dependency versions in JavaScript monorepos. Used by AWS, Cloudflare, DataDog, Electron, Microsoft, Vercel, and others.',
-  logoUrl: 'https://jamiemason.github.io/syncpack/logo.svg',
+  logoUrl: 'https://syncpack.dev/logo.svg',
   npmUrl: 'https://www.npmjs.com/package/syncpack',
   githubUrl: 'https://github.com/JamieMason/syncpack',
   authorName: 'Jamie Mason',

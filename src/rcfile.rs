@@ -211,7 +211,7 @@ impl Rcfile {
       });
     });
     if !is_valid {
-      error!("syncpack will exit due to an invalid config file, see https://jamiemason.github.io/syncpack for documentation");
+      error!("syncpack will exit due to an invalid config file, see https://syncpack.dev for documentation");
       exit(1);
     }
   }
