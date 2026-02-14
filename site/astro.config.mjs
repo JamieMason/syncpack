@@ -6,6 +6,7 @@ import { visit } from 'unist-util-visit';
 export default defineConfig({
   site: 'https://jamiemason.github.io/syncpack',
   base: '/syncpack',
+  output: 'static',
   redirects: {
     // Hoisted docs
     '/config/semver-groups/ignored/': '/syncpack/semver-groups/ignored/',
