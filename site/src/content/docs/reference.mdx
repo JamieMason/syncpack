@@ -3,12 +3,12 @@ title: Reference
 description: Technical reference documentation for Syncpack concepts and terminology
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { getCollection } from 'astro:content';
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { getCollection } from "astro:content";
 
-export const allDocs = await getCollection('docs');
+export const allDocs = await getCollection("docs");
 export const pages = allDocs
-  .filter((doc) => doc.id.startsWith('reference/') && doc.id !== 'reference')
+  .filter((doc) => doc.id.startsWith("reference/") && doc.id !== "reference")
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 
 Reference documentation covering dependency types, specifier types, status codes, and glossary of terms used throughout Syncpack.
@@ -17,7 +17,7 @@ Reference documentation covering dependency types, specifier types, status codes
   {pages.map((page) => (
     <LinkCard
       title={page.data.title}
-      href={`/syncpack/${page.id.replace(/\.mdx?$/, '')}/`}
+      href={`/syncpack/${page.id.replace(/\.mdx?$/, "")}/`}
       description={page.data.description}
     />
   ))}

@@ -3,12 +3,14 @@ title: Semver Groups
 description: Configure semver range formats for dependencies across your monorepo
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { getCollection } from 'astro:content';
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { getCollection } from "astro:content";
 
-export const allDocs = await getCollection('docs');
+export const allDocs = await getCollection("docs");
 export const pages = allDocs
-  .filter((doc) => doc.id.startsWith('semver-groups/') && doc.id !== 'semver-groups')
+  .filter(
+    (doc) => doc.id.startsWith("semver-groups/") && doc.id !== "semver-groups",
+  )
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 
 Allow some packages to have different semver range rules to the rest of your monorepo. Each dependency can only belong to one semver group, the first rule which matches a given dependency and package will apply.
@@ -88,7 +90,7 @@ Allow some packages to have different semver range rules to the rest of your mon
   {pages.map((page) => (
     <LinkCard
       title={page.data.title}
-      href={`/syncpack/${page.id.replace(/\.mdx?$/, '')}/`}
+      href={`/syncpack/${page.id.replace(/\.mdx?$/, "")}/`}
       description={page.data.description}
     />
   ))}
