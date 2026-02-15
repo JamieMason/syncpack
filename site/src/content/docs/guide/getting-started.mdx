@@ -137,7 +137,64 @@ syncpack list --help
 
 ## Configuration
 
-Create a `.syncpackrc` file in your repo root to customise behaviour. See [Configuration](CONFIG_SYNCPACKRC) for all options.
+Create a [.syncpackrc](CONFIG_SYNCPACKRC) file in the root of your repo to customise behaviour. One way to get started is to focus on production dependencies, then gradually broaden out as you feel comfortable. This is done using [`Version Groups`](CONFIG_VERSION_GROUPS).
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Sync all production dependencies",
+      "dependencyTypes": ["prod"]
+    },
+    {
+      "label": "Ignore everything else",
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+Or you could focus on specific dependencies and fix those first:
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Sync react dependencies only",
+      "dependencies": ["react", "react-dom"],
+      "dependencyTypes": ["prod"]
+    },
+    {
+      "label": "Ignore everything else",
+      "isIgnored": true
+    }
+  ]
+}
+```
+
+### `workspace:*` dependencies
+
+This is a popular configuration which ensures that `workspace:*` is always used when you depend on a package which is developed in your monorepo.
+
+```json
+{
+  "versionGroups": [
+    {
+      "label": "Use `workspace:*` protocol for local packages",
+      // for packages developed in your monorepo
+      "dependencies": ["$LOCAL"],
+      // when they are installed as prod or dev dependencies
+      "dependencyTypes": ["dev", "prod"],
+      // always use the workspace protocol to reference them
+      "pinVersion": "workspace:*"
+    },
+    {
+      "label": "Ignore everything else",
+      "isIgnored": true
+    }
+  ]
+}
+```
 
 ## Further reading
 
