@@ -371,6 +371,7 @@ function groupByReleaseType(
         premajor: [],
         major: [],
         prerelease: [],
+        release: [],
       },
     ),
   );
