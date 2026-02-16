@@ -1,4 +1,4 @@
-name: Verify v14-alpha
+name: Verify v14
 
 on:
   pull_request:

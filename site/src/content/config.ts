@@ -6,7 +6,7 @@ import { glob } from 'astro/loaders'; // Not available with legacy API
 const startPage = 'https://syncpack.dev/guide/getting-started/';
 const v13Docs = `https://web.archive.org/web/20250217193908/${startPage}`;
 const v14 = 'https://github.com/JamieMason/syncpack?tab=readme-ov-file#syncpack';
-const banner = `This documentation is for <a href="${v14}">v14 alpha</a>, the <a href="${v13Docs}" rel="external nofollow">docs for v13 stable</a> are archived.`;
+const banner = `This documentation is for <a href="${v14}">v14</a>, the <a href="${v13Docs}" rel="external nofollow">docs for v13</a> are archived.`;
 
 const schema = docsSchema({
   extend: z.object({

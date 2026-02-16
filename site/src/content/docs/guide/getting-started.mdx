@@ -24,7 +24,7 @@ Some of the things it can do are:
 The fastest way to try syncpack is via [npx](HREF_NPX).
 
 ```bash
-npx syncpack@alpha list --dependency-types prod
+npx syncpack list --dependency-types prod
 ```
 
 Run this command from the root directory of a monorepo and it will list every dependency installed under a [`dependencies`](HREF_DEPENDENCIES) property of a package.json file in the project.
@@ -34,13 +34,13 @@ Syncpack uses your package manager's workspace configuration to locate your pack
 For any given command, browse a summary of its options with `-h`
 
 ```bash
-npx syncpack@alpha update -h
+npx syncpack update -h
 ```
 
 or display documentation and examples with `--help`
 
 ```bash
-npx syncpack@alpha update --help
+npx syncpack update --help
 ```
 
 ## Install
@@ -48,7 +48,7 @@ npx syncpack@alpha update --help
 When setting up a project for real, install `syncpack` in [`devDependencies`](HREF_DEV_DEPENDENCIES) so that everyone working on your project uses the same version.
 
 ```bash
-npm install syncpack@alpha --save-dev
+npm install syncpack --save-dev
 ```
 
 The locally installed binary can be run using [npm exec](HREF_NPM_EXEC)
@@ -60,7 +60,7 @@ npm exec syncpack -- list
 ## Introduction
 
 :::note
-The examples below assume syncpack is installed globally. Replace `syncpack` with `npx syncpack@alpha` if you haven't installed it or `npm exec syncpack` if you have installed it locally.
+The examples below assume syncpack is installed globally. Replace `syncpack` with `npx syncpack` if you haven't installed it or `npm exec syncpack` if you have installed it locally.
 :::
 
 Let's see which dependencies we use the most.

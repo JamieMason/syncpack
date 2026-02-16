@@ -30,13 +30,13 @@ Allow some packages to have different semver range rules to the rest of your mon
 }
 ```
 
-2: Every dependency of `@myrepo/library` whose name matches `@alpha/**` should have a semver range of `^`, regardless of what the rest of that package or the rest of the monorepo uses:
+2: Every dependency of `@myrepo/library` whose name matches `@foo/**` should have a semver range of `^`, regardless of what the rest of that package or the rest of the monorepo uses:
 
 ```json title=".syncpackrc.json"
 {
   "semverGroups": [
     {
-      "dependencies": ["@alpha/**"],
+      "dependencies": ["@foo/**"],
       "packages": ["@myrepo/library"],
       "range": "^"
     }
@@ -44,13 +44,13 @@ Allow some packages to have different semver range rules to the rest of your mon
 }
 ```
 
-3: Every dependency in the monorepo whose name matches `@alpha/**` should have a semver range of `~`, regardless of what the rest of the monorepo uses:
+3: Every dependency in the monorepo whose name matches `@foo/**` should have a semver range of `~`, regardless of what the rest of the monorepo uses:
 
 ```json title=".syncpackrc.json"
 {
   "semverGroups": [
     {
-      "dependencies": ["@alpha/**"],
+      "dependencies": ["@foo/**"],
       "range": "~"
     }
   ]
