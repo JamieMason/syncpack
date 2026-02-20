@@ -36,47 +36,57 @@ fn returns_correct_registry_update_url() {
       .get_update_url()
   };
 
+  // Local packages should not have update URLs
   assert_eq!(get_update_url_by_name("local-package"), None);
+
+  // Direct JSR package
   assert_eq!(
     get_update_url_by_name("@jsr/luca__cases"),
     Some(UpdateUrl {
       internal_name: "@jsr/luca__cases".to_string(),
-      url: "https://npm.jsr.io/@jsr/luca__cases".to_string()
+      package_name: "@jsr/luca__cases".to_string()
     })
   );
+
+  // npm package with alias (aliased name matches actual name)
   assert_eq!(
     get_update_url_by_name("@lit-labs/ssr"),
     Some(UpdateUrl {
       internal_name: "@lit-labs/ssr".to_string(),
-      url: "https://registry.npmjs.org/@lit-labs/ssr".to_string()
+      package_name: "@lit-labs/ssr".to_string()
     })
   );
+
+  // Aliased JSR package - uses the JSR aliased name
   assert_eq!(
     get_update_url_by_name("@luca/cases"),
     Some(UpdateUrl {
       internal_name: "@luca/cases".to_string(),
-      url: "https://npm.jsr.io/@jsr/luca__cases".to_string()
+      package_name: "@jsr/luca__cases".to_string()
     })
   );
+
   assert_eq!(
     get_update_url_by_name("@std/fmt"),
     Some(UpdateUrl {
       internal_name: "@std/fmt".to_string(),
-      url: "https://npm.jsr.io/@jsr/std__fmt".to_string()
+      package_name: "@jsr/std__fmt".to_string()
     })
   );
   assert_eq!(
     get_update_url_by_name("@std/yaml"),
     Some(UpdateUrl {
       internal_name: "@std/yaml".to_string(),
-      url: "https://npm.jsr.io/@jsr/std__yaml".to_string()
+      package_name: "@jsr/std__yaml".to_string()
     })
   );
+
+  // Regular npm package with alias
   assert_eq!(
     get_update_url_by_name("lit"),
     Some(UpdateUrl {
       internal_name: "lit".to_string(),
-      url: "https://registry.npmjs.org/lit".to_string()
+      package_name: "lit".to_string()
     })
   );
 }
