@@ -3,8 +3,8 @@ import { docsLoader } from '@astrojs/starlight/loaders';
 import { docsSchema } from '@astrojs/starlight/schema';
 import { glob } from 'astro/loaders'; // Not available with legacy API
 
-const startPage = 'https://syncpack.dev/guide/getting-started/';
-const v13Docs = `https://web.archive.org/web/20250217193908/${startPage}`;
+const oldStartPage = 'https://jamiemason.github.io/syncpack/guide/getting-started/';
+const v13Docs = `https://web.archive.org/web/20250217193908/${oldStartPage}`;
 const v14 = 'https://github.com/JamieMason/syncpack?tab=readme-ov-file#syncpack';
 const banner = `This documentation is for <a href="${v14}">v14</a>, the <a href="${v13Docs}" rel="external nofollow">docs for v13</a> are archived.`;
 
