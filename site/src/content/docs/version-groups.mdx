@@ -94,7 +94,7 @@ Any properties of a version group that are omitted will match-all by default, so
   {pages.map((page) => (
     <LinkCard
       title={page.data.title}
-      href={`/syncpack/${page.id.replace(/\.mdx?$/, "")}/`}
+      href={`/${page.id.replace(/\.mdx?$/, "")}/`}
       description={page.data.description}
     />
   ))}
