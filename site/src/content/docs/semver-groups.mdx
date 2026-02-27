@@ -90,7 +90,7 @@ Allow some packages to have different semver range rules to the rest of your mon
   {pages.map((page) => (
     <LinkCard
       title={page.data.title}
-      href={`/syncpack/${page.id.replace(/\.mdx?$/, "")}/`}
+      href={`/${page.id.replace(/\.mdx?$/, "")}/`}
       description={page.data.description}
     />
   ))}
