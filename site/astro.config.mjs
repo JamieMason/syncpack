@@ -1,6 +1,8 @@
+import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import rehypeExternalLinks from 'rehype-external-links';
+import { headingAnchorLinks } from './remark-plugins/heading-anchor-links.mjs';
 import { linkAliases } from './remark-plugins/link-aliases.mjs';
 import { sectionWrapper } from './remark-plugins/section-wrapper.mjs';
 
@@ -10,13 +12,16 @@ export default defineConfig({
   output: 'static',
   markdown: {
     smartypants: false,
-    rehypePlugins: [[rehypeExternalLinks, { rel: ['nofollow', 'noopener'] }]],
+    rehypePlugins: [rehypeHeadingIds, headingAnchorLinks, [rehypeExternalLinks, { rel: ['nofollow', 'noopener'] }]],
     remarkPlugins: [sectionWrapper, linkAliases],
   },
   integrations: [
     starlight({
       title: 'Syncpack',
       lastUpdated: true,
+      markdown: {
+        headingLinks: false,
+      },
       routeMiddleware: './src/route-data.ts',
       social: [
         {
