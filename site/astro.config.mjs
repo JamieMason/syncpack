@@ -5,6 +5,7 @@ import rehypeExternalLinks from 'rehype-external-links';
 import { headingAnchorLinks } from './remark-plugins/heading-anchor-links.mjs';
 import { linkAliases } from './remark-plugins/link-aliases.mjs';
 import { sectionWrapper } from './remark-plugins/section-wrapper.mjs';
+import { tocSchemaMicrodata } from './remark-plugins/toc-schema-microdata.mjs';
 
 export default defineConfig({
   site: 'https://syncpack.dev',
@@ -16,6 +17,7 @@ export default defineConfig({
     remarkPlugins: [sectionWrapper, linkAliases],
   },
   integrations: [
+    tocSchemaMicrodata(),
     starlight({
       title: 'Syncpack',
       lastUpdated: true,
