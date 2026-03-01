@@ -3,10 +3,10 @@ name: Benchmark v14
 on:
   pull_request:
     branches:
-      - v14-alpha
+      - dev
   push:
     branches:
-      - v14-alpha
+      - dev
 
 jobs:
   benchmark:

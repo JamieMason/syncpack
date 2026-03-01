@@ -1,4 +1,4 @@
-name: Release v14-alpha
+name: Release
 
 on:
   release:
