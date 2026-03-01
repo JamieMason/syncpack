@@ -17,6 +17,7 @@ export function buildSchemas(route: StarlightRouteData) {
     schemas.push(buildWebSiteSchema());
     schemas.push(buildPersonSchema());
     schemas.push(buildSoftwareApplicationSchema());
+    schemas.push(buildWebPageSchema(route));
   }
 
   if (isDocPage) {
@@ -81,6 +82,58 @@ function buildSoftwareApplicationSchema() {
     },
     funding: siteConfig.sponsorUrl,
     downloadUrl: siteConfig.npmUrl,
+  };
+}
+
+/**
+ * WebPage schema for homepage with mainEntity ItemList derived from the TOC.
+ * The ItemList tells Google which sections are the primary content, increasing
+ * the likelihood of fragment "jump-to" buttons in search results.
+ * https://schema.org/WebPage
+ * https://schema.org/ItemList
+ */
+function buildWebPageSchema(route: StarlightRouteData) {
+  // Flatten TocItem tree into a position-ordered list, skipping the synthetic
+  // "Overview" entry (slug === '_top') which is not a real heading.
+  const items: Array<{ position: number; name: string; url: string }> = [];
+
+  function collectItems(tocItems: any[]) {
+    for (const item of tocItems) {
+      if (item.slug !== '_top') {
+        items.push({
+          position: items.length + 1,
+          name: item.text,
+          url: `${siteConfig.siteUrl}/#${item.slug}`,
+        });
+      }
+      if (item.children?.length) {
+        collectItems(item.children);
+      }
+    }
+  }
+
+  const tocItems = route.toc?.items ?? [];
+  collectItems(tocItems);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: siteConfig.siteName,
+    url: siteConfig.siteUrl,
+    description: siteConfig.description,
+    mainEntity: {
+      '@type': 'ItemList',
+      name: 'On this page',
+      itemListElement: items.map(({ position, name, url }) => ({
+        '@type': 'ListItem',
+        position,
+        item: {
+          '@type': 'WebPageElement',
+          name,
+          url,
+        },
+      })),
+    },
   };
 }
 
