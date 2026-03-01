@@ -3,8 +3,11 @@ import { fileURLToPath } from 'node:url';
 import { glob } from 'glob';
 
 /**
- * Rewrites `nav[aria-labelledby="starlight__on-this-page"]` (and its mobile
- * counterpart) to add schema.org SiteNavigationElement microdata attributes.
+ * Rewrites the desktop `nav[aria-labelledby="starlight__on-this-page"]` to add
+ * schema.org SiteNavigationElement microdata attributes.
+ *
+ * Starlight renders two TOC navs (mobile + desktop). Only the desktop one is
+ * patched so there is exactly one SiteNavigationElement in the document.
  *
  * Before:
  *   <nav aria-labelledby="starlight__on-this-page">
@@ -105,12 +108,11 @@ function rewriteNav(html, labelledby) {
 }
 
 /**
- * Apply microdata rewrites to both the desktop and mobile TOC navs.
+ * Apply microdata rewrite to the desktop TOC nav only.
+ * The mobile nav is intentionally skipped — one SiteNavigationElement per page.
  */
 function rewriteHtml(html) {
-  let result = rewriteNav(html, 'starlight__on-this-page');
-  result = rewriteNav(result, 'starlight__on-this-page--mobile');
-  return result;
+  return rewriteNav(html, 'starlight__on-this-page');
 }
 
 /**
