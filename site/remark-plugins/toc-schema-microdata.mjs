@@ -77,9 +77,7 @@ function patchNavFragment(fragment) {
  */
 function rewriteNav(html, labelledby) {
   // Match the opening <nav ...> tag with the given aria-labelledby value.
-  const navOpenRe = new RegExp(
-    `<nav(\\s[^>]*?aria-labelledby="${labelledby}"[^>]*?)>`,
-  );
+  const navOpenRe = new RegExp(`<nav(\\s[^>]*?aria-labelledby="${labelledby}"[^>]*?)>`);
   const match = navOpenRe.exec(html);
   if (!match) return html;
 
