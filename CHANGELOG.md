@@ -1,3 +1,11 @@
+# Changelog
+
+## [14.0.1](https://github.com/JamieMason/syncpack/compare/14.0.0...14.0.1) (2026-03-05)
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([c85144b](https://github.com/JamieMason/syncpack/commit/c85144b17d324cde937899bdb0aeddf3823ad03e))
+* **core:** handle negated source globs ([aaf5032](https://github.com/JamieMason/syncpack/commit/aaf5032e115e81e09c0d71395949ca96c6639716)), closes [#319](https://github.com/JamieMason/syncpack/issues/319)
 
 ## [14.0.0](https://github.com/JamieMason/syncpack/compare/14.0.0-alpha.41...14.0.0) (2026-02-16)
 
