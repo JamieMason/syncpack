@@ -24,6 +24,11 @@ fn normalizes_backslashes_to_forward_slashes() {
     // Complex patterns
     ("**\\*\\package.json", "**/*/package.json"),
     ("src\\**\\tests", "src/**/tests/package.json"),
+    // Negative globs (! prefix)
+    ("!apps/test2", "!apps/test2/package.json"),
+    ("!packages/*", "!packages/*/package.json"),
+    ("!apps/test2/package.json", "!apps/test2/package.json"),
+    ("!projects\\apps\\*", "!projects/apps/*/package.json"),
   ];
 
   for (input, expected) in cases {

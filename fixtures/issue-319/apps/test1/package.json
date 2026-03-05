@@ -1,0 +1,6 @@
+{
+  "name": "test1",
+  "dependencies": {
+    "typescript": "5.9.3"
+  }
+}

@@ -14,7 +14,7 @@ use {
   serde_json::Value,
   std::{
     cell::RefCell,
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs,
     path::{Path, PathBuf},
     rc::Rc,
@@ -157,17 +157,29 @@ impl Packages {
 }
 
 /// Normalize a source pattern by:
-/// 1. Converting Windows backslashes to forward slashes for glob compatibility
-/// 2. Ensuring pattern ends with /package.json
+/// 1. Preserving negation prefix (`!`) through normalization
+/// 2. Converting Windows backslashes to forward slashes for glob compatibility
+/// 3. Ensuring pattern ends with /package.json
 ///
 /// Examples:
 /// - "projects\\apps\\*" -> "projects/apps/*/package.json"
 /// - "projects/libs/*" -> "projects/libs/*/package.json"
 /// - "package.json" -> "package.json"
 /// - "apps\\*/package.json" -> "apps/*/package.json"
-pub fn normalize_pattern(pattern: String) -> String {
+/// - "!apps/test2" -> "!apps/test2/package.json"
+pub fn normalize_pattern(mut pattern: String) -> String {
+  let negated = pattern.starts_with('!');
+  if negated {
+    pattern.remove(0);
+  }
   let normalized = pattern.replace('\\', "/");
-  if normalized.contains("package.json") {
+  if negated {
+    if normalized.contains("package.json") {
+      format!("!{normalized}")
+    } else {
+      format!("!{normalized}/package.json")
+    }
+  } else if normalized.contains("package.json") {
     normalized
   } else {
     format!("{normalized}/package.json")
@@ -177,26 +189,43 @@ pub fn normalize_pattern(pattern: String) -> String {
 /// Resolve every source glob pattern into their absolute file paths of
 /// package.json files
 fn get_file_paths(config: &Config) -> Vec<PathBuf> {
-  get_source_patterns(config)
+  let all_patterns = get_source_patterns(config);
+  let (negatives, positives): (Vec<_>, Vec<_>) = all_patterns.iter().partition(|p| p.starts_with('!'));
+
+  let to_absolute = |pattern: &str| -> String {
+    if PathBuf::from(pattern).is_absolute() {
+      pattern.to_string()
+    } else {
+      config.cli.cwd.join(pattern).to_str().unwrap().to_string()
+    }
+  };
+
+  let resolve_glob = |pattern: &str| -> Vec<PathBuf> {
+    glob(pattern)
+      .map_err(|err| debug!("Invalid glob pattern '{pattern}': {err}"))
+      .into_iter()
+      .flat_map(|paths| paths.filter_map(Result::ok))
+      .collect()
+  };
+
+  let included: Vec<PathBuf> = positives
     .iter()
-    .map(|pattern| {
-      if PathBuf::from(pattern).is_absolute() {
-        pattern.clone()
-      } else {
-        config.cli.cwd.join(pattern).to_str().unwrap().to_string()
-      }
-    })
-    .flat_map(|pattern| glob(&pattern).ok())
-    .flat_map(|paths| {
-      paths
-        .filter_map(Result::ok)
-        .filter(|path| !path.to_string_lossy().contains("node_modules"))
-        .fold(vec![], |mut paths, path| {
-          paths.push(path.clone());
-          paths
-        })
-    })
-    .collect()
+    .map(|p| to_absolute(p))
+    .flat_map(|pattern| resolve_glob(&pattern))
+    .filter(|path| !path.to_string_lossy().contains("node_modules"))
+    .collect();
+
+  if negatives.is_empty() {
+    return included;
+  }
+
+  let excluded: HashSet<PathBuf> = negatives
+    .iter()
+    .map(|p| to_absolute(p.trim_start_matches('!')))
+    .flat_map(|pattern| resolve_glob(&pattern))
+    .collect();
+
+  included.into_iter().filter(|path| !excluded.contains(path)).collect()
 }
 
 /// Based on the user's config file and command line `--source` options, return
