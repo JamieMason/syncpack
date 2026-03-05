@@ -42,7 +42,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.4",
     "@release-it/conventional-changelog": "^10.0.5",
-    "auto-changelog": "^2.5.0",
     "release-it": "^19.2.4",
     "ts-json-schema-generator": "^2.5.0",
     "typescript": "^5.9.3"
