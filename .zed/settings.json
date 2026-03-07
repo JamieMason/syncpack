@@ -8,12 +8,6 @@
       },
     },
   },
-  "formatter": {
-    "external": {
-      "command": "node_modules/.bin/biome",
-      "arguments": ["format", "--stdin-file-path", "{buffer_path}"],
-    },
-  },
   "languages": {
     "Rust": {
       "formatter": "language_server",
