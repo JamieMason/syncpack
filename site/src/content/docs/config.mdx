@@ -17,7 +17,7 @@ Configure syncpack's behavior using a `.syncpackrc` file in your project root. T
   {pages.map((page) => (
     <LinkCard
       title={page.data.title}
-      href={`/syncpack/${page.id.replace(/\.mdx?$/, "")}/`}
+      href={`/${page.id.replace(/\.mdx?$/, "")}/`}
       description={page.data.description}
     />
   ))}

@@ -17,7 +17,7 @@ Step-by-step guides to help you get the most out of Syncpack in your JavaScript 
   {pages.map((page) => (
     <LinkCard
       title={page.data.title}
-      href={`/syncpack/${page.id.replace(/\.mdx?$/, "")}/`}
+      href={`/${page.id.replace(/\.mdx?$/, "")}/`}
       description={page.data.description}
     />
   ))}

@@ -1,6 +1,7 @@
 import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import astroBrokenLinksChecker from 'astro-broken-links-checker';
 import rehypeExternalLinks from 'rehype-external-links';
 import { headingAnchorLinks } from './remark-plugins/heading-anchor-links.mjs';
 import { linkAliases } from './remark-plugins/link-aliases.mjs';
@@ -17,6 +18,11 @@ export default defineConfig({
     remarkPlugins: [sectionWrapper, linkAliases],
   },
   integrations: [
+    astroBrokenLinksChecker({
+      checkExternalLinks: false,
+      cacheExternalLinks: true,
+      throwError: true,
+    }),
     tocSchemaMicrodata(),
     starlight({
       title: 'Syncpack',
