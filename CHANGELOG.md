@@ -1,5 +1,13 @@
 # Changelog
 
+## [14.1.0](https://github.com/JamieMason/syncpack/compare/14.0.2...14.1.0) (2026-03-07)
+
+### Features
+
+* **cli:** add --reporter json to fix and format commands ([5522ffe](https://github.com/JamieMason/syncpack/commit/5522ffe646fec8f9803b4aa63eb62a8b366d46d4)), closes [#322](https://github.com/JamieMason/syncpack/issues/322)
+* **cli:** add statusType property to json output ([5a82a85](https://github.com/JamieMason/syncpack/commit/5a82a85ca5dd93037488bf16e771dd01e041cc8b)), closes [#322](https://github.com/JamieMason/syncpack/issues/322)
+* **write:** detect indentation when config is not set ([66c0493](https://github.com/JamieMason/syncpack/commit/66c0493cb019dc9df1d415d2ec1487f9ce40bd3e)), closes [#318](https://github.com/JamieMason/syncpack/issues/318)
+
 ## [14.0.2](https://github.com/JamieMason/syncpack/compare/14.0.1...14.0.2) (2026-03-07)
 
 ### Bug Fixes
