@@ -8,13 +8,13 @@ use {
     rcfile::Rcfile,
     specifier::Specifier,
   },
-  glob::glob,
+  globset::{Glob, GlobSet, GlobSetBuilder},
   log::debug,
   serde::Deserialize,
   serde_json::Value,
   std::{
     cell::RefCell,
-    collections::{HashMap, HashSet},
+    collections::{HashMap, VecDeque},
     fs,
     path::{Path, PathBuf},
     rc::Rc,
@@ -186,46 +186,66 @@ pub fn normalize_pattern(mut pattern: String) -> String {
   }
 }
 
+/// Walk a directory tree, skipping `node_modules` and other irrelevant
+/// directories, and return every `package.json` path that matches
+/// `include_set` and does not match `exclude_set`.
+fn walk_matching(root: &Path, include_set: &GlobSet, exclude_set: &GlobSet) -> Vec<PathBuf> {
+  let mut results = Vec::new();
+  let mut queue: VecDeque<PathBuf> = VecDeque::new();
+  queue.push_back(root.to_path_buf());
+  while let Some(dir) = queue.pop_front() {
+    let entries = match fs::read_dir(&dir) {
+      Ok(e) => e,
+      Err(err) => {
+        debug!("Could not read directory '{}': {err}", dir.display());
+        continue;
+      }
+    };
+    for entry in entries.flatten() {
+      let path = entry.path();
+      let file_name = entry.file_name();
+      let name = file_name.to_string_lossy();
+      if path.is_dir() {
+        // Prune directories that can never contain relevant package.json files
+        if name == "node_modules" || name == ".git" {
+          continue;
+        }
+        queue.push_back(path);
+      } else if name == "package.json" {
+        let rel = path.strip_prefix(root).unwrap_or(&path);
+        if include_set.is_match(rel) && !exclude_set.is_match(rel) {
+          results.push(path);
+        }
+      }
+    }
+  }
+  results
+}
+
 /// Resolve every source glob pattern into their absolute file paths of
 /// package.json files
 fn get_file_paths(config: &Config) -> Vec<PathBuf> {
   let all_patterns = get_source_patterns(config);
   let (negatives, positives): (Vec<_>, Vec<_>) = all_patterns.iter().partition(|p| p.starts_with('!'));
 
-  let to_absolute = |pattern: &str| -> String {
-    if PathBuf::from(pattern).is_absolute() {
-      pattern.to_string()
-    } else {
-      config.cli.cwd.join(pattern).to_str().unwrap().to_string()
+  let build_globset = |patterns: &[&String], strip_prefix: &str| -> GlobSet {
+    let mut builder = GlobSetBuilder::new();
+    for pattern in patterns {
+      let p = pattern.trim_start_matches(strip_prefix);
+      match Glob::new(p) {
+        Ok(g) => {
+          builder.add(g);
+        }
+        Err(err) => debug!("Invalid glob pattern '{p}': {err}"),
+      }
     }
+    builder.build().unwrap_or_else(|_| GlobSet::empty())
   };
 
-  let resolve_glob = |pattern: &str| -> Vec<PathBuf> {
-    glob(pattern)
-      .map_err(|err| debug!("Invalid glob pattern '{pattern}': {err}"))
-      .into_iter()
-      .flat_map(|paths| paths.filter_map(Result::ok))
-      .collect()
-  };
+  let include_set = build_globset(&positives, "");
+  let exclude_set = build_globset(&negatives, "!");
 
-  let included: Vec<PathBuf> = positives
-    .iter()
-    .map(|p| to_absolute(p))
-    .flat_map(|pattern| resolve_glob(&pattern))
-    .filter(|path| !path.to_string_lossy().contains("node_modules"))
-    .collect();
-
-  if negatives.is_empty() {
-    return included;
-  }
-
-  let excluded: HashSet<PathBuf> = negatives
-    .iter()
-    .map(|p| to_absolute(p.trim_start_matches('!')))
-    .flat_map(|pattern| resolve_glob(&pattern))
-    .collect();
-
-  included.into_iter().filter(|path| !excluded.contains(path)).collect()
+  walk_matching(&config.cli.cwd, &include_set, &exclude_set)
 }
 
 /// Based on the user's config file and command line `--source` options, return
