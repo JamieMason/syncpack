@@ -5,7 +5,7 @@ use {
     config::Config,
     context::Context,
     packages::Packages,
-    registry_client::LiveRegistryClient,
+    registry_client::{LiveRegistryClient, RegistryClient},
     visit_formatting::visit_formatting,
     visit_packages::visit_packages,
   },
@@ -28,6 +28,8 @@ mod group_selector;
 mod instance;
 mod instance_state;
 mod logger;
+#[cfg(test)]
+mod npmrc_integration_test;
 mod package_json;
 mod packages;
 #[cfg(test)]
@@ -70,16 +72,17 @@ async fn main() {
     len => debug!("Found {len} package.json files"),
   }
 
-  let ctx = Context::create(
-    config,
-    packages,
-    if is_update_command {
-      Some(Arc::new(LiveRegistryClient::new()))
-    } else {
-      None
-    },
-    catalogs,
-  );
+  let registry_client = if is_update_command {
+    let npmrc = npmrc_config_rs::NpmrcConfig::load().unwrap_or_else(|e| {
+      error!("Failed to load .npmrc config: {e}");
+      exit(1);
+    });
+    Some(Arc::new(LiveRegistryClient::new(npmrc)) as Arc<dyn RegistryClient>)
+  } else {
+    None
+  };
+
+  let ctx = Context::create(config, packages, registry_client, catalogs);
 
   let _exit_code = match ctx.config.cli.subcommand {
     Subcommand::Fix => {
