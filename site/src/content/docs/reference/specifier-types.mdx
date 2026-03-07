@@ -16,6 +16,12 @@ A dependency that uses npm's alias syntax to reference a package under a differe
 
 Example: `npm:@preact/compat`
 
+### catalog
+
+A dependency that uses the `catalog:` protocol to reference a version defined in a shared catalog.
+
+Example: `catalog:`
+
 ### exact
 
 A dependency with a precise version number, including potential pre-release identifiers.
@@ -27,6 +33,12 @@ Examples: `1.2.3`, `1.2.3-alpha`, `1.2.3-rc.1`
 A dependency referencing a local file path on the filesystem.
 
 Example: `file:./path/to/package`
+
+### link
+
+A dependency that uses the `link:` protocol to reference a local path without installing it as a symlink via the package manager.
+
+Example: `link:../other-package`
 
 ### git
 

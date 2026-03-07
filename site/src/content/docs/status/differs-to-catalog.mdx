@@ -1,0 +1,12 @@
+---
+title: DiffersToCatalog
+status: fixable
+description: Dependency version differs from the catalog protocol used by other instances in its version group
+---
+
+## When this happens
+
+- ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
+- ✓ One or more other instances use the `catalog:` protocol
+- ✘ Instance does not use the `catalog:` protocol
+- ! `catalog:` protocol wins
