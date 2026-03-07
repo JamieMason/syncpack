@@ -1,5 +1,11 @@
 # Changelog
 
+## [14.0.2](https://github.com/JamieMason/syncpack/compare/14.0.1...14.0.2) (2026-03-07)
+
+### Bug Fixes
+
+* **globs:** ignore node_modules ([467cb57](https://github.com/JamieMason/syncpack/commit/467cb5797e3914f988c4a74370790abe4d38ff03)), closes [#321](https://github.com/JamieMason/syncpack/issues/321)
+
 ## [14.0.1](https://github.com/JamieMason/syncpack/compare/14.0.0...14.0.1) (2026-03-05)
 
 ### Bug Fixes
