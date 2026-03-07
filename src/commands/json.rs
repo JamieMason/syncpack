@@ -15,6 +15,7 @@ pub fn instance_to_json(_ctx: &Context, instance: &Instance, variant: &VersionGr
     "versionGroup": format!("{:?}", variant),
     "preferredSemverRange": instance.preferred_semver_range.as_ref().map(|range| range.unwrap()),
     "statusCode": instance.state.borrow().get_name(),
+    "statusType": instance.state.borrow().get_status_type(),
     "actual": json!({
       "raw": instance.descriptor.specifier.get_raw(),
       "type": instance.descriptor.specifier.get_config_identifier(),

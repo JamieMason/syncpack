@@ -124,6 +124,19 @@ impl InstanceState {
     InstanceState::Invalid(InvalidInstance::Unfixable(state))
   }
 
+  pub fn get_status_type(&self) -> &'static str {
+    match self {
+      InstanceState::Unknown => "Unknown",
+      InstanceState::Valid(_) => "Valid",
+      InstanceState::Invalid(variant) => match variant {
+        InvalidInstance::Fixable(_) => "Fixable",
+        InvalidInstance::Unfixable(_) => "Unfixable",
+        InvalidInstance::Conflict(_) => "Conflict",
+      },
+      InstanceState::Suspect(_) => "Suspect",
+    }
+  }
+
   pub fn get_name(&self) -> String {
     match self {
       InstanceState::Unknown => "Unknown".to_string(),

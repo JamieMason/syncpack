@@ -50,6 +50,7 @@ fn fix_json_each_line_has_required_fields() {
     assert!(line.get("strategy").is_some(), "missing 'strategy' field: {line}");
     assert!(line.get("versionGroup").is_some(), "missing 'versionGroup' field: {line}");
     assert!(line.get("statusCode").is_some(), "missing 'statusCode' field: {line}");
+    assert!(line.get("statusType").is_some(), "missing 'statusType' field: {line}");
     assert!(line.get("actual").is_some(), "missing 'actual' field: {line}");
     assert!(line.get("expected").is_some(), "missing 'expected' field: {line}");
   }
@@ -68,6 +69,7 @@ fn fix_json_contains_correct_values_for_fixture() {
   assert_eq!(foo_line["actual"]["type"], "exact");
   assert_eq!(foo_line["expected"]["type"], "exact");
   assert_eq!(foo_line["dependencyType"], "prod");
+  assert_eq!(foo_line["statusType"], "Fixable");
   assert_eq!(foo_line["versionGroup"], "HighestSemver");
   let property = foo_line["property"].as_array().expect("property should be an array");
   assert_eq!(property, &vec![Value::String("dependencies".to_string())]);

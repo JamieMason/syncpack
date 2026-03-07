@@ -4,8 +4,30 @@ Set the output format. Defaults to `pretty` which prints human-readable output w
 
 Each line has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
 
-```json
-{"dependency":"kleur","dependencyGroup":"kleur","dependencyType":"prod","package":"apps/billing/package.json","property":["dependencies"],"strategy":"versionsByName","versionGroup":"HighestSemver","preferredSemverRange":"","statusCode":"DiffersToHighestSemver","actual":{"raw":"4.1.4","type":"exact"},"expected":{"raw":"4.1.5","type":"exact"}}
+```jsonc
+// This JSON has been formatted but appears on a single line in syncpack
+{
+  "dependency": "kleur",
+  "dependencyGroup": "kleur",
+  "dependencyType": "prod",
+  "package": "apps/billing/package.json",
+  "property": [
+    "dependencies"
+  ],
+  "strategy": "versionsByName",
+  "versionGroup": "HighestSemver",
+  "preferredSemverRange": "",
+  "statusCode": "DiffersToHighestSemver",
+  "statusType": "Fixable",
+  "actual": {
+    "raw": "4.1.4",
+    "type": "exact"
+  },
+  "expected": {
+    "raw": "4.1.5",
+    "type": "exact"
+  }
+}
 ```
 
 <Code
@@ -14,6 +36,12 @@ syncpack ${props.command} --reporter pretty
 # Machine-readable NDJSON output
 syncpack ${props.command} --reporter json
 # Pipe to jq to filter fixable instances
-syncpack ${props.command} --reporter json | jq 'select(.statusCode == "DiffersToHighestSemver")'`}
+syncpack ${props.command} --reporter json | jq 'select(.statusCode == "DiffersToHighestSemver")'
+# Filter by statusType to get all fixable instances
+syncpack ${props.command} --reporter json | jq 'select(.statusType == "Fixable")'
+# Get only unfixable instances that need manual intervention
+syncpack ${props.command} --reporter json | jq 'select(.statusType == "Unfixable")'
+# Get suspect instances (possible misconfigurations)
+syncpack ${props.command} --reporter json | jq 'select(.statusType == "Suspect")'`}
 lang="bash"
 />

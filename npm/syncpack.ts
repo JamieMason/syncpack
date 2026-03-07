@@ -182,6 +182,7 @@ export type JsonOutput = {
   versionGroup: VersionGroupVariant;
   preferredSemverRange: SemverRange | null;
   statusCode: StatusCode;
+  statusType: StatusType;
   actual: {
     raw: string;
     type: SpecifierType;
@@ -191,6 +192,8 @@ export type JsonOutput = {
     type: SpecifierType;
   } | null;
 };
+
+export type StatusType = 'Valid' | 'Fixable' | 'Unfixable' | 'Suspect' | 'Conflict';
 
 /** Each formatting mismatch printed by `syncpack format --reporter json` */
 export type FormatJsonOutput = {
