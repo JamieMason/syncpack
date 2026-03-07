@@ -18,10 +18,6 @@ pub fn print_invalid_package(ctx: &Context, package: &PackageJson) {
   info!("{count_column} {name} {location}");
 }
 
-pub fn print_fixed_package(ctx: &Context, package: &PackageJson) {
-  print_invalid_package(ctx, package);
-}
-
 pub fn print_invalid(ctx: &Context, mismatch: &Rc<FormatMismatch>) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::err();

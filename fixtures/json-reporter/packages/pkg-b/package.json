@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "name": "pkg-b",
+  "scripts": {
+    "test": "echo test",
+    "build": "echo build"
+  },
+  "dependencies": {
+    "foo": "2.0.0"
+  }
+}

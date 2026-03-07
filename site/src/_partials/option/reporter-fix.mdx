@@ -1,0 +1,19 @@
+import { Code } from "astro:components";
+
+Set the output format. Defaults to `pretty` which prints human-readable output with colours and formatting. Use `json` to output one line of newline-delimited JSON (NDJSON) per fixable instance — the same shape as the [json](COMMAND_JSON) command.
+
+Each line has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
+
+```json
+{"dependency":"kleur","dependencyGroup":"kleur","dependencyType":"prod","package":"apps/billing/package.json","property":["dependencies"],"strategy":"versionsByName","versionGroup":"HighestSemver","preferredSemverRange":"","statusCode":"DiffersToHighestSemver","actual":{"raw":"4.1.4","type":"exact"},"expected":{"raw":"4.1.5","type":"exact"}}
+```
+
+<Code
+code={`# Default human-readable output
+syncpack ${props.command} --reporter pretty
+# Machine-readable NDJSON output
+syncpack ${props.command} --reporter json
+# Pipe to jq to filter fixable instances
+syncpack ${props.command} --reporter json | jq 'select(.statusCode == "DiffersToHighestSemver")'`}
+lang="bash"
+/>

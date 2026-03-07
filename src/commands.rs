@@ -1,5 +1,6 @@
 /// Write fixes to disk
 pub mod fix;
+
 /// DEPRECATED: Use fix instead
 pub mod fix_mismatches;
 /// Lint and fix package.json formatting
@@ -16,6 +17,8 @@ pub mod list;
 pub mod list_mismatches;
 /// DEPRECATED: Not yet implemented in v14
 pub mod prompt;
+/// Reporter traits for fix and format output
+pub mod reporter;
 /// DEPRECATED: Use fix instead
 pub mod set_semver_ranges;
 /// A shared module with methods for printing messages to the console

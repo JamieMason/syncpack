@@ -1,0 +1,27 @@
+import { Code } from "astro:components";
+
+Set the output format. Defaults to `pretty` which prints human-readable output with colours and formatting. Use `json` to output one line of newline-delimited JSON (NDJSON) per formatting mismatch. See also the [json](COMMAND_JSON) command which outputs the state of every instance in your repo.
+
+Each line has the type [`FormatJsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
+
+```jsonc
+// This JSON has been formatted but appears on a single line in syncpack
+{
+  "package": "my-app",
+  "filePath": "packages/my-app/package.json",
+  "property": [
+    "scripts"
+  ],
+  "statusCode": "PropertyIsNotSortedAz"
+}
+```
+
+<Code
+code={`# Default human-readable output
+syncpack ${props.command} --reporter pretty
+# Machine-readable NDJSON output
+syncpack ${props.command} --reporter json
+# Pipe to jq to filter by status code
+syncpack ${props.command} --reporter json | jq 'select(.statusCode == "PackagePropertiesAreNotSorted")'`}
+lang="bash"
+/>

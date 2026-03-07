@@ -1,14 +1,14 @@
-use crate::{commands::ui, context::Context};
+use crate::{commands::reporter::FormatReporter, context::Context};
 
-pub fn run(ctx: Context) -> i32 {
+pub fn run(ctx: Context, reporter: &dyn FormatReporter) -> i32 {
   if ctx.config.cli.check {
-    check_formatting(ctx)
+    check_formatting(ctx, reporter)
   } else {
-    fix_formatting(ctx)
+    fix_formatting(ctx, reporter)
   }
 }
 
-fn check_formatting(ctx: Context) -> i32 {
+fn check_formatting(ctx: Context, reporter: &dyn FormatReporter) -> i32 {
   let mut is_invalid = false;
   ctx
     .packages
@@ -17,13 +17,14 @@ fn check_formatting(ctx: Context) -> i32 {
     .filter(|package| package.borrow().has_formatting_mismatches())
     .for_each(|package| {
       is_invalid = true;
-      ui::package::print_invalid_package(&ctx, &package.borrow());
-      package.borrow().formatting_mismatches.borrow().iter().for_each(|mismatch| {
-        ui::package::print_invalid(&ctx, mismatch);
+      let package = package.borrow();
+      reporter.on_package_header(&ctx, &package);
+      package.formatting_mismatches.borrow().iter().for_each(|mismatch| {
+        reporter.on_mismatch_unfixed(&ctx, &package, mismatch);
       });
     });
   if !is_invalid {
-    ui::util::print_no_issues_found();
+    reporter.on_no_issues();
   }
   if is_invalid {
     1
@@ -32,7 +33,7 @@ fn check_formatting(ctx: Context) -> i32 {
   }
 }
 
-fn fix_formatting(ctx: Context) -> i32 {
+fn fix_formatting(ctx: Context, reporter: &dyn FormatReporter) -> i32 {
   let mut was_invalid = false;
   ctx
     .packages
@@ -42,9 +43,9 @@ fn fix_formatting(ctx: Context) -> i32 {
     .for_each(|package| {
       was_invalid = true;
       let package = package.borrow();
-      ui::package::print_fixed_package(&ctx, &package);
+      reporter.on_package_header(&ctx, &package);
       package.formatting_mismatches.borrow().iter().for_each(|mismatch| {
-        ui::package::print_fixed(&ctx, mismatch);
+        reporter.on_mismatch_fixed(&ctx, &package, mismatch);
         if mismatch.property_path == "/" {
           *package.contents.borrow_mut() = mismatch.expected.clone();
         } else if let Some(value) = package.contents.borrow_mut().pointer_mut(&mismatch.property_path) {
@@ -58,7 +59,7 @@ fn fix_formatting(ctx: Context) -> i32 {
     });
   }
   if !was_invalid {
-    ui::util::print_no_issues_found();
+    reporter.on_no_issues();
   }
   0
 }

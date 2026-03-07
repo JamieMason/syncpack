@@ -2,7 +2,7 @@ use {
   super::registry_client::MockRegistryClient,
   crate::{
     catalogs::{Catalog, CatalogsByName},
-    cli::{Cli, SortBy, Subcommand, UpdateTarget},
+    cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
     config::Config,
     context::Context,
     package_json::PackageJson,
@@ -27,6 +27,7 @@ pub fn cli() -> Cli {
     dry_run: true,
     log_levels: vec![LevelFilter::Error],
     packages: vec![],
+    reporter: ReporterKind::Pretty,
     show_hints: false,
     show_ignored: false,
     show_instances: false,

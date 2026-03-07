@@ -1,7 +1,11 @@
 use {
   crate::{
-    cli::{Cli, Subcommand},
-    commands::{fix, fix_mismatches, format, json, lint, lint_semver_ranges, list, list_mismatches, prompt, set_semver_ranges, update},
+    cli::{Cli, ReporterKind, Subcommand},
+    commands::{
+      fix, fix_mismatches, format, json, lint, lint_semver_ranges, list, list_mismatches, prompt,
+      reporter::{JsonFixReporter, JsonFormatReporter, PrettyFixReporter, PrettyFormatReporter},
+      set_semver_ranges, update,
+    },
     config::Config,
     context::Context,
     packages::Packages,
@@ -86,11 +90,23 @@ async fn main() {
   let _exit_code = match ctx.config.cli.subcommand {
     Subcommand::Fix => {
       let ctx = visit_packages(ctx);
-      fix::run(ctx)
+      let pretty = PrettyFixReporter;
+      let json_reporter = JsonFixReporter;
+      let reporter: &dyn commands::reporter::FixReporter = match ctx.config.cli.reporter {
+        ReporterKind::Pretty => &pretty,
+        ReporterKind::Json => &json_reporter,
+      };
+      fix::run(ctx, reporter)
     }
     Subcommand::Format => {
       let ctx = visit_formatting(ctx);
-      format::run(ctx)
+      let pretty = PrettyFormatReporter;
+      let json_reporter = JsonFormatReporter;
+      let reporter: &dyn commands::reporter::FormatReporter = match ctx.config.cli.reporter {
+        ReporterKind::Pretty => &pretty,
+        ReporterKind::Json => &json_reporter,
+      };
+      format::run(ctx, reporter)
     }
     Subcommand::Lint => {
       let ctx = visit_packages(ctx);

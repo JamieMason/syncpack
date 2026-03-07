@@ -20,6 +20,10 @@ import QuoteFilters from "@partials/tips/quote-filters.mdx";
 
 Export dependency data from your monorepo as JSON. Outputs one line per dependency instance with version, location, and status information. Use with tools like [`jq`](https://jqlang.org/) to analyse, filter, or pipe into other programs.
 
+:::tip
+The [fix](COMMAND_FIX) and [format](COMMAND_FORMAT) commands also support `--reporter json` for machine-readable output of their results. Use `syncpack fix --reporter json` for fixable version mismatches or `syncpack format --reporter json` for formatting issues.
+:::
+
 ## Examples
 
 ```bash
@@ -38,29 +42,6 @@ syncpack json -h
 ## TypeScript
 
 Each instance printed by `syncpack json` has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/main/npm/syncpack.ts).
-
-```ts
-/** Each Instance printed by `syncpack json` */
-export type JsonOutput = {
-  dependency: string;
-  dependencyGroup: string;
-  dependencyType: DependencyType;
-  package: string;
-  property: ["dependencies"];
-  strategy: CustomType.Any["strategy"];
-  versionGroup: VersionGroupVariant;
-  preferredSemverRange: SemverRange | null;
-  statusCode: StatusCode;
-  actual: {
-    raw: string;
-    type: SpecifierType;
-  };
-  expected: {
-    raw: string;
-    type: SpecifierType;
-  } | null;
-};
-```
 
 ## Options
 

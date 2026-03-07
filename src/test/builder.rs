@@ -2,7 +2,10 @@
 
 use {
   super::{mock, registry_client::MockRegistryClient},
-  crate::{catalogs::CatalogsByName, cli::UpdateTarget, context::Context, registry_client::RegistryClient, visit_packages::visit_packages},
+  crate::{
+    catalogs::CatalogsByName, cli::UpdateTarget, context::Context, registry_client::RegistryClient, visit_formatting::visit_formatting,
+    visit_packages::visit_packages,
+  },
   serde_json::{json, Value},
   std::sync::Arc,
 };
@@ -121,6 +124,11 @@ impl TestBuilder {
   pub fn build_and_visit_packages(self) -> Context {
     let ctx = self.build();
     visit_packages(ctx)
+  }
+
+  pub fn build_and_visit_formatting(self) -> Context {
+    let ctx = self.build();
+    visit_formatting(ctx)
   }
 
   pub async fn build_with_registry_and_visit(self) -> Context {

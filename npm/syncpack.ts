@@ -171,13 +171,13 @@ type SpecifierType =
 
 type AnyString = string & {};
 
-/** Each Instance printed by `syncpack json` */
+/** Each Instance printed by `syncpack json` and `syncpack fix --reporter json` */
 export type JsonOutput = {
   dependency: string;
   dependencyGroup: string;
   dependencyType: DependencyType;
   package: string;
-  property: ['dependencies'];
+  property: string[];
   strategy: CustomType.Any['strategy'];
   versionGroup: VersionGroupVariant;
   preferredSemverRange: SemverRange | null;
@@ -191,6 +191,21 @@ export type JsonOutput = {
     type: SpecifierType;
   } | null;
 };
+
+/** Each formatting mismatch printed by `syncpack format --reporter json` */
+export type FormatJsonOutput = {
+  package: string;
+  filePath: string;
+  property: string[];
+  statusCode: FormatStatusCode;
+};
+
+export type FormatStatusCode =
+  | 'BugsPropertyIsNotFormatted'
+  | 'RepositoryPropertyIsNotFormatted'
+  | 'PropertyIsNotSortedAz'
+  | 'PackagePropertiesAreNotSorted'
+  | 'ExportsPropertyIsNotSorted';
 
 export type VersionGroupVariant =
   | 'Banned'

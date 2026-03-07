@@ -1,9 +1,6 @@
-use {
-  crate::{commands::ui, context::Context},
-  log::warn,
-};
+use crate::{commands::reporter::FixReporter, context::Context};
 
-pub fn run(ctx: Context) -> i32 {
+pub fn run(ctx: Context, reporter: &dyn FixReporter) -> i32 {
   let mut contains_unfixable_issues = false;
   let mut was_invalid = false;
 
@@ -26,16 +23,14 @@ pub fn run(ctx: Context) -> i32 {
           .for_each(|instance| {
             was_invalid = true;
             if !has_printed_group {
-              ui::group::print_header(&ctx, group);
+              reporter.on_group_header(&ctx, group);
               has_printed_group = true;
             }
             if !has_printed_dependency {
-              ui::dependency::print_fixed(&ctx, dependency, &group.variant);
+              reporter.on_dependency(&ctx, dependency, &group.variant);
               has_printed_dependency = true;
             }
-            if ctx.config.cli.show_instances {
-              ui::instance::print_fixed(&ctx, instance, &group.variant);
-            }
+            reporter.on_instance(&ctx, instance, &group.variant);
             if instance.is_banned() {
               instance.remove()
             } else {
@@ -52,12 +47,11 @@ pub fn run(ctx: Context) -> i32 {
   }
 
   if contains_unfixable_issues {
-    println!(" ");
-    warn!("Some issues remain which cannot be fixed automatically, run syncpack lint to view them");
+    reporter.on_unfixable_warning();
   }
 
   if !contains_unfixable_issues && !was_invalid {
-    ui::util::print_no_issues_found();
+    reporter.on_no_issues();
   }
 
   if contains_unfixable_issues {

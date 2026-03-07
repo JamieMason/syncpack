@@ -39,6 +39,12 @@ pub enum UpdateTarget {
 }
 
 #[derive(Debug)]
+pub enum ReporterKind {
+  Pretty,
+  Json,
+}
+
+#[derive(Debug)]
 pub struct Cli {
   /// Whether to check formatting instead of fixing it
   pub check: bool,
@@ -80,6 +86,8 @@ pub struct Cli {
   pub subcommand: Subcommand,
   /// How greedy npm updates should be
   pub target: UpdateTarget,
+  /// Output format for fix and format commands
+  pub reporter: ReporterKind,
 }
 
 impl Cli {
@@ -96,6 +104,7 @@ impl Cli {
         dry_run: (matches!(&subcommand, Subcommand::Fix | Subcommand::Format | Subcommand::Update)) && matches.get_flag("dry-run"),
         log_levels: get_log_levels(matches),
         packages: get_patterns(matches, "packages"),
+        reporter: get_reporter(&subcommand, matches),
         show_hints: should_show(matches, "hints"),
         show_ignored: should_show(matches, "ignored"),
         show_instances: should_show(matches, "instances"),
@@ -125,6 +134,7 @@ impl Cli {
         dry_run: false,
         log_levels: vec![],
         packages: vec![],
+        reporter: ReporterKind::Pretty,
         show_hints: false,
         show_ignored: false,
         show_instances: false,
@@ -145,6 +155,7 @@ impl Cli {
         dry_run: false,
         log_levels: vec![],
         packages: vec![],
+        reporter: ReporterKind::Pretty,
         show_hints: false,
         show_ignored: false,
         show_instances: false,
@@ -165,6 +176,7 @@ impl Cli {
         dry_run: false,
         log_levels: vec![],
         packages: vec![],
+        reporter: ReporterKind::Pretty,
         show_hints: false,
         show_ignored: false,
         show_instances: false,
@@ -185,6 +197,7 @@ impl Cli {
         dry_run: false,
         log_levels: vec![],
         packages: vec![],
+        reporter: ReporterKind::Pretty,
         show_hints: false,
         show_ignored: false,
         show_instances: false,
@@ -205,6 +218,7 @@ impl Cli {
         dry_run: false,
         log_levels: vec![],
         packages: vec![],
+        reporter: ReporterKind::Pretty,
         show_hints: false,
         show_ignored: false,
         show_instances: false,
@@ -272,6 +286,7 @@ fn create() -> Command {
         .arg(dry_run_option("fix"))
         .arg(log_levels_option("fix"))
         .arg(no_ansi_option("fix"))
+        .arg(reporter_option("fix"))
         .arg(show_option_versions("fix"))
         .arg(sort_option("fix"))
         .arg(source_option("fix"))
@@ -291,6 +306,7 @@ fn create() -> Command {
         .arg(dry_run_option("format"))
         .arg(log_levels_option("format"))
         .arg(no_ansi_option("format"))
+        .arg(reporter_option("format"))
         .arg(source_option("format")),
     )
     .subcommand(
@@ -586,6 +602,23 @@ See <blue>https://syncpack.dev/config/custom-types/</>
     .value_name("comma-separated-dependency-type-names")
 }
 
+fn reporter_option(command: &str) -> Arg {
+  let short_help = "Set the output format for the command";
+  Arg::new("reporter")
+    .long("reporter")
+    .help(short_help)
+    .long_help(cformat!(
+      r#"{short_help}
+
+<bold><underline>Examples:</underline></bold>
+<dim>Output as newline-delimited JSON</dim>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --reporter json</>"#
+    ))
+    .value_parser(["pretty", "json"])
+    .value_name("reporter-name")
+    .default_value("pretty")
+}
+
 fn dry_run_option(command: &str) -> Arg {
   let short_help = "Simulate changes without writing them to disk";
   Arg::new("dry-run")
@@ -720,6 +753,17 @@ fn get_patterns(matches: &ArgMatches, option_name: &str) -> Vec<String> {
     .flatten()
     .map(|source| source.into_iter().map(|source| source.to_owned()).collect_vec())
     .unwrap_or_default()
+}
+
+fn get_reporter(subcommand: &Subcommand, matches: &ArgMatches) -> ReporterKind {
+  if matches!(subcommand, Subcommand::Fix | Subcommand::Format) {
+    match matches.get_one::<String>("reporter").map(|s| s.as_str()) {
+      Some("json") => ReporterKind::Json,
+      _ => ReporterKind::Pretty,
+    }
+  } else {
+    ReporterKind::Pretty
+  }
 }
 
 fn get_target(matches: &ArgMatches) -> UpdateTarget {
