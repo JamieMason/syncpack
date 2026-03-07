@@ -35,8 +35,8 @@ fn default_false() -> bool {
   false
 }
 
-fn default_indent() -> String {
-  "  ".to_string()
+fn default_indent() -> Option<String> {
+  None
 }
 
 fn default_sort_az() -> Vec<String> {
@@ -122,7 +122,7 @@ pub struct Rcfile {
   #[serde(default = "default_false")]
   pub format_repository: bool,
   #[serde(default = "default_indent")]
-  pub indent: String,
+  pub indent: Option<String>,
   #[serde(default = "default_max_concurrent_requests")]
   pub max_concurrent_requests: usize,
   #[serde(default)]

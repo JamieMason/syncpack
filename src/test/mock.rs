@@ -84,6 +84,8 @@ pub fn package_json_from_value(contents: Value) -> PackageJson {
     formatting_mismatches: RefCell::new(vec![]),
     json: RefCell::new(contents.to_string()),
     contents: RefCell::new(contents),
+    detected_indent: "  ".to_string(),
+    detected_newline: "\n".to_string(),
   }
 }
 

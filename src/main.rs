@@ -29,6 +29,8 @@ mod instance;
 mod instance_state;
 mod logger;
 mod package_json;
+#[cfg(test)]
+mod package_json_test;
 mod packages;
 #[cfg(test)]
 mod packages_test;

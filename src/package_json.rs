@@ -1,5 +1,7 @@
 use {
   crate::{config::Config, dependency_type::Strategy, instance::Instance},
+  detect_indent::detect_indent,
+  detect_newline_style::LineEnding,
   log::error,
   serde::Serialize,
   serde_json::{ser::PrettyFormatter, Serializer, Value},
@@ -18,6 +20,10 @@ pub struct PackageJson {
   pub json: RefCell<String>,
   /// The parsed JSON object
   pub contents: RefCell<Value>,
+  /// Indentation detected from the file's raw content (e.g. "  ", "    ", "\t")
+  pub detected_indent: String,
+  /// Newline style detected from the file's raw content (e.g. "\n", "\r\n")
+  pub detected_newline: String,
 }
 
 #[derive(Debug)]
@@ -50,6 +56,41 @@ pub enum FormatMismatchVariant {
 }
 
 impl PackageJson {
+  /// Parse a package.json from a raw JSON string and a file path
+  pub fn from_raw(raw: &str, file_path: PathBuf) -> Option<Self> {
+    serde_json::from_str(raw)
+      .inspect_err(|_| {
+        error!("Invalid JSON: {}", file_path.to_str().unwrap_or("unknown"));
+      })
+      .map(|contents: Value| {
+        let detected_indent = detect_indent(raw).indent().to_string();
+        let detected_indent = if detected_indent.is_empty() {
+          "  ".to_string()
+        } else {
+          detected_indent
+        };
+        let detected_newline = match LineEnding::find_or_use_lf(raw) {
+          LineEnding::CRLF => "\r\n".to_string(),
+          LineEnding::CR => "\r".to_string(),
+          LineEnding::LF => "\n".to_string(),
+        };
+        Self {
+          name: contents
+            .pointer("/name")
+            .and_then(|name| name.as_str())
+            .unwrap_or("NAME_IS_MISSING")
+            .to_string(),
+          file_path,
+          formatting_mismatches: RefCell::new(vec![]),
+          json: RefCell::new(contents.to_string()),
+          contents: RefCell::new(contents),
+          detected_indent,
+          detected_newline,
+        }
+      })
+      .ok()
+  }
+
   /// Read a package.json file from the given location
   pub fn from_file(file_path: &PathBuf) -> Option<Self> {
     fs::read_to_string(file_path)
@@ -57,24 +98,7 @@ impl PackageJson {
         error!("package.json not readable at {}", &file_path.to_str().unwrap());
       })
       .ok()
-      .and_then(|json| {
-        serde_json::from_str(&json)
-          .inspect_err(|_| {
-            error!("Invalid JSON: {}", &file_path.to_str().unwrap());
-          })
-          .map(|contents: Value| Self {
-            name: contents
-              .pointer("/name")
-              .and_then(|name| name.as_str())
-              .unwrap_or("NAME_IS_MISSING")
-              .to_string(),
-            file_path: file_path.clone(),
-            formatting_mismatches: RefCell::new(vec![]),
-            json: RefCell::new(contents.to_string()),
-            contents: RefCell::new(contents),
-          })
-          .ok()
-      })
+      .and_then(|raw| Self::from_raw(&raw, file_path.clone()))
   }
 
   /// Does a property exist at this path of the parsed package.json?
@@ -128,18 +152,20 @@ impl PackageJson {
     };
   }
 
-  /// Serialize the parsed JSON object back into pretty JSON as bytes
-  pub fn serialize(&self, indent: &str) -> Vec<u8> {
-    // Create a pretty JSON formatter
-    let indent_with_fixed_tabs = &indent.replace("\\t", "	");
+  /// Serialize the parsed JSON object back into pretty JSON as bytes.
+  /// Pass `Some(indent)` to override the detected indent, or `None` to use the detected value.
+  pub fn serialize(&self, config_indent: Option<&str>) -> Vec<u8> {
+    // Resolve indent: config wins, otherwise fall back to detected
+    let indent = config_indent.unwrap_or(&self.detected_indent);
+    let indent_with_fixed_tabs = &indent.replace("\\t", "\t");
     let formatter = PrettyFormatter::with_indent(indent_with_fixed_tabs.as_bytes());
     let buffer = Vec::new();
     let mut serializer = Serializer::with_formatter(buffer, formatter);
     // Write pretty JSON to the buffer
     self.contents.serialize(&mut serializer).expect("Failed to serialize package.json");
-    // Append a new line to the buffer
+    // Append the detected newline to the buffer
     let mut writer = serializer.into_inner();
-    writer.extend(b"\n");
+    writer.extend(self.detected_newline.as_bytes());
     writer
   }
 
@@ -151,7 +177,7 @@ impl PackageJson {
 
   /// Write the package.json to disk, returns whether the file has changed
   pub fn write_to_disk(&self, config: &Config) -> bool {
-    let vec = self.serialize(&config.rcfile.indent);
+    let vec = self.serialize(config.rcfile.indent.as_deref());
     std::fs::write(&self.file_path, &vec).expect("Failed to write package.json to disk");
     let next_json = self.to_pretty_json(vec);
     let has_changed = next_json != *self.json.borrow();

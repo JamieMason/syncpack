@@ -233,6 +233,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52560adf09603e58c9a7ee1fe1dcb95a16927b17c127f0ac02d6e768a0e25bc1"
 
 [[package]]
+name = "detect-indent"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ae11867b75e44bacc8baf64be8abe6501c6571bbf33fed819a0a90623c82d1b"
+dependencies = [
+ "lazy_static",
+ "regex",
+]
+
+[[package]]
+name = "detect-newline-style"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1124f25c3615ab547669f878088cef84850679327f79eccc70412c25a6643749"
+dependencies = [
+ "regex",
+]
+
+[[package]]
 name = "displaydoc"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1236,6 +1255,8 @@ dependencies = [
  "color-print",
  "colored",
  "ctor",
+ "detect-indent",
+ "detect-newline-style",
  "env_logger",
  "globset",
  "indicatif",
