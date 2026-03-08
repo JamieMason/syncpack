@@ -15,7 +15,8 @@ export const getStaticPaths = (async () => {
 export const GET: APIRoute = async ({ props }) => {
   const { entry } = props as any;
   const title = entry.data.title || ' ';
-  const description = 'Consistent dependency versions in large JavaScript Monorepos';
+  const defaultDescription = 'Consistent dependency versions in large JavaScript Monorepos';
+  const description = entry.data.description || defaultDescription;
 
   return await satoriAstroOG({
     template: html`
