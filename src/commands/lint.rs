@@ -21,7 +21,7 @@ pub fn run(ctx: Context) -> i32 {
             has_printed_dependency = true;
           }
           if ctx.config.cli.show_instances {
-            ui::instance::print(&ctx, instance, &group.variant);
+            ui::instance::print(&ctx, instance);
           }
           is_invalid = true;
         });

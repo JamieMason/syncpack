@@ -13,7 +13,7 @@ pub fn run(ctx: Context) -> i32 {
         ui::dependency::print(&ctx, dependency, &group.variant);
         dependency.get_sorted_instances().for_each(|instance| {
           if ctx.config.cli.show_instances {
-            ui::instance::print(&ctx, instance, &group.variant);
+            ui::instance::print(&ctx, instance);
           }
           if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {
             is_invalid = true;

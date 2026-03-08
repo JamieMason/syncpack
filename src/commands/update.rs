@@ -32,13 +32,13 @@ pub fn run(ctx: Context) -> i32 {
                 ui::dependency::print_outdated(&ctx, dependency, &group.variant);
                 has_printed_dependency = true;
               }
-              ui::instance::print_outdated(&ctx, instance, &group.variant);
+              ui::instance::print_outdated(&ctx, instance);
             } else {
               if !has_printed_dependency {
                 ui::dependency::print_fixed(&ctx, dependency, &group.variant);
                 has_printed_dependency = true;
               }
-              ui::instance::print_fixed(&ctx, instance, &group.variant);
+              ui::instance::print_fixed(&ctx, instance);
               instance.descriptor.package.borrow().copy_expected_specifier(instance);
             }
           });

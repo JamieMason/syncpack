@@ -39,9 +39,9 @@ impl FixReporter for PrettyFixReporter {
     ui::dependency::print_fixed(ctx, dependency, variant);
   }
 
-  fn on_instance(&self, ctx: &Context, instance: &Instance, variant: &VersionGroupVariant) {
+  fn on_instance(&self, ctx: &Context, instance: &Instance, _variant: &VersionGroupVariant) {
     if ctx.config.cli.show_instances {
-      ui::instance::print_fixed(ctx, instance, variant);
+      ui::instance::print_fixed(ctx, instance);
     }
   }
 
