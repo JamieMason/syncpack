@@ -76,6 +76,8 @@ export function linkAliases() {
     SEMVER_GROUP_IGNORED: '/semver-groups/ignored/',
     SEMVER_GROUP_WITH_RANGE: '/semver-groups/with-range/',
 
+    STATUS_SAME_MINOR_MISMATCH: '/status/same-minor-mismatch',
+
     VERSION_GROUP_BANNED: '/version-groups/banned/',
     VERSION_GROUP_HIGHEST_SEMVER: '/version-groups/highest-semver/',
     VERSION_GROUP_IGNORED: '/version-groups/ignored/',

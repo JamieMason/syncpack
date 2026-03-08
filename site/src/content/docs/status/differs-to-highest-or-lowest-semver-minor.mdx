@@ -1,0 +1,21 @@
+---
+title: DiffersToHighestOrLowestSemverMinor
+status: fixable
+description: Same-minor dependency version differs from preferred highest or lowest minor version in its group
+---
+
+## When this happens
+
+- ✓ Instance is in a [Same Minor](VERSION_GROUP_SAME_MINOR) version group with `preferVersion` set
+- ✓ All instances share the same MAJOR version
+- ✘ Instance's MAJOR.MINOR is not the highest (or lowest) MAJOR.MINOR in the group
+
+## How it's fixed
+
+The instance is updated to match the preferred MAJOR.MINOR target. The range selection follows this priority:
+
+1. If instance has a [With Range](SEMVER_GROUP_WITH_RANGE) semver group with a safe preferred range → use preferred range
+2. If instance has no semver group and on-disk range is safe → preserve on-disk range
+3. Otherwise → force `~` (Same Minor policy wins over unsafe ranges)
+
+Safe ranges are `""` (Exact) and `~` (Patch).

@@ -1,0 +1,12 @@
+---
+title: SameMinorHasMajorMismatch
+status: unfixable
+description: Same-minor dependency has instances with different major versions
+---
+
+## When this happens
+
+- ✘ Instance is in a [Same Minor](VERSION_GROUP_SAME_MINOR) version group
+- ✘ One or more other instances have a different MAJOR version
+- ? Crossing a major version boundary is unsafe
+- ? We cannot know which MAJOR version the user wants and have to ask them

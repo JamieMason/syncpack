@@ -349,6 +349,26 @@ impl Instance {
         .satisfies_all(&instances.iter().map(|i| Rc::clone(&i.descriptor.specifier)).collect::<Vec<_>>())
   }
 
+  /// Does this instance have the same major version as all other instances?
+  /// Semver ranges are not taken into account.
+  pub fn already_has_same_major_as_all(&self, instances: &[Rc<Instance>]) -> bool {
+    if matches!(&*self.descriptor.specifier, Specifier::None) {
+      return false;
+    }
+    match self.descriptor.specifier.get_node_version() {
+      None => false,
+      Some(a) => instances.iter().all(|other_instance| {
+        if matches!(&*other_instance.descriptor.specifier, Specifier::None) {
+          return false;
+        }
+        match other_instance.descriptor.specifier.get_node_version() {
+          None => false,
+          Some(b) => a.major == b.major,
+        }
+      }),
+    }
+  }
+
   /// Does this instance have the same major.minor version as all other
   /// instances? Semver ranges are not taken into account.
   pub fn already_has_same_minor_number_as_all(&self, instances: &[Rc<Instance>]) -> bool {

@@ -313,6 +313,15 @@ pub enum FixableInstance {
   /// - ! The semver group requires a range which would break same minor policy
   /// - ! Same minor policy wins
   SameMinorOverridesSemverRangeMismatch,
+  /// - ✓ Instance is in a sameMinor version group with preferVersion set
+  /// - ✓ All instances share the same MAJOR version
+  /// - ✘ Instance's MAJOR.MINOR is not the highest (or lowest) MAJOR.MINOR in the group
+  /// - ! Fix: update to the preferred MAJOR.MINOR target
+  /// - ! Range selection (in priority order):
+  ///     1. If instance has a semver group with a safe preferred range → use preferred range
+  ///     2. If instance has no semver group and on-disk range is safe → preserve on-disk range
+  ///     3. Otherwise → force ~ (sameMinor policy wins over unsafe ranges)
+  DiffersToHighestOrLowestSemverMinor,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -333,6 +342,11 @@ pub enum UnfixableInstance {
   /// - ? Instance has no semver group
   /// - ? We can't know what range the user wants and have to ask them
   SameMinorMismatch,
+  /// - ✘ Instance is in a sameMinor version group
+  /// - ✘ One or more other instances have a different MAJOR version
+  /// - ? Crossing a major version boundary is unsafe
+  /// - ? We cannot know which MAJOR the user wants and have to ask them
+  SameMinorHasMajorMismatch,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

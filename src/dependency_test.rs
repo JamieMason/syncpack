@@ -25,7 +25,7 @@ fn internal_name_is_supported() {
     (false, "simplemde>marked"),
   ];
   for (expected, name) in scenarios {
-    let dependency = Dependency::new(name.to_string(), VersionGroupVariant::HighestSemver, None, None);
+    let dependency = Dependency::new(name.to_string(), VersionGroupVariant::HighestSemver, None, None, None);
     assert_eq!(expected, dependency.internal_name_is_supported());
   }
 }

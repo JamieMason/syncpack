@@ -13,7 +13,11 @@ import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
 import Details from "@site/components/details.astro";
 
-Ensure that all instances of dependencies in this group have the same `MAJOR.MINOR` version number, while allowing different patch versions. The only Semver Ranges which are allowed are exact and `~`.
+Loosen requirements to only ensure that the `MAJOR.MINOR.x` version number should match for all members of this group, allowing different patch versions. The only semver ranges allowed are exact and `~` as others will allow versions to be installed outside of this range.
+
+Consider whether you need this behaviour because it will result in another copy of the same dependency being installed for every patch version number which is not the same. Usually we're trying to reduce the number of variables in our system and increase confidence, so most people won't need this.
+
+One use case where a Same Minor group can help is when using a [dependency group](CONFIG_DEPENDENCY_GROUPS) to alias multiple related packages such as `@aws-sdk/**` into one, each package in the set may not have identical version numbers, but they should fall within the same minor.
 
 ## Configuration
 
@@ -47,6 +51,35 @@ Set the policy to "sameMinor" to enable this behaviour for a Version Group.
 ### label <Badge text="Optional" variant="note" />
 
 <Label />
+
+### preferVersion <Badge text="Optional" variant="note" />
+
+When set, determines how to resolve versions when instances differ in their MAJOR.MINOR (while sharing the same MAJOR version).
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react", "react-dom"],
+      "policy": "sameMinor",
+      "preferVersion": "highestSemver"
+    }
+  ]
+}
+```
+
+#### Possible values
+
+The default status for instances that differ in MAJOR.MINOR is [`SameMinorMismatch`](STATUS_SAME_MINOR_MISMATCH), which is not auto-fixable, since syncpack can't know which minor versions are safe to change without your guidance.
+
+:::caution
+
+Setting a `preferVersion` loosens this requirement, but beware of dependencies which are still within `0.x.x` or whose authors don't follow strict semver correctly.
+
+:::
+
+- `"highestSemver"` - Updates instances to use the highest MAJOR.MINOR version found in the group
+- `"lowestSemver"` - Updates instances to use the lowest MAJOR.MINOR version found in the group
 
 ### packages <Badge text="Optional" variant="note" />
 

@@ -61,6 +61,16 @@ pub enum VersionGroupVariant {
   SnappedTo,
 }
 
+/// When a version group has `preferVersion` set, this determines the direction
+/// used to pick a winner among differing versions.
+#[derive(Clone, Debug)]
+pub enum PreferVersion {
+  /// All instances should use the highest semver version found
+  HighestSemver,
+  /// All instances should use the lowest semver version found
+  LowestSemver,
+}
+
 #[derive(Debug)]
 pub struct VersionGroup {
   /// Group instances of each dependency together for comparison.
@@ -69,6 +79,9 @@ pub struct VersionGroup {
   pub matches_cli_filter: bool,
   /// The version to pin all instances to when variant is `Pinned`
   pub pin_version: Option<Rc<Specifier>>,
+  /// When set, determines whether to prefer the highest or lowest version
+  /// within a version group that supports it (e.g. `SameMinor`).
+  pub prefer_version: Option<PreferVersion>,
   /// Data to determine which instances should be added to this group
   pub selector: GroupSelector,
   /// package.json files whose names match the `snapTo` config when variant is
@@ -85,6 +98,7 @@ impl VersionGroup {
       dependencies: BTreeMap::new(),
       matches_cli_filter: false,
       pin_version: None,
+      prefer_version: None,
       selector: GroupSelector::new(
         /* all_packages: */ &Packages::new(),
         /* include_dependencies: */ vec![],
@@ -109,6 +123,7 @@ impl VersionGroup {
           /* variant: */ self.variant.clone(),
           /* pin_version: */ self.pin_version.clone(),
           /* snap_to: */ self.snap_to.clone(),
+          /* prefer_version: */ self.prefer_version.clone(),
         )
       });
     if instance.descriptor.name != dependency.internal_name {
@@ -138,6 +153,7 @@ impl VersionGroup {
         dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
+        prefer_version: None,
         selector,
         snap_to: None,
         variant: VersionGroupVariant::Banned,
@@ -148,6 +164,7 @@ impl VersionGroup {
         dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
+        prefer_version: None,
         selector,
         snap_to: None,
         variant: VersionGroupVariant::Ignored,
@@ -158,6 +175,7 @@ impl VersionGroup {
         dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: Some(Specifier::new(pin_version)),
+        prefer_version: None,
         selector,
         snap_to: None,
         variant: VersionGroupVariant::Pinned,
@@ -169,15 +187,24 @@ impl VersionGroup {
           dependencies: BTreeMap::new(),
           matches_cli_filter: false,
           pin_version: None,
+          prefer_version: None,
           selector,
           snap_to: None,
           variant: VersionGroupVariant::SameRange,
         };
       } else if policy == "sameMinor" {
+        let prefer_version = group.prefer_version.as_ref().map(|pv| {
+          if pv == "lowestSemver" {
+            PreferVersion::LowestSemver
+          } else {
+            PreferVersion::HighestSemver
+          }
+        });
         return VersionGroup {
           dependencies: BTreeMap::new(),
           matches_cli_filter: false,
           pin_version: None,
+          prefer_version,
           selector,
           snap_to: None,
           variant: VersionGroupVariant::SameMinor,
@@ -192,6 +219,7 @@ impl VersionGroup {
         dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
+        prefer_version: None,
         selector,
         snap_to: Some(
           snap_to
@@ -213,6 +241,7 @@ impl VersionGroup {
         dependencies: BTreeMap::new(),
         matches_cli_filter: false,
         pin_version: None,
+        prefer_version: None,
         selector,
         snap_to: None,
         variant: if prefer_version == "lowestSemver" {
@@ -226,6 +255,7 @@ impl VersionGroup {
       dependencies: BTreeMap::new(),
       matches_cli_filter: false,
       pin_version: None,
+      prefer_version: None,
       selector,
       snap_to: None,
       variant: VersionGroupVariant::HighestSemver,

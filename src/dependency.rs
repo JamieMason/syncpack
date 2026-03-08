@@ -12,8 +12,13 @@
 
 use {
   crate::{
-    context::Context, instance::Instance, instance_state::InstanceState, package_json::PackageJson, specifier::Specifier,
-    version_group::VersionGroupVariant,
+    context::Context,
+    instance::Instance,
+    instance_state::InstanceState,
+    package_json::PackageJson,
+    semver_range::SemverRange,
+    specifier::Specifier,
+    version_group::{PreferVersion, VersionGroupVariant},
   },
   itertools::Itertools,
   std::{cell::RefCell, cmp::Ordering, collections::HashMap, rc::Rc, vec},
@@ -60,6 +65,9 @@ pub struct Dependency {
   pub internal_name: String,
   /// The version to pin all instances to when variant is `Pinned`
   pub pinned_specifier: Option<Rc<Specifier>>,
+  /// When set, determines whether to prefer the highest or lowest version
+  /// within a version group that supports it (e.g. `SameMinor`).
+  pub prefer_version: Option<PreferVersion>,
   /// package.json files developed in the monorepo when variant is `SnappedTo`.
   /// Rc<RefCell<T>> for shared ownership with interior mutability.
   pub snapped_to_packages: Option<Vec<Rc<RefCell<PackageJson>>>>,
@@ -74,6 +82,7 @@ impl Dependency {
     variant: VersionGroupVariant,
     pinned_specifier: Option<Rc<Specifier>>,
     snapped_to_packages: Option<Vec<Rc<RefCell<PackageJson>>>>,
+    prefer_version: Option<PreferVersion>,
   ) -> Dependency {
     Dependency {
       expected: RefCell::new(None),
@@ -83,6 +92,7 @@ impl Dependency {
       matches_cli_filter: false,
       internal_name,
       pinned_specifier,
+      prefer_version,
       snapped_to_packages,
       variant,
     }
@@ -179,6 +189,48 @@ impl Dependency {
       }
     }
     unique_specifiers
+  }
+
+  /// Get the highest (or lowest) semver specifier in this group, for use by
+  /// the `SameMinor` visitor when `preferVersion` is set.
+  ///
+  /// Direction is read from `self.prefer_version`. Semver group preferred
+  /// ranges are applied before comparison (greedy-range tiebreaker). Returns
+  /// the winning specifier with its version number intact — range is applied
+  /// per-instance later by the visitor based on safe/unsafe rules.
+  pub fn get_highest_or_lowest_minor_specifier(&self) -> Option<Rc<Specifier>> {
+    let prefer_highest = match &self.prefer_version {
+      Some(PreferVersion::HighestSemver) => true,
+      Some(PreferVersion::LowestSemver) => false,
+      None => return None,
+    };
+    let specifiers = self
+      .get_instances()
+      .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
+      .map(|instance| {
+        // Apply preferred semver range for comparison (greedy-range tiebreaker)
+        // but if the preferred range is unsafe, use Patch instead so we
+        // compare using safe semantics within the sameMinor context.
+        let adjusted = instance
+          .preferred_semver_range
+          .as_ref()
+          .and_then(|range| {
+            let safe_range = if matches!(range, SemverRange::Exact | SemverRange::Patch) {
+              range.clone()
+            } else {
+              SemverRange::Patch
+            };
+            instance.descriptor.specifier.with_range(&safe_range)
+          })
+          .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier));
+        adjusted
+      });
+
+    if prefer_highest {
+      specifiers.max()
+    } else {
+      specifiers.min()
+    }
   }
 
   /// Get the highest (or lowest) semver specifier in this group.
