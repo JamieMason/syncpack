@@ -1,5 +1,15 @@
 # Changelog
 
+## [14.2.0](https://github.com/JamieMason/syncpack/compare/14.1.0...14.2.0) (2026-03-08)
+
+### Features
+
+* **groups:** extend and improve sameMinor policy ([42c31a3](https://github.com/JamieMason/syncpack/commit/42c31a34073d816317e5144a29fa63572b28a0e1))
+
+### Bug Fixes
+
+* **cli:** fix link to DiffersToHighestOrLowestSemver docs ([51bf8ff](https://github.com/JamieMason/syncpack/commit/51bf8fffda78b50881df5b0c5cb5a7ace5868e88)), closes [#324](https://github.com/JamieMason/syncpack/issues/324)
+
 ## [14.1.0](https://github.com/JamieMason/syncpack/compare/14.0.2...14.1.0) (2026-03-07)
 
 ### Features

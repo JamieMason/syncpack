@@ -1248,7 +1248,7 @@ dependencies = [
 
 [[package]]
 name = "syncpack"
-version = "14.1.0"
+version = "14.2.0"
 dependencies = [
  "async-trait",
  "clap",
