@@ -49,7 +49,7 @@ Then explain the trade-offs if needed.
 Readers have a question in mind. Answer it in the first sentence.
 
 **Bad (makes reader wait):**
-"Syncpack is a CLI tool built in Rust. It uses a configuration file in JSON format. The configuration file specifies rules for how to synchronize dependencies. These rules can be customized per workspace..."
+"Syncpack is a CLI tool built in Rust. It uses a configuration file in JSON format. The configuration file specifies rules for how to synchronise dependencies. These rules can be customized per workspace..."
 
 Reader's question: "How do I configure Syncpack?" Buried in paragraph 3.
 

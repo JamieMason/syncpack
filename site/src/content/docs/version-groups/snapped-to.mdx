@@ -1,6 +1,6 @@
 ---
 title: Snapped To
-description: Synchronize dependency versions to match those defined in a specific source package
+description: Synchronise dependency versions to match those defined in a specific source package
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -11,7 +11,9 @@ import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
 import Details from "@site/components/details.astro";
 
-Pin the version of all dependencies in this group to follow the versions used by the other packages named within the `snapTo` array.
+Synchronise versions by following a source package. Every dependency in this group will use the same version as defined in the packages you've designated via the `snapTo` array.
+
+This is useful when certain packages within your monorepo are the source of truth for dependency versions. For example, if your main application package has been carefully tested with specific versions, you want all other packages to follow those same versions to ensure consistency and reduce the variables in your system.
 
 ## Configuration
 
@@ -50,3 +52,26 @@ Pin the version of all dependencies in this group to follow the versions used by
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+## Status Codes
+
+These are all the issues that a {frontmatter.title} Version Group can find:
+
+### Valid
+
+- [IsIdenticalToSnapTarget](/status/is-identical-to-snap-target)
+- [SatisfiesSnapTarget](/status/satisfies-snap-target)
+
+### Fixable
+
+- [DiffersToSnapTarget](/status/differs-to-snap-target)
+
+### Suspect
+
+- [RefuseToSnapLocal](/status/refuse-to-snap-local)
+- [DependsOnMissingSnapTarget](/status/depends-on-missing-snap-target)
+
+### Conflict
+
+- [MatchConflictsWithSnapTarget](/status/match-conflicts-with-snap-target)
+- [MismatchConflictsWithSnapTarget](/status/mismatch-conflicts-with-snap-target)

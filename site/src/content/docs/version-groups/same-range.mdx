@@ -1,6 +1,6 @@
 ---
 title: Same Range
-description: Keep dependencies synchronized to identical version ranges across your monorepo
+description: Ensure all semver ranges for a dependency overlap across your monorepo
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -11,7 +11,33 @@ import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
 import Details from "@site/components/details.astro";
 
-Relax syncpack to ensure that all versions have semver ranges which all satisfy each other, instead of having to be identical.
+Checks that every instance of a dependency uses a semver range that **overlaps** with every other instance in the group. Ranges don't need to be identical — they just need to share at least one version in common (ie. they _intersect_).
+
+This is the loosest version group policy. It does **not** enforce identical versions — the default [Highest Semver](/version-groups/highest-semver) group does that. It does **not** enforce same minor versions — use [`sameMinor`](/version-groups/same-minor) for that.
+
+:::caution
+`sameRange` only works with semver **ranges** like `^1.2.3`, `>=1.0.0`, or `~2.0.0`. Exact pinned versions like `1.0.0` and `1.0.1` are non-overlapping ranges — they will be flagged as mismatches because no single version satisfies both. If you want to enforce that exact versions share the same minor number, use [`sameMinor`](/version-groups/same-minor) instead.
+:::
+
+#### When to use this
+
+- **Peer dependencies** where different packages legitimately need different ranges, as long as a compatible version can be resolved
+- **Typed dependencies** (`foo` and `@types/foo`) that may move on different release cadences but must coexist
+
+#### Examples
+
+**Overlapping ranges** — at least one version satisfies both:
+
+- `>=1.0.0` and `<=2.0.0` ✅ (versions 1.0.0–2.0.0 satisfy both)
+- `>=1.0.0` and `^1.2.3` ✅ (versions 1.2.3–1.x.x satisfy both)
+- `^1.0.0` and `~1.4.2` ✅ (versions 1.4.2–1.4.x satisfy both)
+
+**Non-overlapping ranges** — no version exists in both:
+
+- `>=1.0.0` and `<1.0.0` ✗
+- `~1.0.0` and `1.4.2` ✗ (`~1.0.0` covers 1.0.x, the exact version 1.4.2 is outside it)
+
+Mismatches in a Same Range group are **unfixable** — syncpack cannot auto-fix them because it doesn't know which range should change. You'll need to resolve these manually.
 
 ## Configuration
 
@@ -49,3 +75,19 @@ Choose the "sameRange" policy to apply this behaviour to a Version Group.
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+## Status Codes
+
+These are all the issues that a {frontmatter.title} Version Group can find:
+
+### Valid
+
+- [SatisfiesSameRangeGroup](/status/satisfies-same-range-group)
+
+### Fixable
+
+- [SemverRangeMismatch](/status/semver-range-mismatch)
+
+### Unfixable
+
+- [SameRangeMismatch](/status/same-range-mismatch)

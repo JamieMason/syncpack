@@ -11,7 +11,9 @@ import Packages from "@partials/group-config/packages.mdx";
 import { Badge } from "@astrojs/starlight/components";
 import Details from "@site/components/details.astro";
 
-Find and remove dependencies which you've decided should never be used.
+Prevent dependencies you've decided should never be used. This helps teams enforce architectural decisions—for example, preventing accidental use of legacy packages, conflicting libraries, or packages that violate your security or licensing policy.
+
+Use this when you want to actively prevent a dependency from appearing anywhere in your monorepo, or only in specific packages. When syncpack finds a banned dependency, it flags it as an issue that must be removed.
 
 ## Configuration
 
@@ -49,3 +51,15 @@ This property activates this behaviour for a given Version Group.
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+## Status Codes
+
+These are all the issues that a {frontmatter.title} Version Group can find:
+
+### Fixable
+
+- [IsBanned](/status/is-banned)
+
+### Suspect
+
+- [RefuseToBanLocal](/status/refuse-to-ban-local)

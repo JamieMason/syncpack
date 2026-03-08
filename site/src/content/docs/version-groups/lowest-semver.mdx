@@ -1,6 +1,6 @@
 ---
 title: Lowest Semver
-description: Keep all dependencies synchronized to the lowest semver version found across your monorepo
+description: Keep all dependencies synchronised to the lowest semver version found across your monorepo
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -10,7 +10,7 @@ import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
 
-Fix mismatched versions in this group by choosing the lowest/oldest semver version in use.
+Require all dependencies in this group to use the lowest semver version found of all the instances where it is already installed in your monorepo. When versions differ, syncpack will align them to the lowest one installed.
 
 ## Examples
 
@@ -50,3 +50,21 @@ Must be set to `lowestSemver`.
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+## Status Codes
+
+These are all the issues that a {frontmatter.title} Version Group can find:
+
+### Valid
+
+- [IsHighestOrLowestSemver](/status/is-highest-or-lowest-semver)
+- [SatisfiesHighestOrLowestSemver](/status/satisfies-highest-or-lowest-semver)
+
+### Fixable
+
+- [DiffersToHighestOrLowestSemver](/status/differs-to-highest-or-lowest-semver)
+
+### Conflict
+
+- [MatchConflictsWithHighestOrLowestSemver](/status/match-conflicts-with-highest-or-lowest-semver)
+- [MismatchConflictsWithHighestOrLowestSemver](/status/mismatch-conflicts-with-highest-or-lowest-semver)
