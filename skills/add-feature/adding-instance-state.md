@@ -244,14 +244,14 @@ fn major_mismatch_marks_all_instances_unfixable() {
 Cover every leaf of the decision tree. For a visitor with semver group
 interaction, the minimum test matrix is:
 
-| scenario | test name pattern |
-|---|---|
-| no semver group, correct version | `satisfies_..._and_has_no_semver_group` |
-| no semver group, wrong version | `has_..._mismatch_and_no_semver_group` |
-| safe semver group, already matches | `satisfies_..._and_matches_compatible_..._semver_group` |
-| safe semver group, does not match | `satisfies_..._but_mismatches_compatible_..._semver_group` |
-| unsafe semver group, already matches | `..._but_range_matches_incompatible_..._semver_group` |
-| unsafe semver group, does not match | `..._but_range_mismatches_incompatible_..._semver_group` |
+| scenario                             | test name pattern                                          |
+| ------------------------------------ | ---------------------------------------------------------- |
+| no semver group, correct version     | `satisfies_..._and_has_no_semver_group`                    |
+| no semver group, wrong version       | `has_..._mismatch_and_no_semver_group`                     |
+| safe semver group, already matches   | `satisfies_..._and_matches_compatible_..._semver_group`    |
+| safe semver group, does not match    | `satisfies_..._but_mismatches_compatible_..._semver_group` |
+| unsafe semver group, already matches | `..._but_range_matches_incompatible_..._semver_group`      |
+| unsafe semver group, does not match  | `..._but_range_mismatches_incompatible_..._semver_group`   |
 
 ---
 
