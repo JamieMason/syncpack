@@ -10,4 +10,5 @@ flamegraph.svg
 lcp_trace.json
 node_modules/
 npm/packages/
+site/.link-checker
 target/
