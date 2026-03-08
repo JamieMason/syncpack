@@ -9,17 +9,17 @@ use {
 
 #[derive(Debug)]
 pub enum Subcommand {
-  Lint,
   Fix,
-  Format,
-  Update,
-  List,
-  Json,
-  ListMismatches,
-  LintSemverRanges,
   FixMismatches,
-  SetSemverRanges,
+  Format,
+  Json,
+  Lint,
+  LintSemverRanges,
+  List,
+  ListMismatches,
   Prompt,
+  SetSemverRanges,
+  Update,
 }
 
 #[derive(Debug)]
@@ -90,6 +90,32 @@ pub struct Cli {
   pub reporter: ReporterKind,
 }
 
+impl Default for Cli {
+  fn default() -> Self {
+    Self {
+      check: false,
+      config_path: None,
+      cwd: env::current_dir().unwrap_or_default(),
+      dependencies: Vec::new(),
+      dependency_types: Vec::new(),
+      disable_ansi: false,
+      dry_run: false,
+      log_levels: vec![LevelFilter::Warn],
+      packages: Vec::new(),
+      reporter: ReporterKind::Pretty,
+      show_hints: false,
+      show_ignored: false,
+      show_instances: false,
+      show_status_codes: false,
+      sort: SortBy::Name,
+      source_patterns: vec!["package.json".to_string(), "**/package.json".to_string()],
+      specifier_types: Vec::new(),
+      subcommand: Subcommand::Lint,
+      target: UpdateTarget::Latest,
+    }
+  }
+}
+
 impl Cli {
   /// Parse all command-line arguments from the user into a `Cli` struct
   pub fn parse() -> Self {
@@ -117,118 +143,25 @@ impl Cli {
       }
     }
 
+    fn from_deprecated(subcommand: Subcommand) -> Cli {
+      Cli {
+        subcommand,
+        ..Default::default()
+      }
+    }
+
     match create().get_matches().subcommand() {
-      Some(("lint", matches)) => from_arg_matches(Subcommand::Lint, matches),
       Some(("fix", matches)) => from_arg_matches(Subcommand::Fix, matches),
+      Some(("fix-mismatches", _)) => from_deprecated(Subcommand::FixMismatches),
       Some(("format", matches)) => from_arg_matches(Subcommand::Format, matches),
-      Some(("update", matches)) => from_arg_matches(Subcommand::Update, matches),
-      Some(("list", matches)) => from_arg_matches(Subcommand::List, matches),
       Some(("json", matches)) => from_arg_matches(Subcommand::Json, matches),
-      Some(("list-mismatches", _)) => Cli {
-        check: false,
-        config_path: None,
-        cwd: env::current_dir().unwrap(),
-        dependencies: vec![],
-        dependency_types: vec![],
-        disable_ansi: false,
-        dry_run: false,
-        log_levels: vec![],
-        packages: vec![],
-        reporter: ReporterKind::Pretty,
-        show_hints: false,
-        show_ignored: false,
-        show_instances: false,
-        show_status_codes: false,
-        sort: SortBy::Name,
-        source_patterns: vec![],
-        specifier_types: vec![],
-        subcommand: Subcommand::ListMismatches,
-        target: UpdateTarget::Latest,
-      },
-      Some(("lint-semver-ranges", _)) => Cli {
-        check: false,
-        config_path: None,
-        cwd: env::current_dir().unwrap(),
-        dependencies: vec![],
-        dependency_types: vec![],
-        disable_ansi: false,
-        dry_run: false,
-        log_levels: vec![],
-        packages: vec![],
-        reporter: ReporterKind::Pretty,
-        show_hints: false,
-        show_ignored: false,
-        show_instances: false,
-        show_status_codes: false,
-        sort: SortBy::Name,
-        source_patterns: vec![],
-        specifier_types: vec![],
-        subcommand: Subcommand::LintSemverRanges,
-        target: UpdateTarget::Latest,
-      },
-      Some(("fix-mismatches", _)) => Cli {
-        check: false,
-        config_path: None,
-        cwd: env::current_dir().unwrap(),
-        dependencies: vec![],
-        dependency_types: vec![],
-        disable_ansi: false,
-        dry_run: false,
-        log_levels: vec![],
-        packages: vec![],
-        reporter: ReporterKind::Pretty,
-        show_hints: false,
-        show_ignored: false,
-        show_instances: false,
-        show_status_codes: false,
-        sort: SortBy::Name,
-        source_patterns: vec![],
-        specifier_types: vec![],
-        subcommand: Subcommand::FixMismatches,
-        target: UpdateTarget::Latest,
-      },
-      Some(("set-semver-ranges", _)) => Cli {
-        check: false,
-        config_path: None,
-        cwd: env::current_dir().unwrap(),
-        dependencies: vec![],
-        dependency_types: vec![],
-        disable_ansi: false,
-        dry_run: false,
-        log_levels: vec![],
-        packages: vec![],
-        reporter: ReporterKind::Pretty,
-        show_hints: false,
-        show_ignored: false,
-        show_instances: false,
-        show_status_codes: false,
-        sort: SortBy::Name,
-        source_patterns: vec![],
-        specifier_types: vec![],
-        subcommand: Subcommand::SetSemverRanges,
-        target: UpdateTarget::Latest,
-      },
-      Some(("prompt", _)) => Cli {
-        check: false,
-        config_path: None,
-        cwd: env::current_dir().unwrap(),
-        dependencies: vec![],
-        dependency_types: vec![],
-        disable_ansi: false,
-        dry_run: false,
-        log_levels: vec![],
-        packages: vec![],
-        reporter: ReporterKind::Pretty,
-        show_hints: false,
-        show_ignored: false,
-        show_instances: false,
-        show_status_codes: false,
-        sort: SortBy::Name,
-        source_patterns: vec![],
-        specifier_types: vec![],
-        subcommand: Subcommand::Prompt,
-        target: UpdateTarget::Latest,
-      },
+      Some(("lint", matches)) => from_arg_matches(Subcommand::Lint, matches),
+      Some(("lint-semver-ranges", _)) => from_deprecated(Subcommand::LintSemverRanges),
+      Some(("list", matches)) => from_arg_matches(Subcommand::List, matches),
+      Some(("list-mismatches", _)) => from_deprecated(Subcommand::ListMismatches),
+      Some(("prompt", _)) => from_deprecated(Subcommand::Prompt),
+      Some(("set-semver-ranges", _)) => from_deprecated(Subcommand::SetSemverRanges),
+      Some(("update", matches)) => from_arg_matches(Subcommand::Update, matches),
       _ => {
         std::process::exit(1);
       }
