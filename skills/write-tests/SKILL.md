@@ -42,13 +42,13 @@ fn test_descriptive_name() {
         ])
         .with_version_group(json!({
             "dependencies": ["react"],
-            "pinned": "18.0.0"
+            "pinVersion": "18.0.0"
         }))
         .build_and_visit_packages();
 
     expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
-            state: InstanceState::fixable(DiffersToPinnedVersion),
+            state: InstanceState::fixable(DiffersToPin),
             dependency_name: "react",
             id: "react in /dependencies of pkg-a",
             actual: "17.0.0",
@@ -133,7 +133,7 @@ Study these files:
 
 - `src/visit_packages/banned_test.rs` — Comprehensive examples
 - `src/visit_packages/pinned_test.rs` — Version group testing
-- `src/visit_packages/local_test.rs` — Local package handling
+- `src/visit_packages/preferred_semver_test.rs` — Local package and highest/lowest semver handling
 
 ## Common Mistakes
 

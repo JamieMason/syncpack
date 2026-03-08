@@ -41,14 +41,14 @@ fn test_descriptive_name() {
         ])
         .with_version_group(json!({
             "dependencies": ["react"],
-            "pinned": "18.0.0"
+            "pinVersion": "18.0.0"
         }))
         .build_and_visit_packages();
 
     // 2. Assert expectations
     expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
-            state: InstanceState::fixable(DiffersToPinnedVersion),
+            state: InstanceState::fixable(DiffersToPin),
             dependency_name: "react",
             id: "react in /dependencies of package-a",
             actual: "17.0.0",
@@ -246,12 +246,24 @@ fn detects_version_mismatch_across_packages() {
         .build_and_visit_packages();
 
     // Both will be marked - one as reference, one as mismatch
-    let instances: Vec<_> = ctx.instances.iter()
-        .filter(|i| i.dependency.name == "lodash")
-        .collect();
-
-    assert_eq!(instances.len(), 2);
-    assert!(instances.iter().any(|i| i.is_invalid()));
+    expect(&ctx).to_have_instances(vec![
+        ExpectedInstance {
+            state: InstanceState::unfixable(SameRangeMismatch),
+            dependency_name: "lodash",
+            id: "lodash in /dependencies of pkg-a",
+            actual: "4.17.0",
+            expected: None,
+            overridden: None,
+        },
+        ExpectedInstance {
+            state: InstanceState::unfixable(SameRangeMismatch),
+            dependency_name: "lodash",
+            id: "lodash in /dependencies of pkg-b",
+            actual: "4.18.0",
+            expected: None,
+            overridden: None,
+        },
+    ]);
 }
 ```
 
@@ -355,13 +367,13 @@ fn validates_custom_package_manager_field() {
         .with_version_group(json!({
             "dependencies": ["pnpm"],
             "dependencyTypes": ["packageManager"],
-            "pinned": "8.0.0"
+            "pinVersion": "8.0.0"
         }))
         .build_and_visit_packages();
 
     expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
-            state: InstanceState::fixable(DiffersToPinnedVersion),
+            state: InstanceState::fixable(DiffersToPin),
             dependency_name: "pnpm",
             id: "pnpm in /packageManager of pkg-a",
             actual: "7.0.0",
@@ -397,15 +409,24 @@ fn enforces_caret_range() {
         }))
         .build_and_visit_packages();
 
-    let react = ctx.instances.iter()
-        .find(|i| i.dependency.name == "react")
-        .unwrap();
-    // React should be marked as needing fix (wrong range)
-
-    let lodash = ctx.instances.iter()
-        .find(|i| i.dependency.name == "lodash")
-        .unwrap();
-    // Lodash should be valid (correct range)
+    expect(&ctx).to_have_instances(vec![
+        ExpectedInstance {
+            state: InstanceState::fixable(SemverRangeMismatch),
+            dependency_name: "react",
+            id: "react in /dependencies of pkg-a",
+            actual: "~18.0.0",
+            expected: Some("^18.0.0"),
+            overridden: None,
+        },
+        ExpectedInstance {
+            state: InstanceState::valid(IsHighestOrLowestSemver),
+            dependency_name: "lodash",
+            id: "lodash in /dependencies of pkg-a",
+            actual: "^4.17.0",
+            expected: Some("^4.17.0"),
+            overridden: None,
+        },
+    ]);
 }
 ```
 
@@ -424,26 +445,35 @@ fn uses_highest_semver_found() {
             json!({"name": "pkg-b", "dependencies": {"lodash": "4.17.21"}}),
             json!({"name": "pkg-c", "dependencies": {"lodash": "4.17.10"}}),
         ])
-        .with_version_group(json!({
-            "dependencies": ["lodash"],
-            "policy": "highestSemver"
-        }))
+        // highestSemver is the default — no version group config needed
         .build_and_visit_packages();
 
-    // All should use 4.17.21 (highest)
-    let instances: Vec<_> = ctx.instances.iter()
-        .filter(|i| i.dependency.name == "lodash")
-        .collect();
-
-    let pkg_b = instances.iter()
-        .find(|i| i.package.name == "pkg-b")
-        .unwrap();
-    assert!(pkg_b.is_valid());  // Already at highest
-
-    let pkg_a = instances.iter()
-        .find(|i| i.package.name == "pkg-a")
-        .unwrap();
-    assert!(pkg_a.is_fixable());  // Needs update to 4.17.21
+    expect(&ctx).to_have_instances(vec![
+        ExpectedInstance {
+            state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+            dependency_name: "lodash",
+            id: "lodash in /dependencies of pkg-a",
+            actual: "4.17.0",
+            expected: Some("4.17.21"),
+            overridden: None,
+        },
+        ExpectedInstance {
+            state: InstanceState::valid(IsHighestOrLowestSemver),
+            dependency_name: "lodash",
+            id: "lodash in /dependencies of pkg-b",
+            actual: "4.17.21",
+            expected: Some("4.17.21"),
+            overridden: None,
+        },
+        ExpectedInstance {
+            state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+            dependency_name: "lodash",
+            id: "lodash in /dependencies of pkg-c",
+            actual: "4.17.10",
+            expected: Some("4.17.21"),
+            overridden: None,
+        },
+    ]);
 }
 ```
 
@@ -469,12 +499,10 @@ fn applies_first_matching_version_group() {
         .with_version_groups(vec![
             json!({
                 "dependencies": ["react"],
-                "pinned": "18.0.0"
+                "pinVersion": "18.0.0"
             }),
-            json!({
-                "dependencies": ["**"],  // Catches everything else
-                "policy": "highestSemver"
-            }),
+            // highestSemver is the default catch-all — no second group needed
+            // unless you want to be explicit
         ])
         .build_and_visit_packages();
 
@@ -557,23 +585,18 @@ fn manual_assertion_example() {
         }))
         .build_and_visit_packages();
 
-    // Find specific instance
+    // Find specific instance by id
     let react = ctx.instances.iter()
-        .find(|i| i.dependency.name == "react")
+        .find(|i| i.id == "react in /dependencies of pkg-a")
         .expect("Should find react instance");
 
-    // Make assertions
-    assert_eq!(react.dependency.name, "react");
-    assert_eq!(react.package.name, "pkg-a");
+    // Make assertions using descriptor fields
+    assert_eq!(react.descriptor.name, "react");
+    assert_eq!(react.descriptor.package.borrow().name, "pkg-a");
     assert!(react.is_valid());
 
-    // Check specifier
-    match &react.specifier {
-        Specifier::BasicSemver(basic) => {
-            assert_eq!(basic.raw, "17.0.0");
-        }
-        _ => panic!("Expected BasicSemver"),
-    }
+    // Check specifier via descriptor
+    assert_eq!(react.descriptor.specifier.get_raw(), "17.0.0");
 }
 ```
 
@@ -619,11 +642,11 @@ fn handles_malformed_version() {
         .build_and_visit_packages();
 
     let react = ctx.instances.iter()
-        .find(|i| i.dependency.name == "react")
+        .find(|i| i.id == "react in /dependencies of pkg-a")
         .unwrap();
 
     // Should be marked as unsupported
-    assert!(matches!(react.specifier, Specifier::Unsupported(_)));
+    assert!(matches!(*react.descriptor.specifier, Specifier::Tag(_) | Specifier::Unsupported(_)));
 }
 ```
 
@@ -646,10 +669,10 @@ fn handles_git_dependencies() {
         .build_and_visit_packages();
 
     let git_dep = ctx.instances.iter()
-        .find(|i| i.dependency.name == "my-pkg")
+        .find(|i| i.id == "my-pkg in /dependencies of pkg-a")
         .unwrap();
 
-    assert!(matches!(git_dep.specifier, Specifier::Git(_)));
+    assert!(matches!(*git_dep.descriptor.specifier, Specifier::Git(_)));
 }
 ```
 
@@ -702,7 +725,7 @@ Study these files for patterns:
 
 - `src/visit_packages/banned_test.rs` - Comprehensive examples
 - `src/visit_packages/pinned_test.rs` - Version group testing
-- `src/visit_packages/local_test.rs` - Local package handling
+- `src/visit_packages/preferred_semver_test.rs` - Local package and highest/lowest semver handling
 
 </good_examples>
 
@@ -746,11 +769,17 @@ let ctx = TestBuilder::new()
 let instance = ctx.instances[0];  // Fragile!
 ```
 
-✅ **Do** find instances by criteria
+✅ **Do** use `expect(&ctx).to_have_instances(...)` (preferred), or find by `id`
 
 ```rust
+// Preferred — declarative and checks all fields at once
+expect(&ctx).to_have_instances(vec![
+    ExpectedInstance { state: ..., id: "react in /dependencies of pkg-a", ... },
+]);
+
+// Alternative — find a single instance for a focused assertion
 let instance = ctx.instances.iter()
-    .find(|i| i.dependency.name == "react")
+    .find(|i| i.id == "react in /dependencies of pkg-a")
     .unwrap();
 ```
 
