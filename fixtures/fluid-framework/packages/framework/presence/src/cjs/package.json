@@ -1,0 +1,18 @@
+{
+	"name": "@fluidframework/presence",
+	"type": "commonjs",
+	"exports": {
+		"./beta": {
+			"types": "./beta.d.ts",
+			"default": "./index.js"
+		},
+		"./alpha": {
+			"types": "./alpha.d.ts",
+			"default": "./index.js"
+		},
+		"./legacy/alpha": {
+			"types": "./legacy.alpha.d.ts",
+			"default": "./index.js"
+		}
+	}
+}

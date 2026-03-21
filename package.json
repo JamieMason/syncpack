@@ -1,0 +1,40 @@
+{
+  "name": "syncpack-bench",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "bench": "./bench.sh"
+  },
+  "keywords": [],
+  "author": "Jamie Mason <jamie@foldleft.io> (https://github.com/JamieMason)",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "syncpack-7.0.0": "npm:syncpack@7.0.0",
+    "syncpack-8.0.0": "npm:syncpack@8.0.0",
+    "syncpack-9.0.0": "npm:syncpack@9.0.0",
+    "syncpack-10.0.0": "npm:syncpack@10.0.0",
+    "syncpack-11.2.1": "npm:syncpack@11.2.1",
+    "syncpack-12.0.0": "npm:syncpack@12.0.0",
+    "syncpack-12.0.1": "npm:syncpack@12.0.1",
+    "syncpack-12.1.0": "npm:syncpack@12.1.0",
+    "syncpack-12.2.0": "npm:syncpack@12.2.0",
+    "syncpack-12.3.0": "npm:syncpack@12.3.0",
+    "syncpack-12.3.1": "npm:syncpack@12.3.1",
+    "syncpack-12.3.2": "npm:syncpack@12.3.2",
+    "syncpack-12.3.3": "npm:syncpack@12.3.3",
+    "syncpack-12.4.0": "npm:syncpack@12.4.0",
+    "syncpack-13.0.0": "npm:syncpack@13.0.0",
+    "syncpack-13.0.1": "npm:syncpack@13.0.1",
+    "syncpack-13.0.2": "npm:syncpack@13.0.2",
+    "syncpack-13.0.3": "npm:syncpack@13.0.3",
+    "syncpack-13.0.4": "npm:syncpack@13.0.4",
+    "syncpack-14.0.0": "npm:syncpack@14.0.0",
+    "syncpack-14.0.1": "npm:syncpack@14.0.1",
+    "syncpack-14.0.2": "npm:syncpack@14.0.2",
+    "syncpack-14.1.0": "npm:syncpack@14.1.0",
+    "syncpack-14.2.0": "npm:syncpack@14.2.0",
+    "syncpack-14.2.1": "npm:syncpack@14.2.1"
+  }
+}
