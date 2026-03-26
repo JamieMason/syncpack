@@ -58,10 +58,7 @@ pub fn from_javascript_path(file_path: &Path) -> Result<RawRcfile, RcfileError> 
 }
 
 fn build_nodejs_script(file_path: &Path) -> String {
-  let escaped_file_path_for_nodejs = file_path
-    .to_string_lossy()
-    .replace('\\', "\\\\")
-    .replace('\'', "\\'");
+  let escaped_file_path_for_nodejs = file_path.to_string_lossy().replace('\\', "\\\\").replace('\'', "\\'");
   format!(
     r#"
     const {{ pathToFileURL }} = require('node:url');
@@ -165,9 +162,7 @@ mod tests {
     let path = PathBuf::from("/some/path/syncpack.config.cjs");
     let script = build_nodejs_script(&path);
     // Extract the import() argument — should NOT be a bare string literal
-    let import_call = script
-      .find("import(")
-      .expect("script should contain import()");
+    let import_call = script.find("import(").expect("script should contain import()");
     let after_import = &script[import_call + "import(".len()..];
     assert!(
       after_import.starts_with("pathToFileURL("),
