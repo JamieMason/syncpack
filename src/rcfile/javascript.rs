@@ -58,7 +58,10 @@ pub fn from_javascript_path(file_path: &Path) -> Result<RawRcfile, RcfileError> 
 }
 
 fn build_nodejs_script(file_path: &Path) -> String {
-  let escaped_file_path_for_nodejs = file_path.to_string_lossy().replace('\\', "\\\\");
+  let escaped_file_path_for_nodejs = file_path
+    .to_string_lossy()
+    .replace('\\', "\\\\")
+    .replace('\'', "\\'");
   format!(
     r#"
     const {{ pathToFileURL }} = require('node:url');
@@ -161,9 +164,15 @@ mod tests {
   fn script_does_not_import_raw_path() {
     let path = PathBuf::from("/some/path/syncpack.config.cjs");
     let script = build_nodejs_script(&path);
+    // Extract the import() argument — should NOT be a bare string literal
+    let import_call = script
+      .find("import(")
+      .expect("script should contain import()");
+    let after_import = &script[import_call + "import(".len()..];
     assert!(
-      !script.contains("import('/some/path/syncpack.config.cjs')"),
-      "import() should not use a raw file path directly"
+      after_import.starts_with("pathToFileURL("),
+      "import() argument should be pathToFileURL(...), got: {}",
+      &after_import[..after_import.find(')').unwrap_or(60)]
     );
   }
 
@@ -184,6 +193,20 @@ mod tests {
     assert!(
       script.contains("require('/some/path/syncpack.config.cjs')"),
       "require() should use the raw path since it handles OS paths natively"
+    );
+  }
+
+  #[test]
+  fn script_escapes_single_quotes_in_paths() {
+    let path = PathBuf::from("/user's projects/syncpack.config.cjs");
+    let script = build_nodejs_script(&path);
+    assert!(
+      script.contains("/user\\'s projects/syncpack.config.cjs"),
+      "single quotes in paths should be escaped to avoid JS syntax errors"
+    );
+    assert!(
+      !script.contains("/user's projects/"),
+      "unescaped single quote should not appear in the script"
     );
   }
 
