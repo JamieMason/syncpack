@@ -5,7 +5,7 @@ use {
     instance::{Instance, InstanceIdx},
     packages::Packages,
     rcfile::{error::RcfileError, Rcfile},
-    version_group::VersionGroup,
+    version_group::{VersionGroup, VersionGroupBehavior},
   },
   log::debug,
   std::{fmt, mem},
@@ -142,7 +142,7 @@ impl Context {
         .find(|group| group.selector.can_add(&descriptor))
         .and_then(|group| group.range.clone());
 
-      let version_group = version_groups.iter_mut().find(|group| group.selector.can_add(&descriptor));
+      let version_group = version_groups.iter_mut().find(|group| group.selector().can_add(&descriptor));
 
       let instance = Instance::new(descriptor, preferred_semver_range);
       let idx = InstanceIdx(instances.len());

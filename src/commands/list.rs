@@ -9,11 +9,11 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
   ctx
     .version_groups
     .iter()
-    .filter(|group| !group.has_ignored_variant() || ctx.config.cli.show_ignored)
+    .filter(|group| !group.is_ignored() || ctx.config.cli.show_ignored)
     .for_each(|group| {
       ui::group::print_header(&ctx, group);
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
-        ui::dependency::print(&ctx, dependency, &group.variant);
+        ui::dependency::print(&ctx, dependency, group.variant_label());
         dependency.get_sorted_instances(&ctx.instances).for_each(|instance| {
           if ctx.config.cli.show_instances {
             ui::instance::print(&ctx, instance);

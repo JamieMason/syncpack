@@ -2,41 +2,39 @@ use {
   crate::{
     instance::{FixableInstance::*, InstanceState, SemverGroupAndVersionConflict::*, SuspectInstance::*, ValidInstance::*},
     test::{
-      self,
+      builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    visit_packages::visit_packages,
-    Context,
+    version_group::visit_groups,
   },
   serde_json::json,
 };
 
 #[test]
 fn instance_identical_to_snapped_to_and_has_no_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -75,30 +73,29 @@ fn instance_identical_to_snapped_to_and_has_no_semver_group() {
 
 #[test]
 fn instance_has_different_version_to_snapped_to_and_has_no_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "1.1.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "1.1.0"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -137,30 +134,29 @@ fn instance_has_different_version_to_snapped_to_and_has_no_semver_group() {
 
 #[test]
 fn instance_has_same_version_number_as_snapped_to_but_a_different_range_and_has_no_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "^1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "devDependencies": {
-        "foo": "~1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "^1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "devDependencies": {
+          "foo": "~1.0.0"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -199,34 +195,30 @@ fn instance_has_same_version_number_as_snapped_to_but_a_different_range_and_has_
 
 #[test]
 fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_compatible_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "semverGroups": [{
-      "packages": ["follower"],
-      "range": "~"
-    }],
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "^1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "~1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "^1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "~1.0.0"
+        }
+      }),
+    ])
+    .with_semver_group(json!({"packages": ["follower"], "range": "~"}))
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -265,34 +257,30 @@ fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_co
 
 #[test]
 fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but_compatible_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "semverGroups": [{
-      "packages": ["follower"],
-      "range": "^"
-    }],
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": ">=1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "~1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": ">=1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "~1.0.0"
+        }
+      }),
+    ])
+    .with_semver_group(json!({"packages": ["follower"], "range": "^"}))
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -331,34 +319,30 @@ fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but
 
 #[test]
 fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_incompatible_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "semverGroups": [{
-      "packages": ["follower"],
-      "range": "<"
-    }],
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "<1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "<1.0.0"
+        }
+      }),
+    ])
+    .with_semver_group(json!({"packages": ["follower"], "range": "<"}))
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -397,34 +381,30 @@ fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_in
 
 #[test]
 fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but_incompatible_semver_group() {
-  let config = test::mock::config_from_mock(json!({
-    "semverGroups": [{
-      "packages": ["follower"],
-      "range": "<"
-    }],
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "~1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "~1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+    ])
+    .with_semver_group(json!({"packages": ["follower"], "range": "<"}))
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -463,29 +443,28 @@ fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but
 
 #[test]
 fn instance_cannot_find_a_snapped_to_version() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "version": "1.0.0"
-    }),
-    json!({
-      "name": "follower",
-      "version": "0.1.0",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "version": "1.0.0"
+      }),
+      json!({
+        "name": "follower",
+        "version": "0.1.0",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -516,29 +495,28 @@ fn instance_cannot_find_a_snapped_to_version() {
 
 #[test]
 fn instance_is_in_a_snapped_to_group_and_is_itself_a_snapped_to_target() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -577,27 +555,26 @@ fn instance_is_in_a_snapped_to_group_and_is_itself_a_snapped_to_target() {
 
 #[test]
 fn refuses_to_snap_local_version_to_another_target() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "snapTo": ["package-b"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "package-a",
-      "version": "1.1.0"
-    }),
-    json!({
-      "name": "package-b",
-      "version": "0.1.0",
-      "dependencies": {
-        "package-a": "0.0.1"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "snapTo": ["package-b"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "version": "1.1.0"
+      }),
+      json!({
+        "name": "package-b",
+        "version": "0.1.0",
+        "dependencies": {
+          "package-a": "0.0.1"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(RefuseToSnapLocal),
@@ -628,30 +605,29 @@ fn refuses_to_snap_local_version_to_another_target() {
 
 #[test]
 fn workspace_star_identical_to_snapped_to_target() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["localpkg"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "localpkg": "workspace:*"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "peerDependencies": {
-        "localpkg": "workspace:*"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["localpkg"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "localpkg": "workspace:*"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "peerDependencies": {
+          "localpkg": "workspace:*"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -690,30 +666,29 @@ fn workspace_star_identical_to_snapped_to_target() {
 
 #[test]
 fn workspace_star_differs_from_workspace_with_embedded_version() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["localpkg"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "localpkg": "workspace:^1.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "peerDependencies": {
-        "localpkg": "workspace:*"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["localpkg"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "localpkg": "workspace:^1.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "peerDependencies": {
+          "localpkg": "workspace:*"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -752,30 +727,29 @@ fn workspace_star_differs_from_workspace_with_embedded_version() {
 
 #[test]
 fn workspace_caret_identical_to_snapped_to_target() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["localpkg"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "localpkg": "workspace:^"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "localpkg": "workspace:^"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["localpkg"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "localpkg": "workspace:^"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "localpkg": "workspace:^"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -814,30 +788,29 @@ fn workspace_caret_identical_to_snapped_to_target() {
 
 #[test]
 fn workspace_tilde_identical_to_snapped_to_target() {
-  let config = test::mock::config_from_mock(json!({
-    "versionGroups": [{
-      "dependencies": ["localpkg"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "localpkg": "workspace:~"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "localpkg": "workspace:~"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["localpkg"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "localpkg": "workspace:~"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "localpkg": "workspace:~"
+        }
+      }),
+    ])
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -879,34 +852,30 @@ fn workspace_tilde_identical_to_snapped_to_target() {
 /// instead of inheriting the snap target's range.
 #[test]
 fn differs_to_snap_target_should_apply_semver_group_range() {
-  let config = test::mock::config_from_mock(json!({
-    "semverGroups": [{
-      "packages": ["follower"],
-      "range": ""
-    }],
-    "versionGroups": [{
-      "dependencies": ["foo"],
-      "packages": ["follower"],
-      "snapTo": ["leader"]
-    }]
-  }));
-  let packages = test::mock::packages_from_mocks(vec![
-    json!({
-      "name": "leader",
-      "dependencies": {
-        "foo": "^2.0.0"
-      }
-    }),
-    json!({
-      "name": "follower",
-      "dependencies": {
-        "foo": "1.0.0"
-      }
-    }),
-  ]);
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
-  let ctx = visit_packages(ctx, None);
+  let vg = json!({
+    "dependencies": ["foo"],
+    "packages": ["follower"],
+    "snapTo": ["leader"]
+  });
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "leader",
+        "dependencies": {
+          "foo": "^2.0.0"
+        }
+      }),
+      json!({
+        "name": "follower",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }),
+    ])
+    .with_semver_group(json!({"packages": ["follower"], "range": ""}))
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),

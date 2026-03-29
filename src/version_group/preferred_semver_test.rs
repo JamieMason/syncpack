@@ -1,16 +1,14 @@
 use {
   crate::{
     cli::UpdateTarget,
-    context::Context,
     instance::{
       FixableInstance::*, InstanceState, SemverGroupAndVersionConflict::*, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*,
     },
     test::{
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
-      mock,
     },
-    visit_packages,
+    version_group::visit_groups,
   },
   serde_json::json,
 };
@@ -30,7 +28,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -74,7 +73,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -118,7 +118,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -162,7 +163,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -206,7 +208,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -250,7 +253,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -297,7 +301,8 @@ mod local {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -342,7 +347,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -387,7 +393,8 @@ mod local {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -434,7 +441,8 @@ mod local {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -481,7 +489,8 @@ mod local {
       .with_semver_group(json!({
         "range": "<"
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -528,7 +537,8 @@ mod local {
       .with_semver_group(json!({
         "range": ">"
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -573,7 +583,8 @@ mod highest_or_lowest {
           "wat": "2.0.0"
         }
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -617,7 +628,8 @@ mod highest_or_lowest {
           "wat": "0.2.0"
         }
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -671,7 +683,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -710,6 +723,8 @@ mod highest_or_lowest {
 
   #[test]
   fn does_not_report_highest_version_mismatches_when_in_different_version_groups() {
+    let vg_a = json!({"packages": ["package-a"]});
+    let vg_b = json!({"packages": ["package-b"]});
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -725,8 +740,9 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .with_version_groups(vec![json!({"packages": ["package-a"]}), json!({"packages": ["package-b"]})])
-      .build_and_visit_packages();
+      .with_version_groups(vec![vg_a.clone(), vg_b.clone()])
+      .build();
+    visit_groups(&ctx, &[vg_a, vg_b]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -788,7 +804,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -858,7 +875,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -897,24 +915,23 @@ mod highest_or_lowest {
 
   #[test]
   fn instance_has_different_version_to_highest_semver_and_has_no_semver_group() {
-    let config = mock::config();
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": "1.0.0"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "foo": "1.1.0"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "1.1.0"
+          }
+        }),
+      ])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -953,24 +970,23 @@ mod highest_or_lowest {
 
   #[test]
   fn instance_has_same_version_number_as_highest_semver_but_a_different_range_and_has_no_semver_group() {
-    let config = mock::config();
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": "^1.0.0"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "devDependencies": {
-          "foo": "~1.0.0"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "^1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "devDependencies": {
+            "foo": "~1.0.0"
+          }
+        }),
+      ])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1009,29 +1025,27 @@ mod highest_or_lowest {
 
   #[test]
   fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_compatible_semver_group() {
-    let config = mock::config_from_mock(json!({
-      "semverGroups": [{
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "^1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "~1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
         "packages": ["package-b"],
         "range": "~"
-      }]
-    }));
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": "^1.0.0"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "foo": "~1.0.0"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+      }))
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1070,29 +1084,27 @@ mod highest_or_lowest {
 
   #[test]
   fn instance_has_same_version_number_as_highest_semver_but_mismatches_a_different_but_compatible_semver_group() {
-    let config = mock::config_from_mock(json!({
-      "semverGroups": [{
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": ">=1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "~1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
         "packages": ["package-b"],
         "range": "^"
-      }]
-    }));
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": ">=1.0.0"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "foo": "~1.0.0"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+      }))
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1131,29 +1143,27 @@ mod highest_or_lowest {
 
   #[test]
   fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_incompatible_semver_group() {
-    let config = mock::config_from_mock(json!({
-      "semverGroups": [{
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "<1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
         "packages": ["package-b"],
         "range": "<"
-      }]
-    }));
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": "1.0.0"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "foo": "<1.0.0"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+      }))
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1192,29 +1202,27 @@ mod highest_or_lowest {
 
   #[test]
   fn instance_has_same_version_number_as_highest_semver_but_mismatches_a_different_but_incompatible_semver_group() {
-    let config = mock::config_from_mock(json!({
-      "semverGroups": [{
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "~1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
         "packages": ["package-b"],
         "range": "<"
-      }]
-    }));
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": "~1.0.0"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "foo": "1.0.0"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+      }))
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1268,7 +1276,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1308,6 +1317,9 @@ mod highest_or_lowest {
 
   #[test]
   fn lowest_semver_prefers_least_greedy_range_when_versions_equal() {
+    let vg = json!({
+      "preferVersion": "lowestSemver"
+    });
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1329,10 +1341,9 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .with_version_group(json!({
-        "preferVersion": "lowestSemver"
-      }))
-      .build_and_visit_packages();
+      .with_version_group(vg.clone())
+      .build();
+    visit_groups(&ctx, &[vg]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1411,7 +1422,8 @@ mod highest_or_lowest {
         "packages": ["**"],
         "dependencies": ["**"]
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1498,7 +1510,8 @@ mod highest_or_lowest {
         "packages": ["**"],
         "dependencies": ["**"]
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1527,7 +1540,6 @@ mod highest_or_lowest {
         overridden: None,
       },
       // pkg-b has a lower version — fix should update version AND apply pinned range
-      // BUG: currently suggests ^18.0.0 (inherits ^ from highest)
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
         dependency_name: "react",
@@ -1557,7 +1569,7 @@ mod highest_or_lowest {
   }
 
   /// Exploratory: when a semver group makes one instance greedier (e.g. exact
-  /// → ^), that adjusted specifier becomes the highest via the range tiebreaker.
+  /// -> ^), that adjusted specifier becomes the highest via the range tiebreaker.
   /// Other instances (not in a semver group) should follow the new highest.
   #[test]
   fn semver_group_greedier_range_becomes_highest() {
@@ -1587,7 +1599,8 @@ mod highest_or_lowest {
         "range": "^",
         "packages": ["pkg-a"]
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1598,7 +1611,7 @@ mod highest_or_lowest {
         expected: Some(""),
         overridden: None,
       },
-      // pkg-a has exact 1.0.0 but semver group wants ^ → adjusted to ^1.0.0
+      // pkg-a has exact 1.0.0 but semver group wants ^ -> adjusted to ^1.0.0
       // ^1.0.0 is greedier than ~1.0.0, making it the highest
       // pkg-a's actual range (exact) doesn't match its preferred range (^)
       ExpectedInstance {
@@ -1652,24 +1665,23 @@ mod non_semver {
 
   #[test]
   fn no_instances_are_semver_but_all_are_identical() {
-    let config = mock::config();
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": "workspace:*"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "foo": "workspace:*"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "workspace:*"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "workspace:*"
+          }
+        }),
+      ])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1708,24 +1720,23 @@ mod non_semver {
 
   #[test]
   fn no_instances_are_semver_and_they_differ() {
-    let config = mock::config();
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "foo": "workspace:*"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "foo": "workspace:^"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "workspace:*"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "workspace:^"
+          }
+        }),
+      ])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1764,19 +1775,17 @@ mod non_semver {
 
   #[test]
   fn workspace_protocol_version_differs_to_local_version_is_invalid_in_strict_mode() {
-    let config = mock::config_from_mock(json!({
-      "strict": true
-    }));
-    let packages = mock::packages_from_mocks(vec![json!({
-      "name": "package-a",
-      "version": "1.0.0",
-      "devDependencies": {
-        "package-a": "workspace:*"
-      }
-    })]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_strict(true)
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "devDependencies": {
+          "package-a": "workspace:*"
+        }
+      })])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1799,17 +1808,16 @@ mod non_semver {
 
   #[test]
   fn workspace_protocol_version_differs_to_local_version_is_valid_by_default() {
-    let config = mock::config_from_mock(json!({}));
-    let packages = mock::packages_from_mocks(vec![json!({
-      "name": "package-a",
-      "version": "1.0.0",
-      "devDependencies": {
-        "package-a": "workspace:*"
-      }
-    })]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "devDependencies": {
+          "package-a": "workspace:*"
+        }
+      })])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1832,24 +1840,23 @@ mod non_semver {
 
   #[test]
   fn link_specifiers_without_local_instance_are_identical() {
-    let config = mock::config();
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "external-package": "link:../../external/external-package"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "external-package": "link:../../external/external-package"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "external-package": "link:../../external/external-package"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "external-package": "link:../../external/external-package"
+          }
+        }),
+      ])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1888,24 +1895,23 @@ mod non_semver {
 
   #[test]
   fn link_specifiers_without_local_instance_differ() {
-    let config = mock::config();
-    let packages = mock::packages_from_mocks(vec![
-      json!({
-        "name": "package-a",
-        "dependencies": {
-          "external-package": "link:../../external/external-package"
-        }
-      }),
-      json!({
-        "name": "package-b",
-        "dependencies": {
-          "external-package": "link:../../elsewhere/external-package"
-        }
-      }),
-    ]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "external-package": "link:../../external/external-package"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "external-package": "link:../../elsewhere/external-package"
+          }
+        }),
+      ])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1944,19 +1950,18 @@ mod non_semver {
 
   #[test]
   fn non_semver_and_semver_mismatch() {
-    let config = mock::config_from_mock(json!({}));
-    let packages = mock::packages_from_mocks(vec![json!({
-      "name": "package-a",
-      "dependencies": {
-        "mix": "1.2.3"
-      },
-      "devDependencies": {
-        "mix": "file:./mix"
-      }
-    })]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "dependencies": {
+          "mix": "1.2.3"
+        },
+        "devDependencies": {
+          "mix": "file:./mix"
+        }
+      })])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1991,25 +1996,25 @@ mod dependency_groups {
 
   #[test]
   fn dependency_group_of_dependency_and_its_types_that_can_be_relied_on_to_be_same_version() {
-    let config = mock::config_from_mock(json!({
-      "dependencyGroups": [{
-        "aliasName": "foo-group",
-        "dependencies": ["@types/foo", "foo"]
-      }]
-    }));
-    let packages = mock::packages_from_mocks(vec![json!({
-      "name": "package-a",
-      "version": "0.1.0",
-      "dependencies": {
-        "foo": "4.1.0"
-      },
-      "devDependencies": {
-        "@types/foo": "4.0.5"
-      }
-    })]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_config(json!({
+        "dependencyGroups": [{
+          "aliasName": "foo-group",
+          "dependencies": ["@types/foo", "foo"]
+        }]
+      }))
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "0.1.0",
+        "dependencies": {
+          "foo": "4.1.0"
+        },
+        "devDependencies": {
+          "@types/foo": "4.0.5"
+        }
+      })])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -2040,29 +2045,30 @@ mod dependency_groups {
 
   #[test]
   fn dependency_group_of_dependency_and_its_types_that_track_the_same_major_version() {
-    let config = mock::config_from_mock(json!({
-      "dependencyGroups": [{
-        "aliasName": "foo-group",
-        "dependencies": ["@types/foo", "foo"]
-      }],
-      "versionGroups": [{
-        "dependencies": ["foo-group"],
-        "policy": "sameRange"
-      }]
-    }));
-    let packages = mock::packages_from_mocks(vec![json!({
-      "name": "package-a",
-      "version": "0.1.0",
-      "dependencies": {
-        "foo": "4.1.0"
-      },
-      "devDependencies": {
-        "@types/foo": "^4.0.5"
-      }
-    })]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let vg = json!({
+      "dependencies": ["foo-group"],
+      "policy": "sameRange"
+    });
+    let ctx = TestBuilder::new()
+      .with_config(json!({
+        "dependencyGroups": [{
+          "aliasName": "foo-group",
+          "dependencies": ["@types/foo", "foo"]
+        }]
+      }))
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "0.1.0",
+        "dependencies": {
+          "foo": "4.1.0"
+        },
+        "devDependencies": {
+          "@types/foo": "^4.0.5"
+        }
+      })])
+      .with_version_group(vg.clone())
+      .build();
+    visit_groups(&ctx, &[vg]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -2210,11 +2216,9 @@ mod registry_updates {
         .with_package(json!({
           "name": "package-a",
           "dependencies": {
-            // JSR dependencies (https://jsr.io/docs/npm-compatibility)
             "@jsr/luca__cases": "1.2.3",
             "@luca/cases": "npm:@jsr/luca__cases@1.2.3",
             "@std/fmt": "npm:@jsr/std__fmt@1.2.3",
-            // normal npm dependencies, but aliased
             "@lit-labs/ssr": "npm:@lit-labs/ssr@1.2.3",
             "lit": "npm:lit@1.2.3",
           }
@@ -2605,6 +2609,10 @@ mod custom_types {
 
   #[test]
   fn custom_engines_type_visible_in_catch_all_group_without_cli_filter() {
+    let vg = json!({
+      "dependencies": ["react"],
+      "dependencyTypes": ["prod", "dev", "peer"]
+    });
     let ctx = TestBuilder::new()
       .with_config(json!({
         "customTypes": {
@@ -2612,13 +2620,7 @@ mod custom_types {
             "strategy": "versionsByName",
             "path": "engines"
           }
-        },
-        "versionGroups": [
-          {
-            "dependencies": ["react"],
-            "dependencyTypes": ["prod", "dev", "peer"]
-          }
-        ]
+        }
       }))
       .with_packages(vec![json!({
         "name": "package-a",
@@ -2631,7 +2633,9 @@ mod custom_types {
           "yarn": "^1.22.5"
         }
       })])
-      .build_and_visit_packages();
+      .with_version_group(vg.clone())
+      .build();
+    visit_groups(&ctx, &[vg]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -2672,8 +2676,6 @@ mod custom_types {
   #[test]
   fn exact_version_with_equals_prefix_should_be_fixable_when_semver_group_requires_caret() {
     // Reproduces issue #239
-    // User has semverGroups with range "^" but dependency uses =9.0.0 (npm's equals prefix)
-    // This should be marked as fixable (needs ^ prefix added)
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
         "name": "pkg-a",
@@ -2682,12 +2684,11 @@ mod custom_types {
           "react": "=9.0.0"
         }
       })])
-      .with_config(json!({
-        "semverGroups": [{
-          "range": "^"
-        }]
+      .with_semver_group(json!({
+        "range": "^"
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -2711,8 +2712,6 @@ mod custom_types {
 
   #[test]
   fn exact_version_without_prefix_should_be_fixable_when_semver_group_requires_caret() {
-    // Also test plain exact versions like "9.0.0" (without =)
-    // These should also be flagged when semver group requires ^
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
         "name": "pkg-a",
@@ -2721,12 +2720,11 @@ mod custom_types {
           "react": "9.0.0"
         }
       })])
-      .with_config(json!({
-        "semverGroups": [{
-          "range": "^"
-        }]
+      .with_semver_group(json!({
+        "range": "^"
       }))
-      .build_and_visit_packages();
+      .build();
+    visit_groups(&ctx, &[]);
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -2754,19 +2752,18 @@ mod catalogs {
 
   #[test]
   fn catalog_and_semver_mismatch() {
-    let config = mock::config_from_mock(json!({}));
-    let packages = mock::packages_from_mocks(vec![json!({
-      "name": "package-a",
-      "dependencies": {
-        "mix": "1.2.3"
-      },
-      "devDependencies": {
-        "mix": "catalog:"
-      }
-    })]);
-    let catalogs = None;
-    let ctx = Context::create(config, packages, catalogs).unwrap();
-    let ctx = visit_packages(ctx, None);
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "dependencies": {
+          "mix": "1.2.3"
+        },
+        "devDependencies": {
+          "mix": "catalog:"
+        }
+      })])
+      .build();
+    visit_groups(&ctx, &[]);
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),

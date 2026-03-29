@@ -2,7 +2,7 @@ use {
   crate::{
     context::ConfigError,
     rcfile::{semver_group::AnySemverGroup, RawRcfile, Rcfile},
-    version_group::AnyVersionGroup,
+    version_group::{AnyVersionGroup, VersionGroup},
   },
   serde_json::json,
 };
@@ -182,6 +182,181 @@ fn version_group_from_config_rejects_invalid_policy() {
   }))
   .unwrap();
   let packages = crate::packages::Packages::new();
-  let err = crate::version_group::VersionGroup::from_config(group, &packages).unwrap_err();
+  let err = VersionGroup::from_config(group, &packages).unwrap_err();
   assert!(matches!(err, ConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
+}
+
+mod comment_properties {
+  use {
+    crate::{context::ConfigError, rcfile::RawRcfile},
+    serde_json::json,
+  };
+
+  #[test]
+  fn ignored_at_root() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "// why we pin react": "see issue #123",
+      "//": "this is a comment",
+      "// another note": true,
+    }))
+    .unwrap();
+    assert!(raw.validate_unknown_fields().is_ok());
+  }
+
+  #[test]
+  fn coexist_with_real_config() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "// note": "explanation",
+      "indent": "  ",
+      "source": ["packages/*/package.json"],
+    }))
+    .unwrap();
+    assert!(raw.validate_unknown_fields().is_ok());
+    assert_eq!(raw.indent, Some("  ".to_string()));
+  }
+
+  #[test]
+  fn do_not_mask_errors_at_root() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "// note": "this is fine",
+      "notARealProperty": true,
+    }))
+    .unwrap();
+    let errors = raw.validate_unknown_fields().unwrap_err();
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "notARealProperty"));
+  }
+
+  #[test]
+  fn ignored_in_custom_types() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "customTypes": {
+        "myType": {
+          "strategy": "versionsByName",
+          "path": "myDeps",
+          "// note": "this explains the custom type"
+        }
+      }
+    }))
+    .unwrap();
+    assert!(raw.validate_unknown_fields().is_ok());
+  }
+
+  #[test]
+  fn do_not_mask_errors_in_custom_types() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "customTypes": {
+        "myType": {
+          "strategy": "versionsByName",
+          "path": "myDeps",
+          "// note": "fine",
+          "bogus": true
+        }
+      }
+    }))
+    .unwrap();
+    let errors = raw.validate_unknown_fields().unwrap_err();
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "customTypes.myType.bogus"));
+  }
+
+  #[test]
+  fn ignored_in_dependency_groups() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "dependencyGroups": [{
+        "aliasName": "group1",
+        "// reason": "explain grouping"
+      }]
+    }))
+    .unwrap();
+    assert!(raw.validate_unknown_fields().is_ok());
+  }
+
+  #[test]
+  fn do_not_mask_errors_in_dependency_groups() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "dependencyGroups": [{
+        "aliasName": "group1",
+        "// reason": "fine",
+        "bogus": true
+      }]
+    }))
+    .unwrap();
+    let errors = raw.validate_unknown_fields().unwrap_err();
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "dependencyGroups[0].bogus"));
+  }
+
+  #[test]
+  fn ignored_in_semver_groups() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "semverGroups": [{
+        "range": "^",
+        "// why": "pin everything"
+      }]
+    }))
+    .unwrap();
+    assert!(raw.validate_unknown_fields().is_ok());
+  }
+
+  #[test]
+  fn do_not_mask_errors_in_semver_groups() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "semverGroups": [{
+        "range": "^",
+        "// why": "fine",
+        "bogus": 1
+      }]
+    }))
+    .unwrap();
+    let errors = raw.validate_unknown_fields().unwrap_err();
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "semverGroups[0].bogus"));
+  }
+
+  #[test]
+  fn ignored_in_version_groups() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "versionGroups": [{
+        "label": "test",
+        "// note": "explanation"
+      }]
+    }))
+    .unwrap();
+    assert!(raw.validate_unknown_fields().is_ok());
+  }
+
+  #[test]
+  fn do_not_mask_errors_in_version_groups() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "versionGroups": [{
+        "label": "test",
+        "// note": "fine",
+        "notReal": true
+      }]
+    }))
+    .unwrap();
+    let errors = raw.validate_unknown_fields().unwrap_err();
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "versionGroups[0].notReal"));
+  }
+
+  #[test]
+  fn ignored_across_all_nested_locations() {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "// root comment": "ok",
+      "customTypes": {
+        "myType": {
+          "strategy": "versionsByName",
+          "path": "myDeps",
+          "// ct comment": "ok"
+        }
+      },
+      "dependencyGroups": [{ "aliasName": "g", "// dg comment": "ok" }],
+      "semverGroups": [{ "range": "^", "// sg comment": "ok" }],
+      "versionGroups": [{ "label": "v", "// vg comment": "ok" }],
+    }))
+    .unwrap();
+    assert!(raw.validate_unknown_fields().is_ok());
+  }
 }

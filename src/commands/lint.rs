@@ -20,7 +20,7 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
             has_printed_group = true;
           }
           if !has_printed_dependency {
-            ui::dependency::print(&ctx, dependency, &group.variant);
+            ui::dependency::print(&ctx, dependency, group.variant_label());
             has_printed_dependency = true;
           }
           if ctx.config.cli.show_instances {

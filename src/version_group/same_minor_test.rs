@@ -5,6 +5,7 @@ use {
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
+    version_group::visit_groups,
   },
   serde_json::json,
 };
@@ -15,6 +16,10 @@ use {
 
 #[test]
 fn non_semver_all_identical() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -28,11 +33,9 @@ fn non_semver_all_identical() {
         "dependencies": { "foo": "alpha" }
       }),
     ])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -71,6 +74,10 @@ fn non_semver_all_identical() {
 
 #[test]
 fn non_semver_differing() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -84,11 +91,9 @@ fn non_semver_differing() {
         "dependencies": { "foo": "beta" }
       }),
     ])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -131,6 +136,10 @@ fn non_semver_differing() {
 
 #[test]
 fn major_mismatch_marks_all_unfixable() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -138,11 +147,9 @@ fn major_mismatch_marks_all_unfixable() {
       "dependencies": { "foo": "1.2.0" },
       "devDependencies": { "foo": "2.1.0" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -173,6 +180,10 @@ fn major_mismatch_marks_all_unfixable() {
 
 #[test]
 fn major_mismatch_with_ranges_marks_all_unfixable() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -180,11 +191,9 @@ fn major_mismatch_with_ranges_marks_all_unfixable() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "^22.3.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -215,6 +224,11 @@ fn major_mismatch_with_ranges_marks_all_unfixable() {
 
 #[test]
 fn major_mismatch_even_with_prefer_version() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -222,12 +236,9 @@ fn major_mismatch_even_with_prefer_version() {
       "dependencies": { "foo": "1.2.0" },
       "devDependencies": { "foo": "2.1.0" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -262,6 +273,10 @@ fn major_mismatch_even_with_prefer_version() {
 
 #[test]
 fn satisfies_every_other_and_has_no_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -269,11 +284,9 @@ fn satisfies_every_other_and_has_no_semver_group() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "21.3.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -304,6 +317,10 @@ fn satisfies_every_other_and_has_no_semver_group() {
 
 #[test]
 fn has_same_minor_and_compatible_semver_range_and_no_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -311,11 +328,9 @@ fn has_same_minor_and_compatible_semver_range_and_no_semver_group() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "~21.3.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -346,6 +361,10 @@ fn has_same_minor_and_compatible_semver_range_and_no_semver_group() {
 
 #[test]
 fn same_minor_no_semver_group_unsafe_caret_range_on_disk() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -353,11 +372,9 @@ fn same_minor_no_semver_group_unsafe_caret_range_on_disk() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "^21.3.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -392,6 +409,10 @@ fn same_minor_no_semver_group_unsafe_caret_range_on_disk() {
 
 #[test]
 fn satisfies_every_other_and_matches_compatible_tilde_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -403,11 +424,9 @@ fn satisfies_every_other_and_matches_compatible_tilde_semver_group() {
       "dependencyTypes": ["peer"],
       "range": "~"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -438,6 +457,10 @@ fn satisfies_every_other_and_matches_compatible_tilde_semver_group() {
 
 #[test]
 fn satisfies_every_other_but_mismatches_compatible_tilde_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -449,11 +472,9 @@ fn satisfies_every_other_but_mismatches_compatible_tilde_semver_group() {
       "dependencyTypes": ["peer"],
       "range": "~"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -484,6 +505,10 @@ fn satisfies_every_other_but_mismatches_compatible_tilde_semver_group() {
 
 #[test]
 fn satisfies_every_other_and_matches_compatible_exact_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -495,11 +520,9 @@ fn satisfies_every_other_and_matches_compatible_exact_semver_group() {
       "dependencyTypes": ["peer"],
       "range": ""
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -534,6 +557,10 @@ fn satisfies_every_other_and_matches_compatible_exact_semver_group() {
 
 #[test]
 fn has_semver_number_which_satisfies_every_other_but_range_matches_incompatible_caret_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -545,11 +572,9 @@ fn has_semver_number_which_satisfies_every_other_but_range_matches_incompatible_
       "dependencyTypes": ["peer"],
       "range": "^"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -580,6 +605,10 @@ fn has_semver_number_which_satisfies_every_other_but_range_matches_incompatible_
 
 #[test]
 fn has_semver_number_which_satisfies_every_other_but_range_mismatches_incompatible_caret_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -591,11 +620,9 @@ fn has_semver_number_which_satisfies_every_other_but_range_mismatches_incompatib
       "dependencyTypes": ["peer"],
       "range": "^"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -630,6 +657,10 @@ fn has_semver_number_which_satisfies_every_other_but_range_mismatches_incompatib
 
 #[test]
 fn has_different_minor_and_no_prefer_version() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -637,11 +668,9 @@ fn has_different_minor_and_no_prefer_version() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "21.4.0" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -676,6 +705,11 @@ fn has_different_minor_and_no_prefer_version() {
 
 #[test]
 fn minor_mismatch_highest_no_semver_group_safe_range() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -683,12 +717,9 @@ fn minor_mismatch_highest_no_semver_group_safe_range() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "21.4.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -719,6 +750,11 @@ fn minor_mismatch_highest_no_semver_group_safe_range() {
 
 #[test]
 fn minor_mismatch_highest_no_semver_group_tilde_range_preserved() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -726,12 +762,9 @@ fn minor_mismatch_highest_no_semver_group_tilde_range_preserved() {
       "dependencies": { "foo": "~21.3.0" },
       "devDependencies": { "foo": "21.4.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -762,6 +795,11 @@ fn minor_mismatch_highest_no_semver_group_tilde_range_preserved() {
 
 #[test]
 fn minor_mismatch_highest_no_semver_group_unsafe_caret_range_forced_to_tilde() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -769,12 +807,9 @@ fn minor_mismatch_highest_no_semver_group_unsafe_caret_range_forced_to_tilde() {
       "dependencies": { "foo": "^21.3.0" },
       "devDependencies": { "foo": "21.4.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -809,6 +844,11 @@ fn minor_mismatch_highest_no_semver_group_unsafe_caret_range_forced_to_tilde() {
 
 #[test]
 fn minor_mismatch_highest_safe_tilde_semver_group_applied_to_fix_target() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -820,12 +860,9 @@ fn minor_mismatch_highest_safe_tilde_semver_group_applied_to_fix_target() {
       "dependencyTypes": ["dev"],
       "range": "~"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -856,6 +893,11 @@ fn minor_mismatch_highest_safe_tilde_semver_group_applied_to_fix_target() {
 
 #[test]
 fn minor_mismatch_highest_safe_tilde_semver_group_on_below_target_instance() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -873,12 +915,9 @@ fn minor_mismatch_highest_safe_tilde_semver_group_on_below_target_instance() {
       "packages": ["pkg-a"],
       "range": "~"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -917,6 +956,11 @@ fn minor_mismatch_highest_safe_tilde_semver_group_on_below_target_instance() {
 
 #[test]
 fn minor_mismatch_highest_unsafe_caret_semver_group_forced_to_tilde_on_fix_target() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -934,12 +978,9 @@ fn minor_mismatch_highest_unsafe_caret_semver_group_forced_to_tilde_on_fix_targe
       "packages": ["pkg-a"],
       "range": "^"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -982,6 +1023,11 @@ fn minor_mismatch_highest_unsafe_caret_semver_group_forced_to_tilde_on_fix_targe
 
 #[test]
 fn minor_mismatch_lowest_no_semver_group_safe_range() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "lowestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -989,12 +1035,9 @@ fn minor_mismatch_lowest_no_semver_group_safe_range() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "21.4.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "lowestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1025,6 +1068,11 @@ fn minor_mismatch_lowest_no_semver_group_safe_range() {
 
 #[test]
 fn minor_mismatch_lowest_no_semver_group_unsafe_range_forced_to_tilde() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "lowestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -1032,12 +1080,9 @@ fn minor_mismatch_lowest_no_semver_group_unsafe_range_forced_to_tilde() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "^21.4.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "lowestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1073,6 +1118,11 @@ fn minor_mismatch_lowest_no_semver_group_unsafe_range_forced_to_tilde() {
 
 #[test]
 fn minor_mismatch_highest_at_target_no_semver_group_safe() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "my-project",
@@ -1080,12 +1130,9 @@ fn minor_mismatch_highest_at_target_no_semver_group_safe() {
       "dependencies": { "foo": "21.3.0" },
       "devDependencies": { "foo": "21.4.1" }
     })])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   // Instance at 21.4.1 is at target minor — should be valid
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -1117,6 +1164,11 @@ fn minor_mismatch_highest_at_target_no_semver_group_safe() {
 
 #[test]
 fn minor_mismatch_highest_at_target_unsafe_range_overridden() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -1130,12 +1182,9 @@ fn minor_mismatch_highest_at_target_unsafe_range_overridden() {
         "dependencies": { "foo": "^21.4.1" }
       }),
     ])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1174,6 +1223,11 @@ fn minor_mismatch_highest_at_target_unsafe_range_overridden() {
 
 #[test]
 fn minor_mismatch_highest_at_target_matches_safe_tilde_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -1191,12 +1245,9 @@ fn minor_mismatch_highest_at_target_matches_safe_tilde_semver_group() {
       "dependencyTypes": ["peer"],
       "range": "~"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1235,6 +1286,11 @@ fn minor_mismatch_highest_at_target_matches_safe_tilde_semver_group() {
 
 #[test]
 fn minor_mismatch_highest_at_target_mismatches_safe_tilde_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -1252,12 +1308,9 @@ fn minor_mismatch_highest_at_target_mismatches_safe_tilde_semver_group() {
       "dependencyTypes": ["peer"],
       "range": "~"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1296,6 +1349,11 @@ fn minor_mismatch_highest_at_target_mismatches_safe_tilde_semver_group() {
 
 #[test]
 fn minor_mismatch_highest_at_target_matches_unsafe_caret_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -1313,12 +1371,9 @@ fn minor_mismatch_highest_at_target_matches_unsafe_caret_semver_group() {
       "dependencyTypes": ["peer"],
       "range": "^"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1357,6 +1412,11 @@ fn minor_mismatch_highest_at_target_matches_unsafe_caret_semver_group() {
 
 #[test]
 fn minor_mismatch_highest_at_target_mismatches_unsafe_caret_semver_group() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -1374,12 +1434,9 @@ fn minor_mismatch_highest_at_target_mismatches_unsafe_caret_semver_group() {
       "dependencyTypes": ["peer"],
       "range": "^"
     }))
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1423,6 +1480,11 @@ fn minor_mismatch_highest_at_target_mismatches_unsafe_caret_semver_group() {
 
 #[test]
 fn minor_mismatch_highest_multiple_below_target() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor",
+    "preferVersion": "highestSemver"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -1441,12 +1503,9 @@ fn minor_mismatch_highest_multiple_below_target() {
         "dependencies": { "foo": "5.3.0" }
       }),
     ])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor",
-      "preferVersion": "highestSemver"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -1506,6 +1565,10 @@ fn minor_mismatch_highest_multiple_below_target() {
 
 #[test]
 fn all_same_minor_different_patches_all_valid() {
+  let vg = json!({
+    "dependencies": ["foo"],
+    "policy": "sameMinor"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -1524,11 +1587,9 @@ fn all_same_minor_different_patches_all_valid() {
         "dependencies": { "foo": "5.3.99" }
       }),
     ])
-    .with_version_groups(vec![json!({
-      "dependencies": ["foo"],
-      "policy": "sameMinor"
-    })])
-    .build_and_visit_packages();
+    .with_version_group(vg.clone())
+    .build();
+  visit_groups(&ctx, &[vg]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),

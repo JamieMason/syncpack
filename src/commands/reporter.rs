@@ -2,10 +2,9 @@ use {
   crate::{
     commands::{json::instance_to_json, ui},
     context::Context,
-    dependency::Dependency,
     instance::Instance,
     package_json::{FormatMismatch, PackageJson},
-    version_group::{VersionGroup, VersionGroupVariant},
+    version_group::{DependencyCore, VersionGroup},
   },
   serde_json::json,
   std::rc::Rc,
@@ -13,8 +12,8 @@ use {
 
 pub trait FixReporter {
   fn on_group_header(&self, ctx: &Context, group: &VersionGroup);
-  fn on_dependency(&self, ctx: &Context, dependency: &Dependency, variant: &VersionGroupVariant);
-  fn on_instance(&self, ctx: &Context, instance: &Instance, variant: &VersionGroupVariant);
+  fn on_dependency(&self, ctx: &Context, dependency: &DependencyCore, variant: &str);
+  fn on_instance(&self, ctx: &Context, instance: &Instance, variant: &str);
   fn on_no_issues(&self);
   fn on_unfixable_warning(&self);
 }
@@ -35,11 +34,11 @@ impl FixReporter for PrettyFixReporter {
     ui::group::print_header(ctx, group);
   }
 
-  fn on_dependency(&self, ctx: &Context, dependency: &Dependency, variant: &VersionGroupVariant) {
+  fn on_dependency(&self, ctx: &Context, dependency: &DependencyCore, variant: &str) {
     ui::dependency::print_fixed(ctx, dependency, variant);
   }
 
-  fn on_instance(&self, ctx: &Context, instance: &Instance, _variant: &VersionGroupVariant) {
+  fn on_instance(&self, ctx: &Context, instance: &Instance, _variant: &str) {
     if ctx.config.cli.show_instances {
       ui::instance::print_fixed(ctx, instance);
     }
@@ -82,9 +81,9 @@ pub struct JsonFixReporter;
 impl FixReporter for JsonFixReporter {
   fn on_group_header(&self, _ctx: &Context, _group: &VersionGroup) {}
 
-  fn on_dependency(&self, _ctx: &Context, _dependency: &Dependency, _variant: &VersionGroupVariant) {}
+  fn on_dependency(&self, _ctx: &Context, _dependency: &DependencyCore, _variant: &str) {}
 
-  fn on_instance(&self, ctx: &Context, instance: &Instance, variant: &VersionGroupVariant) {
+  fn on_instance(&self, ctx: &Context, instance: &Instance, variant: &str) {
     let value = instance_to_json(ctx, instance, variant);
     println!("{}", serde_json::to_string(&value).unwrap());
   }

@@ -261,35 +261,45 @@ impl RawRcfile {
         });
       }
       _ => {
-        errors.push(ConfigError::UnrecognisedProperty { path: key.clone() });
+        if !key.starts_with("//") {
+          errors.push(ConfigError::UnrecognisedProperty { path: key.clone() });
+        }
       }
     });
     self.custom_types.iter().for_each(|(custom_type_name, value)| {
-      value.unknown_fields.iter().for_each(|(field_name, _)| {
-        errors.push(ConfigError::UnrecognisedProperty {
-          path: format!("customTypes.{custom_type_name}.{field_name}"),
-        });
+      value.unknown_fields.iter().for_each(|(key, _)| {
+        if !key.starts_with("//") {
+          errors.push(ConfigError::UnrecognisedProperty {
+            path: format!("customTypes.{custom_type_name}.{key}"),
+          });
+        }
       });
     });
     self.dependency_groups.iter().enumerate().for_each(|(index, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
-        errors.push(ConfigError::UnrecognisedProperty {
-          path: format!("dependencyGroups[{index}].{key}"),
-        });
+        if !key.starts_with("//") {
+          errors.push(ConfigError::UnrecognisedProperty {
+            path: format!("dependencyGroups[{index}].{key}"),
+          });
+        }
       });
     });
     self.semver_groups.iter().enumerate().for_each(|(index, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
-        errors.push(ConfigError::UnrecognisedProperty {
-          path: format!("semverGroups[{index}].{key}"),
-        });
+        if !key.starts_with("//") {
+          errors.push(ConfigError::UnrecognisedProperty {
+            path: format!("semverGroups[{index}].{key}"),
+          });
+        }
       });
     });
     self.version_groups.iter().enumerate().for_each(|(index, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
-        errors.push(ConfigError::UnrecognisedProperty {
-          path: format!("versionGroups[{index}].{key}"),
-        });
+        if !key.starts_with("//") {
+          errors.push(ConfigError::UnrecognisedProperty {
+            path: format!("versionGroups[{index}].{key}"),
+          });
+        }
       });
     });
     if errors.is_empty() {

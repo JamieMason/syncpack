@@ -3,7 +3,7 @@ use {
     commands::{ui, ui::LINE_ENDING},
     context::{Context, SyncpackError},
     registry::updates::RegistryUpdates,
-    version_group::VersionGroupVariant,
+    version_group::VersionGroup,
   },
   log::{error, warn},
 };
@@ -14,7 +14,7 @@ pub fn run(ctx: Context, registry_updates: &RegistryUpdates) -> Result<Context, 
   ctx
     .version_groups
     .iter()
-    .filter(|group| matches!(group.variant, VersionGroupVariant::HighestSemver))
+    .filter(|group| matches!(group, VersionGroup::PreferredSemver(g) if g.prefer_highest))
     .for_each(|group| {
       let mut has_printed_group = false;
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
@@ -30,13 +30,13 @@ pub fn run(ctx: Context, registry_updates: &RegistryUpdates) -> Result<Context, 
             }
             if ctx.config.cli.check {
               if !has_printed_dependency {
-                ui::dependency::print_outdated(&ctx, dependency, &group.variant);
+                ui::dependency::print_outdated(&ctx, dependency, group.variant_label());
                 has_printed_dependency = true;
               }
               ui::instance::print_outdated(&ctx, instance);
             } else {
               if !has_printed_dependency {
-                ui::dependency::print_fixed(&ctx, dependency, &group.variant);
+                ui::dependency::print_fixed(&ctx, dependency, group.variant_label());
                 has_printed_dependency = true;
               }
               ui::instance::print_fixed(&ctx, instance);

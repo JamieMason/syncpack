@@ -156,6 +156,16 @@ serve-coverage:
 test:
     cargo test -- --nocapture --color=always
 
+test-js-config-loading:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cargo build
+    PROJECT_ROOT=$(pwd)
+
+    echo "JS/TS Config should be read without errors"
+    cd "$PROJECT_ROOT/fixtures/js-config-loading"
+    ../../target/debug/syncpack list
+
 test-glob-matching:
     #!/usr/bin/env bash
     set -euo pipefail

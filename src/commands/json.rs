@@ -2,12 +2,11 @@ use {
   crate::{
     context::{Context, SyncpackError},
     instance::Instance,
-    version_group::VersionGroupVariant,
   },
   serde_json::{json, Value},
 };
 
-pub fn instance_to_json(_ctx: &Context, instance: &Instance, variant: &VersionGroupVariant) -> Value {
+pub fn instance_to_json(_ctx: &Context, instance: &Instance, variant_label: &str) -> Value {
   let package = instance.descriptor.package.borrow();
   json!({
     "dependency": instance.descriptor.name,
@@ -16,7 +15,7 @@ pub fn instance_to_json(_ctx: &Context, instance: &Instance, variant: &VersionGr
     "package": package.file_path.to_string_lossy(),
     "property": instance.descriptor.dependency_type.path.split('/').filter(|part| !part.is_empty()).collect::<Vec<&str>>(),
     "strategy": instance.descriptor.dependency_type.strategy,
-    "versionGroup": format!("{:?}", variant),
+    "versionGroup": variant_label,
     "preferredSemverRange": instance.preferred_semver_range.as_ref().map(|range| range.unwrap()),
     "statusCode": instance.state.borrow().get_name(),
     "statusType": instance.state.borrow().get_status_type(),
@@ -39,11 +38,12 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
   ctx
     .version_groups
     .iter()
-    .filter(|group| !group.has_ignored_variant() || ctx.config.cli.show_ignored)
+    .filter(|group| !group.is_ignored() || ctx.config.cli.show_ignored)
     .for_each(|group| {
-      group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
-        dependency.get_sorted_instances(&ctx.instances).for_each(|instance| {
-          let instance_json = instance_to_json(&ctx, instance, &dependency.variant);
+      let variant_label = group.variant_label();
+      group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dep| {
+        dep.get_sorted_instances(&ctx.instances).for_each(|instance| {
+          let instance_json = instance_to_json(&ctx, instance, variant_label);
           println!("{}", serde_json::to_string(&instance_json).unwrap());
           if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {
             is_invalid = true;

@@ -1,5 +1,15 @@
 # Changelog
 
+## [14.3.0](https://github.com/JamieMason/syncpack/compare/14.2.1...14.3.0) (2026-03-29)
+
+### Features
+
+* **rcfile:** allow // comment properties ([df0cc01](https://github.com/JamieMason/syncpack/commit/df0cc01b4e716f260de8cb5a6e2d9e0526f0d6a3))
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([6af7e45](https://github.com/JamieMason/syncpack/commit/6af7e45abfac48313958196ea3ea20aebe9243fa))
+
 ## [14.2.1](https://github.com/JamieMason/syncpack/compare/14.2.0...14.2.1) (2026-03-21)
 
 ### Bug Fixes

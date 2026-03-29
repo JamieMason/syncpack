@@ -5,12 +5,21 @@ use {
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
+    version_group::visit_groups,
   },
   serde_json::json,
 };
 
 #[test]
 fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_semver_groups() {
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -26,17 +35,9 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_semver_
         }
       }),
     ])
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -75,6 +76,14 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_semver_
 
 #[test]
 fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_semver_group() {
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -94,17 +103,9 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_semver_g
       "packages": ["package-b"],
       "range": "^"
     }))
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -143,6 +144,14 @@ fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_semver_g
 
 #[test]
 fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its_semver_group() {
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -162,17 +171,9 @@ fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its_semve
       "packages": ["package-b"],
       "range": "~"
     }))
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -211,6 +212,14 @@ fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its_semve
 
 #[test]
 fn instance_in_a_same_range_group_does_not_satisfy_another() {
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -226,17 +235,9 @@ fn instance_in_a_same_range_group_does_not_satisfy_another() {
         }
       }),
     ])
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -275,7 +276,15 @@ fn instance_in_a_same_range_group_does_not_satisfy_another() {
 
 #[test]
 fn caret_and_tilde_ranges_overlap_when_tilde_is_within_caret() {
-  // ^1.0.0 covers 1.0.0–1.x.x, ~1.4.2 covers 1.4.2–1.4.x — they overlap
+  // ^1.0.0 covers 1.0.0-1.x.x, ~1.4.2 covers 1.4.2-1.4.x -- they overlap
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -291,17 +300,9 @@ fn caret_and_tilde_ranges_overlap_when_tilde_is_within_caret() {
         }
       }),
     ])
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -340,7 +341,15 @@ fn caret_and_tilde_ranges_overlap_when_tilde_is_within_caret() {
 
 #[test]
 fn tilde_ranges_do_not_overlap_when_minor_versions_differ() {
-  // ~1.0.0 covers 1.0.x, ~1.4.2 covers 1.4.x — no overlap
+  // ~1.0.0 covers 1.0.x, ~1.4.2 covers 1.4.x -- no overlap
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -356,17 +365,9 @@ fn tilde_ranges_do_not_overlap_when_minor_versions_differ() {
         }
       }),
     ])
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -405,7 +406,15 @@ fn tilde_ranges_do_not_overlap_when_minor_versions_differ() {
 
 #[test]
 fn exact_pinned_versions_that_differ_do_not_overlap() {
-  // 1.0.0 and 1.0.1 are each a single point — they don't intersect
+  // 1.0.0 and 1.0.1 are each a single point -- they don't intersect
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -421,17 +430,9 @@ fn exact_pinned_versions_that_differ_do_not_overlap() {
         }
       }),
     ])
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -470,7 +471,15 @@ fn exact_pinned_versions_that_differ_do_not_overlap() {
 
 #[test]
 fn three_ranges_all_overlap_pairwise() {
-  // >=1.0.0, ^1.2.3, <=2.0.0 — all three pairwise intersect
+  // >=1.0.0, ^1.2.3, <=2.0.0 -- all three pairwise intersect
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -492,17 +501,9 @@ fn three_ranges_all_overlap_pairwise() {
         }
       }),
     ])
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -558,6 +559,14 @@ fn three_ranges_all_overlap_pairwise() {
 #[test]
 fn three_ranges_where_one_does_not_overlap_with_others() {
   // ^1.0.0 and ~1.2.0 overlap, but <1.0.0 overlaps with neither
+  let vg1 = json!({
+    "dependencyTypes": ["local"],
+    "isIgnored": true
+  });
+  let vg2 = json!({
+    "dependencies": ["foo"],
+    "policy": "sameRange"
+  });
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -579,17 +588,9 @@ fn three_ranges_where_one_does_not_overlap_with_others() {
         }
       }),
     ])
-    .with_version_groups(vec![
-      json!({
-        "dependencyTypes": ["local"],
-        "isIgnored": true
-      }),
-      json!({
-        "dependencies": ["foo"],
-        "policy": "sameRange"
-      }),
-    ])
-    .build_and_visit_packages();
+    .with_version_groups(vec![vg1.clone(), vg2.clone()])
+    .build();
+  visit_groups(&ctx, &[vg1, vg2]);
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
