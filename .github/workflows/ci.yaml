@@ -69,7 +69,7 @@ jobs:
         run: just check-clippy
       - name: Cargo test
         run: just test
-      # - name: Test issue 327
-      #   run: just test-js-config-loading
+      - name: Test issue 327
+        run: just test-js-config-loading
       - name: Test issue 311 and 319
         run: just test-glob-matching
