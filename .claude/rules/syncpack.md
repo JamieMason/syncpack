@@ -15,6 +15,7 @@ Rust CLI tool for synchronising npm dependency versions across JavaScript monore
 - Action-oriented: what to DO
 - Grounded in facts: cite code/docs
 - BANNED WORDS: basically, essentially, in order to, comprehensive
+- Always use AskUserQuestion when asking questions
 
 ## Pre-Implementation Checklist
 
@@ -55,17 +56,17 @@ MUST NOT:
 
 Examples of BANNED actions:
 
-- ❌ Creating "status" docs, "validation" docs, "current-status" files
-- ❌ Creating "summary" docs, "guide" docs, "checklist" files
-- ❌ Splitting existing docs into multiple files
-- ❌ Creating "handoff" docs, "next steps" docs
+- Creating "status" docs, "validation" docs, "current-status" files
+- Creating "summary" docs, "guide" docs, "checklist" files
+- Splitting existing docs into multiple files
+- Creating "handoff" docs, "next steps" docs
 
 **ONLY update existing docs:**
 
-- ✅ Update the original document in place
-- ✅ Add sections/checkboxes to existing files
-- ✅ Mark tasks complete where they already exist
+- Update the original document in place
+- Add sections/checkboxes to existing files
+- Mark tasks complete where they already exist
 
-**If user has ONE plan file → keep ONE plan file.**
+**If user has ONE plan file, keep ONE plan file.**
 
 Do NOT proliferate documentation. Update existing files only.
