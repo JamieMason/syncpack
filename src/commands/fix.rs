@@ -1,8 +1,4 @@
-use crate::{
-  commands::reporter::FixReporter,
-  context::{Context, SyncpackError},
-  version_group::VersionGroupBehavior,
-};
+use crate::{commands::reporter::FixReporter, context::Context, errors::SyncpackError, version_group::VersionGroupBehavior};
 
 pub fn run(ctx: Context, reporter: &dyn FixReporter) -> Result<Context, SyncpackError> {
   let mut contains_unfixable_issues = false;

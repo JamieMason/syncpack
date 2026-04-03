@@ -1,7 +1,4 @@
-use crate::{
-  commands::reporter::FormatReporter,
-  context::{Context, SyncpackError},
-};
+use crate::{commands::reporter::FormatReporter, context::Context, errors::SyncpackError};
 
 pub fn run(ctx: Context, reporter: &dyn FormatReporter) -> Result<Context, SyncpackError> {
   if ctx.config.cli.check {

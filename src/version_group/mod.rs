@@ -1,8 +1,9 @@
 use {
   crate::{
     cli::SortBy,
-    context::{ConfigError, Context},
+    context::Context,
     dependency::UpdateUrl,
+    errors::ConfigError,
     group_selector::GroupSelector,
     instance::{Instance, InstanceIdx, InstanceState},
     packages::Packages,

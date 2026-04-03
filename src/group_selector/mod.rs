@@ -4,7 +4,7 @@ pub mod pattern_matcher;
 mod group_selector_test;
 
 use {
-  crate::{context::ConfigError, dependency::DependencyType, instance::InstanceDescriptor},
+  crate::{dependency::DependencyType, errors::ConfigError, instance::InstanceDescriptor},
   pattern_matcher::PatternMatcher,
 };
 

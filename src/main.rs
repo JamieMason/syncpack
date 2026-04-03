@@ -1,12 +1,16 @@
 use {
   crate::{
+    catalogs::CatalogsByName,
     cli::{Cli, ReporterKind, Subcommand},
     commands::{
       fix, fix_mismatches, format, json, lint, lint_semver_ranges, list, list_mismatches, prompt,
       reporter::{JsonFixReporter, JsonFormatReporter, PrettyFixReporter, PrettyFormatReporter},
       set_semver_ranges, update,
     },
-    context::{Context, SyncpackError},
+    context::{Config, Context},
+    errors::SyncpackError,
+    packages::Packages,
+    rcfile::Rcfile,
     registry::{client::LiveRegistryClient, updates::RegistryUpdates},
     visit_formatting::visit_formatting,
     visit_packages::visit_packages,
@@ -24,6 +28,7 @@ mod cli;
 mod commands;
 mod context;
 mod dependency;
+mod errors;
 mod group_selector;
 mod instance;
 mod logger;
@@ -50,7 +55,11 @@ async fn main() {
 async fn run() -> Result<(), SyncpackError> {
   let cli = Cli::parse()?;
   logger::init(&cli);
-  let ctx = Context::from_cli(cli)?;
+  let rcfile = Rcfile::from_disk(&cli)?;
+  let config = Config { rcfile, cli };
+  let packages = Packages::from_config(&config);
+  let catalogs: Option<CatalogsByName> = None; // catalogs::from_config(&config);
+  let ctx = Context::create(config, packages, catalogs)?;
 
   match ctx.config.cli.subcommand {
     Subcommand::Fix => {

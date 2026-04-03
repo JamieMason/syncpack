@@ -1,7 +1,8 @@
 use {
   crate::{
     commands::{ui, ui::LINE_ENDING},
-    context::{Context, SyncpackError},
+    context::Context,
+    errors::SyncpackError,
     registry::updates::RegistryUpdates,
     version_group::VersionGroup,
   },

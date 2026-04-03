@@ -6,8 +6,8 @@ mod rcfile_test;
 
 use {
   crate::{
-    context::ConfigError,
     dependency::DependencyType,
+    errors::ConfigError,
     group_selector::GroupSelector,
     packages::Packages,
     version_group::{AnyVersionGroup, VersionGroup},

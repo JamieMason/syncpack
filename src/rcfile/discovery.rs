@@ -1,7 +1,7 @@
 use {
   crate::{
     cli::Cli,
-    context::SyncpackError,
+    errors::SyncpackError,
     rcfile::{
       error::RcfileError,
       javascript::{from_javascript_path, try_from_js_candidates},

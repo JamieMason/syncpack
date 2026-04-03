@@ -1,5 +1,5 @@
 use {
-  crate::{context::ConfigError, group_selector::GroupSelector, semver_range::SemverRange},
+  crate::{errors::ConfigError, group_selector::GroupSelector, semver_range::SemverRange},
   serde::Deserialize,
   serde_json::Value,
   std::collections::HashMap,

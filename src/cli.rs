@@ -102,7 +102,7 @@ impl Default for Cli {
 
 impl Cli {
   /// Parse all command-line arguments from the user into a `Cli` struct
-  pub fn parse() -> Result<Self, crate::context::SyncpackError> {
+  pub fn parse() -> Result<Self, crate::errors::SyncpackError> {
     fn from_arg_matches(subcommand: Subcommand, matches: &ArgMatches) -> Cli {
       let dependencies = get_patterns(matches, "dependencies");
       let dependency_types = get_patterns(matches, "dependency-types");
@@ -158,7 +158,7 @@ impl Cli {
       Some(("prompt", _)) => from_deprecated(Subcommand::Prompt),
       Some(("set-semver-ranges", _)) => from_deprecated(Subcommand::SetSemverRanges),
       Some(("update", matches)) => from_arg_matches(Subcommand::Update, matches),
-      _ => return Err(crate::context::SyncpackError::NoSubcommand),
+      _ => return Err(crate::errors::SyncpackError::NoSubcommand),
     })
   }
 }

@@ -1,6 +1,6 @@
 use {
   crate::{
-    context::ConfigError,
+    errors::ConfigError,
     rcfile::{semver_group::AnySemverGroup, RawRcfile, Rcfile},
     version_group::{AnyVersionGroup, VersionGroup},
   },
@@ -188,7 +188,7 @@ fn version_group_from_config_rejects_invalid_policy() {
 
 mod comment_properties {
   use {
-    crate::{context::ConfigError, rcfile::RawRcfile},
+    crate::{errors::ConfigError, rcfile::RawRcfile},
     serde_json::json,
   };
 

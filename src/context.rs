@@ -2,93 +2,19 @@ use {
   crate::{
     catalogs::CatalogsByName,
     cli::Cli,
+    errors::SyncpackError,
     instance::{Instance, InstanceIdx},
     packages::Packages,
-    rcfile::{error::RcfileError, Rcfile},
+    rcfile::Rcfile,
     version_group::{VersionGroup, VersionGroupBehavior},
   },
-  log::debug,
-  std::{fmt, mem},
-  thiserror::Error,
+  std::mem,
 };
-
-#[derive(Debug, Error)]
-pub enum ConfigError {
-  #[error("Config property '{property}' is deprecated\n{hint}")]
-  DeprecatedProperty { property: String, hint: String },
-  #[error("Config property '{path}' is not recognised")]
-  UnrecognisedProperty { path: String },
-  #[error("dependencyType '{name}' does not match any built-in or custom types")]
-  InvalidDependencyType { name: String },
-  #[error("Invalid semver group: must have isDisabled, isIgnored, or range")]
-  InvalidSemverGroup,
-  #[error("Unrecognised version group policy: '{0}'")]
-  InvalidVersionGroupPolicy(String),
-}
-
-#[derive(Debug)]
-pub enum SyncpackError {
-  DeprecatedCommand,
-  InvalidConfig(Vec<ConfigError>),
-  IssuesFound,
-  NoSubcommand,
-  RcfileError(RcfileError),
-}
-
-impl fmt::Display for SyncpackError {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      Self::DeprecatedCommand => Ok(()),
-      Self::InvalidConfig(errors) => {
-        for (i, e) in errors.iter().enumerate() {
-          if i > 0 {
-            writeln!(f)?;
-          }
-          write!(f, "{e}")?;
-        }
-        write!(f, "\ncheck your syncpack config file, see https://syncpack.dev for documentation")
-      }
-      Self::IssuesFound => Ok(()),
-      Self::NoSubcommand => write!(f, "No subcommand specified"),
-      Self::RcfileError(e) => write!(f, "{e}"),
-    }
-  }
-}
-
-impl std::error::Error for SyncpackError {}
-
-impl From<RcfileError> for SyncpackError {
-  fn from(e: RcfileError) -> Self {
-    Self::RcfileError(e)
-  }
-}
-
-impl From<ConfigError> for SyncpackError {
-  fn from(e: ConfigError) -> Self {
-    Self::InvalidConfig(vec![e])
-  }
-}
-
-impl From<Vec<ConfigError>> for SyncpackError {
-  fn from(errors: Vec<ConfigError>) -> Self {
-    Self::InvalidConfig(errors)
-  }
-}
 
 #[derive(Debug)]
 pub struct Config {
   pub cli: Cli,
   pub rcfile: Rcfile,
-}
-
-impl Config {
-  /// Read the rcfile from stdin and fall back to defaults if none was sent
-  pub fn from_cli(cli: Cli) -> Result<Config, SyncpackError> {
-    Ok(Config {
-      rcfile: Rcfile::from_disk(&cli)?,
-      cli,
-    })
-  }
 }
 
 /// The central data structure that owns all project data.
@@ -160,18 +86,5 @@ impl Context {
       packages,
       version_groups,
     })
-  }
-
-  pub fn from_cli(cli: Cli) -> Result<Self, SyncpackError> {
-    let config = Config::from_cli(cli)?;
-
-    debug!("Command: {:?}", config.cli.subcommand);
-    debug!("{:#?}", config.cli);
-    debug!("{:#?}", config.rcfile);
-
-    let packages = Packages::from_config(&config);
-    let catalogs: Option<CatalogsByName> = None; // catalogs::from_config(&config);
-
-    Context::create(config, packages, catalogs)
   }
 }

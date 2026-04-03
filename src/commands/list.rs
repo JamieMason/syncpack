@@ -1,7 +1,4 @@
-use crate::{
-  commands::ui,
-  context::{Context, SyncpackError},
-};
+use crate::{commands::ui, context::Context, errors::SyncpackError};
 
 pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
   let mut is_invalid = false;

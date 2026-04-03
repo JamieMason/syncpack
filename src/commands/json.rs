@@ -1,8 +1,5 @@
 use {
-  crate::{
-    context::{Context, SyncpackError},
-    instance::Instance,
-  },
+  crate::{context::Context, errors::SyncpackError, instance::Instance},
   serde_json::{json, Value},
 };
 

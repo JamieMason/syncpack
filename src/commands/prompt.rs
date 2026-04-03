@@ -1,4 +1,4 @@
-use {crate::context::SyncpackError, colored::Colorize};
+use {crate::errors::SyncpackError, colored::Colorize};
 
 /// Run the prompt command (deprecated in v14)
 pub fn run() -> Result<(), SyncpackError> {
