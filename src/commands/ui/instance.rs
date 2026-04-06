@@ -138,7 +138,8 @@ pub fn get_location(ctx: &Context, instance: &Instance) -> String {
     "".to_string()
   };
   let path_to_prop = instance.descriptor.dependency_type.path.replace("/", ".");
-  let file_link = ui::package::get_package_json_link(ctx, &instance.descriptor.package.borrow());
+  let package_file_path = &ctx.packages.all[instance.descriptor.package_idx.0].file_path;
+  let file_link = ui::package::get_package_json_link(ctx, package_file_path);
   ui::util::join_line(vec![&alias_info, &"in".to_string(), &file_link, &"at".to_string(), &path_to_prop])
 }
 

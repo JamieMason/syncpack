@@ -117,7 +117,7 @@ impl GroupSelector {
     Ok(())
   }
 
-  pub fn can_add(&self, descriptor: &InstanceDescriptor) -> bool {
+  pub fn can_add(&self, descriptor: &InstanceDescriptor, package_name: &str) -> bool {
     // Order checks from cheapest/most-likely-to-fail to most expensive
     // 1. Specifier types (often empty, cheap string comparison)
     if self.has_specifier_type_filters && !self.matches_specifier_types(descriptor) {
@@ -134,8 +134,8 @@ impl GroupSelector {
       return false;
     }
 
-    // 4. Packages (pattern matching + borrow, most expensive)
-    if self.has_package_filters && !self.matches_packages(descriptor) {
+    // 4. Packages (pattern matching, most expensive)
+    if self.has_package_filters && !self.matches_packages(package_name) {
       return false;
     }
 
@@ -152,8 +152,7 @@ impl GroupSelector {
   }
 
   #[inline]
-  fn matches_packages(&self, descriptor: &InstanceDescriptor) -> bool {
-    let package_name = &descriptor.package.borrow().name;
+  fn matches_packages(&self, package_name: &str) -> bool {
     let is_included = self.include_packages.is_empty() || matches_any_pattern(package_name, &self.include_packages);
     let is_excluded = !self.exclude_packages.is_empty() && matches_any_pattern(package_name, &self.exclude_packages);
     is_included && !is_excluded

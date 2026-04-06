@@ -69,13 +69,14 @@ impl Context {
     }
 
     packages.get_all_instances(all_dependency_types, |mut descriptor| {
-      let dependency_group = dependency_groups.iter().find(|alias| alias.can_add(&descriptor));
+      let package_name = &packages.all[descriptor.package_idx.0].name;
+      let dependency_group = dependency_groups.iter().find(|alias| alias.can_add(&descriptor, package_name));
 
       if let Some(group) = dependency_group {
         descriptor.internal_name = group.label.clone();
       }
 
-      descriptor.matches_cli_filter = config.cli.filters.as_ref().is_none_or(|f| f.can_add(&descriptor));
+      descriptor.matches_cli_filter = config.cli.filters.as_ref().is_none_or(|f| f.can_add(&descriptor, package_name));
 
       if !descriptor.matches_cli_filter {
         return;
@@ -83,12 +84,12 @@ impl Context {
 
       let preferred_semver_range = semver_groups
         .iter()
-        .find(|group| group.selector.can_add(&descriptor))
+        .find(|group| group.selector.can_add(&descriptor, package_name))
         .and_then(|group| group.range.clone());
 
-      let version_group = version_groups.iter_mut().find(|group| group.selector().can_add(&descriptor));
+      let version_group = version_groups.iter_mut().find(|group| group.selector().can_add(&descriptor, package_name));
 
-      let instance = Instance::new(descriptor, preferred_semver_range);
+      let instance = Instance::new(descriptor, package_name, preferred_semver_range);
       let idx = InstanceIdx(instances.len());
       instances.push(instance);
 

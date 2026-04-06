@@ -6,6 +6,7 @@ use {
     errors::UnsupportedConfigError,
     group_selector::GroupSelector,
     instance::{Instance, InstanceIdx, InstanceState},
+    package_json::PackageJson,
     packages::Packages,
     registry::updates::RegistryUpdates,
     specifier::Specifier,
@@ -183,7 +184,11 @@ impl DependencyCore {
       .filter(|instance| instance.descriptor.matches_cli_filter)
   }
 
-  pub fn get_sorted_instances<'a>(&'a self, arena: &'a [Instance]) -> impl Iterator<Item = &'a Instance> {
+  pub fn get_sorted_instances<'a>(
+    &'a self,
+    arena: &'a [Instance],
+    packages: &'a [PackageJson],
+  ) -> impl Iterator<Item = &'a Instance> {
     self.get_instances(arena).sorted_by(|a, b| {
       if a.is_valid() && !b.is_valid() {
         return Ordering::Less;
@@ -199,7 +204,9 @@ impl DependencyCore {
       }
       let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
       if matches!(specifier_order, Ordering::Equal) {
-        a.descriptor.package.borrow().name.cmp(&b.descriptor.package.borrow().name)
+        packages[a.descriptor.package_idx.0]
+          .name
+          .cmp(&packages[b.descriptor.package_idx.0].name)
       } else {
         specifier_order
       }
@@ -487,7 +494,8 @@ pub(crate) fn visit_groups_with_registry(
   // Assign instances (first-match-wins)
   for (i, instance) in ctx.instances.iter().enumerate() {
     let idx = InstanceIdx(i);
-    if let Some(group) = groups.iter_mut().find(|g| g.selector().can_add(&instance.descriptor)) {
+    let package_name = &ctx.packages.all[instance.descriptor.package_idx.0].name;
+    if let Some(group) = groups.iter_mut().find(|g| g.selector().can_add(&instance.descriptor, package_name)) {
       group.add_instance(idx, instance);
     }
   }

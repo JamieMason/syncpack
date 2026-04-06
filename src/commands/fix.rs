@@ -13,7 +13,7 @@ pub fn run(ctx: Context, reporter: &dyn FixReporter) -> Result<Context, Syncpack
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
         let mut has_printed_dependency = false;
         dependency
-          .get_sorted_instances(&ctx.instances)
+          .get_sorted_instances(&ctx.instances, &ctx.packages.all)
           .inspect(|instance| {
             if instance.is_unfixable() || instance.is_suspect() && ctx.config.rcfile.strict {
               contains_unfixable_issues = true
@@ -31,10 +31,11 @@ pub fn run(ctx: Context, reporter: &dyn FixReporter) -> Result<Context, Syncpack
               has_printed_dependency = true;
             }
             reporter.on_instance(&ctx, instance, group.variant_label());
+            let package = &ctx.packages.all[instance.descriptor.package_idx.0];
             if instance.is_banned() {
-              instance.remove()
+              instance.remove(package);
             } else {
-              instance.descriptor.package.borrow().copy_expected_specifier(instance);
+              package.copy_expected_specifier(instance);
             }
           });
       })
@@ -42,9 +43,7 @@ pub fn run(ctx: Context, reporter: &dyn FixReporter) -> Result<Context, Syncpack
 
   if !ctx.config.cli.dry_run {
     ctx.packages.all.iter().for_each(|package| {
-      package
-        .borrow()
-        .write_to_disk(ctx.config.rcfile.indent.as_deref(), &ctx.packages.formatting);
+      package.write_to_disk(ctx.config.rcfile.indent.as_deref(), &ctx.packages.formatting);
     });
   }
 

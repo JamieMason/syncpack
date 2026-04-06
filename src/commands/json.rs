@@ -3,8 +3,8 @@ use {
   serde_json::{json, Value},
 };
 
-pub fn instance_to_json(_ctx: &Context, instance: &Instance, variant_label: &str) -> Value {
-  let package = instance.descriptor.package.borrow();
+pub fn instance_to_json(ctx: &Context, instance: &Instance, variant_label: &str) -> Value {
+  let package = &ctx.packages.all[instance.descriptor.package_idx.0];
   json!({
     "dependency": instance.descriptor.name,
     "dependencyGroup": instance.descriptor.internal_name,
@@ -39,7 +39,7 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
     .for_each(|group| {
       let variant_label = group.variant_label();
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dep| {
-        dep.get_sorted_instances(&ctx.instances).for_each(|instance| {
+        dep.get_sorted_instances(&ctx.instances, &ctx.packages.all).for_each(|instance| {
           let instance_json = instance_to_json(&ctx, instance, variant_label);
           println!("{}", serde_json::to_string(&instance_json).unwrap());
           if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {

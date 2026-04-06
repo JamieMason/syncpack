@@ -4,12 +4,12 @@ use {
     context::Context,
     group_selector::GroupSelector,
     instance::{FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance},
-    package_json::PackageJson,
+    packages::PackageIdx,
     registry::updates::RegistryUpdates,
     specifier::Specifier,
   },
   log::debug,
-  std::{cell::RefCell, collections::BTreeMap, rc::Rc},
+  std::{collections::BTreeMap, rc::Rc},
 };
 
 #[cfg(test)]
@@ -20,7 +20,7 @@ mod snapped_to_test;
 pub struct SnappedToGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
-  pub snap_to: Vec<Rc<RefCell<PackageJson>>>,
+  pub snap_to: Vec<PackageIdx>,
 }
 
 impl SnappedToGroup {
@@ -31,8 +31,8 @@ impl SnappedToGroup {
   pub fn get_snapped_to_specifier(&self, dep: &DependencyCore, all_instances: &[Instance]) -> Option<Rc<Specifier>> {
     for instance in all_instances {
       if *instance.descriptor.internal_name == *dep.internal_name {
-        for snapped_to_package in &self.snap_to {
-          if instance.descriptor.package.borrow().name == snapped_to_package.borrow().name {
+        for &snapped_to_idx in &self.snap_to {
+          if instance.descriptor.package_idx == snapped_to_idx {
             return Some(Rc::clone(&instance.descriptor.specifier));
           }
         }

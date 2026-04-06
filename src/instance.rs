@@ -23,6 +23,7 @@ use {
   crate::{
     dependency::{DependencyType, Strategy, UpdateUrl},
     package_json::PackageJson,
+    packages::PackageIdx,
     semver_range::SemverRange,
     specifier::Specifier,
   },
@@ -70,10 +71,8 @@ pub struct InstanceDescriptor {
   pub matches_cli_filter: bool,
   /// The dependency name, e.g., "react", "react-dom", "@types/node"
   pub name: String,
-  /// The package.json this instance belongs to
-  /// The package.json this instance belongs to.
-  /// Wrapped in Rc<RefCell<T>> for shared ownership with interior mutability.
-  pub package: Rc<RefCell<PackageJson>>,
+  /// Index into the Packages.all arena for the package.json this instance belongs to
+  pub package_idx: PackageIdx,
   /// The original version specifier, which should never be mutated,
   /// e.g., "18.0.0", "^18.0.0", "workspace:*", "git://github.com/..."
   pub specifier: Rc<Specifier>,
@@ -110,9 +109,8 @@ pub struct Instance {
 }
 
 impl Instance {
-  pub fn new(descriptor: InstanceDescriptor, preferred_semver_range: Option<SemverRange>) -> Instance {
+  pub fn new(descriptor: InstanceDescriptor, package_name: &str, preferred_semver_range: Option<SemverRange>) -> Instance {
     let dependency_type_name = &descriptor.dependency_type.path;
-    let package_name = descriptor.package.borrow().name.clone();
     let id = format!("{} in {} of {}", &descriptor.name, dependency_type_name, package_name);
     let is_local_instance = dependency_type_name == "/version";
     Instance {
@@ -130,10 +128,10 @@ impl Instance {
   /// Examples:
   /// - "link:../package-a" from /packages/package-b/package.json -> /packages/package-a
   /// - "link:../../elsewhere/package-a" from /packages/package-b/package.json -> /elsewhere/package-a
-  pub fn link_resolves_to_local_package(&self, local_instance: &Instance) -> bool {
+  pub fn link_resolves_to_local_package(&self, local_instance: &Instance, packages: &[PackageJson]) -> bool {
     if let Specifier::Link(link) = &*self.descriptor.specifier {
       // Get the directory of the consuming package
-      let consuming_package_path = &self.descriptor.package.borrow().file_path;
+      let consuming_package_path = &packages[self.descriptor.package_idx.0].file_path;
       let consuming_package_dir = consuming_package_path.parent().unwrap_or_else(|| Path::new(""));
 
       // Extract the path from "link:../path/to/package"
@@ -143,7 +141,7 @@ impl Instance {
       let resolved_link_path = consuming_package_dir.join(link_path);
 
       // Get the local package's directory
-      let local_package_path = &local_instance.descriptor.package.borrow().file_path;
+      let local_package_path = &packages[local_instance.descriptor.package_idx.0].file_path;
       let local_package_dir = local_package_path.parent().unwrap_or_else(|| Path::new(""));
 
       // Try to canonicalize both paths if they exist (real filesystem)
@@ -419,14 +417,14 @@ impl Instance {
   }
 
   /// Delete from the package.json
-  pub fn remove(&self) {
+  pub fn remove(&self, package: &PackageJson) {
     match self.descriptor.dependency_type.strategy {
       Strategy::NameAndVersionProps => {
         let path_to_prop = &self.descriptor.dependency_type.path;
         if let Some(parent_path) = path_to_prop.rfind('/') {
           let parent_path = &path_to_prop[..parent_path];
           let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(parent_path) {
+          if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(parent_path) {
             obj.remove(prop_name);
           }
         } else if path_to_prop == "/" {
@@ -438,7 +436,7 @@ impl Instance {
         if let Some(parent_path) = path_to_prop.rfind('/') {
           let parent_path = &path_to_prop[..parent_path];
           let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(parent_path) {
+          if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(parent_path) {
             obj.remove(prop_name);
           }
         } else if path_to_prop == "/" {
@@ -450,7 +448,7 @@ impl Instance {
         if let Some(parent_path) = path_to_prop.rfind('/') {
           let parent_path = &path_to_prop[..parent_path];
           let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(parent_path) {
+          if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(parent_path) {
             obj.remove(prop_name);
           }
         } else if path_to_prop == "/" {
@@ -460,7 +458,7 @@ impl Instance {
       Strategy::VersionsByName => {
         let path_to_obj = &self.descriptor.dependency_type.path;
         let name = &self.descriptor.name;
-        if let Some(Value::Object(obj)) = self.descriptor.package.borrow_mut().contents.borrow_mut().pointer_mut(path_to_obj) {
+        if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(path_to_obj) {
           obj.remove(name);
         }
       }

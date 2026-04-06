@@ -8,12 +8,16 @@ use {
   },
   log::error,
   serde_json::Value,
-  std::{cell::RefCell, collections::HashSet, path::PathBuf, rc::Rc},
+  std::{collections::HashSet, path::PathBuf},
 };
+
+/// Index into the Packages.all arena.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct PackageIdx(pub usize);
 
 #[derive(Debug)]
 pub struct Packages {
-  pub all: Vec<Rc<RefCell<PackageJson>>>,
+  pub all: Vec<PackageJson>,
   pub formatting: DetectedFormatting,
 }
 
@@ -52,13 +56,17 @@ impl Packages {
 
   /// Add a package.json file to this collection
   pub fn add_package(&mut self, package_json: PackageJson) -> &mut Self {
-    self.all.push(Rc::new(RefCell::new(package_json)));
+    self.all.push(package_json);
     self
   }
 
-  /// Get a package.json file by its name
-  pub fn get_by_name(&self, name: &str) -> Option<Rc<RefCell<PackageJson>>> {
-    self.all.iter().find(|package| package.borrow().name == name).map(Rc::clone)
+  /// Get a package.json file's index by its name
+  pub fn get_by_name(&self, name: &str) -> Option<PackageIdx> {
+    self
+      .all
+      .iter()
+      .position(|package| package.name == name)
+      .map(PackageIdx)
   }
 
   /// Get every instance of a dependency from every package.json file
@@ -67,12 +75,12 @@ impl Packages {
     F: FnMut(InstanceDescriptor),
   {
     // Pre-compute local package names for O(1) is_local_dependency lookups
-    let local_package_names: HashSet<String> = self.all.iter().map(|p| p.borrow().name.clone()).collect();
+    let local_package_names: HashSet<String> = self.all.iter().map(|p| p.name.clone()).collect();
     let empty_version = Value::String(String::new());
 
-    for package in self.all.iter() {
-      let pkg = package.borrow();
-      let contents = pkg.contents.borrow();
+    for (pkg_index, package) in self.all.iter().enumerate() {
+      let package_idx = PackageIdx(pkg_index);
+      let contents = package.contents.borrow();
       for dependency_type in all_dependency_types {
         match dependency_type.strategy {
           Strategy::NameAndVersionProps => {
@@ -92,7 +100,7 @@ impl Packages {
                 is_local_dependency: local_package_names.contains(name.as_str()),
                 matches_cli_filter: false,
                 name: name.to_string(),
-                package: Rc::clone(package),
+                package_idx,
                 specifier: Specifier::new(raw_specifier),
               });
             }
@@ -106,7 +114,7 @@ impl Packages {
                   is_local_dependency: local_package_names.contains(name),
                   matches_cli_filter: false,
                   name: name.to_string(),
-                  package: Rc::clone(package),
+                  package_idx,
                   specifier: Specifier::new(raw_specifier),
                 });
               }
@@ -120,7 +128,7 @@ impl Packages {
                 is_local_dependency: local_package_names.contains(&dependency_type.name),
                 matches_cli_filter: false,
                 name: dependency_type.name.clone(),
-                package: Rc::clone(package),
+                package_idx,
                 specifier: Specifier::new(raw_specifier),
               });
             }
@@ -135,7 +143,7 @@ impl Packages {
                     is_local_dependency: local_package_names.contains(name.as_str()),
                     matches_cli_filter: false,
                     name: name.to_string(),
-                    package: Rc::clone(package),
+                    package_idx,
                     specifier: Specifier::new(raw_specifier),
                   });
                 }

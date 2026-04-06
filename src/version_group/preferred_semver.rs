@@ -124,7 +124,7 @@ impl PreferredSemverGroup {
             debug!("{L5}it is using the link specifier");
             if let Some(local_idx) = dep.local_instance.borrow().as_ref() {
               let local_instance = &arena[local_idx.0];
-              if instance.link_resolves_to_local_package(local_instance) {
+              if instance.link_resolves_to_local_package(local_instance, &ctx.packages.all) {
                 debug!("{L6}link resolves to local package directory");
                 debug!("{L7}mark as satisfying local");
                 instance.mark_valid(ValidInstance::SatisfiesLocal, &instance.descriptor.specifier);

@@ -21,7 +21,7 @@ pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, S
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
         let mut has_printed_dependency = false;
         dependency
-          .get_sorted_instances(&ctx.instances)
+          .get_sorted_instances(&ctx.instances, &ctx.packages.all)
           .filter(|instance| instance.is_outdated())
           .for_each(|instance| {
             was_outdated = true;
@@ -41,7 +41,7 @@ pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, S
                 has_printed_dependency = true;
               }
               ui::instance::print_fixed(&ctx, instance);
-              instance.descriptor.package.borrow().copy_expected_specifier(instance);
+              ctx.packages.all[instance.descriptor.package_idx.0].copy_expected_specifier(instance);
             }
           });
       })
@@ -65,9 +65,7 @@ pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, S
 
   if !ctx.config.cli.dry_run {
     ctx.packages.all.iter().for_each(|package| {
-      package
-        .borrow()
-        .write_to_disk(ctx.config.rcfile.indent.as_deref(), &ctx.packages.formatting);
+      package.write_to_disk(ctx.config.rcfile.indent.as_deref(), &ctx.packages.formatting);
     });
   }
 

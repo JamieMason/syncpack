@@ -6,14 +6,14 @@ use {
   },
   colored::*,
   log::info,
-  std::rc::Rc,
+  std::{path::Path, rc::Rc},
 };
 
 pub fn print_invalid_package(ctx: &Context, package: &PackageJson) {
   let count = package.formatting_mismatches.borrow().len();
   let count_column = ui::util::count_column(count);
   let name = &package.name;
-  let file_link = get_package_json_link(ctx, package);
+  let file_link = get_package_json_link(ctx, &package.file_path);
   let location = format!("at {file_link}").dimmed();
   info!("{count_column} {name} {location}");
 }
@@ -39,8 +39,16 @@ pub fn print_fixed(ctx: &Context, mismatch: &Rc<FormatMismatch>) {
 }
 
 /// Render a clickable link to a package.json file
-pub fn get_package_json_link(ctx: &Context, package: &PackageJson) -> String {
-  let file_path = package.file_path.to_str().unwrap();
-  let relative_file_path = package.get_relative_file_path(&ctx.config.cli.cwd);
+pub fn get_package_json_link(ctx: &Context, package_file_path: &Path) -> String {
+  let file_path = package_file_path.to_str().unwrap();
+  let relative_file_path = get_relative_file_path(&ctx.config.cli.cwd, package_file_path);
   ui::util::get_link(ctx, format!("file:{file_path}"), relative_file_path)
+}
+
+fn get_relative_file_path(cwd: &Path, file_path: &Path) -> String {
+  file_path
+    .strip_prefix(cwd)
+    .ok()
+    .and_then(|path| path.to_str().map(|path_str| path_str.to_string()))
+    .expect("Failed to create relative file path")
 }
