@@ -28,7 +28,6 @@ use {
     specifier::Specifier,
   },
   log::debug,
-  serde_json::Value,
   std::{
     cell::RefCell,
     path::{Path, PathBuf},
@@ -419,48 +418,19 @@ impl Instance {
   /// Delete from the package.json
   pub fn remove(&self, package: &mut PackageJson) {
     match self.descriptor.dependency_type.strategy {
-      Strategy::NameAndVersionProps => {
+      Strategy::NameAndVersionProps | Strategy::NamedVersionString | Strategy::UnnamedVersionString => {
         let path_to_prop = &self.descriptor.dependency_type.path;
         if let Some(parent_path) = path_to_prop.rfind('/') {
-          let parent_path = &path_to_prop[..parent_path];
-          let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = package.contents.pointer_mut(parent_path) {
-            obj.remove(prop_name);
-          }
+          let parent_pointer = &path_to_prop[..parent_path];
+          let prop_name = &path_to_prop[parent_path + 1..];
+          package.remove_prop(parent_pointer, prop_name);
         } else if path_to_prop == "/" {
-          debug!("Cannot remove root property for NameAndVersionProps");
-        }
-      }
-      Strategy::NamedVersionString => {
-        let path_to_prop = &self.descriptor.dependency_type.path;
-        if let Some(parent_path) = path_to_prop.rfind('/') {
-          let parent_path = &path_to_prop[..parent_path];
-          let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = package.contents.pointer_mut(parent_path) {
-            obj.remove(prop_name);
-          }
-        } else if path_to_prop == "/" {
-          debug!("Cannot remove root property for NamedVersionString");
-        }
-      }
-      Strategy::UnnamedVersionString => {
-        let path_to_prop = &self.descriptor.dependency_type.path;
-        if let Some(parent_path) = path_to_prop.rfind('/') {
-          let parent_path = &path_to_prop[..parent_path];
-          let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = package.contents.pointer_mut(parent_path) {
-            obj.remove(prop_name);
-          }
-        } else if path_to_prop == "/" {
-          debug!("Cannot remove root property for UnnamedVersionString");
+          debug!("Cannot remove root property");
         }
       }
       Strategy::VersionsByName => {
         let path_to_obj = &self.descriptor.dependency_type.path;
-        let name = &self.descriptor.name;
-        if let Some(Value::Object(obj)) = package.contents.pointer_mut(path_to_obj) {
-          obj.remove(name);
-        }
+        package.remove_prop(path_to_obj, &self.descriptor.name);
       }
       Strategy::InvalidConfig => {
         unreachable!("unrecognised strategy");

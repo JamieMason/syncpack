@@ -76,7 +76,7 @@ impl Packages {
 
     for (pkg_index, package) in self.all.iter().enumerate() {
       let package_idx = PackageIdx(pkg_index);
-      let contents = &package.contents;
+      let contents = package.contents();
       for dependency_type in all_dependency_types {
         match dependency_type.strategy {
           Strategy::NameAndVersionProps => {

@@ -47,7 +47,7 @@ pub fn get_sorted_exports(rcfile: &Rcfile, package: &PackageJson) -> Option<Valu
       }
     }
   }
-  if let Some(exports) = package.contents.pointer("/exports") {
+  if let Some(exports) = package.contents().pointer("/exports") {
     let mut sorted_exports = exports.clone();
     sort_nested_objects(&rcfile.sort_exports, &mut sorted_exports);
     if !is_identical(exports, &sorted_exports) {
@@ -59,7 +59,7 @@ pub fn get_sorted_exports(rcfile: &Rcfile, package: &PackageJson) -> Option<Valu
 
 /// Get a sorted version of the given property from package.json
 pub fn get_sorted_az(key: &str, package: &PackageJson) -> Option<Value> {
-  if let Some(value) = package.contents.pointer(format!("/{key}").as_str()) {
+  if let Some(value) = package.contents().pointer(format!("/{key}").as_str()) {
     let mut sorted = value.clone();
     sort_alphabetically(&mut sorted);
     if !is_identical(value, &sorted) {
@@ -71,7 +71,7 @@ pub fn get_sorted_az(key: &str, package: &PackageJson) -> Option<Value> {
 
 /// Get a new package.json with its keys sorted to match the rcfile
 pub fn get_sorted_first(rcfile: &Rcfile, package: &PackageJson) -> Option<Value> {
-  if let Value::Object(value) = &package.contents {
+  if let Value::Object(value) = package.contents() {
     let mut sorted = value.clone();
     sort_keys_with_priority(&rcfile.sort_first, rcfile.sort_packages, &mut sorted);
     if !has_same_key_order(value, &sorted) {

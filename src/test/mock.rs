@@ -65,26 +65,16 @@ pub fn rcfile_from_mock(value: serde_json::Value) -> Rcfile {
     .unwrap()
 }
 
-/// Parse a package.json string
+/// Parse a package.json value into a PackageJson struct
 pub fn package_json_from_value(contents: Value) -> PackageJson {
   let name = contents
     .pointer("/name")
     .and_then(|name| name.as_str())
     .unwrap_or("NAME_IS_MISSING")
     .to_string();
-
-  // Create a realistic file path based on package name
-  // e.g., "package-a" -> "/packages/package-a/package.json"
   let file_path = PathBuf::from(format!("/packages/{name}/package.json"));
-
   let raw = serde_json::to_string_pretty(&contents).unwrap_or_default();
-  PackageJson {
-    name,
-    file_path,
-    formatting_mismatches: vec![],
-    raw,
-    contents,
-  }
+  PackageJson::from_raw(raw, file_path).expect("Failed to parse mock package.json")
 }
 
 /// Create an collection of package.json files from mocked values
