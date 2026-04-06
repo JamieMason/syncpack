@@ -9,7 +9,7 @@ use {
   log::{error, warn},
 };
 
-pub fn run(ctx: Context, registry_updates: &RegistryUpdates) -> Result<Context, SyncpackError> {
+pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, SyncpackError> {
   let mut was_outdated = false;
 
   ctx

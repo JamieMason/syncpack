@@ -1,6 +1,6 @@
 use {
   crate::{
-    errors::ConfigError,
+    errors::UnsupportedConfigError,
     rcfile::{semver_group::AnySemverGroup, RawRcfile, Rcfile},
     version_group::{AnyVersionGroup, VersionGroup},
   },
@@ -111,10 +111,10 @@ fn validate_unknown_fields_returns_deprecated_errors() {
   assert_eq!(errors.len(), 2);
   assert!(errors
     .iter()
-    .any(|e| matches!(e, ConfigError::DeprecatedProperty { property, .. } if property == "dependencyTypes")));
+    .any(|e| matches!(e, UnsupportedConfigError::DeprecatedProperty { property, .. } if property == "dependencyTypes")));
   assert!(errors
     .iter()
-    .any(|e| matches!(e, ConfigError::DeprecatedProperty { property, .. } if property == "lintFormatting")));
+    .any(|e| matches!(e, UnsupportedConfigError::DeprecatedProperty { property, .. } if property == "lintFormatting")));
 }
 
 #[test]
@@ -125,7 +125,7 @@ fn validate_unknown_fields_returns_unrecognised_errors() {
   .unwrap();
   let errors = raw.validate_unknown_fields().unwrap_err();
   assert_eq!(errors.len(), 1);
-  assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "notARealProperty"));
+  assert!(matches!(&errors[0], UnsupportedConfigError::UnrecognisedProperty { path } if path == "notARealProperty"));
 }
 
 #[test]
@@ -139,10 +139,10 @@ fn validate_unknown_fields_returns_nested_unrecognised_errors() {
   assert_eq!(errors.len(), 2);
   assert!(errors
     .iter()
-    .any(|e| matches!(e, ConfigError::UnrecognisedProperty { path } if path == "versionGroups[0].notReal")));
+    .any(|e| matches!(e, UnsupportedConfigError::UnrecognisedProperty { path } if path == "versionGroups[0].notReal")));
   assert!(errors
     .iter()
-    .any(|e| matches!(e, ConfigError::UnrecognisedProperty { path } if path == "semverGroups[0].bogus")));
+    .any(|e| matches!(e, UnsupportedConfigError::UnrecognisedProperty { path } if path == "semverGroups[0].bogus")));
 }
 
 #[test]
@@ -161,7 +161,7 @@ fn try_from_rejects_invalid_dependency_type() {
   }))
   .unwrap();
   let err = Rcfile::try_from(raw).unwrap_err();
-  assert!(matches!(err, ConfigError::InvalidDependencyType { name } if name == "nonexistent"));
+  assert!(matches!(err, UnsupportedConfigError::InvalidDependencyType { name } if name == "nonexistent"));
 }
 
 #[test]
@@ -171,7 +171,7 @@ fn semver_group_from_config_rejects_missing_required_fields() {
   }))
   .unwrap();
   let err = crate::rcfile::semver_group::SemverGroup::from_config(group).unwrap_err();
-  assert!(matches!(err, ConfigError::InvalidSemverGroup));
+  assert!(matches!(err, UnsupportedConfigError::InvalidSemverGroup));
 }
 
 #[test]
@@ -183,12 +183,12 @@ fn version_group_from_config_rejects_invalid_policy() {
   .unwrap();
   let packages = crate::packages::Packages::new();
   let err = VersionGroup::from_config(group, &packages).unwrap_err();
-  assert!(matches!(err, ConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
+  assert!(matches!(err, UnsupportedConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
 }
 
 mod comment_properties {
   use {
-    crate::{errors::ConfigError, rcfile::RawRcfile},
+    crate::{errors::UnsupportedConfigError, rcfile::RawRcfile},
     serde_json::json,
   };
 
@@ -224,7 +224,7 @@ mod comment_properties {
     .unwrap();
     let errors = raw.validate_unknown_fields().unwrap_err();
     assert_eq!(errors.len(), 1);
-    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "notARealProperty"));
+    assert!(matches!(&errors[0], UnsupportedConfigError::UnrecognisedProperty { path } if path == "notARealProperty"));
   }
 
   #[test]
@@ -257,7 +257,7 @@ mod comment_properties {
     .unwrap();
     let errors = raw.validate_unknown_fields().unwrap_err();
     assert_eq!(errors.len(), 1);
-    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "customTypes.myType.bogus"));
+    assert!(matches!(&errors[0], UnsupportedConfigError::UnrecognisedProperty { path } if path == "customTypes.myType.bogus"));
   }
 
   #[test]
@@ -284,7 +284,7 @@ mod comment_properties {
     .unwrap();
     let errors = raw.validate_unknown_fields().unwrap_err();
     assert_eq!(errors.len(), 1);
-    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "dependencyGroups[0].bogus"));
+    assert!(matches!(&errors[0], UnsupportedConfigError::UnrecognisedProperty { path } if path == "dependencyGroups[0].bogus"));
   }
 
   #[test]
@@ -311,7 +311,7 @@ mod comment_properties {
     .unwrap();
     let errors = raw.validate_unknown_fields().unwrap_err();
     assert_eq!(errors.len(), 1);
-    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "semverGroups[0].bogus"));
+    assert!(matches!(&errors[0], UnsupportedConfigError::UnrecognisedProperty { path } if path == "semverGroups[0].bogus"));
   }
 
   #[test]
@@ -338,7 +338,7 @@ mod comment_properties {
     .unwrap();
     let errors = raw.validate_unknown_fields().unwrap_err();
     assert_eq!(errors.len(), 1);
-    assert!(matches!(&errors[0], ConfigError::UnrecognisedProperty { path } if path == "versionGroups[0].notReal"));
+    assert!(matches!(&errors[0], UnsupportedConfigError::UnrecognisedProperty { path } if path == "versionGroups[0].notReal"));
   }
 
   #[test]

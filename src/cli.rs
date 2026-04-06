@@ -1,5 +1,5 @@
 use {
-  crate::group_selector::GroupSelector,
+  crate::{errors::SyncpackError, group_selector::GroupSelector},
   clap::{builder::ValueParser, crate_description, crate_name, crate_version, Arg, ArgMatches, Command},
   color_print::cformat,
   itertools::Itertools,
@@ -40,8 +40,8 @@ pub enum ReporterKind {
 pub struct Cli {
   /// Whether to check formatting instead of fixing it
   pub check: bool,
-  /// Path to a specific config file to use
-  pub config_path: Option<String>,
+  /// Absolute path to a specific config file to use
+  pub config_path: Option<PathBuf>,
   /// The path to the root of the project
   pub cwd: PathBuf,
   /// Whether to disable ANSI color codes in terminal output
@@ -86,7 +86,7 @@ impl Default for Cli {
       disable_ansi: false,
       dry_run: false,
       filters: None,
-      log_levels: vec![LevelFilter::Warn],
+      log_levels: vec![LevelFilter::Info, LevelFilter::Warn, LevelFilter::Error],
       reporter: ReporterKind::Pretty,
       show_hints: false,
       show_ignored: false,
@@ -102,8 +102,9 @@ impl Default for Cli {
 
 impl Cli {
   /// Parse all command-line arguments from the user into a `Cli` struct
-  pub fn parse() -> Result<Self, crate::errors::SyncpackError> {
+  pub fn parse(args: &[String]) -> Result<Self, SyncpackError> {
     fn from_arg_matches(subcommand: Subcommand, matches: &ArgMatches) -> Cli {
+      let cwd = env::current_dir().unwrap();
       let dependencies = get_patterns(matches, "dependencies");
       let dependency_types = get_patterns(matches, "dependency-types");
       let packages = get_patterns(matches, "packages");
@@ -121,8 +122,14 @@ impl Cli {
       };
       Cli {
         check: (matches!(&subcommand, Subcommand::Format | Subcommand::Update)) && matches.get_flag("check"),
-        config_path: matches.get_one::<String>("config").cloned(),
-        cwd: env::current_dir().unwrap(),
+        config_path: matches.get_one::<PathBuf>("config").map(|config_path| {
+          if config_path.is_absolute() {
+            config_path.clone()
+          } else {
+            cwd.join(config_path)
+          }
+        }),
+        cwd,
         disable_ansi: matches.get_flag("no-ansi"),
         dry_run: (matches!(&subcommand, Subcommand::Fix | Subcommand::Format | Subcommand::Update)) && matches.get_flag("dry-run"),
         filters,
@@ -146,20 +153,28 @@ impl Cli {
       }
     }
 
-    Ok(match create().get_matches().subcommand() {
-      Some(("fix", matches)) => from_arg_matches(Subcommand::Fix, matches),
-      Some(("fix-mismatches", _)) => from_deprecated(Subcommand::FixMismatches),
-      Some(("format", matches)) => from_arg_matches(Subcommand::Format, matches),
-      Some(("json", matches)) => from_arg_matches(Subcommand::Json, matches),
-      Some(("lint", matches)) => from_arg_matches(Subcommand::Lint, matches),
-      Some(("lint-semver-ranges", _)) => from_deprecated(Subcommand::LintSemverRanges),
-      Some(("list", matches)) => from_arg_matches(Subcommand::List, matches),
-      Some(("list-mismatches", _)) => from_deprecated(Subcommand::ListMismatches),
-      Some(("prompt", _)) => from_deprecated(Subcommand::Prompt),
-      Some(("set-semver-ranges", _)) => from_deprecated(Subcommand::SetSemverRanges),
-      Some(("update", matches)) => from_arg_matches(Subcommand::Update, matches),
-      _ => return Err(crate::errors::SyncpackError::NoSubcommand),
-    })
+    create()
+      .try_get_matches_from(args)
+      .map_err(SyncpackError::CliError)
+      .and_then(|matches| {
+        matches
+          .subcommand()
+          .and_then(|subcommand| match subcommand {
+            ("fix", matches) => Some(from_arg_matches(Subcommand::Fix, matches)),
+            ("fix-mismatches", _) => Some(from_deprecated(Subcommand::FixMismatches)),
+            ("format", matches) => Some(from_arg_matches(Subcommand::Format, matches)),
+            ("json", matches) => Some(from_arg_matches(Subcommand::Json, matches)),
+            ("lint", matches) => Some(from_arg_matches(Subcommand::Lint, matches)),
+            ("lint-semver-ranges", _) => Some(from_deprecated(Subcommand::LintSemverRanges)),
+            ("list", matches) => Some(from_arg_matches(Subcommand::List, matches)),
+            ("list-mismatches", _) => Some(from_deprecated(Subcommand::ListMismatches)),
+            ("prompt", _) => Some(from_deprecated(Subcommand::Prompt)),
+            ("set-semver-ranges", _) => Some(from_deprecated(Subcommand::SetSemverRanges)),
+            ("update", matches) => Some(from_arg_matches(Subcommand::Update, matches)),
+            _ => None,
+          })
+          .ok_or(SyncpackError::NoSubcommand)
+      })
   }
 }
 

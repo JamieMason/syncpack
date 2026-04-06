@@ -1,8 +1,5 @@
 use {
-  crate::{
-    package_json::{detect_formatting, PackageJson},
-    test::mock,
-  },
+  crate::{disk::detect_formatting, package_json::PackageJson, test::mock},
   std::path::PathBuf,
 };
 
@@ -35,7 +32,7 @@ fn serialize_uses_detected_2_space_indent() {
   let raw = "{\n  \"name\": \"pkg\",\n  \"version\": \"1.0.0\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialize(&fmt.indent, &fmt.newline)).unwrap();
+  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
   assert!(result.contains("  \"name\""), "expected 2-space indent, got:\n{result}");
   assert!(
     !result.contains("    \"name\""),
@@ -48,7 +45,7 @@ fn serialize_uses_detected_4_space_indent() {
   let raw = "{\n    \"name\": \"pkg\",\n    \"version\": \"1.0.0\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialize(&fmt.indent, &fmt.newline)).unwrap();
+  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
   assert!(result.contains("    \"name\""), "expected 4-space indent, got:\n{result}");
 }
 
@@ -57,7 +54,7 @@ fn serialize_uses_detected_tab_indent() {
   let raw = "{\n\t\"name\": \"pkg\",\n\t\"version\": \"1.0.0\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialize(&fmt.indent, &fmt.newline)).unwrap();
+  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
   assert!(result.contains("\t\"name\""), "expected tab indent, got:\n{result}");
 }
 
@@ -66,9 +63,10 @@ fn serialize_config_indent_overrides_detected() {
   // File uses 4-space indent
   let raw = "{\n    \"name\": \"pkg\",\n    \"version\": \"1.0.0\"\n}\n";
   let pkg = package_json_from_raw(raw);
-  let fmt = detect_formatting(raw);
+  let mut fmt = detect_formatting(raw);
   // Config says 2-space — override indent but keep detected newline
-  let result = String::from_utf8(pkg.serialize("  ", &fmt.newline)).unwrap();
+  fmt.indent = "  ".to_string();
+  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
   assert!(
     result.contains("  \"name\""),
     "expected config 2-space indent to win, got:\n{result}"
@@ -86,7 +84,7 @@ fn serialize_preserves_lf_newline() {
   let raw = "{\n  \"name\": \"pkg\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialize(&fmt.indent, &fmt.newline)).unwrap();
+  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
   assert!(result.ends_with('\n'), "expected trailing LF");
   assert!(
     !result.ends_with("\r\n"),
@@ -100,40 +98,10 @@ fn serialize_preserves_crlf_newline() {
   let raw = "{\r\n  \"name\": \"pkg\"\r\n}\r\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialize(&fmt.indent, &fmt.newline)).unwrap();
+  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
   assert!(
     result.ends_with("\r\n"),
     "expected trailing CRLF, got bytes: {:?}",
     result.as_bytes().iter().rev().take(4).collect::<Vec<_>>()
-  );
-}
-
-// --- write_to_disk uses detection ---
-
-#[test]
-fn write_to_disk_uses_detected_indent_when_config_is_not_set() {
-  let raw = "{\n    \"name\": \"pkg\",\n    \"version\": \"1.0.0\"\n}\n";
-  let pkg = package_json_from_raw(raw);
-  let fmt = detect_formatting(raw);
-  let config = mock::config();
-  let indent = config.rcfile.indent.as_deref().unwrap_or(&fmt.indent);
-  let serialized = String::from_utf8(pkg.serialize(indent, &fmt.newline)).unwrap();
-  assert!(
-    serialized.contains("    \"name\""),
-    "expected 4-space indent from file detection, got:\n{serialized}"
-  );
-}
-
-#[test]
-fn write_to_disk_uses_config_indent_when_set() {
-  let raw = "{\n    \"name\": \"pkg\",\n    \"version\": \"1.0.0\"\n}\n";
-  let pkg = package_json_from_raw(raw);
-  let fmt = detect_formatting(raw);
-  let config = config_with_indent("  ");
-  let indent = config.rcfile.indent.as_deref().unwrap_or(&fmt.indent);
-  let serialized = String::from_utf8(pkg.serialize(indent, &fmt.newline)).unwrap();
-  assert!(
-    serialized.contains("  \"name\""),
-    "expected config 2-space indent, got:\n{serialized}"
   );
 }

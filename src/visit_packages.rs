@@ -14,7 +14,7 @@ use {
 /// `visit()` to assign InstanceState to every instance.
 ///
 /// Takes ownership of Context and returns it with states assigned.
-pub fn visit_packages(ctx: Context, registry_updates: Option<&RegistryUpdates>) -> Context {
+pub fn visit_packages(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context {
   ctx
     .version_groups
     .iter()

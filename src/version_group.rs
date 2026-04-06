@@ -3,7 +3,7 @@ use {
     cli::SortBy,
     context::Context,
     dependency::UpdateUrl,
-    errors::ConfigError,
+    errors::UnsupportedConfigError,
     group_selector::GroupSelector,
     instance::{Instance, InstanceIdx, InstanceState},
     packages::Packages,
@@ -21,6 +21,14 @@ use {
     rc::Rc,
   },
 };
+
+mod banned;
+mod ignored;
+mod pinned;
+mod preferred_semver;
+mod same_minor;
+mod same_range;
+mod snapped_to;
 
 /// When a version group has `preferVersion` set, this determines the direction
 /// used to pick a winner among differing versions.
@@ -53,14 +61,6 @@ pub struct AnyVersionGroup {
   #[serde(flatten)]
   pub unknown_fields: HashMap<String, Value>,
 }
-
-mod banned;
-mod ignored;
-mod pinned;
-mod preferred_semver;
-mod same_minor;
-mod same_range;
-mod snapped_to;
 
 pub use {
   banned::BannedGroup, ignored::IgnoredGroup, pinned::PinnedGroup, preferred_semver::PreferredSemverGroup, same_minor::SameMinorGroup,
@@ -266,7 +266,7 @@ pub trait VersionGroupBehavior {
   fn selector(&self) -> &GroupSelector;
   fn dependencies(&self) -> &BTreeMap<String, DependencyCore>;
   fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance);
-  fn visit(&self, ctx: &Context, registry_updates: Option<&RegistryUpdates>);
+  fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>);
 }
 
 // ── Enum ────────────────────────────────────────────────────────────────────
@@ -319,7 +319,7 @@ impl VersionGroupBehavior for VersionGroup {
     }
   }
 
-  fn visit(&self, ctx: &Context, registry_updates: Option<&RegistryUpdates>) {
+  fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
     match self {
       Self::Banned(g) => g.visit(ctx, registry_updates),
       Self::Ignored(g) => g.visit(ctx, registry_updates),
@@ -381,7 +381,7 @@ impl VersionGroup {
     })
   }
 
-  pub fn from_config(group: AnyVersionGroup, packages: &Packages) -> Result<Self, ConfigError> {
+  pub fn from_config(group: AnyVersionGroup, packages: &Packages) -> Result<Self, UnsupportedConfigError> {
     let selector = GroupSelector::new(
       group.dependencies,
       group.dependency_types,
@@ -429,7 +429,7 @@ impl VersionGroup {
           prefer_version,
         }));
       } else {
-        return Err(ConfigError::InvalidVersionGroupPolicy(policy.clone()));
+        return Err(UnsupportedConfigError::InvalidVersionGroupPolicy(policy.clone()));
       }
     }
     if let Some(snap_to) = &group.snap_to {
@@ -466,14 +466,14 @@ impl VersionGroup {
 
 #[cfg(test)]
 pub(crate) fn visit_groups(ctx: &Context, version_group_configs: &[serde_json::Value]) {
-  visit_groups_with_registry(ctx, version_group_configs, None);
+  visit_groups_with_registry(ctx, version_group_configs, &None);
 }
 
 #[cfg(test)]
 pub(crate) fn visit_groups_with_registry(
   ctx: &Context,
   version_group_configs: &[serde_json::Value],
-  registry_updates: Option<&RegistryUpdates>,
+  registry_updates: &Option<RegistryUpdates>,
 ) {
   let mut groups: Vec<VersionGroup> = version_group_configs
     .iter()

@@ -1,4 +1,4 @@
-use crate::packages::normalize_pattern;
+use crate::source_patterns::normalise_pattern;
 
 #[test]
 fn normalizes_backslashes_to_forward_slashes() {
@@ -32,7 +32,7 @@ fn normalizes_backslashes_to_forward_slashes() {
   ];
 
   for (input, expected) in cases {
-    let result = normalize_pattern(input.to_string());
+    let result = normalise_pattern(input.to_string());
     assert_eq!(result, expected, "normalize_pattern({input:?}) should return {expected:?}");
   }
 }

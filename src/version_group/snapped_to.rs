@@ -41,7 +41,7 @@ impl SnappedToGroup {
     None
   }
 
-  pub fn visit(&self, ctx: &Context, _registry_updates: Option<&RegistryUpdates>) {
+  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
     let arena = &ctx.instances;
     for dep in self.dependencies.values() {
       debug!("visit snapped to version group");

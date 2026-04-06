@@ -8,6 +8,10 @@ use {
   serde_json::{json, Value},
 };
 
+#[cfg(test)]
+#[path = "builder_test.rs"]
+mod builder_test;
+
 /// Builder pattern for creating test contexts with reduced boilerplate
 pub struct TestBuilder {
   catalogs: Option<Value>,
@@ -120,7 +124,7 @@ impl TestBuilder {
 
   pub fn build_and_visit_packages(self) -> Context {
     let ctx = self.build();
-    visit_packages(ctx, None)
+    visit_packages(ctx, &None)
   }
 
   pub fn build_and_visit_formatting(self) -> Context {
@@ -143,10 +147,10 @@ impl TestBuilder {
 
     if let Some(mock_updates) = self.registry_updates {
       let (ctx, updates) = mock::context_with_registry_updates(config, packages, mock_updates, catalogs).await;
-      visit_packages(ctx, Some(&updates))
+      visit_packages(ctx, &Some(updates))
     } else {
       let ctx = Context::create(config, packages, catalogs).unwrap();
-      visit_packages(ctx, None)
+      visit_packages(ctx, &None)
     }
   }
 
@@ -161,7 +165,3 @@ impl Default for TestBuilder {
     Self::new()
   }
 }
-
-#[cfg(test)]
-#[path = "builder_test.rs"]
-mod builder_test;

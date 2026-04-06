@@ -3,44 +3,12 @@
 mod package_json_test;
 
 use {
-  crate::{dependency::Strategy, instance::Instance},
-  detect_indent::detect_indent,
-  detect_newline_style::LineEnding,
+  crate::{dependency::Strategy, disk::DetectedFormatting, instance::Instance},
   log::error,
   serde::Serialize,
   serde_json::{ser::PrettyFormatter, Serializer, Value},
   std::{cell::RefCell, path::PathBuf, rc::Rc},
 };
-
-/// Indent and newline style detected from a package.json file
-#[derive(Clone, Debug)]
-pub struct DetectedFormatting {
-  /// Indentation detected from the file's raw content (e.g. "  ", "    ", "\t")
-  pub indent: String,
-  /// Newline style detected from the file's raw content (e.g. "\n", "\r\n")
-  pub newline: String,
-}
-
-impl Default for DetectedFormatting {
-  fn default() -> Self {
-    Self {
-      indent: "  ".to_string(),
-      newline: "\n".to_string(),
-    }
-  }
-}
-
-/// Detect indent and newline style from a raw JSON string
-pub fn detect_formatting(raw: &str) -> DetectedFormatting {
-  let indent = detect_indent(raw).indent().to_string();
-  let indent = if indent.is_empty() { "  ".to_string() } else { indent };
-  let newline = match LineEnding::find_or_use_lf(raw) {
-    LineEnding::CRLF => "\r\n".to_string(),
-    LineEnding::CR => "\r".to_string(),
-    LineEnding::LF => "\n".to_string(),
-  };
-  DetectedFormatting { indent, newline }
-}
 
 #[derive(Debug)]
 pub struct PackageJson {
@@ -158,29 +126,21 @@ impl PackageJson {
   }
 
   /// Serialize the parsed JSON object back into pretty JSON as bytes.
-  pub fn serialize(&self, indent: &str, newline: &str) -> Vec<u8> {
-    let indent_with_fixed_tabs = &indent.replace("\\t", "\t");
-    let formatter = PrettyFormatter::with_indent(indent_with_fixed_tabs.as_bytes());
-    let buffer = Vec::new();
-    let mut serializer = Serializer::with_formatter(buffer, formatter);
-    self.contents.serialize(&mut serializer).expect("Failed to serialize package.json");
-    let mut writer = serializer.into_inner();
-    writer.extend(newline.as_bytes());
-    writer
-  }
-
-  /// Convert a buffer of pretty JSON as bytes to a pretty JSON string
-  pub fn to_pretty_json(&self, vec: Vec<u8>) -> String {
-    let from_utf8 = String::from_utf8(vec);
-    from_utf8.expect("Failed to convert JSON buffer to string")
+  pub fn serialise(&self, formatting: &DetectedFormatting) -> Vec<u8> {
+    serialise_json(&self.contents.borrow(), formatting)
   }
 
   /// Write the package.json to disk, returns whether the file has changed
-  pub fn write_to_disk(&self, config_indent: Option<&str>, detected: &DetectedFormatting) -> bool {
-    let indent = config_indent.unwrap_or(&detected.indent);
-    let vec = self.serialize(indent, &detected.newline);
+  pub fn write_to_disk(&self, indent_override: Option<&str>, formatting: &DetectedFormatting) -> bool {
+    let vec = match indent_override {
+      Some(indent) => self.serialise(&DetectedFormatting {
+        indent: indent.to_string(),
+        newline: formatting.newline.clone(),
+      }),
+      None => self.serialise(formatting),
+    };
     std::fs::write(&self.file_path, &vec).expect("Failed to write package.json to disk");
-    let next = self.to_pretty_json(vec);
+    let next = String::from_utf8(vec).expect("Failed to convert JSON buffer to string");
     let has_changed = next != *self.raw.borrow();
     if has_changed {
       *self.raw.borrow_mut() = next;
@@ -197,4 +157,16 @@ impl PackageJson {
       .and_then(|path| path.to_str().map(|path_str| path_str.to_string()))
       .expect("Failed to create relative file path")
   }
+}
+
+/// Serialize the parsed JSON object back into pretty JSON as bytes.
+fn serialise_json(value: &serde_json::Value, formatting: &DetectedFormatting) -> Vec<u8> {
+  let buffer = Vec::new();
+  let indent = &formatting.indent.replace("\\t", "\t");
+  let formatter = PrettyFormatter::with_indent(indent.as_bytes());
+  let mut serializer = Serializer::with_formatter(buffer, formatter);
+  value.serialize(&mut serializer).expect("Failed to serialize package.json");
+  let mut writer = serializer.into_inner();
+  writer.extend(formatting.newline.as_bytes());
+  writer
 }

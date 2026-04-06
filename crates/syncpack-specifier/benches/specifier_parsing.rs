@@ -1,7 +1,6 @@
 use {
   criterion::{criterion_group, criterion_main, BenchmarkId, Criterion},
-  std::hint::black_box,
-  std::time::Duration,
+  std::{hint::black_box, time::Duration},
   syncpack_specifier::Specifier,
 };
 

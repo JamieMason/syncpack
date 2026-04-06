@@ -1,13 +1,7 @@
-pub mod semver_group;
-
-#[cfg(test)]
-#[path = "rcfile_test.rs"]
-mod rcfile_test;
-
 use {
   crate::{
     dependency::DependencyType,
-    errors::ConfigError,
+    errors::UnsupportedConfigError,
     group_selector::GroupSelector,
     packages::Packages,
     version_group::{AnyVersionGroup, VersionGroup},
@@ -17,6 +11,12 @@ use {
   serde_json::Value,
   std::{collections::HashMap, mem},
 };
+
+pub mod from_disk;
+#[cfg(test)]
+#[path = "rcfile_test.rs"]
+mod rcfile_test;
+pub mod semver_group;
 
 pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) -> Vec<DependencyType> {
   let default_types = HashMap::from([
@@ -90,13 +90,6 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
     .map(|(name, custom_type)| DependencyType::new(name, custom_type))
     .collect()
 }
-
-mod discovery;
-pub mod error;
-mod javascript;
-mod json;
-mod package_json;
-mod yaml;
 
 fn empty_custom_types() -> HashMap<String, CustomType> {
   HashMap::new()
@@ -227,49 +220,49 @@ pub(crate) struct RawRcfile {
 
 impl RawRcfile {
   /// Handle config that is no longer supported or was hallucinated by an LLM
-  pub fn validate_unknown_fields(&self) -> Result<(), Vec<ConfigError>> {
-    let mut errors: Vec<ConfigError> = vec![];
+  pub fn validate_unknown_fields(&self) -> Result<(), Vec<UnsupportedConfigError>> {
+    let mut errors: Vec<UnsupportedConfigError> = vec![];
     self.unknown_fields.iter().for_each(|(key, _)| match key.as_str() {
       "dependencyTypes" => {
-        errors.push(ConfigError::DeprecatedProperty {
+        errors.push(UnsupportedConfigError::DeprecatedProperty {
           property: key.clone(),
           hint: "Use CLI flag instead: --dependency-types prod,dev,peer".to_string(),
         });
       }
       "specifierTypes" => {
-        errors.push(ConfigError::DeprecatedProperty {
+        errors.push(UnsupportedConfigError::DeprecatedProperty {
           property: key.clone(),
           hint: "Use CLI flag instead: --specifier-types exact,range".to_string(),
         });
       }
       "lintFormatting" => {
-        errors.push(ConfigError::DeprecatedProperty {
+        errors.push(UnsupportedConfigError::DeprecatedProperty {
           property: key.clone(),
           hint: "Use 'syncpack format --check' to validate formatting".to_string(),
         });
       }
       "lintSemverRanges" => {
-        errors.push(ConfigError::DeprecatedProperty {
+        errors.push(UnsupportedConfigError::DeprecatedProperty {
           property: key.clone(),
           hint: "Semver range checking is always enabled in 'syncpack lint'".to_string(),
         });
       }
       "lintVersions" => {
-        errors.push(ConfigError::DeprecatedProperty {
+        errors.push(UnsupportedConfigError::DeprecatedProperty {
           property: key.clone(),
           hint: "Version checking is always enabled in 'syncpack lint'".to_string(),
         });
       }
       _ => {
         if !key.starts_with("//") {
-          errors.push(ConfigError::UnrecognisedProperty { path: key.clone() });
+          errors.push(UnsupportedConfigError::UnrecognisedProperty { path: key.clone() });
         }
       }
     });
     self.custom_types.iter().for_each(|(custom_type_name, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
         if !key.starts_with("//") {
-          errors.push(ConfigError::UnrecognisedProperty {
+          errors.push(UnsupportedConfigError::UnrecognisedProperty {
             path: format!("customTypes.{custom_type_name}.{key}"),
           });
         }
@@ -278,7 +271,7 @@ impl RawRcfile {
     self.dependency_groups.iter().enumerate().for_each(|(index, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
         if !key.starts_with("//") {
-          errors.push(ConfigError::UnrecognisedProperty {
+          errors.push(UnsupportedConfigError::UnrecognisedProperty {
             path: format!("dependencyGroups[{index}].{key}"),
           });
         }
@@ -287,7 +280,7 @@ impl RawRcfile {
     self.semver_groups.iter().enumerate().for_each(|(index, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
         if !key.starts_with("//") {
-          errors.push(ConfigError::UnrecognisedProperty {
+          errors.push(UnsupportedConfigError::UnrecognisedProperty {
             path: format!("semverGroups[{index}].{key}"),
           });
         }
@@ -296,7 +289,7 @@ impl RawRcfile {
     self.version_groups.iter().enumerate().for_each(|(index, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
         if !key.starts_with("//") {
-          errors.push(ConfigError::UnrecognisedProperty {
+          errors.push(UnsupportedConfigError::UnrecognisedProperty {
             path: format!("versionGroups[{index}].{key}"),
           });
         }
@@ -310,20 +303,20 @@ impl RawRcfile {
   }
 }
 
-fn validate_raw_dep_types(raw: &[String], all: &[DependencyType]) -> Result<(), ConfigError> {
+fn validate_raw_dep_types(raw: &[String], all: &[DependencyType]) -> Result<(), UnsupportedConfigError> {
   for s in raw {
     let name = s.trim_start_matches('!');
     if name != "**" && !all.iter().any(|dt| dt.name == name) {
-      return Err(ConfigError::InvalidDependencyType { name: name.to_string() });
+      return Err(UnsupportedConfigError::InvalidDependencyType { name: name.to_string() });
     }
   }
   Ok(())
 }
 
 impl TryFrom<RawRcfile> for Rcfile {
-  type Error = ConfigError;
+  type Error = UnsupportedConfigError;
 
-  fn try_from(raw: RawRcfile) -> Result<Self, ConfigError> {
+  fn try_from(raw: RawRcfile) -> Result<Self, UnsupportedConfigError> {
     let all_dependency_types = compute_all_dependency_types(&raw.custom_types);
     let mut dependency_groups = vec![];
     for dg in raw.dependency_groups {
@@ -391,7 +384,7 @@ impl Default for Rcfile {
 
 impl Rcfile {
   /// Create every version group defined in the rcfile.
-  pub fn get_version_groups(&mut self, packages: &Packages) -> Result<Vec<VersionGroup>, ConfigError> {
+  pub fn get_version_groups(&mut self, packages: &Packages) -> Result<Vec<VersionGroup>, UnsupportedConfigError> {
     let mut all_groups: Vec<VersionGroup> = mem::take(&mut self.version_groups)
       .into_iter()
       .map(|group_config| VersionGroup::from_config(group_config, packages))

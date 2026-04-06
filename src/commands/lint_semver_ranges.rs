@@ -1,7 +1,10 @@
-use {crate::errors::SyncpackError, colored::Colorize};
+use {
+  crate::{context::Context, errors::SyncpackError},
+  colored::Colorize,
+};
 
 /// Run the lint-semver-ranges command (deprecated in v14)
-pub fn run() -> Result<(), SyncpackError> {
+pub fn run(_ctx: Context) -> Result<Context, SyncpackError> {
   eprintln!("{}", "Deprecated in syncpack v14".red().bold());
   eprintln!();
   eprintln!("{}", "lint-semver-ranges → lint".yellow().bold());

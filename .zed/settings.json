@@ -1,4 +1,14 @@
 {
+  "project_name": "syncpack",
+  "file_scan_exclusions": [
+    ".astro",
+    ".DS_Store",
+    ".git",
+    "dist",
+    "fixtures",
+    "node_modules",
+    "target",
+  ],
   "lsp": {
     "rust-analyzer": {
       "initialization_options": {

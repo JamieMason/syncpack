@@ -85,7 +85,7 @@ impl PreferredSemverGroup {
     })
   }
 
-  pub fn visit(&self, ctx: &Context, registry_updates: Option<&RegistryUpdates>) {
+  pub fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
     let arena = &ctx.instances;
     for dep in self.dependencies.values() {
       debug!("visit standard version group");
@@ -224,8 +224,9 @@ impl PreferredSemverGroup {
             instance.mark_fixable(FixableInstance::DiffersToCatalog, catalog_specifier);
           }
         }
-      } else if let Some(specifiers_by_eligible_update) =
-        registry_updates.and_then(|updates| self.get_eligible_registry_updates(dep, arena, updates, &ctx.config.cli.target))
+      } else if let Some(specifiers_by_eligible_update) = registry_updates
+        .as_ref()
+        .and_then(|updates| self.get_eligible_registry_updates(dep, arena, updates, &ctx.config.cli.target))
       {
         debug!("{L2}eligible updates were found on the npm registry ({specifiers_by_eligible_update:?})");
         for &idx in &dep.instances {

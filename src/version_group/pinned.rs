@@ -27,7 +27,7 @@ impl PinnedGroup {
     add_instance_to_dependencies(&mut self.dependencies, idx, instance);
   }
 
-  pub fn visit(&self, ctx: &Context, _registry_updates: Option<&RegistryUpdates>) {
+  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
     let arena = &ctx.instances;
     let pinned_specifier = &self.pin_version;
     for dep in self.dependencies.values() {

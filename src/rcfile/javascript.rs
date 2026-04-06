@@ -1,20 +1,25 @@
-use {
-  crate::{
-    cli::Cli,
-    rcfile::{
-      error::{NodeJsResult, RcfileError},
-      RawRcfile,
-    },
-  },
-  log::debug,
-  std::{path::Path, process::Command},
-};
+use {serde::Deserialize, std::path::Path};
 
-pub fn from_javascript_path(file_path: &Path) -> Result<RawRcfile, RcfileError> {
-  let escaped_file_path_for_nodejs = file_path.to_string_lossy().replace('\\', "\\\\");
-  let nodejs_script = format!(
+/// The JSON returned to Rust from JavaScript when evaluating a config file
+#[derive(Debug, Deserialize)]
+#[serde(tag = "_tag")]
+pub enum JsResult {
+  #[serde(rename = "Ok")]
+  Success { value: String },
+  #[serde(rename = "Err")]
+  Error {
+    #[serde(rename = "importError")]
+    import_error: String,
+    #[serde(rename = "requireError")]
+    require_error: String,
+  },
+}
+
+pub fn get_javascript_contents(file_path: &Path) -> String {
+  let escaped_file_path = file_path.to_string_lossy().replace('\\', "\\\\");
+  format!(
     r#"
-    import('{escaped_file_path_for_nodejs}')
+    import('{escaped_file_path}')
       .then(findConfig)
       .then((value) => {{
         if (isNonEmptyObject(value)) {{
@@ -33,7 +38,7 @@ pub fn from_javascript_path(file_path: &Path) -> Result<RawRcfile, RcfileError> 
 
     function tryRequire(importError) {{
       Promise.resolve(null)
-        .then(() => require('{escaped_file_path_for_nodejs}'))
+        .then(() => require('{escaped_file_path}'))
         .then(findConfig)
         .then((value) => {{
           if (isNonEmptyObject(value)) {{
@@ -67,69 +72,5 @@ pub fn from_javascript_path(file_path: &Path) -> Result<RawRcfile, RcfileError> 
       return mod.default && mod.default.default ? mod.default.default : mod.default;
     }}
     "#
-  );
-
-  let is_typescript = file_path.to_string_lossy().ends_with("ts");
-  let mut args = vec![];
-
-  if is_typescript {
-    args.push("--experimental-strip-types");
-  }
-
-  args.push("--eval");
-  args.push(&nodejs_script);
-
-  Command::new("node")
-    .args(args)
-    .current_dir(file_path.parent().unwrap_or_else(|| Path::new(".")))
-    .output()
-    .map_err(RcfileError::NodeJsExecutionFailed)
-    .and_then(|output| {
-      if output.status.success() {
-        Ok(output.stdout)
-      } else {
-        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-        if stderr.contains("experimental-strip-types") {
-          Err(RcfileError::NodeJsCannotStripTypes { stderr })
-        } else {
-          Err(RcfileError::ProcessFailed { stderr })
-        }
-      }
-    })
-    .and_then(|stdout| String::from_utf8(stdout).map_err(RcfileError::InvalidUtf8))
-    .inspect(|json_str| {
-      debug!("Raw output from {:?}: {}", file_path, json_str.trim());
-    })
-    .and_then(|json_str| serde_json::from_str::<NodeJsResult>(&json_str).map_err(RcfileError::JsonParseFailed))
-    .and_then(|response| match response {
-      NodeJsResult::Success { value } => serde_json::from_str::<RawRcfile>(&value).map_err(RcfileError::InvalidConfig),
-      NodeJsResult::Error {
-        import_error,
-        require_error,
-      } => Err(RcfileError::JavaScriptImportFailed {
-        import_error,
-        require_error,
-      }),
-    })
-}
-
-pub fn try_from_js_candidates(cli: &Cli) -> Option<Result<RawRcfile, RcfileError>> {
-  let candidates = vec![
-    ".syncpackrc.js",
-    ".syncpackrc.ts",
-    ".syncpackrc.mjs",
-    ".syncpackrc.cjs",
-    "syncpack.config.js",
-    "syncpack.config.ts",
-    "syncpack.config.mjs",
-    "syncpack.config.cjs",
-  ];
-  for candidate in candidates {
-    let config_path = cli.cwd.join(candidate);
-    if config_path.exists() {
-      debug!("Found JavaScript/TypeScript config file: {config_path:?}");
-      return Some(from_javascript_path(&config_path));
-    }
-  }
-  None
+  )
 }

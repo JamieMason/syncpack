@@ -2,14 +2,21 @@ use {
   crate::{
     catalogs::CatalogsByName,
     cli::Cli,
-    errors::SyncpackError,
+    errors::UnsupportedConfigErrors,
     instance::{Instance, InstanceIdx},
     packages::Packages,
-    rcfile::Rcfile,
+    rcfile::{from_disk::RcfileError, Rcfile},
     version_group::{VersionGroup, VersionGroupBehavior},
   },
   std::mem,
+  thiserror::Error,
 };
+
+#[derive(Debug, Error)]
+pub enum ContextError {
+  #[error(transparent)]
+  RcfileError(RcfileError),
+}
 
 #[derive(Debug)]
 pub struct Config {
@@ -40,14 +47,25 @@ pub struct Context {
 impl Context {
   /// Read all configuration and package.json files, collect all dependency
   /// instances, and assign them to version groups.
-  pub fn create(mut config: Config, packages: Packages, catalogs: Option<CatalogsByName>) -> Result<Self, SyncpackError> {
+  pub fn create(mut config: Config, packages: Packages, catalogs: Option<CatalogsByName>) -> Result<Self, ContextError> {
     let mut instances = vec![];
     let dependency_groups = mem::take(&mut config.rcfile.dependency_groups);
     let semver_groups = mem::take(&mut config.rcfile.semver_groups);
-    let mut version_groups = config.rcfile.get_version_groups(&packages)?;
+    let mut version_groups = config
+      .rcfile
+      .get_version_groups(&packages) // @TODO: Return every error
+      .map_err(|err| vec![err])
+      .map_err(UnsupportedConfigErrors)
+      .map_err(RcfileError::UnsupportedConfig)
+      .map_err(ContextError::RcfileError)?;
     let all_dependency_types = &config.rcfile.all_dependency_types;
     if let Some(ref filters) = config.cli.filters {
-      filters.validate_dependency_types(all_dependency_types)?;
+      filters
+        .validate_dependency_types(all_dependency_types) // @TODO: Return every error
+        .map_err(|err| vec![err])
+        .map_err(UnsupportedConfigErrors)
+        .map_err(RcfileError::UnsupportedConfig)
+        .map_err(ContextError::RcfileError)?;
     }
 
     packages.get_all_instances(all_dependency_types, |mut descriptor| {
