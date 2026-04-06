@@ -7,7 +7,6 @@ use {
     version_group::{DependencyCore, VersionGroup},
   },
   serde_json::json,
-  std::rc::Rc,
 };
 
 pub trait FixReporter {
@@ -20,8 +19,8 @@ pub trait FixReporter {
 
 pub trait FormatReporter {
   fn on_package_header(&self, ctx: &Context, package: &PackageJson);
-  fn on_mismatch_fixed(&self, ctx: &Context, package: &PackageJson, mismatch: &Rc<FormatMismatch>);
-  fn on_mismatch_unfixed(&self, ctx: &Context, package: &PackageJson, mismatch: &Rc<FormatMismatch>);
+  fn on_mismatch_fixed(&self, ctx: &Context, package: &PackageJson, mismatch: &FormatMismatch);
+  fn on_mismatch_unfixed(&self, ctx: &Context, package: &PackageJson, mismatch: &FormatMismatch);
   fn on_no_issues(&self);
 }
 
@@ -61,11 +60,11 @@ impl FormatReporter for PrettyFormatReporter {
     ui::package::print_invalid_package(ctx, package);
   }
 
-  fn on_mismatch_fixed(&self, ctx: &Context, _package: &PackageJson, mismatch: &Rc<FormatMismatch>) {
+  fn on_mismatch_fixed(&self, ctx: &Context, _package: &PackageJson, mismatch: &FormatMismatch) {
     ui::package::print_fixed(ctx, mismatch);
   }
 
-  fn on_mismatch_unfixed(&self, ctx: &Context, _package: &PackageJson, mismatch: &Rc<FormatMismatch>) {
+  fn on_mismatch_unfixed(&self, ctx: &Context, _package: &PackageJson, mismatch: &FormatMismatch) {
     ui::package::print_invalid(ctx, mismatch);
   }
 
@@ -96,7 +95,7 @@ impl FixReporter for JsonFixReporter {
 pub struct JsonFormatReporter;
 
 impl JsonFormatReporter {
-  fn print_mismatch_json(&self, _ctx: &Context, package: &PackageJson, mismatch: &Rc<FormatMismatch>) {
+  fn print_mismatch_json(&self, _ctx: &Context, package: &PackageJson, mismatch: &FormatMismatch) {
     let value = json!({
       "package": &package.name,
       "filePath": package.file_path.to_string_lossy(),
@@ -110,11 +109,11 @@ impl JsonFormatReporter {
 impl FormatReporter for JsonFormatReporter {
   fn on_package_header(&self, _ctx: &Context, _package: &PackageJson) {}
 
-  fn on_mismatch_fixed(&self, ctx: &Context, package: &PackageJson, mismatch: &Rc<FormatMismatch>) {
+  fn on_mismatch_fixed(&self, ctx: &Context, package: &PackageJson, mismatch: &FormatMismatch) {
     self.print_mismatch_json(ctx, package, mismatch);
   }
 
-  fn on_mismatch_unfixed(&self, ctx: &Context, package: &PackageJson, mismatch: &Rc<FormatMismatch>) {
+  fn on_mismatch_unfixed(&self, ctx: &Context, package: &PackageJson, mismatch: &FormatMismatch) {
     self.print_mismatch_json(ctx, package, mismatch);
   }
 

@@ -10,8 +10,8 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
       let mut has_printed_dependency = false;
       dependency
         .get_sorted_instances(&ctx.instances, &ctx.packages.all)
-        .filter(|instance| instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict))
-        .for_each(|instance| {
+        .filter(|(_, instance)| instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict))
+        .for_each(|(_, instance)| {
           if !has_printed_group {
             ui::group::print_header(&ctx, group);
             has_printed_group = true;

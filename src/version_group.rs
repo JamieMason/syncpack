@@ -176,20 +176,20 @@ impl DependencyCore {
     unique
   }
 
-  pub fn get_instances<'a>(&'a self, arena: &'a [Instance]) -> impl Iterator<Item = &'a Instance> {
+  pub fn get_instances<'a>(&'a self, arena: &'a [Instance]) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
     self
       .instances
       .iter()
-      .map(move |idx| &arena[idx.0])
-      .filter(|instance| instance.descriptor.matches_cli_filter)
+      .map(move |idx| (*idx, &arena[idx.0]))
+      .filter(|(_, instance)| instance.descriptor.matches_cli_filter)
   }
 
   pub fn get_sorted_instances<'a>(
     &'a self,
-    arena: &'a [Instance],
+    instances: &'a [Instance],
     packages: &'a [PackageJson],
-  ) -> impl Iterator<Item = &'a Instance> {
-    self.get_instances(arena).sorted_by(|a, b| {
+  ) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
+    self.get_instances(instances).sorted_by(|(_, a), (_, b)| {
       if a.is_valid() && !b.is_valid() {
         return Ordering::Less;
       }

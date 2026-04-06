@@ -36,8 +36,8 @@ impl PreferredSemverGroup {
   pub fn get_highest_or_lowest_specifier(&self, dep: &DependencyCore, arena: &[Instance]) -> Option<Rc<Specifier>> {
     let specifiers = dep
       .get_instances(arena)
-      .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
-      .map(|instance| {
+      .filter(|(_, instance)| instance.descriptor.specifier.get_node_version().is_some())
+      .map(|(_, instance)| {
         instance
           .preferred_semver_range
           .as_ref()

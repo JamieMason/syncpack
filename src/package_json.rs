@@ -7,7 +7,7 @@ use {
   log::error,
   serde::Serialize,
   serde_json::{ser::PrettyFormatter, Serializer, Value},
-  std::{cell::RefCell, path::PathBuf, rc::Rc},
+  std::path::PathBuf,
 };
 
 #[derive(Debug)]
@@ -17,11 +17,11 @@ pub struct PackageJson {
   /// The path to the package.json file
   pub file_path: PathBuf,
   /// Syncpack formatting mismatches found in the file
-  pub formatting_mismatches: RefCell<Vec<Rc<FormatMismatch>>>,
+  pub formatting_mismatches: Vec<FormatMismatch>,
   /// The original file content as read from disk, used for change detection
-  pub raw: RefCell<String>,
+  pub raw: String,
   /// The parsed JSON object
-  pub contents: RefCell<Value>,
+  pub contents: Value,
 }
 
 #[derive(Debug)]
@@ -67,38 +67,38 @@ impl PackageJson {
           .unwrap_or("NAME_IS_MISSING")
           .to_string(),
         file_path,
-        formatting_mismatches: RefCell::new(vec![]),
-        raw: RefCell::new(raw),
-        contents: RefCell::new(contents),
+        formatting_mismatches: vec![],
+        raw,
+        contents,
       })
       .ok()
   }
 
   /// Does a property exist at this path of the parsed package.json?
   pub fn has_prop(&self, pointer: &str) -> bool {
-    self.contents.borrow().pointer(pointer).is_some()
+    self.contents.pointer(pointer).is_some()
   }
 
   pub fn has_formatting_mismatches(&self) -> bool {
-    !self.formatting_mismatches.borrow().is_empty()
+    !self.formatting_mismatches.is_empty()
   }
 
   /// Deeply get a property in the parsed package.json
   pub fn get_prop(&self, pointer: &str) -> Option<Value> {
-    self.contents.borrow().pointer(pointer).cloned()
+    self.contents.pointer(pointer).cloned()
   }
 
   /// Deeply set a property in the parsed package.json
-  pub fn set_prop(&self, pointer: &str, next_value: Value) {
+  pub fn set_prop(&mut self, pointer: &str, next_value: Value) {
     if pointer == "/" {
-      *self.contents.borrow_mut() = next_value;
-    } else if let Some(value) = self.contents.borrow_mut().pointer_mut(pointer) {
+      self.contents = next_value;
+    } else if let Some(value) = self.contents.pointer_mut(pointer) {
       *value = next_value;
     }
   }
 
   /// Update this package in-memory with the given instance's specifier
-  pub fn copy_expected_specifier(&self, instance: &Instance) {
+  pub fn copy_expected_specifier(&mut self, instance: &Instance) {
     let path_to_prop_str = &instance.descriptor.dependency_type.path.as_str();
     let raw_specifier = instance.expected_specifier.borrow().as_ref().unwrap().get_raw().to_string();
     match instance.descriptor.dependency_type.strategy {
@@ -113,11 +113,9 @@ impl PackageJson {
         self.set_prop(path_to_prop_str, Value::String(raw_specifier));
       }
       Strategy::VersionsByName => {
-        let mut contents = self.contents.borrow_mut();
-        let versions_by_name = contents.pointer_mut(path_to_prop_str).unwrap().as_object_mut().unwrap();
+        let versions_by_name = self.contents.pointer_mut(path_to_prop_str).unwrap().as_object_mut().unwrap();
         let old_specifier = versions_by_name.get_mut(&instance.descriptor.name).unwrap();
         *old_specifier = Value::String(raw_specifier);
-        std::mem::drop(contents);
       }
       Strategy::InvalidConfig => {
         unreachable!("unrecognised strategy");
@@ -127,11 +125,11 @@ impl PackageJson {
 
   /// Serialize the parsed JSON object back into pretty JSON as bytes.
   pub fn serialise(&self, formatting: &DetectedFormatting) -> Vec<u8> {
-    serialise_json(&self.contents.borrow(), formatting)
+    serialise_json(&self.contents, formatting)
   }
 
   /// Write the package.json to disk, returns whether the file has changed
-  pub fn write_to_disk(&self, indent_override: Option<&str>, formatting: &DetectedFormatting) -> bool {
+  pub fn write_to_disk(&mut self, indent_override: Option<&str>, formatting: &DetectedFormatting) -> bool {
     let vec = match indent_override {
       Some(indent) => self.serialise(&DetectedFormatting {
         indent: indent.to_string(),
@@ -141,9 +139,9 @@ impl PackageJson {
     };
     std::fs::write(&self.file_path, &vec).expect("Failed to write package.json to disk");
     let next = String::from_utf8(vec).expect("Failed to convert JSON buffer to string");
-    let has_changed = next != *self.raw.borrow();
+    let has_changed = next != self.raw;
     if has_changed {
-      *self.raw.borrow_mut() = next;
+      self.raw = next;
     }
     has_changed
   }

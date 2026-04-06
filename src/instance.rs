@@ -417,14 +417,14 @@ impl Instance {
   }
 
   /// Delete from the package.json
-  pub fn remove(&self, package: &PackageJson) {
+  pub fn remove(&self, package: &mut PackageJson) {
     match self.descriptor.dependency_type.strategy {
       Strategy::NameAndVersionProps => {
         let path_to_prop = &self.descriptor.dependency_type.path;
         if let Some(parent_path) = path_to_prop.rfind('/') {
           let parent_path = &path_to_prop[..parent_path];
           let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(parent_path) {
+          if let Some(Value::Object(obj)) = package.contents.pointer_mut(parent_path) {
             obj.remove(prop_name);
           }
         } else if path_to_prop == "/" {
@@ -436,7 +436,7 @@ impl Instance {
         if let Some(parent_path) = path_to_prop.rfind('/') {
           let parent_path = &path_to_prop[..parent_path];
           let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(parent_path) {
+          if let Some(Value::Object(obj)) = package.contents.pointer_mut(parent_path) {
             obj.remove(prop_name);
           }
         } else if path_to_prop == "/" {
@@ -448,7 +448,7 @@ impl Instance {
         if let Some(parent_path) = path_to_prop.rfind('/') {
           let parent_path = &path_to_prop[..parent_path];
           let prop_name = &path_to_prop[parent_path.len() + 1..];
-          if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(parent_path) {
+          if let Some(Value::Object(obj)) = package.contents.pointer_mut(parent_path) {
             obj.remove(prop_name);
           }
         } else if path_to_prop == "/" {
@@ -458,7 +458,7 @@ impl Instance {
       Strategy::VersionsByName => {
         let path_to_obj = &self.descriptor.dependency_type.path;
         let name = &self.descriptor.name;
-        if let Some(Value::Object(obj)) = package.contents.borrow_mut().pointer_mut(path_to_obj) {
+        if let Some(Value::Object(obj)) = package.contents.pointer_mut(path_to_obj) {
           obj.remove(name);
         }
       }

@@ -39,13 +39,15 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
     .for_each(|group| {
       let variant_label = group.variant_label();
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dep| {
-        dep.get_sorted_instances(&ctx.instances, &ctx.packages.all).for_each(|instance| {
-          let instance_json = instance_to_json(&ctx, instance, variant_label);
-          println!("{}", serde_json::to_string(&instance_json).unwrap());
-          if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {
-            is_invalid = true;
-          }
-        });
+        dep
+          .get_sorted_instances(&ctx.instances, &ctx.packages.all)
+          .for_each(|(_, instance)| {
+            let instance_json = instance_to_json(&ctx, instance, variant_label);
+            println!("{}", serde_json::to_string(&instance_json).unwrap());
+            if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {
+              is_invalid = true;
+            }
+          });
       });
     });
 

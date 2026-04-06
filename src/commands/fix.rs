@@ -1,8 +1,11 @@
-use crate::{commands::reporter::FixReporter, context::Context, errors::SyncpackError, version_group::VersionGroupBehavior};
+use crate::{
+  commands::reporter::FixReporter, context::Context, errors::SyncpackError, instance::InstanceIdx, version_group::VersionGroupBehavior,
+};
 
-pub fn run(ctx: Context, reporter: &dyn FixReporter) -> Result<Context, SyncpackError> {
+pub fn run(mut ctx: Context, reporter: &dyn FixReporter) -> Result<Context, SyncpackError> {
   let mut contains_unfixable_issues = false;
   let mut was_invalid = false;
+  let mut fix_actions: Vec<(usize, InstanceIdx, bool)> = vec![];
 
   ctx
     .version_groups
@@ -14,13 +17,13 @@ pub fn run(ctx: Context, reporter: &dyn FixReporter) -> Result<Context, Syncpack
         let mut has_printed_dependency = false;
         dependency
           .get_sorted_instances(&ctx.instances, &ctx.packages.all)
-          .inspect(|instance| {
+          .inspect(|(_, instance)| {
             if instance.is_unfixable() || instance.is_suspect() && ctx.config.rcfile.strict {
               contains_unfixable_issues = true
             }
           })
-          .filter(|instance| instance.is_fixable())
-          .for_each(|instance| {
+          .filter(|(_, instance)| instance.is_fixable())
+          .for_each(|(idx, instance)| {
             was_invalid = true;
             if !has_printed_group {
               reporter.on_group_header(&ctx, group);
@@ -31,20 +34,27 @@ pub fn run(ctx: Context, reporter: &dyn FixReporter) -> Result<Context, Syncpack
               has_printed_dependency = true;
             }
             reporter.on_instance(&ctx, instance, group.variant_label());
-            let package = &ctx.packages.all[instance.descriptor.package_idx.0];
-            if instance.is_banned() {
-              instance.remove(package);
-            } else {
-              package.copy_expected_specifier(instance);
-            }
+            fix_actions.push((instance.descriptor.package_idx.0, idx, instance.is_banned()));
           });
       })
     });
 
+  for (pkg_idx, inst_idx, is_banned) in fix_actions {
+    let instance = &ctx.instances[inst_idx.0];
+    let package = &mut ctx.packages.all[pkg_idx];
+    if is_banned {
+      instance.remove(package);
+    } else {
+      package.copy_expected_specifier(instance);
+    }
+  }
+
   if !ctx.config.cli.dry_run {
-    ctx.packages.all.iter().for_each(|package| {
-      package.write_to_disk(ctx.config.rcfile.indent.as_deref(), &ctx.packages.formatting);
-    });
+    let indent = ctx.config.rcfile.indent.as_deref();
+    let formatting = &ctx.packages.formatting;
+    for package in ctx.packages.all.iter_mut() {
+      package.write_to_disk(indent, formatting);
+    }
   }
 
   if contains_unfixable_issues {

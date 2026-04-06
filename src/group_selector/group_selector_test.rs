@@ -1,11 +1,9 @@
-use {
-  crate::{
-    dependency::{DependencyType, Strategy},
-    group_selector::GroupSelector,
-    instance::InstanceDescriptor,
-    packages::PackageIdx,
-    specifier::Specifier,
-  },
+use crate::{
+  dependency::{DependencyType, Strategy},
+  group_selector::GroupSelector,
+  instance::InstanceDescriptor,
+  packages::PackageIdx,
+  specifier::Specifier,
 };
 
 fn make_dep_type() -> DependencyType {

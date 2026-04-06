@@ -40,8 +40,8 @@ impl SameMinorGroup {
     };
     let specifiers = dep
       .get_instances(arena)
-      .filter(|instance| instance.descriptor.specifier.get_node_version().is_some())
-      .map(|instance| {
+      .filter(|(_, instance)| instance.descriptor.specifier.get_node_version().is_some())
+      .map(|(_, instance)| {
         let adjusted = instance
           .preferred_semver_range
           .as_ref()

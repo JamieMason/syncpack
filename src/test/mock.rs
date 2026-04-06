@@ -12,7 +12,7 @@ use {
   },
   log::LevelFilter,
   serde_json::Value,
-  std::{cell::RefCell, collections::HashMap, env, path::PathBuf, sync::Arc},
+  std::{collections::HashMap, env, path::PathBuf, sync::Arc},
 };
 
 pub fn cli() -> Cli {
@@ -81,9 +81,9 @@ pub fn package_json_from_value(contents: Value) -> PackageJson {
   PackageJson {
     name,
     file_path,
-    formatting_mismatches: RefCell::new(vec![]),
-    raw: RefCell::new(raw),
-    contents: RefCell::new(contents),
+    formatting_mismatches: vec![],
+    raw,
+    contents,
   }
 }
 

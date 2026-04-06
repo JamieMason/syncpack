@@ -3,14 +3,16 @@ use {
     commands::{ui, ui::LINE_ENDING},
     context::Context,
     errors::SyncpackError,
+    instance::InstanceIdx,
     registry::updates::RegistryUpdates,
     version_group::VersionGroup,
   },
   log::{error, warn},
 };
 
-pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, SyncpackError> {
+pub fn run(mut ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, SyncpackError> {
   let mut was_outdated = false;
+  let mut copy_actions: Vec<(usize, InstanceIdx)> = vec![];
 
   ctx
     .version_groups
@@ -22,8 +24,8 @@ pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, S
         let mut has_printed_dependency = false;
         dependency
           .get_sorted_instances(&ctx.instances, &ctx.packages.all)
-          .filter(|instance| instance.is_outdated())
-          .for_each(|instance| {
+          .filter(|(_, instance)| instance.is_outdated())
+          .for_each(|(idx, instance)| {
             was_outdated = true;
             if !has_printed_group {
               ui::group::print_header(&ctx, group);
@@ -41,11 +43,17 @@ pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, S
                 has_printed_dependency = true;
               }
               ui::instance::print_fixed(&ctx, instance);
-              ctx.packages.all[instance.descriptor.package_idx.0].copy_expected_specifier(instance);
+              copy_actions.push((instance.descriptor.package_idx.0, idx));
             }
           });
       })
     });
+
+  for (pkg_idx, inst_idx) in copy_actions {
+    let instance = &ctx.instances[inst_idx.0];
+    let package = &mut ctx.packages.all[pkg_idx];
+    package.copy_expected_specifier(instance);
+  }
 
   if !registry_updates.failed.is_empty() {
     println!(" ");
@@ -64,9 +72,11 @@ pub fn run(ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, S
   }
 
   if !ctx.config.cli.dry_run {
-    ctx.packages.all.iter().for_each(|package| {
-      package.write_to_disk(ctx.config.rcfile.indent.as_deref(), &ctx.packages.formatting);
-    });
+    let indent = ctx.config.rcfile.indent.as_deref();
+    let formatting = &ctx.packages.formatting;
+    for package in ctx.packages.all.iter_mut() {
+      package.write_to_disk(indent, formatting);
+    }
   }
 
   Ok(ctx)

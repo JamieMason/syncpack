@@ -18,7 +18,7 @@ fn check_formatting(ctx: Context, reporter: &dyn FormatReporter) -> Result<Conte
     .for_each(|package| {
       is_invalid = true;
       reporter.on_package_header(&ctx, package);
-      package.formatting_mismatches.borrow().iter().for_each(|mismatch| {
+      package.formatting_mismatches.iter().for_each(|mismatch| {
         reporter.on_mismatch_unfixed(&ctx, package, mismatch);
       });
     });
@@ -32,29 +32,37 @@ fn check_formatting(ctx: Context, reporter: &dyn FormatReporter) -> Result<Conte
   }
 }
 
-fn fix_formatting(ctx: Context, reporter: &dyn FormatReporter) -> Result<Context, SyncpackError> {
+fn fix_formatting(mut ctx: Context, reporter: &dyn FormatReporter) -> Result<Context, SyncpackError> {
   let mut was_invalid = false;
-  ctx
-    .packages
-    .all
-    .iter()
-    .filter(|package| package.has_formatting_mismatches())
-    .for_each(|package| {
-      was_invalid = true;
-      reporter.on_package_header(&ctx, package);
-      package.formatting_mismatches.borrow().iter().for_each(|mismatch| {
-        reporter.on_mismatch_fixed(&ctx, package, mismatch);
-        if mismatch.property_path == "/" {
-          *package.contents.borrow_mut() = mismatch.expected.clone();
-        } else if let Some(value) = package.contents.borrow_mut().pointer_mut(&mismatch.property_path) {
-          *value = mismatch.expected.clone();
-        }
-      });
-    });
+  let mut fix_indices: Vec<usize> = vec![];
+
+  for (i, package) in ctx.packages.all.iter().enumerate() {
+    if !package.has_formatting_mismatches() {
+      continue;
+    }
+    was_invalid = true;
+    reporter.on_package_header(&ctx, package);
+    for mismatch in package.formatting_mismatches.iter() {
+      reporter.on_mismatch_fixed(&ctx, package, mismatch);
+    }
+    fix_indices.push(i);
+  }
+
+  for i in fix_indices {
+    let package = &mut ctx.packages.all[i];
+    for j in 0..package.formatting_mismatches.len() {
+      let property_path = package.formatting_mismatches[j].property_path.clone();
+      let expected = package.formatting_mismatches[j].expected.clone();
+      package.set_prop(&property_path, expected);
+    }
+  }
+
   if !ctx.config.cli.dry_run {
-    ctx.packages.all.iter().for_each(|package| {
-      package.write_to_disk(ctx.config.rcfile.indent.as_deref(), &ctx.packages.formatting);
-    });
+    let indent = ctx.config.rcfile.indent.as_deref();
+    let formatting = &ctx.packages.formatting;
+    for package in ctx.packages.all.iter_mut() {
+      package.write_to_disk(indent, formatting);
+    }
   }
   if !was_invalid {
     reporter.on_no_issues();

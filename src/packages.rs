@@ -62,17 +62,13 @@ impl Packages {
 
   /// Get a package.json file's index by its name
   pub fn get_by_name(&self, name: &str) -> Option<PackageIdx> {
-    self
-      .all
-      .iter()
-      .position(|package| package.name == name)
-      .map(PackageIdx)
+    self.all.iter().position(|package| package.name == name).map(PackageIdx)
   }
 
   /// Get every instance of a dependency from every package.json file
   pub fn get_all_instances<F>(&self, all_dependency_types: &Vec<DependencyType>, mut on_instance: F)
   where
-    F: FnMut(InstanceDescriptor),
+    F: FnMut(InstanceDescriptor, &PackageJson),
   {
     // Pre-compute local package names for O(1) is_local_dependency lookups
     let local_package_names: HashSet<String> = self.all.iter().map(|p| p.name.clone()).collect();
@@ -80,7 +76,7 @@ impl Packages {
 
     for (pkg_index, package) in self.all.iter().enumerate() {
       let package_idx = PackageIdx(pkg_index);
-      let contents = package.contents.borrow();
+      let contents = &package.contents;
       for dependency_type in all_dependency_types {
         match dependency_type.strategy {
           Strategy::NameAndVersionProps => {
@@ -94,58 +90,70 @@ impl Packages {
               }
             });
             if let (Some(Value::String(name)), Some(Value::String(raw_specifier))) = (name_val, version_val) {
-              on_instance(InstanceDescriptor {
-                dependency_type: dependency_type.clone(),
-                internal_name: name.to_string(),
-                is_local_dependency: local_package_names.contains(name.as_str()),
-                matches_cli_filter: false,
-                name: name.to_string(),
-                package_idx,
-                specifier: Specifier::new(raw_specifier),
-              });
+              on_instance(
+                InstanceDescriptor {
+                  dependency_type: dependency_type.clone(),
+                  internal_name: name.to_string(),
+                  is_local_dependency: local_package_names.contains(name.as_str()),
+                  matches_cli_filter: false,
+                  name: name.to_string(),
+                  package_idx,
+                  specifier: Specifier::new(raw_specifier),
+                },
+                package,
+              );
             }
           }
           Strategy::NamedVersionString => {
             if let Some(Value::String(specifier)) = contents.pointer(&dependency_type.path) {
               if let Some((name, raw_specifier)) = specifier.split_once('@') {
-                on_instance(InstanceDescriptor {
-                  dependency_type: dependency_type.clone(),
-                  internal_name: name.to_string(),
-                  is_local_dependency: local_package_names.contains(name),
-                  matches_cli_filter: false,
-                  name: name.to_string(),
-                  package_idx,
-                  specifier: Specifier::new(raw_specifier),
-                });
+                on_instance(
+                  InstanceDescriptor {
+                    dependency_type: dependency_type.clone(),
+                    internal_name: name.to_string(),
+                    is_local_dependency: local_package_names.contains(name),
+                    matches_cli_filter: false,
+                    name: name.to_string(),
+                    package_idx,
+                    specifier: Specifier::new(raw_specifier),
+                  },
+                  package,
+                );
               }
             }
           }
           Strategy::UnnamedVersionString => {
             if let Some(Value::String(raw_specifier)) = contents.pointer(&dependency_type.path) {
-              on_instance(InstanceDescriptor {
-                dependency_type: dependency_type.clone(),
-                internal_name: dependency_type.name.clone(),
-                is_local_dependency: local_package_names.contains(&dependency_type.name),
-                matches_cli_filter: false,
-                name: dependency_type.name.clone(),
-                package_idx,
-                specifier: Specifier::new(raw_specifier),
-              });
+              on_instance(
+                InstanceDescriptor {
+                  dependency_type: dependency_type.clone(),
+                  internal_name: dependency_type.name.clone(),
+                  is_local_dependency: local_package_names.contains(&dependency_type.name),
+                  matches_cli_filter: false,
+                  name: dependency_type.name.clone(),
+                  package_idx,
+                  specifier: Specifier::new(raw_specifier),
+                },
+                package,
+              );
             }
           }
           Strategy::VersionsByName => {
             if let Some(Value::Object(versions_by_name)) = contents.pointer(&dependency_type.path) {
               for (name, raw_specifier) in versions_by_name {
                 if let Value::String(raw_specifier) = raw_specifier {
-                  on_instance(InstanceDescriptor {
-                    dependency_type: dependency_type.clone(),
-                    internal_name: name.to_string(),
-                    is_local_dependency: local_package_names.contains(name.as_str()),
-                    matches_cli_filter: false,
-                    name: name.to_string(),
-                    package_idx,
-                    specifier: Specifier::new(raw_specifier),
-                  });
+                  on_instance(
+                    InstanceDescriptor {
+                      dependency_type: dependency_type.clone(),
+                      internal_name: name.to_string(),
+                      is_local_dependency: local_package_names.contains(name.as_str()),
+                      matches_cli_filter: false,
+                      name: name.to_string(),
+                      package_idx,
+                      specifier: Specifier::new(raw_specifier),
+                    },
+                    package,
+                  );
                 }
               }
             }

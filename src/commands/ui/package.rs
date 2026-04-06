@@ -6,11 +6,11 @@ use {
   },
   colored::*,
   log::info,
-  std::{path::Path, rc::Rc},
+  std::path::Path,
 };
 
 pub fn print_invalid_package(ctx: &Context, package: &PackageJson) {
-  let count = package.formatting_mismatches.borrow().len();
+  let count = package.formatting_mismatches.len();
   let count_column = ui::util::count_column(count);
   let name = &package.name;
   let file_link = get_package_json_link(ctx, &package.file_path);
@@ -18,7 +18,7 @@ pub fn print_invalid_package(ctx: &Context, package: &PackageJson) {
   info!("{count_column} {name} {location}");
 }
 
-pub fn print_invalid(ctx: &Context, mismatch: &Rc<FormatMismatch>) {
+pub fn print_invalid(ctx: &Context, mismatch: &FormatMismatch) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::err();
   let status_code = format!("{:?}", mismatch.variant);
@@ -28,7 +28,7 @@ pub fn print_invalid(ctx: &Context, mismatch: &Rc<FormatMismatch>) {
   info!("{indent} {icon} {status_code_link} {location}");
 }
 
-pub fn print_fixed(ctx: &Context, mismatch: &Rc<FormatMismatch>) {
+pub fn print_fixed(ctx: &Context, mismatch: &FormatMismatch) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::ok();
   let status_code = format!("{:?}", mismatch.variant);

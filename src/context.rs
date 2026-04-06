@@ -68,8 +68,8 @@ impl Context {
         .map_err(ContextError::RcfileError)?;
     }
 
-    packages.get_all_instances(all_dependency_types, |mut descriptor| {
-      let package_name = &packages.all[descriptor.package_idx.0].name;
+    packages.get_all_instances(all_dependency_types, |mut descriptor, package| {
+      let package_name = &package.name;
       let dependency_group = dependency_groups.iter().find(|alias| alias.can_add(&descriptor, package_name));
 
       if let Some(group) = dependency_group {
@@ -87,7 +87,9 @@ impl Context {
         .find(|group| group.selector.can_add(&descriptor, package_name))
         .and_then(|group| group.range.clone());
 
-      let version_group = version_groups.iter_mut().find(|group| group.selector().can_add(&descriptor, package_name));
+      let version_group = version_groups
+        .iter_mut()
+        .find(|group| group.selector().can_add(&descriptor, package_name));
 
       let instance = Instance::new(descriptor, package_name, preferred_semver_range);
       let idx = InstanceIdx(instances.len());
