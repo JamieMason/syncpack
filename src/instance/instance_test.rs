@@ -1,8 +1,8 @@
 use {
   crate::{
+    context::Context,
     dependency::UpdateUrl,
     test::{self},
-    Context,
   },
   serde_json::json,
 };
