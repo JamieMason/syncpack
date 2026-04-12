@@ -2,6 +2,7 @@ use {
   crate::{
     commands::{ui, ui::LINE_ENDING},
     context::Context,
+    disk::DiskIo,
     errors::SyncpackError,
     instance::InstanceIdx,
     registry::updates::RegistryUpdates,
@@ -10,7 +11,7 @@ use {
   log::{error, warn},
 };
 
-pub fn run(mut ctx: Context, registry_updates: RegistryUpdates) -> Result<Context, SyncpackError> {
+pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &D) -> Result<Context, SyncpackError> {
   let mut was_outdated = false;
   let mut copy_actions: Vec<(usize, InstanceIdx)> = vec![];
 
@@ -75,7 +76,7 @@ pub fn run(mut ctx: Context, registry_updates: RegistryUpdates) -> Result<Contex
     let indent = ctx.config.rcfile.indent.as_deref();
     let formatting = &ctx.packages.formatting;
     for package in ctx.packages.all.iter_mut() {
-      package.write_to_disk(indent, formatting);
+      package.write_to_disk(io, indent, formatting)?;
     }
   }
 

@@ -1,8 +1,9 @@
 use crate::{
-  commands::reporter::FixReporter, context::Context, errors::SyncpackError, instance::InstanceIdx, version_group::VersionGroupBehavior,
+  commands::reporter::FixReporter, context::Context, disk::DiskIo, errors::SyncpackError, instance::InstanceIdx,
+  version_group::VersionGroupBehavior,
 };
 
-pub fn run(mut ctx: Context, reporter: &dyn FixReporter) -> Result<Context, SyncpackError> {
+pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> Result<Context, SyncpackError> {
   let mut contains_unfixable_issues = false;
   let mut was_invalid = false;
   let mut fix_actions: Vec<(usize, InstanceIdx, bool)> = vec![];
@@ -53,7 +54,7 @@ pub fn run(mut ctx: Context, reporter: &dyn FixReporter) -> Result<Context, Sync
     let indent = ctx.config.rcfile.indent.as_deref();
     let formatting = &ctx.packages.formatting;
     for package in ctx.packages.all.iter_mut() {
-      package.write_to_disk(indent, formatting);
+      package.write_to_disk(io, indent, formatting)?;
     }
   }
 

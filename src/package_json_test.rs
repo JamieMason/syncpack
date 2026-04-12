@@ -1,7 +1,7 @@
 use {
   crate::{
     dependency::{DependencyType, Strategy},
-    disk::detect_formatting,
+    disk::{detect_formatting, get_pretty_json_bytes, DetectedFormatting, File},
     instance::{FixableInstance, Instance},
     package_json::PackageJson,
     packages::PackageIdx,
@@ -13,6 +13,15 @@ use {
 
 fn package_json_from_raw(raw: &str) -> PackageJson {
   PackageJson::from_raw(raw.to_string(), PathBuf::from("/packages/test/package.json")).expect("Failed to parse test package.json")
+}
+
+fn serialise_pkg(pkg: &PackageJson, formatting: DetectedFormatting) -> String {
+  let file = File {
+    filepath: PathBuf::from("/test"),
+    formatting,
+    contents: pkg.contents(),
+  };
+  String::from_utf8(get_pretty_json_bytes(&file).unwrap()).unwrap()
 }
 
 fn make_instance(name: &str, dep_type: DependencyType, expected: &str) -> Instance {
@@ -38,7 +47,7 @@ fn serialize_uses_detected_2_space_indent() {
   let raw = "{\n  \"name\": \"pkg\",\n  \"version\": \"1.0.0\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
+  let result = serialise_pkg(&pkg, fmt);
   assert!(result.contains("  \"name\""), "expected 2-space indent, got:\n{result}");
   assert!(
     !result.contains("    \"name\""),
@@ -51,7 +60,7 @@ fn serialize_uses_detected_4_space_indent() {
   let raw = "{\n    \"name\": \"pkg\",\n    \"version\": \"1.0.0\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
+  let result = serialise_pkg(&pkg, fmt);
   assert!(result.contains("    \"name\""), "expected 4-space indent, got:\n{result}");
 }
 
@@ -60,7 +69,7 @@ fn serialize_uses_detected_tab_indent() {
   let raw = "{\n\t\"name\": \"pkg\",\n\t\"version\": \"1.0.0\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
+  let result = serialise_pkg(&pkg, fmt);
   assert!(result.contains("\t\"name\""), "expected tab indent, got:\n{result}");
 }
 
@@ -72,7 +81,7 @@ fn serialize_uses_overridden_indent() {
   let mut fmt = detect_formatting(raw);
   // Config says 2-space — override indent but keep detected newline
   fmt.indent = "  ".to_string();
-  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
+  let result = serialise_pkg(&pkg, fmt);
   assert!(
     result.contains("  \"name\""),
     "expected config 2-space indent to win, got:\n{result}"
@@ -90,7 +99,7 @@ fn serialize_preserves_lf_newline() {
   let raw = "{\n  \"name\": \"pkg\"\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
+  let result = serialise_pkg(&pkg, fmt);
   assert!(result.ends_with('\n'), "expected trailing LF");
   assert!(
     !result.ends_with("\r\n"),
@@ -104,7 +113,7 @@ fn serialize_preserves_crlf_newline() {
   let raw = "{\r\n  \"name\": \"pkg\"\r\n}\r\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
+  let result = serialise_pkg(&pkg, fmt);
   assert!(
     result.ends_with("\r\n"),
     "expected trailing CRLF, got bytes: {:?}",
@@ -397,7 +406,7 @@ fn serialize_preserves_key_order() {
   let raw = "{\n  \"z\": 1,\n  \"a\": 2,\n  \"m\": 3\n}\n";
   let pkg = package_json_from_raw(raw);
   let fmt = detect_formatting(raw);
-  let result = String::from_utf8(pkg.serialise(&fmt)).unwrap();
+  let result = serialise_pkg(&pkg, fmt);
   let z_pos = result.find("\"z\"").unwrap();
   let a_pos = result.find("\"a\"").unwrap();
   let m_pos = result.find("\"m\"").unwrap();

@@ -31,7 +31,7 @@ impl Packages {
   }
 
   /// Get every package.json file matched by the user's source patterns
-  pub fn from_config<T: DiskIo>(disk: &Disk<T>, file_paths: &[PathBuf]) -> Self {
+  pub fn from_config<T: DiskIo>(disk: &Disk<'_, T>, file_paths: &[PathBuf]) -> Self {
     let mut packages = Self::new();
     packages.formatting = disk
       .package_json_root

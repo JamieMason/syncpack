@@ -1,5 +1,5 @@
 use {
-  crate::{context::ContextError, rcfile::from_disk::RcfileError},
+  crate::{context::ContextError, disk::DiskIoError, rcfile::from_disk::RcfileError},
   std::fmt,
   thiserror::Error,
 };
@@ -37,6 +37,8 @@ pub enum UnsupportedConfigError {
 pub enum SyncpackError {
   #[error(transparent)]
   ContextError(ContextError),
+  #[error(transparent)]
+  DiskIoError(#[from] DiskIoError),
   #[error("Deprecated command")]
   DeprecatedCommand,
   #[error("Issues found")]

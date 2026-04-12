@@ -1,10 +1,10 @@
-use crate::{commands::reporter::FormatReporter, context::Context, errors::SyncpackError};
+use crate::{commands::reporter::FormatReporter, context::Context, disk::DiskIo, errors::SyncpackError};
 
-pub fn run(ctx: Context, reporter: &dyn FormatReporter) -> Result<Context, SyncpackError> {
+pub fn run<D: DiskIo>(ctx: Context, reporter: &dyn FormatReporter, io: &D) -> Result<Context, SyncpackError> {
   if ctx.config.cli.check {
     check_formatting(ctx, reporter)
   } else {
-    fix_formatting(ctx, reporter)
+    fix_formatting(ctx, reporter, io)
   }
 }
 
@@ -32,7 +32,7 @@ fn check_formatting(ctx: Context, reporter: &dyn FormatReporter) -> Result<Conte
   }
 }
 
-fn fix_formatting(mut ctx: Context, reporter: &dyn FormatReporter) -> Result<Context, SyncpackError> {
+fn fix_formatting<D: DiskIo>(mut ctx: Context, reporter: &dyn FormatReporter, io: &D) -> Result<Context, SyncpackError> {
   let mut was_invalid = false;
   let mut fix_indices: Vec<usize> = vec![];
 
@@ -61,7 +61,7 @@ fn fix_formatting(mut ctx: Context, reporter: &dyn FormatReporter) -> Result<Con
     let indent = ctx.config.rcfile.indent.as_deref();
     let formatting = &ctx.packages.formatting;
     for package in ctx.packages.all.iter_mut() {
-      package.write_to_disk(indent, formatting);
+      package.write_to_disk(io, indent, formatting)?;
     }
   }
   if !was_invalid {

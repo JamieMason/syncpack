@@ -3,10 +3,13 @@
 mod package_json_test;
 
 use {
-  crate::{dependency::Strategy, disk::DetectedFormatting, instance::Instance},
+  crate::{
+    dependency::Strategy,
+    disk::{DetectedFormatting, DiskIo, DiskIoError, File},
+    instance::Instance,
+  },
   log::error,
-  serde::Serialize,
-  serde_json::{ser::PrettyFormatter, Serializer, Value},
+  serde_json::Value,
   std::path::PathBuf,
 };
 
@@ -160,26 +163,31 @@ impl PackageJson {
     };
   }
 
-  /// Serialize the parsed JSON object back into pretty JSON as bytes.
-  pub fn serialise(&self, formatting: &DetectedFormatting) -> Vec<u8> {
-    serialise_json(&self.contents, formatting)
-  }
-
   /// Write the package.json to disk, returns whether the file has changed
-  pub fn write_to_disk(&mut self, indent_override: Option<&str>, formatting: &DetectedFormatting) -> bool {
+  pub fn write_to_disk<D: DiskIo>(
+    &mut self,
+    io: &D,
+    indent_override: Option<&str>,
+    formatting: &DetectedFormatting,
+  ) -> Result<bool, DiskIoError> {
     if !self.dirty {
-      return false;
+      return Ok(false);
     }
-    let vec = match indent_override {
-      Some(indent) => self.serialise(&DetectedFormatting {
+    let effective_formatting = match indent_override {
+      Some(indent) => DetectedFormatting {
         indent: indent.to_string(),
         newline: formatting.newline.clone(),
-      }),
-      None => self.serialise(formatting),
+      },
+      None => formatting.clone(),
     };
-    std::fs::write(&self.file_path, &vec).expect("Failed to write package.json to disk");
+    let file = File {
+      filepath: self.file_path.clone(),
+      formatting: effective_formatting,
+      contents: &self.contents,
+    };
+    io.write_json_file(&file)?;
     self.dirty = false;
-    true
+    Ok(true)
   }
 
   /// Return a short path for logging to the terminal
@@ -203,16 +211,4 @@ fn values_differ(a: &Value, b: &Value) -> bool {
     (Value::Array(a), Value::Array(b)) => a.len() != b.len() || a.iter().zip(b.iter()).any(|(a, b)| values_differ(a, b)),
     _ => a != b,
   }
-}
-
-/// Serialize the parsed JSON object back into pretty JSON as bytes.
-fn serialise_json(value: &serde_json::Value, formatting: &DetectedFormatting) -> Vec<u8> {
-  let buffer = Vec::new();
-  let indent = &formatting.indent.replace("\\t", "\t");
-  let formatter = PrettyFormatter::with_indent(indent.as_bytes());
-  let mut serializer = Serializer::with_formatter(buffer, formatter);
-  value.serialize(&mut serializer).expect("Failed to serialize package.json");
-  let mut writer = serializer.into_inner();
-  writer.extend(formatting.newline.as_bytes());
-  writer
 }

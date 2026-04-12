@@ -39,7 +39,7 @@ pub enum RcfileError {
 }
 
 impl Rcfile {
-  pub fn from_disk<T: DiskIo>(disk: &Disk<T>, cli: &Cli) -> Result<File<Rcfile>, RcfileError> {
+  pub fn from_disk<T: DiskIo>(disk: &Disk<'_, T>, cli: &Cli) -> Result<File<Rcfile>, RcfileError> {
     let start = Instant::now();
 
     let from_json_path = |filepath: &Path| -> Option<Result<File<RawRcfile>, RcfileError>> {

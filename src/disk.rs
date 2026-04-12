@@ -89,11 +89,11 @@ pub fn detect_formatting(raw: &str) -> DetectedFormatting {
 
 /// The owner of all writable files in the workspace
 #[derive(Debug)]
-pub struct Disk<T: DiskIo> {
+pub struct Disk<'a, T: DiskIo> {
   /// The root directory of the workspace
   pub cwd: PathBuf,
   /// The underlying disk IO implementation
-  pub io: T,
+  pub io: &'a T,
   /// The lerna.json file, if found
   pub lerna_json: Option<File<serde_json::Value>>,
   /// All package.json files found in the workspace except the root package.json
@@ -106,8 +106,8 @@ pub struct Disk<T: DiskIo> {
   pub pnpm_workspace: Option<File<serde_yaml::Value>>,
 }
 
-impl<T: DiskIo> Disk<T> {
-  pub fn from_workspace(io: T, directory: &Path) -> Self {
+impl<'a, T: DiskIo> Disk<'a, T> {
+  pub fn from_workspace(io: &'a T, directory: &Path) -> Self {
     let package_json_files = vec![];
     let lerna_json = io.read_json_file(&directory.join("lerna.json"));
     let package_json_root = io.read_json_file(&directory.join("package.json"));
@@ -155,7 +155,7 @@ pub trait DiskIo {
   /// Read a YAML file from disk
   fn read_yaml_file<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>>;
   /// Write a JSON file to disk
-  fn write_json_file<V: serde::ser::Serialize>(&self, file: File<V>) -> Result<(), DiskIoError>;
+  fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError>;
   /// Write a YAML file to disk
   fn write_yaml_file<V: serde::ser::Serialize>(&self, file: File<V>) -> Result<(), DiskIoError>;
 }
@@ -236,8 +236,8 @@ impl DiskIo for LiveDiskIo {
     })
   }
 
-  fn write_json_file<V: serde::ser::Serialize>(&self, file: File<V>) -> Result<(), DiskIoError> {
-    let pretty_bytes = get_pretty_json_bytes(&file)?;
+  fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError> {
+    let pretty_bytes = get_pretty_json_bytes(file)?;
     fs::write(&file.filepath, &pretty_bytes).map_err(DiskIoError::FileWrite)
   }
 
@@ -248,7 +248,7 @@ impl DiskIo for LiveDiskIo {
 }
 
 /// Serialize a JSON Value back into pretty JSON as bytes.
-fn get_pretty_json_bytes<V: serde::ser::Serialize>(file: &File<V>) -> Result<Vec<u8>, DiskIoError> {
+pub(crate) fn get_pretty_json_bytes<V: serde::ser::Serialize>(file: &File<V>) -> Result<Vec<u8>, DiskIoError> {
   let buffer = Vec::new();
   let indent = &file.formatting.indent.replace("\\t", "\t");
   let formatter = serde_json::ser::PrettyFormatter::with_indent(indent.as_bytes());

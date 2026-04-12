@@ -7,7 +7,7 @@ use {
 
 /// Resolve every source glob pattern into their absolute file paths of
 /// package.json files
-pub fn get_file_paths<T: DiskIo>(all_patterns: &[String], disk: &Disk<T>) -> Vec<PathBuf> {
+pub fn get_file_paths<T: DiskIo>(all_patterns: &[String], disk: &Disk<'_, T>) -> Vec<PathBuf> {
   let (negatives, positives): (Vec<_>, Vec<_>) = all_patterns.iter().partition(|p| p.starts_with('!'));
   let build_globset = |patterns: &[&String], strip_prefix: &str| -> GlobSet {
     let mut builder = GlobSetBuilder::new();
@@ -32,7 +32,7 @@ pub fn get_file_paths<T: DiskIo>(all_patterns: &[String], disk: &Disk<T>) -> Vec
 /// Walk a directory tree, skipping `node_modules` and other irrelevant
 /// directories, and return every `package.json` path that matches
 /// `include_set` and does not match `exclude_set`.
-fn walk_matching<T: DiskIo>(disk: &Disk<T>, include_set: &GlobSet, exclude_set: &GlobSet) -> Vec<PathBuf> {
+fn walk_matching<T: DiskIo>(disk: &Disk<'_, T>, include_set: &GlobSet, exclude_set: &GlobSet) -> Vec<PathBuf> {
   let mut results = Vec::new();
   let mut queue: VecDeque<PathBuf> = VecDeque::new();
   queue.push_back(disk.cwd.clone());

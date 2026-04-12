@@ -58,8 +58,8 @@ async fn main() {
     logger::init();
     let args: Vec<String> = std::env::args().collect();
     let io = LiveDiskIo::new();
-    let registry_client = LiveRegistryClient::new();
-    syncpack(&args, io, registry_client).await
+    let registry_client: Arc<dyn RegistryClient> = Arc::new(LiveRegistryClient::new());
+    syncpack(&args, &io, &registry_client).await
   }
   .await;
 
@@ -72,16 +72,16 @@ async fn main() {
   }
 }
 
-async fn syncpack<D: DiskIo, R: RegistryClient + 'static>(args: &[String], io: D, registry_client: R) -> Result<Context, SyncpackError> {
+async fn syncpack<D: DiskIo>(args: &[String], io: &D, registry_client: &Arc<dyn RegistryClient>) -> Result<Context, SyncpackError> {
   let ctx = analyse(args, io)?;
   let registry_updates = fetch_updates(&ctx, registry_client).await;
   let ctx = inspect(ctx, &registry_updates);
-  run(ctx, registry_updates)
+  run(ctx, registry_updates, io)
 }
 
 /// Analyse the project, discover config and packages, and return a `Context`
 /// struct. All disk reading activity should happening during this phase.
-fn analyse<D: DiskIo>(args: &[String], io: D) -> Result<Context, SyncpackError> {
+fn analyse<D: DiskIo>(args: &[String], io: &D) -> Result<Context, SyncpackError> {
   let cli = Cli::parse(args)?;
   logger::configure(&cli);
   let disk = Disk::from_workspace(io, &cli.cwd);
@@ -98,12 +98,11 @@ fn analyse<D: DiskIo>(args: &[String], io: D) -> Result<Context, SyncpackError> 
 }
 
 /// Fetch updates from the npm registry, if applicable
-async fn fetch_updates<R: RegistryClient + 'static>(ctx: &Context, registry_client: R) -> Option<RegistryUpdates> {
+async fn fetch_updates(ctx: &Context, registry_client: &Arc<dyn RegistryClient>) -> Option<RegistryUpdates> {
   match ctx.config.cli.subcommand {
     Subcommand::Update => {
-      let client: Arc<dyn RegistryClient> = Arc::new(registry_client);
       let registry_updates = RegistryUpdates::fetch(
-        &client,
+        registry_client,
         &ctx.version_groups,
         &ctx.instances,
         ctx.config.rcfile.max_concurrent_requests,
@@ -131,7 +130,7 @@ fn inspect(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context 
 }
 
 /// Run the side-effects of the chosen subcommand
-fn run(ctx: Context, registry_updates: Option<RegistryUpdates>) -> Result<Context, SyncpackError> {
+fn run<D: DiskIo>(ctx: Context, registry_updates: Option<RegistryUpdates>, io: &D) -> Result<Context, SyncpackError> {
   match ctx.config.cli.subcommand {
     Subcommand::Fix => {
       let pretty = PrettyFixReporter;
@@ -140,7 +139,7 @@ fn run(ctx: Context, registry_updates: Option<RegistryUpdates>) -> Result<Contex
         ReporterKind::Pretty => &pretty,
         ReporterKind::Json => &json_reporter,
       };
-      fix::run(ctx, reporter)
+      fix::run(ctx, reporter, io)
     }
     Subcommand::FixMismatches => fix_mismatches::run(ctx),
     Subcommand::Format => {
@@ -150,7 +149,7 @@ fn run(ctx: Context, registry_updates: Option<RegistryUpdates>) -> Result<Contex
         ReporterKind::Pretty => &pretty,
         ReporterKind::Json => &json_reporter,
       };
-      format::run(ctx, reporter)
+      format::run(ctx, reporter, io)
     }
     Subcommand::Json => json::run(ctx),
     Subcommand::Lint => lint::run(ctx),
@@ -159,6 +158,6 @@ fn run(ctx: Context, registry_updates: Option<RegistryUpdates>) -> Result<Contex
     Subcommand::ListMismatches => list_mismatches::run(ctx),
     Subcommand::Prompt => prompt::run(ctx),
     Subcommand::SetSemverRanges => set_semver_ranges::run(ctx),
-    Subcommand::Update => update::run(ctx, registry_updates.expect("registry_updates is None")),
+    Subcommand::Update => update::run(ctx, registry_updates.expect("registry_updates is None"), io),
   }
 }
