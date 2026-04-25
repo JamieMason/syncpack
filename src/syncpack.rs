@@ -23,11 +23,15 @@ use {
 };
 
 /// Run the full syncpack CLI using injected dependencies
-pub async fn syncpack<D: DiskIo>(args: &[String], io: &D, registry_client: &Arc<dyn RegistryClient>) -> Result<Context, SyncpackError> {
+pub async fn syncpack<D: DiskIo>(
+  args: &[String],
+  io: &D,
+  registry_client: &Arc<dyn RegistryClient>,
+) -> Result<(Context, Option<RegistryUpdates>), SyncpackError> {
   let ctx = analyse(args, io)?;
   let registry_updates = fetch_updates(&ctx, registry_client).await;
   let ctx = inspect(ctx, &registry_updates);
-  run(ctx, registry_updates, io)
+  Ok((ctx, registry_updates))
 }
 
 /// Analyse the project, discover config and packages, and return a `Context`
@@ -81,7 +85,7 @@ fn inspect(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context 
 }
 
 /// Run the side-effects of the chosen subcommand
-fn run<D: DiskIo>(ctx: Context, registry_updates: Option<RegistryUpdates>, io: &D) -> Result<Context, SyncpackError> {
+pub fn run<D: DiskIo>(ctx: Context, registry_updates: Option<RegistryUpdates>, io: &D) -> Result<Context, SyncpackError> {
   match ctx.config.cli.subcommand {
     Subcommand::Fix => {
       let pretty = PrettyFixReporter;

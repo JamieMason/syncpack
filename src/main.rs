@@ -42,7 +42,8 @@ async fn main() {
     let args: Vec<String> = std::env::args().collect();
     let io = LiveDiskIo::new();
     let registry_client: Arc<dyn RegistryClient> = Arc::new(LiveRegistryClient::new());
-    syncpack::syncpack(&args, &io, &registry_client).await
+    let (ctx, registry_updates) = syncpack::syncpack(&args, &io, &registry_client).await?;
+    syncpack::run(ctx, registry_updates, &io)
   }
   .await;
 
