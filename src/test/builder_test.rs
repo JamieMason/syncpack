@@ -7,14 +7,15 @@ use {
   serde_json::json,
 };
 
-#[test]
-fn test_builder_basic_usage() {
+#[tokio::test]
+async fn test_builder_basic_usage() {
   let ctx = TestBuilder::new()
     .with_package(json!({
       "name": "package-a",
       "version": "1.0.0"
     }))
-    .build_and_visit_packages();
+    .run()
+    .await;
 
   expect(&ctx).to_have_instances(vec![ExpectedInstance {
     state: InstanceState::valid(IsLocalAndValid),
@@ -26,8 +27,8 @@ fn test_builder_basic_usage() {
   }]);
 }
 
-#[test]
-fn test_builder_with_version_group() {
+#[tokio::test]
+async fn test_builder_with_version_group() {
   let ctx = TestBuilder::new()
     .with_package(json!({
       "name": "package-a",
@@ -38,26 +39,28 @@ fn test_builder_with_version_group() {
       "dependencies": ["foo"],
       "pinVersion": "2.0.0"
     }))
-    .build_and_visit_packages();
+    .run()
+    .await;
 
   // The test should show that foo gets pinned to 2.0.0
   assert!(ctx.instances.len() > 1);
 }
 
-#[test]
-fn test_builder_with_multiple_packages() {
+#[tokio::test]
+async fn test_builder_with_multiple_packages() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({"name": "package-a", "version": "1.0.0"}),
       json!({"name": "package-b", "version": "2.0.0"}),
     ])
-    .build_and_visit_packages();
+    .run()
+    .await;
 
   assert_eq!(ctx.instances.len(), 2);
 }
 
-#[test]
-fn test_builder_with_strict_mode() {
+#[tokio::test]
+async fn test_builder_with_strict_mode() {
   let ctx = TestBuilder::new()
     .with_package(json!({
       "name": "package-a",
@@ -65,7 +68,8 @@ fn test_builder_with_strict_mode() {
       "dependencies": {"package-a": "workspace:*"}
     }))
     .with_strict(true)
-    .build_and_visit_packages();
+    .run()
+    .await;
 
   // In strict mode, workspace protocol should be invalid when differs from local
   assert!(ctx.instances.iter().any(|i| i.state.borrow().is_invalid()));
@@ -79,7 +83,7 @@ async fn test_builder_with_registry_updates() {
       "dependencies": {"foo": "1.0.0"}
     }))
     .with_registry_updates(json!({"foo": ["1.0.0", "2.0.0"]}))
-    .build_with_registry_and_visit()
+    .run()
     .await;
 
   // Should show registry update available
@@ -97,7 +101,7 @@ async fn test_builder_with_update_target() {
     }))
     .with_update_target(UpdateTarget::Minor)
     .with_registry_updates(json!({"foo": ["1.0.0", "1.1.0", "2.0.0"]}))
-    .build_with_registry_and_visit()
+    .run()
     .await;
 
   // Should target minor updates (1.1.0) not latest (2.0.0)

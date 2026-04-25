@@ -2,7 +2,7 @@ use {
   detect_indent::detect_indent,
   detect_newline_style::LineEnding,
   std::{
-    fs::{self, ReadDir},
+    fs,
     path::{Path, PathBuf},
     process::Command,
   },
@@ -140,14 +140,38 @@ impl<'a, T: DiskIo> Disk<'a, T> {
   }
 }
 
+/// Abstract directory entry returned by DiskIo::read_dir
+pub struct DiskDirEntry {
+  path: PathBuf,
+  is_dir: bool,
+}
+
+impl DiskDirEntry {
+  pub fn new(path: PathBuf, is_dir: bool) -> Self {
+    Self { path, is_dir }
+  }
+
+  pub fn path(&self) -> &Path {
+    &self.path
+  }
+
+  pub fn file_name(&self) -> std::ffi::OsString {
+    self.path.file_name().unwrap_or_default().to_owned()
+  }
+
+  pub fn is_dir(&self) -> bool {
+    self.is_dir
+  }
+}
+
 /// Allow DI of the disk IO layer
 pub trait DiskIo {
   /// Execute a NodeJS command and return the stdout
   fn exec_node_command(&self, current_dir: &Path, args: &[&str]) -> Result<String, NodeJsError>;
   /// Check if a file exists on disk
   fn path_exists(&self, filepath: &Path) -> bool;
-  /// Returns an iterator over the entries within a directory.
-  fn read_dir(&self, path: &Path) -> Result<ReadDir, std::io::Error>;
+  /// Returns the entries within a directory.
+  fn read_dir(&self, path: &Path) -> Result<Vec<DiskDirEntry>, std::io::Error>;
   /// Read a JSON file from disk
   fn read_json_file<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>>;
   /// Read a file from disk to a string
@@ -194,8 +218,18 @@ impl DiskIo for LiveDiskIo {
     filepath.exists()
   }
 
-  fn read_dir(&self, path: &Path) -> Result<ReadDir, std::io::Error> {
-    fs::read_dir(path)
+  fn read_dir(&self, path: &Path) -> Result<Vec<DiskDirEntry>, std::io::Error> {
+    let entries = fs::read_dir(path)?;
+    Ok(
+      entries
+        .flatten()
+        .map(|entry| {
+          let path = entry.path();
+          let is_dir = path.is_dir();
+          DiskDirEntry::new(path, is_dir)
+        })
+        .collect(),
+    )
   }
 
   fn read_textfile(&self, filepath: &Path) -> Option<Result<File<String>, DiskIoError>> {

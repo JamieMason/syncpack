@@ -19,6 +19,7 @@ pub struct TestBuilder {
   dependency_groups: Vec<Value>,
   packages: Vec<Value>,
   registry_updates: Option<Value>,
+  subcommand: Option<String>,
   semver_groups: Vec<Value>,
   strict: Option<bool>,
   update_target: Option<UpdateTarget>,
@@ -33,6 +34,7 @@ impl TestBuilder {
       dependency_groups: vec![],
       packages: vec![],
       registry_updates: None,
+      subcommand: None,
       semver_groups: vec![],
       strict: None,
       update_target: None,
@@ -90,6 +92,11 @@ impl TestBuilder {
     self
   }
 
+  pub fn with_subcommand(mut self, subcommand: &str) -> Self {
+    self.subcommand = Some(subcommand.to_string());
+    self
+  }
+
   /// Build the final configuration from all the builder settings
   fn build_config(&self) -> Value {
     let mut config = self.config.clone();
@@ -106,6 +113,60 @@ impl TestBuilder {
       config["strict"] = Value::Bool(strict);
     }
     config
+  }
+
+  pub async fn run(self) -> Context {
+    use {
+      crate::{
+        registry::client::RegistryClient,
+        syncpack,
+        test::{mock_disk::MockDiskIo, registry_client::MockRegistryClient},
+      },
+      std::sync::Arc,
+    };
+
+    let mut disk = MockDiskIo::new();
+
+    // Add package.json files at packages/{name}/package.json
+    for pkg in &self.packages {
+      let name = pkg["name"].as_str().unwrap_or("unknown");
+      let path = format!("packages/{name}/package.json");
+      disk.add_json(&path, pkg);
+    }
+
+    // Add .syncpackrc if config has custom settings
+    let config = self.build_config();
+    if config != json!({}) {
+      disk.add_json(".syncpackrc", &config);
+    }
+
+    let subcommand = self
+      .subcommand
+      .as_deref()
+      .unwrap_or(if self.registry_updates.is_some() { "update" } else { "lint" });
+    let mut args: Vec<String> = vec!["syncpack".into(), subcommand.into()];
+    if let Some(ref target) = self.update_target {
+      args.push("--target".into());
+      args.push(
+        match target {
+          crate::cli::UpdateTarget::Latest => "latest",
+          crate::cli::UpdateTarget::Minor => "minor",
+          crate::cli::UpdateTarget::Patch => "patch",
+        }
+        .into(),
+      );
+    }
+
+    let registry_client: Arc<dyn RegistryClient> = if let Some(ref updates) = self.registry_updates {
+      Arc::new(MockRegistryClient::from_json(updates.clone()))
+    } else {
+      Arc::new(MockRegistryClient::from_json(json!({})))
+    };
+
+    let (ctx, _registry_updates) = syncpack::syncpack(&args, &disk, &registry_client)
+      .await
+      .expect("syncpack analyse/inspect failed");
+    ctx
   }
 
   pub fn build(self) -> Context {

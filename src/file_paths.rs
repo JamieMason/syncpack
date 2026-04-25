@@ -44,20 +44,19 @@ fn walk_matching<T: DiskIo>(disk: &Disk<'_, T>, include_set: &GlobSet, exclude_s
         continue;
       }
     };
-    for entry in entries.flatten() {
-      let path = entry.path();
-      let file_name = entry.file_name();
-      let name = file_name.to_string_lossy();
-      if path.is_dir() {
+    for entry in entries {
+      let name = entry.file_name().to_string_lossy().to_string();
+      if entry.is_dir() {
         // Prune directories that can never contain relevant package.json files
         if name == "node_modules" || name == ".git" {
           continue;
         }
-        queue.push_back(path);
+        queue.push_back(entry.path().to_path_buf());
       } else if name == "package.json" {
-        let rel = path.strip_prefix(&disk.cwd).unwrap_or(&path);
+        let path = entry.path();
+        let rel = path.strip_prefix(&disk.cwd).unwrap_or(path);
         if include_set.is_match(rel) && !exclude_set.is_match(rel) {
-          results.push(path);
+          results.push(path.to_path_buf());
         }
       }
     }

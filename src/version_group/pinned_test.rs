@@ -5,7 +5,6 @@ use {
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    version_group::visit_groups,
   },
   serde_json::json,
 };
@@ -13,12 +12,8 @@ use {
 mod local {
   use super::*;
 
-  #[test]
-  fn refuses_to_pin_local_version() {
-    let vg = json!({
-      "dependencies": ["package-a"],
-      "pinVersion": "1.2.0"
-    });
+  #[tokio::test]
+  async fn refuses_to_pin_local_version() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -32,9 +27,12 @@ mod local {
           }
         }),
       ])
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["package-a"],
+        "pinVersion": "1.2.0"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -67,12 +65,8 @@ mod local {
 mod normal {
   use super::*;
 
-  #[test]
-  fn a_pinned_version_will_replace_anything_different() {
-    let vg = json!({
-      "dependencies": ["foo"],
-      "pinVersion": "1.2.0"
-    });
+  #[tokio::test]
+  async fn a_pinned_version_will_replace_anything_different() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -81,9 +75,12 @@ mod normal {
           "foo": "workspace:*"
         }
       }))
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "pinVersion": "1.2.0"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -104,12 +101,8 @@ mod normal {
     ]);
   }
 
-  #[test]
-  fn pin_version_will_override_instance_with_same_version_number_as_pinned_but_matching_a_semver_group() {
-    let vg = json!({
-      "dependencies": ["foo"],
-      "pinVersion": "1.0.0"
-    });
+  #[tokio::test]
+  async fn pin_version_will_override_instance_with_same_version_number_as_pinned_but_matching_a_semver_group() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -122,9 +115,12 @@ mod normal {
         "range": "^",
         "dependencies": ["foo"]
       }))
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "pinVersion": "1.0.0"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::fixable(PinOverridesSemverRange),
@@ -145,12 +141,8 @@ mod normal {
     ]);
   }
 
-  #[test]
-  fn pin_version_will_override_instance_with_same_version_number_as_pinned_but_mismatching_a_semver_group() {
-    let vg = json!({
-      "dependencies": ["foo"],
-      "pinVersion": "1.0.0"
-    });
+  #[tokio::test]
+  async fn pin_version_will_override_instance_with_same_version_number_as_pinned_but_mismatching_a_semver_group() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -163,9 +155,12 @@ mod normal {
         "range": "^",
         "dependencies": ["foo"]
       }))
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "pinVersion": "1.0.0"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::fixable(PinOverridesSemverRangeMismatch),
@@ -186,12 +181,8 @@ mod normal {
     ]);
   }
 
-  #[test]
-  fn pin_version_will_override_instance_with_same_version_number_as_pinned_but_a_different_range_and_no_semver_group() {
-    let vg = json!({
-      "dependencies": ["foo"],
-      "pinVersion": "1.0.0"
-    });
+  #[tokio::test]
+  async fn pin_version_will_override_instance_with_same_version_number_as_pinned_but_a_different_range_and_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -200,9 +191,12 @@ mod normal {
           "foo": "^1.0.0"
         }
       }))
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "pinVersion": "1.0.0"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -223,12 +217,8 @@ mod normal {
     ]);
   }
 
-  #[test]
-  fn an_already_pinned_version_is_valid() {
-    let vg = json!({
-      "dependencies": ["foo"],
-      "pinVersion": "1.2.0"
-    });
+  #[tokio::test]
+  async fn an_already_pinned_version_is_valid() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -237,9 +227,12 @@ mod normal {
           "foo": "1.2.0"
         }
       }))
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "pinVersion": "1.2.0"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -260,13 +253,8 @@ mod normal {
     ]);
   }
 
-  #[test]
-  fn an_already_pinned_workspace_protocol_version_is_valid() {
-    let vg = json!({
-      "dependencies": ["package-a"],
-      "dependencyTypes": ["dev"],
-      "pinVersion": "workspace:*"
-    });
+  #[tokio::test]
+  async fn an_already_pinned_workspace_protocol_version_is_valid() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -275,9 +263,13 @@ mod normal {
           "package-a": "workspace:*"
         }
       }))
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["package-a"],
+        "dependencyTypes": ["dev"],
+        "pinVersion": "workspace:*"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),

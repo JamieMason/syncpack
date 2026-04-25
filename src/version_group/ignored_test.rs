@@ -5,16 +5,12 @@ use {
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    version_group::visit_groups,
   },
   serde_json::json,
 };
 
-#[test]
-fn all_instances_are_ignored() {
-  let vg = json!({
-    "isIgnored": true
-  });
+#[tokio::test]
+async fn all_instances_are_ignored() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -28,9 +24,9 @@ fn all_instances_are_ignored() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({"isIgnored": true}))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),

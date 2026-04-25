@@ -5,17 +5,12 @@ use {
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    version_group::visit_groups,
   },
   serde_json::json,
 };
 
-#[test]
-fn refuses_to_ban_local_version() {
-  let vg = json!({
-    "dependencies": ["package-a"],
-    "isBanned": true
-  });
+#[tokio::test]
+async fn refuses_to_ban_local_version() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -27,9 +22,12 @@ fn refuses_to_ban_local_version() {
         "dependencies": {"package-a": "1.1.0"}
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["package-a"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -58,13 +56,8 @@ fn refuses_to_ban_local_version() {
   ]);
 }
 
-#[test]
-fn removes_instance_with_name_and_version_props_strategy() {
-  let vg = json!({
-    "dependencies": ["my-custom-package"],
-    "dependencyTypes": ["customPackage"],
-    "isBanned": true
-  });
+#[tokio::test]
+async fn removes_instance_with_name_and_version_props_strategy() {
   let ctx = TestBuilder::new()
     .with_config(json!({
       "customTypes": {
@@ -81,9 +74,13 @@ fn removes_instance_with_name_and_version_props_strategy() {
       "customName": "my-custom-package",
       "customVersion": "2.1.0"
     })])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["my-custom-package"],
+      "dependencyTypes": ["customPackage"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -105,13 +102,8 @@ fn removes_instance_with_name_and_version_props_strategy() {
   ]);
 }
 
-#[test]
-fn removes_instance_with_named_version_string_strategy() {
-  let vg = json!({
-    "dependencies": ["pnpm"],
-    "dependencyTypes": ["packageManager"],
-    "isBanned": true
-  });
+#[tokio::test]
+async fn removes_instance_with_named_version_string_strategy() {
   let ctx = TestBuilder::new()
     .with_config(json!({
       "customTypes": {
@@ -126,9 +118,13 @@ fn removes_instance_with_named_version_string_strategy() {
       "version": "1.0.0",
       "packageManager": "pnpm@7.27.0"
     })])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["pnpm"],
+      "dependencyTypes": ["packageManager"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -150,13 +146,8 @@ fn removes_instance_with_named_version_string_strategy() {
   ]);
 }
 
-#[test]
-fn removes_instance_with_unnamed_version_string_strategy() {
-  let vg = json!({
-    "dependencies": ["nodeVersion"],
-    "dependencyTypes": ["nodeVersion"],
-    "isBanned": true
-  });
+#[tokio::test]
+async fn removes_instance_with_unnamed_version_string_strategy() {
   let ctx = TestBuilder::new()
     .with_config(json!({
       "customTypes": {
@@ -173,9 +164,13 @@ fn removes_instance_with_unnamed_version_string_strategy() {
         "node": ">=16.0.0"
       }
     })])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["nodeVersion"],
+      "dependencyTypes": ["nodeVersion"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -197,12 +192,8 @@ fn removes_instance_with_unnamed_version_string_strategy() {
   ]);
 }
 
-#[test]
-fn removes_instance_with_versions_by_name_strategy() {
-  let vg = json!({
-    "dependencies": ["react"],
-    "isBanned": true
-  });
+#[tokio::test]
+async fn removes_instance_with_versions_by_name_strategy() {
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "package-a",
@@ -212,9 +203,12 @@ fn removes_instance_with_versions_by_name_strategy() {
         "lodash": "4.17.21"
       }
     })])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["react"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
@@ -244,13 +238,8 @@ fn removes_instance_with_versions_by_name_strategy() {
   ]);
 }
 
-#[test]
-fn removes_nested_property_with_unnamed_version_string_strategy() {
-  let vg = json!({
-    "dependencies": ["customConfig"],
-    "dependencyTypes": ["customConfig"],
-    "isBanned": true
-  });
+#[tokio::test]
+async fn removes_nested_property_with_unnamed_version_string_strategy() {
   let ctx = TestBuilder::new()
     .with_config(json!({
       "customTypes": {
@@ -270,9 +259,13 @@ fn removes_nested_property_with_unnamed_version_string_strategy() {
         }
       }
     })])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["customConfig"],
+      "dependencyTypes": ["customConfig"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
 
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {

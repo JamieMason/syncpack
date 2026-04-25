@@ -8,7 +8,6 @@ use {
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    version_group::visit_groups,
   },
   serde_json::json,
 };
@@ -16,8 +15,8 @@ use {
 mod local {
   use super::*;
 
-  #[test]
-  fn instance_depends_on_local_version_which_is_missing() {
+  #[tokio::test]
+  async fn instance_depends_on_local_version_which_is_missing() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({"name": "package-a"}),
@@ -28,8 +27,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -58,8 +57,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_depends_on_local_version_which_is_not_exact_semver() {
+  #[tokio::test]
+  async fn instance_depends_on_local_version_which_is_not_exact_semver() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -73,8 +72,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -103,8 +102,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_has_higher_version_than_local_package_and_has_no_semver_group() {
+  #[tokio::test]
+  async fn instance_has_higher_version_than_local_package_and_has_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -118,8 +117,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -148,8 +147,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_identical_to_local_package_and_has_no_semver_group() {
+  #[tokio::test]
+  async fn instance_identical_to_local_package_and_has_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -163,8 +162,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -193,8 +192,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_has_different_version_to_local_package_and_has_no_semver_group() {
+  #[tokio::test]
+  async fn instance_has_different_version_to_local_package_and_has_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -208,8 +207,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -238,8 +237,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_local_package_but_a_different_range_and_has_no_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_local_package_but_a_different_range_and_has_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -253,8 +252,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -283,8 +282,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_local_package_but_matches_a_different_but_compatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_local_package_but_matches_a_different_but_compatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -301,8 +300,8 @@ mod local {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -331,8 +330,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_is_linked_to_local_package() {
+  #[tokio::test]
+  async fn instance_is_linked_to_local_package() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -347,8 +346,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -377,8 +376,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_is_linked_to_wrong_directory() {
+  #[tokio::test]
+  async fn instance_is_linked_to_wrong_directory() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -393,8 +392,8 @@ mod local {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -423,8 +422,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_local_package_but_mismatches_a_different_but_compatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_local_package_but_mismatches_a_different_but_compatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -441,8 +440,8 @@ mod local {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -471,8 +470,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_local_package_but_matches_a_different_but_incompatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_local_package_but_matches_a_different_but_incompatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -489,8 +488,8 @@ mod local {
       .with_semver_group(json!({
         "range": "<"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -519,8 +518,8 @@ mod local {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_local_package_but_mismatches_a_different_but_incompatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_local_package_but_mismatches_a_different_but_incompatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -537,8 +536,8 @@ mod local {
       .with_semver_group(json!({
         "range": ">"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -571,8 +570,8 @@ mod local {
 mod highest_or_lowest {
   use super::*;
 
-  #[test]
-  fn reports_one_highest_version_mismatch_in_one_file() {
+  #[tokio::test]
+  async fn reports_one_highest_version_mismatch_in_one_file() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -583,8 +582,8 @@ mod highest_or_lowest {
           "wat": "2.0.0"
         }
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -613,8 +612,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn reports_many_highest_version_mismatches_in_one_file() {
+  #[tokio::test]
+  async fn reports_many_highest_version_mismatches_in_one_file() {
     let ctx = TestBuilder::new()
       .with_package(json!({
         "name": "package-a",
@@ -628,8 +627,8 @@ mod highest_or_lowest {
           "wat": "0.2.0"
         }
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -666,8 +665,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn reports_highest_version_mismatches_in_many_files() {
+  #[tokio::test]
+  async fn reports_highest_version_mismatches_in_many_files() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -683,8 +682,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -721,10 +720,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn does_not_report_highest_version_mismatches_when_in_different_version_groups() {
-    let vg_a = json!({"packages": ["package-a"]});
-    let vg_b = json!({"packages": ["package-b"]});
+  #[tokio::test]
+  async fn does_not_report_highest_version_mismatches_when_in_different_version_groups() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -740,9 +737,9 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .with_version_groups(vec![vg_a.clone(), vg_b.clone()])
-      .build();
-    visit_groups(&ctx, &[vg_a, vg_b]);
+      .with_version_groups(vec![json!({"packages": ["package-a"]}), json!({"packages": ["package-b"]})])
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -779,8 +776,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn does_not_confuse_highest_version_matches_and_mismatches_of_the_same_dependency() {
+  #[tokio::test]
+  async fn does_not_confuse_highest_version_matches_and_mismatches_of_the_same_dependency() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -804,8 +801,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -858,8 +855,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn instance_identical_to_highest_semver_and_has_no_semver_group() {
+  #[tokio::test]
+  async fn instance_identical_to_highest_semver_and_has_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -875,8 +872,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -913,8 +910,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn instance_has_different_version_to_highest_semver_and_has_no_semver_group() {
+  #[tokio::test]
+  async fn instance_has_different_version_to_highest_semver_and_has_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -930,8 +927,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -968,8 +965,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_highest_semver_but_a_different_range_and_has_no_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_highest_semver_but_a_different_range_and_has_no_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -985,8 +982,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1023,8 +1020,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_compatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_compatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1044,8 +1041,8 @@ mod highest_or_lowest {
         "packages": ["package-b"],
         "range": "~"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1082,8 +1079,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_highest_semver_but_mismatches_a_different_but_compatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_highest_semver_but_mismatches_a_different_but_compatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1103,8 +1100,8 @@ mod highest_or_lowest {
         "packages": ["package-b"],
         "range": "^"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1141,8 +1138,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_incompatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_highest_semver_but_matches_a_different_but_incompatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1162,8 +1159,8 @@ mod highest_or_lowest {
         "packages": ["package-b"],
         "range": "<"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1200,8 +1197,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn instance_has_same_version_number_as_highest_semver_but_mismatches_a_different_but_incompatible_semver_group() {
+  #[tokio::test]
+  async fn instance_has_same_version_number_as_highest_semver_but_mismatches_a_different_but_incompatible_semver_group() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1221,8 +1218,8 @@ mod highest_or_lowest {
         "packages": ["package-b"],
         "range": "<"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1259,8 +1256,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn highest_semver_with_prerelease_versions_prefers_most_greedy() {
+  #[tokio::test]
+  async fn highest_semver_with_prerelease_versions_prefers_most_greedy() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1276,8 +1273,8 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1315,11 +1312,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn lowest_semver_prefers_least_greedy_range_when_versions_equal() {
-    let vg = json!({
-      "preferVersion": "lowestSemver"
-    });
+  #[tokio::test]
+  async fn lowest_semver_prefers_least_greedy_range_when_versions_equal() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1341,9 +1335,11 @@ mod highest_or_lowest {
           }
         }),
       ])
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "preferVersion": "lowestSemver"
+      }))
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1397,8 +1393,8 @@ mod highest_or_lowest {
     ]);
   }
 
-  #[test]
-  fn regression_test_for_issue_314() {
+  #[tokio::test]
+  async fn regression_test_for_issue_314() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1422,8 +1418,8 @@ mod highest_or_lowest {
         "packages": ["**"],
         "dependencies": ["**"]
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1481,8 +1477,8 @@ mod highest_or_lowest {
   /// When versions differ AND a semver group exists, the fix target for
   /// DiffersToHighestOrLowestSemver should apply the semver group's preferred
   /// range — not inherit the range from the highest specifier.
-  #[test]
-  fn differs_to_highest_semver_should_apply_semver_group_range() {
+  #[tokio::test]
+  async fn differs_to_highest_semver_should_apply_semver_group_range() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1510,8 +1506,8 @@ mod highest_or_lowest {
         "packages": ["**"],
         "dependencies": ["**"]
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1571,8 +1567,8 @@ mod highest_or_lowest {
   /// Exploratory: when a semver group makes one instance greedier (e.g. exact
   /// -> ^), that adjusted specifier becomes the highest via the range tiebreaker.
   /// Other instances (not in a semver group) should follow the new highest.
-  #[test]
-  fn semver_group_greedier_range_becomes_highest() {
+  #[tokio::test]
+  async fn semver_group_greedier_range_becomes_highest() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1599,8 +1595,8 @@ mod highest_or_lowest {
         "range": "^",
         "packages": ["pkg-a"]
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -1663,8 +1659,8 @@ mod highest_or_lowest {
 mod non_semver {
   use super::*;
 
-  #[test]
-  fn no_instances_are_semver_but_all_are_identical() {
+  #[tokio::test]
+  async fn no_instances_are_semver_but_all_are_identical() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1680,8 +1676,8 @@ mod non_semver {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1718,8 +1714,8 @@ mod non_semver {
     ]);
   }
 
-  #[test]
-  fn no_instances_are_semver_and_they_differ() {
+  #[tokio::test]
+  async fn no_instances_are_semver_and_they_differ() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1735,8 +1731,8 @@ mod non_semver {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1773,8 +1769,8 @@ mod non_semver {
     ]);
   }
 
-  #[test]
-  fn workspace_protocol_version_differs_to_local_version_is_invalid_in_strict_mode() {
+  #[tokio::test]
+  async fn workspace_protocol_version_differs_to_local_version_is_invalid_in_strict_mode() {
     let ctx = TestBuilder::new()
       .with_strict(true)
       .with_packages(vec![json!({
@@ -1784,8 +1780,8 @@ mod non_semver {
           "package-a": "workspace:*"
         }
       })])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1806,8 +1802,8 @@ mod non_semver {
     ]);
   }
 
-  #[test]
-  fn workspace_protocol_version_differs_to_local_version_is_valid_by_default() {
+  #[tokio::test]
+  async fn workspace_protocol_version_differs_to_local_version_is_valid_by_default() {
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
         "name": "package-a",
@@ -1816,8 +1812,8 @@ mod non_semver {
           "package-a": "workspace:*"
         }
       })])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1838,8 +1834,8 @@ mod non_semver {
     ]);
   }
 
-  #[test]
-  fn link_specifiers_without_local_instance_are_identical() {
+  #[tokio::test]
+  async fn link_specifiers_without_local_instance_are_identical() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1855,8 +1851,8 @@ mod non_semver {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1893,8 +1889,8 @@ mod non_semver {
     ]);
   }
 
-  #[test]
-  fn link_specifiers_without_local_instance_differ() {
+  #[tokio::test]
+  async fn link_specifiers_without_local_instance_differ() {
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({
@@ -1910,8 +1906,8 @@ mod non_semver {
           }
         }),
       ])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1948,8 +1944,8 @@ mod non_semver {
     ]);
   }
 
-  #[test]
-  fn non_semver_and_semver_mismatch() {
+  #[tokio::test]
+  async fn non_semver_and_semver_mismatch() {
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
         "name": "package-a",
@@ -1960,8 +1956,8 @@ mod non_semver {
           "mix": "file:./mix"
         }
       })])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1994,8 +1990,8 @@ mod non_semver {
 mod dependency_groups {
   use super::*;
 
-  #[test]
-  fn dependency_group_of_dependency_and_its_types_that_can_be_relied_on_to_be_same_version() {
+  #[tokio::test]
+  async fn dependency_group_of_dependency_and_its_types_that_can_be_relied_on_to_be_same_version() {
     let ctx = TestBuilder::new()
       .with_config(json!({
         "dependencyGroups": [{
@@ -2013,8 +2009,8 @@ mod dependency_groups {
           "@types/foo": "4.0.5"
         }
       })])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -2043,12 +2039,8 @@ mod dependency_groups {
     ]);
   }
 
-  #[test]
-  fn dependency_group_of_dependency_and_its_types_that_track_the_same_major_version() {
-    let vg = json!({
-      "dependencies": ["foo-group"],
-      "policy": "sameRange"
-    });
+  #[tokio::test]
+  async fn dependency_group_of_dependency_and_its_types_that_track_the_same_major_version() {
     let ctx = TestBuilder::new()
       .with_config(json!({
         "dependencyGroups": [{
@@ -2066,9 +2058,12 @@ mod dependency_groups {
           "@types/foo": "^4.0.5"
         }
       })])
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["foo-group"],
+        "policy": "sameRange"
+      }))
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -2116,7 +2111,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2150,7 +2145,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2188,7 +2183,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2230,7 +2225,7 @@ mod registry_updates {
           "@std/fmt": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
           "lit": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2301,7 +2296,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2339,7 +2334,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.0.1", "1.0.2", "1.1.2", "1.3.3", "2.0.0", "2.2.2"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2382,7 +2377,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2421,7 +2416,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2460,7 +2455,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2498,7 +2493,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.0.1", "1.0.2", "1.1.1", "1.1.2", "1.3.3", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2541,7 +2536,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2580,7 +2575,7 @@ mod registry_updates {
         .with_registry_updates(json!({
           "wat": ["1.2.2", "1.2.3", "1.2.4", "1.3.4", "2.0.0"],
         }))
-        .build_with_registry_and_visit()
+        .run()
         .await;
       expect(&ctx).to_have_instances(vec![
         ExpectedInstance {
@@ -2607,12 +2602,8 @@ mod registry_updates {
 mod custom_types {
   use super::*;
 
-  #[test]
-  fn custom_engines_type_visible_in_catch_all_group_without_cli_filter() {
-    let vg = json!({
-      "dependencies": ["react"],
-      "dependencyTypes": ["prod", "dev", "peer"]
-    });
+  #[tokio::test]
+  async fn custom_engines_type_visible_in_catch_all_group_without_cli_filter() {
     let ctx = TestBuilder::new()
       .with_config(json!({
         "customTypes": {
@@ -2633,9 +2624,12 @@ mod custom_types {
           "yarn": "^1.22.5"
         }
       })])
-      .with_version_group(vg.clone())
-      .build();
-    visit_groups(&ctx, &[vg]);
+      .with_version_group(json!({
+        "dependencies": ["react"],
+        "dependencyTypes": ["prod", "dev", "peer"]
+      }))
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -2673,8 +2667,8 @@ mod custom_types {
     ]);
   }
 
-  #[test]
-  fn exact_version_with_equals_prefix_should_be_fixable_when_semver_group_requires_caret() {
+  #[tokio::test]
+  async fn exact_version_with_equals_prefix_should_be_fixable_when_semver_group_requires_caret() {
     // Reproduces issue #239
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
@@ -2687,8 +2681,8 @@ mod custom_types {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -2710,8 +2704,8 @@ mod custom_types {
     ]);
   }
 
-  #[test]
-  fn exact_version_without_prefix_should_be_fixable_when_semver_group_requires_caret() {
+  #[tokio::test]
+  async fn exact_version_without_prefix_should_be_fixable_when_semver_group_requires_caret() {
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
         "name": "pkg-a",
@@ -2723,8 +2717,8 @@ mod custom_types {
       .with_semver_group(json!({
         "range": "^"
       }))
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
 
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
@@ -2750,8 +2744,8 @@ mod custom_types {
 mod catalogs {
   use super::*;
 
-  #[test]
-  fn catalog_and_semver_mismatch() {
+  #[tokio::test]
+  async fn catalog_and_semver_mismatch() {
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
         "name": "package-a",
@@ -2762,8 +2756,8 @@ mod catalogs {
           "mix": "catalog:"
         }
       })])
-      .build();
-    visit_groups(&ctx, &[]);
+      .run()
+      .await;
     expect(&ctx).to_have_instances(vec![
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),

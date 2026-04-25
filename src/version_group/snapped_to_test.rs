@@ -5,18 +5,12 @@ use {
       builder::TestBuilder,
       expect::{expect, ExpectedInstance},
     },
-    version_group::visit_groups,
   },
   serde_json::json,
 };
 
-#[test]
-fn instance_identical_to_snapped_to_and_has_no_semver_group() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_identical_to_snapped_to_and_has_no_semver_group() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -32,9 +26,13 @@ fn instance_identical_to_snapped_to_and_has_no_semver_group() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -71,13 +69,8 @@ fn instance_identical_to_snapped_to_and_has_no_semver_group() {
   ]);
 }
 
-#[test]
-fn instance_has_different_version_to_snapped_to_and_has_no_semver_group() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_has_different_version_to_snapped_to_and_has_no_semver_group() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -93,9 +86,13 @@ fn instance_has_different_version_to_snapped_to_and_has_no_semver_group() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -132,13 +129,8 @@ fn instance_has_different_version_to_snapped_to_and_has_no_semver_group() {
   ]);
 }
 
-#[test]
-fn instance_has_same_version_number_as_snapped_to_but_a_different_range_and_has_no_semver_group() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_has_same_version_number_as_snapped_to_but_a_different_range_and_has_no_semver_group() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -154,9 +146,13 @@ fn instance_has_same_version_number_as_snapped_to_but_a_different_range_and_has_
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -193,13 +189,8 @@ fn instance_has_same_version_number_as_snapped_to_but_a_different_range_and_has_
   ]);
 }
 
-#[test]
-fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_compatible_semver_group() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_compatible_semver_group() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -216,9 +207,13 @@ fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_co
       }),
     ])
     .with_semver_group(json!({"packages": ["follower"], "range": "~"}))
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -255,13 +250,8 @@ fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_co
   ]);
 }
 
-#[test]
-fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but_compatible_semver_group() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but_compatible_semver_group() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -278,9 +268,13 @@ fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but
       }),
     ])
     .with_semver_group(json!({"packages": ["follower"], "range": "^"}))
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -317,13 +311,8 @@ fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but
   ]);
 }
 
-#[test]
-fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_incompatible_semver_group() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_incompatible_semver_group() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -340,9 +329,13 @@ fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_in
       }),
     ])
     .with_semver_group(json!({"packages": ["follower"], "range": "<"}))
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -379,13 +372,8 @@ fn instance_has_same_version_number_as_snapped_to_but_matches_a_different_but_in
   ]);
 }
 
-#[test]
-fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but_incompatible_semver_group() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but_incompatible_semver_group() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -402,9 +390,13 @@ fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but
       }),
     ])
     .with_semver_group(json!({"packages": ["follower"], "range": "<"}))
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -441,13 +433,8 @@ fn instance_has_same_version_number_as_snapped_to_but_mismatches_a_different_but
   ]);
 }
 
-#[test]
-fn instance_cannot_find_a_snapped_to_version() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_cannot_find_a_snapped_to_version() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -462,9 +449,13 @@ fn instance_cannot_find_a_snapped_to_version() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -493,12 +484,8 @@ fn instance_cannot_find_a_snapped_to_version() {
   ]);
 }
 
-#[test]
-fn instance_is_in_a_snapped_to_group_and_is_itself_a_snapped_to_target() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn instance_is_in_a_snapped_to_group_and_is_itself_a_snapped_to_target() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -514,9 +501,12 @@ fn instance_is_in_a_snapped_to_group_and_is_itself_a_snapped_to_target() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -553,11 +543,8 @@ fn instance_is_in_a_snapped_to_group_and_is_itself_a_snapped_to_target() {
   ]);
 }
 
-#[test]
-fn refuses_to_snap_local_version_to_another_target() {
-  let vg = json!({
-    "snapTo": ["package-b"]
-  });
+#[tokio::test]
+async fn refuses_to_snap_local_version_to_another_target() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -572,9 +559,11 @@ fn refuses_to_snap_local_version_to_another_target() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "snapTo": ["package-b"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(RefuseToSnapLocal),
@@ -603,13 +592,8 @@ fn refuses_to_snap_local_version_to_another_target() {
   ]);
 }
 
-#[test]
-fn workspace_star_identical_to_snapped_to_target() {
-  let vg = json!({
-    "dependencies": ["localpkg"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn workspace_star_identical_to_snapped_to_target() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -625,9 +609,13 @@ fn workspace_star_identical_to_snapped_to_target() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -664,13 +652,8 @@ fn workspace_star_identical_to_snapped_to_target() {
   ]);
 }
 
-#[test]
-fn workspace_star_differs_from_workspace_with_embedded_version() {
-  let vg = json!({
-    "dependencies": ["localpkg"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn workspace_star_differs_from_workspace_with_embedded_version() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -686,9 +669,13 @@ fn workspace_star_differs_from_workspace_with_embedded_version() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -725,13 +712,8 @@ fn workspace_star_differs_from_workspace_with_embedded_version() {
   ]);
 }
 
-#[test]
-fn workspace_caret_identical_to_snapped_to_target() {
-  let vg = json!({
-    "dependencies": ["localpkg"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn workspace_caret_identical_to_snapped_to_target() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -747,9 +729,13 @@ fn workspace_caret_identical_to_snapped_to_target() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -786,13 +772,8 @@ fn workspace_caret_identical_to_snapped_to_target() {
   ]);
 }
 
-#[test]
-fn workspace_tilde_identical_to_snapped_to_target() {
-  let vg = json!({
-    "dependencies": ["localpkg"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn workspace_tilde_identical_to_snapped_to_target() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -808,9 +789,13 @@ fn workspace_tilde_identical_to_snapped_to_target() {
         }
       }),
     ])
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["localpkg"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
@@ -850,13 +835,8 @@ fn workspace_tilde_identical_to_snapped_to_target() {
 /// Same bug as preferred_semver: when version differs from snap target AND a
 /// semver group exists, the fix target should apply the semver group's range
 /// instead of inheriting the snap target's range.
-#[test]
-fn differs_to_snap_target_should_apply_semver_group_range() {
-  let vg = json!({
-    "dependencies": ["foo"],
-    "packages": ["follower"],
-    "snapTo": ["leader"]
-  });
+#[tokio::test]
+async fn differs_to_snap_target_should_apply_semver_group_range() {
   let ctx = TestBuilder::new()
     .with_packages(vec![
       json!({
@@ -873,9 +853,13 @@ fn differs_to_snap_target_should_apply_semver_group_range() {
       }),
     ])
     .with_semver_group(json!({"packages": ["follower"], "range": ""}))
-    .with_version_group(vg.clone())
-    .build();
-  visit_groups(&ctx, &[vg]);
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "packages": ["follower"],
+      "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
       state: InstanceState::suspect(InvalidLocalVersion),
