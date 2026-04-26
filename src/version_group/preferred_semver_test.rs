@@ -1654,6 +1654,281 @@ mod highest_or_lowest {
       },
     ]);
   }
+
+  #[tokio::test]
+  async fn lowest_semver_with_semver_group_applies_preferred_range() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "pkg-a",
+          "dependencies": {
+            "foo": "^2.0.0"
+          }
+        }),
+        json!({
+          "name": "pkg-b",
+          "dependencies": {
+            "foo": "1.0.0"
+          }
+        }),
+      ])
+      .with_version_group(json!({
+        "preferVersion": "lowestSemver"
+      }))
+      .with_semver_group(json!({
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of pkg-a",
+        actual: "^2.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "pkg-b",
+        id: "pkg-b in /version of pkg-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /dependencies of pkg-b",
+        actual: "1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn gte_range_in_semver_group_with_local_package() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "version": "1.0.0"
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "package-a": "^1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
+        "range": ">="
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "^1.0.0",
+        expected: Some(">=1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn lte_range_in_semver_group_with_local_package() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "version": "1.0.0"
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "package-a": "~1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
+        "range": "<="
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "~1.0.0",
+        expected: Some("<=1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn gte_range_in_semver_group_with_highest_semver() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "^1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
+        "packages": ["package-b"],
+        "range": ">="
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some(">=1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "^1.0.0",
+        expected: Some(">=1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn lte_range_in_semver_group_with_highest_semver() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "foo": "~1.0.0"
+          }
+        }),
+      ])
+      .with_semver_group(json!({
+        "packages": ["package-b"],
+        "range": "<="
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "~1.0.0",
+        expected: Some("<=1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
 }
 
 mod non_semver {
@@ -2597,6 +2872,381 @@ mod registry_updates {
       ]);
     }
   }
+
+  #[tokio::test]
+  async fn registry_fold_keeps_previous_preferred_when_later_version_is_lower() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "dependencies": {
+          "wat": "1.0.0"
+        }
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.0.0", "3.0.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("3.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn registry_update_skips_non_semver_specifier_in_same_dep_group() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "semver-dep": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "git-dep": "git+ssh://git@github.com/foo/bar.git"
+          }
+        }),
+      ])
+      .with_registry_updates(json!({
+        "semver-dep": ["1.0.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "semver-dep",
+        id: "semver-dep in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsNonSemverButIdentical),
+        dependency_name: "git-dep",
+        id: "git-dep in /dependencies of package-b",
+        actual: "git+ssh://git@github.com/foo/bar.git",
+        expected: Some("git+ssh://git@github.com/foo/bar.git"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn same_dep_different_versions_across_packages() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "wat": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "wat": "2.0.0"
+          }
+        }),
+      ])
+      .with_registry_updates(json!({
+        "wat": ["1.0.0", "2.0.0", "3.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("3.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-b",
+        actual: "2.0.0",
+        expected: Some("3.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn different_deps_across_packages() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "foo": "1.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "bar": "1.0.0"
+          }
+        }),
+      ])
+      .with_registry_updates(json!({
+        "foo": ["1.0.0", "2.0.0"],
+        "bar": ["1.0.0", "3.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "bar",
+        id: "bar in /dependencies of package-b",
+        actual: "1.0.0",
+        expected: Some("3.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn lowest_semver_ignores_registry_updates() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "dependencies": {
+            "wat": "2.0.0"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "wat": "1.0.0"
+          }
+        }),
+      ])
+      .with_version_group(json!({
+        "preferVersion": "lowestSemver"
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.0.0", "2.0.0", "3.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "2.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-b",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn stable_installed_filters_out_prerelease_registry_updates() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "dependencies": {
+          "wat": "1.0.0"
+        }
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.0.0", "2.0.0", "2.0.0-beta.1"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn prerelease_installed_filters_out_stable_registry_updates() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "dependencies": {
+          "wat": "1.0.0-beta.1"
+        }
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.0.0-beta.1", "2.0.0", "2.0.0-beta.2"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.0.0-beta.1",
+        expected: Some("2.0.0-beta.2"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn no_eligible_registry_update_when_already_at_latest() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "dependencies": {
+          "wat": "2.0.0"
+        }
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.0.0", "1.5.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    // When registry data exists but no eligible update, the instance
+    // enters the registry branch but no update is applied. With a single
+    // instance, it remains in the default state.
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::Unknown,
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "2.0.0",
+        expected: None,
+        overridden: None,
+      },
+    ]);
+  }
 }
 
 mod custom_types {
@@ -2780,6 +3430,62 @@ mod catalogs {
         dependency_name: "mix",
         id: "mix in /devDependencies of package-a",
         actual: "catalog:",
+        expected: Some("catalog:"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn catalog_protocol_in_package_that_is_also_a_local_package() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({
+          "name": "package-a",
+          "version": "1.0.0",
+          "dependencies": {
+            "external-dep": "catalog:"
+          }
+        }),
+        json!({
+          "name": "package-b",
+          "dependencies": {
+            "external-dep": "2.0.0"
+          }
+        }),
+      ])
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalog),
+        dependency_name: "external-dep",
+        id: "external-dep in /dependencies of package-a",
+        actual: "catalog:",
+        expected: Some("catalog:"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToCatalog),
+        dependency_name: "external-dep",
+        id: "external-dep in /dependencies of package-b",
+        actual: "2.0.0",
         expected: Some("catalog:"),
         overridden: None,
       },

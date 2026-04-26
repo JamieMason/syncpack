@@ -317,10 +317,6 @@ impl PreferredSemverGroup {
                   FixableInstance::SemverRangeMismatch,
                   &instance.get_specifier_with_preferred_semver_range().unwrap(),
                 );
-              } else {
-                debug!("{L6}the preferred semver range will not satisfy the highest semver version");
-                debug!("{L7}mark as unfixable error");
-                instance.mark_conflict(SemverGroupAndVersionConflict::MismatchConflictsWithHighestOrLowestSemver);
               }
             } else if instance.already_equals(&highest_specifier) {
               debug!("{L5}it is identical to the highest semver version");
