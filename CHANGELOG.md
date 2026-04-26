@@ -1,5 +1,11 @@
 # Changelog
 
+## [14.3.1](https://github.com/JamieMason/syncpack/compare/14.3.0...14.3.1) (2026-04-26)
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([5a14a28](https://github.com/JamieMason/syncpack/commit/5a14a28e00273e2e96295494ad4873ee18a6fb4a))
+
 ## [14.3.0](https://github.com/JamieMason/syncpack/compare/14.2.1...14.3.0) (2026-03-29)
 
 ### Features
