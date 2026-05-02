@@ -9,7 +9,7 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
     group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
       let mut has_printed_dependency = false;
       dependency
-        .get_sorted_instances(&ctx.instances, &ctx.packages.all)
+        .get_sorted_instances(&ctx.instances, &ctx.sources.all)
         .filter(|(_, instance)| instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict))
         .for_each(|(_, instance)| {
           if !has_printed_group {

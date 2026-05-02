@@ -1,4 +1,16 @@
-use std::cmp::Ordering;
+use {
+  crate::specifier::Specifier,
+  std::{cmp::Ordering, rc::Rc},
+};
+
+/// Strip the Debug payload off an enum variant's `format!("{:?}", ..)` so
+/// `MissingFromCatalog { catalog_name: "default", winning_specifier: .. }`
+/// renders as `MissingFromCatalog` and `NotUsingCatalog("react18")` renders as
+/// `NotUsingCatalog`. Unit variants pass through unchanged.
+fn trim_variant_name(debug: String) -> String {
+  let cut = debug.find(['(', ' ', '{']).unwrap_or(debug.len());
+  debug[..cut].to_string()
+}
 
 /// The state of a dependency instance after validation.
 #[derive(Clone, Debug)]
@@ -55,13 +67,13 @@ impl InstanceState {
   pub fn get_name(&self) -> String {
     match self {
       InstanceState::Unknown => "Unknown".to_string(),
-      InstanceState::Valid(variant) => format!("{variant:?}"),
+      InstanceState::Valid(variant) => trim_variant_name(format!("{variant:?}")),
       InstanceState::Invalid(variant) => match variant {
-        InvalidInstance::Fixable(variant) => format!("{variant:?}"),
-        InvalidInstance::Conflict(variant) => format!("{variant:?}"),
-        InvalidInstance::Unfixable(variant) => format!("{variant:?}"),
+        InvalidInstance::Fixable(variant) => trim_variant_name(format!("{variant:?}")),
+        InvalidInstance::Conflict(variant) => trim_variant_name(format!("{variant:?}")),
+        InvalidInstance::Unfixable(variant) => trim_variant_name(format!("{variant:?}")),
       },
-      InstanceState::Suspect(variant) => format!("{variant:?}"),
+      InstanceState::Suspect(variant) => trim_variant_name(format!("{variant:?}")),
     }
   }
 
@@ -136,6 +148,9 @@ impl Ord for InstanceState {
 pub enum ValidInstance {
   /// - ✓ Instance uses the catalog: protocol and wins out
   IsCatalog,
+  /// - ✓ Instance is a catalog definition in pnpm-workspace.yaml or root package.json
+  /// - ✓ Zero or more siblings use the catalog: protocol for this dependency
+  IsCatalogDefinition,
   /// - ✓ Instance is configured to be ignored by Syncpack
   IsIgnored,
   /// - ✓ Instance is a local package and its version is valid
@@ -193,6 +208,24 @@ pub enum FixableInstance {
   /// - ✘ Instance does not use the catalog: protocol
   /// - ! catalog: protocol wins
   DiffersToCatalog,
+  /// - ✓ Instance is in a catalog version group
+  /// - ✓ Instance's dependency is defined in exactly one catalog
+  /// - ✘ Instance does not use the catalog: protocol
+  /// - ! Fix: replace specifier with `catalog:` or `catalog:{name}`
+  /// - String carries the target catalog name (`"default"` for the unnamed catalog).
+  NotUsingCatalog(String),
+  /// - ✓ Instance is in a catalog version group
+  /// - ✓ One catalog (or zero — implicit "default") exists in the project
+  /// - ✘ Instance's dependency is not defined in any catalog
+  /// - ✘ Instance does not use the catalog: protocol
+  /// - ! Fix: add dependency to the catalog and replace specifier with catalog:
+  /// - `catalog_name` carries the target catalog (`"default"` for the unnamed catalog)
+  /// - `winning_specifier` carries the value to enshrine in the catalog (resolved at visit time: unique value when all-identical, highest
+  ///   semver otherwise)
+  MissingFromCatalog {
+    catalog_name: String,
+    winning_specifier: Rc<Specifier>,
+  },
   /// - ✘ Instance mismatches the version of its locally-developed package
   DiffersToLocal,
   /// - ✘ Instance mismatches highest/lowest semver in its group
@@ -262,6 +295,23 @@ pub enum UnfixableInstance {
   /// - ? Crossing a major version boundary is unsafe
   /// - ? We cannot know which MAJOR the user wants and have to ask them
   SameMinorHasMajorMismatch,
+  /// - ✓ Instance is in a catalog version group
+  /// - ✓ MissingFromCatalog applies to multiple instances of the same dep
+  /// - ✘ Their specifiers differ AND at least one is non-semver
+  /// - ? Syncpack cannot pick which specifier to enshrine in the catalog
+  /// - String carries the target catalog name (`"default"` for the unnamed catalog).
+  MissingFromCatalogAndNonSemverMismatch(String),
+  /// - ✓ Instance is in a catalog version group
+  /// - ✓ Two or more catalogs exist in the project
+  /// - ✓ Instance's dependency is defined in zero OR two-or-more of those catalogs
+  /// - ✘ Instance does not use the catalog: protocol
+  /// - ? Syncpack cannot determine which catalog the dependency belongs to
+  NotUsingCatalogAndCatalogUnknown,
+  /// - ✓ Instance is in a catalog version group
+  /// - ✓ Project has 0 catalogs
+  /// - ✘ `Disk.package_manager` is npm/yarn/Unknown — no recognized lock file
+  /// - ? Cannot infer whether to create pnpm-workspace.yaml or root package.json /catalog
+  CannotInferCatalogFile,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -317,4 +367,12 @@ pub enum SuspectInstance {
   /// - ✘ An instance of the same dependency was not found in any of the snapped to packages
   /// - ! This is a misconfiguration resulting in this instance being orphaned
   DependsOnMissingSnapTarget,
+  /// - ✓ Instance uses the catalog: protocol (bare `catalog:` or `catalog:name`)
+  /// - ✘ The referenced catalog does not exist OR the dep name is not defined in it
+  DependsOnMissingCatalogDefinition,
+  /// - ✓ Instance is in a catalog version group
+  /// - ✓ Instance is a local instance (its own package.json `/version` property)
+  /// - ✘ Local instances cannot use the catalog: protocol
+  /// - ! Reconfigure version groups to exclude local instances from the catalog group
+  RefuseToCatalogLocal,
 }

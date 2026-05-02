@@ -1,0 +1,15 @@
+---
+title: MissingFromCatalog
+status: fixable
+description: Dependency should be defined in a catalog but is not, and instances must use the catalog protocol
+---
+
+## When this happens
+
+- ✓ Instance is in a [Catalog](VERSION_GROUP_CATALOG) version group
+- ✓ One catalog (or zero — implicit `"default"`) exists in the project
+- ✘ Instance's dependency is not defined in any catalog
+- ✘ Instance does not use the `catalog:` protocol
+- ! Fix: add dependency to the catalog and replace specifier with `catalog:`
+
+The specifier added to the catalog is the unique value when all instances are identical, or the highest semver when all instances are semver.

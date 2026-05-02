@@ -8,33 +8,27 @@ use {
 
 #[derive(Debug)]
 pub struct ExpectedInstance {
-  /// The original version on disk
+  /// Original specifier on disk.
   pub actual: &'static str,
-  /// eg "react-dom"
   pub dependency_name: &'static str,
-  /// The specifier syncpack determined the instance should have
+  /// Specifier syncpack determined the instance should have.
   pub expected: Option<&'static str>,
-  /// The instance id
   pub id: &'static str,
-  /// In the case of a semver group being overridden
+  /// Set when a semver group overrode the version group's choice.
   pub overridden: Option<&'static str>,
-  /// The error or valid state syncpack determined the instance is in
   pub state: InstanceState,
 }
 
 #[derive(Debug)]
 pub struct ActualInstance {
-  /// The original version on disk
+  /// Original specifier on disk.
   pub actual: String,
-  /// eg "react-dom"
   pub dependency_name: String,
-  /// The specifier syncpack determined the instance should have
+  /// Specifier syncpack determined the instance should have.
   pub expected: Option<String>,
-  /// The instance id
   pub id: String,
-  /// In the case of a semver group being overridden
+  /// Set when a semver group overrode the version group's choice.
   pub overridden: Option<String>,
-  /// The error or valid state syncpack determined the instance is in
   pub state: InstanceState,
 }
 

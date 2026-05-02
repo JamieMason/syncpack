@@ -1,0 +1,13 @@
+---
+title: NotUsingCatalogAndCatalogUnknown
+status: unfixable
+description: Dependency should use the catalog protocol but Syncpack cannot determine which catalog it belongs to
+---
+
+## When this happens
+
+- ✓ Instance is in a [Catalog](VERSION_GROUP_CATALOG) version group
+- ✓ Two or more catalogs exist in the project
+- ✓ Instance's dependency is defined in zero OR two-or-more of those catalogs
+- ✘ Instance does not use the `catalog:` protocol
+- ? Syncpack cannot determine which catalog the dependency belongs to

@@ -1,14 +1,14 @@
 use {
   crate::{
-    cli::SortBy,
+    cli::{SortBy, UpdateTarget},
     context::Context,
     dependency::UpdateUrl,
     errors::UnsupportedConfigError,
     group_selector::GroupSelector,
     instance::{Instance, InstanceIdx, InstanceState},
-    package_json::PackageJson,
-    packages::Packages,
     registry::updates::RegistryUpdates,
+    source::Source,
+    sources::Sources,
     specifier::Specifier,
   },
   itertools::Itertools,
@@ -24,6 +24,17 @@ use {
 };
 
 mod banned;
+#[cfg(test)]
+#[path = "version_group/bun_catalog_test.rs"]
+mod bun_catalog_test;
+mod catalog;
+mod catalog_defs;
+#[cfg(test)]
+#[path = "version_group/catalog_defs_test.rs"]
+mod catalog_defs_test;
+#[cfg(test)]
+#[path = "version_group/catalog_test.rs"]
+mod catalog_test;
 mod ignored;
 mod pinned;
 mod preferred_semver;
@@ -64,14 +75,9 @@ pub struct AnyVersionGroup {
 }
 
 pub use {
-  banned::BannedGroup, ignored::IgnoredGroup, pinned::PinnedGroup, preferred_semver::PreferredSemverGroup, same_minor::SameMinorGroup,
-  same_range::SameRangeGroup, snapped_to::SnappedToGroup,
+  banned::BannedGroup, catalog::CatalogGroup, catalog_defs::CatalogDefsGroup, ignored::IgnoredGroup, pinned::PinnedGroup,
+  preferred_semver::PreferredSemverGroup, same_minor::SameMinorGroup, same_range::SameRangeGroup, snapped_to::SnappedToGroup,
 };
-
-// Logger init is handled by the #[ctor::ctor] in visit_packages.rs
-// — only one per test binary is needed.
-
-// ── Indent constants for debug logging ──────────────────────────────────────
 
 pub(crate) const L1: &str = "  ";
 pub(crate) const L2: &str = "    ";
@@ -84,15 +90,12 @@ pub(crate) const L8: &str = "                ";
 pub(crate) const L9: &str = "                  ";
 pub(crate) const L10: &str = "                    ";
 
-// ── DependencyCore ──────────────────────────────────────────────────────────
-
 #[derive(Debug)]
 pub struct DependencyCore {
   pub expected: RefCell<Option<Rc<Specifier>>>,
   pub has_alias: bool,
   pub instances: Vec<InstanceIdx>,
   pub local_instance: RefCell<Option<InstanceIdx>>,
-  pub matches_cli_filter: bool,
   pub internal_name: String,
 }
 
@@ -103,13 +106,12 @@ impl DependencyCore {
       has_alias: false,
       instances: vec![],
       local_instance: RefCell::new(None),
-      matches_cli_filter: false,
       internal_name,
     }
   }
 
   pub fn get_update_url(&self, arena: &[Instance]) -> Option<UpdateUrl> {
-    if self.matches_cli_filter && self.internal_name_is_supported() {
+    if self.internal_name_is_supported() {
       self.instances.iter().find_map(|idx| arena[idx.0].get_update_url())
     } else {
       None
@@ -177,17 +179,13 @@ impl DependencyCore {
   }
 
   pub fn get_instances<'a>(&'a self, arena: &'a [Instance]) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
-    self
-      .instances
-      .iter()
-      .map(move |idx| (*idx, &arena[idx.0]))
-      .filter(|(_, instance)| instance.descriptor.matches_cli_filter)
+    self.instances.iter().map(move |idx| (*idx, &arena[idx.0]))
   }
 
   pub fn get_sorted_instances<'a>(
     &'a self,
     instances: &'a [Instance],
-    packages: &'a [PackageJson],
+    sources: &'a [Source],
   ) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
     self.get_instances(instances).sorted_by(|(_, a), (_, b)| {
       if a.is_valid() && !b.is_valid() {
@@ -204,17 +202,15 @@ impl DependencyCore {
       }
       let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
       if matches!(specifier_order, Ordering::Equal) {
-        packages[a.descriptor.package_idx.0]
-          .name
-          .cmp(&packages[b.descriptor.package_idx.0].name)
+        let a_name = sources[a.source_idx().0].name();
+        let b_name = sources[b.source_idx().0].name();
+        a_name.cmp(b_name)
       } else {
         specifier_order
       }
     })
   }
 }
-
-// ── Shared add_instance helper ──────────────────────────────────────────────
 
 pub(crate) fn add_instance_to_dependencies(dependencies: &mut BTreeMap<String, DependencyCore>, idx: InstanceIdx, instance: &Instance) {
   let dep = dependencies
@@ -227,9 +223,42 @@ pub(crate) fn add_instance_to_dependencies(dependencies: &mut BTreeMap<String, D
   if instance.descriptor.name != dep.internal_name {
     dep.has_alias = true;
   }
-  if instance.descriptor.matches_cli_filter {
-    dep.matches_cli_filter = true;
-  }
+}
+
+/// Pick the highest eligible registry update for each unique installed
+/// specifier of `dep`, keyed by the update specifier's raw string. Shared by
+/// `PreferredSemverGroup` and `CatalogDefsGroup`.
+pub(super) fn eligible_registry_updates(
+  dep: &DependencyCore,
+  arena: &[Instance],
+  registry_updates: &RegistryUpdates,
+  target: &UpdateTarget,
+) -> Option<HashMap<String, Vec<Rc<Specifier>>>> {
+  registry_updates.updates_by_internal_name.get(&dep.internal_name).map(|updates| {
+    let mut specifiers_by_eligible_update: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
+    dep.get_unique_specifiers(arena).iter().for_each(|installed| {
+      updates
+        .iter()
+        .filter(|update| update.is_eligible_update_for(installed, target))
+        .filter(|update| installed.has_same_release_channel_as(update))
+        .fold(None, |preferred, specifier| match preferred {
+          None => Some(specifier),
+          Some(preferred) => {
+            if specifier.get_node_version().cmp(&preferred.get_node_version()) == Ordering::Greater {
+              Some(specifier)
+            } else {
+              Some(preferred)
+            }
+          }
+        })
+        .inspect(|highest_update| {
+          let key = highest_update.get_raw().to_string();
+          let affected = specifiers_by_eligible_update.entry(key).or_default();
+          affected.push(Rc::clone(installed));
+        });
+    });
+    specifiers_by_eligible_update
+  })
 }
 
 #[cfg(test)]
@@ -267,8 +296,6 @@ mod dependency_core_test {
   }
 }
 
-// ── Trait ────────────────────────────────────────────────────────────────────
-
 pub trait VersionGroupBehavior {
   fn selector(&self) -> &GroupSelector;
   fn dependencies(&self) -> &BTreeMap<String, DependencyCore>;
@@ -276,11 +303,16 @@ pub trait VersionGroupBehavior {
   fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>);
 }
 
-// ── Enum ────────────────────────────────────────────────────────────────────
-
 #[derive(Debug)]
 pub enum VersionGroup {
   Banned(BannedGroup),
+  /// User-opt-in `policy: "catalog"` group. Enforces that claimed instances
+  /// either ARE catalog definitions or use the `catalog:` protocol.
+  Catalog(CatalogGroup),
+  /// Auto-injected catch-all that claims catalog definition instances. Sits
+  /// one slot above the existing `PreferredSemver` catch-all so user-defined
+  /// groups can still claim catalog defs first (first-match-wins).
+  CatalogDefs(CatalogDefsGroup),
   Ignored(IgnoredGroup),
   Pinned(PinnedGroup),
   PreferredSemver(PreferredSemverGroup),
@@ -293,6 +325,8 @@ impl VersionGroupBehavior for VersionGroup {
   fn selector(&self) -> &GroupSelector {
     match self {
       Self::Banned(g) => &g.selector,
+      Self::Catalog(g) => &g.selector,
+      Self::CatalogDefs(g) => &g.selector,
       Self::Ignored(g) => &g.selector,
       Self::Pinned(g) => &g.selector,
       Self::PreferredSemver(g) => &g.selector,
@@ -305,6 +339,8 @@ impl VersionGroupBehavior for VersionGroup {
   fn dependencies(&self) -> &BTreeMap<String, DependencyCore> {
     match self {
       Self::Banned(g) => &g.dependencies,
+      Self::Catalog(g) => &g.dependencies,
+      Self::CatalogDefs(g) => &g.dependencies,
       Self::Ignored(g) => &g.dependencies,
       Self::Pinned(g) => &g.dependencies,
       Self::PreferredSemver(g) => &g.dependencies,
@@ -317,6 +353,8 @@ impl VersionGroupBehavior for VersionGroup {
   fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
     match self {
       Self::Banned(g) => g.add_instance(idx, instance),
+      Self::Catalog(g) => g.add_instance(idx, instance),
+      Self::CatalogDefs(g) => g.add_instance(idx, instance),
       Self::Ignored(g) => g.add_instance(idx, instance),
       Self::Pinned(g) => g.add_instance(idx, instance),
       Self::PreferredSemver(g) => g.add_instance(idx, instance),
@@ -329,6 +367,8 @@ impl VersionGroupBehavior for VersionGroup {
   fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
     match self {
       Self::Banned(g) => g.visit(ctx, registry_updates),
+      Self::Catalog(g) => g.visit(ctx, registry_updates),
+      Self::CatalogDefs(g) => g.visit(ctx, registry_updates),
       Self::Ignored(g) => g.visit(ctx, registry_updates),
       Self::Pinned(g) => g.visit(ctx, registry_updates),
       Self::PreferredSemver(g) => g.visit(ctx, registry_updates),
@@ -343,6 +383,8 @@ impl VersionGroup {
   pub fn variant_label(&self) -> &str {
     match self {
       Self::Banned(_) => "Banned",
+      Self::Catalog(_) => "Catalog",
+      Self::CatalogDefs(_) => "CatalogDefs",
       Self::Ignored(_) => "Ignored",
       Self::Pinned(_) => "Pinned",
       Self::PreferredSemver(g) => {
@@ -363,19 +405,16 @@ impl VersionGroup {
   }
 
   pub fn get_sorted_dependencies(&self, sort: &SortBy) -> impl Iterator<Item = &DependencyCore> {
-    self
-      .dependencies()
-      .values()
-      .filter(|d| d.matches_cli_filter)
-      .sorted_by(|a, b| match sort {
-        SortBy::Count => b.instances.len().cmp(&a.instances.len()),
-        SortBy::Name => Ordering::Equal,
-      })
+    self.dependencies().values().sorted_by(|a, b| match sort {
+      SortBy::Count => b.instances.len().cmp(&a.instances.len()),
+      SortBy::Name => Ordering::Equal,
+    })
   }
 
   pub fn get_update_urls(&self, arena: &[Instance]) -> Option<Vec<UpdateUrl>> {
     match self {
       Self::PreferredSemver(g) if g.prefer_highest => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
+      Self::CatalogDefs(g) => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
       _ => None,
     }
   }
@@ -388,7 +427,7 @@ impl VersionGroup {
     })
   }
 
-  pub fn from_config(group: AnyVersionGroup, packages: &Packages) -> Result<Self, UnsupportedConfigError> {
+  pub fn from_config(group: AnyVersionGroup, sources: &Sources) -> Result<Self, UnsupportedConfigError> {
     let selector = GroupSelector::new(
       group.dependencies,
       group.dependency_types,
@@ -435,6 +474,11 @@ impl VersionGroup {
           dependencies: BTreeMap::new(),
           prefer_version,
         }));
+      } else if policy == "catalog" {
+        return Ok(Self::Catalog(CatalogGroup {
+          selector,
+          dependencies: BTreeMap::new(),
+        }));
       } else {
         return Err(UnsupportedConfigError::InvalidVersionGroupPolicy(policy.clone()));
       }
@@ -446,7 +490,7 @@ impl VersionGroup {
         snap_to: snap_to
           .iter()
           .flat_map(|name| {
-            packages.get_by_name(name).or_else(|| {
+            sources.find_package(name).or_else(|| {
               warn!("Invalid Snapped To Version Group: No package.json file found with a name property of '{name}'");
               None
             })
@@ -469,8 +513,6 @@ impl VersionGroup {
   }
 }
 
-// ── Test helpers ────────────────────────────────────────────────────────────
-
 #[cfg(test)]
 pub(crate) fn visit_groups(ctx: &Context, version_group_configs: &[serde_json::Value]) {
   visit_groups_with_registry(ctx, version_group_configs, &None);
@@ -486,21 +528,19 @@ pub(crate) fn visit_groups_with_registry(
     .iter()
     .map(|json| {
       let cfg: AnyVersionGroup = serde_json::from_value(json.clone()).unwrap();
-      VersionGroup::from_config(cfg, &ctx.packages).unwrap()
+      VersionGroup::from_config(cfg, &ctx.sources).unwrap()
     })
     .collect();
   groups.push(VersionGroup::get_catch_all());
 
-  // Assign instances (first-match-wins)
   for (i, instance) in ctx.instances.iter().enumerate() {
     let idx = InstanceIdx(i);
-    let package_name = &ctx.packages.all[instance.descriptor.package_idx.0].name;
+    let package_name = ctx.sources.all[instance.source_idx().0].name();
     if let Some(group) = groups.iter_mut().find(|g| g.selector().can_add(&instance.descriptor, package_name)) {
       group.add_instance(idx, instance);
     }
   }
 
-  // Visit all groups, SnappedTo last
   let mut snapped_to_indices = Vec::new();
   let mut other_indices = Vec::new();
   for (i, group) in groups.iter().enumerate() {

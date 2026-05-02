@@ -4,8 +4,8 @@ use {
     context::Context,
     group_selector::GroupSelector,
     instance::{FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance},
-    packages::PackageIdx,
     registry::updates::RegistryUpdates,
+    sources::SourceIdx,
     specifier::Specifier,
   },
   log::debug,
@@ -20,7 +20,7 @@ mod snapped_to_test;
 pub struct SnappedToGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
-  pub snap_to: Vec<PackageIdx>,
+  pub snap_to: Vec<SourceIdx>,
 }
 
 impl SnappedToGroup {
@@ -31,8 +31,9 @@ impl SnappedToGroup {
   pub fn get_snapped_to_specifier(&self, dep: &DependencyCore, all_instances: &[Instance]) -> Option<Rc<Specifier>> {
     for instance in all_instances {
       if *instance.descriptor.internal_name == *dep.internal_name {
+        let instance_idx = instance.source_idx();
         for &snapped_to_idx in &self.snap_to {
-          if instance.descriptor.package_idx == snapped_to_idx {
+          if instance_idx == snapped_to_idx {
             return Some(Rc::clone(&instance.descriptor.specifier));
           }
         }

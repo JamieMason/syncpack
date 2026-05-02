@@ -39,20 +39,16 @@ pub enum RcfileError {
 }
 
 impl Rcfile {
-  pub fn from_disk<T: DiskIo>(disk: &Disk<'_, T>, cli: &Cli) -> Result<File<Rcfile>, RcfileError> {
+  pub fn from_disk<T: DiskIo>(disk: &Disk, io: &T, cli: &Cli) -> Result<File<Rcfile>, RcfileError> {
     let start = Instant::now();
 
     let from_json_path = |filepath: &Path| -> Option<Result<File<RawRcfile>, RcfileError>> {
-      disk
-        .io
-        .read_json_file::<RawRcfile>(filepath)
+      io.read_json_file::<RawRcfile>(filepath)
         .map(|res| res.map_err(RcfileError::DiskIoError))
     };
 
     let from_yaml_path = |filepath: &Path| -> Option<Result<File<RawRcfile>, RcfileError>> {
-      disk
-        .io
-        .read_yaml_file::<RawRcfile>(filepath)
+      io.read_yaml_typed::<RawRcfile>(filepath)
         .map(|res| res.map_err(RcfileError::DiskIoError))
     };
 
@@ -69,9 +65,7 @@ impl Rcfile {
         args.push("--eval");
         args.push(&nodejs_script);
 
-        disk
-          .io
-          .exec_node_command(&cli.cwd, &args)
+        io.exec_node_command(&disk.cwd, &args)
           .map_err(JsRcfileError::NodeJsError)
           .inspect(|stdout| {
             debug!("Raw output from {:?}: {}", filepath, stdout.trim());
@@ -89,6 +83,7 @@ impl Rcfile {
                 filepath: filepath.to_path_buf(),
                 formatting: detect_formatting(&value),
                 contents,
+                dirty: false,
               }),
             JsResult::Error {
               import_error,
@@ -119,7 +114,7 @@ impl Rcfile {
     };
 
     let from_package_json_config_property = || -> Option<Result<File<RawRcfile>, RcfileError>> {
-      disk.package_json_root.as_ref().and_then(|file| {
+      disk.package_json_root().and_then(|file| {
         file
           .contents
           .get("syncpack")
@@ -139,24 +134,25 @@ impl Rcfile {
                 filepath: file.filepath.clone(),
                 formatting: file.formatting.clone(),
                 contents,
+                dirty: false,
               })
           })
       })
     };
 
     let raw_rcfile = from_cli_option()
-      .or_else(|| from_json_path(&cli.cwd.join(".syncpackrc")))
-      .or_else(|| from_json_path(&cli.cwd.join(".syncpackrc.json")))
-      .or_else(|| from_yaml_path(&cli.cwd.join(".syncpackrc.yaml")))
-      .or_else(|| from_yaml_path(&cli.cwd.join(".syncpackrc.yml")))
-      .or_else(|| from_javascript_path(&cli.cwd.join(".syncpackrc.js")))
-      .or_else(|| from_javascript_path(&cli.cwd.join(".syncpackrc.ts")))
-      .or_else(|| from_javascript_path(&cli.cwd.join(".syncpackrc.mjs")))
-      .or_else(|| from_javascript_path(&cli.cwd.join(".syncpackrc.cjs")))
-      .or_else(|| from_javascript_path(&cli.cwd.join("syncpack.config.js")))
-      .or_else(|| from_javascript_path(&cli.cwd.join("syncpack.config.ts")))
-      .or_else(|| from_javascript_path(&cli.cwd.join("syncpack.config.mjs")))
-      .or_else(|| from_javascript_path(&cli.cwd.join("syncpack.config.cjs")))
+      .or_else(|| from_json_path(&disk.cwd.join(".syncpackrc")))
+      .or_else(|| from_json_path(&disk.cwd.join(".syncpackrc.json")))
+      .or_else(|| from_yaml_path(&disk.cwd.join(".syncpackrc.yaml")))
+      .or_else(|| from_yaml_path(&disk.cwd.join(".syncpackrc.yml")))
+      .or_else(|| from_javascript_path(&disk.cwd.join(".syncpackrc.js")))
+      .or_else(|| from_javascript_path(&disk.cwd.join(".syncpackrc.ts")))
+      .or_else(|| from_javascript_path(&disk.cwd.join(".syncpackrc.mjs")))
+      .or_else(|| from_javascript_path(&disk.cwd.join(".syncpackrc.cjs")))
+      .or_else(|| from_javascript_path(&disk.cwd.join("syncpack.config.js")))
+      .or_else(|| from_javascript_path(&disk.cwd.join("syncpack.config.ts")))
+      .or_else(|| from_javascript_path(&disk.cwd.join("syncpack.config.mjs")))
+      .or_else(|| from_javascript_path(&disk.cwd.join("syncpack.config.cjs")))
       .or_else(from_package_json_config_property);
 
     if let Some(Ok(file)) = raw_rcfile {
@@ -169,22 +165,30 @@ impl Rcfile {
         return Err(RcfileError::UnsupportedConfig(UnsupportedConfigErrors(config_errors)));
       }
 
-      if let Ok(rcfile) = Rcfile::try_from(raw_rcfile) {
-        debug!("Config discovery completed in {:?}", start.elapsed());
-        return Ok(File {
-          filepath,
-          formatting: file.formatting.clone(),
-          contents: rcfile,
-        });
+      match Rcfile::try_from(raw_rcfile) {
+        Ok(rcfile) => {
+          debug!("Config discovery completed in {:?}", start.elapsed());
+          return Ok(File {
+            filepath,
+            formatting: file.formatting.clone(),
+            contents: rcfile,
+            dirty: false,
+          });
+        }
+        Err(config_error) => {
+          debug!("Config discovery completed in {:?}", start.elapsed());
+          return Err(RcfileError::UnsupportedConfig(UnsupportedConfigErrors(vec![config_error])));
+        }
       }
     }
 
     debug!("No config file found, using defaults");
     debug!("Config discovery completed in {:?}", start.elapsed());
     Ok(File {
-      filepath: cli.cwd.join(".syncpackrc"),
+      filepath: disk.cwd.join(".syncpackrc"),
       formatting: DetectedFormatting::default(),
       contents: Rcfile::default(),
+      dirty: false,
     })
   }
 }

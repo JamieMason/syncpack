@@ -3319,7 +3319,6 @@ mod custom_types {
 
   #[tokio::test]
   async fn exact_version_with_equals_prefix_should_be_fixable_when_semver_group_requires_caret() {
-    // Reproduces issue #239
     let ctx = TestBuilder::new()
       .with_packages(vec![json!({
         "name": "pkg-a",
@@ -3486,6 +3485,356 @@ mod catalogs {
         dependency_name: "external-dep",
         id: "external-dep in /dependencies of package-b",
         actual: "2.0.0",
+        expected: Some("catalog:"),
+        overridden: None,
+      },
+    ]);
+  }
+}
+
+/// Catalog definitions should obey semver groups the same way regular
+/// dependencies do. Today `CatalogDefsGroup::visit` and the catalog short-
+/// circuits inside `PreferredSemverGroup::visit` ignore
+/// `instance.preferred_semver_range` and always mark defs as
+/// `IsCatalogDefinition`. These tests pin the target behaviour.
+mod catalog_defs_with_semver_group {
+  use super::*;
+
+  /// RED: the def's range (^) differs from the semver group's preferred range
+  /// (~). The def lives in the auto-injected `CatalogDefs` catch-all (no user
+  /// version group claims it). It should be `SemverRangeMismatch` fixable to
+  /// `~1.0.0`.
+  #[tokio::test]
+  async fn pnpm_catalog_def_alone_with_semver_group_mismatch() {
+    let yaml = "catalog:\n  foo: ^1.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({"name": "package-a", "version": "0.0.0"})])
+      .with_semver_group(json!({
+        "dependencyTypes": ["pnpmCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /catalog of pnpm-workspace.yaml",
+        actual: "^1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// GREEN regression: the def's range already matches the semver group's
+  /// preferred range. Stays `IsCatalogDefinition`.
+  #[tokio::test]
+  async fn pnpm_catalog_def_alone_with_semver_group_match() {
+    let yaml = "catalog:\n  foo: ~1.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({"name": "package-a", "version": "0.0.0"})])
+      .with_semver_group(json!({
+        "dependencyTypes": ["pnpmCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalogDefinition),
+        dependency_name: "foo",
+        id: "foo in /catalog of pnpm-workspace.yaml",
+        actual: "~1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// RED on def, GREEN on consumer: catalog def + a `catalog:` consumer. The
+  /// def is in `CatalogDefs` (range mismatch → `SemverRangeMismatch`). The
+  /// consumer is a regular dep type and falls through `PreferredSemverGroup`'s
+  /// catalog-protocol branch unchanged.
+  #[tokio::test]
+  async fn pnpm_catalog_def_with_semver_group_and_catalog_consumer() {
+    let yaml = "catalog:\n  foo: ^1.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": {"foo": "catalog:"}
+      })])
+      .with_semver_group(json!({
+        "dependencyTypes": ["pnpmCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /catalog of pnpm-workspace.yaml",
+        actual: "^1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalog),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "catalog:",
+        expected: Some("catalog:"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// RED on def, GREEN on consumer: catalog def + a literal-version consumer.
+  /// The semver group only matches `pnpmCatalog`, so the consumer (in
+  /// `dependencies`) is unaffected and stays `IsHighestOrLowestSemver`. The def
+  /// flips to `SemverRangeMismatch`.
+  #[tokio::test]
+  async fn pnpm_catalog_def_with_semver_group_and_literal_consumer() {
+    let yaml = "catalog:\n  foo: ^1.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": {"foo": "^1.0.0"}
+      })])
+      .with_semver_group(json!({
+        "dependencyTypes": ["pnpmCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /catalog of pnpm-workspace.yaml",
+        actual: "^1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "^1.0.0",
+        expected: Some("^1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// GREEN regression: the def's specifier is non-semver (`latest`), so
+  /// `with_range(~)` returns `None`. The new logic must fall through to
+  /// `IsCatalogDefinition` rather than panicking or producing junk.
+  #[tokio::test]
+  async fn pnpm_catalog_def_non_semver_with_semver_group_stays_valid() {
+    let yaml = "catalog:\n  foo: latest\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({"name": "package-a", "version": "0.0.0"})])
+      .with_semver_group(json!({
+        "dependencyTypes": ["pnpmCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalogDefinition),
+        dependency_name: "foo",
+        id: "foo in /catalog of pnpm-workspace.yaml",
+        actual: "latest",
+        expected: Some("latest"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// RED via `PreferredSemverGroup`: a user-defined version group with no
+  /// banned/policy/etc claims `pnpmCatalog` defs and routes them through
+  /// `PreferredSemverGroup::visit` instead of the auto-injected `CatalogDefs`
+  /// catch-all. The catalog short-circuit inside `PreferredSemverGroup` must
+  /// also enforce the semver group — covers the duplicated implementation.
+  #[tokio::test]
+  async fn pnpm_catalog_def_in_preferred_semver_group_with_semver_group_mismatch() {
+    let yaml = "catalog:\n  foo: ^1.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({"name": "package-a", "version": "0.0.0"})])
+      .with_version_group(json!({
+        "dependencyTypes": ["pnpmCatalog"]
+      }))
+      .with_semver_group(json!({
+        "dependencyTypes": ["pnpmCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /catalog of pnpm-workspace.yaml",
+        actual: "^1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// RED: bun parity for the def-alone scenario. Bun catalogs live in the root
+  /// package.json under `/catalog`; the dep type name is `bunCatalog`.
+  #[tokio::test]
+  async fn bun_catalog_def_alone_with_semver_group_mismatch() {
+    let ctx = TestBuilder::new()
+      .with_bun_catalogs(json!({
+        "name": "bun-root",
+        "catalog": {"foo": "^1.0.0"}
+      }))
+      .with_packages(vec![json!({"name": "package-a", "version": "0.0.0"})])
+      .with_semver_group(json!({
+        "dependencyTypes": ["bunCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "bun-root",
+        id: "bun-root in /version of bun-root",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /catalog of bun-root",
+        actual: "^1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  /// RED on def, GREEN on consumer: bun parity for the catalog: consumer
+  /// scenario.
+  #[tokio::test]
+  async fn bun_catalog_def_with_semver_group_and_catalog_consumer() {
+    let ctx = TestBuilder::new()
+      .with_bun_catalogs(json!({
+        "name": "bun-root",
+        "catalog": {"foo": "^1.0.0"}
+      }))
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": {"foo": "catalog:"}
+      })])
+      .with_semver_group(json!({
+        "dependencyTypes": ["bunCatalog"],
+        "range": "~"
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "bun-root",
+        id: "bun-root in /version of bun-root",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /catalog of bun-root",
+        actual: "^1.0.0",
+        expected: Some("~1.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalog),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
       },

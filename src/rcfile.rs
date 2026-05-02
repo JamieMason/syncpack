@@ -3,13 +3,16 @@ use {
     dependency::DependencyType,
     errors::UnsupportedConfigError,
     group_selector::GroupSelector,
-    packages::Packages,
-    version_group::{AnyVersionGroup, VersionGroup},
+    sources::Sources,
+    version_group::{AnyVersionGroup, CatalogDefsGroup, VersionGroup},
   },
   semver_group::{AnySemverGroup, SemverGroup},
   serde::Deserialize,
   serde_json::Value,
-  std::{collections::HashMap, mem},
+  std::{
+    collections::{BTreeMap, HashMap},
+    mem,
+  },
 };
 
 pub mod from_disk;
@@ -18,7 +21,7 @@ pub mod from_disk;
 mod rcfile_test;
 pub mod semver_group;
 
-pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) -> Vec<DependencyType> {
+pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) -> Result<Vec<DependencyType>, UnsupportedConfigError> {
   let default_types = HashMap::from([
     (
       String::from("dev"),
@@ -26,6 +29,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
         strategy: String::from("versionsByName"),
         name_path: None,
         path: String::from("devDependencies"),
+        source: None,
         unknown_fields: HashMap::new(),
       },
     ),
@@ -35,6 +39,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
         strategy: String::from("name~version"),
         name_path: Some(String::from("name")),
         path: String::from("version"),
+        source: None,
         unknown_fields: HashMap::new(),
       },
     ),
@@ -44,6 +49,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
         strategy: String::from("versionsByName"),
         name_path: None,
         path: String::from("overrides"),
+        source: None,
         unknown_fields: HashMap::new(),
       },
     ),
@@ -53,6 +59,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
         strategy: String::from("versionsByName"),
         name_path: None,
         path: String::from("peerDependencies"),
+        source: None,
         unknown_fields: HashMap::new(),
       },
     ),
@@ -62,6 +69,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
         strategy: String::from("versionsByName"),
         name_path: None,
         path: String::from("pnpm.overrides"),
+        source: None,
         unknown_fields: HashMap::new(),
       },
     ),
@@ -71,6 +79,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
         strategy: String::from("versionsByName"),
         name_path: None,
         path: String::from("dependencies"),
+        source: None,
         unknown_fields: HashMap::new(),
       },
     ),
@@ -80,6 +89,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
         strategy: String::from("versionsByName"),
         name_path: None,
         path: String::from("resolutions"),
+        source: None,
         unknown_fields: HashMap::new(),
       },
     ),
@@ -160,6 +170,11 @@ pub struct CustomType {
   pub strategy: String,
   pub name_path: Option<String>,
   pub path: String,
+  /// Which source file kind this dep type reads from. Defaults to
+  /// `"PackageJson"` when omitted. Recognised values: `"PackageJson"`,
+  /// `"PnpmWorkspace"`. Parsed via `SourceKind::parse` in
+  /// `DependencyType::new`.
+  pub source: Option<String>,
   #[serde(flatten)]
   pub unknown_fields: HashMap<String, Value>,
 }
@@ -303,7 +318,10 @@ impl RawRcfile {
   }
 }
 
-fn validate_raw_dep_types(raw: &[String], all: &[DependencyType]) -> Result<(), UnsupportedConfigError> {
+/// Validate dependency-type filter strings against the post-discovery list of
+/// dependency types. Used by `Context::create` after catalog dep types have
+/// been appended.
+pub fn validate_raw_dep_types(raw: &[String], all: &[DependencyType]) -> Result<(), UnsupportedConfigError> {
   for s in raw {
     let name = s.trim_start_matches('!');
     if name != "**" && !all.iter().any(|dt| dt.name == name) {
@@ -317,23 +335,22 @@ impl TryFrom<RawRcfile> for Rcfile {
   type Error = UnsupportedConfigError;
 
   fn try_from(raw: RawRcfile) -> Result<Self, UnsupportedConfigError> {
-    let all_dependency_types = compute_all_dependency_types(&raw.custom_types);
+    // Dep-type validation for `dependency_groups`, `semver_groups`, and
+    // `version_groups` is deferred to `Context::create` so user-referenced
+    // catalog dep types like `pnpmCatalog:react18` (which only exist after
+    // catalog discovery) resolve correctly.
+    let all_dependency_types = compute_all_dependency_types(&raw.custom_types)?;
     let mut dependency_groups = vec![];
     for dg in raw.dependency_groups {
       let selector = GroupSelector::new(dg.dependencies, dg.dependency_types, dg.alias_name, dg.packages, dg.specifier_types);
-      selector.validate_dependency_types(&all_dependency_types)?;
       dependency_groups.push(selector);
     }
     let mut semver_groups = vec![SemverGroup::get_exact_local_specifiers()];
     for group_config in raw.semver_groups {
       let semver_group = SemverGroup::from_config(group_config)?;
-      semver_group.selector.validate_dependency_types(&all_dependency_types)?;
       semver_groups.push(semver_group);
     }
     semver_groups.push(SemverGroup::get_catch_all());
-    for group in &raw.version_groups {
-      validate_raw_dep_types(&group.dependency_types, &all_dependency_types)?;
-    }
 
     Ok(Rcfile {
       dependency_groups,
@@ -383,12 +400,43 @@ impl Default for Rcfile {
 }
 
 impl Rcfile {
+  /// Names of catalog dep types currently registered in `all_dependency_types`
+  /// (e.g. `pnpmCatalog`, `bunCatalog`, `pnpmCatalog:react18`).
+  ///
+  /// Filters by the `is_catalog_definition` flag — set to `true` only for
+  /// built-in auto-generated catalog dep types. User `customTypes` named
+  /// like `pnpmCatalogLike` are NOT picked up.
+  pub(crate) fn catalog_dep_type_names(&self) -> Vec<String> {
+    self
+      .all_dependency_types
+      .iter()
+      .filter(|dt| dt.is_catalog_definition)
+      .map(|dt| dt.name.clone())
+      .collect()
+  }
+
+  #[cfg(test)]
+  pub(crate) fn catalog_dep_type_names_for_test(&self) -> Vec<String> {
+    self.catalog_dep_type_names()
+  }
+
   /// Create every version group defined in the rcfile.
-  pub fn get_version_groups(&mut self, packages: &Packages) -> Result<Vec<VersionGroup>, UnsupportedConfigError> {
+  ///
+  /// Auto-injects a `CatalogDefs` catch-all immediately before the default
+  /// `PreferredSemver` catch-all, but only when at least one catalog dep
+  /// type exists. Non-catalog projects see no injection.
+  pub fn get_version_groups(&mut self, sources: &Sources) -> Result<Vec<VersionGroup>, UnsupportedConfigError> {
     let mut all_groups: Vec<VersionGroup> = mem::take(&mut self.version_groups)
       .into_iter()
-      .map(|group_config| VersionGroup::from_config(group_config, packages))
+      .map(|group_config| VersionGroup::from_config(group_config, sources))
       .collect::<Result<Vec<_>, _>>()?;
+    let catalog_dep_type_names = self.catalog_dep_type_names();
+    if !catalog_dep_type_names.is_empty() {
+      all_groups.push(VersionGroup::CatalogDefs(CatalogDefsGroup {
+        selector: GroupSelector::new(vec![], catalog_dep_type_names, "Catalog Definitions".into(), vec![], vec![]),
+        dependencies: BTreeMap::new(),
+      }));
+    }
     all_groups.push(VersionGroup::get_catch_all());
     Ok(all_groups)
   }

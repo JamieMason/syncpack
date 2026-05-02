@@ -1,15 +1,18 @@
 use {
-  crate::{context::Context, errors::SyncpackError, instance::Instance},
+  crate::{context::Context, errors::SyncpackError, instance::Instance, source::Source},
   serde_json::{json, Value},
 };
 
 pub fn instance_to_json(ctx: &Context, instance: &Instance, variant_label: &str) -> Value {
-  let package = &ctx.packages.all[instance.descriptor.package_idx.0];
+  let package_path = match &ctx.sources.all[instance.source_idx().0] {
+    Source::Package { file_idx, .. } => ctx.disk.package_json_files[*file_idx].filepath.to_string_lossy().to_string(),
+    Source::PnpmYaml => "pnpm-workspace.yaml".to_string(),
+  };
   json!({
     "dependency": instance.descriptor.name,
     "dependencyGroup": instance.descriptor.internal_name,
     "dependencyType": instance.descriptor.dependency_type.name,
-    "package": package.file_path.to_string_lossy(),
+    "package": package_path,
     "property": instance.descriptor.dependency_type.path.split('/').filter(|part| !part.is_empty()).collect::<Vec<&str>>(),
     "strategy": instance.descriptor.dependency_type.strategy,
     "versionGroup": variant_label,
@@ -40,7 +43,7 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
       let variant_label = group.variant_label();
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dep| {
         dep
-          .get_sorted_instances(&ctx.instances, &ctx.packages.all)
+          .get_sorted_instances(&ctx.instances, &ctx.sources.all)
           .for_each(|(_, instance)| {
             let instance_json = instance_to_json(&ctx, instance, variant_label);
             println!("{}", serde_json::to_string(&instance_json).unwrap());

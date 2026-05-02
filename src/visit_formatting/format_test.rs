@@ -272,11 +272,9 @@ fn sorts_named_properties_first_then_the_rest_alphabetically() {
 
 #[test]
 fn sorts_dependencies_like_javascript_locale_compare() {
-  // This test demonstrates the specific sorting behavior that matches npm's use
-  // of localeCompare() as mentioned in GitHub issue #206.
-  //
-  // Scoped packages (@babel/*) should come before packages starting with
-  // numbers (5to6-codemod), which is different from ASCII sorting.
+  // Sort matches npm's `localeCompare()`: scoped packages (@babel/*) come
+  // before packages starting with numbers (5to6-codemod), which differs
+  // from ASCII sorting.
   assert_eq!(
     get_sorted_az(
       "dependencies",

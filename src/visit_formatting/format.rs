@@ -3,37 +3,36 @@
 mod format_test;
 
 use {
-  crate::{package_json::PackageJson, rcfile::Rcfile},
+  crate::rcfile::Rcfile,
   regex::Regex,
   serde_json::{self, Map, Value},
   std::{cmp::Ordering, collections::HashSet},
 };
 
 /// Use a shorthand format for the bugs URL when possible
-pub fn get_formatted_bugs(package: &PackageJson) -> Option<Value> {
-  package.get_prop("/bugs/url")
+pub fn get_formatted_bugs(contents: &Value) -> Option<Value> {
+  contents.pointer("/bugs/url").cloned()
 }
 
 /// Use a shorthand format for the repository URL when possible
-pub fn get_formatted_repository(package: &PackageJson) -> Option<Value> {
-  if !package.has_prop("/repository/directory") {
-    package.get_prop("/repository/url").and_then(|url| {
-      if let Value::String(url) = url {
-        Regex::new(r#".+github\.com/"#)
-          .ok()
-          .map(|re| re.replace(url.as_str(), "").to_string())
-          .map(Value::String)
-      } else {
-        None
-      }
-    })
-  } else {
-    None
+pub fn get_formatted_repository(contents: &Value) -> Option<Value> {
+  if contents.pointer("/repository/directory").is_some() {
+    return None;
   }
+  contents.pointer("/repository/url").and_then(|url| {
+    if let Value::String(url) = url {
+      Regex::new(r#".+github\.com/"#)
+        .ok()
+        .map(|re| re.replace(url.as_str(), "").to_string())
+        .map(Value::String)
+    } else {
+      None
+    }
+  })
 }
 
 /// Get sorted conditional exports and conditional exports subpaths
-pub fn get_sorted_exports(rcfile: &Rcfile, package: &PackageJson) -> Option<Value> {
+pub fn get_sorted_exports(rcfile: &Rcfile, contents: &Value) -> Option<Value> {
   /// Recursively visit and sort nested objects of the exports object
   fn sort_nested_objects(sort_exports: &Vec<String>, value: &mut Value) {
     if let Value::Object(obj) = value {
@@ -47,7 +46,7 @@ pub fn get_sorted_exports(rcfile: &Rcfile, package: &PackageJson) -> Option<Valu
       }
     }
   }
-  if let Some(exports) = package.contents().pointer("/exports") {
+  if let Some(exports) = contents.pointer("/exports") {
     let mut sorted_exports = exports.clone();
     sort_nested_objects(&rcfile.sort_exports, &mut sorted_exports);
     if !is_identical(exports, &sorted_exports) {
@@ -58,8 +57,8 @@ pub fn get_sorted_exports(rcfile: &Rcfile, package: &PackageJson) -> Option<Valu
 }
 
 /// Get a sorted version of the given property from package.json
-pub fn get_sorted_az(key: &str, package: &PackageJson) -> Option<Value> {
-  if let Some(value) = package.contents().pointer(format!("/{key}").as_str()) {
+pub fn get_sorted_az(key: &str, contents: &Value) -> Option<Value> {
+  if let Some(value) = contents.pointer(format!("/{key}").as_str()) {
     let mut sorted = value.clone();
     sort_alphabetically(&mut sorted);
     if !is_identical(value, &sorted) {
@@ -70,8 +69,8 @@ pub fn get_sorted_az(key: &str, package: &PackageJson) -> Option<Value> {
 }
 
 /// Get a new package.json with its keys sorted to match the rcfile
-pub fn get_sorted_first(rcfile: &Rcfile, package: &PackageJson) -> Option<Value> {
-  if let Value::Object(value) = package.contents() {
+pub fn get_sorted_first(rcfile: &Rcfile, contents: &Value) -> Option<Value> {
+  if let Value::Object(value) = contents {
     let mut sorted = value.clone();
     sort_keys_with_priority(&rcfile.sort_first, rcfile.sort_packages, &mut sorted);
     if !has_same_key_order(value, &sorted) {

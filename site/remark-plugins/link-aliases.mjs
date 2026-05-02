@@ -79,6 +79,7 @@ export function linkAliases() {
     STATUS_SAME_MINOR_MISMATCH: '/status/same-minor-mismatch',
 
     VERSION_GROUP_BANNED: '/version-groups/banned/',
+    VERSION_GROUP_CATALOG: '/version-groups/catalog/',
     VERSION_GROUP_HIGHEST_SEMVER: '/version-groups/highest-semver/',
     VERSION_GROUP_IGNORED: '/version-groups/ignored/',
     VERSION_GROUP_LOWEST_SEMVER: '/version-groups/lowest-semver/',

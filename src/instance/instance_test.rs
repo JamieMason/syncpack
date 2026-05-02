@@ -10,7 +10,7 @@ use {
 #[test]
 fn returns_correct_registry_update_url() {
   let config = test::mock::config_from_mock(json!({}));
-  let packages = test::mock::packages_from_mocks(vec![json!({
+  let (disk, sources) = test::mock::disk_and_sources_from_mocks(vec![json!({
     "name": "local-package",
     "version": "0.0.0",
     "dependencies": {
@@ -23,8 +23,7 @@ fn returns_correct_registry_update_url() {
     }
   })]);
 
-  let catalogs = None;
-  let ctx = Context::create(config, packages, catalogs).unwrap();
+  let ctx = Context::create(config, disk, sources, vec![]).unwrap();
 
   let get_update_url_by_name = |name: &str| {
     ctx

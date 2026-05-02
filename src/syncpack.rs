@@ -1,6 +1,6 @@
 use {
   crate::{
-    catalogs::CatalogsByName,
+    catalogs,
     cli::{Cli, ReporterKind, Subcommand},
     commands::{
       self, fix, fix_mismatches, format, json, lint, lint_semver_ranges, list, list_mismatches, prompt,
@@ -12,10 +12,10 @@ use {
     errors::SyncpackError,
     file_paths::get_file_paths,
     logger,
-    packages::Packages,
     rcfile::Rcfile,
     registry::{client::RegistryClient, updates::RegistryUpdates},
     source_patterns::get_source_patterns,
+    sources::Sources,
     visit_formatting::visit_formatting,
     visit_packages::visit_packages,
   },
@@ -34,22 +34,23 @@ pub async fn syncpack<D: DiskIo>(
   Ok((ctx, registry_updates))
 }
 
-/// Analyse the project, discover config and packages, and return a `Context`
-/// struct. All disk reading activity should happening during this phase.
+/// Analyse the project, discover config and packages, and return a `Context`.
+/// All disk reads happen here.
 fn analyse<D: DiskIo>(args: &[String], io: &D) -> Result<Context, SyncpackError> {
   let cli = Cli::parse(args)?;
   logger::configure(&cli);
-  let disk = Disk::from_workspace(io, &cli.cwd);
-  let rcfile = Rcfile::from_disk(&disk, &cli).map_err(SyncpackError::RcfileError)?;
+  let mut disk = Disk::from_workspace(io, &cli.cwd);
+  let rcfile = Rcfile::from_disk(&disk, io, &cli).map_err(SyncpackError::RcfileError)?;
   let config = Config {
     cli,
     rcfile: rcfile.contents,
   };
   let source_patterns = get_source_patterns(&config, &disk);
-  let file_paths = get_file_paths(&source_patterns, &disk);
-  let packages = Packages::from_config(&disk, &file_paths);
-  let catalogs: Option<CatalogsByName> = None; // catalogs::from_config(&config);
-  Context::create(config, packages, catalogs).map_err(SyncpackError::ContextError)
+  let file_paths = get_file_paths(&source_patterns, &disk, io);
+  disk.load_package_files(io, &file_paths);
+  let dep_types = catalogs::make_catalog_dep_types(&disk)?;
+  let sources = Sources::from_disk(&disk, &file_paths);
+  Context::create(config, disk, sources, dep_types).map_err(SyncpackError::ContextError)
 }
 
 /// Fetch updates from the npm registry, if applicable

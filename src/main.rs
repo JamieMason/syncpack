@@ -14,6 +14,9 @@ use {
 mod test;
 
 mod catalogs;
+#[cfg(test)]
+#[path = "catalogs_test.rs"]
+mod catalogs_test;
 mod cli;
 mod commands;
 mod context;
@@ -24,11 +27,11 @@ mod file_paths;
 mod group_selector;
 mod instance;
 mod logger;
-mod package_json;
-mod packages;
 mod rcfile;
 mod registry;
+mod source;
 mod source_patterns;
+mod sources;
 pub use syncpack_specifier::{self as specifier, semver_range};
 mod syncpack;
 mod version_group;

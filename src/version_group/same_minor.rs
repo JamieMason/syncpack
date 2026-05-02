@@ -69,7 +69,6 @@ impl SameMinorGroup {
       debug!("visit same minor version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
 
-      // ── Non-semver gate ──
       let any_has_semver = dep
         .instances
         .iter()
@@ -96,7 +95,6 @@ impl SameMinorGroup {
         continue;
       }
 
-      // ── Major-mismatch gate ──
       let all_same_major = dep
         .instances
         .first()
@@ -114,7 +112,6 @@ impl SameMinorGroup {
 
       debug!("{L2}all instances share the same MAJOR");
 
-      // ── Minor-match gate ──
       let all_same_minor = dep
         .instances
         .first()
@@ -127,7 +124,6 @@ impl SameMinorGroup {
 
       debug!("{L3}instances have differing MAJOR.MINOR");
 
-      // ── preferVersion branching ──
       if self.prefer_version.is_none() {
         debug!("{L4}preferVersion is not set");
         for &idx in &dep.instances {

@@ -29,6 +29,8 @@ pub enum UnsupportedConfigError {
   InvalidSemverGroup,
   #[error("Unrecognised version group policy: '{0}'")]
   InvalidVersionGroupPolicy(String),
+  #[error("customTypes.<name>.source: '{value}' is not a recognised source.\nUse 'PackageJson' or 'PnpmWorkspace'.")]
+  InvalidSource { value: String },
   #[error("Config property '{path}' is not recognised")]
   UnrecognisedProperty { path: String },
 }
@@ -49,4 +51,8 @@ pub enum SyncpackError {
   NoSubcommand,
   #[error(transparent)]
   RcfileError(RcfileError),
+  #[error(
+    "Bun catalog blocks were found at both top-level (/catalog or /catalogs/*) and nested under /workspaces (/workspaces/catalog or /workspaces/catalogs/*) in the root package.json. Only one location can be used."
+  )]
+  BunDualCatalogPath,
 }

@@ -1,8 +1,5 @@
 use {
-  crate::{
-    context::Config,
-    disk::{Disk, DiskIo},
-  },
+  crate::{context::Config, disk::Disk},
   log::debug,
 };
 
@@ -25,7 +22,7 @@ impl<T> DebugNone for Option<T> {
 
 /// Based on the user's config file and command line `--source` options, return
 /// the source glob patterns which should be used to resolve package.json files
-pub fn get_source_patterns<T: DiskIo>(config: &Config, disk: &Disk<'_, T>) -> Vec<String> {
+pub fn get_source_patterns(config: &Config, disk: &Disk) -> Vec<String> {
   get_cli_patterns(config)
     .debug_none("No --source patterns provided")
     .or_else(|| get_rcfile_patterns(config))
@@ -56,8 +53,8 @@ fn get_rcfile_patterns(config: &Config) -> Option<Vec<String>> {
 
 /// Look for source patterns in the `package.json` file in the locations
 /// searched by `npm` and `yarn`
-fn get_npm_and_yarn_patterns<T: DiskIo>(disk: &Disk<'_, T>) -> Option<Vec<String>> {
-  let contents = &disk.package_json_root.as_ref()?.contents;
+fn get_npm_and_yarn_patterns(disk: &Disk) -> Option<Vec<String>> {
+  let contents = &disk.package_json_root()?.contents;
   contents
     .pointer("/workspaces/packages")
     .or_else(|| contents.get("workspaces"))
@@ -66,7 +63,7 @@ fn get_npm_and_yarn_patterns<T: DiskIo>(disk: &Disk<'_, T>) -> Option<Vec<String
 }
 
 /// Look for source patterns in the `pnpm-workspace.yaml` file
-fn get_pnpm_patterns<T: DiskIo>(disk: &Disk<'_, T>) -> Option<Vec<String>> {
+fn get_pnpm_patterns(disk: &Disk) -> Option<Vec<String>> {
   disk
     .pnpm_workspace
     .as_ref()?
@@ -77,7 +74,7 @@ fn get_pnpm_patterns<T: DiskIo>(disk: &Disk<'_, T>) -> Option<Vec<String>> {
 }
 
 /// Look for source patterns in the `lerna.json` file
-fn get_lerna_patterns<T: DiskIo>(disk: &Disk<'_, T>) -> Option<Vec<String>> {
+fn get_lerna_patterns(disk: &Disk) -> Option<Vec<String>> {
   disk
     .lerna_json
     .as_ref()?

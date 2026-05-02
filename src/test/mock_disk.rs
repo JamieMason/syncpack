@@ -1,15 +1,20 @@
 use {
-  crate::disk::{detect_formatting, DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError},
+  crate::disk::{detect_formatting, DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile},
   std::{
+    cell::RefCell,
     collections::{HashMap, HashSet},
     path::{Path, PathBuf},
   },
 };
 
-/// In-memory filesystem for testing
+/// In-memory filesystem for testing.
+///
+/// Captures writes so tests can assert on serialised output. Reads
+/// pull from the mock files map.
 pub struct MockDiskIo {
   root: PathBuf,
   files: HashMap<PathBuf, String>,
+  writes: RefCell<HashMap<PathBuf, Vec<u8>>>,
 }
 
 impl MockDiskIo {
@@ -17,6 +22,7 @@ impl MockDiskIo {
     Self {
       root: std::env::current_dir().unwrap(),
       files: HashMap::new(),
+      writes: RefCell::new(HashMap::new()),
     }
   }
 
@@ -35,8 +41,28 @@ impl MockDiskIo {
     self.add_file(relative_path, raw);
   }
 
+  /// Inspect captured write bytes for a path. `None` if nothing was
+  /// written there.
+  pub fn written_bytes(&self, path: &Path) -> Option<Vec<u8>> {
+    self.writes.borrow().get(path).cloned()
+  }
+
+  /// Inspect captured write text for a path (UTF-8). `None` if nothing
+  /// was written.
+  pub fn written_text(&self, path: &Path) -> Option<String> {
+    self
+      .writes
+      .borrow()
+      .get(path)
+      .map(|bytes| String::from_utf8_lossy(bytes).into_owned())
+  }
+
   fn has_children(&self, dir: &Path) -> bool {
     self.files.keys().any(|f| f.starts_with(dir) && f != dir)
+  }
+
+  fn record_write(&self, path: &Path, bytes: Vec<u8>) {
+    self.writes.borrow_mut().insert(path.to_path_buf(), bytes);
   }
 }
 
@@ -72,6 +98,7 @@ impl DiskIo for MockDiskIo {
         filepath: filepath.to_path_buf(),
         formatting: detect_formatting(raw),
         contents,
+        dirty: false,
       })
     })
   }
@@ -82,25 +109,53 @@ impl DiskIo for MockDiskIo {
         filepath: filepath.to_path_buf(),
         formatting: detect_formatting(raw),
         contents: raw.clone(),
+        dirty: false,
       })
     })
   }
 
-  fn read_yaml_file<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>> {
+  fn read_yaml_file(&self, filepath: &Path) -> Option<Result<YamlFile, DiskIoError>> {
+    self.files.get(filepath).map(|raw| {
+      let formatting = detect_formatting(raw);
+      serde_yaml::from_str::<serde_yaml::Value>(raw)
+        .map_err(DiskIoError::YamlParse)
+        .map(|contents| YamlFile {
+          filepath: filepath.to_path_buf(),
+          formatting,
+          contents,
+          raw: raw.clone(),
+          patches: Vec::new(),
+          dirty: false,
+        })
+    })
+  }
+
+  fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>> {
     self.files.get(filepath).map(|raw| {
       serde_yaml::from_str::<V>(raw).map_err(DiskIoError::YamlParse).map(|contents| File {
         filepath: filepath.to_path_buf(),
         formatting: detect_formatting(raw),
         contents,
+        dirty: false,
       })
     })
   }
 
-  fn write_json_file<V: serde::ser::Serialize>(&self, _file: &File<V>) -> Result<(), DiskIoError> {
+  fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError> {
+    let buffer: Vec<u8> = Vec::new();
+    let indent = file.formatting.indent.replace("\\t", "\t");
+    let formatter = serde_json::ser::PrettyFormatter::with_indent(indent.as_bytes());
+    let mut serializer = serde_json::ser::Serializer::with_formatter(buffer, formatter);
+    file.contents.serialize(&mut serializer).map_err(DiskIoError::JsonSerialize)?;
+    let mut bytes = serializer.into_inner();
+    bytes.extend(file.formatting.newline.as_bytes());
+    self.record_write(&file.filepath, bytes);
     Ok(())
   }
 
-  fn write_yaml_file<V: serde::ser::Serialize>(&self, _file: File<V>) -> Result<(), DiskIoError> {
+  fn write_yaml_file(&self, file: &YamlFile) -> Result<(), DiskIoError> {
+    let bytes = crate::disk::render_yaml_bytes(file)?;
+    self.record_write(&file.filepath, bytes);
     Ok(())
   }
 }

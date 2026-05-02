@@ -8,12 +8,9 @@ use {
   std::cmp::Ordering,
 };
 
-/// Phase 2 of the 3-phase pipeline: Inspect Context (assign InstanceState).
-///
-/// Iterates version groups (SnappedTo last) and delegates to each group's
-/// `visit()` to assign InstanceState to every instance.
-///
-/// Takes ownership of Context and returns it with states assigned.
+/// Iterate version groups (SnappedTo last) and assign `InstanceState` to every
+/// instance via each group's `visit()`. Takes ownership of `Context` and
+/// returns it with states assigned.
 pub fn visit_packages(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context {
   ctx
     .version_groups

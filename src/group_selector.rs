@@ -50,7 +50,6 @@ pub struct GroupSelector {
   /// - "workspace-protocol" or -!workspace-protocol"
   pub include_specifier_types: Vec<String>,
   pub exclude_specifier_types: Vec<String>,
-  // Cache frequently accessed values
   has_dependency_type_filters: bool,
   has_specifier_type_filters: bool,
   has_dependency_filters: bool,
@@ -87,7 +86,6 @@ impl GroupSelector {
     let exclude_specifier_types = create_identifiers(false, &specifier_types);
 
     GroupSelector {
-      // Pre-compute boolean flags to avoid repeated empty checks
       has_dependency_type_filters: !include_dependency_types.is_empty() || !exclude_dependency_types.is_empty(),
       has_specifier_type_filters: !include_specifier_types.is_empty() || !exclude_specifier_types.is_empty(),
       has_dependency_filters: !include_dependencies.is_empty() || !exclude_dependencies.is_empty() || match_local || exclude_local,
@@ -118,27 +116,20 @@ impl GroupSelector {
   }
 
   pub fn can_add(&self, descriptor: &InstanceDescriptor, package_name: &str) -> bool {
-    // Order checks from cheapest/most-likely-to-fail to most expensive
-    // 1. Specifier types (often empty, cheap string comparison)
+    // Ordered cheapest/most-likely-to-fail first: specifier types, dep types,
+    // dep patterns, package patterns.
     if self.has_specifier_type_filters && !self.matches_specifier_types(descriptor) {
       return false;
     }
-
-    // 2. Dependency types (cheap string comparison)
     if self.has_dependency_type_filters && !self.matches_dependency_types(descriptor) {
       return false;
     }
-
-    // 3. Dependencies (pattern matching, optimised for common cases)
     if self.has_dependency_filters && !self.matches_dependencies(descriptor) {
       return false;
     }
-
-    // 4. Packages (pattern matching, most expensive)
     if self.has_package_filters && !self.matches_packages(package_name) {
       return false;
     }
-
     true
   }
 
@@ -161,14 +152,11 @@ impl GroupSelector {
   #[inline]
   fn matches_dependencies(&self, descriptor: &InstanceDescriptor) -> bool {
     let is_local = descriptor.is_local_dependency;
-    // excludes: explicit exclude patterns OR exclude_local wins over everything
     let is_excluded = (!self.exclude_dependencies.is_empty() && matches_any_pattern(&descriptor.internal_name, &self.exclude_dependencies))
       || (self.exclude_local && is_local);
     if is_excluded {
       return false;
     }
-    // includes: no filters at all → match; matches a pattern → match; match_local + is_local → match
-
     (self.include_dependencies.is_empty() && !self.match_local)
       || matches_any_pattern(&descriptor.internal_name, &self.include_dependencies)
       || (self.match_local && is_local)

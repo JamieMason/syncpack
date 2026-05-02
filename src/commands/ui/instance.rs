@@ -138,8 +138,12 @@ pub fn get_location(ctx: &Context, instance: &Instance) -> String {
     "".to_string()
   };
   let path_to_prop = instance.descriptor.dependency_type.path.replace("/", ".");
-  let package_file_path = &ctx.packages.all[instance.descriptor.package_idx.0].file_path;
-  let file_link = ui::package::get_package_json_link(ctx, package_file_path);
+  let file_link = match &ctx.sources.all[instance.source_idx().0] {
+    crate::source::Source::Package { file_idx, .. } => {
+      ui::package::get_package_json_link(ctx, &ctx.disk.package_json_files[*file_idx].filepath)
+    }
+    crate::source::Source::PnpmYaml => "pnpm-workspace.yaml".to_string(),
+  };
   ui::util::join_line(vec![&alias_info, &"in".to_string(), &file_link, &"at".to_string(), &path_to_prop])
 }
 

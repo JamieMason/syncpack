@@ -14,6 +14,24 @@ The default dependency types in syncpack are the ones defined by npm, pnpm, and 
 
 <DefaultDependencyTypes />
 
+## Catalog Names
+
+Catalog dependency types are added automatically when syncpack detects [pnpm catalogs](https://pnpm.io/catalogs) in `pnpm-workspace.yaml` or [Bun catalogs](https://bun.sh/docs/install/catalogs) in the root `package.json`.
+
+| Name                 | Source                                  | When                                 |
+| :------------------- | :-------------------------------------- | :----------------------------------- |
+| `pnpmCatalog`        | `pnpm-workspace.yaml` `catalog`         | the pnpm default catalog has entries |
+| `pnpmCatalog:<name>` | `pnpm-workspace.yaml` `catalogs.<name>` | one per named pnpm catalog           |
+| `bunCatalog`         | root `package.json` `catalog`           | the Bun default catalog is present   |
+| `bunCatalog:<name>`  | root `package.json` `catalogs.<name>`   | one per named Bun catalog            |
+
+Bun also recognises `workspaces.catalog` and `workspaces.catalogs.<name>`. These names work everywhere a dependency type is accepted.
+
+```bash
+syncpack lint --dependency-types pnpmCatalog
+syncpack list --dependency-types 'pnpmCatalog:react18'
+```
+
 ## Custom Values
 
 You can extend the above list by defining your own [custom types](CONFIG_CUSTOM_TYPES), such as:
@@ -21,6 +39,7 @@ You can extend the above list by defining your own [custom types](CONFIG_CUSTOM_
 - Engine versions (`engines`)
 - Package manager versions (`packageManager`)
 - Any other nested property in package.json
+- Properties in `pnpm-workspace.yaml` (via [`source: "PnpmWorkspace"`](CONFIG_CUSTOM_TYPES#reading-from-pnpm-workspaceyaml))
 
 ## Using Dependency Types
 

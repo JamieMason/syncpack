@@ -2,10 +2,11 @@ use {
   crate::{
     commands::{ui, ui::LINE_ENDING},
     context::Context,
-    disk::DiskIo,
+    disk::{copy_expected_specifier_json, copy_expected_specifier_yaml, write_json_file, write_yaml_file, DiskIo},
     errors::SyncpackError,
     instance::InstanceIdx,
     registry::updates::RegistryUpdates,
+    source::Source,
     version_group::VersionGroup,
   },
   log::{error, warn},
@@ -13,18 +14,22 @@ use {
 
 pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &D) -> Result<Context, SyncpackError> {
   let mut was_outdated = false;
-  let mut copy_actions: Vec<(usize, InstanceIdx)> = vec![];
+  // Apply-time dispatch reads `instance.source_idx()`; no SourceIdx is
+  // duplicated into the action tuple. Catalog defs (pnpm yaml or Bun root
+  // pkg.json) and regular package.json instances flow through the same
+  // `ctx.sources.all[idx]` write path.
+  let mut copy_actions: Vec<InstanceIdx> = vec![];
 
   ctx
     .version_groups
     .iter()
-    .filter(|group| matches!(group, VersionGroup::PreferredSemver(g) if g.prefer_highest))
+    .filter(|group| matches!(group, VersionGroup::PreferredSemver(g) if g.prefer_highest) || matches!(group, VersionGroup::CatalogDefs(_)))
     .for_each(|group| {
       let mut has_printed_group = false;
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
         let mut has_printed_dependency = false;
         dependency
-          .get_sorted_instances(&ctx.instances, &ctx.packages.all)
+          .get_sorted_instances(&ctx.instances, &ctx.sources.all)
           .filter(|(_, instance)| instance.is_outdated())
           .for_each(|(idx, instance)| {
             was_outdated = true;
@@ -44,16 +49,24 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
                 has_printed_dependency = true;
               }
               ui::instance::print_fixed(&ctx, instance);
-              copy_actions.push((instance.descriptor.package_idx.0, idx));
+              copy_actions.push(idx);
             }
           });
       })
     });
 
-  for (pkg_idx, inst_idx) in copy_actions {
+  for inst_idx in copy_actions {
+    let source_idx = ctx.instances[inst_idx.0].source_idx();
+    let consumer_file_idx: Option<usize> = match &ctx.sources.all[source_idx.0] {
+      Source::Package { file_idx, .. } => Some(*file_idx),
+      Source::PnpmYaml => None,
+    };
     let instance = &ctx.instances[inst_idx.0];
-    let package = &mut ctx.packages.all[pkg_idx];
-    package.copy_expected_specifier(instance);
+    if let Some(fi) = consumer_file_idx {
+      copy_expected_specifier_json(&mut ctx.disk.package_json_files[fi], instance);
+    } else if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
+      copy_expected_specifier_yaml(yaml, instance);
+    }
   }
 
   if !registry_updates.failed.is_empty() {
@@ -74,9 +87,12 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
 
   if !ctx.config.cli.dry_run {
     let indent = ctx.config.rcfile.indent.as_deref();
-    let formatting = &ctx.packages.formatting;
-    for package in ctx.packages.all.iter_mut() {
-      package.write_to_disk(io, indent, formatting)?;
+    let fallback = ctx.disk.formatting_fallback();
+    for file in ctx.disk.package_json_files.iter_mut() {
+      write_json_file(file, io, indent, &fallback)?;
+    }
+    if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
+      write_yaml_file(yaml, io, indent, &fallback)?;
     }
   }
 

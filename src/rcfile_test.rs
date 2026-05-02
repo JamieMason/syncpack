@@ -152,7 +152,10 @@ fn validate_unknown_fields_ok_when_valid() {
 }
 
 #[test]
-fn try_from_rejects_invalid_dependency_type() {
+fn try_from_no_longer_rejects_invalid_dependency_type() {
+  // Dep-type validation lives in `Context::create`, not `TryFrom<RawRcfile>`,
+  // so user-referenced catalog dep types resolve after discovery. A `RawRcfile`
+  // referencing an unknown dep type parses cleanly here.
   let raw: RawRcfile = serde_json::from_value(json!({
     "versionGroups": [{
       "label": "test",
@@ -160,8 +163,111 @@ fn try_from_rejects_invalid_dependency_type() {
     }]
   }))
   .unwrap();
-  let err = Rcfile::try_from(raw).unwrap_err();
-  assert!(matches!(err, UnsupportedConfigError::InvalidDependencyType { name } if name == "nonexistent"));
+  assert!(Rcfile::try_from(raw).is_ok());
+}
+
+#[test]
+fn context_create_rejects_invalid_dependency_type() {
+  use crate::{
+    context::{Context, ContextError},
+    rcfile::from_disk::RcfileError,
+    test::mock,
+  };
+  let config = mock::config_from_mock(json!({
+    "versionGroups": [{
+      "label": "test",
+      "dependencyTypes": ["nonexistent"]
+    }]
+  }));
+  let (disk, sources) = mock::disk_and_sources_from_mocks(vec![json!({"name": "pkg-a", "version": "0.0.0"})]);
+  let err = Context::create(config, disk, sources, vec![]).unwrap_err();
+  let ContextError::RcfileError(RcfileError::UnsupportedConfig(errs)) = err else {
+    panic!("expected RcfileError::UnsupportedConfig");
+  };
+  assert!(errs
+    .0
+    .iter()
+    .any(|e| matches!(e, UnsupportedConfigError::InvalidDependencyType { name } if name == "nonexistent")));
+}
+
+#[test]
+fn custom_type_with_explicit_source_parses() {
+  use crate::{rcfile::compute_all_dependency_types, source::SourceKind};
+  let raw: RawRcfile = serde_json::from_value(json!({
+    "customTypes": {
+      "x": { "strategy": "versionsByName", "path": "/x", "source": "PnpmWorkspace" }
+    }
+  }))
+  .unwrap();
+  let dep_types = compute_all_dependency_types(&raw.custom_types).expect("compute should succeed");
+  let dt = dep_types
+    .iter()
+    .find(|dt| dt.name == "x")
+    .expect("custom type x should produce a dep type");
+  assert_eq!(dt.source, SourceKind::PnpmWorkspace);
+  assert!(!dt.is_catalog_definition);
+}
+
+#[test]
+fn custom_type_with_invalid_source_returns_error() {
+  use crate::rcfile::compute_all_dependency_types;
+  let raw: RawRcfile = serde_json::from_value(json!({
+    "customTypes": {
+      "x": { "strategy": "versionsByName", "path": "/x", "source": "BunYaml" }
+    }
+  }))
+  .unwrap();
+  let err = compute_all_dependency_types(&raw.custom_types).unwrap_err();
+  match err {
+    UnsupportedConfigError::InvalidSource { value } => assert_eq!(value, "BunYaml"),
+    other => panic!("expected InvalidSource, got {other:?}"),
+  }
+}
+
+#[test]
+fn custom_type_without_source_field_defaults_package_json() {
+  use crate::{rcfile::compute_all_dependency_types, source::SourceKind};
+  let raw: RawRcfile = serde_json::from_value(json!({
+    "customTypes": {
+      "x": { "strategy": "versionsByName", "path": "/x" }
+    }
+  }))
+  .unwrap();
+  let dep_types = compute_all_dependency_types(&raw.custom_types).expect("compute should succeed");
+  let dt = dep_types
+    .iter()
+    .find(|dt| dt.name == "x")
+    .expect("custom type x should produce a dep type");
+  assert_eq!(dt.source, SourceKind::PackageJson);
+}
+
+#[test]
+fn rcfile_catalog_dep_type_names_uses_flag() {
+  // Even a customType named "pnpmCatalogLike" (matching v2's prefix filter)
+  // must NOT be treated as a catalog dep type — it isn't auto-generated and
+  // its `is_catalog_definition` flag is false.
+  use crate::dependency::{DependencyType, Strategy};
+  let mut rcfile = Rcfile::default();
+  // Add a regular user dep type whose name happens to start with "pnpmCatalog".
+  rcfile.all_dependency_types.push(DependencyType {
+    name_path: None,
+    name: "pnpmCatalogLike".to_string(),
+    path: "/x".to_string(),
+    strategy: Strategy::VersionsByName,
+    source: crate::source::SourceKind::PackageJson,
+    is_catalog_definition: false,
+  });
+  // Add an actual auto-gen catalog dep type.
+  rcfile.all_dependency_types.push(DependencyType {
+    name_path: None,
+    name: "pnpmCatalog".to_string(),
+    path: "/catalog".to_string(),
+    strategy: Strategy::VersionsByName,
+    source: crate::source::SourceKind::PnpmWorkspace,
+    is_catalog_definition: true,
+  });
+  let names = rcfile.catalog_dep_type_names_for_test();
+  assert_eq!(names, vec!["pnpmCatalog".to_string()]);
 }
 
 #[test]
@@ -181,8 +287,8 @@ fn version_group_from_config_rejects_invalid_policy() {
     "policy": "notAPolicy"
   }))
   .unwrap();
-  let packages = crate::packages::Packages::new();
-  let err = VersionGroup::from_config(group, &packages).unwrap_err();
+  let sources = crate::sources::Sources::new();
+  let err = VersionGroup::from_config(group, &sources).unwrap_err();
   assert!(matches!(err, UnsupportedConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
 }
 

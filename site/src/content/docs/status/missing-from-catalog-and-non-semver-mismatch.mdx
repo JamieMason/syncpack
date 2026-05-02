@@ -1,0 +1,12 @@
+---
+title: MissingFromCatalogAndNonSemverMismatch
+status: unfixable
+description: Dependency should be added to a catalog but Syncpack cannot pick which specifier to enshrine
+---
+
+## When this happens
+
+- ✓ Instance is in a [Catalog](VERSION_GROUP_CATALOG) version group
+- ✓ [MissingFromCatalog](/status/missing-from-catalog) applies to multiple instances of the same dependency
+- ✘ Their specifiers differ AND at least one is non-semver
+- ? Syncpack cannot pick which specifier to enshrine in the catalog

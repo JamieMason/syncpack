@@ -1,0 +1,10 @@
+---
+title: DependsOnMissingCatalogDefinition
+status: suspect
+description: Instance uses the catalog protocol but the referenced catalog or dependency is not defined
+---
+
+## When this happens
+
+- ✓ Instance uses the `catalog:` protocol (bare `catalog:` or `catalog:{name}`)
+- ✘ The referenced catalog does not exist OR the dependency name is not defined in it

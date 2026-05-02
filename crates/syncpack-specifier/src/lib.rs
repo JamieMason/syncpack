@@ -29,6 +29,8 @@ mod is_eligible_update_for_test;
 #[cfg(test)]
 mod new_test;
 
+#[cfg(test)]
+mod eq_hash_test;
 pub mod latest;
 pub mod major;
 pub mod minor;
@@ -97,7 +99,7 @@ pub fn strip_semver_range(value: &str) -> &str {
     .unwrap_or(value)
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub enum Specifier {
   Alias(alias::Alias),                                      // "npm:foo@1.2.3"
   Catalog(catalog::Catalog),                                // "catalog:", "catalog:react18"
@@ -968,4 +970,16 @@ impl PartialOrd for Specifier {
   }
 }
 
+impl PartialEq for Specifier {
+  fn eq(&self, other: &Self) -> bool {
+    self.get_raw() == other.get_raw()
+  }
+}
+
 impl Eq for Specifier {}
+
+impl std::hash::Hash for Specifier {
+  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    self.get_raw().hash(state);
+  }
+}

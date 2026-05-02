@@ -1,11 +1,3 @@
-//! Fast pattern matching for dependency and package names.
-//!
-//! Optimises common glob patterns into faster string operations:
-//! - "react" → exact match (==)
-//! - "@aws-sdk/**" → prefix match (starts_with)
-//! - "**-loader" → suffix match (ends_with)
-//! - Complex patterns → full glob matching (fallback)
-
 use {
   globset::{Glob, GlobMatcher},
   std::fmt,

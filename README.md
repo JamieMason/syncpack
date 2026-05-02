@@ -8,6 +8,19 @@
 
 Syncpack is used by [AWS](https://github.com/aws/aws-pdk), [Cloudflare](https://github.com/cloudflare/mcp-server-cloudflare), [DataDog](https://github.com/DataDog/datadog-ci), [Electron](https://github.com/electron/forge), [GoDaddy](https://github.com/godaddy/gasket), [Lottie](https://github.com/LottieFiles/dotlottie-web), [Microsoft](https://github.com/microsoft/fluentui), [PostHog](https://github.com/PostHog/posthog), [Qwik](https://github.com/QwikDev/qwik), [Raycast](https://github.com/raycast/extensions), [Salesforce](https://github.com/SalesforceCommerceCloud/pwa-kit), [TopTal](https://github.com/toptal/picasso), [Vercel](https://github.com/vercel/vercel), [VoltAgent](https://github.com/VoltAgent/voltagent), [WooCommerce](https://github.com/woocommerce/woocommerce) and others.
 
+Some of the things it can do are:
+
+- Find and fix dependency version mismatches.
+- Enforce a single version policy, or create partitions with separate policies.
+- Find and bump outdated versions from the npm registry.
+- Ensure some dependencies always remain pinned at a specific version.
+- Ban some dependencies from being used: anywhere, or in specific places.
+- Define rules for where exact or loose semver ranges should be used, including in catalogs.
+- Assign packages as the source of truth for specific dependencies' versions.
+- Sort and format package.json files consistently.
+- Auto-migrate all or parts of your repo to [pnpm catalogs](https://pnpm.io/catalogs) or [bun catalogs](https://bun.sh/docs/pm/catalogs).
+- Bump outdated versions in catalogs.
+
 ## Installation
 
 ```bash

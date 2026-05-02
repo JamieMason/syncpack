@@ -1,0 +1,82 @@
+---
+title: Catalog
+description: Enforce that dependencies are defined in pnpm or Bun catalogs and consumed via the catalog protocol
+sidebar:
+  badge: New
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Packages from "@partials/group-config/packages.mdx";
+import Dependencies from "@partials/group-config/dependencies.mdx";
+import DependencyTypes from "@partials/group-config/dependency-types.mdx";
+import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
+import Label from "@partials/group-config/label.mdx";
+
+Require dependencies to be defined in a [pnpm](HREF_PNPM) or [Bun](https://bun.sh) catalog and consumed via the `catalog:` protocol. Catalog definitions live in `pnpm-workspace.yaml` (pnpm) or the root `package.json` at `/catalog`, `/catalogs/{name}`, `/workspaces/catalog`, or `/workspaces/catalogs/{name}` (Bun).
+
+Use this group when you want a single source of truth for a dependency's version across the monorepo. Members of the group must either be a catalog definition or use `catalog:` / `catalog:{name}` to point at one. Syncpack will fix instances that use a literal version specifier by replacing them with `catalog:` and, where needed, inserting the dependency into the catalog.
+
+When no catalog yet exists and the project uses pnpm or Bun, Syncpack creates the implicit `default` catalog at fix time. For npm, yarn, or unknown package managers there is no catalog system to write to and instances are flagged as [CannotInferCatalogFile](/status/cannot-infer-catalog-file).
+
+## Configuration
+
+### policy <Badge text="Required" variant="danger" />
+
+Set the policy to `"catalog"` to enable this behaviour for a Version Group.
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "label": "All production deps must come from the catalog",
+      "dependencyTypes": ["prod"],
+      "policy": "catalog"
+    }
+  ]
+}
+```
+
+### dependencies <Badge text="Optional" variant="note" />
+
+<Dependencies />
+
+### dependencyTypes <Badge text="Optional" variant="note" />
+
+<DependencyTypes />
+
+### specifierTypes <Badge text="Optional" variant="note" />
+
+<SpecifierTypes />
+
+### label <Badge text="Optional" variant="note" />
+
+<Label />
+
+### packages <Badge text="Optional" variant="note" />
+
+<Packages />
+
+## Status Codes
+
+These are all the issues that a {frontmatter.title} Version Group can find:
+
+### Valid
+
+- [IsCatalog](/status/is-catalog)
+- [IsCatalogDefinition](/status/is-catalog-definition)
+
+### Fixable
+
+- [NotUsingCatalog](/status/not-using-catalog)
+- [MissingFromCatalog](/status/missing-from-catalog)
+
+### Unfixable
+
+- [NotUsingCatalogAndCatalogUnknown](/status/not-using-catalog-and-catalog-unknown)
+- [MissingFromCatalogAndNonSemverMismatch](/status/missing-from-catalog-and-non-semver-mismatch)
+- [CannotInferCatalogFile](/status/cannot-infer-catalog-file)
+
+### Suspect
+
+- [DependsOnMissingCatalogDefinition](/status/depends-on-missing-catalog-definition)
+- [RefuseToCatalogLocal](/status/refuse-to-catalog-local)

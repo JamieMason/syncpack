@@ -12,7 +12,7 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
       group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
         ui::dependency::print(&ctx, dependency, group.variant_label());
         dependency
-          .get_sorted_instances(&ctx.instances, &ctx.packages.all)
+          .get_sorted_instances(&ctx.instances, &ctx.sources.all)
           .for_each(|(_, instance)| {
             if ctx.config.cli.show_instances {
               ui::instance::print(&ctx, instance);
