@@ -1,828 +1,420 @@
-# Example: Writing Tests with TestBuilder
+# Test patterns
 
-<purpose>
-This guide shows you how to write effective tests for Syncpack using the TestBuilder pattern.
-</purpose>
+Real, trimmed examples for the common scenarios. Imports and `mod` wrapping omitted for brevity — see [SKILL.md](SKILL.md) for the full preamble.
 
-<testbuilder_pattern>
+## Banned
 
-## The TestBuilder Pattern
-
-**Always use TestBuilder** - Never manually construct Context in tests. TestBuilder provides a fluent API that handles all the complexity of setting up test scenarios.
-
-</testbuilder_pattern>
-
-<basic_structure>
-
-## Basic Test Structure
+`src/version_group/banned_test.rs`. Removes a dep; refuses to ban a local-package version.
 
 ```rust
-use {
-  crate::{
-    instance_state::{FixableInstance::*, InstanceState, ValidInstance::*},
-    test::{
-      builder::TestBuilder,
-      expect::{expect, ExpectedInstance},
+#[tokio::test]
+async fn refuses_to_ban_local_version() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({"name": "package-a", "version": "1.0.0"}),
+      json!({"name": "package-b", "dependencies": {"package-a": "1.1.0"}}),
+    ])
+    .with_version_group(json!({
+      "dependencies": ["package-a"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "package-b",
+      id: "package-b in /version of package-b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
     },
-  },
-  serde_json::json,
-};
-
-#[test]
-fn test_descriptive_name() {
-    // 1. Build the test scenario
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({
-                "name": "package-a",
-                "version": "1.0.0",
-                "dependencies": { "react": "17.0.0" }
-            }),
-        ])
-        .with_version_group(json!({
-            "dependencies": ["react"],
-            "pinVersion": "18.0.0"
-        }))
-        .build_and_visit_packages();
-
-    // 2. Assert expectations
-    expect(&ctx).to_have_instances(vec![
-        ExpectedInstance {
-            state: InstanceState::fixable(DiffersToPin),
-            dependency_name: "react",
-            id: "react in /dependencies of package-a",
-            actual: "17.0.0",
-            expected: Some("18.0.0"),
-            overridden: None,
-        },
-    ]);
+    ExpectedInstance {
+      state: InstanceState::suspect(RefuseToBanLocal),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(IsBanned),
+      dependency_name: "package-a",
+      id: "package-a in /dependencies of package-b",
+      actual: "1.1.0",
+      expected: Some(""),
+      overridden: None,
+    },
+  ]);
 }
 ```
 
-</basic_structure>
-
-<testbuilder_methods>
-
-## TestBuilder Methods
-
-<adding_packages>
-
-### Adding Packages
+### Banned with `customTypes`
 
 ```rust
-// Single package
-.with_package(json!({
-    "name": "my-package",
-    "version": "1.0.0"
-}))
-
-// Multiple packages
-.with_packages(vec![
-    json!({"name": "pkg-a", "dependencies": {"lodash": "4.17.0"}}),
-    json!({"name": "pkg-b", "dependencies": {"lodash": "4.18.0"}}),
-])
-```
-
-</adding_packages>
-
-<adding_version_groups>
-
-### Adding Version Groups
-
-```rust
-// Pinned version
-.with_version_group(json!({
-    "dependencies": ["react"],
-    "pinned": "18.0.0"
-}))
-
-// Multiple version groups
-.with_version_groups(vec![
-    json!({"dependencies": ["react"], "pinned": "18.0.0"}),
-    json!({"dependencies": ["lodash"], "policy": "highestSemver"}),
-])
-```
-
-</adding_version_groups>
-
-<adding_semver_groups>
-
-### Adding Semver Groups
-
-```rust
-.with_semver_group(json!({
-    "dependencies": ["**"],
-    "range": "^"
-}))
-```
-
-</adding_semver_groups>
-
-<custom_config>
-
-### Custom Configuration
-
-```rust
-.with_config(json!({
-    "customTypes": {
+#[tokio::test]
+async fn removes_instance_with_named_version_string_strategy() {
+  let ctx = TestBuilder::new()
+    .with_config(json!({
+      "customTypes": {
         "packageManager": {
-            "strategy": "name@version",
-            "path": "packageManager"
+          "strategy": "name@version",
+          "path": "packageManager"
         }
-    }
-}))
+      }
+    }))
+    .with_packages(vec![json!({
+      "name": "package-a",
+      "version": "1.0.0",
+      "packageManager": "pnpm@7.27.0"
+    })])
+    .with_version_group(json!({
+      "dependencies": ["pnpm"],
+      "dependencyTypes": ["packageManager"],
+      "isBanned": true
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(IsBanned),
+      dependency_name: "pnpm",
+      id: "pnpm in /packageManager of package-a",
+      actual: "7.27.0",
+      expected: Some(""),
+      overridden: None,
+    },
+  ]);
+}
 ```
 
-</custom_config>
+## Pinned
 
-<strict_mode>
-
-### Strict Mode
+`src/version_group/pinned_test.rs`.
 
 ```rust
-.with_strict(true)  // Treat Suspect states as errors
+#[tokio::test]
+async fn an_already_pinned_version_is_valid() {
+  let ctx = TestBuilder::new()
+    .with_package(json!({
+      "name": "package-a",
+      "version": "1.0.0",
+      "devDependencies": {"foo": "1.2.0"}
+    }))
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "pinVersion": "1.2.0"
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToPin),
+      dependency_name: "foo",
+      id: "foo in /devDependencies of package-a",
+      actual: "1.2.0",
+      expected: Some("1.2.0"),
+      overridden: None,
+    },
+  ]);
+}
 ```
 
-</strict_mode>
-
-<registry_updates>
-
-### Registry Updates
+### Pin overrides a semver-group range
 
 ```rust
-.with_registry_updates(json!({
-    "react": ["17.0.0", "17.0.1", "18.0.0", "18.2.0"],
-    "lodash": ["4.17.0", "4.17.21"]
-}))
+#[tokio::test]
+async fn pin_overrides_semver_group_match() {
+  let ctx = TestBuilder::new()
+    .with_package(json!({
+      "name": "package-a",
+      "version": "1.0.0",
+      "devDependencies": {"foo": "^1.0.0"}
+    }))
+    .with_semver_group(json!({"range": "^", "dependencies": ["foo"]}))
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "pinVersion": "1.0.0"
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::fixable(PinOverridesSemverRange),
+      dependency_name: "foo",
+      id: "foo in /devDependencies of package-a",
+      actual: "^1.0.0",
+      expected: Some("1.0.0"),
+      overridden: Some("^1.0.0"),
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+    },
+  ]);
+}
 ```
 
-</registry_updates>
+## Same range
 
-<update_target>
-
-### Update Target
+`src/version_group/same_range_test.rs`. Use a `local`-ignored group as guard so the local instances don't pollute the assertion.
 
 ```rust
-use crate::cli::UpdateTarget;
-
-.with_update_target(UpdateTarget::Latest)
-.with_update_target(UpdateTarget::Minor)
-.with_update_target(UpdateTarget::Patch)
+#[tokio::test]
+async fn ranges_satisfy_each_other() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({"name": "package-a", "dependencies": {"foo": ">=1.0.0"}}),
+      json!({"name": "package-b", "dependencies": {"foo": "<=2.0.0"}}),
+    ])
+    .with_version_groups(vec![
+      json!({"dependencyTypes": ["local"], "isIgnored": true}),
+      json!({"dependencies": ["foo"], "policy": "sameRange"}),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "package-b",
+      id: "package-b in /version of package-b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "foo",
+      id: "foo in /dependencies of package-a",
+      actual: ">=1.0.0",
+      expected: Some(">=1.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "foo",
+      id: "foo in /dependencies of package-b",
+      actual: "<=2.0.0",
+      expected: Some("<=2.0.0"),
+      overridden: None,
+    },
+  ]);
+}
 ```
 
-</update_target>
+For mismatching ranges the consumer instances become `InstanceState::unfixable(SameRangeMismatch)`.
 
-<build_methods>
+## Pnpm catalogs
 
-### Build Methods
+`src/version_group/catalog_test.rs`. `with_pnpm_catalogs` injects `pnpm-workspace.yaml`. Catalog definitions are themselves instances under `/catalog of pnpm-workspace.yaml`.
 
 ```rust
-// Build Context without visiting (rare)
-.build()
-
-// Build Context and run visit_packages (most common)
-.build_and_visit_packages()
+#[tokio::test]
+async fn catalog_group_definition_valid() {
+  let yaml = "catalog:\n  react: ^18.0.0\n";
+  let ctx = TestBuilder::new()
+    .with_pnpm_catalogs(yaml)
+    .with_packages(vec![json!({
+      "name": "pkg-a",
+      "version": "0.0.0",
+      "dependencies": {"react": "catalog:"},
+    })])
+    .with_version_group(json!({
+      "label": "enforce catalog",
+      "dependencies": ["react"],
+      "policy": "catalog",
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "pkg-a",
+      id: "pkg-a in /version of pkg-a",
+      actual: "0.0.0",
+      expected: Some("0.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsCatalog),
+      dependency_name: "react",
+      id: "react in /dependencies of pkg-a",
+      actual: "catalog:",
+      expected: Some("catalog:"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsCatalogDefinition),
+      dependency_name: "react",
+      id: "react in /catalog of pnpm-workspace.yaml",
+      actual: "^18.0.0",
+      expected: Some("^18.0.0"),
+      overridden: None,
+    },
+  ]);
+}
 ```
 
-</build_methods>
+Named catalog: yaml `catalogs:\n  react18:\n    react: ^18.0.0\n`, consumer `"react": "catalog:react18"`, def id `react in /catalogs/react18 of pnpm-workspace.yaml`.
 
-</testbuilder_methods>
+## Bun catalogs
 
-<common_test_patterns>
+`src/version_group/bun_catalog_test.rs`. Two shapes:
 
-## Common Test Patterns
+- `with_bun_catalogs(json!({...}))` puts `/catalog`, `/catalogs/{n}` at the synthetic Bun root.
+- `with_bun_workspaces_catalogs(json!({...}))` nests them under `/workspaces/`.
 
-<banned_dependencies>
-
-### Testing Banned Dependencies
+These tests often use sync `.build()` — they're checking discovery wiring, not the visit pipeline:
 
 ```rust
 #[test]
-fn removes_banned_dependency() {
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({
-                "name": "pkg-a",
-                "dependencies": {"jquery": "3.6.0"}
-            }),
-        ])
-        .with_version_group(json!({
-            "dependencies": ["jquery"],
-            "isBanned": true
-        }))
-        .build_and_visit_packages();
-
-    expect(&ctx).to_have_instances(vec![
-        ExpectedInstance {
-            state: InstanceState::fixable(IsBanned),
-            dependency_name: "jquery",
-            id: "jquery in /dependencies of pkg-a",
-            actual: "3.6.0",
-            expected: Some(""),  // Empty means remove
-            overridden: None,
-        },
-    ]);
+fn bun_top_level_catalog_definition_emits_instance() {
+  let ctx = TestBuilder::new()
+    .with_bun_catalogs(json!({
+      "name": "bun-root",
+      "catalog": {"react": "^18.0.0"}
+    }))
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .build();
+  let react = ctx
+    .instances
+    .iter()
+    .find(|i| i.descriptor.name == "react")
+    .expect("expected a react bun catalog instance");
+  assert!(react.is_catalog_instance());
+  assert_eq!(react.descriptor.specifier.get_raw(), "^18.0.0");
 }
 ```
 
-</banned_dependencies>
-
-<version_mismatches>
-
-### Testing Version Mismatches
+Full validation pass (consumer + def states):
 
 ```rust
 #[test]
-fn detects_version_mismatch_across_packages() {
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({"name": "pkg-a", "dependencies": {"lodash": "4.17.0"}}),
-            json!({"name": "pkg-b", "dependencies": {"lodash": "4.18.0"}}),
-        ])
-        .with_version_group(json!({
-            "dependencies": ["lodash"],
-            "policy": "sameRange"
-        }))
-        .build_and_visit_packages();
-
-    // Both will be marked - one as reference, one as mismatch
-    expect(&ctx).to_have_instances(vec![
-        ExpectedInstance {
-            state: InstanceState::unfixable(SameRangeMismatch),
-            dependency_name: "lodash",
-            id: "lodash in /dependencies of pkg-a",
-            actual: "4.17.0",
-            expected: None,
-            overridden: None,
-        },
-        ExpectedInstance {
-            state: InstanceState::unfixable(SameRangeMismatch),
-            dependency_name: "lodash",
-            id: "lodash in /dependencies of pkg-b",
-            actual: "4.18.0",
-            expected: None,
-            overridden: None,
-        },
-    ]);
+fn bun_catalog_definition_with_consumer_valid() {
+  let ctx = TestBuilder::new()
+    .with_bun_catalogs(json!({
+      "name": "bun-root",
+      "catalog": {"react": "^18.0.0"}
+    }))
+    .with_packages(vec![json!({
+      "name": "pkg-a",
+      "version": "0.0.0",
+      "dependencies": {"react": "catalog:"}
+    })])
+    .build_and_visit_packages();
+  // assert states via expect(&ctx).to_have_instances(...) as elsewhere
 }
 ```
 
-</version_mismatches>
+## Semver groups
 
-<local_packages>
-
-### Testing Local Package Versions
+A semver group rewrites the *expected* range; mismatches are `SemverRangeMismatch` (fixable). Combine with version groups to test interaction:
 
 ```rust
-#[test]
-fn validates_local_package_version() {
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({
-                "name": "my-lib",
-                "version": "2.0.0"
-            }),
-            json!({
-                "name": "my-app",
-                "dependencies": {"my-lib": "1.0.0"}  // Wrong version
-            }),
-        ])
-        .build_and_visit_packages();
-
-    expect(&ctx).to_have_instances(vec![
-        ExpectedInstance {
-            state: InstanceState::valid(IsLocalAndValid),
-            dependency_name: "my-lib",
-            id: "my-lib in /version of my-lib",
-            actual: "2.0.0",
-            expected: Some("2.0.0"),
-            overridden: None,
-        },
-        ExpectedInstance {
-            state: InstanceState::fixable(DiffersToLocal),
-            dependency_name: "my-lib",
-            id: "my-lib in /dependencies of my-app",
-            actual: "1.0.0",
-            expected: Some("2.0.0"),  // Should match local version
-            overridden: None,
-        },
-    ]);
+#[tokio::test]
+async fn semver_group_targets_one_package_only() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({"name": "package-a", "dependencies": {"foo": ">=1.0.0"}}),
+      json!({"name": "package-b", "dependencies": {"foo": "^1.2.3"}}),
+    ])
+    .with_semver_group(json!({"packages": ["package-b"], "range": "^"}))
+    .with_version_groups(vec![
+      json!({"dependencyTypes": ["local"], "isIgnored": true}),
+      json!({"dependencies": ["foo"], "policy": "sameRange"}),
+    ])
+    .run()
+    .await;
+  // package-b's `^1.2.3` matches the `^` semver group → no mismatch
+  // assert SatisfiesSameRangeGroup on both consumer instances
 }
 ```
 
-</local_packages>
+## Registry updates
 
-<workspace_protocol>
-
-### Testing Workspace Protocol
+`with_registry_updates` mocks the npm registry and implies subcommand `update`. Optional `with_update_target` bounds it.
 
 ```rust
-#[test]
-fn handles_workspace_protocol() {
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({
-                "name": "my-lib",
-                "version": "1.0.0"
-            }),
-            json!({
-                "name": "my-app",
-                "dependencies": {"my-lib": "workspace:*"}
-            }),
-        ])
-        .build_and_visit_packages();
-
-    let workspace_instance = ctx.instances.iter()
-        .find(|i| i.dependency.name == "my-lib" && i.package.name == "my-app")
-        .unwrap();
-
-    assert!(workspace_instance.is_valid());
+#[tokio::test]
+async fn pnpm_catalog_def_marked_outdated_when_registry_has_newer_version() {
+  let yaml = "catalog:\n  react: ^17.0.0\n";
+  let ctx = TestBuilder::new()
+    .with_pnpm_catalogs(yaml)
+    .with_packages(vec![json!({
+      "name": "pkg-a",
+      "version": "0.0.0",
+      "dependencies": {"react": "catalog:"},
+    })])
+    .with_registry_updates(json!({"react": ["17.0.0", "18.5.0"]}))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "pkg-a",
+      id: "pkg-a in /version of pkg-a",
+      actual: "0.0.0",
+      expected: Some("0.0.0"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsCatalog),
+      dependency_name: "react",
+      id: "react in /dependencies of pkg-a",
+      actual: "catalog:",
+      expected: Some("catalog:"),
+      overridden: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToNpmRegistry),
+      dependency_name: "react",
+      id: "react in /catalog of pnpm-workspace.yaml",
+      actual: "^17.0.0",
+      expected: Some("^18.5.0"),
+      overridden: None,
+    },
+  ]);
 }
 ```
 
-</workspace_protocol>
-
-<custom_types>
-
-### Testing Custom Dependency Types
-
-```rust
-#[test]
-fn validates_custom_package_manager_field() {
-    let ctx = TestBuilder::new()
-        .with_config(json!({
-            "customTypes": {
-                "packageManager": {
-                    "strategy": "name@version",
-                    "path": "packageManager"
-                }
-            }
-        }))
-        .with_packages(vec![
-            json!({
-                "name": "pkg-a",
-                "packageManager": "pnpm@7.0.0"
-            }),
-        ])
-        .with_version_group(json!({
-            "dependencies": ["pnpm"],
-            "dependencyTypes": ["packageManager"],
-            "pinVersion": "8.0.0"
-        }))
-        .build_and_visit_packages();
-
-    expect(&ctx).to_have_instances(vec![
-        ExpectedInstance {
-            state: InstanceState::fixable(DiffersToPin),
-            dependency_name: "pnpm",
-            id: "pnpm in /packageManager of pkg-a",
-            actual: "7.0.0",
-            expected: Some("8.0.0"),
-            overridden: None,
-        },
-    ]);
-}
-```
-
-</custom_types>
-
-<semver_ranges>
-
-### Testing Semver Ranges
-
-```rust
-#[test]
-fn enforces_caret_range() {
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({
-                "name": "pkg-a",
-                "dependencies": {
-                    "react": "~18.0.0",  // Tilde range
-                    "lodash": "^4.17.0"  // Caret range
-                }
-            }),
-        ])
-        .with_semver_group(json!({
-            "dependencies": ["**"],
-            "range": "^"
-        }))
-        .build_and_visit_packages();
-
-    expect(&ctx).to_have_instances(vec![
-        ExpectedInstance {
-            state: InstanceState::fixable(SemverRangeMismatch),
-            dependency_name: "react",
-            id: "react in /dependencies of pkg-a",
-            actual: "~18.0.0",
-            expected: Some("^18.0.0"),
-            overridden: None,
-        },
-        ExpectedInstance {
-            state: InstanceState::valid(IsHighestOrLowestSemver),
-            dependency_name: "lodash",
-            id: "lodash in /dependencies of pkg-a",
-            actual: "^4.17.0",
-            expected: Some("^4.17.0"),
-            overridden: None,
-        },
-    ]);
-}
-```
-
-</semver_ranges>
-
-<highest_lowest_semver>
-
-### Testing Highest/Lowest Semver
-
-```rust
-#[test]
-fn uses_highest_semver_found() {
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({"name": "pkg-a", "dependencies": {"lodash": "4.17.0"}}),
-            json!({"name": "pkg-b", "dependencies": {"lodash": "4.17.21"}}),
-            json!({"name": "pkg-c", "dependencies": {"lodash": "4.17.10"}}),
-        ])
-        // highestSemver is the default — no version group config needed
-        .build_and_visit_packages();
-
-    expect(&ctx).to_have_instances(vec![
-        ExpectedInstance {
-            state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
-            dependency_name: "lodash",
-            id: "lodash in /dependencies of pkg-a",
-            actual: "4.17.0",
-            expected: Some("4.17.21"),
-            overridden: None,
-        },
-        ExpectedInstance {
-            state: InstanceState::valid(IsHighestOrLowestSemver),
-            dependency_name: "lodash",
-            id: "lodash in /dependencies of pkg-b",
-            actual: "4.17.21",
-            expected: Some("4.17.21"),
-            overridden: None,
-        },
-        ExpectedInstance {
-            state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
-            dependency_name: "lodash",
-            id: "lodash in /dependencies of pkg-c",
-            actual: "4.17.10",
-            expected: Some("4.17.21"),
-            overridden: None,
-        },
-    ]);
-}
-```
-
-</highest_lowest_semver>
-
-<multiple_version_groups>
-
-### Testing Multiple Version Groups
-
-```rust
-#[test]
-fn applies_first_matching_version_group() {
-    let ctx = TestBuilder::new()
-        .with_packages(vec![
-            json!({
-                "name": "pkg-a",
-                "dependencies": {
-                    "react": "17.0.0",
-                    "lodash": "4.17.0"
-                }
-            }),
-        ])
-        .with_version_groups(vec![
-            json!({
-                "dependencies": ["react"],
-                "pinVersion": "18.0.0"
-            }),
-            // highestSemver is the default catch-all — no second group needed
-            // unless you want to be explicit
-        ])
-        .build_and_visit_packages();
-
-    // React matches first group (pinned)
-    // Lodash matches second group (highestSemver)
-}
-```
-
-</multiple_version_groups>
-
-</common_test_patterns>
-
-<expected_instance_fields>
-
-## ExpectedInstance Fields
-
-```rust
-ExpectedInstance {
-    // The state this instance should have
-    state: InstanceState::fixable(IsBanned),
-
-    // The dependency name (e.g., "react")
-    dependency_name: "react",
-
-    // Location string: "{dep} in {location} of {package}"
-    id: "react in /dependencies of package-a",
-
-    // Current version
-    actual: "17.0.0",
-
-    // Expected version (Some("") means remove, None means no expectation)
-    expected: Some("18.0.0"),
-
-    // If version was overridden by config
-    overridden: None,
-}
-```
-
-</expected_instance_fields>
-
-<location_strings>
-
-## Location String Format
-
-The `id` field follows this pattern:
-
-```
-{dependency} in {location} of {package}
-```
-
-<examples>
-
-Examples:
-
-```rust
-"react in /dependencies of package-a"
-"lodash in /devDependencies of package-b"
-"pnpm in /packageManager of package-c"
-"node in /engines/node of package-d"
-"customConfig in /custom/config/version of package-e"
-```
-
-</examples>
-
-</location_strings>
-
-<manual_assertions>
-
-## Manual Assertions (Alternative)
-
-Instead of `expect()`, you can make manual assertions:
-
-```rust
-#[test]
-fn manual_assertion_example() {
-    let ctx = TestBuilder::new()
-        .with_package(json!({
-            "name": "pkg-a",
-            "dependencies": {"react": "17.0.0"}
-        }))
-        .build_and_visit_packages();
-
-    // Find specific instance by id
-    let react = ctx.instances.iter()
-        .find(|i| i.id == "react in /dependencies of pkg-a")
-        .expect("Should find react instance");
-
-    // Make assertions using descriptor fields
-    assert_eq!(react.descriptor.name, "react");
-    assert_eq!(react.descriptor.package.borrow().name, "pkg-a");
-    assert!(react.is_valid());
-
-    // Check specifier via descriptor
-    assert_eq!(react.descriptor.specifier.get_raw(), "17.0.0");
-}
-```
-
-</manual_assertions>
-
-<edge_cases>
-
-## Testing Edge Cases
-
-<empty_dependencies>
-
-### Empty Dependencies
-
-```rust
-#[test]
-fn handles_package_with_no_dependencies() {
-    let ctx = TestBuilder::new()
-        .with_package(json!({
-            "name": "pkg-a",
-            "version": "1.0.0"
-        }))
-        .build_and_visit_packages();
-
-    // Should only have the version instance
-    assert_eq!(ctx.instances.len(), 1);
-}
-```
-
-</empty_dependencies>
-
-<invalid_json>
-
-### Invalid JSON
-
-```rust
-#[test]
-fn handles_malformed_version() {
-    let ctx = TestBuilder::new()
-        .with_package(json!({
-            "name": "pkg-a",
-            "dependencies": {"react": "not-a-version"}
-        }))
-        .build_and_visit_packages();
-
-    let react = ctx.instances.iter()
-        .find(|i| i.id == "react in /dependencies of pkg-a")
-        .unwrap();
-
-    // Should be marked as unsupported
-    assert!(matches!(*react.descriptor.specifier, Specifier::Tag(_) | Specifier::Unsupported(_)));
-}
-```
-
-</invalid_json>
-
-<git_file_url>
-
-### Git/File/URL Dependencies
-
-```rust
-#[test]
-fn handles_git_dependencies() {
-    let ctx = TestBuilder::new()
-        .with_package(json!({
-            "name": "pkg-a",
-            "dependencies": {
-                "my-pkg": "git://github.com/user/repo.git"
-            }
-        }))
-        .build_and_visit_packages();
-
-    let git_dep = ctx.instances.iter()
-        .find(|i| i.id == "my-pkg in /dependencies of pkg-a")
-        .unwrap();
-
-    assert!(matches!(*git_dep.descriptor.specifier, Specifier::Git(_)));
-}
-```
-
-</git_file_url>
-
-</edge_cases>
-
-<running_tests>
-
-## Running Tests
-
-```bash
-# Run all tests
-just test
-cargo test
-
-# Run specific test
-cargo test test_name
-
-# Run tests in a file (matches pattern)
-cargo test banned_test
-
-# Run with output
-cargo test test_name -- --nocapture
-
-# Run and show ignored
-cargo test -- --ignored
-
-# Watch mode
-just watch
-```
-
-</running_tests>
-
-<test_organization>
-
-## Test Organization
-
-- **Integration tests:** `src/visit_packages/*_test.rs` (preferred)
-- **Unit tests:** Co-located as `*_test.rs`
-- **Test utilities:** `src/test/builder.rs`, `src/test/expect.rs`, `src/test/mock.rs`
-
-</test_organization>
-
-<good_examples>
-
-## Good Test Examples
-
-Study these files for patterns:
-
-- `src/visit_packages/banned_test.rs` - Comprehensive examples
-- `src/visit_packages/pinned_test.rs` - Version group testing
-- `src/visit_packages/preferred_semver_test.rs` - Local package and highest/lowest semver handling
-
-</good_examples>
-
-<common_mistakes>
-
-## Common Mistakes
-
-<wrong_patterns>
-
-❌ **Don't** manually construct Context
-
-```rust
-let ctx = Context { /* ... */ };  // Wrong!
-```
-
-✅ **Do** use TestBuilder
-
-```rust
-let ctx = TestBuilder::new().build();
-```
-
-❌ **Don't** forget to call build_and_visit_packages()
+Bound the update target:
 
 ```rust
 let ctx = TestBuilder::new()
-    .with_package(...)
-    .build();  // States won't be assigned!
+  .with_package(json!({"name": "package-a", "dependencies": {"wat": "1.2.3"}}))
+  .with_update_target(UpdateTarget::Minor)
+  .with_registry_updates(json!({"wat": ["1.2.3", "1.3.4", "2.0.0"]}))
+  .run()
+  .await;
+// wat → 1.3.4 (minor cap), not 2.0.0
 ```
 
-✅ **Do** call build_and_visit_packages() when testing validation
-
-```rust
-let ctx = TestBuilder::new()
-    .with_package(...)
-    .build_and_visit_packages();  // States assigned
-```
-
-❌ **Don't** hardcode instance indices
-
-```rust
-let instance = ctx.instances[0];  // Fragile!
-```
-
-✅ **Do** use `expect(&ctx).to_have_instances(...)` (preferred), or find by `id`
-
-```rust
-// Preferred — declarative and checks all fields at once
-expect(&ctx).to_have_instances(vec![
-    ExpectedInstance { state: ..., id: "react in /dependencies of pkg-a", ... },
-]);
-
-// Alternative — find a single instance for a focused assertion
-let instance = ctx.instances.iter()
-    .find(|i| i.id == "react in /dependencies of pkg-a")
-    .unwrap();
-```
-
-</wrong_patterns>
-
-</common_mistakes>
-
-<troubleshooting>
-
-## Troubleshooting
-
-<problem>
-**Problem:** Test can't find instance
-→ Check package name spelling and location path format
-</problem>
-
-<problem>
-**Problem:** State is Unknown instead of expected
-→ Make sure you called `build_and_visit_packages()`, not just `build()`
-</problem>
-
-<problem>
-**Problem:** Wrong number of instances
-→ Remember that package versions create instances too ("pkg-a in /version of pkg-a")
-</problem>
-
-<problem>
-**Problem:** Expected state doesn't match
-→ Check if another validation ran first and set a different state
-</problem>
-
-</troubleshooting>
-
-<tips>
-
-## Tips
-
-1. **Name tests descriptively** - Test name should explain what scenario is being tested
-2. **One concept per test** - Don't test multiple unrelated things in one test
-3. **Use real JSON structures** - Mirrors real-world usage
-4. **Check all instances** - Don't forget about version instances for local packages
-5. **Test edge cases** - Empty deps, malformed versions, etc.
-6. **Use expect() for complex assertions** - Makes tests more readable
-7. **Study existing tests** - Best source of patterns
-
-</tips>
+`UpdateTarget` import: `use crate::cli::UpdateTarget;`.

@@ -46,8 +46,30 @@ Rules:
 
 - Functions <50 lines, commands 100-300 lines
 - Zero warnings (except during TDD red phase)
-- No comments by default (only for genuinely complex logic)
 - Run `just format` before committing
+
+## Comments
+
+### Forbidden
+
+- **`//!` module docs** — collect implementation history and rot
+- **Phase/F-N labels** — `// Phase v4-2`, `// F16:`, banner headers like `// ---------- Phase v4-3 RED ----------`
+- **History refs** — `Migrated from`, `carry-over`, `Mirrors v3`, `replaces the v3`, `previously inside X`, `reserved for future`
+- **Issue/PR refs** — `Reproduces issue #239`, `GitHub issue #206`. Plans rot; the code is the truth
+- **Banner separators** — `// ---------- Free functions: yaml ops ----------`. Use module structure or let the file speak for itself
+- **Test scenario labels** — don't write `// Windows-style backslashes` above a test input. Use a descriptive variable binding (`let windows_backslashes = [...]`) instead
+- **Name-restating field docs** — `/// A unique identifier for this instance`, `/// The dependency name`, `/// The instance id`. The field name already says it
+- **Step numbering inside functions** — `// 1. ...`, `// 2. ...`. Drop the numbers; keep the WHY if it's non-obvious
+
+### Allowed
+
+- **`@TODO` markers** — future plans worth tracking inline
+- **`///` doc comments** for non-obvious detail: `None`/`Err` semantics, side effects, invariants, distinctions between similar fields (e.g. `is_local_dependency` vs `is_local_instance`)
+- **`//` inline comments** when WHY is non-obvious: hidden constraints, ordering invariants ("SnappedTo groups must be visited last"), workarounds for surprising library behaviour, "must not poison X" cautions
+
+### Default
+
+No comments. Add one only when the WHY is non-obvious to a fresh reader.
 
 ## Patterns
 
