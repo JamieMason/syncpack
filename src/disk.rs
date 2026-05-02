@@ -9,6 +9,10 @@ use {
   thiserror::Error,
 };
 
+#[cfg(test)]
+#[path = "disk_test.rs"]
+mod disk_test;
+
 #[derive(Debug, Error)]
 pub enum NodeJsError {
   #[error("Node.js v22.6.0 or higher is needed for a TypeScript config file, try a JavaScript or JSON config file")]
@@ -111,13 +115,13 @@ impl<'a, T: DiskIo> Disk<'a, T> {
     let package_json_files = vec![];
     let lerna_json = io.read_json_file(&directory.join("lerna.json"));
     let package_json_root = io.read_json_file(&directory.join("package.json"));
-    let package_manager = if io.path_exists(&directory.join("pnpm-lock.yaml")) {
+    let package_manager = if io.path_exists(&directory.join("pnpm-lock.yaml")) || io.path_exists(&directory.join("pnpm-workspace.yaml")) {
       Some(PackageManager::Pnpm)
     } else if io.path_exists(&directory.join("yarn.lock")) {
       Some(PackageManager::Yarn)
     } else if io.path_exists(&directory.join("package-lock.json")) {
       Some(PackageManager::Npm)
-    } else if io.path_exists(&directory.join("bun.lock")) {
+    } else if io.path_exists(&directory.join("bun.lock")) || io.path_exists(&directory.join("bun.lockb")) {
       Some(PackageManager::Bun)
     } else {
       Some(PackageManager::Unknown)
