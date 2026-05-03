@@ -11,9 +11,9 @@ function getCustomTitle(route: any): string {
 
   const pageTitle = route.entry.data.title;
 
-  // Special case: Status Codes overview page (reference/status-codes with slug: status)
+  // Special case: Status Codes overview page (src/pages/status.astro with slug: status)
   // Title is "Status Codes" so avoid duplicate
-  if (route.id === 'reference/status-codes' || (route.slug === 'status' && pageTitle === 'Status Codes')) {
+  if (route.slug === 'status' && pageTitle === 'Status Codes') {
     return `${pageTitle} | Syncpack`;
   }
 

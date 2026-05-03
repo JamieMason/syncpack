@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+const sections = [
+  { status: 'valid', label: 'Valid' },
+  { status: 'fixable', label: 'Fixable' },
+  { status: 'unfixable', label: 'Unfixable' },
+  { status: 'suspect', label: 'Suspect' },
+  { status: 'conflict', label: 'Conflict' },
+] as const;
+
+const allDocs = await getCollection('docs');
+const statusPages = allDocs
+  .filter(doc => doc.id.startsWith('status/') && doc.data.status)
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+const grouped = sections.map(({ status, label }) => ({
+  label,
+  pages: statusPages.filter(doc => doc.data.status === status),
+}));
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Status Codes",
+    description: "Reference for all status codes assigned to dependencies during syncpack analysis",
+    editUrl: `https://github.com/JamieMason/syncpack/edit/main/site/src/pages/status.astro`,
+  }}
+  headings={grouped.map(({ label }) => ({
+    depth: 2,
+    text: label,
+    slug: label.toLowerCase(),
+  }))}
+>
+  <p>
+    When syncpack analyses your monorepo, every instance of every dependency is assigned <strong>one</strong> of the following status codes.
+  </p>
+
+  {
+    grouped.map(({ label, pages }) => (
+      <>
+        <h2 id={label.toLowerCase()}>{label}</h2>
+        <ul>
+          {pages.map((doc) => (
+            <li>
+              <a href={`/${doc.id}`}>{doc.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </>
+    ))
+  }
+</StarlightPage>

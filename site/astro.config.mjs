@@ -123,7 +123,7 @@ export default defineConfig({
         },
         {
           label: 'Reference',
-          autogenerate: { directory: 'reference' },
+          items: ['dependency-types', 'glossary', 'specifier-types', { label: 'Status Codes', link: '/status/' }],
         },
       ],
       components: {

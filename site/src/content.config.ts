@@ -15,6 +15,7 @@ const schema = docsSchema({
       content: banner,
     }),
     schemaOverride: z.enum(['article', 'faq', 'howto']).optional(),
+    status: z.enum(['valid', 'fixable', 'unfixable', 'suspect', 'conflict']).optional(),
   }),
 });
 
