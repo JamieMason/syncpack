@@ -7,6 +7,10 @@ use {
   std::{env, path::PathBuf},
 };
 
+#[cfg(test)]
+#[path = "cli_test.rs"]
+mod cli_test;
+
 #[derive(Debug)]
 pub enum Subcommand {
   Fix,
@@ -314,9 +318,31 @@ fn create() -> Command {
 }
 
 fn config_option(_command: &str) -> Arg {
-  Arg::new("config").long("config").value_name("PATH").long_help(cformat!(
-    r#"Path to a specific config file to use. When set, config file discovery is skipped."#
-  ))
+  Arg::new("config")
+    .long("config")
+    .value_name("PATH")
+    .value_parser(ValueParser::new(parse_config_path))
+    .long_help(cformat!(
+      r#"Path to a specific config file to use. When set, config file discovery is skipped."#
+    ))
+}
+
+fn parse_config_path(raw: &str) -> Result<PathBuf, String> {
+  let path = PathBuf::from(raw);
+  let resolved = if path.is_absolute() {
+    path.clone()
+  } else {
+    env::current_dir()
+      .map_err(|e| format!("could not resolve current directory: {e}"))?
+      .join(&path)
+  };
+  if !resolved.exists() {
+    return Err(format!("file not found: {}", path.display()));
+  }
+  if !resolved.is_file() {
+    return Err(format!("not a file: {}", path.display()));
+  }
+  Ok(path)
 }
 
 fn dependencies_option(command: &str) -> Arg {
