@@ -3,8 +3,10 @@
 use {
   crate::{
     disk::LiveDiskIo,
+    errors::SyncpackError,
     registry::client::{LiveRegistryClient, RegistryClient},
   },
+  clap::error::ErrorKind,
   log::error,
   std::{process::exit, sync::Arc},
 };
@@ -51,6 +53,12 @@ async fn main() {
   .await;
 
   if let Err(e) = result {
+    if let SyncpackError::CliError(clap_err) = &e {
+      if matches!(clap_err.kind(), ErrorKind::DisplayHelp | ErrorKind::DisplayVersion) {
+        println!("{clap_err}");
+        return;
+      }
+    }
     let msg = e.to_string();
     if !msg.is_empty() {
       error!("{e}");
