@@ -1,0 +1,40 @@
+{
+  "name": "sofash",
+  "version": "0.0.1",
+  "dependencies": {
+    "@grammyjs/conversations": "^2.0.1",
+    "@hono/swagger-ui": "^0.5.1",
+    "@hono/zod-validator": "^0.4.1",
+    "date-fns": "catalog:",
+    "drizzle-orm": "^0.44.2",
+    "drizzle-zod": "^0.7.1",
+    "grammy": "^1.31.2",
+    "hono": "^4.10.6",
+    "hono-openapi": "^0.4.6",
+    "uuid": "^11.1.0",
+    "zod": "catalog:",
+    "zod-openapi": "^4.2.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241112.0",
+    "@hono/vite-dev-server": "^0.19.0",
+    "@libsql/client": "^0.14.0",
+    "@total-typescript/ts-reset": "catalog:",
+    "@types/node": "catalog:",
+    "dotenv": "catalog:",
+    "drizzle-kit": "^0.31.4",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "deploy:production": "wrangler deploy",
+    "migrate:production": "wrangler d1 migrations apply DB --remote",
+    "proxy:dev": "ngrok http 5173",
+    "start:dev": "vite",
+    "ts:check": "tsc"
+  },
+  "type": "module"
+}

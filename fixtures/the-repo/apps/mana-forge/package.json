@@ -1,0 +1,45 @@
+{
+  "name": "mana-forge",
+  "version": "0.0.0",
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@mantine/core": "catalog:",
+    "@mantine/hooks": "catalog:",
+    "@tabler/icons-react": "catalog:",
+    "cn": "workspace:*",
+    "immer": "catalog:",
+    "papaparse": "^5.5.3",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-dropzone-esm": "catalog:",
+    "react-router": "catalog:",
+    "tailwindcss": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@total-typescript/ts-reset": "catalog:",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
+    "postcss-preset-mantine": "catalog:",
+    "postcss-simple-vars": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "deploy:preview": "wrangler deploy --env preview",
+    "deploy:production": "wrangler deploy",
+    "start:dev": "vite",
+    "ts:check": "tsc"
+  },
+  "type": "module"
+}

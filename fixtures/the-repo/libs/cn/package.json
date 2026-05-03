@@ -1,0 +1,13 @@
+{
+  "name": "cn",
+  "version": "0.0.1",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "license": "MIT",
+  "main": "src/index.ts",
+  "private": true,
+  "type": "module",
+  "types": "src/index.ts"
+}

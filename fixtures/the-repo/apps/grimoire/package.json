@@ -1,0 +1,28 @@
+{
+  "name": "grimoire",
+  "version": "0.0.1",
+  "bin": {
+    "grimoire": "src/main.ts"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.0.0",
+    "@google/generative-ai": "^0.21.0",
+    "dedent": "^1.7.1",
+    "env-paths": "^3.0.0",
+    "fs-extra": "catalog:",
+    "linkedom": "^0.18.5",
+    "slugify": "^1.6.6",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@total-typescript/ts-reset": "catalog:",
+    "@types/fs-extra": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "private": true,
+  "scripts": {
+    "ts:check": "tsc"
+  },
+  "type": "module"
+}

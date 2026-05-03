@@ -1,0 +1,31 @@
+{
+  "name": "studio",
+  "version": "0.0.1",
+  "dependencies": {
+    "@remotion/cli": "4.0.376",
+    "@remotion/tailwind-v4": "4.0.376",
+    "@remotion/zod-types": "4.0.376",
+    "cn": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "remotion": "4.0.376",
+    "tailwindcss": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@total-typescript/ts-reset": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "private": true,
+  "scripts": {
+    "build": "remotion bundle",
+    "start:dev": "remotion studio",
+    "ts:check": "tsc"
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}

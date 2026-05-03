@@ -1,0 +1,57 @@
+packages:
+  - 'apps/*'
+  - 'tools/*'
+  - 'libs/*'
+
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  sharp: true
+  workerd: true
+
+catalog:
+  # Build toolchain
+  typescript: ^5.9.3
+  vite: ^6.4.1
+  wrangler: ^4.2.0
+
+  # React
+  react: ^19.2.0
+  react-dom: ^19.2.0
+  react-router: ^7.9.6
+  react-dropzone-esm: ^15.2.0
+  immer: ^10.1.1
+  zustand: ^5.0.8
+
+  # Testing
+  "@playwright/test": ^1.56.1
+  "@testing-library/jest-dom": ^6.9.1
+  "@testing-library/react": ^16.3.0
+
+  # TypeScript utilities
+  "@total-typescript/ts-reset": ^0.6.1
+  "@types/fs-extra": ^11.0.4
+  "@types/node": ^22.19.1
+  "@types/react": ^19.2.5
+  "@types/react-dom": ^19.2.3
+  "@vitejs/plugin-react": ^5.1.1
+  babel-plugin-react-compiler: ^1.0.0
+
+  # CSS / styling
+  autoprefixer: ^10.4.21
+  cssnano: ^7.0.6
+  tailwindcss: ^4.1.1
+  "@tailwindcss/vite": ^4.1.17
+
+  # Mantine UI
+  "@mantine/core": ^8.3.8
+  "@mantine/hooks": ^8.3.8
+  "@tabler/icons-react": ^3.35.0
+  postcss-preset-mantine: ^1.15.0
+  postcss-simple-vars: ^7.0.1
+
+  # Utilities
+  date-fns: ^4.1.0
+  dotenv: ^16.4.7
+  fs-extra: ^11.3.0
+  zod: ^3.24.2
