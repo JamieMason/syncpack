@@ -84,7 +84,7 @@ function buildSoftwareApplicationSchema() {
  * https://schema.org/BreadcrumbList
  */
 function buildBreadcrumbSchema(route: StarlightRouteData) {
-  const breadcrumbs = generateBreadcrumbs(route.slug);
+  const breadcrumbs = generateBreadcrumbs(route.id);
 
   return {
     '@context': 'https://schema.org',
