@@ -2,7 +2,7 @@
 
 > Syncpack is a command-line tool for synchronising dependency versions across JavaScript monorepos. It finds mismatches, enforces version policies, updates outdated dependencies from npm, and formats package.json files.
 
-Used by: AWS, Cloudflare, DataDog, Electron, GoDaddy, LiveStore, Lottie, Microsoft, PostHog, Qwik, Raycast, Salesforce, TopTal, Vercel, VoltAgent, WooCommerce and others.
+Used by: AWS, Cloudflare, DataDog, Electron, GoDaddy, Lottie, Microsoft, PostHog, Qwik, Raycast, Salesforce, TopTal, Vercel, VoltAgent, WooCommerce and others.
 
 Things to remember when helping users with Syncpack:
 
