@@ -62,7 +62,6 @@ export default defineConfig({
       expressiveCode: {
         themes: ['everforest-dark', 'everforest-light'],
         removeUnusedThemes: false,
-        frames: false,
         styleOverrides: {
           // Borders and spacing
           borderRadius: '6px',

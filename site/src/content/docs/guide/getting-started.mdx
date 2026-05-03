@@ -25,7 +25,7 @@ Some of the things it can do are:
 
 The fastest way to try syncpack is via [npx](HREF_NPX).
 
-```bash
+```bash frame="none"
 npx syncpack list --dependency-types prod
 ```
 
@@ -35,13 +35,13 @@ Syncpack uses your package manager's workspace configuration to locate your pack
 
 For any given command, browse a summary of its options with `-h`
 
-```bash
+```bash frame="none"
 npx syncpack update -h
 ```
 
 or display documentation and examples with `--help`
 
-```bash
+```bash frame="none"
 npx syncpack update --help
 ```
 
@@ -49,13 +49,13 @@ npx syncpack update --help
 
 When setting up a project for real, install `syncpack` in [`devDependencies`](HREF_DEV_DEPENDENCIES) so that everyone working on your project uses the same version.
 
-```bash
+```bash frame="none"
 npm install syncpack --save-dev
 ```
 
 The locally installed binary can be run using [npm exec](HREF_NPM_EXEC)
 
-```bash
+```bash frame="none"
 npm exec syncpack -- list
 ```
 
@@ -67,7 +67,7 @@ The examples below assume syncpack is installed globally. Replace `syncpack` wit
 
 Let's see which dependencies we use the most.
 
-```bash
+```bash frame="none"
 syncpack list --dependency-types prod --sort count
 ```
 
@@ -75,13 +75,13 @@ Some of our dependencies might have [status codes](REF_STATUS_CODES) next to the
 
 To focus only on dependencies with errors, use `lint` instead of `list`.
 
-```bash
+```bash frame="none"
 syncpack lint --dependency-types prod
 ```
 
 If the suggested changes look ok, we can autofix them.
 
-```bash
+```bash frame="none"
 syncpack fix --dependency-types prod
 ```
 
@@ -91,49 +91,49 @@ After running `fix` or `update`, run your package manager (`npm install`, `pnpm 
 
 Or we could choose to only autofix one of them, for this example I've chosen `react`.
 
-```bash
+```bash frame="none"
 syncpack fix --dependency-types prod --dependencies react
 ```
 
 All of syncpack's commands can be filtered in the same way, let's see if `react` needs updating.
 
-```bash
+```bash frame="none"
 syncpack update --check --dependencies react
 ```
 
 Or list every dependency with `eslint` somewhere in the name.
 
-```bash
+```bash frame="none"
 syncpack list --dependencies '**eslint**'
 ```
 
 Or every dependency published under the `@types` scope.
 
-```bash
+```bash frame="none"
 syncpack list --dependencies '@types/**'
 ```
 
 We can find every dependency installed with an exact version number.
 
-```bash
+```bash frame="none"
 syncpack list --specifier-types exact
 ```
 
 Or look for updates to [`devDependencies`](HREF_DEV_DEPENDENCIES) where only the patch version is newer than what we have installed.
 
-```bash
+```bash frame="none"
 syncpack update --check --dependency-types dev --target patch
 ```
 
 And by removing the `--check` option we can write the newer versions to our files.
 
-```bash
+```bash frame="none"
 syncpack update --dependencies react
 ```
 
 Each command supports `--help` for examples and available options.
 
-```bash
+```bash frame="none"
 syncpack list --help
 ```
 
@@ -141,7 +141,7 @@ syncpack list --help
 
 Create a [.syncpackrc](CONFIG_SYNCPACKRC) file in the root of your repo to customise behaviour. One way to get started is to focus on production dependencies, then gradually broaden out as you feel comfortable. This is done using [`Version Groups`](CONFIG_VERSION_GROUPS).
 
-```json
+```json title=".syncpackrc.json"
 {
   "versionGroups": [
     {
@@ -158,7 +158,7 @@ Create a [.syncpackrc](CONFIG_SYNCPACKRC) file in the root of your repo to custo
 
 Or you could focus on specific dependencies and fix those first:
 
-```json
+```json title=".syncpackrc.json"
 {
   "versionGroups": [
     {
@@ -178,7 +178,7 @@ Or you could focus on specific dependencies and fix those first:
 
 This is a popular configuration which ensures that `workspace:*` is always used when you depend on a package which is developed in your monorepo.
 
-```json
+```json title=".syncpackrc.json"
 {
   "versionGroups": [
     {
