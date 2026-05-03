@@ -1,5 +1,9 @@
 use {serde::Deserialize, std::path::Path};
 
+#[cfg(test)]
+#[path = "javascript_test.rs"]
+mod tests;
+
 /// The JSON returned to Rust from JavaScript when evaluating a config file
 #[derive(Debug, Deserialize)]
 #[serde(tag = "_tag")]
@@ -16,10 +20,10 @@ pub enum JsResult {
 }
 
 pub fn get_javascript_contents(file_path: &Path) -> String {
-  let escaped_file_path = file_path.to_string_lossy().replace('\\', "\\\\");
+  let escaped_file_path = file_path.to_string_lossy().replace('\\', "\\\\").replace('\'', "\\'");
   format!(
     r#"
-    import('{escaped_file_path}')
+    import(require('node:url').pathToFileURL('{escaped_file_path}').href)
       .then(findConfig)
       .then((value) => {{
         if (isNonEmptyObject(value)) {{
