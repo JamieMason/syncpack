@@ -1,15 +1,23 @@
 {
+  "semverGroups": [
+    {
+      "label": "All catalog dependencies must use ~ versions",
+      "dependencyTypes": ["pnpmCatalog"],
+      "range": "~"
+    }
+  ],
   "versionGroups": [
+    {
+      "label": "Ban zod from the catalog",
+      "dependencies": ["zod"],
+      "dependencyTypes": ["pnpmCatalog"],
+      "isBanned": true
+    },
     {
       "label": "Use workspace protocol when developing local packages",
       "dependencies": ["$LOCAL"],
       "dependencyTypes": ["!local"],
       "pinVersion": "workspace:*"
-    },
-    {
-      "label": "Enforce catalogs for development and production deps",
-      "dependencyTypes": ["dev", "prod"],
-      "policy": "catalog"
     }
   ]
 }
