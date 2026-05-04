@@ -14,6 +14,7 @@ fn filters_out_deprecated_versions() {
       versions.insert("9.39.0".to_string(), json!({"version": "9.39.0"}));
       versions
     },
+    time: BTreeMap::new(),
   };
 
   let versions: Vec<String> = package_meta
@@ -40,6 +41,7 @@ fn includes_all_versions_when_none_deprecated() {
       versions.insert("3.0.0".to_string(), json!({"version": "3.0.0"}));
       versions
     },
+    time: BTreeMap::new(),
   };
 
   let versions: Vec<String> = package_meta

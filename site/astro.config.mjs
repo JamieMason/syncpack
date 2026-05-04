@@ -110,6 +110,7 @@ export default defineConfig({
             'config/format-repository',
             'config/indent',
             'config/max-concurrent-requests',
+            'config/minimum-release-age',
             { label: 'semverGroups', link: '/semver-groups/' },
             'config/sort-az',
             'config/sort-exports',

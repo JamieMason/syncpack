@@ -1,0 +1,42 @@
+---
+title: minimumReleaseAge
+description: Skip updates to dependency versions published more recently than this threshold
+sidebar:
+  badge: New
+---
+
+When using the [update](COMMAND_UPDATE) command, the minimum age (in minutes) a published version must reach before syncpack will consider it as an available update. Reduces supply chain attack risk by ignoring versions that have been on the registry for less time than the configured window — most malicious releases are detected and unpublished within an hour.
+
+When this option is omitted from the [rcfile](TERM_RCFILE), syncpack reads `minimumReleaseAge` from the project's `pnpm-workspace.yaml` if present. When neither is set, it defaults to `1440` (one day). Setting `0` disables the filter.
+
+## Default Value
+
+```json title=".syncpackrc.json"
+{
+  "minimumReleaseAge": 1440
+}
+```
+
+## Examples
+
+Wait one week before considering a published version:
+
+```json title=".syncpackrc.json"
+{
+  "minimumReleaseAge": 10080
+}
+```
+
+Disable the filter and consider all published versions:
+
+```json title=".syncpackrc.json"
+{
+  "minimumReleaseAge": 0
+}
+```
+
+Inherit the value already configured for [pnpm](HREF_PNPM_MINIMUM_RELEASE_AGE) by omitting it from the rcfile:
+
+```yaml title="pnpm-workspace.yaml"
+minimumReleaseAge: 1440
+```

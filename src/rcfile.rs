@@ -109,6 +109,11 @@ fn default_max_concurrent_requests() -> usize {
   12
 }
 
+/// Default `minimumReleaseAge` (one day in minutes) used when neither the
+/// rcfile nor `pnpm-workspace.yaml` provides a value. Resolution lives in
+/// `rcfile::from_disk::resolve_minimum_release_age`.
+pub(crate) const DEFAULT_MINIMUM_RELEASE_AGE: u64 = 1440;
+
 fn default_true() -> bool {
   true
 }
@@ -213,6 +218,11 @@ pub(crate) struct RawRcfile {
   pub indent: Option<String>,
   #[serde(default = "default_max_concurrent_requests")]
   pub max_concurrent_requests: usize,
+  /// User-supplied value from the rcfile. `None` means "fall back to
+  /// pnpm-workspace.yaml or the default" — resolution happens in
+  /// `from_disk::resolve_minimum_release_age`.
+  #[serde(default)]
+  pub minimum_release_age: Option<u64>,
   #[serde(default)]
   pub semver_groups: Vec<AnySemverGroup>,
   #[serde(default = "default_sort_az")]
@@ -358,6 +368,10 @@ impl TryFrom<RawRcfile> for Rcfile {
       format_repository: raw.format_repository,
       indent: raw.indent,
       max_concurrent_requests: raw.max_concurrent_requests,
+      // `from_disk` re-resolves this against pnpm-workspace.yaml. The
+      // `try_from`-only paths (tests, `Rcfile::default()`) get the
+      // default here so consumers always see a `u64`.
+      minimum_release_age: raw.minimum_release_age.unwrap_or(DEFAULT_MINIMUM_RELEASE_AGE),
       semver_groups,
       sort_az: raw.sort_az,
       sort_exports: raw.sort_exports,
@@ -378,6 +392,10 @@ pub struct Rcfile {
   pub format_repository: bool,
   pub indent: Option<String>,
   pub max_concurrent_requests: usize,
+  /// Skip dependency updates published less than this many minutes ago.
+  /// `0` disables age filtering. Resolved with precedence:
+  /// rcfile → `pnpm-workspace.yaml` → `DEFAULT_MINIMUM_RELEASE_AGE`.
+  pub minimum_release_age: u64,
   pub semver_groups: Vec<SemverGroup>,
   pub sort_az: Vec<String>,
   pub sort_exports: Vec<String>,

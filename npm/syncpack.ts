@@ -15,6 +15,14 @@ export interface RcFile {
   indent?: string;
   /** @see https://syncpack.dev/config/max-concurrent-requests */
   maxConcurrentRequests?: number;
+  /**
+   * Skip dependency updates published less than this many minutes ago.
+   * `0` disables the filter. When omitted, the value from the project's
+   * `pnpm-workspace.yaml` is used; if neither is set, defaults to `1440`
+   * (one day). Setting it here always overrides the pnpm value.
+   * @see https://pnpm.io/settings#minimumreleaseage
+   */
+  minimumReleaseAge?: number;
   /** @see https://syncpack.dev/semver-groups */
   semverGroups?: SemverGroup.Any[];
   /** @see https://syncpack.dev/config/sort-az */

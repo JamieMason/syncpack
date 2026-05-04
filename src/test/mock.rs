@@ -134,6 +134,7 @@ pub async fn context_with_registry_updates(
     &ctx.version_groups,
     &ctx.instances,
     ctx.config.rcfile.max_concurrent_requests,
+    ctx.config.rcfile.minimum_release_age,
   )
   .await;
   (ctx, updates)

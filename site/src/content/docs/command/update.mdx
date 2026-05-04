@@ -1,6 +1,8 @@
 ---
 title: update
 description: Update dependency versions to latest releases from the npm registry
+sidebar:
+  badge: Updated
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -19,7 +21,7 @@ import SourceOption from "@partials/option/source.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 import TargetOption from "@partials/option/target.mdx";
 
-Update dependencies in your monorepo to newer versions from the npm registry. Checks for available updates and modifies package.json files to use them. Unlike `fix` which synchronises versions across packages, `update` fetches the latest published versions. Use `--target` to control update strategy (latest, minor, patch).
+Update dependencies in your monorepo to newer versions from the npm registry. Checks for available updates and modifies package.json files — and `pnpm-workspace.yaml` catalog entries when present — to use them. Unlike `fix` which synchronises versions across packages, `update` fetches the latest published versions. Use `--target` to control update strategy (latest, minor, patch). Versions newer than [minimumReleaseAge](CONFIG_MINIMUM_RELEASE_AGE) are excluded by default to reduce supply chain attack risk.
 
 ## Examples
 
@@ -34,6 +36,10 @@ syncpack update --target patch
 syncpack update --check --source 'packages/pingu/package.json'
 # Update dependencies and devDependencies in the whole monorepo
 syncpack update --dependency-types dev,prod
+# Update only pnpm catalog entries in pnpm-workspace.yaml
+syncpack update --dependency-types pnpmCatalog
+# Update only the named pnpm catalog 'react18'
+syncpack update --dependency-types 'pnpmCatalog:react18'
 # Only update dependencies with a semver range specifier (^, ~, etc.)
 syncpack update --specifier-types range
 # Update dependencies where name exactly matches 'react'

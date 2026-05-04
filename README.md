@@ -84,7 +84,7 @@ syncpack fix -h
 
 ### [update](https://syncpack.dev/command/update)
 
-Update packages to the latest versions from the npm registry, wherever they are in your monorepo.<br/>Semver range preferences are preserved when updating.
+Update packages to the latest versions from the npm registry, wherever they are in your monorepo, including pnpm catalog entries in `pnpm-workspace.yaml`.<br/>Semver range preferences are preserved when updating.
 
 #### Examples
 
@@ -99,6 +99,10 @@ syncpack update --target patch
 syncpack update --check --source 'packages/pingu/package.json'
 # Update dependencies and devDependencies in the whole monorepo
 syncpack update --dependency-types dev,prod
+# Update only pnpm catalog entries in pnpm-workspace.yaml
+syncpack update --dependency-types pnpmCatalog
+# Update only the named pnpm catalog 'react18'
+syncpack update --dependency-types 'pnpmCatalog:react18'
 # Only update dependencies with a semver range specifier (^, ~, etc.)
 syncpack update --specifier-types range
 # Update dependencies where name exactly matches 'react'

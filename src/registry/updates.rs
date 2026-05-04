@@ -12,13 +12,17 @@ use {
     collections::{HashMap, HashSet},
     rc::Rc,
     sync::Arc,
-    time::Duration,
+    time::{Duration, SystemTime, UNIX_EPOCH},
   },
   tokio::{
     sync::Semaphore,
     task::{spawn, JoinHandle},
   },
 };
+
+#[cfg(test)]
+#[path = "updates_test.rs"]
+mod updates_test;
 
 /// The result of fetching package versions from the npm registry.
 pub struct RegistryUpdates {
@@ -36,6 +40,7 @@ impl RegistryUpdates {
     version_groups: &[VersionGroup],
     arena: &[Instance],
     max_concurrent_requests: usize,
+    minimum_release_age_minutes: u64,
   ) -> Self {
     let client = Arc::clone(client);
     let semaphore = Arc::new(Semaphore::new(max_concurrent_requests));
@@ -43,6 +48,7 @@ impl RegistryUpdates {
     let mut handles: Vec<(String, JoinHandle<Result<AllPackageVersions, RegistryError>>)> = vec![];
     let mut updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
     let mut failed: Vec<String> = vec![];
+    let cutoff_unix_seconds = age_cutoff_unix_seconds(minimum_release_age_minutes);
 
     for update_url in get_unique_update_urls(version_groups, arena) {
       let permit = Arc::clone(&semaphore).acquire_owned().await;
@@ -71,7 +77,7 @@ impl RegistryUpdates {
           Ok(package_meta) => {
             let all_updates = updates_by_internal_name.entry(internal_name.clone()).or_default();
             for version in package_meta.versions.iter() {
-              if !version.contains("created") && !version.contains("modified") {
+              if !is_too_recent(version, &package_meta.times, cutoff_unix_seconds) {
                 all_updates.push(Specifier::new(version));
               }
             }
@@ -93,6 +99,75 @@ impl RegistryUpdates {
       failed,
     }
   }
+}
+
+/// Compute the UNIX-second cutoff for the age filter. Returns `None` when
+/// filtering is disabled (`minimum_release_age_minutes == 0`) or when the
+/// system clock is before the UNIX epoch.
+pub(crate) fn age_cutoff_unix_seconds(minimum_release_age_minutes: u64) -> Option<i64> {
+  if minimum_release_age_minutes == 0 {
+    return None;
+  }
+  let now = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs() as i64;
+  Some(now - (minimum_release_age_minutes as i64) * 60)
+}
+
+/// `true` when the version was published after the cutoff and so should
+/// be filtered out. Versions absent from `times` are kept.
+pub(crate) fn is_too_recent(version: &str, times: &HashMap<String, String>, cutoff_unix_seconds: Option<i64>) -> bool {
+  let Some(cutoff) = cutoff_unix_seconds else { return false };
+  let Some(timestamp) = times.get(version) else { return false };
+  match parse_rfc3339_to_unix_seconds(timestamp) {
+    Some(published_at) => published_at > cutoff,
+    None => false,
+  }
+}
+
+/// Parse an RFC 3339 / ISO 8601 timestamp such as
+/// `"2024-01-15T10:30:00.000Z"` into UNIX seconds. Returns `None` for
+/// any input that does not match the npm registry's fixed format.
+///
+/// Implements Howard Hinnant's date algorithm
+/// (<https://howardhinnant.github.io/date_algorithms.html>) for the
+/// civil → days-since-epoch conversion so we avoid pulling in a date
+/// crate for one call site.
+pub(crate) fn parse_rfc3339_to_unix_seconds(s: &str) -> Option<i64> {
+  let bytes = s.as_bytes();
+  if bytes.len() < 20 || !s.ends_with('Z') {
+    return None;
+  }
+  let year: i32 = std::str::from_utf8(&bytes[0..4]).ok()?.parse().ok()?;
+  if bytes[4] != b'-' {
+    return None;
+  }
+  let month: u32 = std::str::from_utf8(&bytes[5..7]).ok()?.parse().ok()?;
+  if bytes[7] != b'-' {
+    return None;
+  }
+  let day: u32 = std::str::from_utf8(&bytes[8..10]).ok()?.parse().ok()?;
+  if bytes[10] != b'T' {
+    return None;
+  }
+  let hour: u32 = std::str::from_utf8(&bytes[11..13]).ok()?.parse().ok()?;
+  if bytes[13] != b':' {
+    return None;
+  }
+  let minute: u32 = std::str::from_utf8(&bytes[14..16]).ok()?.parse().ok()?;
+  if bytes[16] != b':' {
+    return None;
+  }
+  let second: u32 = std::str::from_utf8(&bytes[17..19]).ok()?.parse().ok()?;
+  if !(1..=12).contains(&month) || day == 0 || day > 31 || hour > 23 || minute > 59 || second > 60 {
+    return None;
+  }
+  let y = if month <= 2 { year - 1 } else { year };
+  let era = if y >= 0 { y } else { y - 399 } / 400;
+  let yoe = (y - era * 400) as u32;
+  let m = if month > 2 { month - 3 } else { month + 9 };
+  let doy = (153 * m + 2) / 5 + day - 1;
+  let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+  let days_since_epoch = era as i64 * 146097 + doe as i64 - 719468;
+  Some(days_since_epoch * 86400 + hour as i64 * 3600 + minute as i64 * 60 + second as i64)
 }
 
 /// Return a list of every dependency we should query the registry for

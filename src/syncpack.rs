@@ -62,6 +62,7 @@ async fn fetch_updates(ctx: &Context, registry_client: &Arc<dyn RegistryClient>)
         &ctx.version_groups,
         &ctx.instances,
         ctx.config.rcfile.max_concurrent_requests,
+        ctx.config.rcfile.minimum_release_age,
       )
       .await;
       Some(registry_updates)

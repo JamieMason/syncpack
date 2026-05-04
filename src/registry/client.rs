@@ -8,7 +8,10 @@ use {
   reqwest::{header::ACCEPT, Client, StatusCode},
   serde::{Deserialize, Serialize},
   serde_json::Value,
-  std::{collections::BTreeMap, time::Duration},
+  std::{
+    collections::{BTreeMap, HashMap},
+    time::Duration,
+  },
   thiserror::Error,
 };
 
@@ -30,6 +33,10 @@ pub enum RegistryError {
 pub struct PackageMeta {
   pub name: String,
   pub versions: BTreeMap<String, Value>,
+  /// Per-version publish timestamps (ISO 8601). Also contains
+  /// non-version keys `created` / `modified` which we ignore.
+  #[serde(default)]
+  pub time: BTreeMap<String, String>,
 }
 
 /// All available versions of a package from the npm registry
@@ -37,6 +44,10 @@ pub struct PackageMeta {
 pub struct AllPackageVersions {
   pub name: String,
   pub versions: Vec<String>,
+  /// Map of version → ISO 8601 publish timestamp. May be empty if the
+  /// registry response did not include `time`.
+  #[serde(default)]
+  pub times: HashMap<String, String>,
 }
 
 /// A trait defining the interface for a registry client
@@ -62,7 +73,7 @@ impl RegistryClient for LiveRegistryClient {
       Ok(res) => match res.status() {
         StatusCode::OK => match res.json::<PackageMeta>().await {
           Ok(package_meta) => {
-            let versions = package_meta
+            let versions: Vec<String> = package_meta
               .versions
               .into_iter()
               .filter(|(_, metadata)| {
@@ -71,9 +82,15 @@ impl RegistryClient for LiveRegistryClient {
               })
               .map(|(version, _)| version)
               .collect();
+            let times = package_meta
+              .time
+              .into_iter()
+              .filter(|(k, _)| k != "created" && k != "modified")
+              .collect();
             Ok(AllPackageVersions {
               name: package_meta.name,
               versions,
+              times,
             })
           }
           Err(err) => Err(RegistryError::FetchError {

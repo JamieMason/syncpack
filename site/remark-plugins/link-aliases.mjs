@@ -14,6 +14,7 @@ export function linkAliases() {
     CONFIG_FORMAT_BUGS: '/config/format-bugs/',
     CONFIG_FORMAT_REPOSITORY: '/config/format-repository/',
     CONFIG_INDENT: '/config/indent/',
+    CONFIG_MINIMUM_RELEASE_AGE: '/config/minimum-release-age/',
     CONFIG_SEMVER_GROUPS: '/semver-groups/',
     CONFIG_SORT_AZ: '/config/sort-az/',
     CONFIG_SORT_EXPORTS: '/config/sort-exports/',
@@ -64,6 +65,7 @@ export function linkAliases() {
     HREF_PACKAGE_MANAGER: 'https://nodejs.org/api/packages.html#packagemanager',
     HREF_PEER_DEPENDENCIES: 'https://docs.npmjs.com/cli/v11/configuring-npm/package-json#peerDependencies',
     HREF_PNPM: 'https://pnpm.js.org/',
+    HREF_PNPM_MINIMUM_RELEASE_AGE: 'https://pnpm.io/settings#minimumreleaseage',
     HREF_PNPM_OVERRIDES: 'https://pnpm.io/settings#overrides',
     HREF_RESOLUTIONS: 'https://docs.npmjs.com/cli/v11/configuring-npm/package-json#resolutions',
     HREF_SYNCPACK_GITHUB_ACTION:

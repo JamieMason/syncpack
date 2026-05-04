@@ -14,6 +14,39 @@ fn default_format_bugs_is_false() {
 }
 
 #[test]
+fn raw_minimum_release_age_is_none_when_omitted() {
+  let raw: RawRcfile = serde_json::from_value(json!({})).unwrap();
+  assert_eq!(raw.minimum_release_age, None);
+}
+
+#[test]
+fn raw_minimum_release_age_captures_user_value() {
+  let raw: RawRcfile = serde_json::from_value(json!({ "minimumReleaseAge": 60 })).unwrap();
+  assert_eq!(raw.minimum_release_age, Some(60));
+}
+
+#[test]
+fn try_from_falls_back_to_default_when_user_did_not_set() {
+  let raw: RawRcfile = serde_json::from_value(json!({})).unwrap();
+  let rcfile = Rcfile::try_from(raw).unwrap();
+  assert_eq!(rcfile.minimum_release_age, 1440);
+}
+
+#[test]
+fn try_from_uses_user_value_when_set() {
+  let raw: RawRcfile = serde_json::from_value(json!({ "minimumReleaseAge": 60 })).unwrap();
+  let rcfile = Rcfile::try_from(raw).unwrap();
+  assert_eq!(rcfile.minimum_release_age, 60);
+}
+
+#[test]
+fn try_from_preserves_zero_when_user_disables_filter() {
+  let raw: RawRcfile = serde_json::from_value(json!({ "minimumReleaseAge": 0 })).unwrap();
+  let rcfile = Rcfile::try_from(raw).unwrap();
+  assert_eq!(rcfile.minimum_release_age, 0);
+}
+
+#[test]
 fn default_format_repository_is_false() {
   let rcfile = Rcfile::default();
   assert!(!rcfile.format_repository);

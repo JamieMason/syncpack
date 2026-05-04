@@ -1,11 +1,11 @@
 use {
   crate::{
     cli::Cli,
-    disk::{detect_formatting, DetectedFormatting, Disk, DiskIo, DiskIoError, File, NodeJsError},
+    disk::{detect_formatting, json_view, DetectedFormatting, Disk, DiskIo, DiskIoError, File, NodeJsError},
     errors::UnsupportedConfigErrors,
     rcfile::{
       from_disk::javascript::{get_javascript_contents, JsResult},
-      RawRcfile, Rcfile,
+      RawRcfile, Rcfile, DEFAULT_MINIMUM_RELEASE_AGE,
     },
   },
   log::debug,
@@ -15,6 +15,10 @@ use {
 
 #[path = "javascript.rs"]
 mod javascript;
+
+#[cfg(test)]
+#[path = "from_disk_test.rs"]
+mod from_disk_test;
 
 #[derive(Debug, Error)]
 pub enum JsRcfileError {
@@ -165,8 +169,10 @@ impl Rcfile {
         return Err(RcfileError::UnsupportedConfig(UnsupportedConfigErrors(config_errors)));
       }
 
+      let rcfile_minimum_release_age = raw_rcfile.minimum_release_age;
       match Rcfile::try_from(raw_rcfile) {
-        Ok(rcfile) => {
+        Ok(mut rcfile) => {
+          rcfile.minimum_release_age = resolve_minimum_release_age(rcfile_minimum_release_age, disk);
           debug!("Config discovery completed in {:?}", start.elapsed());
           return Ok(File {
             filepath,
@@ -183,12 +189,34 @@ impl Rcfile {
     }
 
     debug!("No config file found, using defaults");
+    let rcfile = Rcfile {
+      minimum_release_age: resolve_minimum_release_age(None, disk),
+      ..Rcfile::default()
+    };
     debug!("Config discovery completed in {:?}", start.elapsed());
     Ok(File {
       filepath: disk.cwd.join(".syncpackrc"),
       formatting: DetectedFormatting::default(),
-      contents: Rcfile::default(),
+      contents: rcfile,
       dirty: false,
     })
   }
+}
+
+/// Resolve the effective `minimumReleaseAge` (in minutes). Precedence:
+/// 1. value from the rcfile (any user-set value, including `0`)
+/// 2. value from `pnpm-workspace.yaml`
+/// 3. `DEFAULT_MINIMUM_RELEASE_AGE` (1 day)
+pub(crate) fn resolve_minimum_release_age(rcfile_value: Option<u64>, disk: &Disk) -> u64 {
+  if let Some(value) = rcfile_value {
+    return value;
+  }
+  if let Some(yaml) = &disk.pnpm_workspace {
+    let json = json_view(yaml);
+    if let Some(value) = json.get("minimumReleaseAge").and_then(|v| v.as_u64()) {
+      debug!("Using minimumReleaseAge={value} from pnpm-workspace.yaml");
+      return value;
+    }
+  }
+  DEFAULT_MINIMUM_RELEASE_AGE
 }
