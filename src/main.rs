@@ -7,7 +7,7 @@ use {
     registry::client::{LiveRegistryClient, RegistryClient},
   },
   clap::error::ErrorKind,
-  log::error,
+  log::{debug, error},
   std::{process::exit, sync::Arc},
 };
 
@@ -48,6 +48,7 @@ async fn main() {
     let io = LiveDiskIo::new();
     let registry_client: Arc<dyn RegistryClient> = Arc::new(LiveRegistryClient::new());
     let (ctx, registry_updates) = syncpack::syncpack(&args, &io, &registry_client).await?;
+    debug!("config: {:#?}", ctx.config);
     syncpack::run(ctx, registry_updates, &io)
   }
   .await;
