@@ -26,12 +26,12 @@ Pin all dependencies from [@aws-sdk](HREF_AWS_SDK) so that they are always ident
 
 Any `@aws-sdk` packages which do not have the expected version can then be found:
 
-```bash
+```bash frame="none"
 syncpack list-mismatches
 ```
 
 And fixed:
 
-```bash
+```bash frame="none"
 syncpack fix-mismatches
 ```

@@ -27,7 +27,7 @@ Catalog dependency types are added automatically when syncpack detects [pnpm cat
 
 Bun also recognises `workspaces.catalog` and `workspaces.catalogs.<name>`. These names work everywhere a dependency type is accepted.
 
-```bash
+```bash frame="none"
 syncpack lint --dependency-types pnpmCatalog
 syncpack list --dependency-types 'pnpmCatalog:react18'
 ```
@@ -49,7 +49,7 @@ Dependency types can be specified in these contexts:
 
 Use the `--dependency-types` option to target specific types in commands:
 
-```bash
+```bash frame="none"
 # Only check production dependencies
 syncpack lint --dependency-types prod
 

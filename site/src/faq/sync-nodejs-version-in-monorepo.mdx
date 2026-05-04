@@ -23,13 +23,13 @@ I've chosen a name of `nodeEngine` but it can be anything you like.
 
 Perform a one-off check for every usage of `engines.node` in your monorepo.
 
-```bash
+```bash frame="none"
 syncpack list --dependency-types nodeEngine
 ```
 
 If the versions are not identical, they can be synchronised to all use the highest of the semver versions currently in use.
 
-```bash
+```bash frame="none"
 syncpack fix-mismatches --dependency-types nodeEngine
 ```
 
@@ -57,7 +57,7 @@ Add your new custom type to your `dependencyTypes` at the root level. It is incl
 
 Now when you run any syncpack command, `engines.node` will also be checked.
 
-```bash
+```bash frame="none"
 syncpack list
 ```
 

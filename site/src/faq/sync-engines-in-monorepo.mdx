@@ -24,13 +24,13 @@ I've chosen a name of `engines` but it can be anything you like.
 
 Perform a one-off check of all versions defined under `engines` in your monorepo.
 
-```bash
+```bash frame="none"
 syncpack list --dependency-types engines
 ```
 
 If the versions are not identical, they can be synchronised to all use the highest of the semver versions currently in use.
 
-```bash
+```bash frame="none"
 syncpack fix-mismatches --dependency-types engines
 ```
 
@@ -51,7 +51,7 @@ Add your new custom type to your `dependencyTypes`.
 
 Now when you run any syncpack command, versions under `engines` will also be checked.
 
-```bash
+```bash frame="none"
 syncpack list
 ```
 
