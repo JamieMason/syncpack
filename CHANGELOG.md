@@ -1,5 +1,48 @@
 # Changelog
 
+## [15.0.0](https://github.com/JamieMason/syncpack/compare/14.3.1...15.0.0) (2026-05-04)
+
+### ⚠ BREAKING CHANGES
+
+* **pnpm:** https://syncpack.dev/guide/migrate-v15/
+
+`pnpmOverrides` now reads `pnpm-workspace.yaml`
+
+The default `pnpmOverrides` dependency type now reads [`overrides`](https://pnpm.io/settings#overrides) from `pnpm-workspace.yaml` instead of `pnpm.overrides` in `package.json`. This matches pnpm's current convention for managing overrides.
+
+Restoring the legacy behaviour
+
+If your overrides still live in `package.json` under `pnpm.overrides`, define `pnpmOverridesLegacy` in your config to point at the legacy location:
+
+```json title=".syncpackrc.json"
+{
+  "customTypes": {
+    "pnpmOverridesLegacy": {
+      "strategy": "versionsByName",
+      "path": "pnpm.overrides"
+    }
+  }
+}
+```
+
+The default `pnpmOverrides` continues to manage the YAML location.
+
+### Features
+
+* **groups:** add full pnpm/bun catalogs support ([53d54e0](https://github.com/JamieMason/syncpack/commit/53d54e07d69c35abc1a4124509d876f5dc837690)), closes [#258](https://github.com/JamieMason/syncpack/issues/258)
+* **pnpm:** read pnpmOverrides from pnpm-workspace.yaml ([72ce5ef](https://github.com/JamieMason/syncpack/commit/72ce5ef6ab764719f2a06f734ca7d009f889b6c3)), closes [#304](https://github.com/JamieMason/syncpack/issues/304)
+* **update:** add minimumReleaseAge and default to 1 day ([a6648ab](https://github.com/JamieMason/syncpack/commit/a6648ab5cce3b55cbcf316aeb9e507522b5490d2)), closes [#302](https://github.com/JamieMason/syncpack/issues/302)
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([a375df4](https://github.com/JamieMason/syncpack/commit/a375df4ac39ae12fb8414546006a1082d5be76ef))
+* **cli:** do not display --version and --help as errors ([2abe490](https://github.com/JamieMason/syncpack/commit/2abe49056745904f53f76d9b336d8549fbeebfe1)), closes [#331](https://github.com/JamieMason/syncpack/issues/331)
+* **cli:** fix panic when using --config option ([76f1553](https://github.com/JamieMason/syncpack/commit/76f155369909abdce3979801129af7ceda00e0af)), closes [#332](https://github.com/JamieMason/syncpack/issues/332)
+* **config:** prevent ERR_UNSUPPORTED_ESM_URL_SCHEME on Windows ([127ae12](https://github.com/JamieMason/syncpack/commit/127ae128a7f45753d2874d40ed61b81d616b2956)), closes [#327](https://github.com/JamieMason/syncpack/issues/327) [#328](https://github.com/JamieMason/syncpack/issues/328)
+* **core:** widen detection of pnpm and bun projects ([be883f5](https://github.com/JamieMason/syncpack/commit/be883f5d6008d62a37d6daa65998908ec2493e59))
+* **npm:** detect musl libc to resolve correct binary ([89d5654](https://github.com/JamieMason/syncpack/commit/89d5654b4b3b348099e7091b3b6b1ccd04407742)), closes [#329](https://github.com/JamieMason/syncpack/issues/329)
+* **rust:** update edition from 2021 to 2024 ([efad1b5](https://github.com/JamieMason/syncpack/commit/efad1b5bd2a671d17404b15177383b20f208919d))
+
 ## [14.3.1](https://github.com/JamieMason/syncpack/compare/14.3.0...14.3.1) (2026-04-26)
 
 ### Bug Fixes
