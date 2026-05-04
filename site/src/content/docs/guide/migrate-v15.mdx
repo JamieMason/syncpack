@@ -1,0 +1,31 @@
+---
+title: Migrate to 15
+description: Migration guide for upgrading from syncpack v14 to v15
+sidebar:
+  badge: New
+---
+
+```bash
+npm install --save-dev syncpack
+```
+
+## `pnpmOverrides` now reads `pnpm-workspace.yaml`
+
+The default `pnpmOverrides` dependency type now reads [`overrides`](https://pnpm.io/settings#overrides) from `pnpm-workspace.yaml` instead of `pnpm.overrides` in `package.json`. This matches pnpm's current convention for managing overrides.
+
+### Restoring the legacy behaviour
+
+If your overrides still live in `package.json` under `pnpm.overrides`, define `pnpmOverridesLegacy` in your config to point at the legacy location:
+
+```json title=".syncpackrc.json"
+{
+  "customTypes": {
+    "pnpmOverridesLegacy": {
+      "strategy": "versionsByName",
+      "path": "pnpm.overrides"
+    }
+  }
+}
+```
+
+The default `pnpmOverrides` continues to manage the YAML location.

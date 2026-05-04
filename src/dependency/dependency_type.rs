@@ -81,16 +81,16 @@ mod dependency_type_test {
   };
 
   #[test]
-  fn dependency_type_default_source_is_package_json() {
+  fn dependency_type_default_sources_are_correct() {
     let dep_types = compute_all_dependency_types(&HashMap::new()).expect("default dep types compute");
     assert!(!dep_types.is_empty());
     for dt in &dep_types {
-      assert_eq!(
-        dt.source,
-        SourceKind::PackageJson,
-        "{}: default dep type source must be PackageJson",
-        dt.name
-      );
+      let expected_source = if dt.name == "pnpmOverrides" {
+        SourceKind::PnpmWorkspace
+      } else {
+        SourceKind::PackageJson
+      };
+      assert_eq!(dt.source, expected_source, "{}: default dep type source mismatch", dt.name);
       assert!(
         !dt.is_catalog_definition,
         "{}: default dep type is_catalog_definition must be false",

@@ -64,7 +64,7 @@ export function linkAliases() {
     HREF_PACKAGE_MANAGER: 'https://nodejs.org/api/packages.html#packagemanager',
     HREF_PEER_DEPENDENCIES: 'https://docs.npmjs.com/cli/v11/configuring-npm/package-json#peerDependencies',
     HREF_PNPM: 'https://pnpm.js.org/',
-    HREF_PNPM_OVERRIDES: 'https://pnpm.io/package_json#pnpmoverrides',
+    HREF_PNPM_OVERRIDES: 'https://pnpm.io/settings#overrides',
     HREF_RESOLUTIONS: 'https://docs.npmjs.com/cli/v11/configuring-npm/package-json#resolutions',
     HREF_SYNCPACK_GITHUB_ACTION:
       'https://github.com/marketplace/actions/syncpack-synchronise-monorepo-dependency-versions',

@@ -68,8 +68,8 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
       CustomType {
         strategy: String::from("versionsByName"),
         name_path: None,
-        path: String::from("pnpm.overrides"),
-        source: None,
+        path: String::from("overrides"),
+        source: Some(String::from("PnpmWorkspace")),
         unknown_fields: HashMap::new(),
       },
     ),

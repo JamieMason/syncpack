@@ -505,7 +505,7 @@ fn dependency_types_option(command: &str) -> Arg {
 <blue>local</>          version
 <blue>overrides</>      overrides
 <blue>peer</>           peerDependencies
-<blue>pnpmOverrides</>  pnpm.overrides
+<blue>pnpmOverrides</>  overrides (in pnpm-workspace.yaml)
 <blue>prod</>           dependencies
 <blue>resolutions</>    resolutions
 
