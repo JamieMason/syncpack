@@ -1,4 +1,4 @@
-use crate::{update_target::UpdateTarget, Specifier};
+use crate::{Specifier, update_target::UpdateTarget};
 
 #[test]
 fn for_latest() {

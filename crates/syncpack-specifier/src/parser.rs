@@ -6,11 +6,7 @@ fn skip_digits(bytes: &[u8], pos: usize) -> Option<usize> {
   while i < bytes.len() && bytes[i].is_ascii_digit() {
     i += 1;
   }
-  if i == start {
-    None
-  } else {
-    Some(i)
-  }
+  if i == start { None } else { Some(i) }
 }
 
 /// Check if bytes from `pos` match a tag suffix: -[a-z0-9._-]+$

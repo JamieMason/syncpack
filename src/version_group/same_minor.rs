@@ -1,5 +1,5 @@
 use {
-  super::{add_instance_to_dependencies, DependencyCore, PreferVersion, L1, L2, L3, L4, L5, L6, L7, L8, L9},
+  super::{DependencyCore, L1, L2, L3, L4, L5, L6, L7, L8, L9, PreferVersion, add_instance_to_dependencies},
   crate::{
     context::Context,
     group_selector::GroupSelector,
@@ -42,7 +42,7 @@ impl SameMinorGroup {
       .get_instances(arena)
       .filter(|(_, instance)| instance.descriptor.specifier.get_node_version().is_some())
       .map(|(_, instance)| {
-        let adjusted = instance
+        instance
           .preferred_semver_range
           .as_ref()
           .and_then(|range| {
@@ -53,14 +53,9 @@ impl SameMinorGroup {
             };
             instance.descriptor.specifier.with_range(&safe_range)
           })
-          .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier));
-        adjusted
+          .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier))
       });
-    if prefer_highest {
-      specifiers.max()
-    } else {
-      specifiers.min()
-    }
+    if prefer_highest { specifiers.max() } else { specifiers.min() }
   }
 
   pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {

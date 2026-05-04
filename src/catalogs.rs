@@ -28,13 +28,12 @@ pub fn make_catalog_dep_types(disk: &Disk) -> Result<Vec<DependencyType>, Syncpa
       dep_types.push(make_pnpm_dep_type(&catalog_name));
     }
   }
-  if matches!(disk.package_manager, Some(PackageManager::Bun)) {
-    if let Some(root) = disk.package_json_root() {
-      if let Some((prefix, names)) = detect_bun_catalogs(&root.contents)? {
-        for name in names {
-          dep_types.push(make_bun_dep_type(&name, prefix));
-        }
-      }
+  if matches!(disk.package_manager, Some(PackageManager::Bun))
+    && let Some(root) = disk.package_json_root()
+    && let Some((prefix, names)) = detect_bun_catalogs(&root.contents)?
+  {
+    for name in names {
+      dep_types.push(make_bun_dep_type(&name, prefix));
     }
   }
   debug!("Catalog discovery completed in {:?}", start.elapsed());
@@ -117,10 +116,10 @@ fn make_bun_dep_type(catalog_name: &str, path_prefix: &str) -> DependencyType {
 /// `pnpm-workspace.yaml` file.
 pub fn pnpm_catalog_names(file: &YamlFile) -> Vec<String> {
   let mut names = Vec::new();
-  if let Some(YamlValue::Mapping(map)) = file.contents.get("catalog") {
-    if !map.is_empty() {
-      names.push("default".to_string());
-    }
+  if let Some(YamlValue::Mapping(map)) = file.contents.get("catalog")
+    && !map.is_empty()
+  {
+    names.push("default".to_string());
   }
   if let Some(YamlValue::Mapping(map)) = file.contents.get("catalogs") {
     for key in map.keys() {

@@ -1,5 +1,5 @@
 use {
-  super::{add_instance_to_dependencies, eligible_registry_updates, DependencyCore, L1, L2, L3, L4, L5},
+  super::{DependencyCore, L1, L2, L3, L4, L5, add_instance_to_dependencies, eligible_registry_updates},
   crate::{
     context::Context,
     group_selector::GroupSelector,
@@ -82,13 +82,12 @@ fn pick_outdated_target(
       .or_else(|| actual_specifier.get_semver_range())
       .unwrap_or(SemverRange::Exact);
     let update_specifier = Specifier::new(update);
-    if let Some(update_version) = update_specifier.get_node_version() {
-      if let Some(with_updated_version) = actual_specifier.with_node_version(&update_version) {
-        if let Some(with_preferred_range) = with_updated_version.with_range(&range) {
-          debug!("{L5}with semver range applied update becomes {with_preferred_range:?}");
-          return Some(with_preferred_range);
-        }
-      }
+    if let Some(update_version) = update_specifier.get_node_version()
+      && let Some(with_updated_version) = actual_specifier.with_node_version(&update_version)
+      && let Some(with_preferred_range) = with_updated_version.with_range(&range)
+    {
+      debug!("{L5}with semver range applied update becomes {with_preferred_range:?}");
+      return Some(with_preferred_range);
     }
   }
   None

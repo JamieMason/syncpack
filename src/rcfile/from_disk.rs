@@ -1,11 +1,11 @@
 use {
   crate::{
     cli::Cli,
-    disk::{detect_formatting, json_view, DetectedFormatting, Disk, DiskIo, DiskIoError, File, NodeJsError},
+    disk::{DetectedFormatting, Disk, DiskIo, DiskIoError, File, NodeJsError, detect_formatting, json_view},
     errors::UnsupportedConfigErrors,
     rcfile::{
-      from_disk::javascript::{get_javascript_contents, JsResult},
-      RawRcfile, Rcfile, DEFAULT_MINIMUM_RELEASE_AGE,
+      DEFAULT_MINIMUM_RELEASE_AGE, RawRcfile, Rcfile,
+      from_disk::javascript::{JsResult, get_javascript_contents},
     },
   },
   log::debug,

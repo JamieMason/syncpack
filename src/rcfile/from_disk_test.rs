@@ -1,7 +1,7 @@
 use {
   crate::{
     disk::Disk,
-    rcfile::{from_disk::resolve_minimum_release_age, DEFAULT_MINIMUM_RELEASE_AGE},
+    rcfile::{DEFAULT_MINIMUM_RELEASE_AGE, from_disk::resolve_minimum_release_age},
     test::mock::pnpm_yaml_file_from_str,
   },
   std::path::PathBuf,

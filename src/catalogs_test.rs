@@ -1,13 +1,13 @@
 use {
   crate::{
     catalogs::make_catalog_dep_types,
-    disk::{parse_json_file, parse_yaml_file, Disk, PackageManager},
+    disk::{Disk, PackageManager, parse_json_file, parse_yaml_file},
     errors::SyncpackError,
     instance::{InstanceState, ValidInstance::*},
     source::SourceKind,
     test::{
       builder::TestBuilder,
-      expect::{expect, ExpectedInstance},
+      expect::{ExpectedInstance, expect},
     },
   },
   serde_json::json,

@@ -35,23 +35,30 @@ impl PatternMatcher {
 
     // Prefix: "@aws-sdk/**", "foo/**"
     // Must end with /** and have no wildcards before that
-    if let Some(prefix) = pattern.strip_suffix("/**") {
-      if !prefix.contains('*') && !prefix.contains('?') && !prefix.contains('[') {
-        return Self::Prefix(format!("{prefix}/"));
-      }
+    if let Some(prefix) = pattern.strip_suffix("/**")
+      && !prefix.contains('*')
+      && !prefix.contains('?')
+      && !prefix.contains('[')
+    {
+      return Self::Prefix(format!("{prefix}/"));
     }
 
     // Suffix: "**-loader", "**/test"
     // Must start with **/ or ** and have no wildcards after
-    if let Some(suffix) = pattern.strip_prefix("**/") {
-      if !suffix.contains('*') && !suffix.contains('?') && !suffix.contains('[') {
-        return Self::Suffix(suffix.to_string());
-      }
+    if let Some(suffix) = pattern.strip_prefix("**/")
+      && !suffix.contains('*')
+      && !suffix.contains('?')
+      && !suffix.contains('[')
+    {
+      return Self::Suffix(suffix.to_string());
     }
-    if let Some(suffix) = pattern.strip_prefix("**") {
-      if !suffix.is_empty() && !suffix.contains('*') && !suffix.contains('?') && !suffix.contains('[') {
-        return Self::Suffix(suffix.to_string());
-      }
+    if let Some(suffix) = pattern.strip_prefix("**")
+      && !suffix.is_empty()
+      && !suffix.contains('*')
+      && !suffix.contains('?')
+      && !suffix.contains('[')
+    {
+      return Self::Suffix(suffix.to_string());
     }
 
     // Complex glob fallback

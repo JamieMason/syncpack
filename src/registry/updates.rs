@@ -16,7 +16,7 @@ use {
   },
   tokio::{
     sync::Semaphore,
-    task::{spawn, JoinHandle},
+    task::{JoinHandle, spawn},
   },
 };
 

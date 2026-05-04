@@ -566,11 +566,11 @@ pub fn set_prop(file: &mut File<JsonValue>, pointer: &str, next_value: JsonValue
       file.contents = next_value;
       file.dirty = true;
     }
-  } else if let Some(value) = file.contents.pointer_mut(pointer) {
-    if json_values_differ(value, &next_value) {
-      *value = next_value;
-      file.dirty = true;
-    }
+  } else if let Some(value) = file.contents.pointer_mut(pointer)
+    && json_values_differ(value, &next_value)
+  {
+    *value = next_value;
+    file.dirty = true;
   }
 }
 
@@ -589,10 +589,10 @@ pub fn set_nested_prop(file: &mut File<JsonValue>, parent_pointer: &str, key: &s
 
 /// Remove a key from a parent object. Marks dirty only when the key existed.
 pub fn remove_prop(file: &mut File<JsonValue>, parent_pointer: &str, key: &str) {
-  if let Some(JsonValue::Object(obj)) = file.contents.pointer_mut(parent_pointer) {
-    if obj.remove(key).is_some() {
-      file.dirty = true;
-    }
+  if let Some(JsonValue::Object(obj)) = file.contents.pointer_mut(parent_pointer)
+    && obj.remove(key).is_some()
+  {
+    file.dirty = true;
   }
 }
 
@@ -916,7 +916,7 @@ fn ensure_catalog_block<'a>(file: &'a mut YamlFile, catalog_name: &str) -> &'a m
     if !matches!(root.get(&key), Some(YamlValue::Mapping(_))) {
       root.insert(key.clone(), YamlValue::Mapping(Mapping::new()));
     }
-    let YamlValue::Mapping(ref mut block) = root.get_mut(&key).expect("just inserted") else {
+    let YamlValue::Mapping(block) = root.get_mut(&key).expect("just inserted") else {
       unreachable!();
     };
     block
@@ -925,14 +925,14 @@ fn ensure_catalog_block<'a>(file: &'a mut YamlFile, catalog_name: &str) -> &'a m
     if !matches!(root.get(&catalogs_key), Some(YamlValue::Mapping(_))) {
       root.insert(catalogs_key.clone(), YamlValue::Mapping(Mapping::new()));
     }
-    let YamlValue::Mapping(ref mut catalogs) = root.get_mut(&catalogs_key).expect("just inserted") else {
+    let YamlValue::Mapping(catalogs) = root.get_mut(&catalogs_key).expect("just inserted") else {
       unreachable!();
     };
     let name_key = YamlValue::String(catalog_name.to_string());
     if !matches!(catalogs.get(&name_key), Some(YamlValue::Mapping(_))) {
       catalogs.insert(name_key.clone(), YamlValue::Mapping(Mapping::new()));
     }
-    let YamlValue::Mapping(ref mut block) = catalogs.get_mut(&name_key).expect("just inserted") else {
+    let YamlValue::Mapping(block) = catalogs.get_mut(&name_key).expect("just inserted") else {
       unreachable!();
     };
     block

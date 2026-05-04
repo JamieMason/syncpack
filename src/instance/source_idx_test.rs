@@ -7,7 +7,7 @@ use {
     sources::SourceIdx,
     test::{
       builder::TestBuilder,
-      expect::{expect, ExpectedInstance},
+      expect::{ExpectedInstance, expect},
       mock::config_from_mock,
     },
   },

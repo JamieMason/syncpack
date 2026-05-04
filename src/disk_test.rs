@@ -1,8 +1,8 @@
 use {
   crate::{
     disk::{
-      empty_yaml_file, ensure_object_path, insert_catalog_definition, json_view, parse_yaml_file, remove_catalog_definition, remove_prop,
-      render_yaml_bytes, set_nested_prop, set_prop, Disk, File, PackageManager, PendingYamlOp,
+      Disk, File, PackageManager, PendingYamlOp, empty_yaml_file, ensure_object_path, insert_catalog_definition, json_view,
+      parse_yaml_file, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
     },
     specifier::Specifier,
     test::mock_disk::MockDiskIo,
@@ -642,7 +642,7 @@ mod disk_ops {
     crate::{
       dependency::{DependencyType, Strategy},
       disk::{
-        copy_expected_specifier_json, detect_formatting, get_pretty_json_bytes, has_prop, package_name, parse_json_file, DetectedFormatting,
+        DetectedFormatting, copy_expected_specifier_json, detect_formatting, get_pretty_json_bytes, has_prop, package_name, parse_json_file,
       },
       instance::{FixableInstance, Instance, InstanceDescriptor},
       source::SourceKind,

@@ -5,7 +5,7 @@ mod client_test;
 use {
   crate::dependency::UpdateUrl,
   log::debug,
-  reqwest::{header::ACCEPT, Client, StatusCode},
+  reqwest::{Client, StatusCode, header::ACCEPT},
   serde::{Deserialize, Serialize},
   serde_json::Value,
   std::{

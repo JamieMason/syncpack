@@ -1,5 +1,5 @@
 use {
-  crate::disk::{detect_formatting, DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile},
+  crate::disk::{DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile, detect_formatting},
   std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -79,13 +79,13 @@ impl DiskIo for MockDiskIo {
     let mut seen = HashSet::new();
     let mut entries = Vec::new();
     for file_path in self.files.keys() {
-      if let Ok(relative) = file_path.strip_prefix(path) {
-        if let Some(first_component) = relative.iter().next() {
-          let child_path = path.join(first_component);
-          if seen.insert(child_path.clone()) {
-            let is_dir = relative.iter().count() > 1;
-            entries.push(DiskDirEntry::new(child_path, is_dir));
-          }
+      if let Ok(relative) = file_path.strip_prefix(path)
+        && let Some(first_component) = relative.iter().next()
+      {
+        let child_path = path.join(first_component);
+        if seen.insert(child_path.clone()) {
+          let is_dir = relative.iter().count() > 1;
+          entries.push(DiskDirEntry::new(child_path, is_dir));
         }
       }
     }

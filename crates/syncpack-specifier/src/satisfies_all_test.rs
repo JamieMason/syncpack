@@ -61,7 +61,7 @@ fn range_specifiers_satisfy_multiple_ranges() {
 
 #[test]
 #[ignore] // node-semver doesn't allow prereleases to satisfy non-prerelease ranges by
-          // default
+// default
 fn prerelease_versions_with_multiple_ranges() {
   let cases: Vec<(&str, Vec<&str>, bool)> = vec![
     // Prerelease satisfies multiple compatible ranges

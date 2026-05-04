@@ -2,7 +2,7 @@ use {
   super::TestBuilder,
   crate::{
     instance::{InstanceState, ValidInstance::*},
-    test::expect::{expect, ExpectedInstance},
+    test::expect::{ExpectedInstance, expect},
   },
   serde_json::json,
 };

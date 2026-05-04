@@ -1,8 +1,8 @@
 use {
   crate::{
-    alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest, link::Link,
-    major::Major, minor::Minor, range::Range, range_major::RangeMajor, range_minor::RangeMinor, semver_range::SemverRange, tag::Tag,
-    url::Url, workspace_protocol::WorkspaceProtocol, workspace_specifier::WorkspaceSpecifier, Specifier,
+    Specifier, alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest,
+    link::Link, major::Major, minor::Minor, range::Range, range_major::RangeMajor, range_minor::RangeMinor, semver_range::SemverRange,
+    tag::Tag, url::Url, workspace_protocol::WorkspaceProtocol, workspace_specifier::WorkspaceSpecifier,
   },
   std::rc::Rc,
 };

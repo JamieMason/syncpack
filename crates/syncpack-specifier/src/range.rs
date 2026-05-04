@@ -1,5 +1,5 @@
 use {
-  crate::{semver_range::SemverRange, strip_semver_range, Specifier},
+  crate::{Specifier, semver_range::SemverRange, strip_semver_range},
   std::rc::Rc,
 };
 

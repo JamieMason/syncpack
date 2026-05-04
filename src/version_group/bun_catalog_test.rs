@@ -6,7 +6,7 @@ use {
     instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
     test::{
       builder::TestBuilder,
-      expect::{expect, ExpectedInstance},
+      expect::{ExpectedInstance, expect},
       mock_disk::MockDiskIo,
     },
   },

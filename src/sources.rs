@@ -1,7 +1,7 @@
 use {
   crate::{
     dependency::{DependencyType, Strategy},
-    disk::{json_view, package_name, Disk},
+    disk::{Disk, json_view, package_name},
     instance::InstanceDescriptor,
     source::{Source, SourceKind},
     specifier::Specifier,
@@ -147,21 +147,20 @@ impl Sources {
       match dep_type_rc.source {
         SourceKind::PackageJson => {
           // Bun catalogs always live in the root pkg.json.
-          if let Some(root_idx) = disk.package_json_root_idx {
-            if let Some(source_idx) = self
+          if let Some(root_idx) = disk.package_json_root_idx
+            && let Some(source_idx) = self
               .all
               .iter()
               .position(|s| matches!(s, Source::Package { file_idx, .. } if *file_idx == root_idx))
-            {
-              let root_file = &disk.package_json_files[root_idx];
-              collect_descriptors_for_dep_type(
-                dep_type_rc,
-                &root_file.contents,
-                SourceIdx(source_idx),
-                &local_package_names,
-                &mut out,
-              );
-            }
+          {
+            let root_file = &disk.package_json_files[root_idx];
+            collect_descriptors_for_dep_type(
+              dep_type_rc,
+              &root_file.contents,
+              SourceIdx(source_idx),
+              &local_package_names,
+              &mut out,
+            );
           }
         }
         SourceKind::PnpmWorkspace => {
@@ -259,10 +258,10 @@ fn collect_descriptors_for_dep_type(
       }
     }
     Strategy::NamedVersionString => {
-      if let Some(Value::String(specifier)) = contents.pointer(&dep_type.path) {
-        if let Some((name, raw_specifier)) = specifier.split_once('@') {
-          out.push(build_descriptor(dep_type, name, raw_specifier, source_idx, local_package_names));
-        }
+      if let Some(Value::String(specifier)) = contents.pointer(&dep_type.path)
+        && let Some((name, raw_specifier)) = specifier.split_once('@')
+      {
+        out.push(build_descriptor(dep_type, name, raw_specifier, source_idx, local_package_names));
       }
     }
     Strategy::UnnamedVersionString => {

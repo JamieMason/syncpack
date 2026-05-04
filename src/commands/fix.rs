@@ -8,8 +8,8 @@ use {
     commands::reporter::FixReporter,
     context::Context,
     disk::{
-      copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition, set_nested_prop, write_json_file,
-      write_yaml_file, DiskIo, PackageManager,
+      DiskIo, PackageManager, copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition,
+      set_nested_prop, write_json_file, write_yaml_file,
     },
     errors::SyncpackError,
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},

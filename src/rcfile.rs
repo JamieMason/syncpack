@@ -320,11 +320,7 @@ impl RawRcfile {
         }
       });
     });
-    if errors.is_empty() {
-      Ok(())
-    } else {
-      Err(errors)
-    }
+    if errors.is_empty() { Ok(()) } else { Err(errors) }
   }
 }
 

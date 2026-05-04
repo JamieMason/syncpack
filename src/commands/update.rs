@@ -2,7 +2,7 @@ use {
   crate::{
     commands::{ui, ui::LINE_ENDING},
     context::Context,
-    disk::{copy_expected_specifier_json, copy_expected_specifier_yaml, write_json_file, write_yaml_file, DiskIo},
+    disk::{DiskIo, copy_expected_specifier_json, copy_expected_specifier_yaml, write_json_file, write_yaml_file},
     errors::SyncpackError,
     instance::InstanceIdx,
     registry::updates::RegistryUpdates,

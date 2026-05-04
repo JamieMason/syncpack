@@ -1,5 +1,5 @@
 use {
-  super::{add_instance_to_dependencies, eligible_registry_updates, DependencyCore, L1, L10, L2, L3, L4, L5, L6, L7, L8, L9},
+  super::{DependencyCore, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, add_instance_to_dependencies, eligible_registry_updates},
   crate::{
     context::Context,
     group_selector::GroupSelector,
@@ -39,11 +39,7 @@ impl PreferredSemverGroup {
           .and_then(|range| instance.descriptor.specifier.with_range(range))
           .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier))
       });
-    if self.prefer_highest {
-      specifiers.max()
-    } else {
-      specifiers.min()
-    }
+    if self.prefer_highest { specifiers.max() } else { specifiers.min() }
   }
 
   pub fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
@@ -77,12 +73,13 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
-              if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
-                debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                continue;
-              }
+            if instance.must_match_preferred_semver_range()
+              && !instance.matches_preferred_semver_range()
+              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
+            {
+              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
+              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+              continue;
             }
             debug!("{L5}mark as catalog definition");
             instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
@@ -190,12 +187,13 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
-              if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
-                debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                continue;
-              }
+            if instance.must_match_preferred_semver_range()
+              && !instance.matches_preferred_semver_range()
+              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
+            {
+              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
+              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+              continue;
             }
             debug!("{L5}mark as catalog definition");
             instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
@@ -220,12 +218,13 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
-              if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
-                debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                continue;
-              }
+            if instance.must_match_preferred_semver_range()
+              && !instance.matches_preferred_semver_range()
+              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
+            {
+              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
+              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+              continue;
             }
             debug!("{L5}mark as catalog definition");
             instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
@@ -240,13 +239,12 @@ impl PreferredSemverGroup {
                 .or_else(|| actual_specifier.get_semver_range())
                 .unwrap_or(SemverRange::Exact);
               let update_specifier = Specifier::new(update);
-              if let Some(update_version) = update_specifier.get_node_version() {
-                if let Some(with_updated_version) = actual_specifier.with_node_version(&update_version) {
-                  if let Some(with_preferred_range) = with_updated_version.with_range(range) {
-                    debug!("{L4}with semver group applied update becomes {with_preferred_range:?}");
-                    instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, &with_preferred_range);
-                  }
-                }
+              if let Some(update_version) = update_specifier.get_node_version()
+                && let Some(with_updated_version) = actual_specifier.with_node_version(&update_version)
+                && let Some(with_preferred_range) = with_updated_version.with_range(range)
+              {
+                debug!("{L4}with semver group applied update becomes {with_preferred_range:?}");
+                instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, &with_preferred_range);
               }
             }
           });
@@ -260,12 +258,13 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
-              if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
-                debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                continue;
-              }
+            if instance.must_match_preferred_semver_range()
+              && !instance.matches_preferred_semver_range()
+              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
+            {
+              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
+              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+              continue;
             }
             debug!("{L5}mark as catalog definition");
             instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
@@ -350,12 +349,13 @@ impl PreferredSemverGroup {
             debug!("{L4}visit instance '{}' ({actual_specifier:?})", instance.id);
             if instance.is_catalog_instance() {
               debug!("{L5}it is a catalog definition (defensive short-circuit)");
-              if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
-                if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
-                  debug!("{L6}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                  instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                  continue;
-                }
+              if instance.must_match_preferred_semver_range()
+                && !instance.matches_preferred_semver_range()
+                && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
+              {
+                debug!("{L6}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
+                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+                continue;
               }
               debug!("{L6}mark as catalog definition");
               instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
@@ -373,12 +373,13 @@ impl PreferredSemverGroup {
             debug!("{L4}visit instance '{}' ({actual_specifier:?})", instance.id);
             if instance.is_catalog_instance() {
               debug!("{L5}it is a catalog definition (defensive short-circuit)");
-              if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
-                if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
-                  debug!("{L6}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                  instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                  continue;
-                }
+              if instance.must_match_preferred_semver_range()
+                && !instance.matches_preferred_semver_range()
+                && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
+              {
+                debug!("{L6}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
+                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+                continue;
               }
               debug!("{L6}mark as catalog definition");
               instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);

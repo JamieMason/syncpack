@@ -1,6 +1,6 @@
 use {
   crate::{context::Context, errors::SyncpackError, instance::Instance, source::Source},
-  serde_json::{json, Value},
+  serde_json::{Value, json},
 };
 
 pub fn instance_to_json(ctx: &Context, instance: &Instance, variant_label: &str) -> Value {
@@ -54,9 +54,5 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
       });
     });
 
-  if is_invalid {
-    Err(SyncpackError::IssuesFound)
-  } else {
-    Ok(ctx)
-  }
+  if is_invalid { Err(SyncpackError::IssuesFound) } else { Ok(ctx) }
 }

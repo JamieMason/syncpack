@@ -1,5 +1,5 @@
 use {
-  crate::{semver_range::SemverRange, workspace_specifier::WorkspaceSpecifier, Specifier},
+  crate::{Specifier, semver_range::SemverRange, workspace_specifier::WorkspaceSpecifier},
   std::rc::Rc,
 };
 

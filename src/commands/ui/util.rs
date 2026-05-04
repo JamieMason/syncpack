@@ -57,11 +57,7 @@ pub fn get_link(ctx: &Context, url: impl Into<String>, text: impl Into<ColoredSt
 
 /// Convert eg. "/dependencies/react" to ".dependencies.react"
 pub fn get_formatted_path(path: &str) -> String {
-  if path == "/" {
-    "root".to_string()
-  } else {
-    path.replace("/", ".")
-  }
+  if path == "/" { "root".to_string() } else { path.replace("/", ".") }
 }
 
 pub fn print_no_issues_found() {

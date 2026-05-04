@@ -1,5 +1,5 @@
 use {
-  crate::{Specifier, HUGE},
+  crate::{HUGE, Specifier},
   std::{cell::OnceCell, rc::Rc},
 };
 

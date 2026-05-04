@@ -22,6 +22,7 @@ fn specifier_neq_when_raw_differs() {
 }
 
 #[test]
+#[allow(clippy::mutable_key_type)]
 fn specifier_hash_consistent_with_eq() {
   let a = Specifier::new("^1.2.3");
   let b = Specifier::new("^1.2.3");
@@ -31,6 +32,7 @@ fn specifier_hash_consistent_with_eq() {
 }
 
 #[test]
+#[allow(clippy::mutable_key_type)]
 fn specifier_in_hashset() {
   let mut set: HashSet<Rc<Specifier>> = HashSet::new();
   set.insert(Specifier::new("1.0.0"));
@@ -40,6 +42,7 @@ fn specifier_in_hashset() {
 }
 
 #[test]
+#[allow(clippy::mutable_key_type)]
 fn specifier_none_hashes() {
   let a = Specifier::new("");
   let b = Specifier::new("");

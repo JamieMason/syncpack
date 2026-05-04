@@ -28,9 +28,5 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
     ui::util::print_no_issues_found();
   }
 
-  if is_invalid {
-    Err(SyncpackError::IssuesFound)
-  } else {
-    Ok(ctx)
-  }
+  if is_invalid { Err(SyncpackError::IssuesFound) } else { Ok(ctx) }
 }

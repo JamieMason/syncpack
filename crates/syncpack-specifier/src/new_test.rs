@@ -1,6 +1,6 @@
 use {
   super::test_faker as faker,
-  crate::{workspace_specifier::WorkspaceSpecifier, Specifier},
+  crate::{Specifier, workspace_specifier::WorkspaceSpecifier},
 };
 
 #[test]

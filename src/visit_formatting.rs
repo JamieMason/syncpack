@@ -13,53 +13,53 @@ pub fn visit_formatting(mut ctx: Context) -> Context {
   for (source_idx, source) in ctx.sources.all.iter().enumerate() {
     let Source::Package { file_idx, .. } = source else { continue };
     let file = &ctx.disk.package_json_files[*file_idx];
-    if rcfile.sort_packages || !rcfile.sort_first.is_empty() {
-      if let Some(expected) = format::get_sorted_first(rcfile, &file.contents) {
-        new_mismatches.push((
-          source_idx,
-          FormatMismatch {
-            expected,
-            property_path: "/".to_string(),
-            variant: PackagePropertiesAreNotSorted,
-          },
-        ));
-      }
+    if (rcfile.sort_packages || !rcfile.sort_first.is_empty())
+      && let Some(expected) = format::get_sorted_first(rcfile, &file.contents)
+    {
+      new_mismatches.push((
+        source_idx,
+        FormatMismatch {
+          expected,
+          property_path: "/".to_string(),
+          variant: PackagePropertiesAreNotSorted,
+        },
+      ));
     }
-    if rcfile.format_bugs {
-      if let Some(expected) = format::get_formatted_bugs(&file.contents) {
-        new_mismatches.push((
-          source_idx,
-          FormatMismatch {
-            expected,
-            property_path: "/bugs".to_string(),
-            variant: BugsPropertyIsNotFormatted,
-          },
-        ));
-      }
+    if rcfile.format_bugs
+      && let Some(expected) = format::get_formatted_bugs(&file.contents)
+    {
+      new_mismatches.push((
+        source_idx,
+        FormatMismatch {
+          expected,
+          property_path: "/bugs".to_string(),
+          variant: BugsPropertyIsNotFormatted,
+        },
+      ));
     }
-    if rcfile.format_repository {
-      if let Some(expected) = format::get_formatted_repository(&file.contents) {
-        new_mismatches.push((
-          source_idx,
-          FormatMismatch {
-            expected,
-            property_path: "/repository".to_string(),
-            variant: RepositoryPropertyIsNotFormatted,
-          },
-        ));
-      }
+    if rcfile.format_repository
+      && let Some(expected) = format::get_formatted_repository(&file.contents)
+    {
+      new_mismatches.push((
+        source_idx,
+        FormatMismatch {
+          expected,
+          property_path: "/repository".to_string(),
+          variant: RepositoryPropertyIsNotFormatted,
+        },
+      ));
     }
-    if !rcfile.sort_exports.is_empty() {
-      if let Some(expected) = format::get_sorted_exports(rcfile, &file.contents) {
-        new_mismatches.push((
-          source_idx,
-          FormatMismatch {
-            expected,
-            property_path: "/exports".to_string(),
-            variant: ExportsPropertyIsNotSorted,
-          },
-        ));
-      }
+    if !rcfile.sort_exports.is_empty()
+      && let Some(expected) = format::get_sorted_exports(rcfile, &file.contents)
+    {
+      new_mismatches.push((
+        source_idx,
+        FormatMismatch {
+          expected,
+          property_path: "/exports".to_string(),
+          variant: ExportsPropertyIsNotSorted,
+        },
+      ));
     }
     if !rcfile.sort_az.is_empty() {
       for key in rcfile.sort_az.iter() {

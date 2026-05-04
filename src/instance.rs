@@ -334,7 +334,9 @@ impl Instance {
                 url: format!("https://registry.npmjs.org/{actual_name}"),
               })
             } else {
-              debug!("'{aliased_name}' in '{raw}' does not equal the instance name '{actual_name}', skipping update as this might create mismatches");
+              debug!(
+                "'{aliased_name}' in '{raw}' does not equal the instance name '{actual_name}', skipping update as this might create mismatches"
+              );
               None
             }
           } else {

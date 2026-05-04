@@ -22,12 +22,12 @@ use {
     catalogs,
     cli::UpdateTarget,
     context::Context,
-    disk::{detect_formatting, parse_yaml_file, Disk, File, PackageManager},
+    disk::{Disk, File, PackageManager, detect_formatting, parse_yaml_file},
     sources::Sources,
     visit_formatting::visit_formatting,
     visit_packages::visit_packages,
   },
-  serde_json::{json, Value},
+  serde_json::{Value, json},
   std::path::PathBuf,
 };
 

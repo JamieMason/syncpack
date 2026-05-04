@@ -1,5 +1,5 @@
 use {
-  crate::{semver_range::SemverRange, strip_semver_range, Specifier, HUGE},
+  crate::{HUGE, Specifier, semver_range::SemverRange, strip_semver_range},
   std::{cell::OnceCell, rc::Rc},
 };
 

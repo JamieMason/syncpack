@@ -32,11 +32,7 @@ fn check_formatting(ctx: Context, reporter: &dyn FormatReporter) -> Result<Conte
   if !is_invalid {
     reporter.on_no_issues();
   }
-  if is_invalid {
-    Err(SyncpackError::IssuesFound)
-  } else {
-    Ok(ctx)
-  }
+  if is_invalid { Err(SyncpackError::IssuesFound) } else { Ok(ctx) }
 }
 
 fn fix_formatting<D: DiskIo>(mut ctx: Context, reporter: &dyn FormatReporter, io: &D) -> Result<Context, SyncpackError> {

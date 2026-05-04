@@ -1,6 +1,6 @@
 use {
   crate::{errors::SyncpackError, group_selector::GroupSelector},
-  clap::{builder::ValueParser, crate_description, crate_name, crate_version, Arg, ArgMatches, Command},
+  clap::{Arg, ArgMatches, Command, builder::ValueParser, crate_description, crate_name, crate_version},
   color_print::cformat,
   itertools::Itertools,
   log::LevelFilter,

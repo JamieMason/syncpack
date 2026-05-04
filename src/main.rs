@@ -54,11 +54,11 @@ async fn main() {
   .await;
 
   if let Err(e) = result {
-    if let SyncpackError::CliError(clap_err) = &e {
-      if matches!(clap_err.kind(), ErrorKind::DisplayHelp | ErrorKind::DisplayVersion) {
-        println!("{clap_err}");
-        return;
-      }
+    if let SyncpackError::CliError(clap_err) = &e
+      && matches!(clap_err.kind(), ErrorKind::DisplayHelp | ErrorKind::DisplayVersion)
+    {
+      println!("{clap_err}");
+      return;
     }
     let msg = e.to_string();
     if !msg.is_empty() {

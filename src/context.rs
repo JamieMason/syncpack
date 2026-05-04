@@ -5,7 +5,7 @@ use {
     disk::{Disk, PackageManager},
     errors::{UnsupportedConfigError, UnsupportedConfigErrors},
     instance::{Instance, InstanceDescriptor, InstanceIdx},
-    rcfile::{from_disk::RcfileError, validate_raw_dep_types, Rcfile},
+    rcfile::{Rcfile, from_disk::RcfileError, validate_raw_dep_types},
     sources::Sources,
     version_group::{VersionGroup, VersionGroupBehavior},
   },

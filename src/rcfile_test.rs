@@ -1,7 +1,7 @@
 use {
   crate::{
     errors::UnsupportedConfigError,
-    rcfile::{semver_group::AnySemverGroup, RawRcfile, Rcfile},
+    rcfile::{RawRcfile, Rcfile, semver_group::AnySemverGroup},
     version_group::{AnyVersionGroup, VersionGroup},
   },
   serde_json::json,
@@ -142,12 +142,16 @@ fn validate_unknown_fields_returns_deprecated_errors() {
   .unwrap();
   let errors = raw.validate_unknown_fields().unwrap_err();
   assert_eq!(errors.len(), 2);
-  assert!(errors
-    .iter()
-    .any(|e| matches!(e, UnsupportedConfigError::DeprecatedProperty { property, .. } if property == "dependencyTypes")));
-  assert!(errors
-    .iter()
-    .any(|e| matches!(e, UnsupportedConfigError::DeprecatedProperty { property, .. } if property == "lintFormatting")));
+  assert!(
+    errors
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::DeprecatedProperty { property, .. } if property == "dependencyTypes"))
+  );
+  assert!(
+    errors
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::DeprecatedProperty { property, .. } if property == "lintFormatting"))
+  );
 }
 
 #[test]
@@ -170,12 +174,16 @@ fn validate_unknown_fields_returns_nested_unrecognised_errors() {
   .unwrap();
   let errors = raw.validate_unknown_fields().unwrap_err();
   assert_eq!(errors.len(), 2);
-  assert!(errors
-    .iter()
-    .any(|e| matches!(e, UnsupportedConfigError::UnrecognisedProperty { path } if path == "versionGroups[0].notReal")));
-  assert!(errors
-    .iter()
-    .any(|e| matches!(e, UnsupportedConfigError::UnrecognisedProperty { path } if path == "semverGroups[0].bogus")));
+  assert!(
+    errors
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::UnrecognisedProperty { path } if path == "versionGroups[0].notReal"))
+  );
+  assert!(
+    errors
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::UnrecognisedProperty { path } if path == "semverGroups[0].bogus"))
+  );
 }
 
 #[test]
@@ -217,10 +225,12 @@ fn context_create_rejects_invalid_dependency_type() {
   let ContextError::RcfileError(RcfileError::UnsupportedConfig(errs)) = err else {
     panic!("expected RcfileError::UnsupportedConfig");
   };
-  assert!(errs
-    .0
-    .iter()
-    .any(|e| matches!(e, UnsupportedConfigError::InvalidDependencyType { name } if name == "nonexistent")));
+  assert!(
+    errs
+      .0
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::InvalidDependencyType { name } if name == "nonexistent"))
+  );
 }
 
 #[test]

@@ -1,9 +1,9 @@
 use {
   crate::{
     dependency::{DependencyType, Strategy},
-    disk::{detect_formatting, parse_yaml_file, Disk, File},
+    disk::{Disk, File, detect_formatting, parse_yaml_file},
     source::SourceKind,
-    sources::{parse_catalog_name, Sources},
+    sources::{Sources, parse_catalog_name},
   },
   serde_json::json,
   std::path::PathBuf,
@@ -282,7 +282,7 @@ mod via_full_pipeline {
       instance::{InstanceState, ValidInstance::*},
       test::{
         builder::TestBuilder,
-        expect::{expect, ExpectedInstance},
+        expect::{ExpectedInstance, expect},
       },
     },
     serde_json::json,

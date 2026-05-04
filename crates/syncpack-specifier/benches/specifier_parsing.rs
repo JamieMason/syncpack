@@ -1,5 +1,5 @@
 use {
-  criterion::{criterion_group, criterion_main, BenchmarkId, Criterion},
+  criterion::{BenchmarkId, Criterion, criterion_group, criterion_main},
   std::{hint::black_box, time::Duration},
   syncpack_specifier::Specifier,
 };

@@ -1,5 +1,5 @@
 use {
-  super::{add_instance_to_dependencies, DependencyCore, L1, L10, L2, L3, L4, L5, L6, L7, L8, L9},
+  super::{DependencyCore, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, add_instance_to_dependencies},
   crate::{
     context::Context,
     group_selector::GroupSelector,

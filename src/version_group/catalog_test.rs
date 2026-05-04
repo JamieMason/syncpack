@@ -4,7 +4,7 @@ use {
     specifier::Specifier,
     test::{
       builder::TestBuilder,
-      expect::{expect, ExpectedInstance},
+      expect::{ExpectedInstance, expect},
     },
   },
   serde_json::json,

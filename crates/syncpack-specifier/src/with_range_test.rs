@@ -1,4 +1,4 @@
-use crate::{semver_range::SemverRange, Specifier};
+use crate::{Specifier, semver_range::SemverRange};
 
 #[test]
 fn basic_behavior() {

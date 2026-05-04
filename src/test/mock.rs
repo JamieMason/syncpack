@@ -4,7 +4,7 @@ use {
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
     context::{Config, Context},
     dependency::DependencyType,
-    disk::{detect_formatting, empty_yaml_file, parse_yaml_file, Disk, File, YamlFile},
+    disk::{Disk, File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
     rcfile::Rcfile,
     registry::{client::RegistryClient, updates::RegistryUpdates},
     sources::Sources,
