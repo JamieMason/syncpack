@@ -1,15 +1,15 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, add_instance_to_dependencies, eligible_registry_updates},
+  super::{DependencyCore, L1, L2, L3, L4, L5, add_instance_to_dependencies, highest_eligible_for, sort_updates_desc},
   crate::{
     context::Context,
     group_selector::GroupSelector,
     instance::{FixableInstance, Instance, InstanceIdx, ValidInstance},
+    rcfile::update_group::UpdatePolicy,
     registry::updates::RegistryUpdates,
     semver_range::SemverRange,
-    specifier::Specifier,
   },
   log::debug,
-  std::collections::BTreeMap,
+  std::{collections::BTreeMap, rc::Rc},
 };
 
 #[derive(Debug)]
@@ -28,17 +28,23 @@ impl CatalogDefsGroup {
     for dep in self.dependencies.values() {
       debug!("visit catalog defs version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
-      let eligible_updates = registry_updates
+      let sorted_desc = registry_updates
         .as_ref()
-        .and_then(|updates| eligible_registry_updates(dep, arena, updates, &ctx.config.cli.target));
+        .and_then(|r| r.updates_by_internal_name.get(&dep.internal_name))
+        .map(|updates| sort_updates_desc(updates));
       for &idx in &dep.instances {
         let instance = &arena[idx.0];
         let def_specifier = &instance.descriptor.specifier;
         debug!("{L2}visit instance '{}' ({def_specifier:?})", instance.id);
-        if let Some(target) = eligible_updates
-          .as_ref()
-          .and_then(|by_update| pick_outdated_target(instance, by_update))
-        {
+
+        let effective_target = match &instance.preferred_update_policy {
+          Some(UpdatePolicy::UpTo(t)) => Some(ctx.config.cli.target.stricter(*t)),
+          Some(UpdatePolicy::Skip) => None,
+          None => Some(ctx.config.cli.target),
+        };
+        let target = effective_target.and_then(|t| sorted_desc.as_deref().and_then(|s| pick_outdated_target(instance, s, t)));
+
+        if let Some(target) = target {
           debug!("{L3}an eligible registry update applies; mark as DiffersToNpmRegistry ({target:?})");
           instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, &target);
           dep.set_expected_specifier(&target);
@@ -68,27 +74,20 @@ impl CatalogDefsGroup {
 /// when no update is eligible or the new specifier can't be reconstructed.
 fn pick_outdated_target(
   instance: &Instance,
-  by_update: &std::collections::HashMap<String, Vec<std::rc::Rc<Specifier>>>,
-) -> Option<std::rc::Rc<Specifier>> {
+  sorted_desc: &[Rc<crate::specifier::Specifier>],
+  target: syncpack_specifier::update_target::UpdateTarget,
+) -> Option<Rc<crate::specifier::Specifier>> {
   let actual_specifier = &instance.descriptor.specifier;
-  for (update, affected_specifiers) in by_update {
-    if !affected_specifiers.iter().any(|s| s.get_raw() == actual_specifier.get_raw()) {
-      continue;
-    }
-    debug!("{L4}an eligible update {update:?} is available");
-    let range = instance
-      .preferred_semver_range
-      .clone()
-      .or_else(|| actual_specifier.get_semver_range())
-      .unwrap_or(SemverRange::Exact);
-    let update_specifier = Specifier::new(update);
-    if let Some(update_version) = update_specifier.get_node_version()
-      && let Some(with_updated_version) = actual_specifier.with_node_version(&update_version)
-      && let Some(with_preferred_range) = with_updated_version.with_range(&range)
-    {
-      debug!("{L5}with semver range applied update becomes {with_preferred_range:?}");
-      return Some(with_preferred_range);
-    }
-  }
-  None
+  let highest_update = highest_eligible_for(sorted_desc, actual_specifier, &target)?;
+  debug!("{L4}an eligible update {highest_update:?} is available");
+  let range = instance
+    .preferred_semver_range
+    .clone()
+    .or_else(|| actual_specifier.get_semver_range())
+    .unwrap_or(SemverRange::Exact);
+  let update_version = highest_update.get_node_version()?;
+  let with_updated_version = actual_specifier.with_node_version(&update_version)?;
+  let with_preferred_range = with_updated_version.with_range(&range)?;
+  debug!("{L5}with semver range applied update becomes {with_preferred_range:?}");
+  Some(with_preferred_range)
 }

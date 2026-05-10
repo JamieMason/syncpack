@@ -25,6 +25,8 @@ export interface RcFile {
   minimumReleaseAge?: number;
   /** @see https://syncpack.dev/semver-groups */
   semverGroups?: SemverGroup.Any[];
+  /** @see https://syncpack.dev/update-groups */
+  updateGroups?: UpdateGroup.Any[];
   /** @see https://syncpack.dev/config/sort-az */
   sortAz?: string[];
   /** @see https://syncpack.dev/config/sort-exports */
@@ -90,6 +92,18 @@ namespace SemverGroup {
     range: SemverRange;
   }
   export type Any = Ignored | WithRange;
+}
+
+namespace UpdateGroup {
+  export interface Ignored extends GroupSelector {
+    /** @see https://syncpack.dev/update-groups/ignored/#isignored */
+    isIgnored: true;
+  }
+  export interface Targeted extends GroupSelector {
+    /** @see https://syncpack.dev/update-groups/targeted/#target */
+    target: 'patch' | 'minor' | 'latest';
+  }
+  export type Any = Ignored | Targeted;
 }
 
 namespace VersionGroup {

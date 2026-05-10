@@ -1,6 +1,6 @@
 use {
   crate::{
-    cli::{SortBy, UpdateTarget},
+    cli::SortBy,
     context::Context,
     dependency::UpdateUrl,
     errors::UnsupportedConfigError,
@@ -21,6 +21,7 @@ use {
     collections::{BTreeMap, HashMap},
     rc::Rc,
   },
+  syncpack_specifier::update_target::UpdateTarget,
 };
 
 mod banned;
@@ -225,40 +226,24 @@ pub(crate) fn add_instance_to_dependencies(dependencies: &mut BTreeMap<String, D
   }
 }
 
-/// Pick the highest eligible registry update for each unique installed
-/// specifier of `dep`, keyed by the update specifier's raw string. Shared by
-/// `PreferredSemverGroup` and `CatalogDefsGroup`.
-pub(super) fn eligible_registry_updates(
-  dep: &DependencyCore,
-  arena: &[Instance],
-  registry_updates: &RegistryUpdates,
+/// Sort registry updates DESC by node version. Pre-computed once per
+/// dependency so per-instance lookups can early-exit on first match.
+pub(super) fn sort_updates_desc(updates: &[Rc<Specifier>]) -> Vec<Rc<Specifier>> {
+  let mut v: Vec<Rc<Specifier>> = updates.to_vec();
+  v.sort_by_key(|u| std::cmp::Reverse(u.get_node_version()));
+  v
+}
+
+/// Find the highest eligible registry update for `installed` from a
+/// pre-sorted DESC list. Returns `None` when no update is eligible.
+pub(super) fn highest_eligible_for<'a>(
+  sorted_desc: &'a [Rc<Specifier>],
+  installed: &Rc<Specifier>,
   target: &UpdateTarget,
-) -> Option<HashMap<String, Vec<Rc<Specifier>>>> {
-  registry_updates.updates_by_internal_name.get(&dep.internal_name).map(|updates| {
-    let mut specifiers_by_eligible_update: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
-    dep.get_unique_specifiers(arena).iter().for_each(|installed| {
-      updates
-        .iter()
-        .filter(|update| update.is_eligible_update_for(installed, target))
-        .filter(|update| installed.has_same_release_channel_as(update))
-        .fold(None, |preferred, specifier| match preferred {
-          None => Some(specifier),
-          Some(preferred) => {
-            if specifier.get_node_version().cmp(&preferred.get_node_version()) == Ordering::Greater {
-              Some(specifier)
-            } else {
-              Some(preferred)
-            }
-          }
-        })
-        .inspect(|highest_update| {
-          let key = highest_update.get_raw().to_string();
-          let affected = specifiers_by_eligible_update.entry(key).or_default();
-          affected.push(Rc::clone(installed));
-        });
-    });
-    specifiers_by_eligible_update
-  })
+) -> Option<&'a Rc<Specifier>> {
+  sorted_desc
+    .iter()
+    .find(|u| u.is_eligible_update_for(installed, target) && installed.has_same_release_channel_as(u))
 }
 
 #[cfg(test)]

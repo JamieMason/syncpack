@@ -62,6 +62,7 @@ impl Context {
     // Auto-injects `CatalogDefs` when catalog dep types exist.
     let dependency_groups = mem::take(&mut config.rcfile.dependency_groups);
     let semver_groups = mem::take(&mut config.rcfile.semver_groups);
+    let update_groups = mem::take(&mut config.rcfile.update_groups);
     let mut version_groups = config
       .rcfile
       .get_version_groups(&sources) // @TODO: Return every error
@@ -105,11 +106,16 @@ impl Context {
         .find(|group| group.selector.can_add(&descriptor, package_name))
         .and_then(|group| group.range.clone());
 
+      let preferred_update_policy = update_groups
+        .iter()
+        .find(|group| group.selector.can_add(&descriptor, package_name))
+        .map(|group| group.policy.clone());
+
       let version_group = version_groups
         .iter_mut()
         .find(|group| group.selector().can_add(&descriptor, package_name));
 
-      let instance = Instance::new(descriptor, package_name, preferred_semver_range);
+      let instance = Instance::new(descriptor, package_name, preferred_semver_range, preferred_update_policy);
       let idx = InstanceIdx(instances.len());
       instances.push(instance);
 
@@ -162,6 +168,9 @@ fn validate_post_discovery(rcfile: &Rcfile) -> Result<(), UnsupportedConfigError
     selector.validate_dependency_types(&rcfile.all_dependency_types)?;
   }
   for group in &rcfile.semver_groups {
+    group.selector.validate_dependency_types(&rcfile.all_dependency_types)?;
+  }
+  for group in &rcfile.update_groups {
     group.selector.validate_dependency_types(&rcfile.all_dependency_types)?;
   }
   for group in &rcfile.version_groups {

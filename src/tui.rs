@@ -76,7 +76,6 @@ pub struct UpdateRow {
   pub current_time_label: Option<String>,
   /// Raw specifier we'd update to, e.g. `^6.3.1`.
   pub target_raw: String,
-  /// Pre-formatted "how stale" label for the target version.
   pub target_time_label: Option<String>,
   /// Backing `InstanceIdx`s the apply step needs to write back to disk.
   pub instance_indices: Vec<crate::instance::InstanceIdx>,

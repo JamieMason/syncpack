@@ -13,44 +13,53 @@ mod time_difference {
 
   #[test]
   fn under_one_day_returns_lte_label() {
-    let earlier = "2024-01-14T20:00:00Z"; // 4h earlier
-    assert_eq!(time_difference(earlier, FIXED_NOW), Some("⩽1d".to_string()));
+    let four_hours_before_fixed_now = "2024-01-14T20:00:00Z";
+    assert_eq!(time_difference(four_hours_before_fixed_now, FIXED_NOW), Some("⩽1d".to_string()));
   }
 
   #[test]
   fn exactly_one_day_returns_days() {
-    let earlier = "2024-01-14T00:00:00Z";
-    assert_eq!(time_difference(earlier, FIXED_NOW), Some("~1d".to_string()));
+    let one_day_before_fixed_now = "2024-01-14T00:00:00Z";
+    assert_eq!(time_difference(one_day_before_fixed_now, FIXED_NOW), Some("~1d".to_string()));
   }
 
   #[test]
   fn five_days_ago() {
-    let earlier = "2024-01-10T00:00:00Z";
-    assert_eq!(time_difference(earlier, FIXED_NOW), Some("~5d".to_string()));
+    let five_days_before_fixed_now = "2024-01-10T00:00:00Z";
+    assert_eq!(time_difference(five_days_before_fixed_now, FIXED_NOW), Some("~5d".to_string()));
   }
 
   #[test]
   fn thirty_one_days_ago_uses_months() {
-    let earlier = "2023-12-15T00:00:00Z"; // 31 days before fixed_now
-    assert_eq!(time_difference(earlier, FIXED_NOW), Some("~1mo".to_string()));
+    let thirty_one_days_before_fixed_now = "2023-12-15T00:00:00Z";
+    assert_eq!(
+      time_difference(thirty_one_days_before_fixed_now, FIXED_NOW),
+      Some("~1mo".to_string())
+    );
   }
 
   #[test]
   fn three_months_ago() {
-    let earlier = "2023-10-17T00:00:00Z"; // 90 days before fixed_now
-    assert_eq!(time_difference(earlier, FIXED_NOW), Some("~3mo".to_string()));
+    let ninety_days_before_fixed_now = "2023-10-17T00:00:00Z";
+    assert_eq!(time_difference(ninety_days_before_fixed_now, FIXED_NOW), Some("~3mo".to_string()));
   }
 
   #[test]
   fn one_year_ago_uses_years() {
-    let earlier = "2023-01-15T00:00:00Z"; // 365 days before
-    assert_eq!(time_difference(earlier, FIXED_NOW), Some("~1.0y".to_string()));
+    let three_hundred_sixty_five_days_before_fixed_now = "2023-01-15T00:00:00Z";
+    assert_eq!(
+      time_difference(three_hundred_sixty_five_days_before_fixed_now, FIXED_NOW),
+      Some("~1.0y".to_string())
+    );
   }
 
   #[test]
   fn two_point_five_years_ago() {
-    let earlier = "2021-07-15T00:00:00Z"; // ~913 days
-    assert_eq!(time_difference(earlier, FIXED_NOW), Some("~2.5y".to_string()));
+    let two_and_a_half_years_before_fixed_now = "2021-07-15T00:00:00Z";
+    assert_eq!(
+      time_difference(two_and_a_half_years_before_fixed_now, FIXED_NOW),
+      Some("~2.5y".to_string())
+    );
   }
 
   #[test]
@@ -60,8 +69,8 @@ mod time_difference {
 
   #[test]
   fn future_timestamp_returns_none() {
-    let later = "2025-01-15T00:00:00Z";
-    assert_eq!(time_difference(later, FIXED_NOW), None);
+    let one_year_after_fixed_now = "2025-01-15T00:00:00Z";
+    assert_eq!(time_difference(one_year_after_fixed_now, FIXED_NOW), None);
   }
 }
 
@@ -290,7 +299,6 @@ mod render_lines_indexing {
 
   #[test]
   fn narrow_terminal_truncates_dep_name() {
-    // Long name will overflow a 30-col terminal.
     let rows = vec![row(0, "@scope/very-long-package-name", 1, "^1.0.0", "^1.0.1")];
     let lines = render_lines(&rows, Some(&[true]), Some(0), Some(30));
     let solo = &lines[1].text;

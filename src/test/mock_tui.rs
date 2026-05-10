@@ -2,9 +2,7 @@ use crate::tui::{Tui, TuiReadiness, UpdateRow};
 
 /// Canned response for `MockTui::pick`.
 pub enum MockPick {
-  /// Select every row.
   All,
-  /// Select only these row indices.
   Some(Vec<usize>),
   /// Simulate the user pressing `Esc`.
   Cancel,

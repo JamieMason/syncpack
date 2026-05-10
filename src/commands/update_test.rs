@@ -145,6 +145,8 @@ async fn buckets_sort_by_count_desc_then_version_desc() {
 
 #[tokio::test]
 async fn registry_times_populate_time_labels() {
+  let fourteen_days_before_frozen_now = "2024-01-01T00:00:00Z";
+  let three_days_before_frozen_now = "2024-01-12T00:00:00Z";
   let (ctx, updates) = TestBuilder::new()
     .with_packages(vec![json!({
       "name": "package-a",
@@ -154,10 +156,7 @@ async fn registry_times_populate_time_labels() {
     .with_registry_updates(json!({"foo": ["1.0.0", "1.0.1"]}))
     .with_registry_times(
       "foo",
-      times(&[
-        ("1.0.0", "2024-01-01T00:00:00Z"), // 14 days before FROZEN_NOW
-        ("1.0.1", "2024-01-12T00:00:00Z"), // 3 days before FROZEN_NOW
-      ]),
+      times(&[("1.0.0", fourteen_days_before_frozen_now), ("1.0.1", three_days_before_frozen_now)]),
     )
     .run_with_updates()
     .await;
@@ -165,6 +164,25 @@ async fn registry_times_populate_time_labels() {
   assert_eq!(rows.len(), 1);
   assert_eq!(rows[0].current_time_label.as_deref(), Some("~14d"));
   assert_eq!(rows[0].target_time_label.as_deref(), Some("~3d"));
+}
+
+#[tokio::test]
+async fn ignored_dep_via_update_group_does_not_appear_in_rows() {
+  let (ctx, updates) = TestBuilder::new()
+    .with_packages(vec![json!({
+      "name": "package-a",
+      "version": "1.0.0",
+      "dependencies": {"foo": "^1.0.0"}
+    })])
+    .with_update_group(json!({
+      "dependencies": ["foo"],
+      "isIgnored": true
+    }))
+    .with_registry_updates(json!({"foo": ["1.0.0", "1.0.1"]}))
+    .run_with_updates()
+    .await;
+  let rows = build_update_rows(&ctx, &updates.unwrap(), FROZEN_NOW);
+  assert!(rows.is_empty(), "ignored deps must not appear in update rows");
 }
 
 #[tokio::test]

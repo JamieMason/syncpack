@@ -79,6 +79,10 @@ A categorization of version specifiers based on their format. Types include `exa
 
 A code assigned by syncpack to each dependency instance that indicates its validation status. Status codes help identify issues such as version mismatches, banned dependencies, or configurations that need attention.
 
+## Update Group
+
+A configuration that controls which registry updates are eligible for a specific set of dependency instances. Update groups can clamp matched instances to patch-only or minor-only updates, or skip them from update consideration entirely. They affect only the [update](COMMAND_UPDATE) command and are independent of [version groups](TERM_VERSION_GROUP) and [semver groups](TERM_SEMVER_GROUP).
+
 ## Version Group
 
 A configuration object that defines a partition of your monorepo with its own versioning policy. Version groups let you create separate rules for different sections of your project, such as pinning specific dependencies to exact versions, banning certain dependencies, or ensuring dependencies follow the version used by a specific package.

@@ -24,6 +24,8 @@ use {
 #[path = "updates_test.rs"]
 mod updates_test;
 
+type FetchHandle = JoinHandle<Result<Arc<AllPackageVersions>, RegistryError>>;
+
 /// The result of fetching package versions from the npm registry.
 pub struct RegistryUpdates {
   /// All updates from the npm registry keyed by internal dependency name
@@ -49,7 +51,7 @@ impl RegistryUpdates {
     let client = Arc::clone(client);
     let semaphore = Arc::new(Semaphore::new(max_concurrent_requests));
     let progress_bars = Arc::new(MultiProgress::new());
-    let mut handles: Vec<(String, JoinHandle<Result<Arc<AllPackageVersions>, RegistryError>>)> = vec![];
+    let mut handles: Vec<(String, FetchHandle)> = vec![];
     let mut updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
     let mut times_by_internal_name: HashMap<String, HashMap<String, String>> = HashMap::new();
     let mut failed: Vec<String> = vec![];

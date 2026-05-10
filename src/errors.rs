@@ -27,6 +27,8 @@ pub enum UnsupportedConfigError {
   InvalidDependencyType { name: String },
   #[error("Invalid semver group: must have isDisabled, isIgnored, or range")]
   InvalidSemverGroup,
+  #[error("Invalid update group: must have isIgnored or target")]
+  InvalidUpdateGroup,
   #[error("Unrecognised version group policy: '{0}'")]
   InvalidVersionGroupPolicy(String),
   #[error("customTypes.<name>.source: '{value}' is not a recognised source.\nUse 'PackageJson' or 'PnpmWorkspace'.")]

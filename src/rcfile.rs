@@ -13,6 +13,7 @@ use {
     collections::{BTreeMap, HashMap},
     mem,
   },
+  update_group::{AnyUpdateGroup, UpdateGroup},
 };
 
 pub mod from_disk;
@@ -20,6 +21,7 @@ pub mod from_disk;
 #[path = "rcfile_test.rs"]
 mod rcfile_test;
 pub mod semver_group;
+pub mod update_group;
 
 pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) -> Result<Vec<DependencyType>, UnsupportedConfigError> {
   let default_types = HashMap::from([
@@ -225,6 +227,8 @@ pub(crate) struct RawRcfile {
   pub minimum_release_age: Option<u64>,
   #[serde(default)]
   pub semver_groups: Vec<AnySemverGroup>,
+  #[serde(default)]
+  pub update_groups: Vec<AnyUpdateGroup>,
   #[serde(default = "default_sort_az")]
   pub sort_az: Vec<String>,
   #[serde(default = "default_sort_exports")]
@@ -311,6 +315,15 @@ impl RawRcfile {
         }
       });
     });
+    self.update_groups.iter().enumerate().for_each(|(index, value)| {
+      value.unknown_fields.iter().for_each(|(key, _)| {
+        if !key.starts_with("//") {
+          errors.push(UnsupportedConfigError::UnrecognisedProperty {
+            path: format!("updateGroups[{index}].{key}"),
+          });
+        }
+      });
+    });
     self.version_groups.iter().enumerate().for_each(|(index, value)| {
       value.unknown_fields.iter().for_each(|(key, _)| {
         if !key.starts_with("//") {
@@ -358,6 +371,11 @@ impl TryFrom<RawRcfile> for Rcfile {
     }
     semver_groups.push(SemverGroup::get_catch_all());
 
+    let mut update_groups = vec![];
+    for group_config in raw.update_groups {
+      update_groups.push(UpdateGroup::from_config(group_config)?);
+    }
+
     Ok(Rcfile {
       dependency_groups,
       format_bugs: raw.format_bugs,
@@ -375,6 +393,7 @@ impl TryFrom<RawRcfile> for Rcfile {
       sort_packages: raw.sort_packages,
       source: raw.source,
       strict: raw.strict,
+      update_groups,
       version_groups: raw.version_groups,
       all_dependency_types,
     })
@@ -399,6 +418,7 @@ pub struct Rcfile {
   pub sort_packages: bool,
   pub source: Vec<String>,
   pub strict: bool,
+  pub update_groups: Vec<UpdateGroup>,
   pub version_groups: Vec<AnyVersionGroup>,
   /// All dependency types (built-in + custom). Computed after deserialization.
   pub all_dependency_types: Vec<DependencyType>,

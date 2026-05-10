@@ -675,7 +675,7 @@ mod disk_ops {
       source_idx: SourceIdx(0),
       specifier: Specifier::new("0.0.0"), // ignored — overridden by mark_fixable below
     };
-    let instance = Instance::new(descriptor, "test-pkg", None);
+    let instance = Instance::new(descriptor, "test-pkg", None, None);
     instance.mark_fixable(FixableInstance::DiffersToHighestOrLowestSemver, &specifier);
     instance
   }

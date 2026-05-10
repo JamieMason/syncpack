@@ -101,6 +101,11 @@ export default defineConfig({
           items: [{ autogenerate: { directory: 'semver-groups' } }],
         },
         {
+          label: 'Update Groups',
+          badge: 'New',
+          items: [{ autogenerate: { directory: 'update-groups' } }],
+        },
+        {
           label: 'Configuration File',
           items: [
             'config/syncpackrc',
@@ -118,6 +123,7 @@ export default defineConfig({
             'config/sort-packages',
             'config/source',
             'config/strict',
+            { label: 'updateGroups', link: '/update-groups/', badge: 'New' },
             { label: 'versionGroups', link: '/version-groups/' },
           ],
         },

@@ -1,10 +1,15 @@
 use {
   crate::{
     errors::UnsupportedConfigError,
-    rcfile::{RawRcfile, Rcfile, semver_group::AnySemverGroup},
+    rcfile::{
+      RawRcfile, Rcfile,
+      semver_group::AnySemverGroup,
+      update_group::{AnyUpdateGroup, UpdateGroup, UpdatePolicy},
+    },
     version_group::{AnyVersionGroup, VersionGroup},
   },
   serde_json::json,
+  syncpack_specifier::update_target::UpdateTarget,
 };
 
 #[test]
@@ -321,6 +326,66 @@ fn semver_group_from_config_rejects_missing_required_fields() {
   .unwrap();
   let err = crate::rcfile::semver_group::SemverGroup::from_config(group).unwrap_err();
   assert!(matches!(err, UnsupportedConfigError::InvalidSemverGroup));
+}
+
+#[test]
+fn update_group_parses_target_patch() {
+  let group: AnyUpdateGroup = serde_json::from_value(json!({ "target": "patch" })).unwrap();
+  let parsed = UpdateGroup::from_config(group).unwrap();
+  assert!(matches!(parsed.policy, UpdatePolicy::UpTo(UpdateTarget::Patch)));
+}
+
+#[test]
+fn update_group_parses_target_minor() {
+  let group: AnyUpdateGroup = serde_json::from_value(json!({ "target": "minor" })).unwrap();
+  let parsed = UpdateGroup::from_config(group).unwrap();
+  assert!(matches!(parsed.policy, UpdatePolicy::UpTo(UpdateTarget::Minor)));
+}
+
+#[test]
+fn update_group_parses_target_latest() {
+  let group: AnyUpdateGroup = serde_json::from_value(json!({ "target": "latest" })).unwrap();
+  let parsed = UpdateGroup::from_config(group).unwrap();
+  assert!(matches!(parsed.policy, UpdatePolicy::UpTo(UpdateTarget::Latest)));
+}
+
+#[test]
+fn update_group_parses_is_ignored_true() {
+  let group: AnyUpdateGroup = serde_json::from_value(json!({ "isIgnored": true })).unwrap();
+  let parsed = UpdateGroup::from_config(group).unwrap();
+  assert!(matches!(parsed.policy, UpdatePolicy::Skip));
+}
+
+#[test]
+fn update_group_rejects_neither_field() {
+  let group: AnyUpdateGroup = serde_json::from_value(json!({ "label": "x" })).unwrap();
+  let err = UpdateGroup::from_config(group).unwrap_err();
+  assert!(matches!(err, UnsupportedConfigError::InvalidUpdateGroup));
+}
+
+#[test]
+fn update_group_rejects_both_fields() {
+  let group: AnyUpdateGroup = serde_json::from_value(json!({ "isIgnored": true, "target": "patch" })).unwrap();
+  let err = UpdateGroup::from_config(group).unwrap_err();
+  assert!(matches!(err, UnsupportedConfigError::InvalidUpdateGroup));
+}
+
+#[test]
+fn update_group_rejects_unknown_target() {
+  let group: AnyUpdateGroup = serde_json::from_value(json!({ "target": "nope" })).unwrap();
+  let err = UpdateGroup::from_config(group).unwrap_err();
+  assert!(matches!(err, UnsupportedConfigError::InvalidUpdateGroup));
+}
+
+#[test]
+fn update_groups_unknown_field_raises_unrecognised_property() {
+  let raw: RawRcfile = serde_json::from_value(json!({
+    "updateGroups": [{ "target": "patch", "bogus": 1 }]
+  }))
+  .unwrap();
+  let errors = raw.validate_unknown_fields().unwrap_err();
+  assert_eq!(errors.len(), 1);
+  assert!(matches!(&errors[0], UnsupportedConfigError::UnrecognisedProperty { path } if path == "updateGroups[0].bogus"));
 }
 
 #[test]

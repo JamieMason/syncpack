@@ -15,6 +15,7 @@ use {
   crate::{
     dependency::{DependencyType, Strategy, UpdateUrl},
     disk::Disk,
+    rcfile::update_group::UpdatePolicy,
     semver_range::SemverRange,
     source::Source,
     sources::SourceIdx,
@@ -76,13 +77,22 @@ pub struct Instance {
   /// by Version Groups when determining the preferred version, so it tries
   /// to also satisfy any applicable semver group ranges.
   pub preferred_semver_range: Option<SemverRange>,
+  /// If this instance matched an `updateGroups` entry, the policy applied
+  /// when picking eligible registry updates (skip entirely or clamp the
+  /// effective `UpdateTarget`). `None` when no group matched.
+  pub preferred_update_policy: Option<UpdatePolicy>,
   /// Starts as `Unknown`, assigned during `visit_packages()`. `RefCell` so
   /// states can be assigned without `&mut Context`.
   pub state: RefCell<InstanceState>,
 }
 
 impl Instance {
-  pub fn new(descriptor: InstanceDescriptor, package_name: &str, preferred_semver_range: Option<SemverRange>) -> Instance {
+  pub fn new(
+    descriptor: InstanceDescriptor,
+    package_name: &str,
+    preferred_semver_range: Option<SemverRange>,
+    preferred_update_policy: Option<UpdatePolicy>,
+  ) -> Instance {
     let dependency_type_name = &descriptor.dependency_type.path;
     let id = format!("{} in {} of {}", &descriptor.name, dependency_type_name, package_name);
     let is_local_instance = dependency_type_name == "/version";
@@ -92,6 +102,7 @@ impl Instance {
       id,
       is_local_instance,
       preferred_semver_range,
+      preferred_update_policy,
       state: RefCell::new(InstanceState::Unknown),
     }
   }

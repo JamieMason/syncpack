@@ -53,6 +53,7 @@ pub struct TestBuilder {
   subcommand: Option<String>,
   semver_groups: Vec<Value>,
   strict: Option<bool>,
+  update_groups: Vec<Value>,
   update_target: Option<UpdateTarget>,
   version_groups: Vec<Value>,
   interactive: bool,
@@ -73,6 +74,7 @@ impl TestBuilder {
       subcommand: None,
       semver_groups: vec![],
       strict: None,
+      update_groups: vec![],
       update_target: None,
       version_groups: vec![],
       interactive: false,
@@ -176,6 +178,11 @@ impl TestBuilder {
     self
   }
 
+  pub fn with_update_group(mut self, group: Value) -> Self {
+    self.update_groups.push(group);
+    self
+  }
+
   pub fn with_strict(mut self, strict: bool) -> Self {
     self.strict = Some(strict);
     self
@@ -228,6 +235,9 @@ impl TestBuilder {
     }
     if !self.semver_groups.is_empty() {
       config["semverGroups"] = Value::Array(self.semver_groups.clone());
+    }
+    if !self.update_groups.is_empty() {
+      config["updateGroups"] = Value::Array(self.update_groups.clone());
     }
     if !self.dependency_groups.is_empty() {
       config["dependencyGroups"] = Value::Array(self.dependency_groups.clone());

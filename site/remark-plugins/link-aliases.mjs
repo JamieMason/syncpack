@@ -22,6 +22,7 @@ export function linkAliases() {
     CONFIG_SORT_PACKAGES: '/config/sort-packages/',
     CONFIG_SOURCE: '/config/source/',
     CONFIG_SYNCPACKRC: '/config/syncpackrc/',
+    CONFIG_UPDATE_GROUPS: '/update-groups/',
     CONFIG_VERSION_GROUPS: '/version-groups/',
 
     GUIDE_PEER_DEPENDENCIES: '/guide/peer-dependencies/',
@@ -44,6 +45,7 @@ export function linkAliases() {
     TERM_SPECIFIER: '/glossary/#specifier',
     TERM_SPECIFIER_TYPE: '/glossary/#specifier-type',
     TERM_STATUS_CODE: '/glossary/#status-code',
+    TERM_UPDATE_GROUP: '/glossary/#update-group',
     TERM_VERSION_GROUP: '/glossary/#version-group',
     TERM_WORKSPACE: '/glossary/#workspace',
 
@@ -79,6 +81,9 @@ export function linkAliases() {
     SEMVER_GROUP_WITH_RANGE: '/semver-groups/with-range/',
 
     STATUS_SAME_MINOR_MISMATCH: '/status/same-minor-mismatch',
+
+    UPDATE_GROUP_IGNORED: '/update-groups/ignored/',
+    UPDATE_GROUP_TARGETED: '/update-groups/targeted/',
 
     VERSION_GROUP_BANNED: '/version-groups/banned/',
     VERSION_GROUP_CATALOG: '/version-groups/catalog/',

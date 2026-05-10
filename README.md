@@ -95,6 +95,12 @@ syncpack update --target latest
 syncpack update --target minor
 # Only update patch versions (1.2.x)
 syncpack update --target patch
+# Pick which updates to apply through an interactive prompt
+syncpack update --interactive
+# Interactively pick from patch updates only
+syncpack update --interactive --target patch
+# Interactively pick which @aws-sdk packages to update
+syncpack update --interactive --dependencies '@aws-sdk/**'
 # Check for outdated dependencies in one package
 syncpack update --check --source 'packages/pingu/package.json'
 # Update dependencies and devDependencies in the whole monorepo

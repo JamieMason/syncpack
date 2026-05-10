@@ -3841,3 +3841,306 @@ mod catalog_defs_with_semver_group {
     ]);
   }
 }
+
+mod update_groups {
+  use super::*;
+
+  #[tokio::test]
+  async fn target_patch_clamps_minor_candidate_to_patch_when_patch_exists() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": { "wat": "1.2.3" }
+      }))
+      .with_update_group(json!({
+        "dependencies": ["wat"],
+        "target": "patch"
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.2.3", "1.2.4", "1.3.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("1.2.4"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn target_minor_allows_minor_blocks_major() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": { "wat": "1.2.3" }
+      }))
+      .with_update_group(json!({
+        "dependencies": ["wat"],
+        "target": "minor"
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.2.3", "1.3.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("1.3.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn is_ignored_marks_instance_valid_when_registry_update_exists() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": { "wat": "1.0.0" }
+      }))
+      .with_update_group(json!({
+        "dependencies": ["wat"],
+        "isIgnored": true
+      }))
+      .with_registry_updates(json!({
+        "wat": ["1.0.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn cli_target_patch_overrides_group_target_latest() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": { "wat": "1.2.3" }
+      }))
+      .with_update_group(json!({
+        "dependencies": ["wat"],
+        "target": "latest"
+      }))
+      .with_update_target(UpdateTarget::Patch)
+      .with_registry_updates(json!({
+        "wat": ["1.2.3", "1.2.4", "1.3.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("1.2.4"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn group_target_patch_overrides_cli_target_latest() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": { "wat": "1.2.3" }
+      }))
+      .with_update_group(json!({
+        "dependencies": ["wat"],
+        "target": "patch"
+      }))
+      .with_update_target(UpdateTarget::Latest)
+      .with_registry_updates(json!({
+        "wat": ["1.2.3", "1.2.4", "1.3.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("1.2.4"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn first_match_wins_when_two_groups_match_same_dep() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": { "storybook": "1.2.3" }
+      }))
+      .with_update_group(json!({
+        "dependencies": ["storybook"],
+        "target": "patch"
+      }))
+      .with_update_group(json!({
+        "dependencies": ["storybook"],
+        "target": "latest"
+      }))
+      .with_registry_updates(json!({
+        "storybook": ["1.2.3", "1.2.4", "1.3.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "storybook",
+        id: "storybook in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("1.2.4"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn no_update_group_uses_cli_target_only() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "dependencies": { "wat": "1.2.3" }
+      }))
+      .with_update_target(UpdateTarget::Minor)
+      .with_registry_updates(json!({
+        "wat": ["1.2.3", "1.3.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "wat",
+        id: "wat in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("1.3.0"),
+        overridden: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn dependency_types_peer_is_ignored_skips_update() {
+    let ctx = TestBuilder::new()
+      .with_package(json!({
+        "name": "package-a",
+        "version": "0.0.0",
+        "peerDependencies": { "react": "17.0.0" }
+      }))
+      .with_update_group(json!({
+        "dependencyTypes": ["peer"],
+        "isIgnored": true
+      }))
+      .with_registry_updates(json!({
+        "react": ["17.0.0", "18.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "react",
+        id: "react in /peerDependencies of package-a",
+        actual: "17.0.0",
+        expected: Some("17.0.0"),
+        overridden: None,
+      },
+    ]);
+  }
+}
