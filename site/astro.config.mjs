@@ -86,19 +86,19 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Guides',
-          autogenerate: { directory: 'guide' },
+          items: [{ autogenerate: { directory: 'guide' } }],
         },
         {
           label: 'Commands',
-          autogenerate: { directory: 'command' },
+          items: [{ autogenerate: { directory: 'command' } }],
         },
         {
           label: 'Version Groups',
-          autogenerate: { directory: 'version-groups' },
+          items: [{ autogenerate: { directory: 'version-groups' } }],
         },
         {
           label: 'Semver Groups',
-          autogenerate: { directory: 'semver-groups' },
+          items: [{ autogenerate: { directory: 'semver-groups' } }],
         },
         {
           label: 'Configuration File',
