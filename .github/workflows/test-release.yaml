@@ -1,12 +1,9 @@
-name: Release
+name: Test Release Pipeline
 
 on:
-  release:
-    types: [published]
-
-permissions:
-  contents: write
-  id-token: write # Required for OIDC
+  push:
+    branches:
+      - main
 
 jobs:
   build-matrix:
@@ -31,11 +28,11 @@ jobs:
           fi
 
   publish-npm-binaries:
-    name: Publish npm binaries
+    name: (Test) Publish npm binaries
     needs: build-matrix
     runs-on: ${{ matrix.build.OS }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         build: ${{ fromJson(needs.build-matrix.outputs.build_matrix) }}
     steps:
@@ -83,19 +80,13 @@ jobs:
         if: ${{ env.ACT || matrix.build.OS != 'ubuntu-latest' }}
         shell: bash
         run: cargo build --release --locked --target ${{ matrix.build.TARGET }}
-      - name: Publish rust binary package to npm
+      - name: (Test) Publish rust binary package to npm
         shell: bash
         run: |
           just --dotenv-filename .env.${{ matrix.build.NAME }} create-npm-binary-package
-          just --dotenv-filename .env.${{ matrix.build.NAME }} publish-npm-binary-package
-      - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: syncpack-${{ matrix.build.TARGET }}
-          path: target/${{ matrix.build.TARGET }}/release/syncpack
 
   publish-npm-base:
-    name: Publish npm package
+    name: (Test) Publish npm package
     needs: publish-npm-binaries
     runs-on: ubuntu-latest
     steps:
@@ -112,9 +103,8 @@ jobs:
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
         with:
           just-version: 1.35.0
-      - name: Publish the package
+      - name: (Test) Publish the package
         shell: bash
         run: |
           npm install
           just --dotenv-filename .env.linux-x64-glibc create-npm-root-package
-          just --dotenv-filename .env.linux-x64-glibc publish-npm-root-package
