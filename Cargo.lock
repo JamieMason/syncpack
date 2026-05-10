@@ -1650,7 +1650,7 @@ dependencies = [
 
 [[package]]
 name = "syncpack"
-version = "15.0.0"
+version = "15.1.1"
 dependencies = [
  "async-trait",
  "clap",
@@ -1681,7 +1681,7 @@ dependencies = [
 
 [[package]]
 name = "syncpack-specifier"
-version = "15.0.0"
+version = "15.1.1"
 dependencies = [
  "criterion",
  "ctor 1.0.4",

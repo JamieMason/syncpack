@@ -1,5 +1,18 @@
 # Changelog
 
+## [15.1.1](https://github.com/JamieMason/syncpack/compare/15.0.0...15.1.1) (2026-05-10)
+
+### Features
+
+* **config:** add updateGroups to set registry update policies ([bd7573e](https://github.com/JamieMason/syncpack/commit/bd7573e29fce47d8f1a5bc1b5bc2b13b335b9430)), closes [#244](https://github.com/JamieMason/syncpack/issues/244)
+* **update:** add --interactive prompt ([8b1334a](https://github.com/JamieMason/syncpack/commit/8b1334a95092e2e9e032a86315875743e5148b41))
+* **update:** cache registry responses for 30mins ([08bd28c](https://github.com/JamieMason/syncpack/commit/08bd28cc78fb117744d3a098101bad5e8316852b))
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([f99d54f](https://github.com/JamieMason/syncpack/commit/f99d54ff6e849585b63e6eaa2a4df32e05be0b42))
+* **github:** fix release pipeline ([9a38e9e](https://github.com/JamieMason/syncpack/commit/9a38e9e634d6c836fe47cbe073e1eae00747999e))
+
 ## [15.0.0](https://github.com/JamieMason/syncpack/compare/14.3.1...15.0.0) (2026-05-04)
 
 ### ⚠ BREAKING CHANGES
