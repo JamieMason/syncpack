@@ -1,5 +1,11 @@
 # Changelog
 
+## [15.1.2](https://github.com/JamieMason/syncpack/compare/15.1.1...15.1.2) (2026-05-10)
+
+### Bug Fixes
+
+* **npm:** forward stdio correctly to binary ([87be440](https://github.com/JamieMason/syncpack/commit/87be4403cccf00f234550dbd8ed9c79ec4559384))
+
 ## [15.1.1](https://github.com/JamieMason/syncpack/compare/15.0.0...15.1.1) (2026-05-10)
 
 ### Features
