@@ -293,6 +293,10 @@ pub trait DiskIo {
   fn read_dir(&self, path: &Path) -> Result<Vec<DiskDirEntry>, std::io::Error>;
   /// Read a JSON file from disk
   fn read_json_file<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>>;
+  /// Read a file from disk as raw bytes. Used by callers (e.g. the
+  /// registry cache) that don't need formatting detection or the
+  /// `File<V>` envelope. `None` when the file does not exist.
+  fn read_bytes(&self, filepath: &Path) -> Option<Result<Vec<u8>, DiskIoError>>;
   /// Read a file from disk to a string
   fn read_textfile(&self, filepath: &Path) -> Option<Result<File<String>, DiskIoError>>;
   /// Read a YAML file from disk
@@ -302,6 +306,9 @@ pub trait DiskIo {
   /// which carries the raw text + patch queue used for format-preserving
   /// writes — typed reads do not need that machinery.
   fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>>;
+  /// Write raw bytes to disk, creating any missing parent directories.
+  /// Used by callers that don't need the `File<V>` envelope.
+  fn write_bytes(&self, filepath: &Path, bytes: &[u8]) -> Result<(), DiskIoError>;
   /// Write a JSON file to disk
   fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError>;
   /// Write a YAML file to disk. Format-preserving via `yamlpatch` when
@@ -358,6 +365,12 @@ impl DiskIo for LiveDiskIo {
     )
   }
 
+  fn read_bytes(&self, filepath: &Path) -> Option<Result<Vec<u8>, DiskIoError>> {
+    Some(filepath)
+      .filter(|f| self.path_exists(f))
+      .map(|filepath| fs::read(filepath).map_err(DiskIoError::FileRead))
+  }
+
   fn read_textfile(&self, filepath: &Path) -> Option<Result<File<String>, DiskIoError>> {
     Some(filepath).filter(|f| self.path_exists(f)).map(|filepath| {
       fs::read_to_string(filepath).map_err(DiskIoError::FileRead).map(|raw| File {
@@ -405,15 +418,30 @@ impl DiskIo for LiveDiskIo {
     })
   }
 
+  fn write_bytes(&self, filepath: &Path, bytes: &[u8]) -> Result<(), DiskIoError> {
+    ensure_parent_dir(filepath)?;
+    fs::write(filepath, bytes).map_err(DiskIoError::FileWrite)
+  }
+
   fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError> {
     let pretty_bytes = get_pretty_json_bytes(file)?;
+    ensure_parent_dir(&file.filepath)?;
     fs::write(&file.filepath, &pretty_bytes).map_err(DiskIoError::FileWrite)
   }
 
   fn write_yaml_file(&self, file: &YamlFile) -> Result<(), DiskIoError> {
     let bytes = render_yaml_bytes(file)?;
+    ensure_parent_dir(&file.filepath)?;
     fs::write(&file.filepath, &bytes).map_err(DiskIoError::FileWrite)
   }
+}
+
+fn ensure_parent_dir(filepath: &Path) -> Result<(), DiskIoError> {
+  let Some(parent) = filepath.parent() else { return Ok(()) };
+  if parent.as_os_str().is_empty() || parent.exists() {
+    return Ok(());
+  }
+  fs::create_dir_all(parent).map_err(DiskIoError::FileWrite)
 }
 
 /// Serialize a JSON Value back into pretty JSON as bytes.

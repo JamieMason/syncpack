@@ -103,6 +103,10 @@ impl DiskIo for MockDiskIo {
     })
   }
 
+  fn read_bytes(&self, filepath: &Path) -> Option<Result<Vec<u8>, DiskIoError>> {
+    self.files.get(filepath).map(|raw| Ok(raw.as_bytes().to_vec()))
+  }
+
   fn read_textfile(&self, filepath: &Path) -> Option<Result<File<String>, DiskIoError>> {
     self.files.get(filepath).map(|raw| {
       Ok(File {
@@ -139,6 +143,11 @@ impl DiskIo for MockDiskIo {
         dirty: false,
       })
     })
+  }
+
+  fn write_bytes(&self, filepath: &Path, bytes: &[u8]) -> Result<(), DiskIoError> {
+    self.record_write(filepath, bytes.to_vec());
+    Ok(())
   }
 
   fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError> {

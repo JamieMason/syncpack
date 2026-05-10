@@ -1,0 +1,5 @@
+import { Code } from "astro:components";
+
+Bypass the on-disk cache of npm registry responses. By default Syncpack stores responses in the system temp directory for 30 minutes to avoid repeat network calls; this flag skips both reading and writing the cache for the current run.
+
+<Code code={`syncpack ${props.command} --no-cache`} lang="bash" />

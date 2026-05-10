@@ -10,6 +10,7 @@ use {
   serde_json::Value,
   std::{
     collections::{BTreeMap, HashMap},
+    sync::Arc,
     time::Duration,
   },
   thiserror::Error,
@@ -53,12 +54,14 @@ pub struct AllPackageVersions {
 /// A trait defining the interface for a registry client
 #[async_trait::async_trait]
 pub trait RegistryClient: std::fmt::Debug + Send + Sync {
-  /// Fetch latest version of a given dep
-  async fn fetch(&self, update_url: &UpdateUrl) -> Result<AllPackageVersions, RegistryError>;
+  /// Fetch every published version of `update_url`. Implementations are
+  /// free to satisfy hits from a cache (see `CachedRegistryClient`).
+  async fn fetch(&self, update_url: &UpdateUrl) -> Result<Arc<AllPackageVersions>, RegistryError>;
 }
 
-/// The real implementation of RegistryClientTrait which makes actual network
-/// requests
+/// The real implementation of `RegistryClient` which makes network
+/// requests against the npm registry. Pure HTTP — caching is layered on
+/// via `CachedRegistryClient`.
 #[derive(Debug)]
 pub struct LiveRegistryClient {
   pub client: Client,
@@ -66,7 +69,7 @@ pub struct LiveRegistryClient {
 
 #[async_trait::async_trait]
 impl RegistryClient for LiveRegistryClient {
-  async fn fetch(&self, update_url: &UpdateUrl) -> Result<AllPackageVersions, RegistryError> {
+  async fn fetch(&self, update_url: &UpdateUrl) -> Result<Arc<AllPackageVersions>, RegistryError> {
     let req = self.client.get(&update_url.url).header(ACCEPT, "application/json");
     debug!("GET {update_url:?}");
     match req.send().await {
@@ -87,11 +90,11 @@ impl RegistryClient for LiveRegistryClient {
               .into_iter()
               .filter(|(k, _)| k != "created" && k != "modified")
               .collect();
-            Ok(AllPackageVersions {
+            Ok(Arc::new(AllPackageVersions {
               name: package_meta.name,
               versions,
               times,
-            })
+            }))
           }
           Err(err) => Err(RegistryError::FetchError {
             url: update_url.url.to_string(),

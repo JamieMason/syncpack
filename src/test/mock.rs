@@ -33,6 +33,7 @@ pub fn cli() -> Cli {
     subcommand: Subcommand::Lint,
     target: UpdateTarget::Latest,
     interactive: false,
+    no_cache: false,
   }
 }
 

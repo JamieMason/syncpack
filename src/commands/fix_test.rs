@@ -712,6 +712,10 @@ impl crate::disk::DiskIo for RecordingDiskIo {
     self.inner.read_json_file(p)
   }
 
+  fn read_bytes(&self, p: &Path) -> Option<Result<Vec<u8>, crate::disk::DiskIoError>> {
+    self.inner.read_bytes(p)
+  }
+
   fn read_textfile(&self, p: &Path) -> Option<Result<crate::disk::File<String>, crate::disk::DiskIoError>> {
     self.inner.read_textfile(p)
   }
@@ -722,6 +726,11 @@ impl crate::disk::DiskIo for RecordingDiskIo {
 
   fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<crate::disk::File<V>, crate::disk::DiskIoError>> {
     self.inner.read_yaml_typed(p)
+  }
+
+  fn write_bytes(&self, filepath: &Path, _bytes: &[u8]) -> Result<(), crate::disk::DiskIoError> {
+    self.writes.borrow_mut().push(filepath.to_path_buf());
+    Ok(())
   }
 
   fn write_json_file<V: serde::ser::Serialize>(&self, file: &crate::disk::File<V>) -> Result<(), crate::disk::DiskIoError> {

@@ -248,6 +248,7 @@ impl TestBuilder {
   pub async fn run_with_updates(self) -> (Context, Option<RegistryUpdates>) {
     use {
       crate::{
+        cli::Cli,
         registry::client::RegistryClient,
         syncpack,
         test::{mock_disk::MockDiskIo, registry_client::MockRegistryClient},
@@ -324,7 +325,8 @@ impl TestBuilder {
     }
     let registry_client: Arc<dyn RegistryClient> = Arc::new(mock);
 
-    let (ctx, registry_updates) = syncpack::syncpack(&args, &disk, &registry_client)
+    let cli = Cli::parse(&args).expect("Cli::parse failed");
+    let (ctx, registry_updates) = syncpack::syncpack(cli, &disk, &registry_client)
       .await
       .expect("syncpack analyse/inspect failed");
     (ctx, registry_updates)

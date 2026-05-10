@@ -4,7 +4,10 @@ use {
     registry::client::{AllPackageVersions, RegistryClient, RegistryError},
   },
   reqwest::StatusCode,
-  std::collections::{BTreeMap, HashMap},
+  std::{
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+  },
 };
 
 /// A mock implementation of RegistryClient for testing
@@ -19,14 +22,16 @@ pub struct MockRegistryClient {
 #[async_trait::async_trait]
 impl RegistryClient for MockRegistryClient {
   /// Return a dynamically constructed PackageMeta based on the package name
-  async fn fetch(&self, update_url: &UpdateUrl) -> Result<AllPackageVersions, RegistryError> {
+  async fn fetch(&self, update_url: &UpdateUrl) -> Result<Arc<AllPackageVersions>, RegistryError> {
     self
       .package_data
       .get(&update_url.internal_name)
-      .map(|versions| AllPackageVersions {
-        name: update_url.internal_name.to_string(),
-        versions: versions.clone(),
-        times: self.package_times.get(&update_url.internal_name).cloned().unwrap_or_default(),
+      .map(|versions| {
+        Arc::new(AllPackageVersions {
+          name: update_url.internal_name.to_string(),
+          versions: versions.clone(),
+          times: self.package_times.get(&update_url.internal_name).cloned().unwrap_or_default(),
+        })
       })
       .ok_or_else(|| RegistryError::HttpError {
         url: update_url.internal_name.to_string(),

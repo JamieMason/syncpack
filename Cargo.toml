@@ -36,7 +36,7 @@ reqwest = { version = "0.12", features = [
 ], default-features = false }
 detect-indent = "0.1.0"
 detect-newline-style = "0.1.2"
-serde = { version = "1.0.228", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive", "rc"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 serde_yaml = "0.9.34"
 syncpack-specifier = { path = "crates/syncpack-specifier" }

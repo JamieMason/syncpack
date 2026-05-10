@@ -49,7 +49,7 @@ impl RegistryUpdates {
     let client = Arc::clone(client);
     let semaphore = Arc::new(Semaphore::new(max_concurrent_requests));
     let progress_bars = Arc::new(MultiProgress::new());
-    let mut handles: Vec<(String, JoinHandle<Result<AllPackageVersions, RegistryError>>)> = vec![];
+    let mut handles: Vec<(String, JoinHandle<Result<Arc<AllPackageVersions>, RegistryError>>)> = vec![];
     let mut updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
     let mut times_by_internal_name: HashMap<String, HashMap<String, String>> = HashMap::new();
     let mut failed: Vec<String> = vec![];
@@ -86,7 +86,7 @@ impl RegistryUpdates {
                 all_updates.push(Specifier::new(version));
               }
             }
-            times_by_internal_name.insert(internal_name.clone(), package_meta.times);
+            times_by_internal_name.insert(internal_name.clone(), package_meta.times.clone());
           }
           Err(err) => {
             debug!("{err}");

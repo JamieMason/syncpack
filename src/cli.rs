@@ -82,6 +82,9 @@ pub struct Cli {
   /// Whether `update` should drive an interactive picker. Mutually
   /// exclusive with `check` at the clap level.
   pub interactive: bool,
+  /// Whether to bypass the on-disk npm registry cache. Only meaningful
+  /// for `update`.
+  pub no_cache: bool,
 }
 
 impl Default for Cli {
@@ -104,6 +107,7 @@ impl Default for Cli {
       subcommand: Subcommand::Lint,
       target: UpdateTarget::Latest,
       interactive: false,
+      no_cache: false,
     }
   }
 }
@@ -139,6 +143,8 @@ impl Cli {
         }),
         interactive: matches!(&subcommand, Subcommand::Update)
           && matches.try_get_one::<bool>("interactive").ok().flatten().copied().unwrap_or(false),
+        no_cache: matches!(&subcommand, Subcommand::Update)
+          && matches.try_get_one::<bool>("no-cache").ok().flatten().copied().unwrap_or(false),
         cwd,
         disable_ansi: matches.get_flag("no-ansi"),
         dry_run: (matches!(&subcommand, Subcommand::Fix | Subcommand::Format | Subcommand::Update)) && matches.get_flag("dry-run"),
@@ -248,6 +254,18 @@ fn create() -> Command {
             .long("check")
             .long_help(cformat!(r#"Check versions are up to date instead of updating them"#))
             .conflicts_with("interactive")
+            .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+          Arg::new("no-cache")
+            .long("no-cache")
+            .long_help(cformat!(
+              r#"Bypass the on-disk cache of npm registry responses
+
+By default Syncpack caches registry responses in the system temp
+directory for 30 minutes to avoid repeat network calls. Pass this flag
+to skip both reading and writing the cache."#
+            ))
             .action(clap::ArgAction::SetTrue),
         )
         .arg(

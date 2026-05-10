@@ -25,11 +25,11 @@ use {
 
 /// Run the full syncpack CLI using injected dependencies
 pub async fn syncpack<D: DiskIo>(
-  args: &[String],
+  cli: Cli,
   io: &D,
   registry_client: &Arc<dyn RegistryClient>,
 ) -> Result<(Context, Option<RegistryUpdates>), SyncpackError> {
-  let ctx = analyse(args, io)?;
+  let ctx = analyse(cli, io)?;
   let registry_updates = fetch_updates(&ctx, registry_client).await;
   let ctx = inspect(ctx, &registry_updates);
   Ok((ctx, registry_updates))
@@ -37,8 +37,7 @@ pub async fn syncpack<D: DiskIo>(
 
 /// Analyse the project, discover config and packages, and return a `Context`.
 /// All disk reads happen here.
-fn analyse<D: DiskIo>(args: &[String], io: &D) -> Result<Context, SyncpackError> {
-  let cli = Cli::parse(args)?;
+fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Context, SyncpackError> {
   logger::configure(&cli);
   let mut disk = Disk::from_workspace(io, &cli.cwd);
   let rcfile = Rcfile::from_disk(&disk, io, &cli).map_err(SyncpackError::RcfileError)?;

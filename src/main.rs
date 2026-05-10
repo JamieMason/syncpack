@@ -2,9 +2,14 @@
 
 use {
   crate::{
+    cli::Cli,
     disk::LiveDiskIo,
     errors::SyncpackError,
-    registry::client::{LiveRegistryClient, RegistryClient},
+    registry::{
+      cache::default_cache_filepath,
+      cached_client::CachedRegistryClient,
+      client::{LiveRegistryClient, RegistryClient},
+    },
     tui::LiveTui,
   },
   clap::error::ErrorKind,
@@ -46,12 +51,21 @@ async fn main() {
   let result = async {
     logger::init();
     let args: Vec<String> = std::env::args().collect();
-    let io = LiveDiskIo::new();
-    let registry_client: Arc<dyn RegistryClient> = Arc::new(LiveRegistryClient::new());
+    let cli = Cli::parse(&args)?;
+    let io = Arc::new(LiveDiskIo::new());
+    let registry_client: Arc<dyn RegistryClient> = if cli.no_cache {
+      Arc::new(LiveRegistryClient::new())
+    } else {
+      Arc::new(CachedRegistryClient::new(
+        LiveRegistryClient::new(),
+        Arc::clone(&io),
+        default_cache_filepath(),
+      ))
+    };
     let tui = LiveTui::new();
-    let (ctx, registry_updates) = syncpack::syncpack(&args, &io, &registry_client).await?;
+    let (ctx, registry_updates) = syncpack::syncpack(cli, &*io, &registry_client).await?;
     debug!("config: {:#?}", ctx.config);
-    syncpack::run(ctx, registry_updates, &io, &tui)
+    syncpack::run(ctx, registry_updates, &*io, &tui)
   }
   .await;
 
