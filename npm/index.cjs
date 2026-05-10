@@ -15,7 +15,7 @@ const pathToBinary = resolveBinaryPath();
 process.exit(
   spawnSync(pathToBinary, args, {
     cwd: process.cwd(),
-    stdio: ['ignore', 'inherit', 'inherit'],
+    stdio: 'inherit',
     env: process.env,
   }).status || 0,
 );
