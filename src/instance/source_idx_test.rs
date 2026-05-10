@@ -243,11 +243,13 @@ async fn update_pnpm_catalog_def_writes_yaml() {
   ctx.config.cli.dry_run = true;
 
   let disk = crate::test::mock_disk::MockDiskIo::new();
+  let tui = crate::test::mock_tui::MockTui::cancel();
   let registry = crate::registry::updates::RegistryUpdates {
     updates_by_internal_name: std::collections::HashMap::new(),
+    times_by_internal_name: std::collections::HashMap::new(),
     failed: vec![],
   };
-  let _ = update::run(ctx, registry, &disk);
+  let _ = update::run(ctx, registry, &disk, &tui);
 }
 
 #[test]

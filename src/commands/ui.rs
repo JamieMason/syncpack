@@ -11,4 +11,5 @@ pub mod group;
 pub mod icon;
 pub mod instance;
 pub mod package;
+pub mod update_row;
 pub mod util;

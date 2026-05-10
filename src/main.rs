@@ -5,15 +5,12 @@ use {
     disk::LiveDiskIo,
     errors::SyncpackError,
     registry::client::{LiveRegistryClient, RegistryClient},
+    tui::LiveTui,
   },
   clap::error::ErrorKind,
   log::{debug, error},
   std::{process::exit, sync::Arc},
 };
-
-#[cfg(test)]
-#[path = "test/test.rs"]
-mod test;
 
 mod catalogs;
 #[cfg(test)]
@@ -34,8 +31,12 @@ mod registry;
 mod source;
 mod source_patterns;
 mod sources;
+#[cfg(test)]
+#[path = "test/test.rs"]
+mod test;
 pub use syncpack_specifier::{self as specifier, semver_range};
 mod syncpack;
+mod tui;
 mod version_group;
 mod visit_formatting;
 mod visit_packages;
@@ -47,9 +48,10 @@ async fn main() {
     let args: Vec<String> = std::env::args().collect();
     let io = LiveDiskIo::new();
     let registry_client: Arc<dyn RegistryClient> = Arc::new(LiveRegistryClient::new());
+    let tui = LiveTui::new();
     let (ctx, registry_updates) = syncpack::syncpack(&args, &io, &registry_client).await?;
     debug!("config: {:#?}", ctx.config);
-    syncpack::run(ctx, registry_updates, &io)
+    syncpack::run(ctx, registry_updates, &io, &tui)
   }
   .await;
 

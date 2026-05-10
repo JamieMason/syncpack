@@ -1,0 +1,13 @@
+import { Code } from "astro:components";
+
+Pick which updates to apply through an interactive prompt instead of writing every available update. Cannot be combined with `--check`.
+
+Keys:
+
+- `↑` `↓` — navigate
+- `space` — toggle the highlighted row
+- `a` — toggle all rows
+- `enter` — confirm and write selected updates
+- `esc` — cancel without writing
+
+<Code code={`syncpack ${props.command} --interactive`} lang="bash" />

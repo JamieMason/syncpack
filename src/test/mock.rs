@@ -32,6 +32,7 @@ pub fn cli() -> Cli {
     source_patterns: vec![],
     subcommand: Subcommand::Lint,
     target: UpdateTarget::Latest,
+    interactive: false,
   }
 }
 

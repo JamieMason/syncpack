@@ -22,6 +22,7 @@ async-trait = "0.1.89"
 clap = { version = "4.6.1", features = ["cargo"] }
 color-print = "0.3.7"
 colored = "3.1.1"
+crossterm = "0.28.1"
 env_logger = "0.11.10"
 globset = "0.4.18"
 indicatif = "0.18.4"
@@ -43,6 +44,7 @@ thiserror = "2.0.18"
 yamlpatch = "1.24"
 yamlpath = "1.24"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
+unicode-width = "0.2"
 
 [features]
 default = []

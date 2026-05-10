@@ -23,12 +23,17 @@ use {
     cli::UpdateTarget,
     context::Context,
     disk::{Disk, File, PackageManager, detect_formatting, parse_yaml_file},
+    registry::updates::RegistryUpdates,
     sources::Sources,
+    test::mock_tui::MockTui,
     visit_formatting::visit_formatting,
     visit_packages::visit_packages,
   },
   serde_json::{Value, json},
-  std::path::PathBuf,
+  std::{
+    collections::{BTreeMap, HashMap},
+    path::PathBuf,
+  },
 };
 
 #[cfg(test)]
@@ -44,11 +49,14 @@ pub struct TestBuilder {
   pnpm_yaml: Option<String>,
   bun_root: Option<Value>,
   registry_updates: Option<Value>,
+  registry_times: BTreeMap<String, HashMap<String, String>>,
   subcommand: Option<String>,
   semver_groups: Vec<Value>,
   strict: Option<bool>,
   update_target: Option<UpdateTarget>,
   version_groups: Vec<Value>,
+  interactive: bool,
+  tui: Option<MockTui>,
 }
 
 impl TestBuilder {
@@ -61,11 +69,14 @@ impl TestBuilder {
       pnpm_yaml: None,
       bun_root: None,
       registry_updates: None,
+      registry_times: BTreeMap::new(),
       subcommand: None,
       semver_groups: vec![],
       strict: None,
       update_target: None,
       version_groups: vec![],
+      interactive: false,
+      tui: None,
     }
   }
 
@@ -180,6 +191,25 @@ impl TestBuilder {
     self
   }
 
+  /// Attach per-version publish timestamps for one package, surfaced
+  /// through `RegistryUpdates::times_by_internal_name`.
+  pub fn with_registry_times(mut self, internal_name: &str, times: HashMap<String, String>) -> Self {
+    self.registry_times.insert(internal_name.to_string(), times);
+    self
+  }
+
+  /// Inject a `MockTui` for interactive `update` runs.
+  pub fn with_tui(mut self, tui: MockTui) -> Self {
+    self.tui = Some(tui);
+    self
+  }
+
+  /// Pass `--interactive` to the simulated CLI invocation.
+  pub fn with_interactive(mut self) -> Self {
+    self.interactive = true;
+    self
+  }
+
   pub fn with_config(mut self, config: Value) -> Self {
     self.config = config;
     self
@@ -209,6 +239,13 @@ impl TestBuilder {
   }
 
   pub async fn run(self) -> Context {
+    self.run_with_updates().await.0
+  }
+
+  /// Like `run`, but also returns the `RegistryUpdates` that drove
+  /// `visit_packages`. Use when a test needs the per-version time data
+  /// (e.g. `update::build_update_rows` consumers).
+  pub async fn run_with_updates(self) -> (Context, Option<RegistryUpdates>) {
     use {
       crate::{
         registry::client::RegistryClient,
@@ -273,17 +310,24 @@ impl TestBuilder {
         .into(),
       );
     }
+    if self.interactive {
+      args.push("--interactive".into());
+    }
 
-    let registry_client: Arc<dyn RegistryClient> = if let Some(ref updates) = self.registry_updates {
-      Arc::new(MockRegistryClient::from_json(updates.clone()))
+    let mut mock = if let Some(ref updates) = self.registry_updates {
+      MockRegistryClient::from_json(updates.clone())
     } else {
-      Arc::new(MockRegistryClient::from_json(json!({})))
+      MockRegistryClient::from_json(json!({}))
     };
+    for (name, times) in &self.registry_times {
+      mock = mock.with_times(name, times.clone());
+    }
+    let registry_client: Arc<dyn RegistryClient> = Arc::new(mock);
 
-    let (ctx, _registry_updates) = syncpack::syncpack(&args, &disk, &registry_client)
+    let (ctx, registry_updates) = syncpack::syncpack(&args, &disk, &registry_client)
       .await
       .expect("syncpack analyse/inspect failed");
-    ctx
+    (ctx, registry_updates)
   }
 
   pub fn build(self) -> Context {

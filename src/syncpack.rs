@@ -16,6 +16,7 @@ use {
     registry::{client::RegistryClient, updates::RegistryUpdates},
     source_patterns::get_source_patterns,
     sources::Sources,
+    tui::Tui,
     visit_formatting::visit_formatting,
     visit_packages::visit_packages,
   },
@@ -87,7 +88,7 @@ fn inspect(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context 
 }
 
 /// Run the side-effects of the chosen subcommand
-pub fn run<D: DiskIo>(ctx: Context, registry_updates: Option<RegistryUpdates>, io: &D) -> Result<Context, SyncpackError> {
+pub fn run<D: DiskIo>(ctx: Context, registry_updates: Option<RegistryUpdates>, io: &D, tui: &dyn Tui) -> Result<Context, SyncpackError> {
   match ctx.config.cli.subcommand {
     Subcommand::Fix => {
       let pretty = PrettyFixReporter;
@@ -115,6 +116,6 @@ pub fn run<D: DiskIo>(ctx: Context, registry_updates: Option<RegistryUpdates>, i
     Subcommand::ListMismatches => list_mismatches::run(ctx),
     Subcommand::Prompt => prompt::run(ctx),
     Subcommand::SetSemverRanges => set_semver_ranges::run(ctx),
-    Subcommand::Update => update::run(ctx, registry_updates.expect("registry_updates is None"), io),
+    Subcommand::Update => update::run(ctx, registry_updates.expect("registry_updates is None"), io, tui),
   }
 }

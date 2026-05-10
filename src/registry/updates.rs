@@ -28,6 +28,10 @@ mod updates_test;
 pub struct RegistryUpdates {
   /// All updates from the npm registry keyed by internal dependency name
   pub updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>>,
+  /// Per-version publish timestamps (ISO 8601) keyed by internal
+  /// dependency name. Used by the `update` UI to render a `~Nd` /
+  /// `~Nmo` / `~N.Ny` "how stale" hint next to each version.
+  pub times_by_internal_name: HashMap<String, HashMap<String, String>>,
   /// The internal names of all failed updates
   pub failed: Vec<String>,
 }
@@ -47,6 +51,7 @@ impl RegistryUpdates {
     let progress_bars = Arc::new(MultiProgress::new());
     let mut handles: Vec<(String, JoinHandle<Result<AllPackageVersions, RegistryError>>)> = vec![];
     let mut updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
+    let mut times_by_internal_name: HashMap<String, HashMap<String, String>> = HashMap::new();
     let mut failed: Vec<String> = vec![];
     let cutoff_unix_seconds = age_cutoff_unix_seconds(minimum_release_age_minutes);
 
@@ -81,6 +86,7 @@ impl RegistryUpdates {
                 all_updates.push(Specifier::new(version));
               }
             }
+            times_by_internal_name.insert(internal_name.clone(), package_meta.times);
           }
           Err(err) => {
             debug!("{err}");
@@ -96,6 +102,7 @@ impl RegistryUpdates {
 
     Self {
       updates_by_internal_name,
+      times_by_internal_name,
       failed,
     }
   }

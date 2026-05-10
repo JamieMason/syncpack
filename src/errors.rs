@@ -45,6 +45,8 @@ pub enum SyncpackError {
   DeprecatedCommand,
   #[error("Issues found")]
   IssuesFound,
+  #[error("Cancelled, no changes written")]
+  Cancelled,
   #[error("{0}")]
   CliError(clap::Error),
   #[error("No subcommand specified")]

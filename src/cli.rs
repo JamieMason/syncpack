@@ -79,6 +79,9 @@ pub struct Cli {
   pub target: UpdateTarget,
   /// Output format for fix and format commands
   pub reporter: ReporterKind,
+  /// Whether `update` should drive an interactive picker. Mutually
+  /// exclusive with `check` at the clap level.
+  pub interactive: bool,
 }
 
 impl Default for Cli {
@@ -100,6 +103,7 @@ impl Default for Cli {
       source_patterns: vec!["package.json".to_string(), "**/package.json".to_string()],
       subcommand: Subcommand::Lint,
       target: UpdateTarget::Latest,
+      interactive: false,
     }
   }
 }
@@ -133,6 +137,8 @@ impl Cli {
             cwd.join(config_path)
           }
         }),
+        interactive: matches!(&subcommand, Subcommand::Update)
+          && matches.try_get_one::<bool>("interactive").ok().flatten().copied().unwrap_or(false),
         cwd,
         disable_ansi: matches.get_flag("no-ansi"),
         dry_run: (matches!(&subcommand, Subcommand::Fix | Subcommand::Format | Subcommand::Update)) && matches.get_flag("dry-run"),
@@ -241,6 +247,23 @@ fn create() -> Command {
           Arg::new("check")
             .long("check")
             .long_help(cformat!(r#"Check versions are up to date instead of updating them"#))
+            .conflicts_with("interactive")
+            .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+          Arg::new("interactive")
+            .long("interactive")
+            .short('i')
+            .long_help(cformat!(
+              r#"Pick which updates to apply through an interactive prompt.
+
+<bold><underline>Keys:</underline></bold>
+<blue>↑↓</>          navigate
+<blue>space</>       toggle
+<blue>a</>           toggle all
+<blue>enter</>       confirm and write
+<blue>esc</>         cancel without writing"#
+            ))
             .action(clap::ArgAction::SetTrue),
         )
         .arg(config_option("update"))
