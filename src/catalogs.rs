@@ -7,8 +7,8 @@ use {
   },
   log::debug,
   serde_json::Value as JsonValue,
-  serde_yaml::Value as YamlValue,
   std::time::Instant,
+  yaml_serde::Value as YamlValue,
 };
 
 /// All catalog dep types implied by what's parsed onto Disk (pnpm + Bun).

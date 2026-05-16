@@ -102,8 +102,7 @@ fn normalise_patterns(patterns: Vec<String>) -> Vec<String> {
 /// 1. Preserving negation prefix (`!`) through normalization
 /// 2. Converting Windows backslashes to forward slashes for glob compatibility
 /// 3. Ensuring pattern ends with /package.json
-/// 4. Anchoring slashless patterns to the workspace root with a leading `/`
-///    so gitignore basename rules don't make them match at any depth
+/// 4. Anchoring slashless patterns to the workspace root with a leading `/` so gitignore basename rules don't make them match at any depth
 ///
 /// Examples:
 /// - "projects\\apps\\*" -> "projects/apps/*/package.json"
@@ -123,9 +122,5 @@ pub fn normalise_pattern(mut pattern: String) -> String {
   if !normalized.contains('/') {
     normalized = format!("/{normalized}");
   }
-  if negated {
-    format!("!{normalized}")
-  } else {
-    normalized
-  }
+  if negated { format!("!{normalized}") } else { normalized }
 }

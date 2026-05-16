@@ -207,7 +207,7 @@ fn insert_into_existing_default_block_records_add_patch() {
     PendingYamlOp::Add { segments, key, value } => {
       assert_eq!(segments, &vec!["catalog".to_string()]);
       assert_eq!(key, "react");
-      assert_eq!(value, &serde_yaml::Value::String("^18.0.0".to_string()));
+      assert_eq!(value, &yaml_serde::Value::String("^18.0.0".to_string()));
     }
     other => panic!("expected Add, got {:?}", other),
   }
@@ -225,7 +225,7 @@ fn insert_existing_dep_records_replace_patch() {
   match &yaml.patches[0] {
     PendingYamlOp::Replace { segments, value } => {
       assert_eq!(segments, &vec!["catalog".to_string(), "react".to_string()]);
-      assert_eq!(value, &serde_yaml::Value::String("^18.0.0".to_string()));
+      assert_eq!(value, &yaml_serde::Value::String("^18.0.0".to_string()));
     }
     other => panic!("expected Replace, got {:?}", other),
   }
@@ -244,10 +244,10 @@ fn insert_into_missing_default_block_records_root_add() {
     PendingYamlOp::Add { segments, key, value } => {
       assert!(segments.is_empty(), "root-level segments must be empty");
       assert_eq!(key, "catalog");
-      let serde_yaml::Value::Mapping(m) = value else {
+      let yaml_serde::Value::Mapping(m) = value else {
         panic!("expected Mapping value, got {:?}", value);
       };
-      assert_eq!(m.get("react"), Some(&serde_yaml::Value::String("^18.0.0".to_string())));
+      assert_eq!(m.get("react"), Some(&yaml_serde::Value::String("^18.0.0".to_string())));
     }
     other => panic!("expected Add, got {:?}", other),
   }
@@ -266,10 +266,10 @@ fn insert_into_missing_named_catalog_records_named_add() {
     PendingYamlOp::Add { segments, key, value } => {
       assert_eq!(segments, &vec!["catalogs".to_string()]);
       assert_eq!(key, "legacy");
-      let serde_yaml::Value::Mapping(m) = value else {
+      let yaml_serde::Value::Mapping(m) = value else {
         panic!("expected Mapping value, got {:?}", value);
       };
-      assert_eq!(m.get("react"), Some(&serde_yaml::Value::String("^16.0.0".to_string())));
+      assert_eq!(m.get("react"), Some(&yaml_serde::Value::String("^16.0.0".to_string())));
     }
     other => panic!("expected Add, got {:?}", other),
   }
@@ -288,14 +288,14 @@ fn insert_into_missing_catalogs_root_records_root_add() {
     PendingYamlOp::Add { segments, key, value } => {
       assert!(segments.is_empty(), "expected root-level Add");
       assert_eq!(key, "catalogs");
-      let serde_yaml::Value::Mapping(m) = value else {
+      let yaml_serde::Value::Mapping(m) = value else {
         panic!("expected Mapping value, got {:?}", value);
       };
       let legacy = m.get("legacy").expect("legacy entry exists");
-      let serde_yaml::Value::Mapping(legacy_map) = legacy else {
+      let yaml_serde::Value::Mapping(legacy_map) = legacy else {
         panic!("expected nested Mapping, got {:?}", legacy);
       };
-      assert_eq!(legacy_map.get("react"), Some(&serde_yaml::Value::String("^16.0.0".to_string())));
+      assert_eq!(legacy_map.get("react"), Some(&yaml_serde::Value::String("^16.0.0".to_string())));
     }
     other => panic!("expected Add, got {:?}", other),
   }
@@ -401,7 +401,7 @@ fn yamlpatch_add_quotes_keys_with_reserved_chars() {
     out.contains("\"@astrojs/check\":") || out.contains("'@astrojs/check':"),
     "key must be quoted in output:\n{out}"
   );
-  serde_yaml::from_str::<serde_yaml::Value>(&out).expect("output must be valid YAML");
+  yaml_serde::from_str::<yaml_serde::Value>(&out).expect("output must be valid YAML");
 }
 
 #[test]
@@ -425,7 +425,7 @@ fn yamlpatch_add_handles_many_scoped_keys_in_one_pass() {
     insert_catalog_definition(&mut yaml, "default", name, &specifier);
   }
   let out = render(&yaml);
-  serde_yaml::from_str::<serde_yaml::Value>(&out).expect("output must be valid YAML");
+  yaml_serde::from_str::<yaml_serde::Value>(&out).expect("output must be valid YAML");
   assert!(out.contains("typescript: ^5.9.3"), "original key preserved:\n{out}");
 }
 
@@ -511,7 +511,7 @@ fn yamlpatch_error_surfaces_as_disk_io_error() {
   // mutator helpers (which would correctly emit an Add).
   yaml.patches.push(PendingYamlOp::Replace {
     segments: vec!["catalog".to_string(), "missing-dep".to_string()],
-    value: serde_yaml::Value::String("^1.0.0".to_string()),
+    value: yaml_serde::Value::String("^1.0.0".to_string()),
   });
   yaml.dirty = true;
   let result = render_yaml_bytes(&yaml);
@@ -557,12 +557,12 @@ fn indent_override_applies_to_fresh_yaml() {
   yaml.filepath = io.root().join("pnpm.yaml");
   crate::disk::write_yaml_file(&mut yaml, &io, Some("    "), &fallback).expect("write must succeed");
   let written = io.written_text(&yaml.filepath).expect("yaml was written");
-  // serde_yaml's to_string respects the `formatting.indent` we set —
+  // yaml_serde's to_string respects the `formatting.indent` we set —
   // it actually uses 2 spaces by default, so the assertion targets
   // the configured indent landing on `formatting`.
-  // Note: serde_yaml ignores indent at serialize time; this test
+  // Note: yaml_serde ignores indent at serialize time; this test
   // therefore asserts that the formatting field carries the override
-  // through (the indent on disk for fresh files is the serde_yaml
+  // through (the indent on disk for fresh files is the yaml_serde
   // default of 2 spaces — but the formatting struct should reflect
   // what the user asked for so future render passes can honour it).
   // The contract under test: write_yaml_file rewrites file.formatting

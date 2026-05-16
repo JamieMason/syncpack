@@ -8,7 +8,7 @@ license = "MIT"
 
 [dev-dependencies]
 criterion = { version = "0.8.2", features = ["html_reports"] }
-ctor = "1.0.4"
+ctor = "1.0.5"
 
 [[bench]]
 name = "specifier_parsing"

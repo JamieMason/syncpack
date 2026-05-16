@@ -3,7 +3,6 @@ use {
   detect_indent::detect_indent,
   detect_newline_style::LineEnding,
   serde_json::Value as JsonValue,
-  serde_yaml::{Mapping, Value as YamlValue},
   std::{
     fs,
     path::{Path, PathBuf},
@@ -11,18 +10,19 @@ use {
     rc::Rc,
   },
   thiserror::Error,
+  yaml_serde::{Mapping, Value as YamlValue},
 };
 
 /// A YAML file held in memory alongside its raw text and a queue of
 /// pending edit operations. The dual model lets reads (`json_view`,
-/// `pnpm_catalog_names`, etc.) hit the parsed `serde_yaml::Value` while
+/// `pnpm_catalog_names`, etc.) hit the parsed `yaml_serde::Value` while
 /// writes replay `patches` against the original `raw` text via the
 /// `yamlpatch` crate so comments / blank lines / indent are preserved.
 #[derive(Debug)]
 pub struct YamlFile {
   pub filepath: PathBuf,
   pub formatting: DetectedFormatting,
-  pub contents: serde_yaml::Value,
+  pub contents: yaml_serde::Value,
   /// Original on-disk text. Empty for auto-created files.
   pub raw: String,
   /// Edit operations recorded since load (or since last write).
@@ -47,13 +47,13 @@ impl YamlFile {
 #[derive(Debug, Clone)]
 pub enum PendingYamlOp {
   /// Replace the value at `segments`.
-  Replace { segments: Vec<String>, value: serde_yaml::Value },
+  Replace { segments: Vec<String>, value: yaml_serde::Value },
   /// Add `key: value` at the mapping referenced by `segments`. Empty
   /// `segments` targets the document root.
   Add {
     segments: Vec<String>,
     key: String,
-    value: serde_yaml::Value,
+    value: yaml_serde::Value,
   },
   /// Remove the entry at `segments`.
   Remove { segments: Vec<String> },
@@ -86,9 +86,9 @@ pub enum DiskIoError {
   #[error("Failed to serialise JSON:\n\n{0}")]
   JsonSerialize(#[source] serde_json::Error),
   #[error("Failed to parse YAML:\n\n{0}")]
-  YamlParse(#[source] serde_yaml::Error),
+  YamlParse(#[source] yaml_serde::Error),
   #[error("Failed to serialise YAML:\n\n{0}")]
-  YamlSerialize(#[source] serde_yaml::Error),
+  YamlSerialize(#[source] yaml_serde::Error),
   #[error("Failed to parse YAML for format-preserving write:\n\n{0}")]
   YamlPatchParse(#[source] yamlpath::QueryError),
   #[error("Failed to apply YAML patch:\n\n{0}")]
@@ -313,7 +313,7 @@ pub trait DiskIo {
   fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError>;
   /// Write a YAML file to disk. Format-preserving via `yamlpatch` when
   /// `file.raw` is non-empty and `file.patches` is non-empty; otherwise
-  /// the in-memory `contents` is serialised fresh via `serde_yaml`.
+  /// the in-memory `contents` is serialised fresh via `yaml_serde`.
   fn write_yaml_file(&self, file: &YamlFile) -> Result<(), DiskIoError>;
   /// Find every `package.json` under `root` that matches `patterns`,
   /// honouring `.gitignore` and skipping `node_modules`/`.git`. Patterns
@@ -411,7 +411,7 @@ impl DiskIo for LiveDiskIo {
   fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>> {
     self.read_textfile(filepath).map(|res| {
       res.and_then(|file| {
-        serde_yaml::from_str::<V>(&file.contents)
+        yaml_serde::from_str::<V>(&file.contents)
           .map_err(DiskIoError::YamlParse)
           .map(|parsed| File {
             filepath: file.filepath,
@@ -497,7 +497,7 @@ pub(crate) fn get_pretty_json_bytes<V: serde::ser::Serialize>(file: &File<V>) ->
 ///
 /// Two paths:
 ///
-/// - **Empty `raw` (auto-created file) OR no patches recorded**: serialize `contents` fresh via `serde_yaml::to_string`. Nothing exists to
+/// - **Empty `raw` (auto-created file) OR no patches recorded**: serialize `contents` fresh via `yaml_serde::to_string`. Nothing exists to
 ///   preserve.
 /// - **Non-empty `raw` AND patches recorded**: build a `yamlpath::Document` from the original text, replay each `PendingYamlOp` as a
 ///   `yamlpatch::Patch`, and return the resulting `.source()` text. Comments, blank lines, key order, and indent are preserved.
@@ -507,7 +507,7 @@ pub(crate) fn get_pretty_json_bytes<V: serde::ser::Serialize>(file: &File<V>) ->
 /// instead of silently degrading.
 pub fn render_yaml_bytes(file: &YamlFile) -> Result<Vec<u8>, DiskIoError> {
   if file.raw.is_empty() || file.patches.is_empty() {
-    let yaml = serde_yaml::to_string(&file.contents).map_err(DiskIoError::YamlSerialize)?;
+    let yaml = yaml_serde::to_string(&file.contents).map_err(DiskIoError::YamlSerialize)?;
     let mut bytes = yaml.into_bytes();
     bytes.extend(file.formatting.newline.as_bytes());
     return Ok(bytes);
@@ -550,11 +550,11 @@ fn route_from_segments(segments: &[String]) -> yamlpath::Route<'static> {
 /// starts with a reserved indicator (`@`, `` ` ``) or contains
 /// syntactically significant punctuation. yamlpatch's `Op::Add`
 /// inserts the key verbatim into the output text, so any quoting must
-/// be baked into the string we hand it. Defers to `serde_yaml` for the
+/// be baked into the string we hand it. Defers to `yaml_serde` for the
 /// quote decision so we match standard scalar emission rules.
 fn yaml_quote_key(key: &str) -> String {
   let value = YamlValue::String(key.to_string());
-  let serialised = serde_yaml::to_string(&value).expect("string serialisation cannot fail");
+  let serialised = yaml_serde::to_string(&value).expect("string serialisation cannot fail");
   serialised.trim_end().to_string()
 }
 
@@ -576,7 +576,7 @@ pub fn parse_yaml_file(raw: String, filepath: PathBuf) -> Option<YamlFile> {
 /// where the I/O layer already wraps errors.
 fn parse_yaml_file_strict(raw: String, filepath: PathBuf) -> Result<YamlFile, DiskIoError> {
   let formatting = detect_formatting(&raw);
-  let contents = serde_yaml::from_str::<YamlValue>(&raw).map_err(DiskIoError::YamlParse)?;
+  let contents = yaml_serde::from_str::<YamlValue>(&raw).map_err(DiskIoError::YamlParse)?;
   Ok(YamlFile {
     filepath,
     formatting,
@@ -1004,7 +1004,7 @@ fn ensure_catalog_block<'a>(file: &'a mut YamlFile, catalog_name: &str) -> &'a m
   }
 }
 
-/// Convert a `serde_yaml::Value` into a `serde_json::Value` for JSON pointer
+/// Convert a `yaml_serde::Value` into a `serde_json::Value` for JSON pointer
 /// access. Hand-rolled to avoid any reliance on the yaml crate's `Serialize`
 /// quirks. Yaml mappings with non-string keys produce `null` for that entry.
 pub(crate) fn yaml_to_json(yaml: &YamlValue) -> JsonValue {
