@@ -1,5 +1,5 @@
 use {
-  crate::{context::Config, disk::Disk},
+  crate::{context::Config, disk::Disk, rcfile::SourceMode},
   log::debug,
 };
 
@@ -23,22 +23,39 @@ impl<T> DebugNone for Option<T> {
 /// Based on the user's config file and command line `--source` options, return
 /// the source glob patterns which should be used to resolve package.json files
 pub fn get_source_patterns(config: &Config, disk: &Disk) -> Vec<String> {
-  get_cli_patterns(config)
+  let source_mode = config.cli.source_mode.unwrap_or(config.rcfile.source_mode);
+  let user_patterns = get_cli_patterns(config)
     .debug_none("No --source patterns provided")
     .or_else(|| get_rcfile_patterns(config))
     .debug_none("No .source patterns in rcfile")
-    .or_else(|| {
-      get_npm_and_yarn_patterns(disk)
-        .debug_none("No workspaces patterns in package.json")
-        .or_else(|| get_pnpm_patterns(disk))
-        .debug_none("No packages in pnpm-workspace.yaml")
-        .or_else(|| get_lerna_patterns(disk))
-        .debug_none("No packages in lerna.json")
-        .map(append_root_package_json)
-    })
-    .map(normalise_patterns)
-    .debug_none("Using default source patterns")
-    .unwrap_or_else(get_default_patterns)
+    .map(normalise_patterns);
+  let discovered = get_npm_and_yarn_patterns(disk)
+    .debug_none("No workspaces patterns in package.json")
+    .or_else(|| get_pnpm_patterns(disk))
+    .debug_none("No packages in pnpm-workspace.yaml")
+    .or_else(|| get_lerna_patterns(disk))
+    .debug_none("No packages in lerna.json")
+    .map(append_root_package_json)
+    .map(normalise_patterns);
+
+  match source_mode {
+    SourceMode::Replace => user_patterns
+      .or(discovered)
+      .debug_none("Using default source patterns")
+      .unwrap_or_else(get_default_patterns),
+    SourceMode::Extend => match (discovered, user_patterns) {
+      (Some(mut d), Some(u)) => {
+        d.extend(u);
+        d
+      }
+      (Some(d), None) => d,
+      (None, Some(u)) => u,
+      (None, None) => {
+        debug!("Using default source patterns");
+        get_default_patterns()
+      }
+    },
+  }
 }
 
 /// Get source patterns provided via the `--source` CLI option

@@ -30,6 +30,7 @@ pub fn cli() -> Cli {
     show_status_codes: false,
     sort: SortBy::Name,
     source_patterns: vec![],
+    source_mode: None,
     subcommand: Subcommand::Lint,
     target: UpdateTarget::Latest,
     interactive: false,

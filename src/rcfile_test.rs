@@ -400,6 +400,58 @@ fn version_group_from_config_rejects_invalid_policy() {
   assert!(matches!(err, UnsupportedConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
 }
 
+mod source_mode {
+  use {
+    crate::rcfile::{RawRcfile, Rcfile, SourceMode},
+    serde_json::json,
+  };
+
+  #[test]
+  fn raw_defaults_to_replace_when_omitted() {
+    let raw: RawRcfile = serde_json::from_value(json!({})).unwrap();
+    assert_eq!(raw.source_mode, SourceMode::Replace);
+  }
+
+  #[test]
+  fn raw_parses_extend() {
+    let raw: RawRcfile = serde_json::from_value(json!({ "sourceMode": "extend" })).unwrap();
+    assert_eq!(raw.source_mode, SourceMode::Extend);
+  }
+
+  #[test]
+  fn raw_parses_replace() {
+    let raw: RawRcfile = serde_json::from_value(json!({ "sourceMode": "replace" })).unwrap();
+    assert_eq!(raw.source_mode, SourceMode::Replace);
+  }
+
+  #[test]
+  fn raw_rejects_invalid_value() {
+    let result: Result<RawRcfile, _> = serde_json::from_value(json!({ "sourceMode": "merge" }));
+    assert!(result.is_err(), "unknown sourceMode value must not deserialize");
+  }
+
+  #[test]
+  fn not_flagged_as_unknown_field() {
+    let raw: RawRcfile = serde_json::from_value(json!({ "sourceMode": "extend" })).unwrap();
+    assert!(!raw.unknown_fields.contains_key("sourceMode"));
+    assert!(raw.validate_unknown_fields().is_ok());
+  }
+
+  #[test]
+  fn try_from_propagates_value() {
+    let raw: RawRcfile = serde_json::from_value(json!({ "sourceMode": "extend" })).unwrap();
+    let rcfile = Rcfile::try_from(raw).unwrap();
+    assert_eq!(rcfile.source_mode, SourceMode::Extend);
+  }
+
+  #[test]
+  fn try_from_default_is_replace() {
+    let raw: RawRcfile = serde_json::from_value(json!({})).unwrap();
+    let rcfile = Rcfile::try_from(raw).unwrap();
+    assert_eq!(rcfile.source_mode, SourceMode::Replace);
+  }
+}
+
 mod comment_properties {
   use {
     crate::{errors::UnsupportedConfigError, rcfile::RawRcfile},

@@ -1,10 +1,10 @@
 use {
-  crate::{errors::SyncpackError, group_selector::GroupSelector},
+  crate::{errors::SyncpackError, group_selector::GroupSelector, rcfile::SourceMode},
   clap::{Arg, ArgMatches, Command, builder::ValueParser, crate_description, crate_name, crate_version},
   color_print::cformat,
   itertools::Itertools,
   log::LevelFilter,
-  std::{env, path::PathBuf},
+  std::{env, path::PathBuf, str::FromStr},
 };
 
 #[cfg(test)]
@@ -73,6 +73,9 @@ pub struct Cli {
   pub sort: SortBy,
   /// Glob patterns for package.json files to inspect
   pub source_patterns: Vec<String>,
+  /// Whether `--source` / `source` patterns replace or extend workspace
+  /// discovery. `None` means "fall back to the rcfile's `sourceMode`".
+  pub source_mode: Option<SourceMode>,
   /// The subcommand that the user is running
   pub subcommand: Subcommand,
   /// How greedy npm updates should be
@@ -104,6 +107,7 @@ impl Default for Cli {
       show_status_codes: false,
       sort: SortBy::Name,
       source_patterns: vec!["package.json".to_string(), "**/package.json".to_string()],
+      source_mode: None,
       subcommand: Subcommand::Lint,
       target: UpdateTarget::Latest,
       interactive: false,
@@ -157,6 +161,7 @@ impl Cli {
         show_status_codes: should_show(matches, "statuses"),
         sort: get_order_by(matches),
         source_patterns: get_patterns(matches, "source"),
+        source_mode: get_source_mode(matches),
         subcommand,
         target: get_target(matches),
       }
@@ -210,6 +215,7 @@ fn create() -> Command {
         .arg(show_option_versions("lint"))
         .arg(sort_option("lint"))
         .arg(source_option("lint"))
+        .arg(source_mode_option("lint"))
         .arg(specifier_types_option("lint")),
     )
     .subcommand(
@@ -226,6 +232,7 @@ fn create() -> Command {
         .arg(show_option_versions("fix"))
         .arg(sort_option("fix"))
         .arg(source_option("fix"))
+        .arg(source_mode_option("fix"))
         .arg(specifier_types_option("fix")),
     )
     .subcommand(
@@ -243,7 +250,8 @@ fn create() -> Command {
         .arg(log_levels_option("format"))
         .arg(no_ansi_option("format"))
         .arg(reporter_option("format"))
-        .arg(source_option("format")),
+        .arg(source_option("format"))
+        .arg(source_mode_option("format")),
     )
     .subcommand(
       Command::new("update")
@@ -291,6 +299,7 @@ to skip both reading and writing the cache."#
         .arg(log_levels_option("update"))
         .arg(no_ansi_option("update"))
         .arg(source_option("update"))
+        .arg(source_mode_option("update"))
         .arg(specifier_types_option("update"))
         .arg(target_option("update")),
     )
@@ -306,6 +315,7 @@ to skip both reading and writing the cache."#
         .arg(show_option_list("list"))
         .arg(sort_option("list"))
         .arg(source_option("list"))
+        .arg(source_mode_option("list"))
         .arg(specifier_types_option("list")),
     )
     .subcommand(
@@ -319,6 +329,7 @@ to skip both reading and writing the cache."#
         .arg(no_ansi_option("json"))
         .arg(sort_option("json"))
         .arg(source_option("json"))
+        .arg(source_mode_option("json"))
         .arg(specifier_types_option("json")),
     )
     .subcommand(
@@ -676,11 +687,36 @@ Patterns are discovered in the following order, first one wins:
 4. <blue>.workspaces</> property of package.json (npm and yarn)
 5. <blue>.packages</> property of pnpm-workspace.yaml
 6. <blue>.packages</> property of lerna.json
-7. Default to <blue>["package.json","packages/*/package.json"]</>"#
+7. Default to <blue>["package.json","packages/*/package.json"]</>
+
+Pass <blue>--source-mode extend</> to *append* your patterns to the discovered
+ones instead of replacing them."#
     ))
     .action(clap::ArgAction::Append)
     .value_parser(ValueParser::new(validate_source))
     .value_name("file-pattern")
+}
+
+fn source_mode_option(command: &str) -> Arg {
+  let short_help = "How --source patterns combine with workspace discovery";
+  Arg::new("source-mode")
+    .long("source-mode")
+    .help(short_help)
+    .long_help(cformat!(
+      r#"{short_help}
+
+<bold><underline>Values:</underline></bold>
+- <blue>replace</> (default): your <blue>--source</> patterns replace workspace
+  discovery entirely.
+- <blue>extend</>: your <blue>--source</> patterns are appended to the
+  discovered patterns (npm/yarn/pnpm/lerna).
+
+<bold><underline>Example:</underline></bold>
+<dim>$</dim> <blue><bold>syncpack {command}</bold> --source-mode extend --source 'extra/package.json'</>"#
+    ))
+    .action(clap::ArgAction::Set)
+    .value_parser(["replace", "extend"])
+    .value_name("mode")
 }
 
 fn target_option(command: &str) -> Arg {
@@ -740,6 +776,14 @@ fn get_patterns(matches: &ArgMatches, option_name: &str) -> Vec<String> {
     .flatten()
     .map(|source| source.into_iter().map(|source| source.to_owned()).collect_vec())
     .unwrap_or_default()
+}
+
+fn get_source_mode(matches: &ArgMatches) -> Option<SourceMode> {
+  matches
+    .try_get_one::<String>("source-mode")
+    .ok()
+    .flatten()
+    .and_then(|value| SourceMode::from_str(value).ok())
 }
 
 fn get_reporter(subcommand: &Subcommand, matches: &ArgMatches) -> ReporterKind {

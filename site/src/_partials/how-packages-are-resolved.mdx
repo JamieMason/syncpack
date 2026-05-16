@@ -6,3 +6,7 @@ Syncpack will look in the following places for [glob](HREF_GLOB) patterns matchi
 1. If using [pnpm](HREF_PNPM), read `packages` from `./pnpm-workspace.yaml`.
 1. If using [Lerna](HREF_LERNA), read `packages` from `./lerna.json`.
 1. Default to `'package.json'` and `'packages/*/package.json'`.
+
+### Adding sources without replacing discovery
+
+By default, `--source` and `source` *replace* the discovered patterns. To keep workspace discovery and add extra patterns on top, set [`sourceMode`](CONFIG_SOURCE) to `"extend"` (or pass `--source-mode extend`). Discovered patterns come first; your patterns are appended last, so gitignore-style negations such as `!apps/legacy` can exclude discovered entries.
