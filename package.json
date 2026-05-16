@@ -40,11 +40,11 @@
     "Tom Fletcher (https://github.com/tom-fletcher)"
   ],
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
-    "@release-it/conventional-changelog": "^10.0.6",
-    "release-it": "^19.2.4",
+    "@biomejs/biome": "^2.4.15",
+    "@release-it/conventional-changelog": "^11.0.0",
+    "release-it": "^20.0.1",
     "ts-json-schema-generator": "^2.9.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">=14.17.0"
