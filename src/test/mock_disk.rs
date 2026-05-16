@@ -178,7 +178,7 @@ impl DiskIo for MockDiskIo {
     self
       .files
       .keys()
-      .filter(|path| path.file_name().is_some_and(|n| n == "package.json"))
+      .filter(|path| path.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.ends_with(".json")))
       .filter(|path| {
         let rel = path.strip_prefix(root).unwrap_or(path);
         overrides.matched(rel, false).is_whitelist()

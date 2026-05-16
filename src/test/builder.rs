@@ -46,6 +46,7 @@ pub struct TestBuilder {
   dependency_groups: Vec<Value>,
   package_manager: Option<PackageManager>,
   packages: Vec<Value>,
+  manifests_at: Vec<(String, Value)>,
   pnpm_yaml: Option<String>,
   bun_root: Option<Value>,
   registry_updates: Option<Value>,
@@ -67,6 +68,7 @@ impl TestBuilder {
       dependency_groups: vec![],
       package_manager: None,
       packages: vec![],
+      manifests_at: vec![],
       pnpm_yaml: None,
       bun_root: None,
       registry_updates: None,
@@ -160,6 +162,14 @@ impl TestBuilder {
 
   pub fn with_packages(mut self, packages: Vec<Value>) -> Self {
     self.packages.extend(packages);
+    self
+  }
+
+  /// Add a manifest file at an arbitrary path (e.g. `packages/foo/package.public.json`).
+  /// Goes through MockDisk like `with_package` but the caller controls the filename
+  /// so non-standard manifests (per issue #333) can be exercised.
+  pub fn with_manifest_at(mut self, path: &str, json: Value) -> Self {
+    self.manifests_at.push((path.to_string(), json));
     self
   }
 
@@ -273,6 +283,11 @@ impl TestBuilder {
       let name = pkg["name"].as_str().unwrap_or("unknown");
       let path = format!("packages/{name}/package.json");
       disk.add_json(&path, pkg);
+    }
+
+    // Add manifests at caller-specified paths (e.g. package.public.json).
+    for (path, json) in &self.manifests_at {
+      disk.add_json(path, json);
     }
 
     // Synthetic Bun root + bun.lock to trigger PM=Bun + catalog discovery.
@@ -422,6 +437,15 @@ impl TestBuilder {
         filepath: PathBuf::from(format!("/packages/{name}/package.json")),
         formatting: detect_formatting(&raw),
         contents: pkg.clone(),
+        dirty: false,
+      });
+    }
+    for (path, json) in &self.manifests_at {
+      let raw = serde_json::to_string_pretty(json).unwrap_or_default();
+      package_json_files.push(File {
+        filepath: PathBuf::from(format!("/{path}")),
+        formatting: detect_formatting(&raw),
+        contents: json.clone(),
         dirty: false,
       });
     }

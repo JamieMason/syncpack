@@ -108,3 +108,41 @@ async fn test_builder_with_update_target() {
   let foo_instance = ctx.instances.iter().find(|i| i.descriptor.internal_name == "foo").unwrap();
   assert_eq!(foo_instance.expected_specifier.borrow().as_ref().unwrap().get_raw(), "1.1.0");
 }
+
+// Issue #333: source patterns with non-standard filenames (e.g. package.public.json)
+// must be discovered when explicitly listed in `source`. The default rule of
+// appending `/package.json` still applies when no `.json` suffix is given.
+#[tokio::test]
+async fn test_builder_with_non_standard_manifest_filename() {
+  let ctx = TestBuilder::new()
+    .with_package(json!({
+      "name": "package-a",
+      "version": "1.0.0",
+      "dependencies": {"foo": "1.0.0"}
+    }))
+    .with_manifest_at(
+      "packages/package-a/package.public.json",
+      json!({
+        "name": "package-a-public",
+        "version": "2.0.0",
+        "dependencies": {"bar": "1.0.0"}
+      }),
+    )
+    .with_config(json!({
+      "source": ["packages/*/package.json", "packages/*/package.public.json"]
+    }))
+    .run()
+    .await;
+
+  let dep_names: Vec<&str> = ctx.instances.iter().map(|i| i.descriptor.internal_name.as_str()).collect();
+  assert!(
+    dep_names.contains(&"package-a"),
+    "package-a self-version missing; got {dep_names:?}"
+  );
+  assert!(dep_names.contains(&"foo"), "foo dependency missing; got {dep_names:?}");
+  assert!(
+    dep_names.contains(&"package-a-public"),
+    "package-a-public self-version missing; got {dep_names:?}"
+  );
+  assert!(dep_names.contains(&"bar"), "bar dependency missing; got {dep_names:?}");
+}

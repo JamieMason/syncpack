@@ -101,7 +101,7 @@ fn normalise_patterns(patterns: Vec<String>) -> Vec<String> {
 /// Normalize a source pattern by:
 /// 1. Preserving negation prefix (`!`) through normalization
 /// 2. Converting Windows backslashes to forward slashes for glob compatibility
-/// 3. Ensuring pattern ends with /package.json
+/// 3. Ensuring pattern ends with /package.json when no explicit `.json` filename was given
 /// 4. Anchoring slashless patterns to the workspace root with a leading `/` so gitignore basename rules don't make them match at any depth
 ///
 /// Examples:
@@ -110,17 +110,23 @@ fn normalise_patterns(patterns: Vec<String>) -> Vec<String> {
 /// - "package.json" -> "/package.json"
 /// - "apps\\*/package.json" -> "apps/*/package.json"
 /// - "!apps/test2" -> "!apps/test2/package.json"
+/// - "packages/*/package.public.json" -> "packages/*/package.public.json"
 pub fn normalise_pattern(mut pattern: String) -> String {
   let negated = pattern.starts_with('!');
   if negated {
     pattern.remove(0);
   }
   let mut normalized = pattern.replace('\\', "/");
-  if !normalized.contains("package.json") {
+  if !basename_ends_with_json(&normalized) {
     normalized = format!("{normalized}/package.json");
   }
   if !normalized.contains('/') {
     normalized = format!("/{normalized}");
   }
   if negated { format!("!{normalized}") } else { normalized }
+}
+
+fn basename_ends_with_json(pattern: &str) -> bool {
+  let basename = pattern.rsplit('/').next().unwrap_or(pattern);
+  basename.ends_with(".json")
 }

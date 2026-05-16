@@ -34,6 +34,16 @@ fn normalizes_backslashes_to_forward_slashes() {
     ("!apps/test2/package.json", "!apps/test2/package.json"),
     ("!projects\\apps\\*", "!projects/apps/*/package.json"),
   ];
+  let non_standard_manifest_names = [
+    ("packages/*/package.public.json", "packages/*/package.public.json"),
+    ("packages/*/package.private.json", "packages/*/package.private.json"),
+    ("packages/foo/manifest.json", "packages/foo/manifest.json"),
+    ("package.public.json", "/package.public.json"),
+    ("packages\\*\\package.public.json", "packages/*/package.public.json"),
+    ("packages/*/*.json", "packages/*/*.json"),
+    ("!packages/foo/package.public.json", "!packages/foo/package.public.json"),
+    ("!packages/*/*.json", "!packages/*/*.json"),
+  ];
 
   let cases = windows_backslashes
     .iter()
@@ -43,7 +53,8 @@ fn normalizes_backslashes_to_forward_slashes() {
     .chain(forward_slashes_with_package_json.iter())
     .chain(bare_package_json.iter())
     .chain(glob_patterns.iter())
-    .chain(negated_globs.iter());
+    .chain(negated_globs.iter())
+    .chain(non_standard_manifest_names.iter());
 
   for (input, expected) in cases {
     let result = normalise_pattern(input.to_string());

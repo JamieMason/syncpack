@@ -467,7 +467,7 @@ impl DiskIo for LiveDiskIo {
           None
         }
       })
-      .filter(|entry| entry.file_name() == "package.json")
+      .filter(|entry| entry.file_type().is_some_and(|t| t.is_file()) && entry.file_name().to_string_lossy().ends_with(".json"))
       .map(|entry| entry.into_path())
       .collect()
   }

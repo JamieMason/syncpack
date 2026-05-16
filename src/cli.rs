@@ -713,10 +713,10 @@ fn additional_help() -> String {
 }
 
 fn validate_source(value: &str) -> Result<String, String> {
-  if value.ends_with("package.json") {
+  if value.ends_with(".json") {
     Ok(value.to_string())
   } else {
-    Err("must end with 'package.json'".to_string())
+    Err("must end with '.json'".to_string())
   }
 }
 
