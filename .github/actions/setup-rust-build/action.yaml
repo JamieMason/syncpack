@@ -5,6 +5,10 @@ inputs:
   target:
     description: Rust compilation target triple
     required: true
+  cache:
+    description: Use shared cargo cache (set to 'false' for release builds)
+    required: false
+    default: 'true'
 
 runs:
   using: composite
@@ -15,7 +19,8 @@ runs:
         components: rustfmt, clippy
     - shell: bash
       run: rustup target add ${{ inputs.target }}
-    - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+    - if: inputs.cache == 'true'
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
     - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
       with:
         just-version: 1.35.0

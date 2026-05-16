@@ -32,6 +32,7 @@ jobs:
         uses: ./.github/actions/setup-rust-build
         with:
           target: ${{ matrix.build.TARGET }}
+          cache: "false"
       - name: Build Rust binary
         uses: ./.github/actions/build-rust-binary
         with:
