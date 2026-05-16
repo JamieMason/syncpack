@@ -10,7 +10,7 @@ runs:
   using: composite
   steps:
     - if: runner.os == 'Linux'
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@3771e22aa892e03fd35585fae288baad1755695c # v2.78.2
       with:
         tool: cross
     - if: runner.os == 'Linux'
