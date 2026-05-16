@@ -3,5 +3,9 @@ packages:
   - "!**/fixtures/**"
   - "!**/npm/**"
 
+allowBuilds:
+  esbuild: true
+  sharp: true
+
 ignoredBuiltDependencies:
   - sharp

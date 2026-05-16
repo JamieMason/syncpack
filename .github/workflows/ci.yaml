@@ -45,7 +45,7 @@ jobs:
           node-version: 24
           registry-url: "https://registry.npmjs.org"
       - name: Install pnpm
-        run: npm install -g pnpm@latest
+        run: npm install -g pnpm@11.1.2
       - name: Install rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:

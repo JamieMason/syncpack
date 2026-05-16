@@ -72,6 +72,7 @@
     "yarn"
   ],
   "license": "MIT",
+  "packageManager": "pnpm@11.1.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JamieMason/syncpack.git"
