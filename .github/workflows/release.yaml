@@ -24,11 +24,7 @@ jobs:
       - id: set-matrix
         shell: bash
         run: |
-          if [ "$ACT" == true ]; then
-            echo "build_matrix=$( cat .github/workflows/matrix.json | jq --monochrome-output --compact-output '[.[] | select(.RUN_LOCALLY)]' )" >> $GITHUB_OUTPUT
-          else
-            echo "build_matrix=$( cat .github/workflows/matrix.json | jq --monochrome-output --compact-output )" >> $GITHUB_OUTPUT
-          fi
+          echo "build_matrix=$( cat .github/workflows/matrix.json | jq --monochrome-output --compact-output )" >> $GITHUB_OUTPUT
 
   publish-npm-binaries:
     name: Publish npm binaries
@@ -42,11 +38,9 @@ jobs:
       - name: Debug workflow values
         shell: bash
         run: |
-          echo "env.ACT                  : ${{ env.ACT }}"
-          echo "matrix.build.NAME        : ${{ matrix.build.NAME }}"
-          echo "matrix.build.OS          : ${{ matrix.build.OS }}"
-          echo "matrix.build.RUN_LOCALLY : ${{ matrix.build.RUN_LOCALLY }}"
-          echo "matrix.build.TARGET      : ${{ matrix.build.TARGET }}"
+          echo "matrix.build.NAME   : ${{ matrix.build.NAME }}"
+          echo "matrix.build.OS     : ${{ matrix.build.OS }}"
+          echo "matrix.build.TARGET : ${{ matrix.build.TARGET }}"
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install node
@@ -71,16 +65,16 @@ jobs:
         with:
           just-version: 1.35.0
       - name: Install cross
-        if: ${{ !env.ACT && matrix.build.OS == 'ubuntu-latest' }}
+        if: ${{ matrix.build.OS == 'ubuntu-latest' }}
         uses: taiki-e/install-action@v2
         with:
           tool: cross
       - name: Build rust binary (cross)
-        if: ${{ !env.ACT && matrix.build.OS == 'ubuntu-latest' }}
+        if: ${{ matrix.build.OS == 'ubuntu-latest' }}
         shell: bash
         run: cross build --release --locked --target ${{ matrix.build.TARGET }}
       - name: Build rust binary (cargo)
-        if: ${{ env.ACT || matrix.build.OS != 'ubuntu-latest' }}
+        if: ${{ matrix.build.OS != 'ubuntu-latest' }}
         shell: bash
         run: cargo build --release --locked --target ${{ matrix.build.TARGET }}
       - name: Publish rust binary package to npm
