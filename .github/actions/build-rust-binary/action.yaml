@@ -1,0 +1,21 @@
+name: Build Rust binary
+description: Release build using cross on Linux, cargo elsewhere
+
+inputs:
+  target:
+    description: Rust compilation target triple
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - if: runner.os == 'Linux'
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cross
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: cross build --release --locked --target ${{ inputs.target }}
+    - if: runner.os != 'Linux'
+      shell: bash
+      run: cargo build --release --locked --target ${{ inputs.target }}
