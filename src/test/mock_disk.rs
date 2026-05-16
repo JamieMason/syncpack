@@ -167,4 +167,23 @@ impl DiskIo for MockDiskIo {
     self.record_write(&file.filepath, bytes);
     Ok(())
   }
+
+  fn find_package_jsons(&self, root: &Path, patterns: &[String]) -> Vec<PathBuf> {
+    let mut builder = ignore::overrides::OverrideBuilder::new(root);
+    for pattern in patterns {
+      let _ = builder.add(pattern);
+    }
+    let overrides = builder.build().unwrap_or_else(|_| ignore::overrides::Override::empty());
+
+    self
+      .files
+      .keys()
+      .filter(|path| path.file_name().is_some_and(|n| n == "package.json"))
+      .filter(|path| {
+        let rel = path.strip_prefix(root).unwrap_or(path);
+        overrides.matched(rel, false).is_whitelist()
+      })
+      .cloned()
+      .collect()
+  }
 }

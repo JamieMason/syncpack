@@ -27,7 +27,6 @@ mod context;
 mod dependency;
 mod disk;
 mod errors;
-mod file_paths;
 mod group_selector;
 mod instance;
 mod logger;

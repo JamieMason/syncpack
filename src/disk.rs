@@ -315,6 +315,11 @@ pub trait DiskIo {
   /// `file.raw` is non-empty and `file.patches` is non-empty; otherwise
   /// the in-memory `contents` is serialised fresh via `serde_yaml`.
   fn write_yaml_file(&self, file: &YamlFile) -> Result<(), DiskIoError>;
+  /// Find every `package.json` under `root` that matches `patterns`,
+  /// honouring `.gitignore` and skipping `node_modules`/`.git`. Patterns
+  /// use Override semantics: bare globs include, `!`-prefixed globs
+  /// exclude. `*` matches a single path segment; `**` spans separators.
+  fn find_package_jsons(&self, root: &Path, patterns: &[String]) -> Vec<PathBuf>;
 }
 
 #[derive(Debug)]
@@ -433,6 +438,38 @@ impl DiskIo for LiveDiskIo {
     let bytes = render_yaml_bytes(file)?;
     ensure_parent_dir(&file.filepath)?;
     fs::write(&file.filepath, &bytes).map_err(DiskIoError::FileWrite)
+  }
+
+  fn find_package_jsons(&self, root: &Path, patterns: &[String]) -> Vec<PathBuf> {
+    let mut builder = ignore::overrides::OverrideBuilder::new(root);
+    for pattern in patterns {
+      if let Err(err) = builder.add(pattern) {
+        log::debug!("Invalid source pattern '{pattern}': {err}");
+      }
+    }
+    let overrides = builder.build().unwrap_or_else(|err| {
+      log::debug!("Failed to build source pattern overrides: {err}");
+      ignore::overrides::Override::empty()
+    });
+
+    ignore::WalkBuilder::new(root)
+      .require_git(false)
+      .overrides(overrides)
+      .filter_entry(|entry| {
+        let name = entry.file_name();
+        name != "node_modules" && name != ".git"
+      })
+      .build()
+      .filter_map(|result| match result {
+        Ok(entry) => Some(entry),
+        Err(err) => {
+          log::debug!("Walk error: {err}");
+          None
+        }
+      })
+      .filter(|entry| entry.file_name() == "package.json")
+      .map(|entry| entry.into_path())
+      .collect()
   }
 }
 

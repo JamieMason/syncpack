@@ -10,7 +10,6 @@ use {
     context::{Config, Context},
     disk::{Disk, DiskIo},
     errors::SyncpackError,
-    file_paths::get_file_paths,
     logger,
     rcfile::Rcfile,
     registry::{client::RegistryClient, updates::RegistryUpdates},
@@ -46,7 +45,7 @@ fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Context, SyncpackError> {
     rcfile: rcfile.contents,
   };
   let source_patterns = get_source_patterns(&config, &disk);
-  let file_paths = get_file_paths(&source_patterns, &disk, io);
+  let file_paths = io.find_package_jsons(&disk.cwd, &source_patterns);
   disk.load_package_files(io, &file_paths);
   let dep_types = catalogs::make_catalog_dep_types(&disk)?;
   let sources = Sources::from_disk(&disk, &file_paths);

@@ -742,6 +742,10 @@ impl crate::disk::DiskIo for RecordingDiskIo {
     self.writes.borrow_mut().push(file.filepath.clone());
     Ok(())
   }
+
+  fn find_package_jsons(&self, root: &Path, patterns: &[String]) -> Vec<PathBuf> {
+    self.inner.find_package_jsons(root, patterns)
+  }
 }
 
 /// RED: Banned pnpm catalog defs are correctly marked `IsBanned` by visit, but

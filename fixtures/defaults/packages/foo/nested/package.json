@@ -1,0 +1,6 @@
+{
+  "name": "defaults-nested-should-not-match",
+  "dependencies": {
+    "typescript": "5.9.0"
+  }
+}

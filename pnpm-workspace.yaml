@@ -1,5 +1,7 @@
 packages:
   - site
+  - "!**/fixtures/**"
+  - "!**/npm/**"
 
 ignoredBuiltDependencies:
   - sharp

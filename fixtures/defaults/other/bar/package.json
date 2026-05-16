@@ -1,0 +1,6 @@
+{
+  "name": "defaults-other-bar-should-not-match",
+  "dependencies": {
+    "typescript": "5.9.1"
+  }
+}

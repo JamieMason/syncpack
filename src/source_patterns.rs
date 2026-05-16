@@ -86,7 +86,7 @@ fn get_lerna_patterns(disk: &Disk) -> Option<Vec<String>> {
 
 /// Default source patterns to use if no other source patterns are found
 fn get_default_patterns() -> Vec<String> {
-  vec![String::from("package.json"), String::from("packages/*/package.json")]
+  vec![String::from("/package.json"), String::from("packages/*/package.json")]
 }
 
 fn append_root_package_json(mut patterns: Vec<String>) -> Vec<String> {
@@ -102,11 +102,13 @@ fn normalise_patterns(patterns: Vec<String>) -> Vec<String> {
 /// 1. Preserving negation prefix (`!`) through normalization
 /// 2. Converting Windows backslashes to forward slashes for glob compatibility
 /// 3. Ensuring pattern ends with /package.json
+/// 4. Anchoring slashless patterns to the workspace root with a leading `/`
+///    so gitignore basename rules don't make them match at any depth
 ///
 /// Examples:
 /// - "projects\\apps\\*" -> "projects/apps/*/package.json"
 /// - "projects/libs/*" -> "projects/libs/*/package.json"
-/// - "package.json" -> "package.json"
+/// - "package.json" -> "/package.json"
 /// - "apps\\*/package.json" -> "apps/*/package.json"
 /// - "!apps/test2" -> "!apps/test2/package.json"
 pub fn normalise_pattern(mut pattern: String) -> String {
@@ -114,16 +116,16 @@ pub fn normalise_pattern(mut pattern: String) -> String {
   if negated {
     pattern.remove(0);
   }
-  let normalized = pattern.replace('\\', "/");
+  let mut normalized = pattern.replace('\\', "/");
+  if !normalized.contains("package.json") {
+    normalized = format!("{normalized}/package.json");
+  }
+  if !normalized.contains('/') {
+    normalized = format!("/{normalized}");
+  }
   if negated {
-    if normalized.contains("package.json") {
-      format!("!{normalized}")
-    } else {
-      format!("!{normalized}/package.json")
-    }
-  } else if normalized.contains("package.json") {
-    normalized
+    format!("!{normalized}")
   } else {
-    format!("{normalized}/package.json")
+    normalized
   }
 }

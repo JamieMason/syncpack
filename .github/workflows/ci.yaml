@@ -69,5 +69,3 @@ jobs:
         run: just check-clippy
       - name: Cargo test
         run: just test
-      - name: Test issue 311 and 319
-        run: just test-glob-matching

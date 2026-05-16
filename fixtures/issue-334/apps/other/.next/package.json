@@ -1,0 +1,6 @@
+{
+  "name": "gitignored-next-build",
+  "dependencies": {
+    "typescript": "5.9.1"
+  }
+}

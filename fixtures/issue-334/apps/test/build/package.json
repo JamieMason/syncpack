@@ -1,0 +1,6 @@
+{
+  "name": "nested-gitignored-build-artifact",
+  "dependencies": {
+    "typescript": "3.0.0"
+  }
+}

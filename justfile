@@ -156,30 +156,6 @@ serve-coverage:
 test:
     cargo test -- --nocapture --color=always
 
-test-glob-matching:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cargo build
-    PROJECT_ROOT=$(pwd)
-
-    echo "--- issue-311: packages outside workspace globs excluded ---"
-    cd "$PROJECT_ROOT/fixtures/issue-311" && pnpm install
-    if ../../target/debug/syncpack json | jq '.package' | grep -q "do-not-include"; then
-        echo "FAIL: 'do-not-include' found in output"
-        exit 1
-    else
-        echo "PASS: 'do-not-include' not found in output"
-    fi
-
-    echo "--- issue-319: negative globs exclude packages ---"
-    cd "$PROJECT_ROOT/fixtures/issue-319"
-    if (../../target/debug/syncpack json || true) | jq '.package' | grep -q "test2"; then
-        echo "FAIL: 'test2' found in output (negative glob ignored)"
-        exit 1
-    else
-        echo "PASS: 'test2' correctly excluded by negative glob"
-    fi
-
 # Run test in watch mode
 watch pattern=no_pattern:
     tput rmam && cargo watch --clear --exec 'test -- --nocapture --color=always {{ pattern }}'

@@ -23,7 +23,7 @@ fn normalizes_backslashes_to_forward_slashes() {
     ("apps/*/package.json", "apps/*/package.json"),
     ("packages/*/package.json", "packages/*/package.json"),
   ];
-  let bare_package_json = [("package.json", "package.json")];
+  let bare_package_json = [("package.json", "/package.json")];
   let glob_patterns = [
     ("**\\*\\package.json", "**/*/package.json"),
     ("src\\**\\tests", "src/**/tests/package.json"),

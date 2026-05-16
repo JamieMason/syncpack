@@ -1,0 +1,6 @@
+{
+  "name": "nested-should-not-match-star",
+  "dependencies": {
+    "typescript": "5.9.2"
+  }
+}

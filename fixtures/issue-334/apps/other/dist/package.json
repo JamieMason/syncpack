@@ -1,0 +1,6 @@
+{
+  "name": "gitignored-dist-output",
+  "dependencies": {
+    "typescript": "5.9.0"
+  }
+}
