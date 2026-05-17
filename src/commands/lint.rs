@@ -1,8 +1,9 @@
-use crate::{commands::ui, context::Context, errors::SyncpackError};
+use crate::{commands::ui, context::Context, errors::SyncpackError, instance::Severity, version_group::InstanceAction};
 
 /// Run the lint command side effects
 pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
   let mut is_invalid = false;
+  let strict = ctx.config.rcfile.strict;
 
   ctx.version_groups.iter().for_each(|group| {
     let mut has_printed_group = false;
@@ -10,8 +11,11 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
       let mut has_printed_dependency = false;
       dependency
         .get_sorted_instances(&ctx.instances, &ctx.sources.all)
-        .filter(|(_, instance)| instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict))
         .for_each(|(_, instance)| {
+          let action = group.resolve_action(instance, strict);
+          if matches!(action, InstanceAction::Valid) {
+            return;
+          }
           if !has_printed_group {
             ui::group::print_header(&ctx, group);
             has_printed_group = true;
@@ -23,7 +27,9 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
           if ctx.config.cli.show_instances {
             ui::instance::print(&ctx, instance);
           }
-          is_invalid = true;
+          if matches!(action, InstanceAction::Render(Severity::Error) | InstanceAction::Fix(_)) {
+            is_invalid = true;
+          }
         });
     });
   });

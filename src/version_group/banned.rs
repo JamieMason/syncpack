@@ -3,7 +3,7 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance},
+    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     specifier::Specifier,
   },
@@ -19,6 +19,7 @@ mod banned_test;
 pub struct BannedGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
+  pub severity: SeverityMap,
 }
 
 impl BannedGroup {

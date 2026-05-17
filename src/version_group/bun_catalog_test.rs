@@ -31,6 +31,7 @@ async fn bun_top_level_catalog_definition_emits_instance() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -39,6 +40,7 @@ async fn bun_top_level_catalog_definition_emits_instance() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -47,6 +49,7 @@ async fn bun_top_level_catalog_definition_emits_instance() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -69,6 +72,7 @@ async fn bun_top_level_named_catalog_definition_emits_instance() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -77,6 +81,7 @@ async fn bun_top_level_named_catalog_definition_emits_instance() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -85,6 +90,7 @@ async fn bun_top_level_named_catalog_definition_emits_instance() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -106,6 +112,7 @@ async fn bun_workspaces_catalog_definition_emits_instance() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -114,6 +121,7 @@ async fn bun_workspaces_catalog_definition_emits_instance() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -122,6 +130,7 @@ async fn bun_workspaces_catalog_definition_emits_instance() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -143,6 +152,7 @@ async fn bun_workspaces_named_catalog_definition_emits_instance() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -151,6 +161,7 @@ async fn bun_workspaces_named_catalog_definition_emits_instance() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -159,6 +170,7 @@ async fn bun_workspaces_named_catalog_definition_emits_instance() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -205,6 +217,7 @@ async fn bun_catalog_definition_with_consumer_valid_via_catalogdefs() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -213,6 +226,7 @@ async fn bun_catalog_definition_with_consumer_valid_via_catalogdefs() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalog),
@@ -221,6 +235,7 @@ async fn bun_catalog_definition_with_consumer_valid_via_catalogdefs() {
       actual: "catalog:",
       expected: Some("catalog:"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -229,6 +244,7 @@ async fn bun_catalog_definition_with_consumer_valid_via_catalogdefs() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -249,5 +265,6 @@ async fn npm_with_pnpm_workspace_yaml_does_not_discover_catalogs() {
     actual: "0.0.0",
     expected: Some("0.0.0"),
     overridden: None,
+    severity: None,
   }]);
 }

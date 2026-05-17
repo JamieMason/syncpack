@@ -3,7 +3,10 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance},
+    instance::{
+      FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance,
+      severity::SeverityMap,
+    },
     rcfile::update_group::UpdatePolicy,
     registry::updates::RegistryUpdates,
     semver_range::SemverRange,
@@ -22,6 +25,7 @@ pub struct PreferredSemverGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
   pub prefer_highest: bool,
+  pub severity: SeverityMap,
 }
 
 impl PreferredSemverGroup {

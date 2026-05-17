@@ -2,7 +2,7 @@ use {
   crate::{
     commands::ui,
     context::Context,
-    instance::{InstanceState, ValidInstance},
+    instance::{InstanceState, Severity, ValidInstance},
     version_group::DependencyCore,
   },
   colored::*,
@@ -14,13 +14,40 @@ pub fn print(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
   match &dependency.get_state(&ctx.instances) {
     InstanceState::Valid(ValidInstance::IsIgnored) => print_ignored(ctx, dependency, group_variant),
     InstanceState::Valid(_) => print_valid(ctx, dependency, group_variant),
-    InstanceState::Invalid(_) => print_invalid(ctx, dependency, group_variant),
-    InstanceState::Suspect(_) => print_suspect(ctx, dependency, group_variant),
+    InstanceState::Invalid(_) => match max_severity(ctx, dependency) {
+      // Every Invalid instance downgraded to Warn → render the rollup yellow
+      // instead of red so the dep line matches the instance lines below.
+      Some(Severity::Warn) | Some(Severity::None) | None => print_suspect(ctx, dependency, group_variant),
+      _ => print_invalid(ctx, dependency, group_variant),
+    },
+    InstanceState::Suspect(_) => match max_severity(ctx, dependency) {
+      Some(Severity::Error) | Some(Severity::Fix) => print_invalid(ctx, dependency, group_variant),
+      _ => print_suspect(ctx, dependency, group_variant),
+    },
     InstanceState::Unknown => {
       let name = &dependency.internal_name;
       error!("Dependency '{name}' has an unknown state, this is a bug in syncpack");
       unreachable!("Unknown Dependency State");
     }
+  }
+}
+
+/// Highest resolved severity across this dependency's instances, ranked
+/// Error > Fix > Warn > None. `None` when no instance has been resolved.
+fn max_severity(ctx: &Context, dependency: &DependencyCore) -> Option<Severity> {
+  dependency
+    .instances
+    .iter()
+    .filter_map(|idx| *ctx.instances[idx.0].severity.borrow())
+    .max_by_key(|s| severity_rank(*s))
+}
+
+fn severity_rank(severity: Severity) -> u8 {
+  match severity {
+    Severity::None => 0,
+    Severity::Warn => 1,
+    Severity::Fix => 2,
+    Severity::Error => 3,
   }
 }
 

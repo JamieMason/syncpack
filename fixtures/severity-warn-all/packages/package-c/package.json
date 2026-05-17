@@ -1,0 +1,20 @@
+{
+  "name": "package-c",
+  "dependencies": {
+    "dep-banned": "1.0.0",
+    "dep-pinned-differs": "1.0.0",
+    "dep-pin-override-range": "~1.0.0",
+    "dep-pin-override-range-mm": "1.0.0",
+    "dep-semver-mm": "~1.0.0",
+    "package-local-differs": "2.0.0",
+    "dep-differs-catalog": "catalog:",
+    "dep-differs-highest": "1.0.0",
+    "dep-snap-differs": "1.0.0",
+    "dep-minor-differs": "1.1.0",
+    "dep-minor-override-range": "^1.0.0",
+    "dep-minor-override-range-mm": "~1.0.0",
+    "dep-same-range-mm": "^1.0.0",
+    "dep-not-using-catalog": "1.0.0",
+    "dep-missing-from-catalog": "1.0.0"
+  }
+}

@@ -5,7 +5,7 @@ use {
     dependency::UpdateUrl,
     errors::UnsupportedConfigError,
     group_selector::GroupSelector,
-    instance::{Instance, InstanceIdx, InstanceState},
+    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, Severity, SuspectInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     source::Source,
     sources::Sources,
@@ -71,6 +71,8 @@ pub struct AnyVersionGroup {
   pub policy: Option<String>,
   pub snap_to: Option<Vec<String>>,
   pub prefer_version: Option<String>,
+  #[serde(default)]
+  pub severity: SeverityMap,
   #[serde(flatten)]
   pub unknown_fields: HashMap<String, Value>,
 }
@@ -409,10 +411,11 @@ impl VersionGroup {
       selector: GroupSelector::new(vec![], vec![], "Default Version Group".into(), vec![], vec![]),
       dependencies: BTreeMap::new(),
       prefer_highest: true,
+      severity: SeverityMap::new(),
     })
   }
 
-  pub fn from_config(group: AnyVersionGroup, sources: &Sources) -> Result<Self, UnsupportedConfigError> {
+  pub fn from_config(group: AnyVersionGroup, index: usize, sources: &Sources) -> Result<Self, UnsupportedConfigError> {
     let selector = GroupSelector::new(
       group.dependencies,
       group.dependency_types,
@@ -422,31 +425,40 @@ impl VersionGroup {
     );
 
     if let Some(true) = group.is_banned {
+      let severity = validate_severity(group.severity, "Banned", index, BANNED_KEYS)?;
       return Ok(Self::Banned(BannedGroup {
         selector,
         dependencies: BTreeMap::new(),
+        severity,
       }));
     }
     if let Some(true) = group.is_ignored {
+      // Ignored produces no statuses; severity is accepted and discarded.
       return Ok(Self::Ignored(IgnoredGroup {
         selector,
         dependencies: BTreeMap::new(),
+        severity: SeverityMap::new(),
       }));
     }
     if let Some(pin_version) = &group.pin_version {
+      let severity = validate_severity(group.severity, "Pinned", index, PINNED_KEYS)?;
       return Ok(Self::Pinned(PinnedGroup {
         selector,
         dependencies: BTreeMap::new(),
         pin_version: Specifier::new(pin_version),
+        severity,
       }));
     }
     if let Some(policy) = &group.policy {
       if policy == "sameRange" {
+        let severity = validate_severity(group.severity, "SameRange", index, SAME_RANGE_KEYS)?;
         return Ok(Self::SameRange(SameRangeGroup {
           selector,
           dependencies: BTreeMap::new(),
+          severity,
         }));
       } else if policy == "sameMinor" {
+        let severity = validate_severity(group.severity, "SameMinor", index, SAME_MINOR_KEYS)?;
         let prefer_version = group.prefer_version.as_ref().map(|pv| {
           if pv == "lowestSemver" {
             PreferVersion::LowestSemver
@@ -458,17 +470,21 @@ impl VersionGroup {
           selector,
           dependencies: BTreeMap::new(),
           prefer_version,
+          severity,
         }));
       } else if policy == "catalog" {
+        let severity = validate_severity(group.severity, "Catalog", index, CATALOG_KEYS)?;
         return Ok(Self::Catalog(CatalogGroup {
           selector,
           dependencies: BTreeMap::new(),
+          severity,
         }));
       } else {
         return Err(UnsupportedConfigError::InvalidVersionGroupPolicy(policy.clone()));
       }
     }
     if let Some(snap_to) = &group.snap_to {
+      let severity = validate_severity(group.severity, "SnappedTo", index, SNAPPED_TO_KEYS)?;
       return Ok(Self::SnappedTo(SnappedToGroup {
         selector,
         dependencies: BTreeMap::new(),
@@ -481,21 +497,131 @@ impl VersionGroup {
             })
           })
           .collect(),
+        severity,
       }));
     }
     if let Some(prefer_version) = &group.prefer_version {
+      let prefer_highest = prefer_version != "lowestSemver";
+      let group_type = if prefer_highest { "HighestSemver" } else { "LowestSemver" };
+      let severity = validate_severity(group.severity, group_type, index, PREFERRED_SEMVER_KEYS)?;
       return Ok(Self::PreferredSemver(PreferredSemverGroup {
         selector,
         dependencies: BTreeMap::new(),
-        prefer_highest: prefer_version != "lowestSemver",
+        prefer_highest,
+        severity,
       }));
     }
+    let severity = validate_severity(group.severity, "HighestSemver", index, PREFERRED_SEMVER_KEYS)?;
     Ok(Self::PreferredSemver(PreferredSemverGroup {
       selector,
       dependencies: BTreeMap::new(),
       prefer_highest: true,
+      severity,
     }))
   }
+
+  /// Resolve the action and severity for `instance` against this group's
+  /// configured severity map and the rcfile's `strict` flag. Writes the
+  /// resolved severity onto `instance.severity` as a side effect so reporters,
+  /// JSON output, and `to_have_instances` test assertions can read it
+  /// directly without re-invoking the resolver. See `.plans/severity.md` §3.5.
+  pub fn resolve_action(&self, instance: &Instance, strict: bool) -> InstanceAction {
+    let severity = self.compute_severity(instance, strict);
+    *instance.severity.borrow_mut() = Some(severity);
+    match severity {
+      Severity::None => InstanceAction::Valid,
+      Severity::Fix => InstanceAction::Fix(Severity::Fix),
+      Severity::Warn | Severity::Error => InstanceAction::Render(severity),
+    }
+  }
+
+  fn compute_severity(&self, instance: &Instance, strict: bool) -> Severity {
+    let state = instance.state.borrow();
+    match &*state {
+      InstanceState::Unknown | InstanceState::Valid(_) => Severity::None,
+      InstanceState::Invalid(InvalidInstance::Unfixable(_)) | InstanceState::Invalid(InvalidInstance::Conflict(_)) => Severity::Error,
+      InstanceState::Invalid(InvalidInstance::Fixable(_)) => {
+        let key = state.get_name();
+        self.severity_map().get(&key).copied().unwrap_or(Severity::Fix)
+      }
+      InstanceState::Suspect(SuspectInstance::RefuseToPinLocal) | InstanceState::Suspect(SuspectInstance::RefuseToSnapLocal) => {
+        let key = state.get_name();
+        let default = if strict { Severity::Error } else { Severity::Warn };
+        self.severity_map().get(&key).copied().unwrap_or(default)
+      }
+      InstanceState::Suspect(_) => {
+        // Other Suspect variants are not user-configurable; strict promotes Warn → Error.
+        if strict { Severity::Error } else { Severity::Warn }
+      }
+    }
+  }
+
+  fn severity_map(&self) -> &SeverityMap {
+    match self {
+      Self::Banned(g) => &g.severity,
+      Self::Catalog(g) => &g.severity,
+      Self::CatalogDefs(g) => &g.severity,
+      Self::Ignored(g) => &g.severity,
+      Self::Pinned(g) => &g.severity,
+      Self::PreferredSemver(g) => &g.severity,
+      Self::SameMinor(g) => &g.severity,
+      Self::SameRange(g) => &g.severity,
+      Self::SnappedTo(g) => &g.severity,
+    }
+  }
+}
+
+/// Resolver output consumed by each command's iteration loop.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InstanceAction {
+  /// Do nothing — instance is Valid or Unknown.
+  Valid,
+  /// Render as warning or error; never apply the fix.
+  Render(Severity),
+  /// Apply the fix; render under `fix`/`lint`.
+  Fix(Severity),
+}
+
+const BANNED_KEYS: &[&str] = &["IsBanned"];
+const PINNED_KEYS: &[&str] = &[
+  "DiffersToPin",
+  "PinOverridesSemverRange",
+  "PinOverridesSemverRangeMismatch",
+  "RefuseToPinLocal",
+];
+const PREFERRED_SEMVER_KEYS: &[&str] = &[
+  "SemverRangeMismatch",
+  "DiffersToLocal",
+  "DiffersToCatalog",
+  "DiffersToHighestOrLowestSemver",
+];
+const SAME_RANGE_KEYS: &[&str] = &["SemverRangeMismatch"];
+const SAME_MINOR_KEYS: &[&str] = &[
+  "DiffersToHighestOrLowestSemverMinor",
+  "SemverRangeMismatch",
+  "SameMinorOverridesSemverRange",
+  "SameMinorOverridesSemverRangeMismatch",
+];
+const SNAPPED_TO_KEYS: &[&str] = &["DiffersToSnapTarget", "SemverRangeMismatch", "RefuseToSnapLocal"];
+const CATALOG_KEYS: &[&str] = &["NotUsingCatalog", "MissingFromCatalog"];
+
+fn validate_severity(
+  severity: SeverityMap,
+  group_type: &'static str,
+  index: usize,
+  permitted: &'static [&'static str],
+) -> Result<SeverityMap, UnsupportedConfigError> {
+  for key in severity.keys() {
+    if !permitted.contains(&key.as_str()) {
+      return Err(UnsupportedConfigError::InvalidSeverityKey {
+        path: format!("versionGroups[{index}].severity.{key}"),
+        group_type: group_type.to_string(),
+        key: key.clone(),
+        permitted: permitted.to_vec(),
+      });
+    }
+  }
+  Ok(severity)
 }
 
 #[cfg(test)]
@@ -511,9 +637,10 @@ pub(crate) fn visit_groups_with_registry(
 ) {
   let mut groups: Vec<VersionGroup> = version_group_configs
     .iter()
-    .map(|json| {
+    .enumerate()
+    .map(|(index, json)| {
       let cfg: AnyVersionGroup = serde_json::from_value(json.clone()).unwrap();
-      VersionGroup::from_config(cfg, &ctx.sources).unwrap()
+      VersionGroup::from_config(cfg, index, &ctx.sources).unwrap()
     })
     .collect();
   groups.push(VersionGroup::get_catch_all());

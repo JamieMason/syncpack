@@ -1,7 +1,7 @@
 use {
   crate::{
     context::Context,
-    instance::{Instance, InstanceState},
+    instance::{Instance, InstanceState, Severity},
   },
   log::error,
 };
@@ -16,6 +16,10 @@ pub struct ExpectedInstance {
   pub id: &'static str,
   /// Set when a semver group overrode the version group's choice.
   pub overridden: Option<&'static str>,
+  /// `None` means do not assert severity (lets existing tests stay green
+  /// without per-assertion churn). `Some(s)` asserts the resolved severity
+  /// equals `s`. See `.plans/severity.md` §2.
+  pub severity: Option<Severity>,
   pub state: InstanceState,
 }
 
@@ -29,6 +33,7 @@ pub struct ActualInstance {
   pub id: String,
   /// Set when a semver group overrode the version group's choice.
   pub overridden: Option<String>,
+  pub severity: Option<Severity>,
   pub state: InstanceState,
 }
 
@@ -46,6 +51,7 @@ impl ActualInstance {
       overridden: instance
         .get_specifier_with_preferred_semver_range()
         .map(|expected| expected.get_raw().to_string()),
+      severity: *instance.severity.borrow(),
       state: instance.state.borrow().clone(),
     }
   }
@@ -89,6 +95,7 @@ impl<'a> Expects<'a> {
           && actual.id == id
           && actual.state == state
           && (expected.overridden.is_none() || actual.overridden == overridden_specifier)
+          && (expected.severity.is_none() || actual.severity == expected.severity)
         {
           continue 'expected;
         }

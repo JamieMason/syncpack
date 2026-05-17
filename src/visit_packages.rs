@@ -9,8 +9,10 @@ use {
 };
 
 /// Iterate version groups (SnappedTo last) and assign `InstanceState` to every
-/// instance via each group's `visit()`. Takes ownership of `Context` and
-/// returns it with states assigned.
+/// instance via each group's `visit()`. Then call `resolve_action` for every
+/// instance against its claiming group so `instance.severity` is populated and
+/// reporters / JSON output / test assertions can read it directly without
+/// re-invoking the resolver. Takes ownership of `Context` and returns it.
 pub fn visit_packages(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context {
   ctx
     .version_groups
@@ -29,5 +31,15 @@ pub fn visit_packages(ctx: Context, registry_updates: &Option<RegistryUpdates>) 
     .for_each(|group| {
       group.visit(&ctx, registry_updates);
     });
+
+  let strict = ctx.config.rcfile.strict;
+  for group in ctx.version_groups.iter() {
+    for dep in group.dependencies().values() {
+      for &idx in &dep.instances {
+        let instance = &ctx.instances[idx.0];
+        group.resolve_action(instance, strict);
+      }
+    }
+  }
   ctx
 }

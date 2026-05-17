@@ -43,6 +43,7 @@ mod definition_and_consumer {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -51,6 +52,7 @@ mod definition_and_consumer {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -59,6 +61,7 @@ mod definition_and_consumer {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -99,6 +102,7 @@ mod definition_and_consumer {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(NotUsingCatalog("default".to_string())),
@@ -107,6 +111,7 @@ mod definition_and_consumer {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -115,6 +120,7 @@ mod definition_and_consumer {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -152,6 +158,7 @@ mod definition_and_consumer {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -160,6 +167,7 @@ mod definition_and_consumer {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -168,6 +176,7 @@ mod definition_and_consumer {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -176,6 +185,7 @@ mod definition_and_consumer {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -216,6 +226,7 @@ mod refuse_to_catalog_local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(RefuseToCatalogLocal),
@@ -224,6 +235,7 @@ mod refuse_to_catalog_local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -235,6 +247,7 @@ mod refuse_to_catalog_local {
         actual: "1.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -243,6 +256,7 @@ mod refuse_to_catalog_local {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -276,6 +290,7 @@ mod refuse_to_catalog_local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -284,6 +299,7 @@ mod refuse_to_catalog_local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -292,6 +308,7 @@ mod refuse_to_catalog_local {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(RefuseToCatalogLocal),
@@ -300,6 +317,7 @@ mod refuse_to_catalog_local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -311,6 +329,7 @@ mod refuse_to_catalog_local {
         actual: "1.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -347,6 +366,7 @@ mod missing_catalog_definition_reference {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(DependsOnMissingCatalogDefinition),
@@ -355,6 +375,7 @@ mod missing_catalog_definition_reference {
         actual: "catalog:foo",
         expected: Some("catalog:foo"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -363,6 +384,7 @@ mod missing_catalog_definition_reference {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -395,6 +417,7 @@ mod missing_catalog_definition_reference {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(DependsOnMissingCatalogDefinition),
@@ -403,6 +426,7 @@ mod missing_catalog_definition_reference {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -411,6 +435,7 @@ mod missing_catalog_definition_reference {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -444,6 +469,7 @@ mod missing_catalog_definition_reference {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(DependsOnMissingCatalogDefinition),
@@ -452,6 +478,7 @@ mod missing_catalog_definition_reference {
         actual: "catalog:foo",
         expected: Some("catalog:foo"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -460,6 +487,7 @@ mod missing_catalog_definition_reference {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -468,6 +496,7 @@ mod missing_catalog_definition_reference {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -501,6 +530,7 @@ mod missing_catalog_definition_reference {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -509,6 +539,7 @@ mod missing_catalog_definition_reference {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -517,6 +548,7 @@ mod missing_catalog_definition_reference {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(DependsOnMissingCatalogDefinition),
@@ -525,6 +557,7 @@ mod missing_catalog_definition_reference {
         actual: "catalog:foo",
         expected: Some("catalog:foo"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -562,6 +595,7 @@ mod not_using_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(NotUsingCatalog("default".to_string())),
@@ -570,6 +604,7 @@ mod not_using_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -578,6 +613,7 @@ mod not_using_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -610,6 +646,7 @@ mod not_using_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(NotUsingCatalog("react18".to_string())),
@@ -618,6 +655,7 @@ mod not_using_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:react18"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -626,6 +664,7 @@ mod not_using_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -660,6 +699,7 @@ mod not_using_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(NotUsingCatalog("react17".to_string())),
@@ -668,6 +708,7 @@ mod not_using_catalog {
         actual: "^17.0.0",
         expected: Some("catalog:react17"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -676,6 +717,7 @@ mod not_using_catalog {
         actual: "^17.0.0",
         expected: Some("^17.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -684,6 +726,7 @@ mod not_using_catalog {
         actual: "^1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -718,6 +761,7 @@ mod not_using_catalog {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -726,6 +770,7 @@ mod not_using_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -734,6 +779,7 @@ mod not_using_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(NotUsingCatalog("default".to_string())),
@@ -742,6 +788,7 @@ mod not_using_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -780,6 +827,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -791,6 +839,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -799,6 +848,7 @@ mod missing_from_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -830,6 +880,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -841,6 +892,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -872,6 +924,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -883,6 +936,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -915,6 +969,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -923,6 +978,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -934,6 +990,7 @@ mod missing_from_catalog {
         actual: "^17.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -945,6 +1002,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -953,6 +1011,7 @@ mod missing_from_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -987,6 +1046,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -995,6 +1055,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1006,6 +1067,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#abc",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1017,6 +1079,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#abc",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1025,6 +1088,7 @@ mod missing_from_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1056,6 +1120,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1064,6 +1129,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1072,6 +1138,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1080,6 +1147,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git",
         expected: Some("git+https://github.com/facebook/react.git"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1088,6 +1156,7 @@ mod missing_from_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1119,6 +1188,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1127,6 +1197,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1135,6 +1206,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#a",
         expected: Some("git+https://github.com/facebook/react.git#a"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1143,6 +1215,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#b",
         expected: Some("git+https://github.com/facebook/react.git#b"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1151,6 +1224,7 @@ mod missing_from_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1181,6 +1255,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1189,6 +1264,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1200,6 +1276,7 @@ mod missing_from_catalog {
         actual: "^17.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1211,6 +1288,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1243,6 +1321,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1251,6 +1330,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1262,6 +1342,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#abc",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1273,6 +1354,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#abc",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1302,6 +1384,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1310,6 +1393,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1318,6 +1402,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1326,6 +1411,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git",
         expected: Some("git+https://github.com/facebook/react.git"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1356,6 +1442,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1364,6 +1451,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1375,6 +1463,7 @@ mod missing_from_catalog {
         actual: "^17.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1386,6 +1475,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1418,6 +1508,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1426,6 +1517,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1437,6 +1529,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#abc",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1448,6 +1541,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git#abc",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1477,6 +1571,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1485,6 +1580,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1493,6 +1589,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("default".to_string())),
@@ -1501,6 +1598,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git",
         expected: Some("git+https://github.com/facebook/react.git"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1535,6 +1633,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1543,6 +1642,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1554,6 +1654,7 @@ mod missing_from_catalog {
         actual: "^17.0.0",
         expected: Some("catalog:react18"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(MissingFromCatalog {
@@ -1565,6 +1666,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("catalog:react18"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1573,6 +1675,7 @@ mod missing_from_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1604,6 +1707,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1612,6 +1716,7 @@ mod missing_from_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("react18".to_string())),
@@ -1620,6 +1725,7 @@ mod missing_from_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(MissingFromCatalogAndNonSemverMismatch("react18".to_string())),
@@ -1628,6 +1734,7 @@ mod missing_from_catalog {
         actual: "git+https://github.com/facebook/react.git",
         expected: Some("git+https://github.com/facebook/react.git"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1636,6 +1743,7 @@ mod missing_from_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1672,6 +1780,7 @@ mod ambiguous_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(NotUsingCatalogAndCatalogUnknown),
@@ -1680,6 +1789,7 @@ mod ambiguous_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1688,6 +1798,7 @@ mod ambiguous_catalog {
         actual: "^4.0.0",
         expected: Some("^4.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1696,6 +1807,7 @@ mod ambiguous_catalog {
         actual: "^1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1728,6 +1840,7 @@ mod ambiguous_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(NotUsingCatalogAndCatalogUnknown),
@@ -1736,6 +1849,7 @@ mod ambiguous_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1744,6 +1858,7 @@ mod ambiguous_catalog {
         actual: "^17.0.0",
         expected: Some("^17.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1752,6 +1867,7 @@ mod ambiguous_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1789,6 +1905,7 @@ mod ambiguous_catalog {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1797,6 +1914,7 @@ mod ambiguous_catalog {
         actual: "^17.0.0",
         expected: Some("^17.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -1805,6 +1923,7 @@ mod ambiguous_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1813,6 +1932,7 @@ mod ambiguous_catalog {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(NotUsingCatalogAndCatalogUnknown),
@@ -1821,6 +1941,7 @@ mod ambiguous_catalog {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1856,6 +1977,7 @@ mod cannot_infer_catalog_file {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(CannotInferCatalogFile),
@@ -1864,6 +1986,7 @@ mod cannot_infer_catalog_file {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1893,6 +2016,7 @@ mod cannot_infer_catalog_file {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(CannotInferCatalogFile),
@@ -1901,6 +2025,7 @@ mod cannot_infer_catalog_file {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1930,6 +2055,7 @@ mod cannot_infer_catalog_file {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(CannotInferCatalogFile),
@@ -1938,7 +2064,228 @@ mod cannot_infer_catalog_file {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
+  }
+}
+
+/// Severity tests — opt out of auto-fix per status (issue #216).
+/// Catalog permits `NotUsingCatalog`, `MissingFromCatalog`.
+mod severity {
+  use {super::*, crate::instance::Severity};
+
+  /// Scenario: pnpm yaml has catalog react ^18.0.0; pkg-a uses `^18.0.0`
+  /// (real specifier, not `catalog:`) → `NotUsingCatalog("default")` Fixable.
+  /// severity downgrades to `Warn`.
+  #[tokio::test]
+  async fn not_using_catalog_warn() {
+    let yaml = "catalog:\n  react: ^18.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({
+        "name": "pkg-a",
+        "version": "0.0.0",
+        "dependencies": {"react": "^18.0.0"},
+      })])
+      .with_version_group(json!({
+        "label": "enforce catalog",
+        "dependencies": ["react"],
+        "policy": "catalog",
+        "severity": {"NotUsingCatalog": "warn"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(NotUsingCatalog("default".to_string())),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-a",
+        actual: "^18.0.0",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalogDefinition),
+        dependency_name: "react",
+        id: "react in /catalog of pnpm-workspace.yaml",
+        actual: "^18.0.0",
+        expected: Some("^18.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+    ]);
+  }
+
+  /// `severity: { NotUsingCatalog: "error" }` → `Error`.
+  #[tokio::test]
+  async fn not_using_catalog_error() {
+    let yaml = "catalog:\n  react: ^18.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({
+        "name": "pkg-a",
+        "version": "0.0.0",
+        "dependencies": {"react": "^18.0.0"},
+      })])
+      .with_version_group(json!({
+        "label": "enforce catalog",
+        "dependencies": ["react"],
+        "policy": "catalog",
+        "severity": {"NotUsingCatalog": "error"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(NotUsingCatalog("default".to_string())),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-a",
+        actual: "^18.0.0",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalogDefinition),
+        dependency_name: "react",
+        id: "react in /catalog of pnpm-workspace.yaml",
+        actual: "^18.0.0",
+        expected: Some("^18.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+    ]);
+  }
+
+  /// Scenario: zero catalogs configured, PM=pnpm; pkg-a uses real specifier
+  /// → MissingFromCatalog{default, ^18.0.0}. severity downgrades to `Warn`.
+  #[tokio::test]
+  async fn missing_from_catalog_warn() {
+    let winning = Specifier::new("^18.0.0");
+    let ctx = TestBuilder::new()
+      .with_pnpm_package_manager()
+      .with_packages(vec![json!({
+        "name": "pkg-a",
+        "version": "0.0.0",
+        "dependencies": {"react": "^18.0.0"},
+      })])
+      .with_version_group(json!({
+        "label": "enforce catalog",
+        "dependencies": ["react"],
+        "policy": "catalog",
+        "severity": {"MissingFromCatalog": "warn"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(MissingFromCatalog {
+          catalog_name: "default".to_string(),
+          winning_specifier: Rc::clone(&winning),
+        }),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-a",
+        actual: "^18.0.0",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+    ]);
+  }
+
+  /// `severity: { MissingFromCatalog: "error" }` → `Error`.
+  #[tokio::test]
+  async fn missing_from_catalog_error() {
+    let winning = Specifier::new("^18.0.0");
+    let ctx = TestBuilder::new()
+      .with_pnpm_package_manager()
+      .with_packages(vec![json!({
+        "name": "pkg-a",
+        "version": "0.0.0",
+        "dependencies": {"react": "^18.0.0"},
+      })])
+      .with_version_group(json!({
+        "label": "enforce catalog",
+        "dependencies": ["react"],
+        "policy": "catalog",
+        "severity": {"MissingFromCatalog": "error"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(MissingFromCatalog {
+          catalog_name: "default".to_string(),
+          winning_specifier: Rc::clone(&winning),
+        }),
+        dependency_name: "react",
+        id: "react in /dependencies of pkg-a",
+        actual: "^18.0.0",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+    ]);
+  }
+
+  /// Catalog permits `NotUsingCatalog` and `MissingFromCatalog`. `DiffersToPin`
+  /// is a Pinned-only key → `InvalidSeverityKey`.
+  #[tokio::test]
+  #[should_panic(expected = "InvalidSeverityKey")]
+  async fn rejects_invalid_severity_key() {
+    let yaml = "catalog:\n  react: ^18.0.0\n";
+    let _ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({
+        "name": "pkg-a",
+        "version": "0.0.0",
+        "dependencies": {"react": "^18.0.0"},
+      })])
+      .with_version_group(json!({
+        "label": "enforce catalog",
+        "dependencies": ["react"],
+        "policy": "catalog",
+        "severity": {"DiffersToPin": "warn"}
+      }))
+      .run()
+      .await;
   }
 }

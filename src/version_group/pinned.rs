@@ -3,7 +3,7 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, ValidInstance},
+    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     specifier::Specifier,
   },
@@ -20,6 +20,7 @@ pub struct PinnedGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
   pub pin_version: Rc<Specifier>,
+  pub severity: SeverityMap,
 }
 
 impl PinnedGroup {
@@ -42,7 +43,7 @@ impl PinnedGroup {
           debug!("{L3}it is the local instance of a package developed locally in this monorepo");
           debug!("{L4}refuse to change it");
           debug!("{L5}mark as error, user should change their config");
-          instance.mark_suspect(SuspectInstance::RefuseToPinLocal);
+          instance.mark_suspect_with_expected(SuspectInstance::RefuseToPinLocal, pinned_specifier);
           continue;
         }
         if instance.already_equals(pinned_specifier) {

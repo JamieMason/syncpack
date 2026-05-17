@@ -2,7 +2,7 @@ use {
   crate::{
     commands::ui,
     context::Context,
-    instance::{Instance, InstanceState, InvalidInstance, ValidInstance},
+    instance::{Instance, InstanceState, InvalidInstance, Severity, ValidInstance},
   },
   colored::*,
   log::{error, info},
@@ -14,8 +14,16 @@ pub fn print(ctx: &Context, instance: &Instance) {
     InstanceState::Valid(_) => print_valid(ctx, instance),
     InstanceState::Invalid(InvalidInstance::Unfixable(_)) => print_unfixable(ctx, instance),
     InstanceState::Invalid(InvalidInstance::Conflict(_)) => print_unfixable(ctx, instance),
-    InstanceState::Invalid(InvalidInstance::Fixable(_)) => print_fixable(ctx, instance),
-    InstanceState::Suspect(_) => print_suspect(ctx, instance),
+    InstanceState::Invalid(InvalidInstance::Fixable(_)) => match *instance.severity.borrow() {
+      Some(Severity::Warn) => print_suspect(ctx, instance),
+      Some(Severity::Error) => print_unfixable(ctx, instance),
+      _ => print_fixable(ctx, instance),
+    },
+    InstanceState::Suspect(_) => match *instance.severity.borrow() {
+      Some(Severity::Error) => print_unfixable(ctx, instance),
+      Some(Severity::Fix) => print_fixable(ctx, instance),
+      _ => print_suspect(ctx, instance),
+    },
     InstanceState::Unknown => {
       let location = get_location(ctx, instance);
       error!("Instance '{location}' has an unknown state, this is a bug in syncpack");

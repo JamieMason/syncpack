@@ -24,6 +24,7 @@ async fn test_builder_basic_usage() {
     actual: "1.0.0",
     expected: Some("1.0.0"),
     overridden: None,
+    severity: None,
   }]);
 }
 

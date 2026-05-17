@@ -185,6 +185,31 @@ async fn ignored_dep_via_update_group_does_not_appear_in_rows() {
   assert!(rows.is_empty(), "ignored deps must not appear in update rows");
 }
 
+/// Severity is owned by `versionGroups` and gates lint/fix/list/json only.
+/// `update` behaviour is owned by `updateGroups`. Setting severity on a
+/// version group must NOT affect what update rows are produced — plan §3.6.
+#[tokio::test]
+async fn severity_on_version_group_does_not_affect_update_rows() {
+  let (ctx, updates) = TestBuilder::new()
+    .with_packages(vec![json!({
+      "name": "package-a",
+      "version": "1.0.0",
+      "dependencies": {"foo": "^1.0.0"}
+    })])
+    .with_version_group(json!({
+      "dependencies": ["foo"],
+      "severity": {"DiffersToHighestOrLowestSemver": "warn"}
+    }))
+    .with_registry_updates(json!({"foo": ["1.0.0", "1.0.1"]}))
+    .run_with_updates()
+    .await;
+  let rows = build_update_rows(&ctx, &updates.unwrap(), FROZEN_NOW);
+  assert_eq!(rows.len(), 1, "update rows are unaffected by severity config");
+  assert_eq!(rows[0].dependency_name, "foo");
+  assert_eq!(rows[0].current_raw, "^1.0.0");
+  assert_eq!(rows[0].target_raw, "^1.0.1");
+}
+
 #[tokio::test]
 async fn missing_registry_times_yield_none_labels() {
   let (ctx, updates) = TestBuilder::new()

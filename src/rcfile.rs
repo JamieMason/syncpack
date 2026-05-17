@@ -3,6 +3,7 @@ use {
     dependency::DependencyType,
     errors::UnsupportedConfigError,
     group_selector::GroupSelector,
+    instance::severity::SeverityMap,
     sources::Sources,
     version_group::{AnyVersionGroup, CatalogDefsGroup, VersionGroup},
   },
@@ -491,13 +492,15 @@ impl Rcfile {
   pub fn get_version_groups(&mut self, sources: &Sources) -> Result<Vec<VersionGroup>, UnsupportedConfigError> {
     let mut all_groups: Vec<VersionGroup> = mem::take(&mut self.version_groups)
       .into_iter()
-      .map(|group_config| VersionGroup::from_config(group_config, sources))
+      .enumerate()
+      .map(|(index, group_config)| VersionGroup::from_config(group_config, index, sources))
       .collect::<Result<Vec<_>, _>>()?;
     let catalog_dep_type_names = self.catalog_dep_type_names();
     if !catalog_dep_type_names.is_empty() {
       all_groups.push(VersionGroup::CatalogDefs(CatalogDefsGroup {
         selector: GroupSelector::new(vec![], catalog_dep_type_names, "Catalog Definitions".into(), vec![], vec![]),
         dependencies: BTreeMap::new(),
+        severity: SeverityMap::new(),
       }));
     }
     all_groups.push(VersionGroup::get_catch_all());

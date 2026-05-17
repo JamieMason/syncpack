@@ -3,7 +3,7 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, ValidInstance},
+    instance::{FixableInstance, Instance, InstanceIdx, ValidInstance, severity::SeverityMap},
     rcfile::update_group::UpdatePolicy,
     registry::updates::RegistryUpdates,
     semver_range::SemverRange,
@@ -16,6 +16,7 @@ use {
 pub struct CatalogDefsGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
+  pub severity: SeverityMap,
 }
 
 impl CatalogDefsGroup {

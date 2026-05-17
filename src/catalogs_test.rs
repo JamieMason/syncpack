@@ -133,6 +133,7 @@ async fn pnpm_catalog_definition_emits_instance() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -141,6 +142,7 @@ async fn pnpm_catalog_definition_emits_instance() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -161,6 +163,7 @@ async fn pnpm_named_catalog_definition_emits_instance() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -169,6 +172,7 @@ async fn pnpm_named_catalog_definition_emits_instance() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -189,6 +193,7 @@ async fn multiple_pnpm_catalog_definitions_emit_multiple_instances() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -197,6 +202,7 @@ async fn multiple_pnpm_catalog_definitions_emit_multiple_instances() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -205,6 +211,7 @@ async fn multiple_pnpm_catalog_definitions_emit_multiple_instances() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -213,6 +220,7 @@ async fn multiple_pnpm_catalog_definitions_emit_multiple_instances() {
       actual: "30.0.0",
       expected: Some("30.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -233,6 +241,7 @@ async fn pnpm_catalog_yaml_loaded_when_present() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -241,6 +250,7 @@ async fn pnpm_catalog_yaml_loaded_when_present() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -260,6 +270,7 @@ async fn pnpm_workspace_yaml_without_catalog_blocks_still_loads() {
     actual: "0.0.0",
     expected: Some("0.0.0"),
     overridden: None,
+    severity: None,
   }]);
 }
 
@@ -279,6 +290,7 @@ async fn catalog_dep_types_appended_to_all_dependency_types() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -287,6 +299,7 @@ async fn catalog_dep_types_appended_to_all_dependency_types() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -295,6 +308,7 @@ async fn catalog_dep_types_appended_to_all_dependency_types() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -315,6 +329,7 @@ async fn catalog_dep_type_with_dot_in_name_preserves_dot() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -323,6 +338,7 @@ async fn catalog_dep_type_with_dot_in_name_preserves_dot() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -343,6 +359,7 @@ async fn non_pnpm_non_bun_pm_skips_catalog_discovery() {
     actual: "0.0.0",
     expected: Some("0.0.0"),
     overridden: None,
+    severity: None,
   }]);
 }
 
@@ -366,6 +383,7 @@ async fn pnpm_catalog_definition_with_consumer_marked_valid() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalog),
@@ -374,6 +392,7 @@ async fn pnpm_catalog_definition_with_consumer_marked_valid() {
       actual: "catalog:",
       expected: Some("catalog:"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -382,6 +401,7 @@ async fn pnpm_catalog_definition_with_consumer_marked_valid() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -409,6 +429,7 @@ async fn pnpm_catalog_definition_without_consumer_does_not_flag_sibling() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -417,6 +438,7 @@ async fn pnpm_catalog_definition_without_consumer_does_not_flag_sibling() {
       actual: "^17.0.0",
       expected: Some("^17.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -425,6 +447,7 @@ async fn pnpm_catalog_definition_without_consumer_does_not_flag_sibling() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -447,6 +470,7 @@ async fn auto_gen_pnpm_catalog_dep_type_has_pnpm_workspace_source_and_catalog_fl
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -455,6 +479,7 @@ async fn auto_gen_pnpm_catalog_dep_type_has_pnpm_workspace_source_and_catalog_fl
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -476,6 +501,7 @@ async fn auto_gen_bun_catalog_dep_type_has_package_json_source_and_catalog_flag(
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -484,6 +510,7 @@ async fn auto_gen_bun_catalog_dep_type_has_package_json_source_and_catalog_flag(
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -492,6 +519,7 @@ async fn auto_gen_bun_catalog_dep_type_has_package_json_source_and_catalog_flag(
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -512,6 +540,7 @@ async fn pnpm_catalog_definition_with_no_siblings_still_valid() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -520,6 +549,7 @@ async fn pnpm_catalog_definition_with_no_siblings_still_valid() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }

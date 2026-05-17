@@ -4,7 +4,7 @@ use {
     context::Context,
     disk::PackageManager,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, UnfixableInstance, ValidInstance},
+    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, UnfixableInstance, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     specifier::Specifier,
   },
@@ -16,6 +16,7 @@ use {
 pub struct CatalogGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
+  pub severity: SeverityMap,
 }
 
 impl CatalogGroup {

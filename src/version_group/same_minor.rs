@@ -3,7 +3,7 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, UnfixableInstance, ValidInstance},
+    instance::{FixableInstance, Instance, InstanceIdx, UnfixableInstance, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     semver_range::SemverRange,
     specifier::Specifier,
@@ -21,6 +21,7 @@ pub struct SameMinorGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
   pub prefer_version: Option<PreferVersion>,
+  pub severity: SeverityMap,
 }
 
 fn is_safe_range(range: &SemverRange) -> bool {

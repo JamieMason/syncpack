@@ -31,6 +31,13 @@ pub enum UnsupportedConfigError {
   InvalidUpdateGroup,
   #[error("Unrecognised version group policy: '{0}'")]
   InvalidVersionGroupPolicy(String),
+  #[error("severity key '{key}' is not valid on a {group_type} group at {path}. Permitted: {}.", permitted.join(", "))]
+  InvalidSeverityKey {
+    path: String,
+    group_type: String,
+    key: String,
+    permitted: Vec<&'static str>,
+  },
   #[error("customTypes.<name>.source: '{value}' is not a recognised source.\nUse 'PackageJson' or 'PnpmWorkspace'.")]
   InvalidSource { value: String },
   #[error("Config property '{path}' is not recognised")]

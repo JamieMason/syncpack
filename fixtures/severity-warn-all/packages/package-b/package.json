@@ -1,0 +1,8 @@
+{
+  "name": "package-b",
+  "version": "1.0.0",
+  "dependencies": {
+    "dep-snap-differs": "2.0.0",
+    "package-snap-local": "2.0.0"
+  }
+}

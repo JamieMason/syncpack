@@ -30,6 +30,7 @@ async fn instance_descriptor_source_resolves_source_idx_for_regular_dep() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -38,6 +39,7 @@ async fn instance_descriptor_source_resolves_source_idx_for_regular_dep() {
       actual: "18.0.0",
       expected: Some("18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -59,6 +61,7 @@ async fn context_pnpm_yaml_absent_when_no_catalogs_configured() {
     actual: "0.0.0",
     expected: Some("0.0.0"),
     overridden: None,
+    severity: None,
   }]);
 }
 
@@ -111,6 +114,7 @@ async fn context_create_uses_sources_for_pkg_json_instances() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -119,6 +123,7 @@ async fn context_create_uses_sources_for_pkg_json_instances() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -127,6 +132,7 @@ async fn context_create_uses_sources_for_pkg_json_instances() {
       actual: "4.17.21",
       expected: Some("4.17.21"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -135,6 +141,7 @@ async fn context_create_uses_sources_for_pkg_json_instances() {
       actual: "^2.0.0",
       expected: Some("^2.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -155,6 +162,7 @@ async fn context_create_uses_sources_for_pnpm_catalog_instances() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -163,6 +171,7 @@ async fn context_create_uses_sources_for_pnpm_catalog_instances() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -171,6 +180,7 @@ async fn context_create_uses_sources_for_pnpm_catalog_instances() {
       actual: "^17.0.0",
       expected: Some("^17.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -192,6 +202,7 @@ async fn context_create_uses_sources_for_bun_catalog_instances() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -200,6 +211,7 @@ async fn context_create_uses_sources_for_bun_catalog_instances() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -208,6 +220,7 @@ async fn context_create_uses_sources_for_bun_catalog_instances() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -216,6 +229,7 @@ async fn context_create_uses_sources_for_bun_catalog_instances() {
       actual: "^17.0.0",
       expected: Some("^17.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -244,6 +258,7 @@ async fn context_create_user_customtype_pnpm_workspace_source_emits_instance() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -252,6 +267,7 @@ async fn context_create_user_customtype_pnpm_workspace_source_emits_instance() {
       actual: "^1.0.0",
       expected: Some("^1.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -283,6 +299,7 @@ async fn context_create_user_customtype_targetable_in_version_group_via_dependen
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -291,6 +308,7 @@ async fn context_create_user_customtype_targetable_in_version_group_via_dependen
       actual: "^1.0.0",
       expected: Some("^1.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }

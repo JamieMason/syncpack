@@ -3,7 +3,7 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, UnfixableInstance, ValidInstance},
+    instance::{FixableInstance, Instance, InstanceIdx, UnfixableInstance, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
   },
   log::debug,
@@ -18,6 +18,7 @@ mod same_range_test;
 pub struct SameRangeGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
+  pub severity: SeverityMap,
 }
 
 impl SameRangeGroup {

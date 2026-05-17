@@ -396,7 +396,7 @@ fn version_group_from_config_rejects_invalid_policy() {
   }))
   .unwrap();
   let sources = crate::sources::Sources::new();
-  let err = VersionGroup::from_config(group, &sources).unwrap_err();
+  let err = VersionGroup::from_config(group, 0, &sources).unwrap_err();
   assert!(matches!(err, UnsupportedConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
 }
 

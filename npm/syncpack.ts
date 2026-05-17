@@ -37,6 +37,8 @@ export interface RcFile {
   sortPackages?: boolean;
   /** @see https://syncpack.dev/config/source */
   source?: string[];
+  /** @see https://syncpack.dev/config/source-mode */
+  sourceMode?: 'replace' | 'extend';
   /** @see https://syncpack.dev/config/strict */
   strict?: boolean;
   /** @see https://syncpack.dev/version-groups */
@@ -110,32 +112,75 @@ namespace VersionGroup {
   export interface Banned extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/banned/#isbanned */
     isBanned: true;
+    /** @see https://syncpack.dev/version-groups/banned/#severity */
+    severity?: { IsBanned?: Severity };
   }
   export interface Ignored extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/ignored/#isignored */
     isIgnored: true;
+    // `severity` on an Ignored group is accepted and silently discarded —
+    // the group emits no statuses to tune. Omitted from the type so writing it
+    // surfaces as a compile-time hint that it does nothing.
   }
   export interface Pinned extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/pinned/#pinversion */
     pinVersion: string;
+    /** @see https://syncpack.dev/version-groups/pinned/#severity */
+    severity?: {
+      DiffersToPin?: Severity;
+      PinOverridesSemverRange?: Severity;
+      PinOverridesSemverRangeMismatch?: Severity;
+      RefuseToPinLocal?: Severity;
+    };
   }
   export interface SnappedTo extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/snapped-to/#snapto */
     snapTo: string[];
+    /** @see https://syncpack.dev/version-groups/snapped-to/#severity */
+    severity?: {
+      DiffersToSnapTarget?: Severity;
+      SemverRangeMismatch?: Severity;
+      RefuseToSnapLocal?: Severity;
+    };
   }
   export interface SameRange extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/same-range/#policy */
     policy: 'sameRange';
+    /** @see https://syncpack.dev/version-groups/same-range/#severity */
+    severity?: { SemverRangeMismatch?: Severity };
   }
   export interface SameMinor extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/same-minor/#policy */
     policy: 'sameMinor';
+    /** @see https://syncpack.dev/version-groups/same-minor/#severity */
+    severity?: {
+      DiffersToHighestOrLowestSemverMinor?: Severity;
+      SemverRangeMismatch?: Severity;
+      SameMinorOverridesSemverRange?: Severity;
+      SameMinorOverridesSemverRangeMismatch?: Severity;
+    };
   }
   export interface Standard extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/lowest-semver/#preferversion */
     preferVersion?: 'highestSemver' | 'lowestSemver';
+    /** @see https://syncpack.dev/version-groups/highest-semver/#severity */
+    severity?: {
+      SemverRangeMismatch?: Severity;
+      DiffersToLocal?: Severity;
+      DiffersToCatalog?: Severity;
+      DiffersToHighestOrLowestSemver?: Severity;
+    };
   }
-  export type Any = Banned | Ignored | Pinned | SameRange | SameMinor | SnappedTo | Standard;
+  export interface Catalog extends GroupSelector {
+    /** @see https://syncpack.dev/version-groups/catalog/#policy */
+    policy: 'catalog';
+    /** @see https://syncpack.dev/version-groups/catalog/#severity */
+    severity?: {
+      NotUsingCatalog?: Severity;
+      MissingFromCatalog?: Severity;
+    };
+  }
+  export type Any = Banned | Catalog | Ignored | Pinned | SameRange | SameMinor | SnappedTo | Standard;
 }
 
 namespace CustomType {
@@ -169,6 +214,13 @@ namespace CustomType {
 }
 
 type SemverRange = '' | '*' | '>' | '>=' | '.x' | '<' | '<=' | '^' | '~';
+
+/** @see https://syncpack.dev/severity/ */
+export type Severity = 'fix' | 'warn' | 'error';
+
+/** Severity values that appear in JSON output. `'none'` is emitted for Valid
+ * instances in `syncpack json` and is not writable in rcfile severity maps. */
+export type JsonSeverity = Severity | 'none';
 
 type DependencyType = 'dev' | 'local' | 'overrides' | 'peer' | 'pnpmOverrides' | 'prod' | 'resolutions' | AnyString;
 
@@ -205,6 +257,8 @@ export type JsonOutput = {
   preferredSemverRange: SemverRange | null;
   statusCode: StatusCode;
   statusType: StatusType;
+  /** @see https://syncpack.dev/config/severity/ */
+  severity: JsonSeverity;
   actual: {
     raw: string;
     type: SpecifierType;
@@ -234,6 +288,7 @@ export type FormatStatusCode =
 
 export type VersionGroupVariant =
   | 'Banned'
+  | 'Catalog'
   | 'HighestSemver'
   | 'Ignored'
   | 'LowestSemver'
@@ -255,12 +310,16 @@ export type StatusCode =
   | 'SatisfiesSameRangeGroup'
   | 'SatisfiesSameMinorGroup'
   | 'SatisfiesSnapTarget'
+  | 'DiffersToCatalog'
   | 'DiffersToHighestOrLowestSemver'
+  | 'DiffersToHighestOrLowestSemverMinor'
   | 'DiffersToLocal'
   | 'DiffersToNpmRegistry'
   | 'DiffersToPin'
   | 'DiffersToSnapTarget'
   | 'IsBanned'
+  | 'MissingFromCatalog'
+  | 'NotUsingCatalog'
   | 'PinOverridesSemverRange'
   | 'PinOverridesSemverRangeMismatch'
   | 'SameMinorOverridesSemverRange'

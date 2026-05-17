@@ -79,6 +79,7 @@ async fn instance_is_catalog_via_dep_type_flag() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalog),
@@ -87,6 +88,7 @@ async fn instance_is_catalog_via_dep_type_flag() {
       actual: "catalog:",
       expected: Some("catalog:"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -95,6 +97,7 @@ async fn instance_is_catalog_via_dep_type_flag() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }

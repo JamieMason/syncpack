@@ -37,6 +37,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -45,6 +46,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(DependsOnInvalidLocalPackage),
@@ -53,6 +55,7 @@ mod local {
         actual: "0.1.0",
         expected: Some("0.1.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -82,6 +85,7 @@ mod local {
         actual: "^1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -90,6 +94,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(DependsOnInvalidLocalPackage),
@@ -98,6 +103,7 @@ mod local {
         actual: "0.1.0",
         expected: Some("0.1.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -127,6 +133,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -135,6 +142,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToLocal),
@@ -143,6 +151,7 @@ mod local {
         actual: "1.1.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -172,6 +181,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -180,6 +190,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsIdenticalToLocal),
@@ -188,6 +199,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -217,6 +229,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -225,6 +238,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToLocal),
@@ -233,6 +247,7 @@ mod local {
         actual: "1.1.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -262,6 +277,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -270,6 +286,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToLocal),
@@ -278,6 +295,7 @@ mod local {
         actual: "~1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -310,6 +328,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -318,6 +337,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(SatisfiesLocal),
@@ -326,6 +346,7 @@ mod local {
         actual: "^1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -356,6 +377,7 @@ mod local {
         actual: "2.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -364,6 +386,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(SatisfiesLocal),
@@ -372,6 +395,7 @@ mod local {
         actual: "link:../package-a",
         expected: Some("link:../package-a"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -402,6 +426,7 @@ mod local {
         actual: "2.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -410,6 +435,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToLocal),
@@ -418,6 +444,7 @@ mod local {
         actual: "link:../../elsewhere/package-a",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -450,6 +477,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -458,6 +486,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -466,6 +495,7 @@ mod local {
         actual: "~1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -498,6 +528,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -506,6 +537,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::conflict(MatchConflictsWithLocal),
@@ -514,6 +546,7 @@ mod local {
         actual: "<1.0.0",
         expected: Some("<1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -546,6 +579,7 @@ mod local {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -554,6 +588,7 @@ mod local {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::conflict(MismatchConflictsWithLocal),
@@ -562,6 +597,7 @@ mod local {
         actual: "~1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -592,6 +628,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -600,6 +637,7 @@ mod highest_or_lowest {
         actual: "2.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -608,6 +646,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -637,6 +676,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -645,6 +685,7 @@ mod highest_or_lowest {
         actual: "0.3.0",
         expected: Some("0.3.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -653,6 +694,7 @@ mod highest_or_lowest {
         actual: "0.1.0",
         expected: Some("0.3.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -661,6 +703,7 @@ mod highest_or_lowest {
         actual: "0.2.0",
         expected: Some("0.3.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -692,6 +735,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -700,6 +744,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -708,6 +753,7 @@ mod highest_or_lowest {
         actual: "2.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -716,6 +762,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -748,6 +795,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -756,6 +804,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -764,6 +813,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -772,6 +822,7 @@ mod highest_or_lowest {
         actual: "2.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -811,6 +862,7 @@ mod highest_or_lowest {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -819,6 +871,7 @@ mod highest_or_lowest {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -827,6 +880,7 @@ mod highest_or_lowest {
         actual: "0.3.0",
         expected: Some("0.3.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -835,6 +889,7 @@ mod highest_or_lowest {
         actual: "0.3.0",
         expected: Some("0.3.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -843,6 +898,7 @@ mod highest_or_lowest {
         actual: "0.1.0",
         expected: Some("0.3.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -851,6 +907,7 @@ mod highest_or_lowest {
         actual: "0.2.0",
         expected: Some("0.3.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -882,6 +939,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -890,6 +948,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -898,6 +957,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -906,6 +966,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -937,6 +998,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -945,6 +1007,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -953,6 +1016,7 @@ mod highest_or_lowest {
         actual: "1.1.0",
         expected: Some("1.1.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -961,6 +1025,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.1.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -992,6 +1057,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1000,6 +1066,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1008,6 +1075,7 @@ mod highest_or_lowest {
         actual: "^1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -1016,6 +1084,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1051,6 +1120,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1059,6 +1129,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(SatisfiesHighestOrLowestSemver),
@@ -1067,6 +1138,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1075,6 +1147,7 @@ mod highest_or_lowest {
         actual: "^1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1110,6 +1183,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1118,6 +1192,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1126,6 +1201,7 @@ mod highest_or_lowest {
         actual: ">=1.0.0",
         expected: Some(">=1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1134,6 +1210,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1169,6 +1246,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1177,6 +1255,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1185,6 +1264,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::conflict(MatchConflictsWithHighestOrLowestSemver),
@@ -1193,6 +1273,7 @@ mod highest_or_lowest {
         actual: "<1.0.0",
         expected: Some("<1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1228,6 +1309,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1236,6 +1318,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1244,6 +1327,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::conflict(MismatchConflictsWithHighestOrLowestSemver),
@@ -1252,6 +1336,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1284,6 +1369,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1292,6 +1378,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -1300,6 +1387,7 @@ mod highest_or_lowest {
         actual: "7.0.0-dev.20260117.1",
         expected: Some("^7.0.0-dev.20260117.1"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1308,6 +1396,7 @@ mod highest_or_lowest {
         actual: "^7.0.0-dev.20260117.1",
         expected: Some("^7.0.0-dev.20260117.1"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1349,6 +1438,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -1357,6 +1447,7 @@ mod highest_or_lowest {
         actual: "^18.0.0",
         expected: Some("18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1365,6 +1456,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1373,6 +1465,7 @@ mod highest_or_lowest {
         actual: "18.0.0",
         expected: Some("18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1381,6 +1474,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -1389,6 +1483,7 @@ mod highest_or_lowest {
         actual: "~18.0.0",
         expected: Some("18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1429,6 +1524,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1437,6 +1533,7 @@ mod highest_or_lowest {
         actual: "7.0.0-dev.20260117.1",
         expected: Some("7.0.0-dev.20260117.1"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1445,6 +1542,7 @@ mod highest_or_lowest {
         actual: "4.17.21",
         expected: Some("4.17.21"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1453,6 +1551,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1461,6 +1560,7 @@ mod highest_or_lowest {
         actual: "^7.0.0-dev.20260117.1",
         expected: Some("7.0.0-dev.20260117.1"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1469,6 +1569,7 @@ mod highest_or_lowest {
         actual: "^4.17.21",
         expected: Some("4.17.21"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1517,6 +1618,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       // pkg-a has the highest version but wrong range (^ instead of pinned)
       ExpectedInstance {
@@ -1526,6 +1628,7 @@ mod highest_or_lowest {
         actual: "^18.0.0",
         expected: Some("18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1534,6 +1637,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       // pkg-b has a lower version — fix should update version AND apply pinned range
       ExpectedInstance {
@@ -1543,6 +1647,7 @@ mod highest_or_lowest {
         actual: "17.0.0",
         expected: Some("18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1551,6 +1656,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       // pkg-c same as pkg-b
       ExpectedInstance {
@@ -1560,6 +1666,7 @@ mod highest_or_lowest {
         actual: "17.0.0",
         expected: Some("18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1606,6 +1713,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       // pkg-a has exact 1.0.0 but semver group wants ^ -> adjusted to ^1.0.0
       // ^1.0.0 is greedier than ~1.0.0, making it the highest
@@ -1617,6 +1725,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1625,6 +1734,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       // pkg-b has ~1.0.0, no semver group — follows adjusted highest ^1.0.0
       ExpectedInstance {
@@ -1634,6 +1744,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1642,6 +1753,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       // pkg-c same as pkg-b
       ExpectedInstance {
@@ -1651,6 +1763,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1688,6 +1801,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -1696,6 +1810,7 @@ mod highest_or_lowest {
         actual: "^2.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1704,6 +1819,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1712,6 +1828,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1744,6 +1861,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1752,6 +1870,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1760,6 +1879,7 @@ mod highest_or_lowest {
         actual: "^1.0.0",
         expected: Some(">=1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1792,6 +1912,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -1800,6 +1921,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1808,6 +1930,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("<=1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1843,6 +1966,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1851,6 +1975,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -1859,6 +1984,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some(">=1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1867,6 +1993,7 @@ mod highest_or_lowest {
         actual: "^1.0.0",
         expected: Some(">=1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1902,6 +2029,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1910,6 +2038,7 @@ mod highest_or_lowest {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -1918,6 +2047,7 @@ mod highest_or_lowest {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -1926,6 +2056,7 @@ mod highest_or_lowest {
         actual: "~1.0.0",
         expected: Some("<=1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -1961,6 +2092,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -1969,6 +2101,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsNonSemverButIdentical),
@@ -1977,6 +2110,7 @@ mod non_semver {
         actual: "workspace:*",
         expected: Some("workspace:*"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsNonSemverButIdentical),
@@ -1985,6 +2119,7 @@ mod non_semver {
         actual: "workspace:*",
         expected: Some("workspace:*"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2016,6 +2151,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -2024,6 +2160,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(NonSemverMismatch),
@@ -2032,6 +2169,7 @@ mod non_semver {
         actual: "workspace:*",
         expected: Some("workspace:*"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(NonSemverMismatch),
@@ -2040,6 +2178,7 @@ mod non_semver {
         actual: "workspace:^",
         expected: Some("workspace:^"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2065,6 +2204,7 @@ mod non_semver {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToLocal),
@@ -2073,6 +2213,7 @@ mod non_semver {
         actual: "workspace:*",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2097,6 +2238,7 @@ mod non_semver {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(SatisfiesLocal),
@@ -2105,6 +2247,7 @@ mod non_semver {
         actual: "workspace:*",
         expected: Some("workspace:*"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2136,6 +2279,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -2144,6 +2288,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsNonSemverButIdentical),
@@ -2152,6 +2297,7 @@ mod non_semver {
         actual: "link:../../external/external-package",
         expected: Some("link:../../external/external-package"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsNonSemverButIdentical),
@@ -2160,6 +2306,7 @@ mod non_semver {
         actual: "link:../../external/external-package",
         expected: Some("link:../../external/external-package"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2191,6 +2338,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -2199,6 +2347,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(NonSemverMismatch),
@@ -2207,6 +2356,7 @@ mod non_semver {
         actual: "link:../../external/external-package",
         expected: Some("link:../../external/external-package"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::unfixable(NonSemverMismatch),
@@ -2215,6 +2365,7 @@ mod non_semver {
         actual: "link:../../elsewhere/external-package",
         expected: Some("link:../../elsewhere/external-package"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2241,6 +2392,7 @@ mod non_semver {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -2249,6 +2401,7 @@ mod non_semver {
         actual: "1.2.3",
         expected: Some("1.2.3"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -2257,6 +2410,7 @@ mod non_semver {
         actual: "file:./mix",
         expected: Some("1.2.3"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2294,6 +2448,7 @@ mod dependency_groups {
         actual: "0.1.0",
         expected: Some("0.1.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -2302,6 +2457,7 @@ mod dependency_groups {
         actual: "4.0.5",
         expected: Some("4.1.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -2310,6 +2466,7 @@ mod dependency_groups {
         actual: "4.1.0",
         expected: Some("4.1.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2347,6 +2504,7 @@ mod dependency_groups {
         actual: "0.1.0",
         expected: Some("0.1.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -2355,6 +2513,7 @@ mod dependency_groups {
         actual: "^4.0.5",
         expected: Some("^4.0.5"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -2363,6 +2522,7 @@ mod dependency_groups {
         actual: "4.1.0",
         expected: Some("4.1.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2396,6 +2556,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2404,6 +2565,7 @@ mod registry_updates {
           actual: "1.2.3",
           expected: Some("2.0.0"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2430,6 +2592,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2438,6 +2601,7 @@ mod registry_updates {
           actual: "^1.2.3",
           expected: Some("^2.0.0"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2468,6 +2632,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2476,6 +2641,7 @@ mod registry_updates {
           actual: "^1.2.3",
           expected: Some("~2.0.0"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2510,6 +2676,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2518,6 +2685,7 @@ mod registry_updates {
           actual: "1.2.3",
           expected: Some("2.0.0"),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2526,6 +2694,7 @@ mod registry_updates {
           actual: "npm:@lit-labs/ssr@1.2.3",
           expected: Some("npm:@lit-labs/ssr@2.0.0"),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2534,6 +2703,7 @@ mod registry_updates {
           actual: "npm:@jsr/luca__cases@1.2.3",
           expected: Some("npm:@jsr/luca__cases@2.0.0"),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2542,6 +2712,7 @@ mod registry_updates {
           actual: "npm:@jsr/std__fmt@1.2.3",
           expected: Some("npm:@jsr/std__fmt@2.0.0"),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2550,6 +2721,7 @@ mod registry_updates {
           actual: "npm:lit@1.2.3",
           expected: Some("npm:lit@2.0.0"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2581,6 +2753,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2589,6 +2762,7 @@ mod registry_updates {
           actual: "1.2.3",
           expected: Some("1.3.4"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2619,6 +2793,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2627,6 +2802,7 @@ mod registry_updates {
           actual: "1.0.1",
           expected: Some("1.3.3"),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2635,6 +2811,7 @@ mod registry_updates {
           actual: "2.0.0",
           expected: Some("2.2.2"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2662,6 +2839,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2670,6 +2848,7 @@ mod registry_updates {
           actual: "^1.2.3",
           expected: Some("^1.3.4"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2701,6 +2880,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2709,6 +2889,7 @@ mod registry_updates {
           actual: "^1.2.3",
           expected: Some("~1.3.4"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2740,6 +2921,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2748,6 +2930,7 @@ mod registry_updates {
           actual: "1.2.3",
           expected: Some("1.2.4"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2778,6 +2961,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2786,6 +2970,7 @@ mod registry_updates {
           actual: "1.0.1",
           expected: Some("1.0.2"),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2794,6 +2979,7 @@ mod registry_updates {
           actual: "1.1.1",
           expected: Some("1.1.2"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2821,6 +3007,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2829,6 +3016,7 @@ mod registry_updates {
           actual: "^1.2.3",
           expected: Some("^1.2.4"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2860,6 +3048,7 @@ mod registry_updates {
           actual: "",
           expected: Some(""),
           overridden: None,
+          severity: None,
         },
         ExpectedInstance {
           state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2868,6 +3057,7 @@ mod registry_updates {
           actual: "^1.2.3",
           expected: Some("~1.2.4"),
           overridden: None,
+          severity: None,
         },
       ]);
     }
@@ -2895,6 +3085,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2903,6 +3094,7 @@ mod registry_updates {
         actual: "1.0.0",
         expected: Some("3.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2937,6 +3129,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -2945,6 +3138,7 @@ mod registry_updates {
         actual: "1.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -2953,6 +3147,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsNonSemverButIdentical),
@@ -2961,6 +3156,7 @@ mod registry_updates {
         actual: "git+ssh://git@github.com/foo/bar.git",
         expected: Some("git+ssh://git@github.com/foo/bar.git"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -2995,6 +3191,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3003,6 +3200,7 @@ mod registry_updates {
         actual: "1.0.0",
         expected: Some("3.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -3011,6 +3209,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3019,6 +3218,7 @@ mod registry_updates {
         actual: "2.0.0",
         expected: Some("3.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3054,6 +3254,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3062,6 +3263,7 @@ mod registry_updates {
         actual: "1.0.0",
         expected: Some("3.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3070,6 +3272,7 @@ mod registry_updates {
         actual: "1.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -3078,6 +3281,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3115,6 +3319,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
@@ -3123,6 +3328,7 @@ mod registry_updates {
         actual: "2.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -3131,6 +3337,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -3139,6 +3346,7 @@ mod registry_updates {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3165,6 +3373,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3173,6 +3382,7 @@ mod registry_updates {
         actual: "1.0.0",
         expected: Some("2.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3199,6 +3409,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3207,6 +3418,7 @@ mod registry_updates {
         actual: "1.0.0-beta.1",
         expected: Some("2.0.0-beta.2"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3236,6 +3448,7 @@ mod registry_updates {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::Unknown,
@@ -3244,6 +3457,7 @@ mod registry_updates {
         actual: "2.0.0",
         expected: None,
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3289,6 +3503,7 @@ mod custom_types {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -3297,6 +3512,7 @@ mod custom_types {
         actual: "18.0.0",
         expected: Some("18.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -3305,6 +3521,7 @@ mod custom_types {
         actual: ">=16.0.0",
         expected: Some(">=16.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -3313,6 +3530,7 @@ mod custom_types {
         actual: "^1.22.5",
         expected: Some("^1.22.5"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3341,6 +3559,7 @@ mod custom_types {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3349,6 +3568,7 @@ mod custom_types {
         actual: "=9.0.0",
         expected: Some("^9.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3377,6 +3597,7 @@ mod custom_types {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3385,6 +3606,7 @@ mod custom_types {
         actual: "9.0.0",
         expected: Some("^9.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3415,6 +3637,7 @@ mod catalogs {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToCatalog),
@@ -3423,6 +3646,7 @@ mod catalogs {
         actual: "1.2.3",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -3431,6 +3655,7 @@ mod catalogs {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3463,6 +3688,7 @@ mod catalogs {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -3471,6 +3697,7 @@ mod catalogs {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::suspect(InvalidLocalVersion),
@@ -3479,6 +3706,7 @@ mod catalogs {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToCatalog),
@@ -3487,6 +3715,7 @@ mod catalogs {
         actual: "2.0.0",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3524,6 +3753,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3532,6 +3762,7 @@ mod catalog_defs_with_semver_group {
         actual: "^1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3558,6 +3789,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -3566,6 +3798,7 @@ mod catalog_defs_with_semver_group {
         actual: "~1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3598,6 +3831,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3606,6 +3840,7 @@ mod catalog_defs_with_semver_group {
         actual: "^1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -3614,6 +3849,7 @@ mod catalog_defs_with_semver_group {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3646,6 +3882,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3654,6 +3891,7 @@ mod catalog_defs_with_semver_group {
         actual: "^1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -3662,6 +3900,7 @@ mod catalog_defs_with_semver_group {
         actual: "^1.0.0",
         expected: Some("^1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3689,6 +3928,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -3697,6 +3937,7 @@ mod catalog_defs_with_semver_group {
         actual: "latest",
         expected: Some("latest"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3729,6 +3970,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3737,6 +3979,7 @@ mod catalog_defs_with_semver_group {
         actual: "^1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3765,6 +4008,7 @@ mod catalog_defs_with_semver_group {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -3773,6 +4017,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3781,6 +4026,7 @@ mod catalog_defs_with_semver_group {
         actual: "^1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3813,6 +4059,7 @@ mod catalog_defs_with_semver_group {
         actual: "",
         expected: Some(""),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -3821,6 +4068,7 @@ mod catalog_defs_with_semver_group {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(SemverRangeMismatch),
@@ -3829,6 +4077,7 @@ mod catalog_defs_with_semver_group {
         actual: "^1.0.0",
         expected: Some("~1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -3837,6 +4086,7 @@ mod catalog_defs_with_semver_group {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3870,6 +4120,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3878,6 +4129,7 @@ mod update_groups {
         actual: "1.2.3",
         expected: Some("1.2.4"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3907,6 +4159,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3915,6 +4168,7 @@ mod update_groups {
         actual: "1.2.3",
         expected: Some("1.3.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3944,6 +4198,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsIgnored),
@@ -3952,6 +4207,7 @@ mod update_groups {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -3982,6 +4238,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -3990,6 +4247,7 @@ mod update_groups {
         actual: "1.2.3",
         expected: Some("1.2.4"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -4020,6 +4278,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -4028,6 +4287,7 @@ mod update_groups {
         actual: "1.2.3",
         expected: Some("1.2.4"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -4061,6 +4321,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -4069,6 +4330,7 @@ mod update_groups {
         actual: "1.2.3",
         expected: Some("1.2.4"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -4095,6 +4357,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -4103,6 +4366,7 @@ mod update_groups {
         actual: "1.2.3",
         expected: Some("1.3.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -4132,6 +4396,7 @@ mod update_groups {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsIgnored),
@@ -4140,7 +4405,426 @@ mod update_groups {
         actual: "17.0.0",
         expected: Some("17.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
+  }
+}
+
+/// Severity tests — opt out of auto-fix per status (issue #216).
+/// Highest/LowestSemver groups permit `SemverRangeMismatch`, `DiffersToLocal`,
+/// `DiffersToCatalog`, `DiffersToHighestOrLowestSemver`.
+mod severity {
+  use {super::*, crate::instance::Severity};
+
+  /// Scenario: package-a foo 1.0.0, package-b foo 2.0.0. Highest wins.
+  /// 1.0.0 → DiffersToHighestOrLowestSemver Fixable, severity `Warn`.
+  /// 2.0.0 → IsHighestOrLowestSemver Valid, severity `None`.
+  #[tokio::test]
+  async fn differs_to_highest_or_lowest_semver_warn() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "dependencies": {"foo": "1.0.0"}}),
+        json!({"name": "package-b", "dependencies": {"foo": "2.0.0"}}),
+      ])
+      .with_version_groups(vec![
+        json!({"dependencyTypes": ["local"], "isIgnored": true}),
+        json!({
+          "dependencies": ["foo"],
+          "severity": {"DiffersToHighestOrLowestSemver": "warn"}
+        }),
+      ])
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "2.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+    ]);
+  }
+
+  /// `severity: { DiffersToHighestOrLowestSemver: "error" }` → `Error`.
+  #[tokio::test]
+  async fn differs_to_highest_or_lowest_semver_error() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "dependencies": {"foo": "1.0.0"}}),
+        json!({"name": "package-b", "dependencies": {"foo": "2.0.0"}}),
+      ])
+      .with_version_groups(vec![
+        json!({"dependencyTypes": ["local"], "isIgnored": true}),
+        json!({
+          "dependencies": ["foo"],
+          "severity": {"DiffersToHighestOrLowestSemver": "error"}
+        }),
+      ])
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "2.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+    ]);
+  }
+
+  /// Scenario: package-a /version 1.0.0; package-b deps package-a `~1.0.0`,
+  /// caret semver group → `SemverRangeMismatch`. severity downgrades to
+  /// `Warn`.
+  #[tokio::test]
+  async fn semver_range_mismatch_warn() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "version": "1.0.0"}),
+        json!({"name": "package-b", "dependencies": {"package-a": "~1.0.0"}}),
+      ])
+      .with_semver_group(json!({"range": "^"}))
+      .with_version_group(json!({
+        "dependencies": ["package-a"],
+        "severity": {"SemverRangeMismatch": "warn"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "~1.0.0",
+        expected: Some("^1.0.0"),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+    ]);
+  }
+
+  /// `severity: { SemverRangeMismatch: "error" }` → `Error`.
+  #[tokio::test]
+  async fn semver_range_mismatch_error() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "version": "1.0.0"}),
+        json!({"name": "package-b", "dependencies": {"package-a": "~1.0.0"}}),
+      ])
+      .with_semver_group(json!({"range": "^"}))
+      .with_version_group(json!({
+        "dependencies": ["package-a"],
+        "severity": {"SemverRangeMismatch": "error"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "~1.0.0",
+        expected: Some("^1.0.0"),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+    ]);
+  }
+
+  /// Scenario: package-a /version 1.0.0; package-b deps package-a `1.1.0`.
+  /// Consumer mismatches local → `DiffersToLocal` Fixable. severity
+  /// downgrades to `Warn`.
+  #[tokio::test]
+  async fn differs_to_local_warn() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "version": "1.0.0"}),
+        json!({"name": "package-b", "dependencies": {"package-a": "1.1.0"}}),
+      ])
+      .with_version_group(json!({
+        "dependencies": ["package-a"],
+        "severity": {"DiffersToLocal": "warn"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToLocal),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "1.1.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+    ]);
+  }
+
+  /// `severity: { DiffersToLocal: "error" }` → `Error`.
+  #[tokio::test]
+  async fn differs_to_local_error() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "version": "1.0.0"}),
+        json!({"name": "package-b", "dependencies": {"package-a": "1.1.0"}}),
+      ])
+      .with_version_group(json!({
+        "dependencies": ["package-a"],
+        "severity": {"DiffersToLocal": "error"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToLocal),
+        dependency_name: "package-a",
+        id: "package-a in /dependencies of package-b",
+        actual: "1.1.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+    ]);
+  }
+
+  /// Scenario: package-a deps mix 1.2.3, devDeps mix catalog:. Sibling uses
+  /// catalog: → DiffersToCatalog Fixable for the non-catalog instance.
+  /// severity downgrades to `Warn`.
+  #[tokio::test]
+  async fn differs_to_catalog_warn() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "dependencies": {"mix": "1.2.3"},
+        "devDependencies": {"mix": "catalog:"}
+      })])
+      .with_version_group(json!({
+        "dependencies": ["mix"],
+        "severity": {"DiffersToCatalog": "warn"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToCatalog),
+        dependency_name: "mix",
+        id: "mix in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalog),
+        dependency_name: "mix",
+        id: "mix in /devDependencies of package-a",
+        actual: "catalog:",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+    ]);
+  }
+
+  /// `severity: { DiffersToCatalog: "error" }` → `Error`.
+  #[tokio::test]
+  async fn differs_to_catalog_error() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "dependencies": {"mix": "1.2.3"},
+        "devDependencies": {"mix": "catalog:"}
+      })])
+      .with_version_group(json!({
+        "dependencies": ["mix"],
+        "severity": {"DiffersToCatalog": "error"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::suspect(InvalidLocalVersion),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToCatalog),
+        dependency_name: "mix",
+        id: "mix in /dependencies of package-a",
+        actual: "1.2.3",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalog),
+        dependency_name: "mix",
+        id: "mix in /devDependencies of package-a",
+        actual: "catalog:",
+        expected: Some("catalog:"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+    ]);
+  }
+
+  /// `IsBanned` is a key on Banned groups only — using it on a PreferredSemver
+  /// group surfaces `InvalidSeverityKey`.
+  #[tokio::test]
+  #[should_panic(expected = "InvalidSeverityKey")]
+  async fn rejects_invalid_severity_key() {
+    let _ctx = TestBuilder::new()
+      .with_package(json!({"name": "package-a", "version": "1.0.0"}))
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "severity": {"IsBanned": "warn"}
+      }))
+      .run()
+      .await;
   }
 }

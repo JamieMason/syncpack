@@ -3,7 +3,7 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{Instance, InstanceIdx, ValidInstance},
+    instance::{Instance, InstanceIdx, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
   },
   log::debug,
@@ -18,6 +18,7 @@ mod ignored_test;
 pub struct IgnoredGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
+  pub severity: SeverityMap,
 }
 
 impl IgnoredGroup {

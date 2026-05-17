@@ -1,5 +1,11 @@
 use {
-  crate::{context::Context, errors::SyncpackError, instance::Instance, source::Source},
+  crate::{
+    context::Context,
+    errors::SyncpackError,
+    instance::{Instance, Severity},
+    source::Source,
+    version_group::InstanceAction,
+  },
   serde_json::{Value, json},
 };
 
@@ -8,6 +14,7 @@ pub fn instance_to_json(ctx: &Context, instance: &Instance, variant_label: &str)
     Source::Package { file_idx, .. } => ctx.disk.package_json_files[*file_idx].filepath.to_string_lossy().to_string(),
     Source::PnpmYaml => "pnpm-workspace.yaml".to_string(),
   };
+  let severity = instance.severity.borrow().unwrap_or(Severity::None);
   json!({
     "dependency": instance.descriptor.name,
     "dependencyGroup": instance.descriptor.internal_name,
@@ -19,6 +26,7 @@ pub fn instance_to_json(ctx: &Context, instance: &Instance, variant_label: &str)
     "preferredSemverRange": instance.preferred_semver_range.as_ref().map(|range| range.unwrap()),
     "statusCode": instance.state.borrow().get_name(),
     "statusType": instance.state.borrow().get_status_type(),
+    "severity": severity,
     "actual": json!({
       "raw": instance.descriptor.specifier.get_raw(),
       "type": instance.descriptor.specifier.get_config_identifier(),
@@ -34,6 +42,7 @@ pub fn instance_to_json(ctx: &Context, instance: &Instance, variant_label: &str)
 
 pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
   let mut is_invalid = false;
+  let strict = ctx.config.rcfile.strict;
 
   ctx
     .version_groups
@@ -45,9 +54,10 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
         dep
           .get_sorted_instances(&ctx.instances, &ctx.sources.all)
           .for_each(|(_, instance)| {
+            let action = group.resolve_action(instance, strict);
             let instance_json = instance_to_json(&ctx, instance, variant_label);
             println!("{}", serde_json::to_string(&instance_json).unwrap());
-            if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {
+            if matches!(action, InstanceAction::Render(Severity::Error) | InstanceAction::Fix(_)) {
               is_invalid = true;
             }
           });

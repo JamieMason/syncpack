@@ -1,0 +1,12 @@
+{
+  "name": "package-d",
+  "dependencies": {
+    "dep-semver-mm": "^1.0.0",
+    "dep-differs-catalog": "1.0.0",
+    "dep-differs-highest": "2.0.0",
+    "dep-minor-differs": "1.2.0",
+    "dep-minor-override-range": "^1.0.5",
+    "dep-minor-override-range-mm": "^1.0.0",
+    "dep-same-range-mm": "^1.0.5"
+  }
+}

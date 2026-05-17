@@ -12,10 +12,10 @@ use {
       set_nested_prop, write_json_file, write_yaml_file,
     },
     errors::SyncpackError,
-    instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
+    instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance, Severity},
     source::Source,
     specifier::Specifier,
-    version_group::VersionGroupBehavior,
+    version_group::{InstanceAction, VersionGroupBehavior},
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
@@ -24,6 +24,7 @@ use {
 pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> Result<Context, SyncpackError> {
   let mut contains_unfixable_issues = false;
   let mut was_invalid = false;
+  let strict = ctx.config.rcfile.strict;
   // Apply-time dispatch reads `instance.descriptor.source_idx`; no SourceIdx
   // is duplicated into the action tuple.
   let mut fix_actions: Vec<(InstanceIdx, bool)> = vec![];
@@ -38,13 +39,19 @@ pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> R
         let mut has_printed_dependency = false;
         dependency
           .get_sorted_instances(&ctx.instances, &ctx.sources.all)
-          .inspect(|(_, instance)| {
-            if instance.is_unfixable() || instance.is_suspect() && ctx.config.rcfile.strict {
-              contains_unfixable_issues = true
-            }
-          })
-          .filter(|(_, instance)| instance.is_fixable())
           .for_each(|(idx, instance)| {
+            let action = group.resolve_action(instance, strict);
+            // `Render(Error)` from non-fixable states (Unfixable, Conflict,
+            // strict-Suspect, user-configured Error on Fixable) cannot be
+            // auto-fixed in this pass.
+            if matches!(action, InstanceAction::Render(Severity::Error)) {
+              contains_unfixable_issues = true;
+            }
+            // Only `Fix(_)` instances are applied. `Render(Warn)` surfaces but
+            // does not change state; `Skip` is silent.
+            if !matches!(action, InstanceAction::Fix(_)) {
+              return;
+            }
             was_invalid = true;
             if !has_printed_group {
               reporter.on_group_header(&ctx, group);

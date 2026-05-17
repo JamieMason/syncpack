@@ -36,6 +36,7 @@ async fn refuses_to_ban_local_version() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::suspect(RefuseToBanLocal),
@@ -44,6 +45,7 @@ async fn refuses_to_ban_local_version() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(IsBanned),
@@ -52,6 +54,7 @@ async fn refuses_to_ban_local_version() {
       actual: "1.1.0",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -90,6 +93,7 @@ async fn removes_instance_with_name_and_version_props_strategy() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(IsBanned),
@@ -98,6 +102,7 @@ async fn removes_instance_with_name_and_version_props_strategy() {
       actual: "2.1.0",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -134,6 +139,7 @@ async fn removes_instance_with_named_version_string_strategy() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(IsBanned),
@@ -142,6 +148,7 @@ async fn removes_instance_with_named_version_string_strategy() {
       actual: "7.27.0",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -180,6 +187,7 @@ async fn removes_instance_with_unnamed_version_string_strategy() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(IsBanned),
@@ -188,6 +196,7 @@ async fn removes_instance_with_unnamed_version_string_strategy() {
       actual: ">=16.0.0",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -218,6 +227,7 @@ async fn removes_instance_with_versions_by_name_strategy() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(IsBanned),
@@ -226,6 +236,7 @@ async fn removes_instance_with_versions_by_name_strategy() {
       actual: "18.0.0",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -234,6 +245,7 @@ async fn removes_instance_with_versions_by_name_strategy() {
       actual: "4.17.21",
       expected: Some("4.17.21"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -275,6 +287,7 @@ async fn removes_nested_property_with_unnamed_version_string_strategy() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(IsBanned),
@@ -283,6 +296,150 @@ async fn removes_nested_property_with_unnamed_version_string_strategy() {
       actual: "2.5.0",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
   ]);
+}
+
+/// Severity tests — opt out of auto-fix per status (issue #216).
+/// IsBanned is the only configurable key on a Banned group.
+mod severity {
+  use {super::*, crate::instance::Severity};
+
+  /// `IsBanned` defaults to severity `Fix` — the resolver picks `Fix` when
+  /// the user has not specified a severity for the produced status. Pins
+  /// today's default behaviour so it doesn't regress.
+  #[tokio::test]
+  async fn is_banned_default_severity_is_fix() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "dependencies": {"foo": "1.0.0"}
+      })])
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "isBanned": true
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(IsBanned),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::Fix),
+      },
+    ]);
+  }
+
+  /// `severity: { IsBanned: "warn" }` — the resolved severity on the
+  /// banned instance is `Warn` instead of the default `Fix`.
+  #[tokio::test]
+  async fn is_banned_warn() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "dependencies": {"foo": "1.0.0"}
+      })])
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "isBanned": true,
+        "severity": {"IsBanned": "warn"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(IsBanned),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+    ]);
+  }
+
+  /// `severity: { IsBanned: "error" }` — resolves to `Error`.
+  #[tokio::test]
+  async fn is_banned_error() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "dependencies": {"foo": "1.0.0"}
+      })])
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "isBanned": true,
+        "severity": {"IsBanned": "error"}
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(IsBanned),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+    ]);
+  }
+
+  /// Banned permits only `IsBanned`. `DiffersToPin` is a Pinned-only key →
+  /// `InvalidSeverityKey` with the offending key, the resolved group type,
+  /// and the permitted set.
+  #[tokio::test]
+  #[should_panic(expected = "InvalidSeverityKey")]
+  async fn rejects_invalid_severity_key() {
+    let _ctx = TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "dependencies": {"foo": "1.0.0"}
+      })])
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "isBanned": true,
+        "severity": {"DiffersToPin": "error"}
+      }))
+      .run()
+      .await;
+  }
 }

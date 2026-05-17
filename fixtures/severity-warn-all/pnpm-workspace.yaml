@@ -1,0 +1,6 @@
+packages:
+  - "packages/*"
+
+catalog:
+  dep-differs-catalog: "1.0.0"
+  dep-not-using-catalog: "1.0.0"

@@ -3,7 +3,9 @@ use {
   crate::{
     context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance},
+    instance::{
+      FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance, severity::SeverityMap,
+    },
     registry::updates::RegistryUpdates,
     sources::SourceIdx,
     specifier::Specifier,
@@ -21,6 +23,7 @@ pub struct SnappedToGroup {
   pub selector: GroupSelector,
   pub dependencies: BTreeMap<String, DependencyCore>,
   pub snap_to: Vec<SourceIdx>,
+  pub severity: SeverityMap,
 }
 
 impl SnappedToGroup {
@@ -58,7 +61,7 @@ impl SnappedToGroup {
             debug!("{L4}it is the local instance of a package developed locally in this monorepo");
             debug!("{L5}refuse to change it");
             debug!("{L6}mark as error, user should change their config");
-            instance.mark_suspect(SuspectInstance::RefuseToSnapLocal);
+            instance.mark_suspect_with_expected(SuspectInstance::RefuseToSnapLocal, &snapped_to_specifier);
             continue;
           }
           debug!("{L4}it is not a local instance of a package developed locally in this monorepo");

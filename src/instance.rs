@@ -1,7 +1,11 @@
 pub mod instance_state;
+pub mod severity;
 
-pub use instance_state::{
-  FixableInstance, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance,
+pub use {
+  instance_state::{
+    FixableInstance, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance,
+  },
+  severity::Severity,
 };
 
 #[cfg(test)]
@@ -81,6 +85,11 @@ pub struct Instance {
   /// when picking eligible registry updates (skip entirely or clamp the
   /// effective `UpdateTarget`). `None` when no group matched.
   pub preferred_update_policy: Option<UpdatePolicy>,
+  /// Resolved by `VersionGroup::resolve_action` from the instance's `state`,
+  /// the matching group's `severity` map and the rcfile's `strict` flag. Set
+  /// as a side effect of `resolve_action`; remains `None` until the resolver
+  /// has run. See `.plans/severity.md` §3.5.
+  pub severity: RefCell<Option<Severity>>,
   /// Starts as `Unknown`, assigned during `visit_packages()`. `RefCell` so
   /// states can be assigned without `&mut Context`.
   pub state: RefCell<InstanceState>,
@@ -103,6 +112,7 @@ impl Instance {
       is_local_instance,
       preferred_semver_range,
       preferred_update_policy,
+      severity: RefCell::new(None),
       state: RefCell::new(InstanceState::Unknown),
     }
   }
@@ -219,6 +229,14 @@ impl Instance {
   pub fn mark_suspect(&self, state: SuspectInstance) -> &Self {
     let specifier = Rc::clone(&self.descriptor.specifier);
     self.set_state(InstanceState::Suspect(state), &specifier)
+  }
+
+  /// Like `mark_suspect` but records an expected specifier so a user can opt
+  /// into routing the instance through the fix path via `severity: { ...: "fix" }`.
+  /// Used by `RefuseToPinLocal` and `RefuseToSnapLocal` — both rewrite a local
+  /// package's `/version` to a target specifier.
+  pub fn mark_suspect_with_expected(&self, state: SuspectInstance, expected_specifier: &Rc<Specifier>) -> &Self {
+    self.set_state(InstanceState::Suspect(state), expected_specifier)
   }
 
   /// Mark this instance as having a mismatch which can be auto-fixed

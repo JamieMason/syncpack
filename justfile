@@ -232,6 +232,20 @@ watch-fluid:
     #!/usr/bin/env bash
     tput rmam && cargo watch --clear --shell 'cd fixtures/fluid-framework && RUST_BACKTRACE=1 cargo run -- lint'
 
+run-severity-warn-all-lint:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    cd fixtures/severity-warn-all
+    RUST_BACKTRACE=1 cargo run -- lint
+
+run-severity-warn-all-list:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    cd fixtures/severity-warn-all
+    RUST_BACKTRACE=1 cargo run -- list
+
 # ==============================================================================
 # Build
 # ==============================================================================

@@ -28,6 +28,7 @@ async fn catalog_def_dep_has_expected_specifier_set() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -36,6 +37,7 @@ async fn catalog_def_dep_has_expected_specifier_set() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -58,6 +60,7 @@ async fn catalog_defs_catch_all_marks_defs_valid() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -66,6 +69,7 @@ async fn catalog_defs_catch_all_marks_defs_valid() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -74,6 +78,7 @@ async fn catalog_defs_catch_all_marks_defs_valid() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -102,6 +107,7 @@ async fn user_banned_group_can_claim_catalog_def_first() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(IsBanned),
@@ -110,6 +116,7 @@ async fn user_banned_group_can_claim_catalog_def_first() {
       actual: "^18.0.0",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -138,6 +145,7 @@ async fn multi_catalog_defs_no_consumer() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -146,6 +154,7 @@ async fn multi_catalog_defs_no_consumer() {
       actual: "^17.0.0",
       expected: Some("^17.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -154,6 +163,7 @@ async fn multi_catalog_defs_no_consumer() {
       actual: "^17.0.0",
       expected: Some("^17.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -162,6 +172,7 @@ async fn multi_catalog_defs_no_consumer() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -188,6 +199,7 @@ async fn multi_catalog_defs_with_consumer_uses_consumer_target() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsLocalAndValid),
@@ -196,6 +208,7 @@ async fn multi_catalog_defs_with_consumer_uses_consumer_target() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalog),
@@ -204,6 +217,7 @@ async fn multi_catalog_defs_with_consumer_uses_consumer_target() {
       actual: "catalog:react18",
       expected: Some("catalog:react18"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(DiffersToCatalog),
@@ -212,6 +226,7 @@ async fn multi_catalog_defs_with_consumer_uses_consumer_target() {
       actual: "^17.0.0",
       expected: Some("catalog:react18"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -220,6 +235,7 @@ async fn multi_catalog_defs_with_consumer_uses_consumer_target() {
       actual: "^17.0.0",
       expected: Some("^17.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -228,6 +244,7 @@ async fn multi_catalog_defs_with_consumer_uses_consumer_target() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -251,6 +268,7 @@ async fn pnpm_catalog_definition_with_local_does_not_pull_def_into_local_branch(
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -259,6 +277,7 @@ async fn pnpm_catalog_definition_with_local_does_not_pull_def_into_local_branch(
       actual: "^1.0.0",
       expected: Some("^1.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -287,6 +306,7 @@ mod registry_updates {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -295,6 +315,7 @@ mod registry_updates {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -303,6 +324,7 @@ mod registry_updates {
         actual: "^17.0.0",
         expected: Some("^18.5.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -328,6 +350,7 @@ mod registry_updates {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -336,6 +359,7 @@ mod registry_updates {
         actual: "catalog:react18",
         expected: Some("catalog:react18"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -344,6 +368,7 @@ mod registry_updates {
         actual: "^17.0.0",
         expected: Some("^18.5.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -372,6 +397,7 @@ mod registry_updates {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -380,6 +406,7 @@ mod registry_updates {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -388,6 +415,7 @@ mod registry_updates {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::fixable(DiffersToNpmRegistry),
@@ -396,6 +424,7 @@ mod registry_updates {
         actual: "^17.0.0",
         expected: Some("^18.5.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -422,6 +451,7 @@ mod registry_updates {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalog),
@@ -430,6 +460,7 @@ mod registry_updates {
         actual: "catalog:",
         expected: Some("catalog:"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -438,6 +469,7 @@ mod registry_updates {
         actual: "^18.5.0",
         expected: Some("^18.5.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -470,6 +502,7 @@ async fn defensive_catalog_def_short_circuit_in_preferred_semver() {
       actual: "0.0.0",
       expected: Some("0.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -478,6 +511,7 @@ async fn defensive_catalog_def_short_circuit_in_preferred_semver() {
       actual: "^19.0.0",
       expected: Some("^19.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsCatalogDefinition),
@@ -486,6 +520,7 @@ async fn defensive_catalog_def_short_circuit_in_preferred_semver() {
       actual: "^18.0.0",
       expected: Some("^18.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }

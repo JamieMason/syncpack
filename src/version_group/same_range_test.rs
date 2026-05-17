@@ -46,6 +46,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_s
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -54,6 +55,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_s
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -62,6 +64,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_s
       actual: ">=1.0.0",
       expected: Some(">=1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -70,6 +73,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_there_are_no_s
       actual: "<=2.0.0",
       expected: Some("<=2.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -115,6 +119,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_se
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -123,6 +128,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_se
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -131,6 +137,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_se
       actual: ">=1.0.0",
       expected: Some(">=1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -139,6 +146,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_and_matches_its_se
       actual: "^1.2.3",
       expected: Some("^1.2.3"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -184,6 +192,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -192,6 +201,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -200,6 +210,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its
       actual: ">=1.0.0",
       expected: Some(">=1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(SemverRangeMismatch),
@@ -208,6 +219,7 @@ async fn instance_in_a_same_range_group_satisfies_every_other_but_mismatches_its
       actual: "^1.2.3",
       expected: Some("~1.2.3"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -249,6 +261,7 @@ async fn instance_in_a_same_range_group_does_not_satisfy_another() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -257,6 +270,7 @@ async fn instance_in_a_same_range_group_does_not_satisfy_another() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -265,6 +279,7 @@ async fn instance_in_a_same_range_group_does_not_satisfy_another() {
       actual: ">=1.0.0",
       expected: Some(">=1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -273,6 +288,7 @@ async fn instance_in_a_same_range_group_does_not_satisfy_another() {
       actual: "<1.0.0",
       expected: Some("<1.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -315,6 +331,7 @@ async fn caret_and_tilde_ranges_overlap_when_tilde_is_within_caret() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -323,6 +340,7 @@ async fn caret_and_tilde_ranges_overlap_when_tilde_is_within_caret() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -331,6 +349,7 @@ async fn caret_and_tilde_ranges_overlap_when_tilde_is_within_caret() {
       actual: "^1.0.0",
       expected: Some("^1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -339,6 +358,7 @@ async fn caret_and_tilde_ranges_overlap_when_tilde_is_within_caret() {
       actual: "~1.4.2",
       expected: Some("~1.4.2"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -381,6 +401,7 @@ async fn tilde_ranges_do_not_overlap_when_minor_versions_differ() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -389,6 +410,7 @@ async fn tilde_ranges_do_not_overlap_when_minor_versions_differ() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -397,6 +419,7 @@ async fn tilde_ranges_do_not_overlap_when_minor_versions_differ() {
       actual: "~1.0.0",
       expected: Some("~1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -405,6 +428,7 @@ async fn tilde_ranges_do_not_overlap_when_minor_versions_differ() {
       actual: "~1.4.2",
       expected: Some("~1.4.2"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -447,6 +471,7 @@ async fn exact_pinned_versions_that_differ_do_not_overlap() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -455,6 +480,7 @@ async fn exact_pinned_versions_that_differ_do_not_overlap() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -463,6 +489,7 @@ async fn exact_pinned_versions_that_differ_do_not_overlap() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -471,6 +498,7 @@ async fn exact_pinned_versions_that_differ_do_not_overlap() {
       actual: "1.0.1",
       expected: Some("1.0.1"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -519,6 +547,7 @@ async fn three_ranges_all_overlap_pairwise() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -527,6 +556,7 @@ async fn three_ranges_all_overlap_pairwise() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -535,6 +565,7 @@ async fn three_ranges_all_overlap_pairwise() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -543,6 +574,7 @@ async fn three_ranges_all_overlap_pairwise() {
       actual: ">=1.0.0",
       expected: Some(">=1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -551,6 +583,7 @@ async fn three_ranges_all_overlap_pairwise() {
       actual: "^1.2.3",
       expected: Some("^1.2.3"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(SatisfiesSameRangeGroup),
@@ -559,6 +592,7 @@ async fn three_ranges_all_overlap_pairwise() {
       actual: "<=2.0.0",
       expected: Some("<=2.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -607,6 +641,7 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -615,6 +650,7 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::valid(IsIgnored),
@@ -623,6 +659,7 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
       actual: "",
       expected: Some(""),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -631,6 +668,7 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
       actual: "^1.0.0",
       expected: Some("^1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -639,6 +677,7 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
       actual: "~1.2.0",
       expected: Some("~1.2.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::unfixable(SameRangeMismatch),
@@ -647,6 +686,155 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
       actual: "<1.0.0",
       expected: Some("<1.0.0"),
       overridden: None,
+      severity: None,
     },
   ]);
+}
+
+/// Severity tests — opt out of auto-fix per status (issue #216).
+/// SameRange only permits `SemverRangeMismatch` (the only Fixable variant it
+/// produces). `SameRangeMismatch` itself is Unfixable and not user-tunable.
+mod severity {
+  use {super::*, crate::instance::Severity};
+
+  /// Scenario: package-a `foo: ">=1.0.0"` is `SatisfiesSameRangeGroup`;
+  /// package-b `foo: "^1.2.3"` matches the same range but mismatches the
+  /// semver group's tilde range → `SemverRangeMismatch` Fixable. With
+  /// `severity: { SemverRangeMismatch: "warn" }`, severity downgrades to
+  /// `Warn`.
+  #[tokio::test]
+  async fn semver_range_mismatch_warn() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "dependencies": {"foo": ">=1.0.0"}}),
+        json!({"name": "package-b", "dependencies": {"foo": "^1.2.3"}}),
+      ])
+      .with_semver_group(json!({"packages": ["package-b"], "range": "~"}))
+      .with_version_groups(vec![
+        json!({"dependencyTypes": ["local"], "isIgnored": true}),
+        json!({
+          "dependencies": ["foo"],
+          "policy": "sameRange",
+          "severity": {"SemverRangeMismatch": "warn"}
+        }),
+      ])
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(SatisfiesSameRangeGroup),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: ">=1.0.0",
+        expected: Some(">=1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "^1.2.3",
+        expected: Some("~1.2.3"),
+        overridden: None,
+        severity: Some(Severity::Warn),
+      },
+    ]);
+  }
+
+  /// `severity: { SemverRangeMismatch: "error" }` → `Error`.
+  #[tokio::test]
+  async fn semver_range_mismatch_error() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "dependencies": {"foo": ">=1.0.0"}}),
+        json!({"name": "package-b", "dependencies": {"foo": "^1.2.3"}}),
+      ])
+      .with_semver_group(json!({"packages": ["package-b"], "range": "~"}))
+      .with_version_groups(vec![
+        json!({"dependencyTypes": ["local"], "isIgnored": true}),
+        json!({
+          "dependencies": ["foo"],
+          "policy": "sameRange",
+          "severity": {"SemverRangeMismatch": "error"}
+        }),
+      ])
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "",
+        expected: Some(""),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(SatisfiesSameRangeGroup),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: ">=1.0.0",
+        expected: Some(">=1.0.0"),
+        overridden: None,
+        severity: Some(Severity::None),
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(SemverRangeMismatch),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "^1.2.3",
+        expected: Some("~1.2.3"),
+        overridden: None,
+        severity: Some(Severity::Error),
+      },
+    ]);
+  }
+
+  /// SameRange only permits `SemverRangeMismatch`. `DiffersToLocal` is a
+  /// PreferredSemver key; using it on a SameRange group → `InvalidSeverityKey`.
+  #[tokio::test]
+  #[should_panic(expected = "InvalidSeverityKey")]
+  async fn rejects_invalid_severity_key() {
+    let _ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "dependencies": {"foo": ">=1.0.0"}}),
+        json!({"name": "package-b", "dependencies": {"foo": "~1.2.3"}}),
+      ])
+      .with_version_group(json!({
+        "dependencies": ["foo"],
+        "policy": "sameRange",
+        "severity": {"DiffersToLocal": "warn"}
+      }))
+      .run()
+      .await;
+  }
 }

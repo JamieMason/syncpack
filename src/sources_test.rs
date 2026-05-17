@@ -315,6 +315,7 @@ mod via_full_pipeline {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -323,6 +324,7 @@ mod via_full_pipeline {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsCatalogDefinition),
@@ -331,6 +333,7 @@ mod via_full_pipeline {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -361,6 +364,7 @@ mod via_full_pipeline {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -369,6 +373,7 @@ mod via_full_pipeline {
         actual: "^18.0.0",
         expected: Some("^18.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -398,6 +403,7 @@ mod via_full_pipeline {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -406,6 +412,7 @@ mod via_full_pipeline {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }
@@ -432,6 +439,7 @@ mod via_full_pipeline {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsLocalAndValid),
@@ -440,6 +448,7 @@ mod via_full_pipeline {
         actual: "0.0.0",
         expected: Some("0.0.0"),
         overridden: None,
+        severity: None,
       },
       ExpectedInstance {
         state: InstanceState::valid(IsHighestOrLowestSemver),
@@ -448,6 +457,7 @@ mod via_full_pipeline {
         actual: "1.0.0",
         expected: Some("1.0.0"),
         overridden: None,
+        severity: None,
       },
     ]);
   }

@@ -1,7 +1,8 @@
-use crate::{commands::ui, context::Context, errors::SyncpackError};
+use crate::{commands::ui, context::Context, errors::SyncpackError, instance::Severity, version_group::InstanceAction};
 
 pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
   let mut is_invalid = false;
+  let strict = ctx.config.rcfile.strict;
 
   ctx
     .version_groups
@@ -14,10 +15,11 @@ pub fn run(ctx: Context) -> Result<Context, SyncpackError> {
         dependency
           .get_sorted_instances(&ctx.instances, &ctx.sources.all)
           .for_each(|(_, instance)| {
+            let action = group.resolve_action(instance, strict);
             if ctx.config.cli.show_instances {
               ui::instance::print(&ctx, instance);
             }
-            if instance.is_invalid() || (instance.is_suspect() && ctx.config.rcfile.strict) {
+            if matches!(action, InstanceAction::Render(Severity::Error) | InstanceAction::Fix(_)) {
               is_invalid = true;
             }
           });

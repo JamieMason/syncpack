@@ -1,0 +1,161 @@
+{
+  "semverGroups": [
+    {
+      "dependencies": ["dep-pin-override-range", "dep-pin-override-range-mm"],
+      "range": "~"
+    },
+    {
+      "dependencies": ["dep-semver-mm"],
+      "range": "^"
+    },
+    {
+      "dependencies": [
+        "dep-minor-override-range",
+        "dep-minor-override-range-mm"
+      ],
+      "range": "^"
+    },
+    {
+      "dependencies": ["dep-same-range-mm"],
+      "range": "~"
+    }
+  ],
+  "strict": true,
+  "versionGroups": [
+    {
+      "label": "IsBanned → warn",
+      "dependencies": ["dep-banned"],
+      "isBanned": true,
+      "severity": {
+        "IsBanned": "warn"
+      }
+    },
+    {
+      "label": "DiffersToPin → warn",
+      "dependencies": ["dep-pinned-differs"],
+      "pinVersion": "2.0.0",
+      "severity": {
+        "DiffersToPin": "warn"
+      }
+    },
+    {
+      "label": "PinOverridesSemverRange → warn",
+      "dependencies": ["dep-pin-override-range"],
+      "pinVersion": "^1.0.0",
+      "severity": {
+        "PinOverridesSemverRange": "warn"
+      }
+    },
+    {
+      "label": "PinOverridesSemverRangeMismatch → warn",
+      "dependencies": ["dep-pin-override-range-mm"],
+      "pinVersion": "^1.0.0",
+      "severity": {
+        "PinOverridesSemverRangeMismatch": "warn"
+      }
+    },
+    {
+      "label": "RefuseToPinLocal → warn",
+      "dependencies": ["package-a"],
+      "dependencyTypes": ["local"],
+      "pinVersion": "2.0.0",
+      "severity": {
+        "RefuseToPinLocal": "warn"
+      }
+    },
+    {
+      "label": "SemverRangeMismatch (HighestSemver) → warn",
+      "dependencies": ["dep-semver-mm"],
+      "severity": {
+        "SemverRangeMismatch": "warn"
+      }
+    },
+    {
+      "label": "DiffersToLocal → warn",
+      "dependencies": ["package-local-differs"],
+      "severity": {
+        "DiffersToLocal": "warn"
+      }
+    },
+    {
+      "label": "DiffersToCatalog → warn",
+      "dependencies": ["dep-differs-catalog"],
+      "severity": {
+        "DiffersToCatalog": "warn"
+      }
+    },
+    {
+      "label": "DiffersToHighestOrLowestSemver → warn",
+      "dependencies": ["dep-differs-highest"],
+      "severity": {
+        "DiffersToHighestOrLowestSemver": "warn"
+      }
+    },
+    {
+      "label": "DiffersToSnapTarget → warn",
+      "dependencies": ["dep-snap-differs"],
+      "snapTo": ["package-b"],
+      "severity": {
+        "DiffersToSnapTarget": "warn"
+      }
+    },
+    {
+      "label": "RefuseToSnapLocal → warn",
+      "dependencies": ["package-snap-local"],
+      "snapTo": ["package-b"],
+      "severity": {
+        "RefuseToSnapLocal": "warn"
+      }
+    },
+    {
+      "label": "DiffersToHighestOrLowestSemverMinor → warn",
+      "dependencies": ["dep-minor-differs"],
+      "policy": "sameMinor",
+      "preferVersion": "highestSemver",
+      "severity": {
+        "DiffersToHighestOrLowestSemverMinor": "warn"
+      }
+    },
+    {
+      "label": "SameMinorOverridesSemverRange → warn",
+      "dependencies": ["dep-minor-override-range"],
+      "policy": "sameMinor",
+      "severity": {
+        "SameMinorOverridesSemverRange": "warn"
+      }
+    },
+    {
+      "label": "SameMinorOverridesSemverRangeMismatch → warn",
+      "dependencies": ["dep-minor-override-range-mm"],
+      "policy": "sameMinor",
+      "severity": {
+        "SameMinorOverridesSemverRange": "warn",
+        "SameMinorOverridesSemverRangeMismatch": "warn"
+      }
+    },
+    {
+      "label": "SemverRangeMismatch (SameRange) → warn",
+      "dependencies": ["dep-same-range-mm"],
+      "policy": "sameRange",
+      "severity": {
+        "SemverRangeMismatch": "warn"
+      }
+    },
+    {
+      "label": "NotUsingCatalog → warn",
+      "dependencies": ["dep-not-using-catalog"],
+      "policy": "catalog",
+      "severity": {
+        "NotUsingCatalog": "warn"
+      }
+    },
+    {
+      "label": "MissingFromCatalog → warn",
+      "dependencies": ["dep-missing-from-catalog"],
+      "policy": "catalog",
+      "severity": {
+        "MissingFromCatalog": "warn"
+      }
+    }
+  ]
+}
