@@ -9,6 +9,7 @@ import Dependencies from "@partials/group-config/dependencies.mdx";
 import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
+import SeverityGroupSection from "@partials/severity/group-section.mdx";
 import Details from "@site/components/details.astro";
 
 Pin the version of all dependencies in this group to match a specific version you've defined.
@@ -49,6 +50,27 @@ The version specifier you would like to use, this can be anything supported by a
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+### severity <Badge text="Optional" variant="note" />
+
+<SeverityGroupSection group="pinned">
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["@types/node"],
+      "pinVersion": "18.14.2",
+      "severity": {
+        "DiffersToPin": "error",
+        "RefuseToPinLocal": "fix"
+      }
+    }
+  ]
+}
+```
+
+</SeverityGroupSection>
 
 ## Status Codes
 

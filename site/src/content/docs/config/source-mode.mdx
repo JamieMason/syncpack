@@ -1,0 +1,22 @@
+---
+title: sourceMode
+description: Control whether source patterns replace workspace discovery or extend it
+sidebar:
+  badge: New
+---
+
+Controls whether your [`source`](CONFIG_SOURCE) patterns (and `--source` CLI options) replace the patterns discovered from your package manager or are appended to them.
+
+- `"replace"` (default): your patterns replace workspace discovery entirely.
+- `"extend"`: your patterns are appended after the discovered patterns from `workspaces` / `pnpm-workspace.yaml` / `lerna.json`.
+
+```json title=".syncpackrc.json"
+{
+  "sourceMode": "extend",
+  "source": ["tools/scripts/package.json"]
+}
+```
+
+The CLI flag `--source-mode <replace|extend>` overrides whatever is set in the rcfile.
+
+Discovered patterns are emitted first; your patterns are appended last, so gitignore-style negations such as `!apps/legacy` can exclude discovered entries.

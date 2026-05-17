@@ -4,6 +4,8 @@ status: conflict
 description: Dependency matches semver group rules but conflicts with snap target source package version policy
 ---
 
+import SeverityUnfixable from "@partials/severity/unfixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Snapped To](VERSION_GROUP_SNAPPED_TO) version group
@@ -11,3 +13,7 @@ description: Dependency matches semver group rules but conflicts with snap targe
 - ✓ Instance matches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ✘ Range preferred by semver group will not satisfy the matching [snapTo](VERSION_GROUP_SNAPPED_TO#snapto) instance
 - ? We can't know whether the incompatible range matters or not and have to ask
+
+## Severity
+
+<SeverityUnfixable />

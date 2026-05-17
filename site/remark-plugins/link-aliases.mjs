@@ -21,6 +21,8 @@ export function linkAliases() {
     CONFIG_SORT_FIRST: '/config/sort-first/',
     CONFIG_SORT_PACKAGES: '/config/sort-packages/',
     CONFIG_SOURCE: '/config/source/',
+    CONFIG_SOURCE_MODE: '/config/source-mode/',
+    CONFIG_STRICT: '/config/strict/',
     CONFIG_SYNCPACKRC: '/config/syncpackrc/',
     CONFIG_UPDATE_GROUPS: '/update-groups/',
     CONFIG_VERSION_GROUPS: '/version-groups/',
@@ -29,8 +31,15 @@ export function linkAliases() {
 
     REF_DEPENDENCY_TYPES: '/dependency-types/',
     REF_GLOSSARY: '/glossary/',
+    REF_SEVERITY: '/config/severity/',
     REF_SPECIFIER_TYPES: '/specifier-types/',
+
     REF_STATUS_CODES: '/status/',
+    REF_STATUS_CODES_VALID: '/status/#valid',
+    REF_STATUS_CODES_FIXABLE: '/status/#fixable',
+    REF_STATUS_CODES_SUSPECT: '/status/#suspect',
+    REF_STATUS_CODES_UNFIXABLE: '/status/#unfixable',
+    REF_STATUS_CODES_CONFLICT: '/status/#conflict',
 
     TERM_CUSTOM_TYPE: '/glossary/#custom-type',
     TERM_DEPENDENCY: '/glossary/#dependency',
@@ -42,6 +51,7 @@ export function linkAliases() {
     TERM_SEMVER: '/glossary/#semver',
     TERM_SEMVER_GROUP: '/glossary/#semver-group',
     TERM_SEMVER_RANGE: '/glossary/#semver-range',
+    TERM_SEVERITY: '/glossary/#severity',
     TERM_SPECIFIER: '/glossary/#specifier',
     TERM_SPECIFIER_TYPE: '/glossary/#specifier-type',
     TERM_STATUS_CODE: '/glossary/#status-code',

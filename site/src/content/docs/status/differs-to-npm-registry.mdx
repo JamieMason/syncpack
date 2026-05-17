@@ -8,3 +8,9 @@ description: Dependency version differs from the latest version available in the
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
 - ✘ Instance is older than highest semver published to the registry
+
+## Severity
+
+Not configurable via [`severity`](REF_SEVERITY). Registry-update behaviour is controlled by [`updateGroups`](CONFIG_UPDATE_GROUPS). Writing `DiffersToNpmRegistry` in a `severity` map fails with `InvalidSeverityKey`.
+
+Only the [`update`](COMMAND_UPDATE) command surfaces this status; [`fix`](COMMAND_FIX), [`lint`](COMMAND_LINT), and [`list`](COMMAND_LIST) are unaffected by it.

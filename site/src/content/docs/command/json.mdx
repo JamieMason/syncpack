@@ -12,6 +12,7 @@ import LogLevelsOption from "@partials/option/log-levels.mdx";
 import NoAnsiOption from "@partials/option/no-ansi.mdx";
 import SortOption from "@partials/option/sort.mdx";
 import SourceOption from "@partials/option/source.mdx";
+import SourceModeOption from "@partials/option/source-mode.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
 import QuoteFilters from "@partials/tips/quote-filters.mdx";
@@ -39,7 +40,7 @@ syncpack json -h
 
 ## TypeScript
 
-Each instance printed by `syncpack json` has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/14.1.0/npm/syncpack.ts#L174-L194):
+Each instance printed by `syncpack json` has the type [`JsonOutput`](https://github.com/search?q=repo%3AJamieMason%2Fsyncpack%20%2FJsonOutput%2F%20path%3Anpm%2Fsyncpack.ts&type=code)
 
 ## Options
 
@@ -72,6 +73,10 @@ Each instance printed by `syncpack json` has the type [`JsonOutput`](https://git
 ### --source <Badge text="<file-pattern>" />
 
 <SourceOption command="json" />
+
+### --source-mode <Badge text="<replace|extend>" />
+
+<SourceModeOption command="json" />
 
 ### --specifier-types <Badge text="<comma-separated-specifier-type-names>" />
 

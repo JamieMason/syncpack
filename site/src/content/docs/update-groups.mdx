@@ -18,7 +18,7 @@ Update groups give you per-dependency control over what counts as an eligible re
 
 ## How groups are assigned
 
-When syncpack reads each [instance](TERM_INSTANCE) of a [dependency](TERM_DEPENDENCY), it walks through your `updateGroups` array in source code order until it finds a match — the first match wins and syncpack stops searching.
+When syncpack reads each [instance](TERM_INSTANCE) of a [dependency](TERM_DEPENDENCY), it walks through your `updateGroups` array in source code order until it finds a match. The first match wins and syncpack stops searching.
 
 An instance can match at most one update group. Instances which do not match any group fall through to the CLI's `--target` value (which defaults to `latest`).
 

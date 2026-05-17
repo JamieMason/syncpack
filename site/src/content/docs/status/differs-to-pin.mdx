@@ -4,7 +4,17 @@ status: fixable
 description: Dependency version differs from the pinned version specified in its version group
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Pinned](VERSION_GROUP_PINNED) version group
 - ✘ Instance mismatches its pinned version group
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance to the pinned version.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Pinned](VERSION_GROUP_PINNED) version group.
+
+</SeverityTable>

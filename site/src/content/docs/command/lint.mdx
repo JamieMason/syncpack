@@ -14,9 +14,10 @@ import QuoteFilters from "@partials/tips/quote-filters.mdx";
 import ShowOption from "@partials/option/show-versions.mdx";
 import SortOption from "@partials/option/sort.mdx";
 import SourceOption from "@partials/option/source.mdx";
+import SourceModeOption from "@partials/option/source-mode.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
-Check for version mismatches in your monorepo. Reports dependencies that don't match your configuration rules and exits with status code 1 if issues are found. Use `fix` to resolve reported issues. Does not check formatting—use `format --check` for that.
+Check for version mismatches in your monorepo. Reports dependencies that don't match your configuration rules and exits with status code 1 if issues are found. Use `fix` to resolve reported issues. Does not check formatting. Use `format --check` for that.
 
 ## Examples
 
@@ -76,6 +77,10 @@ syncpack lint -h
 ### --source <Badge text="<file-pattern>" />
 
 <SourceOption command="lint" />
+
+### --source-mode <Badge text="<replace|extend>" />
+
+<SourceModeOption command="lint" />
 
 ### --specifier-types <Badge text="<comma-separated-specifier-type-names>" />
 

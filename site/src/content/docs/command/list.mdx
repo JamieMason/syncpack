@@ -14,6 +14,7 @@ import QuoteFilters from "@partials/tips/quote-filters.mdx";
 import ShowOption from "@partials/option/show-list.mdx";
 import SortOption from "@partials/option/sort.mdx";
 import SourceOption from "@partials/option/source.mdx";
+import SourceModeOption from "@partials/option/source-mode.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
 List all dependencies in your monorepo with their versions and locations. Shows which dependencies have mismatches, are ignored, or follow your rules. Use this to explore what's installed before running `lint` or `fix`.
@@ -78,6 +79,10 @@ syncpack list -h
 ### --source <Badge text="<file-pattern>" />
 
 <SourceOption command="list" />
+
+### --source-mode <Badge text="<replace|extend>" />
+
+<SourceModeOption command="list" />
 
 ### --specifier-types <Badge text="<comma-separated-specifier-type-names>" />
 

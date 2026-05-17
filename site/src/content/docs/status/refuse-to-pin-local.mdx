@@ -4,8 +4,18 @@ status: suspect
 description: Local workspace package cannot be pinned and must be handled differently
 ---
 
+import SeverityTable from "@partials/severity/table-refuse-local.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Pinned](VERSION_GROUP_PINNED) version group
 - ✘ [Local Instance](REF_GLOSSARY#local-instance) mismatches its pinned version group
 - ✘ Misconfiguration: Syncpack refuses to change the version specifier of a [Local Instance](REF_GLOSSARY#local-instance)
+
+## Severity
+
+<SeverityTable fixEffect="Opt in to rewriting the local package's `version` field to the pinned value. Not the default. Set only on groups where you want the local package itself to follow the pin.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Pinned](VERSION_GROUP_PINNED) version group.
+
+</SeverityTable>

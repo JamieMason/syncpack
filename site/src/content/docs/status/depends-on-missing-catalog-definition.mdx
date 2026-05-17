@@ -4,7 +4,13 @@ status: suspect
 description: Instance uses the catalog protocol but the referenced catalog or dependency is not defined
 ---
 
+import SeveritySuspect from "@partials/severity/suspect-default.mdx";
+
 ## When this happens
 
 - ✓ Instance uses the `catalog:` protocol (bare `catalog:` or `catalog:{name}`)
 - ✘ The referenced catalog does not exist OR the dependency name is not defined in it
+
+## Severity
+
+<SeveritySuspect />

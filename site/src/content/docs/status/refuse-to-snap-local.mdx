@@ -4,8 +4,18 @@ status: suspect
 description: Local workspace package cannot be snapped to another package and must be handled differently
 ---
 
+import SeverityTable from "@partials/severity/table-refuse-local.mdx";
+
 ## When this happens
 
 - ✘ [Local Instance](REF_GLOSSARY#local-instance) is in a [Snapped To](VERSION_GROUP_SNAPPED_TO) version group
 - ✘ An Instance of this dependency was found in the snapped to package
 - ✘ Misconfiguration: Syncpack refuses to change the version specifier of a [Local Instance](REF_GLOSSARY#local-instance)
+
+## Severity
+
+<SeverityTable fixEffect="Opt in to rewriting the local package's `version` field to match the snap target. Not the default. Set only on groups where you want the local package itself to follow the target.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Snapped To](VERSION_GROUP_SNAPPED_TO) version group.
+
+</SeverityTable>

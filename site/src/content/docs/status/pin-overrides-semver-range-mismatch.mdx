@@ -4,6 +4,8 @@ status: fixable
 description: Pinned dependency version overrides semver range rules but has incorrect range format
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Pinned](VERSION_GROUP_PINNED) version group
@@ -11,3 +13,11 @@ description: Pinned dependency version overrides semver range rules but has inco
 - ✘ Instance mismatches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ! The semver group requires a range which is different to the pinned version
 - ! Pinned version wins
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance to the pinned version.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Pinned](VERSION_GROUP_PINNED) version group.
+
+</SeverityTable>

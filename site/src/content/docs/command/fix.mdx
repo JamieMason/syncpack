@@ -15,11 +15,12 @@ import ReporterOption from "@partials/option/reporter-fix.mdx";
 import ShowOption from "@partials/option/show-versions.mdx";
 import SortOption from "@partials/option/sort.mdx";
 import SourceOption from "@partials/option/source.mdx";
+import SourceModeOption from "@partials/option/source-mode.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 
 import QuoteFilters from "@partials/tips/quote-filters.mdx";
 
-Fix version mismatches in your monorepo. When the same dependency has different versions across packages, `fix` updates them to match your configuration rules. Use this to resolve issues reported by `lint`. Does not fix formatting—use `format` for that.
+Fix version mismatches in your monorepo. When the same dependency has different versions across packages, `fix` updates them to match your configuration rules. Use this to resolve issues reported by `lint`. Does not fix formatting. Use `format` for that.
 
 ## Examples
 
@@ -83,6 +84,10 @@ syncpack fix -h
 ### --source <Badge text="<file-pattern>" />
 
 <SourceOption command="fix" />
+
+### --source-mode <Badge text="<replace|extend>" />
+
+<SourceModeOption command="fix" />
 
 ### --specifier-types <Badge text="<comma-separated-specifier-type-names>" />
 

@@ -4,8 +4,14 @@ status: unfixable
 description: Dependency references a local package with an invalid or malformed version
 ---
 
+import SeverityUnfixable from "@partials/severity/unfixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
 - ✘ Instance depends on a local package whose package.json version is not exact semver
 - ? We can't know what the version should be
+
+## Severity
+
+<SeverityUnfixable />

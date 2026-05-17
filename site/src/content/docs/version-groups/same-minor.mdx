@@ -9,6 +9,7 @@ import Dependencies from "@partials/group-config/dependencies.mdx";
 import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
+import SeverityGroupSection from "@partials/severity/group-section.mdx";
 import Details from "@site/components/details.astro";
 
 Loosen requirements to only ensure that the `MAJOR.MINOR.x` version number should match for all members of this group, allowing different patch versions. The only semver ranges allowed are exact and `~` as others will allow versions to be installed outside of this range.
@@ -82,6 +83,29 @@ Setting a `preferVersion` loosens this requirement, but beware of dependencies w
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+### severity <Badge text="Optional" variant="note" />
+
+<SeverityGroupSection group="sameMinor">
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react", "react-dom"],
+      "policy": "sameMinor",
+      "preferVersion": "highestSemver",
+      "severity": {
+        "DiffersToHighestOrLowestSemverMinor": "error"
+      }
+    }
+  ]
+}
+```
+
+</SeverityGroupSection>
+
+`SameMinorMismatch`, `SameMinorHasMajorMismatch`, and `NonSemverMismatch` are unfixable. They are always reported as errors and cannot be tuned via `severity`.
 
 ## Status Codes
 

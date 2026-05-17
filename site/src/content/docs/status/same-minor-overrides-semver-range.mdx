@@ -4,9 +4,19 @@ status: fixable
 description: Same-minor dependency version overrides semver range rules and has correct range format
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance has same major.minor as all other instances in its group
 - ✓ Instance matches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ! The semver group requires a range which would break [Same Minor](VERSION_GROUP_SAME_MINOR) policy
 - ! Same minor policy wins
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance using a range safe for the Same Minor policy.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Same Minor](VERSION_GROUP_SAME_MINOR) version group.
+
+</SeverityTable>

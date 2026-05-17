@@ -4,9 +4,15 @@ status: suspect
 description: Local workspace package cannot use the catalog protocol and must be excluded from the catalog group
 ---
 
+import SeveritySuspect from "@partials/severity/suspect-default.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Catalog](VERSION_GROUP_CATALOG) version group
 - ✓ Instance is a [Local Instance](REF_GLOSSARY#local-instance) (its own `package.json` `/version` property)
 - ✘ Local instances cannot use the `catalog:` protocol
 - ! Reconfigure version groups to exclude local instances from the catalog group
+
+## Severity
+
+<SeveritySuspect reason="a local package cannot catalog itself" />

@@ -11,7 +11,7 @@ npm install --save-dev syncpack
 
 ### `list-mismatches` → `lint`
 
-`list-mismatches` and `lint-semver-ranges` have been merged into a single `lint` command which checks whether every specifier matches the semver group and version group they belong to. The `lint` command no longer checks formatting, which is now handled by `syncpack format ––check`.
+`list-mismatches` and `lint-semver-ranges` have been merged into a single `lint` command which checks whether every specifier matches the semver group and version group they belong to. The `lint` command no longer checks formatting, which is now handled by `syncpack format --check`.
 
 ```bash frame="none"
 # v13
@@ -22,7 +22,7 @@ syncpack lint --dependency-types prod,dev
 
 ### `lint-semver-ranges` → `lint`
 
-`list-mismatches` and `lint-semver-ranges` have been merged into a single `lint` command which checks whether every specifier matches the semver group and version group they belong to. The `lint` command no longer checks formatting, which is now handled by `syncpack format ––check`. It's no longer possible to manage semver ranges without also checking version mismatches, because the two things are so closely linked. Changes to semver ranges affect which versions are considered valid and can indirectly cause version mismatches, so they are now always checked and changed together via the `lint` and `fix` commands.
+`list-mismatches` and `lint-semver-ranges` have been merged into a single `lint` command which checks whether every specifier matches the semver group and version group they belong to. The `lint` command no longer checks formatting, which is now handled by `syncpack format --check`. It's no longer possible to manage semver ranges without also checking version mismatches, because the two things are so closely linked. Changes to semver ranges affect which versions are considered valid and can indirectly cause version mismatches, so they are now always checked and changed together via the `lint` and `fix` commands.
 
 ```bash frame="none"
 # v13

@@ -1,0 +1,72 @@
+---
+title: severity
+description: Per-group control over how each status is treated as fix, warn, or error.
+sidebar:
+  badge: New
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { KEYS, GROUP_LABELS, GROUP_LINKS } from "@partials/severity/keys.js";
+
+Every [status code](REF_STATUS_CODES) syncpack assigns has a default treatment: some can be auto-fixed and others are errors or warnings that need to be fixed manually. The optional `severity` map on a [version group](TERM_VERSION_GROUP) lets you override that behaviour for the dependencies the group matches.
+
+```jsonc title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "label": "Don't auto-delete banned dependencies, fail CI instead",
+      "dependencies": ["lodash", "moment"],
+      "isBanned": true,
+      "severity": {
+        "IsBanned": "error",
+      },
+    },
+    {
+      "label": "Override syncpack's refusal to rewrite .version",
+      "dependencies": ["my-pkg"],
+      "dependencyTypes": ["local"],
+      "pinVersion": "1.0.0",
+      "severity": {
+        "RefuseToPinLocal": "fix",
+      },
+    },
+    {
+      "label": "Don't auto-fix missing catalog entries, warn instead",
+      "policy": "catalog",
+      "severity": {
+        "MissingFromCatalog": "warn",
+      },
+    },
+  ],
+}
+```
+
+## Possible Values
+
+| Value     | [`fix`](COMMAND_FIX)              | [`lint`](COMMAND_LINT)  |
+| --------- | --------------------------------- | ----------------------- |
+| `"fix"`   | Fix, exit 0                       | Display error, exit 1   |
+| `"warn"`  | Display warning, exit 0           | Display warning, exit 0 |
+| `"error"` | Do not fix, display error, exit 1 | Display error, exit 1   |
+
+## Default Values
+
+When a status has no explicit entry in the map, syncpack falls back to a default appropriate for its kind:
+
+| Status Code Type                                                                                    | Configurable? | Default severity |
+| --------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| [Valid](REF_STATUS_CODES_VALID)                                                                     | no            | n/a              |
+| [Fixable](REF_STATUS_CODES_FIXABLE)                                                                 | yes           | `"fix"`          |
+| [Unfixable](REF_STATUS_CODES_UNFIXABLE)                                                             | no            | `"error"`        |
+| [RefuseToPinLocal](/status/refuse-to-pin-local) / [RefuseToSnapLocal](/status/refuse-to-snap-local) | yes           | `"warn"`         |
+| [Suspect](REF_STATUS_CODES_SUSPECT)                                                                 | no            | `"warn"`         |
+| [Conflict](REF_STATUS_CODES_CONFLICT) (between version + semver groups)                             | no            | `"error"`        |
+
+[`strict: true`](CONFIG_STRICT) escalates every unconfigured Suspect default from `"warn"` to `"error"`. It does not touch Fixable defaults, and explicit severity always wins: `"RefuseToPinLocal": "warn"` stays `"warn"` even under `strict: true`.
+
+## Excluded Values
+
+A few status codes are deliberately not configurable:
+
+- `DiffersToNpmRegistry` is owned by [`updateGroups`](CONFIG_UPDATE_GROUPS). Registry-update behaviour is tuned there, not via severity. Writing it as a severity key fails with `InvalidSeverityKey`.
+- Unfixable and Conflict statuses are always `"error"`. They represent ambiguity that severity cannot resolve: syncpack has no fix to apply and silencing them would hide real problems.

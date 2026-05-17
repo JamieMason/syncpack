@@ -8,12 +8,11 @@ import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
 import Packages from "@partials/group-config/packages.mdx";
+import SeverityGroupSection from "@partials/severity/group-section.mdx";
 import { Badge } from "@astrojs/starlight/components";
 import Details from "@site/components/details.astro";
 
-Prevent dependencies you've decided should never be used. This helps teams enforce architectural decisions—for example, preventing accidental use of legacy packages, conflicting libraries, or packages that violate your security or licensing policy.
-
-Use this when you want to actively prevent a dependency from appearing anywhere in your monorepo, or only in specific packages. When syncpack finds a banned dependency, it flags it as an issue that must be removed.
+Prevent dependencies from being used anywhere in your monorepo, or only in specific packages. Common cases are blocking legacy packages, conflicting libraries, or packages that violate your security or licensing policy. When syncpack finds a banned dependency, it flags it as an issue that must be removed.
 
 ## Configuration
 
@@ -51,6 +50,26 @@ This property activates this behaviour for a given Version Group.
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+### severity <Badge text="Optional" variant="note" />
+
+<SeverityGroupSection group="banned">
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["never-gonna"],
+      "isBanned": true,
+      "severity": {
+        "IsBanned": "error"
+      }
+    }
+  ]
+}
+```
+
+</SeverityGroupSection>
 
 ## Status Codes
 

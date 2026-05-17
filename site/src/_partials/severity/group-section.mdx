@@ -1,0 +1,17 @@
+import { KEYS } from "@partials/severity/keys.js";
+
+Override the default [severity](REF_SEVERITY) of any [status code](#status-codes) this group can produce.
+
+{props.children}
+
+**Permitted keys:**
+
+<ul>
+  {KEYS[props.group].map((k) => (
+    <li>
+      <a href={`/status/${k.slug}/#severity`}>
+        <code>{k.name}</code>
+      </a>
+    </li>
+  ))}
+</ul>

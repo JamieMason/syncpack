@@ -4,6 +4,8 @@ status: conflict
 description: Dependency mismatches semver group rules and conflicts with highest or lowest semver version policy
 ---
 
+import SeverityUnfixable from "@partials/severity/unfixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
@@ -11,3 +13,7 @@ description: Dependency mismatches semver group rules and conflicts with highest
 - ✘ Instance mismatches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ✘ The Range preferred by its [With Range](SEMVER_GROUP_WITH_RANGE) semver group will not satisfy the highest/lowest semver version if applied
 - ? We can't know whether the incompatible range matters or not and have to ask
+
+## Severity
+
+<SeverityUnfixable />

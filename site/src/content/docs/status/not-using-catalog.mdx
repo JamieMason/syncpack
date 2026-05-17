@@ -4,9 +4,19 @@ status: fixable
 description: Dependency is defined in a catalog but this instance uses a version specifier instead of the catalog protocol
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Catalog](VERSION_GROUP_CATALOG) version group
 - ✓ Instance's dependency is defined in exactly one catalog
 - ✘ Instance does not use the `catalog:` protocol
 - ! Fix: replace specifier with `catalog:` or `catalog:{name}`
+
+## Severity
+
+<SeverityTable fixEffect="Replace the specifier with `catalog:` (or `catalog:{name}` if the catalog is named).">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Catalog](VERSION_GROUP_CATALOG) version group.
+
+</SeverityTable>

@@ -4,6 +4,8 @@ status: fixable
 description: Same-minor dependency version differs from preferred highest or lowest minor version in its group
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Same Minor](VERSION_GROUP_SAME_MINOR) version group with `preferVersion` set
@@ -19,3 +21,11 @@ The instance is updated to match the preferred MAJOR.MINOR target. The range sel
 3. Otherwise use `~` (Same Minor policy wins over unsafe ranges)
 
 Safe ranges are `""` (Exact) and `~` (Patch).
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance to the preferred MAJOR.MINOR target.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Same Minor](VERSION_GROUP_SAME_MINOR) version group.
+
+</SeverityTable>

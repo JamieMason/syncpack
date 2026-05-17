@@ -6,11 +6,13 @@ description: Configure which package.json files syncpack should discover and pro
 import HowPackagesAreResolved from "@partials/how-packages-are-resolved.mdx";
 import MonorepoNotEssentialTip from "@partials/tips/monorepo-not-essential.mdx";
 
-A list of [Glob](HREF_GLOB) patterns to find package.json files you want to manage with syncpack.
+If for some reason you do not want to use the same files as your package manager, you can use the `source` config to provide an alternative list of [glob](HREF_GLOB) patterns to override which package.json files syncpack will operate on.
+
+<HowPackagesAreResolved />
+
+## Polyrepos
 
 <MonorepoNotEssentialTip />
-
-## Example
 
 In this example we have a directory on our machine called `my-projects` where we `git clone` all of the repositories we work on for our company.
 
@@ -21,23 +23,3 @@ Despite us not having a monorepo, a .syncpackrc.json placed alongside each `git 
   "source": ["./*/package.json", "./*/packages/*/package.json"]
 }
 ```
-
-## `sourceMode`
-
-Controls whether your `source` patterns (and `--source` CLI options) *replace* the discovered patterns or are *appended* to them.
-
-- `"replace"` (default): your patterns replace workspace discovery entirely.
-- `"extend"`: your patterns are appended after the discovered patterns from `workspaces` / `pnpm-workspace.yaml` / `lerna.json`.
-
-```json title=".syncpackrc.json"
-{
-  "sourceMode": "extend",
-  "source": ["tools/scripts/package.json"]
-}
-```
-
-The CLI flag `--source-mode <replace|extend>` overrides whatever is set in the rcfile.
-
-## Resolving Packages
-
-<HowPackagesAreResolved />

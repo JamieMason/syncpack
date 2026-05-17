@@ -9,6 +9,7 @@ import Dependencies from "@partials/group-config/dependencies.mdx";
 import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
+import SeverityGroupSection from "@partials/severity/group-section.mdx";
 
 Require all dependencies in this group to use the highest semver version found of all the instances where it is already installed in your monorepo. When versions differ, syncpack will align them to the highest one installed.
 
@@ -33,6 +34,27 @@ Require all dependencies in this group to use the highest semver version found o
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+### severity <Badge text="Optional" variant="note" />
+
+<SeverityGroupSection group="highestSemver">
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["legacy-pkg"],
+      "severity": {
+        "DiffersToHighestOrLowestSemver": "warn"
+      }
+    }
+  ]
+}
+```
+
+</SeverityGroupSection>
+
+`DiffersToNpmRegistry` is **not** configurable via `severity`. Registry-update behaviour is controlled by [`updateGroups`](CONFIG_UPDATE_GROUPS).
 
 ## Status Codes
 

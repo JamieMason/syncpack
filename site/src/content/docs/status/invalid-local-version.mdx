@@ -4,8 +4,14 @@ status: suspect
 description: Local package has an invalid or malformed version number in its package.json
 ---
 
+import SeveritySuspect from "@partials/severity/suspect-default.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
 - ! [Local Instance](REF_GLOSSARY#local-instance) has no version property
 - ! Not an error on its own unless an instance of it mismatches
+
+## Severity
+
+<SeveritySuspect />

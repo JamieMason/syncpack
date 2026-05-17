@@ -4,9 +4,19 @@ status: fixable
 description: Dependency version differs from the catalog protocol used by other instances in its version group
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
 - ✓ One or more other instances use the `catalog:` protocol
 - ✘ Instance does not use the `catalog:` protocol
 - ! `catalog:` protocol wins
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance to use the `catalog:` protocol.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group.
+
+</SeverityTable>

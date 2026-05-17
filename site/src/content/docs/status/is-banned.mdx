@@ -4,6 +4,16 @@ status: fixable
 description: Dependency is banned and should not be used according to version group rules
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✘ Instance is in a [Banned](VERSION_GROUP_BANNED) version group
+
+## Severity
+
+<SeverityTable fixEffect="Remove the banned dependency from the package.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Banned](VERSION_GROUP_BANNED) version group.
+
+</SeverityTable>

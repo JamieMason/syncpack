@@ -4,6 +4,8 @@ status: unfixable
 description: Dependency should use the catalog protocol but Syncpack cannot determine which catalog it belongs to
 ---
 
+import SeverityUnfixable from "@partials/severity/unfixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Catalog](VERSION_GROUP_CATALOG) version group
@@ -11,3 +13,7 @@ description: Dependency should use the catalog protocol but Syncpack cannot dete
 - ✓ Instance's dependency is defined in zero OR two-or-more of those catalogs
 - ✘ Instance does not use the `catalog:` protocol
 - ? Syncpack cannot determine which catalog the dependency belongs to
+
+## Severity
+
+<SeverityUnfixable />

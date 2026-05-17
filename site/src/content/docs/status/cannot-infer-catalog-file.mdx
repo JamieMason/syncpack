@@ -4,9 +4,15 @@ status: unfixable
 description: Syncpack cannot infer where to create a catalog because no pnpm or Bun lock file was detected
 ---
 
+import SeverityUnfixable from "@partials/severity/unfixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Catalog](VERSION_GROUP_CATALOG) version group
 - ✓ Project has 0 catalogs
 - ✘ No recognised lock file (npm, yarn, or unknown package manager)
 - ? Cannot infer whether to create `pnpm-workspace.yaml` or root `package.json` `/catalog`
+
+## Severity
+
+<SeverityUnfixable />

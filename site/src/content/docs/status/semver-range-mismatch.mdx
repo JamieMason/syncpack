@@ -4,6 +4,8 @@ status: fixable
 description: Dependency has correct semver number but incorrect range format for its semver group
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
@@ -11,3 +13,11 @@ description: Dependency has correct semver number but incorrect range format for
 - ✘ Instance mismatches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group
 - ✓ Range preferred by semver group satisfies the highest/lowest semver
 - ✓ Fixing the semver range satisfy both groups
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance's range to match its semver group.">
+
+Configurable via [`severity`](REF_SEVERITY) on any of the following version groups: [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER), [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER), [Same Range](VERSION_GROUP_SAME_RANGE), [Same Minor](VERSION_GROUP_SAME_MINOR), [Snapped To](VERSION_GROUP_SNAPPED_TO).
+
+</SeverityTable>

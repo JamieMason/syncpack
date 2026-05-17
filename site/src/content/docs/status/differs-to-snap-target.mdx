@@ -4,7 +4,17 @@ status: fixable
 description: Dependency version differs from the version defined in its snap target source package
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Snapped To](VERSION_GROUP_SNAPPED_TO) version group
 - ✘ Instance mismatches the matching [snapTo](VERSION_GROUP_SNAPPED_TO#snapto) instance
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance to match the snap target.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Snapped To](VERSION_GROUP_SNAPPED_TO) version group.
+
+</SeverityTable>

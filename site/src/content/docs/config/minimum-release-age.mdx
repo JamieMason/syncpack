@@ -5,7 +5,7 @@ sidebar:
   badge: New
 ---
 
-When using the [update](COMMAND_UPDATE) command, the minimum age (in minutes) a published version must reach before syncpack will consider it as an available update. Reduces supply chain attack risk by ignoring versions that have been on the registry for less time than the configured window — most malicious releases are detected and unpublished within an hour.
+When using the [update](COMMAND_UPDATE) command, the minimum age (in minutes) a published version must reach before syncpack will consider it as an available update. Reduces supply chain attack risk by ignoring versions that have been on the registry for less time than the configured window. Most malicious releases are detected and unpublished within an hour.
 
 When this option is omitted from the [rcfile](TERM_RCFILE), syncpack reads `minimumReleaseAge` from the project's `pnpm-workspace.yaml` if present. When neither is set, it defaults to `1440` (one day). Setting `0` disables the filter.
 

@@ -1,0 +1,11 @@
+import { Code } from "astro:components";
+
+Control how `--source` (and the rcfile [`source`](CONFIG_SOURCE)) combine with workspace discovery. `replace` (default) uses only the supplied patterns and skips discovery; `extend` appends them after discovered patterns from `workspaces` / `pnpm-workspace.yaml` / `lerna.json`. Overrides [`sourceMode`](CONFIG_SOURCE_MODE) from the rcfile.
+
+<Code
+code={`# Replace discovered patterns with the supplied ones (default)
+syncpack ${props.command} --source-mode replace --source 'packages/*/package.json'
+# Append the supplied pattern to discovered workspace packages
+syncpack ${props.command} --source-mode extend --source 'tools/scripts/package.json'`}
+lang="bash"
+/>

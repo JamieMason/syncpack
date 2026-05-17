@@ -4,7 +4,17 @@ status: fixable
 description: Dependency version differs from the version defined in a local workspace package
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
 - ✘ Instance mismatches the version of its [Local Instance](REF_GLOSSARY#local-instance)
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance to match the local package's version.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group.
+
+</SeverityTable>

@@ -1,0 +1,7 @@
+{props.children}
+
+| Value     | Effect                                                                                 |
+| --------- | -------------------------------------------------------------------------------------- |
+| `"fix"`   | Default. {props.fixEffect} Reported as an error in [`lint`](COMMAND_LINT) until fixed. |
+| `"warn"`  | Skip the fix; show as warning. Does not affect exit code.                              |
+| `"error"` | Skip the fix; show as error. Exits 1.                                                  |

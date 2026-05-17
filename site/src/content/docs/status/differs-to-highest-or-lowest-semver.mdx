@@ -4,7 +4,17 @@ status: fixable
 description: Dependency version differs from the highest or lowest semver version in its group
 ---
 
+import SeverityTable from "@partials/severity/table-fixable.mdx";
+
 ## When this happens
 
 - ✓ Instance is in a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group
 - ✘ Instance mismatches highest/lowest semver in its group
+
+## Severity
+
+<SeverityTable fixEffect="Rewrite the instance to match the highest/lowest semver in its group.">
+
+Configurable via [`severity`](REF_SEVERITY) on a [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) or [Lowest Semver](VERSION_GROUP_LOWEST_SEMVER) version group.
+
+</SeverityTable>

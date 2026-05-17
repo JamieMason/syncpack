@@ -52,6 +52,10 @@ This property activates this behaviour for a given Version Group.
 
 <Packages />
 
+### severity
+
+An Ignored group emits no statuses to tune. A `severity` map written here is accepted and silently discarded. Set [`isIgnored`](#isignored) to `false` and pick a different group type if you want to control how issues are reported.
+
 ## Status Codes
 
 These are all the issues that a {frontmatter.title} Version Group can find:

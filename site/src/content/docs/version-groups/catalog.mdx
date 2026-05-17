@@ -11,6 +11,7 @@ import Dependencies from "@partials/group-config/dependencies.mdx";
 import DependencyTypes from "@partials/group-config/dependency-types.mdx";
 import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
 import Label from "@partials/group-config/label.mdx";
+import SeverityGroupSection from "@partials/severity/group-section.mdx";
 
 Require dependencies to be defined in a [pnpm](HREF_PNPM) or [Bun](https://bun.sh) catalog and consumed via the `catalog:` protocol. Catalog definitions live in `pnpm-workspace.yaml` (pnpm) or the root `package.json` at `/catalog`, `/catalogs/{name}`, `/workspaces/catalog`, or `/workspaces/catalogs/{name}` (Bun).
 
@@ -55,6 +56,28 @@ Set the policy to `"catalog"` to enable this behaviour for a Version Group.
 ### packages <Badge text="Optional" variant="note" />
 
 <Packages />
+
+### severity <Badge text="Optional" variant="note" />
+
+<SeverityGroupSection group="catalog">
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "label": "All production deps must come from the catalog",
+      "dependencyTypes": ["prod"],
+      "policy": "catalog",
+      "severity": {
+        "NotUsingCatalog": "error",
+        "MissingFromCatalog": "warn"
+      }
+    }
+  ]
+}
+```
+
+</SeverityGroupSection>
 
 ## Status Codes
 

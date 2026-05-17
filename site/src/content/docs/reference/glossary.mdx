@@ -4,6 +4,10 @@ slug: glossary
 description: Definitions of key terms and concepts used throughout syncpack documentation
 ---
 
+## Catalog Definition
+
+The entry in a pnpm or Bun catalog that holds the actual version specifier for a dependency. Catalog definitions live in `pnpm-workspace.yaml` for pnpm or under `/catalog`, `/catalogs/{name}`, `/workspaces/catalog`, or `/workspaces/catalogs/{name}` in the root `package.json` for Bun. Consumer packages reference a definition with the `catalog:` or `catalog:{name}` protocol instead of writing the version directly.
+
 ## Complex Semver
 
 A semver version with conditional logic, such as `^1.2.3-alpha || ~1.2.3-rc.1`.
@@ -63,9 +67,17 @@ A pattern that specifies which versions of a dependency are acceptable. Common r
 
 Semantic Versioning, a versioning scheme that uses a three-part number (MAJOR.MINOR.PATCH) to convey meaning about the underlying changes. Major versions indicate breaking changes, minor versions indicate new features without breaking changes, and patch versions indicate bug fixes.
 
+## Severity
+
+The user-tunable treatment of a [Status Code](#status-code) on a particular instance: `fix` (auto-fix it), `warn` (surface but exit 0), or `error` (surface and exit 1). Set via the `severity` map on a [Version Group](#version-group). See [severity](REF_SEVERITY) for the full semantics.
+
 ## Simple Semver
 
 A typical semver version such as `1.2.3`, `^1.2.3`, or `1.2.3.alpha`.
+
+## Source Mode
+
+Controls how user-supplied `source` patterns (in the rcfile or via `--source`) combine with workspace discovery. `"replace"` (default) discards discovered patterns and uses only the user patterns; `"extend"` appends user patterns after discovered ones, letting gitignore-style negations such as `!apps/legacy` exclude discovered entries. See [`sourceMode`](CONFIG_SOURCE_MODE).
 
 ## Specifier
 
@@ -82,6 +94,10 @@ A code assigned by syncpack to each dependency instance that indicates its valid
 ## Update Group
 
 A configuration that controls which registry updates are eligible for a specific set of dependency instances. Update groups can clamp matched instances to patch-only or minor-only updates, or skip them from update consideration entirely. They affect only the [update](COMMAND_UPDATE) command and are independent of [version groups](TERM_VERSION_GROUP) and [semver groups](TERM_SEMVER_GROUP).
+
+## Update Target
+
+The greediness of an [update](COMMAND_UPDATE) run. `"patch"` allows only same major and minor with a higher patch; `"minor"` allows same major with a higher minor or patch; `"latest"` allows any newer version including major bumps. Set via the `--target` CLI flag or the `target` field on an [Update Group](#update-group). When both apply to the same instance, the stricter of the two wins (`patch` < `minor` < `latest`).
 
 ## Version Group
 
