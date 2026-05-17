@@ -3,7 +3,7 @@ members = ["crates/syncpack-specifier"]
 
 [package]
 name = "syncpack"
-version = "15.1.2"
+version = "15.2.0"
 authors = ["Jamie Mason <jamie@foldleft.io>"]
 edition = "2024"
 homepage = "https://syncpack.dev"

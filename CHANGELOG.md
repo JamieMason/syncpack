@@ -1,5 +1,18 @@
 # Changelog
 
+## [15.2.0](https://github.com/JamieMason/syncpack/compare/15.1.2...15.2.0) (2026-05-17)
+
+### Features
+
+* **config:** allow autofix to be optionally disabled ([d589d3e](https://github.com/JamieMason/syncpack/commit/d589d3e6a27219f5668ae1d95cbb57bf790f544f)), closes [#325](https://github.com/JamieMason/syncpack/issues/325) [#216](https://github.com/JamieMason/syncpack/issues/216)
+* **config:** allow other .json files when explicitly set ([5c83a60](https://github.com/JamieMason/syncpack/commit/5c83a60c024e5d74951dc3efcdc0789687c296b8)), closes [#333](https://github.com/JamieMason/syncpack/issues/333)
+* **config:** allow sources to append rather than replace ([99cc046](https://github.com/JamieMason/syncpack/commit/99cc04659a64e94a309a9ee9c1a5bcd4d9531168)), closes [#205](https://github.com/JamieMason/syncpack/issues/205)
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([8aea6d1](https://github.com/JamieMason/syncpack/commit/8aea6d189f77d130b3abcc7b1bc81163fd1b1e5d))
+* **glob:** match globs and gitignore correctly ([df700d8](https://github.com/JamieMason/syncpack/commit/df700d886b94a6130cdea68190c1ebea1e0d2edd)), closes [#334](https://github.com/JamieMason/syncpack/issues/334)
+
 ## [15.1.2](https://github.com/JamieMason/syncpack/compare/15.1.1...15.1.2) (2026-05-10)
 
 ### Bug Fixes
