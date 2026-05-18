@@ -1,0 +1,11 @@
+---
+title: MatchesSemverGroup
+status: valid
+description: Dependency's semver range matches its semver group; version number is not checked
+---
+
+## When this happens
+
+- ✓ Instance is in a [Range Only](VERSION_GROUP_RANGE_ONLY) version group
+- ✓ Instance matches its [With Range](SEMVER_GROUP_WITH_RANGE) semver group, or no range is enforced
+- ! Cross-instance versions are not reconciled in this group

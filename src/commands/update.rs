@@ -28,8 +28,9 @@ pub fn build_update_rows(ctx: &Context, registry_updates: &RegistryUpdates, now_
   let mut rows: Vec<UpdateRow> = Vec::new();
 
   for (group_idx, group) in ctx.version_groups.iter().enumerate() {
-    let is_relevant_group =
-      matches!(group, VersionGroup::PreferredSemver(g) if g.prefer_highest) || matches!(group, VersionGroup::CatalogDefs(_));
+    let is_relevant_group = matches!(group, VersionGroup::PreferredSemver(g) if g.prefer_highest)
+      || matches!(group, VersionGroup::CatalogDefs(_))
+      || matches!(group, VersionGroup::SemverRangeOnly(_));
     if !is_relevant_group {
       continue;
     }

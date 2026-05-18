@@ -41,6 +41,7 @@ mod pinned;
 mod preferred_semver;
 mod same_minor;
 mod same_range;
+mod semver_range_only;
 mod snapped_to;
 
 /// When a version group has `preferVersion` set, this determines the direction
@@ -79,7 +80,8 @@ pub struct AnyVersionGroup {
 
 pub use {
   banned::BannedGroup, catalog::CatalogGroup, catalog_defs::CatalogDefsGroup, ignored::IgnoredGroup, pinned::PinnedGroup,
-  preferred_semver::PreferredSemverGroup, same_minor::SameMinorGroup, same_range::SameRangeGroup, snapped_to::SnappedToGroup,
+  preferred_semver::PreferredSemverGroup, same_minor::SameMinorGroup, same_range::SameRangeGroup, semver_range_only::SemverRangeOnlyGroup,
+  snapped_to::SnappedToGroup,
 };
 
 pub(crate) const L1: &str = "  ";
@@ -305,6 +307,7 @@ pub enum VersionGroup {
   PreferredSemver(PreferredSemverGroup),
   SameMinor(SameMinorGroup),
   SameRange(SameRangeGroup),
+  SemverRangeOnly(SemverRangeOnlyGroup),
   SnappedTo(SnappedToGroup),
 }
 
@@ -319,6 +322,7 @@ impl VersionGroupBehavior for VersionGroup {
       Self::PreferredSemver(g) => &g.selector,
       Self::SameMinor(g) => &g.selector,
       Self::SameRange(g) => &g.selector,
+      Self::SemverRangeOnly(g) => &g.selector,
       Self::SnappedTo(g) => &g.selector,
     }
   }
@@ -333,6 +337,7 @@ impl VersionGroupBehavior for VersionGroup {
       Self::PreferredSemver(g) => &g.dependencies,
       Self::SameMinor(g) => &g.dependencies,
       Self::SameRange(g) => &g.dependencies,
+      Self::SemverRangeOnly(g) => &g.dependencies,
       Self::SnappedTo(g) => &g.dependencies,
     }
   }
@@ -347,6 +352,7 @@ impl VersionGroupBehavior for VersionGroup {
       Self::PreferredSemver(g) => g.add_instance(idx, instance),
       Self::SameMinor(g) => g.add_instance(idx, instance),
       Self::SameRange(g) => g.add_instance(idx, instance),
+      Self::SemverRangeOnly(g) => g.add_instance(idx, instance),
       Self::SnappedTo(g) => g.add_instance(idx, instance),
     }
   }
@@ -361,6 +367,7 @@ impl VersionGroupBehavior for VersionGroup {
       Self::PreferredSemver(g) => g.visit(ctx, registry_updates),
       Self::SameMinor(g) => g.visit(ctx, registry_updates),
       Self::SameRange(g) => g.visit(ctx, registry_updates),
+      Self::SemverRangeOnly(g) => g.visit(ctx, registry_updates),
       Self::SnappedTo(g) => g.visit(ctx, registry_updates),
     }
   }
@@ -383,6 +390,7 @@ impl VersionGroup {
       }
       Self::SameMinor(_) => "SameMinor",
       Self::SameRange(_) => "SameRange",
+      Self::SemverRangeOnly(_) => "SemverRangeOnly",
       Self::SnappedTo(_) => "SnappedTo",
     }
   }
@@ -402,6 +410,7 @@ impl VersionGroup {
     match self {
       Self::PreferredSemver(g) if g.prefer_highest => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
       Self::CatalogDefs(g) => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
+      Self::SemverRangeOnly(g) => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
       _ => None,
     }
   }
@@ -475,6 +484,13 @@ impl VersionGroup {
       } else if policy == "catalog" {
         let severity = validate_severity(group.severity, "Catalog", index, CATALOG_KEYS)?;
         return Ok(Self::Catalog(CatalogGroup {
+          selector,
+          dependencies: BTreeMap::new(),
+          severity,
+        }));
+      } else if policy == "semverRangeOnly" {
+        let severity = validate_severity(group.severity, "SemverRangeOnly", index, SEMVER_RANGE_ONLY_KEYS)?;
+        return Ok(Self::SemverRangeOnly(SemverRangeOnlyGroup {
           selector,
           dependencies: BTreeMap::new(),
           severity,
@@ -566,6 +582,7 @@ impl VersionGroup {
       Self::PreferredSemver(g) => &g.severity,
       Self::SameMinor(g) => &g.severity,
       Self::SameRange(g) => &g.severity,
+      Self::SemverRangeOnly(g) => &g.severity,
       Self::SnappedTo(g) => &g.severity,
     }
   }
@@ -596,6 +613,7 @@ const PREFERRED_SEMVER_KEYS: &[&str] = &[
   "DiffersToHighestOrLowestSemver",
 ];
 const SAME_RANGE_KEYS: &[&str] = &["SemverRangeMismatch"];
+const SEMVER_RANGE_ONLY_KEYS: &[&str] = &["SemverRangeMismatch"];
 const SAME_MINOR_KEYS: &[&str] = &[
   "DiffersToHighestOrLowestSemverMinor",
   "SemverRangeMismatch",

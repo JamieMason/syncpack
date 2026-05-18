@@ -1,0 +1,121 @@
+---
+title: Range Only
+description: Enforce a consistent semver range prefix without syncing version numbers across instances
+sidebar:
+  badge: New
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Packages from "@partials/group-config/packages.mdx";
+import Dependencies from "@partials/group-config/dependencies.mdx";
+import DependencyTypes from "@partials/group-config/dependency-types.mdx";
+import SpecifierTypes from "@partials/group-config/specifier-types.mdx";
+import Label from "@partials/group-config/label.mdx";
+import SeverityGroupSection from "@partials/severity/group-section.mdx";
+
+Loosens syncpack to only enforce that every dependency uses the [semver range](TERM_SEMVER_RANGE) prefix required by its [semver group](TERM_SEMVER_GROUP) — `^`, `~`, exact, etc. and ignores the version number. This is useful when you want to standardise how packages pin their dependencies, but are otherwise not ready or don't want to enforce a specific version they all should use.
+
+:::note
+This is not [`sameRange`](VERSION_GROUP_SAME_RANGE). `sameRange` checks that every range _overlaps_ on at least one shared version. `semverRangeOnly` only checks the prefix.
+:::
+
+When the [`update`](COMMAND_UPDATE) command runs, the new version is taken from the registry and the prefix from the semver group is applied to it.
+
+## Examples
+
+In this example we are only ensuring that semver ranges are used consistently. `dependencies` should use exact versions and `devDependencies` should use `~`, the specific versions are left unchanged.
+
+```json title=".syncpackrc.json"
+{
+  "semverGroups": [
+    {
+      "label": "Use exact versions for dependencies",
+      "dependencyTypes": ["prod"],
+      "range": ""
+    },
+    {
+      "label": "Use ~ for devDependencies",
+      "dependencyTypes": ["dev"],
+      "range": "~"
+    }
+  ],
+  "versionGroups": [
+    {
+      "label": "Only enforce semver ranges, leave versions unchanged",
+      "policy": "semverRangeOnly"
+    }
+  ]
+}
+```
+
+## Configuration
+
+### policy <Badge text="Required" variant="danger" />
+
+Choose the `"semverRangeOnly"` policy to apply this behaviour to a Version Group.
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react"],
+      "policy": "semverRangeOnly"
+    }
+  ]
+}
+```
+
+### dependencies <Badge text="Optional" variant="note" />
+
+<Dependencies />
+
+### dependencyTypes <Badge text="Optional" variant="note" />
+
+<DependencyTypes />
+
+### specifierTypes <Badge text="Optional" variant="note" />
+
+<SpecifierTypes />
+
+### label <Badge text="Optional" variant="note" />
+
+<Label />
+
+### packages <Badge text="Optional" variant="note" />
+
+<Packages />
+
+### severity <Badge text="Optional" variant="note" />
+
+<SeverityGroupSection group="semverRangeOnly">
+
+```json title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["react"],
+      "policy": "semverRangeOnly",
+      "severity": {
+        "SemverRangeMismatch": "warn"
+      }
+    }
+  ]
+}
+```
+
+</SeverityGroupSection>
+
+## Status Codes
+
+These are all the issues that a {frontmatter.title} Version Group can find:
+
+### Valid
+
+- [MatchesSemverGroup](/status/matches-semver-group/)
+- [IsLocalAndValid](/status/is-local-and-valid/)
+- [IsIgnored](/status/is-ignored/)
+
+### Fixable
+
+- [SemverRangeMismatch](/status/semver-range-mismatch/)
+- [DiffersToNpmRegistry](/status/differs-to-npm-registry/)

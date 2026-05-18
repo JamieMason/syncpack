@@ -179,6 +179,10 @@ pub enum ValidInstance {
   /// - ✓ Instance's range satisfies all other ranges in its same range group
   /// - ✓ Instance matches its semver group
   SatisfiesSameRangeGroup,
+  /// - ✓ Instance is in a SemverRangeOnly version group
+  /// - ✓ Instance matches its semver group (or no range is enforced)
+  /// - ! Cross-instance versions are not reconciled in this group
+  MatchesSemverGroup,
   /// - ✓ Instance matches its same minor group
   /// - ✓ Instance matches its semver group
   SatisfiesSameMinorGroup,
