@@ -100,7 +100,7 @@ export function linkAliases() {
     SEMVER_GROUP_IGNORED: "/semver-groups/ignored/",
     SEMVER_GROUP_WITH_RANGE: "/semver-groups/with-range/",
 
-    STATUS_SAME_MINOR_MISMATCH: "/status/same-minor-mismatch",
+    STATUS_SAME_MINOR_MISMATCH: "/status/same-minor-mismatch/",
 
     UPDATE_GROUP_IGNORED: "/update-groups/ignored/",
     UPDATE_GROUP_TARGETED: "/update-groups/targeted/",

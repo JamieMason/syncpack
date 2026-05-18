@@ -14,10 +14,10 @@ import Details from "@site/components/details.astro";
 
 Checks that every instance of a dependency uses a semver range that **overlaps** with every other instance in the group. Ranges don't need to be identical, they just need to share at least one version in common (ie. they _intersect_).
 
-This is the loosest version group policy. It does **not** enforce identical versions; the default [Highest Semver](/version-groups/highest-semver) group does that. It does **not** enforce same minor versions; use [`sameMinor`](/version-groups/same-minor) for that.
+This is the loosest version group policy. It does **not** enforce identical versions; the default [Highest Semver](VERSION_GROUP_HIGHEST_SEMVER) group does that. It does **not** enforce same minor versions; use [`sameMinor`](VERSION_GROUP_SAME_MINOR) for that.
 
 :::caution
-`sameRange` only works with semver **ranges** like `^1.2.3`, `>=1.0.0`, or `~2.0.0`. Exact pinned versions like `1.0.0` and `1.0.1` are non-overlapping ranges. They will be flagged as mismatches because no single version satisfies both. If you want to enforce that exact versions share the same minor number, use [`sameMinor`](/version-groups/same-minor) instead.
+`sameRange` only works with semver **ranges** like `^1.2.3`, `>=1.0.0`, or `~2.0.0`. Exact pinned versions like `1.0.0` and `1.0.1` are non-overlapping ranges. They will be flagged as mismatches because no single version satisfies both. If you want to enforce that exact versions share the same minor number, use [`sameMinor`](VERSION_GROUP_SAME_MINOR) instead.
 :::
 
 ## When to use this
@@ -105,12 +105,12 @@ These are all the issues that a {frontmatter.title} Version Group can find:
 
 ### Valid
 
-- [SatisfiesSameRangeGroup](/status/satisfies-same-range-group)
+- [SatisfiesSameRangeGroup](/status/satisfies-same-range-group/)
 
 ### Fixable
 
-- [SemverRangeMismatch](/status/semver-range-mismatch)
+- [SemverRangeMismatch](/status/semver-range-mismatch/)
 
 ### Unfixable
 
-- [SameRangeMismatch](/status/same-range-mismatch)
+- [SameRangeMismatch](/status/same-range-mismatch/)
