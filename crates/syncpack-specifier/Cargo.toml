@@ -8,12 +8,10 @@ license = "MIT"
 
 [dev-dependencies]
 criterion = { version = "0.8.2", features = ["html_reports"] }
-ctor = "1.0.5"
 
 [[bench]]
 name = "specifier_parsing"
 harness = false
 
 [dependencies]
-log = "0.4.29"
 node-semver = "2.2.0"

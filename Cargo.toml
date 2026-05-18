@@ -14,9 +14,6 @@ keywords = ["monorepo", "npm", "pnpm", "semver", "turborepo"]
 readme = "./README.md"
 include = ["src/**/*.rs"]
 
-[dev-dependencies]
-ctor = "0.6.3"
-
 [dependencies]
 async-trait = "0.1.89"
 clap = { version = "4.6.1", features = ["cargo"] }
