@@ -1,0 +1,80 @@
+---
+title: What's New
+description: High-level summary of changes to syncpack's public API and documentation since v15.0.0
+sidebar:
+  badge: New
+---
+
+import { Badge } from "@astrojs/starlight/components";
+
+## Range Only version group <Badge text="15.3.0" variant="note" />
+
+[`semverRangeOnly`](VERSION_GROUP_RANGE_ONLY) enforces a consistent semver range prefix (`^`, `~`, exact) across instances without syncing the version numbers themselves.
+
+## Update summary lists only accepted updates <Badge text="15.3.0" variant="note" />
+
+The summary printed after choosing updates to apply using [`syncpack update --interactive`](COMMAND_UPDATE) now lists only the updates you actually applied, rather than every candidate found.
+
+## Optionally override autofix per status code <Badge text="15.2.0" variant="note" />
+
+The [`severity`](REF_SEVERITY) map on a version group lets you disable autofixing on a per-[status code](REF_STATUS_CODES) basis, and instead error or warn.
+
+```jsonc title=".syncpackrc.json"
+{
+  "versionGroups": [
+    {
+      "dependencies": ["lodash"],
+      "isBanned": true,
+      "severity": { "IsBanned": "warn" },
+    },
+  ],
+}
+```
+
+## Extend source patterns instead of replacing <Badge text="15.2.0" variant="note" />
+
+A new [`sourceMode`](CONFIG_SOURCE_MODE) option (and `--source-mode` flag) can override the default of `"replace"` to use `"extend"` to append your package.json glob patterns to those discovered from `workspaces` / `pnpm-workspace.yaml` / `lerna.json`.
+
+## Non-`package.json` files as sources <Badge text="15.2.0" variant="note" />
+
+A fairly niche feature request, but the [`source`](CONFIG_SOURCE) option now accepts other `.json` filenames than `package.json` when explicitly listed. Some bugs with Glob and gitignore matching were also fixed in this release.
+
+## Update Groups <Badge text="15.1.1" variant="note" />
+
+[`updateGroups`](CONFIG_UPDATE_GROUPS) control how and whether various parts of your monorepo should be updated from the npm registry. See [Targeted](UPDATE_GROUP_TARGETED) and [Ignored](UPDATE_GROUP_IGNORED).
+
+```jsonc title=".syncpackrc.json"
+{
+  "updateGroups": [
+    { "dependencies": ["storybook", "@storybook/**"], "target": "patch" },
+    { "dependencyTypes": ["dev"], "target": "minor" },
+    { "dependencyTypes": ["peer"], "isIgnored": true },
+  ],
+}
+```
+
+When both the CLI's `--target` and a group's `target` apply, the **stricter** of the two wins.
+
+## Interactive update picker <Badge text="15.1.1" variant="note" />
+
+`syncpack update --interactive` opens a keyboard-driven picker so you choose which updates to apply. Use `space` to toggle, `a` to toggle all, `enter` to confirm.
+
+## Registry response caching <Badge text="15.1.1" variant="note" />
+
+Registry responses are cached on disk for 30 minutes by default to avoid repeat network calls. Pass `--no-cache` to bypass for the current run.
+
+## pnpm and Bun catalogs <Badge text="15.0.0" variant="note" />
+
+Full support for the `catalog:` protocol. Define a dependency's version once and have every package consume it via `catalog:` or `catalog:{name}`.
+
+- New [Catalog](VERSION_GROUP_CATALOG) version group enforces that matched dependencies live in a catalog and are consumed via the protocol.
+- Syncpack writes catalog entries to `pnpm-workspace.yaml` (pnpm) or the root `package.json` (Bun), creating the implicit `default` catalog at fix time when one does not yet exist.
+- Filter updates by catalog: `syncpack update --dependency-types pnpmCatalog`, or by named catalog: `pnpmCatalog:react18`.
+
+## minimumReleaseAge <Badge text="15.0.0" variant="note" />
+
+[`minimumReleaseAge`](CONFIG_MINIMUM_RELEASE_AGE) excludes versions published more recently than the configured window, reducing supply-chain attack risk. Defaults to `1440` minutes (one day). Inherits from `pnpm-workspace.yaml` when unset; set `0` to disable.
+
+## pnpmOverrides reads from pnpm-workspace.yaml <Badge text="15.0.0" variant="danger" />
+
+**Breaking change.** The default `pnpmOverrides` dependency type now reads `overrides` from `pnpm-workspace.yaml` instead of `pnpm.overrides` in `package.json`. See the [v15 migration guide](GUIDE_MIGRATE_V15) for how to restore the legacy behaviour with `pnpmOverridesLegacy`.
