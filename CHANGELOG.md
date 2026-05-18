@@ -1,5 +1,12 @@
 # Changelog
 
+## [15.3.0](https://github.com/JamieMason/syncpack/compare/15.2.0...15.3.0) (2026-05-18)
+
+### Features
+
+* **groups:** add range only version group ([a9d511a](https://github.com/JamieMason/syncpack/commit/a9d511a097b373e14559614e945ad512bb83912b))
+* **update:** only list selected updates in summary ([63d17e5](https://github.com/JamieMason/syncpack/commit/63d17e5d41a9329a60763d49e8f2ec8d6611db5b))
+
 ## [15.2.0](https://github.com/JamieMason/syncpack/compare/15.1.2...15.2.0) (2026-05-17)
 
 ### Features
