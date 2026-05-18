@@ -4,7 +4,7 @@
     "paths": {
       "@site/*": ["./src/*"],
       "@partials/*": ["./src/_partials/*"],
-      "@components/*": ["./src/components/*"],
-    },
-  },
+      "@components/*": ["./src/components/*"]
+    }
+  }
 }
