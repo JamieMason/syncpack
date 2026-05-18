@@ -17,7 +17,7 @@ Require dependencies to be defined in a [pnpm](HREF_PNPM) or [Bun](https://bun.s
 
 Use this group when you want a single source of truth for a dependency's version across the monorepo. Members of the group must either be a catalog definition or use `catalog:` / `catalog:{name}` to point at one. Syncpack will fix instances that use a literal version specifier by replacing them with `catalog:` and, where needed, inserting the dependency into the catalog.
 
-When no catalog yet exists and the project uses pnpm or Bun, Syncpack creates the implicit `default` catalog at fix time. For npm, yarn, or unknown package managers there is no catalog system to write to and instances are flagged as [CannotInferCatalogFile](/status/cannot-infer-catalog-file/).
+When no catalog yet exists and the project uses pnpm or Bun, Syncpack creates the implicit `default` catalog at fix time. For npm, yarn, or unknown package managers there is no catalog system to write to and instances are flagged as [CannotInferCatalogFile](STATUS_CANNOT_INFER_CATALOG_FILE).
 
 ## Configuration
 
@@ -85,21 +85,21 @@ These are all the issues that a {frontmatter.title} Version Group can find:
 
 ### Valid
 
-- [IsCatalog](/status/is-catalog/)
-- [IsCatalogDefinition](/status/is-catalog-definition/)
+- [IsCatalog](STATUS_IS_CATALOG)
+- [IsCatalogDefinition](STATUS_IS_CATALOG_DEFINITION)
 
 ### Fixable
 
-- [NotUsingCatalog](/status/not-using-catalog/)
-- [MissingFromCatalog](/status/missing-from-catalog/)
+- [NotUsingCatalog](STATUS_NOT_USING_CATALOG)
+- [MissingFromCatalog](STATUS_MISSING_FROM_CATALOG)
 
 ### Unfixable
 
-- [NotUsingCatalogAndCatalogUnknown](/status/not-using-catalog-and-catalog-unknown/)
-- [MissingFromCatalogAndNonSemverMismatch](/status/missing-from-catalog-and-non-semver-mismatch/)
-- [CannotInferCatalogFile](/status/cannot-infer-catalog-file/)
+- [NotUsingCatalogAndCatalogUnknown](STATUS_NOT_USING_CATALOG_AND_CATALOG_UNKNOWN)
+- [MissingFromCatalogAndNonSemverMismatch](STATUS_MISSING_FROM_CATALOG_AND_NON_SEMVER_MISMATCH)
+- [CannotInferCatalogFile](STATUS_CANNOT_INFER_CATALOG_FILE)
 
 ### Suspect
 
-- [DependsOnMissingCatalogDefinition](/status/depends-on-missing-catalog-definition/)
-- [RefuseToCatalogLocal](/status/refuse-to-catalog-local/)
+- [DependsOnMissingCatalogDefinition](STATUS_DEPENDS_ON_MISSING_CATALOG_DEFINITION)
+- [RefuseToCatalogLocal](STATUS_REFUSE_TO_CATALOG_LOCAL)

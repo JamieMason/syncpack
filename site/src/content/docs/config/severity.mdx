@@ -53,14 +53,14 @@ Every [status code](REF_STATUS_CODES) syncpack assigns has a default treatment: 
 
 When a status has no explicit entry in the map, syncpack falls back to a default appropriate for its kind:
 
-| Status Code Type                                                                                    | Configurable? | Default severity |
-| --------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
-| [Valid](REF_STATUS_CODES_VALID)                                                                     | no            | n/a              |
-| [Fixable](REF_STATUS_CODES_FIXABLE)                                                                 | yes           | `"fix"`          |
-| [Unfixable](REF_STATUS_CODES_UNFIXABLE)                                                             | no            | `"error"`        |
-| [RefuseToPinLocal](/status/refuse-to-pin-local/) / [RefuseToSnapLocal](/status/refuse-to-snap-local/) | yes           | `"warn"`         |
-| [Suspect](REF_STATUS_CODES_SUSPECT)                                                                 | no            | `"warn"`         |
-| [Conflict](REF_STATUS_CODES_CONFLICT) (between version + semver groups)                             | no            | `"error"`        |
+| Status Code Type                                                                                  | Configurable? | Default severity |
+| ------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| [Valid](REF_STATUS_CODES_VALID)                                                                   | no            | n/a              |
+| [Fixable](REF_STATUS_CODES_FIXABLE)                                                               | yes           | `"fix"`          |
+| [Unfixable](REF_STATUS_CODES_UNFIXABLE)                                                           | no            | `"error"`        |
+| [RefuseToPinLocal](STATUS_REFUSE_TO_PIN_LOCAL) / [RefuseToSnapLocal](STATUS_REFUSE_TO_SNAP_LOCAL) | yes           | `"warn"`         |
+| [Suspect](REF_STATUS_CODES_SUSPECT)                                                               | no            | `"warn"`         |
+| [Conflict](REF_STATUS_CODES_CONFLICT) (between version + semver groups)                           | no            | `"error"`        |
 
 [`strict: true`](CONFIG_STRICT) escalates every unconfigured Suspect default from `"warn"` to `"error"`. It does not touch Fixable defaults, and explicit severity always wins: `"RefuseToPinLocal": "warn"` stays `"warn"` even under `strict: true`.
 
