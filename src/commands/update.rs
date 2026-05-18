@@ -117,6 +117,29 @@ struct Bucket {
   indices: Vec<InstanceIdx>,
 }
 
+/// Keep only the rows the user picked, then rewrite each remaining row's
+/// `dependency_outdated_count` to the sum of bucket counts that survived
+/// the filter for its (group, dependency). Otherwise a multi-bucket dep
+/// with one bucket left would still print the original total.
+pub fn filter_rows_for_display(rows: &[UpdateRow], selection: &[bool]) -> Vec<UpdateRow> {
+  let mut filtered: Vec<UpdateRow> = rows
+    .iter()
+    .zip(selection.iter())
+    .filter(|&(_, &picked)| picked)
+    .map(|(row, _)| row.clone())
+    .collect();
+  let mut totals: std::collections::HashMap<(usize, String), usize> = std::collections::HashMap::new();
+  for row in &filtered {
+    *totals.entry((row.group_idx, row.dependency_name.clone())).or_insert(0) += row.bucket_count;
+  }
+  for row in &mut filtered {
+    if let Some(total) = totals.get(&(row.group_idx, row.dependency_name.clone())) {
+      row.dependency_outdated_count = *total;
+    }
+  }
+  filtered
+}
+
 pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &D, tui: &dyn Tui) -> Result<Context, SyncpackError> {
   let now = update_row::unix_now();
   let rows = build_update_rows(&ctx, &registry_updates, now);
@@ -158,9 +181,12 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
     (None, (0..rows.len()).collect())
   };
 
-  update_row::render_rows(&rows, selection.as_deref());
+  let filtered_for_display: Option<Vec<UpdateRow>> = selection.as_deref().map(|sel| filter_rows_for_display(&rows, sel));
+  let display_rows: &[UpdateRow] = filtered_for_display.as_deref().unwrap_or(&rows);
 
-  let counts = update_row::count_diffs(&rows);
+  update_row::render_rows(display_rows, None);
+
+  let counts = update_row::count_diffs(display_rows);
   update_row::render_summary(counts);
 
   // Apply selected rows by copying expected → actual through the

@@ -1,6 +1,6 @@
 use {
   crate::{
-    commands::update::build_update_rows,
+    commands::update::{build_update_rows, filter_rows_for_display},
     test::{builder::TestBuilder, mock_tui::MockTui},
   },
   serde_json::json,
@@ -254,6 +254,45 @@ async fn mock_tui_cancel_returns_none() {
   let rows = vec![];
   let tui = MockTui::cancel();
   assert!(tui.pick(&rows, 80, 24).is_none());
+}
+
+#[tokio::test]
+async fn filter_rows_for_display_drops_unselected_and_recomputes_dep_total() {
+  let (ctx, updates) = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "version": "1.0.0",
+        "dependencies": {"foo": "^1.0.0"}
+      }),
+      json!({
+        "name": "package-b",
+        "version": "1.0.0",
+        "dependencies": {"foo": "~1.0.0"}
+      }),
+      json!({
+        "name": "package-c",
+        "version": "1.0.0",
+        "dependencies": {"foo": "1.0.0"}
+      }),
+    ])
+    .with_registry_updates(json!({"foo": ["1.0.0", "1.0.1"]}))
+    .run_with_updates()
+    .await;
+  let rows = build_update_rows(&ctx, &updates.unwrap(), FROZEN_NOW);
+  assert_eq!(rows.len(), 3, "three buckets for foo");
+  for row in &rows {
+    assert_eq!(row.dependency_outdated_count, 3, "pre-filter total reflects all buckets");
+  }
+
+  let selection = vec![true, false, false];
+  let filtered = filter_rows_for_display(&rows, &selection);
+  assert_eq!(filtered.len(), 1, "only the selected bucket survives");
+  assert_eq!(
+    filtered[0].dependency_outdated_count, 1,
+    "dep total recomputed to selected bucket counts"
+  );
+  assert_eq!(filtered[0].bucket_count, 1);
 }
 
 mod apply {
