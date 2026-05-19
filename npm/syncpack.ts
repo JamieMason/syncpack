@@ -149,6 +149,12 @@ namespace VersionGroup {
     /** @see https://syncpack.dev/version-groups/same-range/#severity */
     severity?: { SemverRangeMismatch?: Severity };
   }
+  export interface SemverRangeOnly extends GroupSelector {
+    /** @see https://syncpack.dev/version-groups/range-only/#policy */
+    policy: 'semverRangeOnly';
+    /** @see https://syncpack.dev/version-groups/range-only/#severity */
+    severity?: { SemverRangeMismatch?: Severity };
+  }
   export interface SameMinor extends GroupSelector {
     /** @see https://syncpack.dev/version-groups/same-minor/#policy */
     policy: 'sameMinor';
@@ -180,7 +186,16 @@ namespace VersionGroup {
       MissingFromCatalog?: Severity;
     };
   }
-  export type Any = Banned | Catalog | Ignored | Pinned | SameRange | SameMinor | SnappedTo | Standard;
+  export type Any =
+    | Banned
+    | Catalog
+    | Ignored
+    | Pinned
+    | SameRange
+    | SameMinor
+    | SemverRangeOnly
+    | SnappedTo
+    | Standard;
 }
 
 namespace CustomType {
@@ -295,6 +310,7 @@ export type VersionGroupVariant =
   | 'Pinned'
   | 'SameRange'
   | 'SameMinor'
+  | 'SemverRangeOnly'
   | 'SnappedTo';
 
 export type StatusCode =
@@ -309,6 +325,7 @@ export type StatusCode =
   | 'SatisfiesLocal'
   | 'SatisfiesSameRangeGroup'
   | 'SatisfiesSameMinorGroup'
+  | 'MatchesSemverGroup'
   | 'SatisfiesSnapTarget'
   | 'DiffersToCatalog'
   | 'DiffersToHighestOrLowestSemver'
