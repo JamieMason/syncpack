@@ -1,5 +1,11 @@
 # Changelog
 
+## [15.3.1](https://github.com/JamieMason/syncpack/compare/15.3.0...15.3.1) (2026-05-19)
+
+### Bug Fixes
+
+* **types:** update typescript types for 5.3.0 ([82a435b](https://github.com/JamieMason/syncpack/commit/82a435bfb1515bd7a568026067e4509b900d546f))
+
 ## [15.3.0](https://github.com/JamieMason/syncpack/compare/15.2.0...15.3.0) (2026-05-18)
 
 ### Features

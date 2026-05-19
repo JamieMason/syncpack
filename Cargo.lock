@@ -1606,7 +1606,7 @@ dependencies = [
 
 [[package]]
 name = "syncpack"
-version = "15.3.0"
+version = "15.3.1"
 dependencies = [
  "async-trait",
  "clap",
@@ -1637,7 +1637,7 @@ dependencies = [
 
 [[package]]
 name = "syncpack-specifier"
-version = "15.3.0"
+version = "15.3.1"
 dependencies = [
  "criterion",
  "node-semver",
