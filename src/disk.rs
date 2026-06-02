@@ -710,6 +710,35 @@ pub fn json_view(file: &YamlFile) -> JsonValue {
   yaml_to_json(&file.contents)
 }
 
+/// Where in a `pnpm-workspace.yaml` a dependency definition is written: a flat
+/// top-level block such as `catalog:` or `overrides:`, or a named catalog
+/// nested under `catalogs.<name>:`.
+#[derive(Clone, Copy)]
+enum YamlTarget<'a> {
+  Block(&'a str),
+  NamedCatalog(&'a str),
+}
+
+impl<'a> YamlTarget<'a> {
+  /// `"default"` is the flat `catalog:` block; any other name nests under
+  /// `catalogs.<name>:`.
+  fn catalog(catalog_name: &'a str) -> Self {
+    match catalog_name {
+      "default" => YamlTarget::Block("catalog"),
+      name => YamlTarget::NamedCatalog(name),
+    }
+  }
+
+  /// The path of mapping keys from the document root down to the block that
+  /// holds the `dep_name: specifier` entries.
+  fn segments(self) -> Vec<String> {
+    match self {
+      YamlTarget::Block(key) => vec![key.to_string()],
+      YamlTarget::NamedCatalog(name) => vec!["catalogs".to_string(), name.to_string()],
+    }
+  }
+}
+
 /// Insert `dep_name → specifier` under the named catalog block. Idempotent —
 /// if the value already matches, no mutation occurs and `dirty` stays as it
 /// was. Returns `true` when in-memory state changed.
@@ -719,14 +748,20 @@ pub fn json_view(file: &YamlFile) -> JsonValue {
 /// pushes a `PendingYamlOp` describing the edit so the write path can replay
 /// it via `yamlpatch` and preserve formatting.
 pub fn insert_catalog_definition(file: &mut YamlFile, catalog_name: &str, dep_name: &str, specifier: &Rc<Specifier>) -> bool {
-  let raw = specifier.get_raw().to_string();
-  let next_value = YamlValue::String(raw);
-  // Choose patch shape from PRE-mutation state. The in-memory `contents`
-  // is mutated below via `ensure_catalog_block`/`insert`.
-  let pending = build_insert_patch(file, catalog_name, dep_name, &next_value);
-  let block = ensure_catalog_block(file, catalog_name);
-  let current = block.get(dep_name);
-  if current == Some(&next_value) {
+  insert_into_target(file, YamlTarget::catalog(catalog_name), dep_name, specifier)
+}
+
+/// Insert `dep_name → specifier` into `target`, creating any missing blocks.
+/// Idempotent — returns `true` only when in-memory state changed — and records
+/// a `PendingYamlOp` so the write path replays the edit via `yamlpatch` and
+/// preserves formatting.
+fn insert_into_target(file: &mut YamlFile, target: YamlTarget, dep_name: &str, specifier: &Rc<Specifier>) -> bool {
+  let next_value = YamlValue::String(specifier.get_raw().to_string());
+  // Choose patch shape from PRE-mutation state; `ensure_block` mutates
+  // `file.contents` below.
+  let pending = build_insert_patch(file, &target.segments(), dep_name, &next_value);
+  let block = ensure_block(file, target);
+  if block.get(dep_name) == Some(&next_value) {
     return false;
   }
   block.insert(YamlValue::String(dep_name.to_string()), next_value);
@@ -737,77 +772,64 @@ pub fn insert_catalog_definition(file: &mut YamlFile, catalog_name: &str, dep_na
   true
 }
 
-/// Determine the right `PendingYamlOp` for an insert based on the
-/// pre-mutation state of `file.contents`. Returns `None` when the
-/// existing value already equals `next_value` (idempotent case).
-fn build_insert_patch(file: &YamlFile, catalog_name: &str, dep_name: &str, next_value: &YamlValue) -> Option<PendingYamlOp> {
-  let root = match &file.contents {
-    YamlValue::Mapping(map) => Some(map),
-    _ => None,
-  };
-  if catalog_name == "default" {
-    let existing_block = root.and_then(|r| r.get("catalog")).and_then(|v| v.as_mapping());
-    let existing_value = existing_block.and_then(|b| b.get(dep_name));
-    if existing_value == Some(next_value) {
-      return None;
-    }
-    if existing_value.is_some() {
-      return Some(PendingYamlOp::Replace {
-        segments: vec!["catalog".to_string(), dep_name.to_string()],
-        value: next_value.clone(),
-      });
-    }
-    if existing_block.is_some() {
-      return Some(PendingYamlOp::Add {
-        segments: vec!["catalog".to_string()],
-        key: dep_name.to_string(),
-        value: next_value.clone(),
-      });
-    }
-    let mut nested = Mapping::new();
-    nested.insert(YamlValue::String(dep_name.to_string()), next_value.clone());
-    Some(PendingYamlOp::Add {
-      segments: Vec::new(),
-      key: "catalog".to_string(),
-      value: YamlValue::Mapping(nested),
-    })
-  } else {
-    let catalogs = root.and_then(|r| r.get("catalogs")).and_then(|v| v.as_mapping());
-    let existing_named = catalogs.and_then(|c| c.get(catalog_name)).and_then(|v| v.as_mapping());
-    let existing_value = existing_named.and_then(|n| n.get(dep_name));
-    if existing_value == Some(next_value) {
-      return None;
-    }
-    if existing_value.is_some() {
-      return Some(PendingYamlOp::Replace {
-        segments: vec!["catalogs".to_string(), catalog_name.to_string(), dep_name.to_string()],
-        value: next_value.clone(),
-      });
-    }
-    if existing_named.is_some() {
-      return Some(PendingYamlOp::Add {
-        segments: vec!["catalogs".to_string(), catalog_name.to_string()],
-        key: dep_name.to_string(),
-        value: next_value.clone(),
-      });
-    }
-    let mut named_map = Mapping::new();
-    named_map.insert(YamlValue::String(dep_name.to_string()), next_value.clone());
-    if catalogs.is_some() {
-      return Some(PendingYamlOp::Add {
-        segments: vec!["catalogs".to_string()],
-        key: catalog_name.to_string(),
-        value: YamlValue::Mapping(named_map),
-      });
-    }
-    let mut catalogs_map = Mapping::new();
-    catalogs_map.insert(YamlValue::String(catalog_name.to_string()), YamlValue::Mapping(named_map));
-    Some(PendingYamlOp::Add {
-      segments: Vec::new(),
-      key: "catalogs".to_string(),
-      value: YamlValue::Mapping(catalogs_map),
-    })
+/// Descend `segments` from `root`, returning the mapping at that path when
+/// every segment exists and is itself a mapping. `segments == []` yields
+/// `root` unchanged.
+fn descend_to_block<'a>(root: Option<&'a Mapping>, segments: &[String]) -> Option<&'a Mapping> {
+  segments
+    .iter()
+    .fold(root, |node, seg| node.and_then(|m| m.get(seg)).and_then(|v| v.as_mapping()))
+}
+
+/// Wrap `dep_name → value` in one nested single-key mapping per `suffix`
+/// segment, outermost first. `suffix == []` yields just `{ dep_name: value }`.
+fn nest(suffix: &[String], dep_name: &str, value: &YamlValue) -> YamlValue {
+  let mut leaf = Mapping::new();
+  leaf.insert(YamlValue::String(dep_name.to_string()), value.clone());
+  suffix.iter().rev().fold(YamlValue::Mapping(leaf), |acc, seg| {
+    let mut wrapper = Mapping::new();
+    wrapper.insert(YamlValue::String(seg.clone()), acc);
+    YamlValue::Mapping(wrapper)
+  })
+}
+
+/// Determine the `PendingYamlOp` for writing `dep_name → next_value` into the
+/// block at `segments` (e.g. `["catalog"]`, `["overrides"]`, or
+/// `["catalogs", name]`), based on the pre-mutation state of `file.contents`.
+/// Returns `None` when the existing value already equals `next_value`.
+fn build_insert_patch(file: &YamlFile, segments: &[String], dep_name: &str, next_value: &YamlValue) -> Option<PendingYamlOp> {
+  let root = file.contents.as_mapping();
+  let existing_block = descend_to_block(root, segments);
+  let existing_value = existing_block.and_then(|b| b.get(dep_name));
+  if existing_value == Some(next_value) {
+    return None;
   }
+  if existing_value.is_some() {
+    let mut path = segments.to_vec();
+    path.push(dep_name.to_string());
+    return Some(PendingYamlOp::Replace {
+      segments: path,
+      value: next_value.clone(),
+    });
+  }
+  if existing_block.is_some() {
+    return Some(PendingYamlOp::Add {
+      segments: segments.to_vec(),
+      key: dep_name.to_string(),
+      value: next_value.clone(),
+    });
+  }
+  // No block at `segments` yet: add the missing suffix below the deepest
+  // ancestor mapping that does exist.
+  let depth = (0..segments.len())
+    .rev()
+    .find(|&i| descend_to_block(root, &segments[..i]).is_some())
+    .unwrap_or(0);
+  Some(PendingYamlOp::Add {
+    segments: segments[..depth].to_vec(),
+    key: segments[depth].clone(),
+    value: nest(&segments[depth + 1..], dep_name, next_value),
+  })
 }
 
 /// Remove `dep_name` from the named catalog block. If removal empties the
@@ -872,18 +894,27 @@ pub fn remove_catalog_definition(file: &mut YamlFile, catalog_name: &str, dep_na
   removed
 }
 
-/// Apply a consumer instance's `expected_specifier` to the yaml via the
-/// catalog-definition route. No-op when the instance is not a catalog
-/// instance or has no expected specifier.
+/// Apply a consumer instance's `expected_specifier` to the yaml. Catalog
+/// instances route through the catalog-definition path; non-catalog
+/// `PnpmWorkspace` instances (pnpm `overrides`, which use the
+/// `versionsByName` strategy) write into the top-level block named by the
+/// dep type's `path` (e.g. `overrides`). No-op when the instance has no
+/// expected specifier.
 pub fn copy_expected_specifier_yaml(file: &mut YamlFile, instance: &Instance) {
-  let Some(catalog_name) = instance.catalog_name() else {
-    return;
-  };
   let Some(expected) = instance.expected_specifier.borrow().clone() else {
     return;
   };
   let dep_name = instance.descriptor.name.clone();
-  insert_catalog_definition(file, catalog_name, &dep_name, &expected);
+  if let Some(catalog_name) = instance.catalog_name() {
+    insert_catalog_definition(file, catalog_name, &dep_name, &expected);
+    return;
+  }
+  // `overrides` is a flat `name: version` block — the same shape as the
+  // default `catalog:` block. `path` is its JSON pointer, e.g. `/overrides`.
+  if matches!(instance.descriptor.dependency_type.strategy, Strategy::VersionsByName) {
+    let block_key = instance.descriptor.dependency_type.path.trim_start_matches('/');
+    insert_into_target(file, YamlTarget::Block(block_key), &dep_name, &expected);
+  }
 }
 
 /// Persist a JSON file when dirty. Returns `Ok(true)` on actual write,
@@ -966,41 +997,39 @@ fn json_values_differ(a: &JsonValue, b: &JsonValue) -> bool {
   }
 }
 
-/// Get-or-create the catalog block (top-level `catalog` for default, or a
-/// nested entry under `catalogs.{name}` for named catalogs) as a mapping.
-fn ensure_catalog_block<'a>(file: &'a mut YamlFile, catalog_name: &str) -> &'a mut Mapping {
-  // Promote root to a Mapping if it was Null (freshly created file).
+/// Get-or-create the child mapping at `key`, replacing any non-mapping value
+/// already there. The returned reference borrows `map`.
+fn get_or_insert_mapping<'a>(map: &'a mut Mapping, key: &str) -> &'a mut Mapping {
+  let map_key = YamlValue::String(key.to_string());
+  if !matches!(map.get(&map_key), Some(YamlValue::Mapping(_))) {
+    map.insert(map_key.clone(), YamlValue::Mapping(Mapping::new()));
+  }
+  let YamlValue::Mapping(block) = map.get_mut(&map_key).expect("just inserted") else {
+    unreachable!();
+  };
+  block
+}
+
+/// Get-or-create a flat top-level block named `key` as a mapping, promoting
+/// the document root if it was not already a mapping. Shared by the default
+/// `catalog:` block and pnpm `overrides:`.
+fn ensure_yaml_block<'a>(file: &'a mut YamlFile, key: &str) -> &'a mut Mapping {
   if !matches!(file.contents, YamlValue::Mapping(_)) {
     file.contents = YamlValue::Mapping(Mapping::new());
   }
   let YamlValue::Mapping(ref mut root) = file.contents else {
     unreachable!("just promoted to Mapping");
   };
-  if catalog_name == "default" {
-    let key = YamlValue::String("catalog".to_string());
-    if !matches!(root.get(&key), Some(YamlValue::Mapping(_))) {
-      root.insert(key.clone(), YamlValue::Mapping(Mapping::new()));
-    }
-    let YamlValue::Mapping(block) = root.get_mut(&key).expect("just inserted") else {
-      unreachable!();
-    };
-    block
-  } else {
-    let catalogs_key = YamlValue::String("catalogs".to_string());
-    if !matches!(root.get(&catalogs_key), Some(YamlValue::Mapping(_))) {
-      root.insert(catalogs_key.clone(), YamlValue::Mapping(Mapping::new()));
-    }
-    let YamlValue::Mapping(catalogs) = root.get_mut(&catalogs_key).expect("just inserted") else {
-      unreachable!();
-    };
-    let name_key = YamlValue::String(catalog_name.to_string());
-    if !matches!(catalogs.get(&name_key), Some(YamlValue::Mapping(_))) {
-      catalogs.insert(name_key.clone(), YamlValue::Mapping(Mapping::new()));
-    }
-    let YamlValue::Mapping(block) = catalogs.get_mut(&name_key).expect("just inserted") else {
-      unreachable!();
-    };
-    block
+  get_or_insert_mapping(root, key)
+}
+
+/// Get-or-create the mapping that holds a target's `dep_name: specifier`
+/// entries, creating intermediate blocks (and promoting the document root)
+/// as needed.
+fn ensure_block<'a>(file: &'a mut YamlFile, target: YamlTarget) -> &'a mut Mapping {
+  match target {
+    YamlTarget::Block(key) => ensure_yaml_block(file, key),
+    YamlTarget::NamedCatalog(name) => get_or_insert_mapping(ensure_yaml_block(file, "catalogs"), name),
   }
 }
 

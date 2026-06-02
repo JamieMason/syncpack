@@ -93,6 +93,46 @@ fn pnpm_fix_not_using_catalog() {
 }
 
 #[test]
+fn pnpm_fix_updates_overrides_in_yaml() {
+  // pnpm-workspace.yaml `overrides` pins react below the version group's
+  // pinVersion. Fix must rewrite the override in the yaml — not just the
+  // package.json consumers. Regression test for `copy_expected_specifier_yaml`
+  // silently no-opping on non-catalog (versionsByName) PnpmWorkspace instances.
+  let yaml = "overrides:\n  react: 19.2.6\n";
+  let ctx = TestBuilder::new()
+    .with_pnpm_catalogs(yaml)
+    .with_packages(vec![json!({
+      "name": "pkg-a",
+      "version": "0.0.0",
+      "dependencies": {"react": "19.2.6"},
+    })])
+    .with_version_group(json!({
+      "label": "pin react",
+      "dependencies": ["react"],
+      "pinVersion": "19.2.7",
+    }))
+    .build_and_visit_packages();
+  let ctx = run_fix_ok(ctx);
+
+  let yaml = pnpm_yaml(&ctx).unwrap();
+  let got = yaml
+    .contents
+    .get("overrides")
+    .and_then(|m| m.get("react"))
+    .and_then(|v| v.as_str())
+    .map(str::to_string);
+  assert_eq!(got, Some("19.2.7".to_string()), "override should be bumped to the pinned version");
+  assert!(yaml.is_dirty(), "yaml should be dirty after override rewrite");
+
+  let pkg = find_package(&ctx, "pkg-a");
+  assert_eq!(
+    pkg.contents.pointer("/dependencies/react").and_then(|v| v.as_str()),
+    Some("19.2.7"),
+    "consumer react should be pinned too"
+  );
+}
+
+#[test]
 fn pnpm_fix_missing_from_catalog_inserts_definition() {
   // Catalog exists but lacks `react`. Consumer has real specifier. Fix
   // inserts `react → ^18.0.0` into yaml AND writes `catalog:` into consumer.
