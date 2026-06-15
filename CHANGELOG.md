@@ -1,5 +1,12 @@
 # Changelog
 
+## [15.3.2](https://github.com/JamieMason/syncpack/compare/15.3.1...15.3.2) (2026-06-15)
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([5074c2f](https://github.com/JamieMason/syncpack/commit/5074c2f3b9570acac1acc7e53a440b5930a200bf))
+* **pnpm:** write pnpmOverrides to pnpm-workspace.yaml ([ef7639e](https://github.com/JamieMason/syncpack/commit/ef7639e9ed3ea3adf3e75c9e23267189a702bf4e)), closes [#336](https://github.com/JamieMason/syncpack/issues/336)
+
 ## [15.3.1](https://github.com/JamieMason/syncpack/compare/15.3.0...15.3.1) (2026-05-19)
 
 ### Bug Fixes
