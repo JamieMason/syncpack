@@ -691,6 +691,148 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
   ]);
 }
 
+/// Regression test for issue #298: when a sameRange version group matches
+/// multiple *different* dependency names (e.g. `@nx/*` and `nx`) and each
+/// appears only once (single package.json), each dep's DependencyCore contains
+/// exactly one instance. Previously `already_satisfies_all` received a
+/// one-element list that trivially passes — every instance satisfied only
+/// itself, so the group reported "no issues" even when the exact pinned
+/// versions diverged.
+///
+/// The fix: check each instance against ALL instances across ALL deps in the
+/// group, not just against its own dep-name's sibling instances.
+#[tokio::test]
+async fn cross_dep_exact_versions_that_differ_are_flagged_issue_298() {
+  // Mirrors the minimal repro from issue #298:
+  //   npm pkg set dependencies.nx=21.3.0 dependencies.@nx/js=21.3.1 dependencies.@nx/eslint=21.3.2
+  //   syncpack lint  →  was: "✓ No issues found"  (wrong)
+  //                 →  want: SameRangeMismatch on every instance  (correct)
+  let ctx = TestBuilder::new()
+    .with_packages(vec![json!({
+      "name": "repro",
+      "dependencies": {
+        "nx":         "21.3.0",
+        "@nx/js":     "21.3.1",
+        "@nx/eslint": "21.3.2"
+      }
+    })])
+    .with_version_groups(vec![
+      json!({
+        "dependencyTypes": ["local"],
+        "isIgnored": true
+      }),
+      json!({
+        "dependencies": ["nx", "@nx/*"],
+        "policy": "sameRange"
+      }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "repro",
+      id: "repro in /version of repro",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::unfixable(SameRangeMismatch),
+      dependency_name: "@nx/eslint",
+      id: "@nx/eslint in /dependencies of repro",
+      actual: "21.3.2",
+      expected: Some("21.3.2"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::unfixable(SameRangeMismatch),
+      dependency_name: "@nx/js",
+      id: "@nx/js in /dependencies of repro",
+      actual: "21.3.1",
+      expected: Some("21.3.1"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::unfixable(SameRangeMismatch),
+      dependency_name: "nx",
+      id: "nx in /dependencies of repro",
+      actual: "21.3.0",
+      expected: Some("21.3.0"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+/// When all cross-dep versions in the same sameRange group are identical
+/// pinned versions they should be valid (regression guard for the fix).
+#[tokio::test]
+async fn cross_dep_exact_versions_that_match_are_valid_issue_298() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![json!({
+      "name": "repro",
+      "dependencies": {
+        "nx":         "21.3.0",
+        "@nx/js":     "21.3.0",
+        "@nx/eslint": "21.3.0"
+      }
+    })])
+    .with_version_groups(vec![
+      json!({
+        "dependencyTypes": ["local"],
+        "isIgnored": true
+      }),
+      json!({
+        "dependencies": ["nx", "@nx/*"],
+        "policy": "sameRange"
+      }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "repro",
+      id: "repro in /version of repro",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "@nx/eslint",
+      id: "@nx/eslint in /dependencies of repro",
+      actual: "21.3.0",
+      expected: Some("21.3.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "@nx/js",
+      id: "@nx/js in /dependencies of repro",
+      actual: "21.3.0",
+      expected: Some("21.3.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "nx",
+      id: "nx in /dependencies of repro",
+      actual: "21.3.0",
+      expected: Some("21.3.0"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// Severity tests — opt out of auto-fix per status (issue #216).
 /// SameRange only permits `SemverRangeMismatch` (the only Fixable variant it
 /// produces). `SameRangeMismatch` itself is Unfixable and not user-tunable.

@@ -28,6 +28,16 @@ impl SameRangeGroup {
 
   pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
     let arena = &ctx.instances;
+    // Collect every instance index across all dep names in this group so that
+    // cross-dep comparisons work. Without this, a dep that appears only once
+    // (single package.json) trivially satisfies a one-element list — itself —
+    // and is always marked valid even when sibling deps have diverging versions.
+    // See: https://github.com/JamieMason/syncpack/issues/298
+    let all_indices: Vec<InstanceIdx> = self
+      .dependencies
+      .values()
+      .flat_map(|dep| dep.instances.iter().copied())
+      .collect();
     for dep in self.dependencies.values() {
       debug!("visit same range version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
@@ -35,7 +45,7 @@ impl SameRangeGroup {
         let instance = &arena[idx.0];
         let actual_specifier = &instance.descriptor.specifier;
         debug!("{L2}visit instance '{}' ({actual_specifier:?})", instance.id);
-        if instance.already_satisfies_all(&dep.instances, arena) {
+        if instance.already_satisfies_all(&all_indices, arena) {
           debug!("{L3}its specifier satisfies all other instances in the group");
           if instance.must_match_preferred_semver_range() {
             debug!("{L4}it belongs to a semver group");
