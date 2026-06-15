@@ -22,12 +22,12 @@ colored = "3.1.1"
 crossterm = "0.28.1"
 env_logger = "0.11.10"
 globset = "0.4.18"
-ignore = "0.4.25"
+ignore = "0.4.26"
 indicatif = "0.18.4"
 itertools = "0.14.0"
-log = "0.4.29"
+log = "0.4.32"
 node-semver = "2.2.0"
-regex = { version = "1.12.3", default-features = false, features = ["std"] }
+regex = { version = "1.12.4", default-features = false, features = ["std"] }
 reqwest = { version = "0.12", features = [
   "json",
   "rustls-tls",
@@ -35,7 +35,7 @@ reqwest = { version = "0.12", features = [
 detect-indent = "0.1.0"
 detect-newline-style = "0.1.2"
 serde = { version = "1.0.228", features = ["derive", "rc"] }
-serde_json = { version = "1.0.149", features = ["preserve_order"] }
+serde_json = { version = "1.0.150", features = ["preserve_order"] }
 syncpack-specifier = { path = "crates/syncpack-specifier" }
 thiserror = "2.0.18"
 yaml_serde = "0.10"
