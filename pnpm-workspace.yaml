@@ -9,3 +9,7 @@ allowBuilds:
 
 ignoredBuiltDependencies:
   - sharp
+
+peerDependencyRules:
+  allowedVersions:
+    satori-astro>astro: "7"

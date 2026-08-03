@@ -15,29 +15,29 @@ readme = "./README.md"
 include = ["src/**/*.rs"]
 
 [dependencies]
-async-trait = "0.1.89"
-clap = { version = "4.6.1", features = ["cargo"] }
+async-trait = "0.1.91"
+clap = { version = "4.6.5", features = ["cargo"] }
 color-print = "0.3.7"
 colored = "3.1.1"
-crossterm = "0.28.1"
-env_logger = "0.11.10"
-globset = "0.4.18"
-ignore = "0.4.26"
-indicatif = "0.18.4"
-itertools = "0.14.0"
-log = "0.4.32"
+crossterm = "0.29.0"
+env_logger = "0.11.11"
+globset = "0.4.19"
+ignore = "0.4.32"
+indicatif = "0.18.6"
+itertools = "0.15.0"
+log = "0.4.33"
 node-semver = "2.2.0"
-regex = { version = "1.12.4", default-features = false, features = ["std"] }
+regex = { version = "1.13.1", default-features = false, features = ["std"] }
 reqwest = { version = "0.12", features = [
   "json",
   "rustls-tls",
 ], default-features = false }
 detect-indent = "0.1.0"
 detect-newline-style = "0.1.2"
-serde = { version = "1.0.228", features = ["derive", "rc"] }
-serde_json = { version = "1.0.150", features = ["preserve_order"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }
+serde_json = { version = "1.0.151", features = ["preserve_order"] }
 syncpack-specifier = { path = "crates/syncpack-specifier" }
-thiserror = "2.0.18"
+thiserror = "2.0.19"
 yaml_serde = "0.10"
 yamlpatch = "1.25"
 yamlpath = "1.25"
