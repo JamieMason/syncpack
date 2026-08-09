@@ -502,7 +502,12 @@ pub(crate) fn get_pretty_json_bytes<V: serde::ser::Serialize>(file: &File<V>) ->
 /// - **Non-empty `raw` AND patches recorded**: build a `yamlpath::Document` from the original text, replay each `PendingYamlOp` as a
 ///   `yamlpatch::Patch`, and return the resulting `.source()` text. Comments, blank lines, key order, and indent are preserved.
 ///
-/// Errors from the format-preserving path surface as
+/// Patches apply one at a time against the previous result. A `Remove`
+/// whose route no longer resolves is skipped, because `yamlpath` collapses
+/// block parents which a removal leaves dangling. Flow parents
+/// (`catalog: {}`) are not collapsed, so their prune patch still applies.
+///
+/// Every other error from the format-preserving path surfaces as
 /// `DiskIoError::YamlPatch{Parse,Apply}` so callers refuse the write
 /// instead of silently degrading.
 pub fn render_yaml_bytes(file: &YamlFile) -> Result<Vec<u8>, DiskIoError> {
@@ -512,10 +517,16 @@ pub fn render_yaml_bytes(file: &YamlFile) -> Result<Vec<u8>, DiskIoError> {
     bytes.extend(file.formatting.newline.as_bytes());
     return Ok(bytes);
   }
-  let document = yamlpath::Document::new(file.raw.clone()).map_err(DiskIoError::YamlPatchParse)?;
-  let patches: Vec<yamlpatch::Patch<'static>> = file.patches.iter().map(pending_op_to_patch).collect();
-  let result = yamlpatch::apply_yaml_patches(&document, &patches).map_err(DiskIoError::YamlPatchApply)?;
-  Ok(result.source().as_bytes().to_vec())
+  let mut document = yamlpath::Document::new(file.raw.clone()).map_err(DiskIoError::YamlPatchParse)?;
+  for patch in file.patches.iter().map(pending_op_to_patch) {
+    match yamlpatch::apply_yaml_patches(&document, std::slice::from_ref(&patch)) {
+      Ok(patched) => document = patched,
+      // Parent already pruned by the child's removal; nothing left to do.
+      Err(yamlpatch::Error::Query(_)) if matches!(patch.operation, yamlpatch::Op::Remove) => {}
+      Err(err) => return Err(DiskIoError::YamlPatchApply(err)),
+    }
+  }
+  Ok(document.source().as_bytes().to_vec())
 }
 
 /// Convert a syncpack-side `PendingYamlOp` into a `yamlpatch::Patch`

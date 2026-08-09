@@ -597,6 +597,41 @@ fn yamlpatch_remove_last_dep_prunes_named_catalog_and_catalogs() {
 }
 
 #[test]
+fn yamlpatch_remove_sole_flow_dep_prunes_flow_parent() {
+  // Flow containers are not collapsed by `yamlpath`, so the parent-prune
+  // patch is what removes the emptied `catalog:` key.
+  let raw = "packages:\n  - 'apps/*'\ncatalog: {react: ^18.0.0}\n";
+  let mut yaml = yaml_from(raw);
+  remove_catalog_definition(&mut yaml, "default", "react");
+  let out = render(&yaml);
+  assert!(!out.contains("react"), "react gone:\n{out}");
+  assert!(!out.contains("catalog:"), "emptied flow catalog pruned:\n{out}");
+  assert!(out.contains("packages:"), "unrelated keys untouched:\n{out}");
+}
+
+#[test]
+fn yamlpatch_remove_sole_flow_dep_in_named_catalog_prunes_parents() {
+  let raw = "catalogs:\n  legacy: {react: ^16.0.0}\n";
+  let mut yaml = yaml_from(raw);
+  remove_catalog_definition(&mut yaml, "legacy", "react");
+  let out = render(&yaml);
+  assert!(!out.contains("react"), "react gone:\n{out}");
+  assert!(!out.contains("legacy"), "emptied flow catalog pruned:\n{out}");
+  assert!(!out.contains("catalogs:"), "emptied catalogs map pruned:\n{out}");
+}
+
+#[test]
+fn yamlpatch_remove_keeps_unrelated_keys_when_block_parent_collapses() {
+  // The dep patch collapses `catalog:` itself; the skipped parent patch
+  // must not disturb the rest of the document.
+  let raw = "packages:\n  - 'apps/*'\ncatalog:\n  react: ^18.0.0\n";
+  let mut yaml = yaml_from(raw);
+  remove_catalog_definition(&mut yaml, "default", "react");
+  let out = render(&yaml);
+  assert_eq!(out, "packages:\n  - 'apps/*'\n", "only the catalog block is removed");
+}
+
+#[test]
 fn yamlpatch_remove_preserves_neighbouring_comments() {
   // T8: remove a dep with siblings. Comments on sibling keys stay.
   let raw = "catalog:\n  react: ^18.0.0 # to be removed\n  lodash: ^4.0.0 # keep me\n";

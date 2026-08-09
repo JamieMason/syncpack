@@ -103,7 +103,7 @@ impl Instance {
     preferred_update_policy: Option<UpdatePolicy>,
   ) -> Instance {
     let dependency_type_name = &descriptor.dependency_type.path;
-    let id = format!("{} in {} of {}", &descriptor.name, dependency_type_name, package_name);
+    let id = format!("{} in {} of {}", descriptor.name, dependency_type_name, package_name);
     let is_local_instance = dependency_type_name == "/version";
     Instance {
       descriptor,
