@@ -1,5 +1,13 @@
 # Changelog
 
+## [15.3.3](https://github.com/JamieMason/syncpack/compare/15.3.2...15.3.3) (2026-08-09)
+
+### Bug Fixes
+
+* **cargo:** update dependencies ([8e1cd38](https://github.com/JamieMason/syncpack/commit/8e1cd38dc783ff9da0987787213ef4633123922d))
+* **cargo:** update dependencies ([7d47933](https://github.com/JamieMason/syncpack/commit/7d47933dec574a4b76b5b32057243e87d0fef2f2))
+* **rust:** update to 1.97 ([f157e57](https://github.com/JamieMason/syncpack/commit/f157e57005b983cac0a8256abfa04454a6a377b5))
+
 ## [15.3.2](https://github.com/JamieMason/syncpack/compare/15.3.1...15.3.2) (2026-06-15)
 
 ### Bug Fixes
