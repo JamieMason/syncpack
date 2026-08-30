@@ -117,6 +117,64 @@ fn issue_334_double_star_matches_deeply_nested() {
 }
 
 #[test]
+fn issue_334_double_star_keeps_gitignore_exclusions() {
+  let paths = package_paths(&run_json("issue-334", &["--source", "apps/**/package.json"]));
+  for component in [".next", "dist", "build"] {
+    assert!(
+      !has_component(&paths, component),
+      "expected '{component}' directory to be excluded by .gitignore, got: {paths:?}",
+    );
+  }
+}
+
+#[test]
+fn issue_334_separator_matching_character_class_is_discovered() {
+  let paths = package_paths(&run_json("issue-334", &["--source", "apps[.-0]test/nested/package.json"]));
+  assert!(
+    ends_with(&paths, "apps/test/nested/package.json"),
+    "expected a character class matching '/' to reach the nested package, got: {paths:?}",
+  );
+}
+
+#[test]
+fn issue_334_root_dotfile_source_is_discovered() {
+  let paths = package_paths(&run_json("issue-334", &["--source", ".package.json"]));
+  assert!(
+    ends_with(&paths, "issue-334/.package.json"),
+    "expected root '.package.json' to be matched, got: {paths:?}",
+  );
+}
+
+#[test]
+fn issue_334_nested_dotfile_source_is_discovered() {
+  let paths = package_paths(&run_json("issue-334", &["--source", "apps/test/.package.json"]));
+  assert!(
+    ends_with(&paths, "issue-334/apps/test/.package.json"),
+    "expected nested '.package.json' to be matched, got: {paths:?}",
+  );
+}
+
+#[test]
+fn issue_334_exclusion_only_sources_keep_dotfiles_hidden() {
+  let paths = package_paths(&run_json("issue-334", &["--source", "!apps/other/package.json"]));
+
+  assert!(
+    ends_with(&paths, "apps/test/package.json"),
+    "expected unmatched files to remain included, got: {paths:?}"
+  );
+  assert!(
+    !ends_with(&paths, "apps/other/package.json"),
+    "expected the negated package to remain excluded, got: {paths:?}",
+  );
+  for hidden_path in ["issue-334/.package.json", "apps/test/.package.json"] {
+    assert!(
+      !ends_with(&paths, hidden_path),
+      "expected exclusion-only sources to keep '{hidden_path}' hidden, got: {paths:?}",
+    );
+  }
+}
+
+#[test]
 fn issue_334_bare_package_json_matches_root_only() {
   let paths = package_paths(&run_json("issue-334", &["--source", "package.json"]));
   assert!(

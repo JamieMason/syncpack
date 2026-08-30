@@ -1,15 +1,93 @@
 use {
   crate::{
     disk::{
-      Disk, File, PackageManager, PendingYamlOp, empty_yaml_file, ensure_object_path, insert_catalog_definition, json_view,
-      parse_yaml_file, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
+      Disk, File, PackageManager, PendingYamlOp, SourcePatternMatcher, empty_yaml_file, ensure_object_path, insert_catalog_definition,
+      json_view, parse_yaml_file, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
     },
     specifier::Specifier,
     test::mock_disk::MockDiskIo,
   },
   serde_json::json,
-  std::path::PathBuf,
+  std::path::{Path, PathBuf},
 };
+
+fn source_pattern_matcher(patterns: &[&str]) -> SourcePatternMatcher {
+  SourcePatternMatcher::new(
+    Path::new("/repo"),
+    &patterns.iter().map(|pattern| pattern.to_string()).collect::<Vec<_>>(),
+  )
+}
+
+#[test]
+fn source_patterns_prune_unrelated_and_too_deep_directories() {
+  let matcher = source_pattern_matcher(&["/package.json", "apps/*/package.json"]);
+
+  assert!(matcher.matches_directory(Path::new("/repo")));
+  assert!(matcher.matches_directory(Path::new("/repo/apps")));
+  assert!(matcher.matches_directory(Path::new("/repo/apps/one")));
+  assert!(!matcher.matches_directory(Path::new("/repo/cache")));
+  assert!(!matcher.matches_directory(Path::new("/repo/apps/one/cache")));
+}
+
+#[test]
+fn recursive_source_patterns_allow_matching_descendants_only() {
+  let matcher = source_pattern_matcher(&["apps/*/package.json", "libs/**/package.json"]);
+
+  assert!(matcher.matches_directory(Path::new("/repo/apps")));
+  assert!(matcher.matches_directory(Path::new("/repo/apps/one")));
+  assert!(!matcher.matches_directory(Path::new("/repo/apps/one/nested")));
+  assert!(matcher.matches_directory(Path::new("/repo/libs")));
+  assert!(matcher.matches_directory(Path::new("/repo/libs/one/nested")));
+  assert!(!matcher.matches_directory(Path::new("/repo/cache")));
+
+  let root_recursive_matcher = source_pattern_matcher(&["**/package.json"]);
+  assert!(root_recursive_matcher.matches_directory(Path::new("/repo/anything/nested")));
+}
+
+#[test]
+fn source_patterns_keep_file_matching_separate_from_traversal() {
+  let matcher = source_pattern_matcher(&[
+    "/package.json",
+    "packages/*/package.public.json",
+    "!packages/private/package.public.json",
+  ]);
+
+  assert!(matcher.matches_file(Path::new("/repo/package.json")));
+  assert!(matcher.matches_file(Path::new("/repo/packages/public/package.public.json")));
+  assert!(!matcher.matches_file(Path::new("/repo/packages/private/package.public.json")));
+  assert!(!matcher.matches_file(Path::new("/repo/packages/public/package.json")));
+}
+
+#[test]
+fn ambiguous_source_patterns_disable_directory_pruning() {
+  let matcher = source_pattern_matcher(&["{apps/one,libs/two}/package.json"]);
+
+  assert!(matcher.matches_directory(Path::new("/repo/cache")));
+}
+
+#[test]
+fn character_class_source_patterns_disable_directory_pruning() {
+  let matcher = source_pattern_matcher(&["a[.-0]b/c/package.json"]);
+
+  assert!(matcher.matches_file(Path::new("/repo/a/b/c/package.json")));
+  assert!(matcher.matches_directory(Path::new("/repo/a")));
+  assert!(matcher.matches_directory(Path::new("/repo/cache")));
+}
+
+#[test]
+fn source_patterns_preserve_trailing_whitespace_in_directory_names() {
+  for whitespace in [" ", "\t"] {
+    let directory_name = format!("foo{whitespace}");
+    let pattern = format!("{directory_name}/package.json");
+    let directory_path = Path::new("/repo").join(&directory_name);
+    let matcher = source_pattern_matcher(&[pattern.as_str()]);
+
+    assert!(matcher.matches_directory(&directory_path));
+    assert!(!matcher.matches_directory(Path::new("/repo/foo")));
+    assert!(matcher.matches_file(&directory_path.join("package.json")));
+    assert!(!matcher.matches_file(Path::new("/repo/foo/package.json")));
+  }
+}
 
 fn json_file_from_value(value: serde_json::Value) -> File<serde_json::Value> {
   File {

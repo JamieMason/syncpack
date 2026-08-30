@@ -1,0 +1,6 @@
+{
+  "name": "hidden-nested",
+  "dependencies": {
+    "nested-dependency": "1.0.0"
+  }
+}
