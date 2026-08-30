@@ -1,0 +1,6 @@
+{
+  "name": "hidden-root",
+  "dependencies": {
+    "root-dependency": "1.0.0"
+  }
+}

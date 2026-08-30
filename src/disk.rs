@@ -2,6 +2,10 @@ use {
   crate::{dependency::Strategy, instance::Instance, specifier::Specifier},
   detect_indent::detect_indent,
   detect_newline_style::LineEnding,
+  ignore::{
+    overrides::{Override, OverrideBuilder},
+    types::TypesBuilder,
+  },
   serde_json::Value as JsonValue,
   std::{
     fs,
@@ -283,6 +287,128 @@ impl DiskDirEntry {
   }
 }
 
+#[derive(Clone)]
+struct SourcePatternMatcher {
+  root: PathBuf,
+  file_overrides: Override,
+  directory_overrides: Override,
+  prune_directories: bool,
+}
+
+impl SourcePatternMatcher {
+  fn new(root: &Path, patterns: &[String]) -> Self {
+    let mut file_builder = OverrideBuilder::new(root);
+    let mut directory_builder = OverrideBuilder::new(root);
+    let mut can_prune_directories = true;
+
+    for pattern in patterns {
+      if let Err(err) = file_builder.add(pattern) {
+        log::debug!("Invalid source pattern '{pattern}': {err}");
+        continue;
+      }
+      if !pattern.starts_with('!') {
+        can_prune_directories = can_prune_directories && add_directory_patterns(&mut directory_builder, pattern);
+      }
+    }
+
+    let Ok(file_overrides) = file_builder.build() else {
+      log::debug!("Failed to build source pattern overrides");
+      return Self::unrestricted(root);
+    };
+    let has_positive_pattern = file_overrides.num_whitelists() > 0;
+    let (directory_overrides, prune_directories) = match (has_positive_pattern, can_prune_directories) {
+      (true, true) => match directory_builder.build() {
+        Ok(overrides) => (overrides, true),
+        Err(err) => {
+          log::debug!("Failed to build source directory overrides: {err}");
+          (Override::empty(), false)
+        }
+      },
+      _ => (Override::empty(), false),
+    };
+
+    Self {
+      root: root.to_path_buf(),
+      file_overrides,
+      directory_overrides,
+      prune_directories,
+    }
+  }
+
+  fn unrestricted(root: &Path) -> Self {
+    Self {
+      root: root.to_path_buf(),
+      file_overrides: Override::empty(),
+      directory_overrides: Override::empty(),
+      prune_directories: false,
+    }
+  }
+
+  fn matches_file(&self, path: &Path) -> bool {
+    !self.file_overrides.matched(path, false).is_ignore()
+  }
+
+  fn has_positive_patterns(&self) -> bool {
+    self.file_overrides.num_whitelists() > 0
+  }
+
+  fn matches_directory(&self, path: &Path) -> bool {
+    if !self.prune_directories {
+      return true;
+    }
+    let Ok(relative_path) = path.strip_prefix(&self.root) else {
+      return true;
+    };
+    relative_path.as_os_str().is_empty() || self.directory_overrides.matched(relative_path, true).is_whitelist()
+  }
+}
+
+fn add_directory_patterns(builder: &mut OverrideBuilder, pattern: &str) -> bool {
+  let Some(directory_patterns) = get_directory_patterns(pattern) else {
+    return false;
+  };
+  for directory_pattern in directory_patterns {
+    if let Err(err) = builder.add(&directory_pattern) {
+      log::debug!("Invalid source directory pattern '{directory_pattern}': {err}");
+      return false;
+    }
+  }
+  true
+}
+
+fn get_directory_patterns(pattern: &str) -> Option<Vec<String>> {
+  let pattern = pattern.trim_start_matches('/');
+  let mut patterns = Vec::new();
+  let mut brace_depth = 0;
+
+  for (index, character) in pattern.char_indices() {
+    match character {
+      '\\' => return None,
+      '{' => brace_depth += 1,
+      '}' => {
+        if brace_depth == 0 {
+          return None;
+        }
+        brace_depth -= 1;
+      }
+      '[' | ']' => {
+        // Character classes can match separators through ranges, so their directory prefixes are not safe to infer.
+        return None;
+      }
+      '/' => {
+        if brace_depth > 0 {
+          return None;
+        }
+        // Preserve trailing whitespace in the prefix by keeping it internal to a directory-only glob.
+        patterns.push(format!("/{}/", &pattern[..index]));
+      }
+      _ => {}
+    }
+  }
+
+  (brace_depth == 0).then_some(patterns)
+}
+
 /// Allow DI of the disk IO layer
 pub trait DiskIo {
   /// Execute a NodeJS command and return the stdout
@@ -441,23 +567,26 @@ impl DiskIo for LiveDiskIo {
   }
 
   fn find_package_jsons(&self, root: &Path, patterns: &[String]) -> Vec<PathBuf> {
-    let mut builder = ignore::overrides::OverrideBuilder::new(root);
-    for pattern in patterns {
-      if let Err(err) = builder.add(pattern) {
-        log::debug!("Invalid source pattern '{pattern}': {err}");
-      }
+    let matcher = SourcePatternMatcher::new(root, patterns);
+    let directory_matcher = matcher.clone();
+    let mut walk_builder = ignore::WalkBuilder::new(root);
+    walk_builder.require_git(false);
+    if matcher.has_positive_patterns() {
+      let mut types_builder = TypesBuilder::new();
+      types_builder.add("json", "*.json").expect("the JSON file type glob is valid");
+      types_builder.select("json");
+      let json_types = types_builder.build().expect("the JSON file type matcher is valid");
+      // Type whitelists are applied after ignore files but before hidden-file filtering. Install one only when positive sources will reject
+      // unmatched files; exclusion-only sources must retain the walker's default hidden-file behavior.
+      walk_builder.types(json_types);
     }
-    let overrides = builder.build().unwrap_or_else(|err| {
-      log::debug!("Failed to build source pattern overrides: {err}");
-      ignore::overrides::Override::empty()
-    });
 
-    ignore::WalkBuilder::new(root)
-      .require_git(false)
-      .overrides(overrides)
-      .filter_entry(|entry| {
+    walk_builder
+      .filter_entry(move |entry| {
         let name = entry.file_name();
-        name != "node_modules" && name != ".git"
+        name != "node_modules"
+          && name != ".git"
+          && (!entry.file_type().is_some_and(|file_type| file_type.is_dir()) || directory_matcher.matches_directory(entry.path()))
       })
       .build()
       .filter_map(|result| match result {
@@ -467,7 +596,11 @@ impl DiskIo for LiveDiskIo {
           None
         }
       })
-      .filter(|entry| entry.file_type().is_some_and(|t| t.is_file()) && entry.file_name().to_string_lossy().ends_with(".json"))
+      .filter(|entry| {
+        entry.file_type().is_some_and(|file_type| file_type.is_file())
+          && entry.file_name().to_string_lossy().ends_with(".json")
+          && matcher.matches_file(entry.path())
+      })
       .map(|entry| entry.into_path())
       .collect()
   }
