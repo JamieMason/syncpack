@@ -1,9 +1,7 @@
 use {
   crate::{
-    instance::Instance,
     registry::client::{AllPackageVersions, RegistryClient, RegistryError},
     specifier::Specifier,
-    version_group::{Dependency, VersionGroup},
   },
   indicatif::{MultiProgress, ProgressBar, ProgressStyle},
   log::debug,
@@ -28,11 +26,9 @@ type FetchHandle = JoinHandle<Result<Arc<AllPackageVersions>, RegistryError>>;
 
 /// Fetch every version specifier ever published for all updateable
 /// dependencies in the project.
-pub async fn fetch(
+pub async fn fetch_all(
   client: &Arc<dyn RegistryClient>,
-  version_groups: &[VersionGroup],
-  dependencies: &[Dependency],
-  arena: &[Instance],
+  update_urls: HashSet<UpdateUrl>,
   max_concurrent_requests: usize,
   minimum_release_age_minutes: u64,
 ) -> RegistryUpdates {
@@ -45,7 +41,7 @@ pub async fn fetch(
   let mut failed: Vec<String> = vec![];
   let cutoff_unix_seconds = age_cutoff_unix_seconds(minimum_release_age_minutes);
 
-  for update_url in get_unique_update_urls(version_groups, dependencies, arena) {
+  for update_url in update_urls {
     let permit = Arc::clone(&semaphore).acquire_owned().await;
     let client = Arc::clone(&client);
     let progress_bars = Arc::clone(&progress_bars);
@@ -164,18 +160,4 @@ pub(crate) fn parse_rfc3339_to_unix_seconds(s: &str) -> Option<i64> {
   let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
   let days_since_epoch = era as i64 * 146097 + doe as i64 - 719468;
   Some(days_since_epoch * 86400 + hour as i64 * 3600 + minute as i64 * 60 + second as i64)
-}
-
-/// Return a list of every dependency we should query the registry for
-/// updates. We use internal names in order to support dependency groups,
-/// where many dependencies can be aliased as one.
-fn get_unique_update_urls(version_groups: &[VersionGroup], dependencies: &[Dependency], arena: &[Instance]) -> HashSet<UpdateUrl> {
-  version_groups.iter().fold(HashSet::new(), |mut unique_update_urls, group| {
-    group.get_update_urls(dependencies, arena).inspect(|update_urls| {
-      update_urls.iter().for_each(|url| {
-        unique_update_urls.insert(url.clone());
-      });
-    });
-    unique_update_urls
-  })
 }

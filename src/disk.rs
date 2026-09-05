@@ -1,5 +1,5 @@
 use {
-  crate::{instance::Instance, specifier::Specifier},
+  crate::specifier::Specifier,
   serde_json::Value as JsonValue,
   std::{
     path::{Path, PathBuf},
@@ -9,7 +9,10 @@ use {
     DetectedFormatting, DiskIo, File, PendingYamlOp, YamlFile, ensure_yaml_block, get_or_insert_mapping, parse_json_file, set_nested_prop,
     set_prop,
   },
-  syncpack_vocab::{dependency_type::Strategy, package_manager::PackageManager},
+  syncpack_vocab::{
+    dependency_type::{DependencyType, Strategy},
+    package_manager::PackageManager,
+  },
   yaml_serde::{Mapping, Value as YamlValue},
 };
 
@@ -116,22 +119,22 @@ pub fn package_name(file: &File<JsonValue>) -> &str {
 /// Apply an instance's `expected_specifier` to the package.json. Dispatches
 /// over the dependency type's `Strategy`. Marks the file dirty only when the
 /// stored value actually changed.
-pub fn copy_expected_specifier_json(file: &mut File<JsonValue>, instance: &Instance, expected: &Rc<Specifier>) {
-  let path_to_prop_str = &instance.descriptor.dependency_type.path.as_str();
+pub fn copy_expected_specifier_json(file: &mut File<JsonValue>, dependency_type: &DependencyType, name: &str, expected: &Rc<Specifier>) {
+  let path_to_prop_str = dependency_type.path.as_str();
   let raw_specifier = expected.get_raw().to_string();
-  match instance.descriptor.dependency_type.strategy {
+  match dependency_type.strategy {
     Strategy::NameAndVersionProps => {
       set_prop(file, path_to_prop_str, JsonValue::String(raw_specifier));
     }
     Strategy::NamedVersionString => {
-      let full_value = format!("{}@{}", instance.descriptor.name, raw_specifier);
+      let full_value = format!("{name}@{raw_specifier}");
       set_prop(file, path_to_prop_str, JsonValue::String(full_value));
     }
     Strategy::UnnamedVersionString => {
       set_prop(file, path_to_prop_str, JsonValue::String(raw_specifier));
     }
     Strategy::VersionsByName => {
-      set_nested_prop(file, path_to_prop_str, &instance.descriptor.name, JsonValue::String(raw_specifier));
+      set_nested_prop(file, path_to_prop_str, name, JsonValue::String(raw_specifier));
     }
     Strategy::InvalidConfig => {
       unreachable!("unrecognised strategy");
@@ -329,17 +332,22 @@ pub fn remove_catalog_definition(file: &mut YamlFile, catalog_name: &str, dep_na
 /// `versionsByName` strategy) write into the top-level block named by the
 /// dep type's `path` (e.g. `overrides`). No-op when the instance has no
 /// expected specifier.
-pub fn copy_expected_specifier_yaml(file: &mut YamlFile, instance: &Instance, expected: &Rc<Specifier>) {
-  let dep_name = instance.descriptor.name.clone();
-  if let Some(catalog_name) = instance.catalog_name() {
-    insert_catalog_definition(file, catalog_name, &dep_name, expected);
+pub fn copy_expected_specifier_yaml(
+  file: &mut YamlFile,
+  dependency_type: &DependencyType,
+  name: &str,
+  catalog_name: Option<&str>,
+  expected: &Rc<Specifier>,
+) {
+  if let Some(catalog_name) = catalog_name {
+    insert_catalog_definition(file, catalog_name, name, expected);
     return;
   }
   // `overrides` is a flat `name: version` block — the same shape as the
   // default `catalog:` block. `path` is its JSON pointer, e.g. `/overrides`.
-  if matches!(instance.descriptor.dependency_type.strategy, Strategy::VersionsByName) {
-    let block_key = instance.descriptor.dependency_type.path.trim_start_matches('/');
-    insert_into_target(file, YamlTarget::Block(block_key), &dep_name, expected);
+  if matches!(dependency_type.strategy, Strategy::VersionsByName) {
+    let block_key = dependency_type.path.trim_start_matches('/');
+    insert_into_target(file, YamlTarget::Block(block_key), name, expected);
   }
 }
 

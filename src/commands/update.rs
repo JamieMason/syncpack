@@ -217,10 +217,21 @@ pub fn run<D: DiskIo>(mut inspected: Inspected, io: &D, tui: &dyn Tui) -> Result
     };
     if let Some(fi) = consumer_file_idx {
       let instance = &inspected.data.instances[inst_idx.0];
-      copy_expected_specifier_json(&mut inspected.data.disk.package_json_files[fi], instance, expected);
+      copy_expected_specifier_json(
+        &mut inspected.data.disk.package_json_files[fi],
+        &instance.descriptor.dependency_type,
+        &instance.descriptor.name,
+        expected,
+      );
     } else if let Some(yaml) = inspected.data.disk.pnpm_workspace.as_mut() {
       let instance = &inspected.data.instances[inst_idx.0];
-      copy_expected_specifier_yaml(yaml, instance, expected);
+      copy_expected_specifier_yaml(
+        yaml,
+        &instance.descriptor.dependency_type,
+        &instance.descriptor.name,
+        instance.catalog_name(),
+        expected,
+      );
     }
   }
 

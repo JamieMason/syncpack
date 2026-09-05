@@ -5,10 +5,16 @@ use {
     inspection::Inspection,
     instance::{Instance, InstanceDescriptor, InstanceIdx},
     rcfile::{Rcfile, from_disk::RcfileError, validate_raw_dep_types},
+    source::Source,
     sources::Sources,
+    specifier::Specifier,
     version_group::{Dependency, DependencyIdx, VersionGroup, VersionGroupBehavior, add_instance_to_dep_map},
   },
-  std::{collections::BTreeMap, mem},
+  std::{
+    collections::BTreeMap,
+    mem,
+    path::{Path, PathBuf},
+  },
   syncpack_vocab::{
     config_error::{UnsupportedConfigError, UnsupportedConfigErrors},
     dependency_type::DependencyType,
@@ -186,12 +192,59 @@ fn compute_link_resolution(
       for &idx in &dep.instances {
         let instance = &instances[idx.0];
         if instance.descriptor.specifier.is_link() {
-          resolutions.push((idx, instance.link_resolves_to_local_package(local_instance, &sources.all, disk)));
+          resolutions.push((idx, link_resolves_to_local(instance, local_instance, &sources.all, disk)));
         }
       }
     }
   }
   resolutions
+}
+
+/// Whether a `link:` instance of a locally-developed dependency resolves to
+/// that package's directory. Discovery-time filesystem read, so inspection
+/// stays pure. `false` for non-link instances and pnpm-catalog sources (which
+/// do not live in a package.json).
+fn link_resolves_to_local(instance: &Instance, local_instance: &Instance, sources: &[Source], disk: &Disk) -> bool {
+  let Specifier::Link(link) = &*instance.descriptor.specifier else {
+    return false;
+  };
+  let Source::Package {
+    file_idx: consuming_idx, ..
+  } = &sources[instance.source_idx().0]
+  else {
+    return false;
+  };
+  let Source::Package { file_idx: local_idx, .. } = &sources[local_instance.source_idx().0] else {
+    return false;
+  };
+  let consuming_package_path = &disk.package_json_files[*consuming_idx].filepath;
+  let consuming_package_dir = consuming_package_path.parent().unwrap_or_else(|| Path::new(""));
+  let link_path = link.raw.strip_prefix("link:").unwrap_or(&link.raw);
+  let resolved_link_path = consuming_package_dir.join(link_path);
+  let local_package_path = &disk.package_json_files[*local_idx].filepath;
+  let local_package_dir = local_package_path.parent().unwrap_or_else(|| Path::new(""));
+
+  if let (Ok(resolved_canonical), Ok(local_canonical)) = (resolved_link_path.canonicalize(), local_package_dir.canonicalize()) {
+    resolved_canonical == local_canonical
+  } else {
+    normalize_path(&resolved_link_path) == normalize_path(local_package_dir)
+  }
+}
+
+/// Normalize a path by resolving `.` and `..` components without touching the
+/// filesystem.
+fn normalize_path(path: &Path) -> PathBuf {
+  let mut components = Vec::new();
+  for component in path.components() {
+    match component {
+      std::path::Component::ParentDir => {
+        components.pop();
+      }
+      std::path::Component::CurDir => {}
+      _ => components.push(component),
+    }
+  }
+  components.iter().collect()
 }
 
 /// Validate every dep-type-filter selector against the post-discovery list of

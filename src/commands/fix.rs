@@ -137,10 +137,16 @@ fn apply_fix_actions(data: &mut Discovered, inspection: &Inspection, actions: &[
       if let Some(fi) = consumer_file_idx {
         let file = &mut data.disk.package_json_files[fi];
         let instance = &data.instances[inst_idx.0];
-        copy_expected_specifier_json(file, instance, expected);
+        copy_expected_specifier_json(file, &instance.descriptor.dependency_type, &instance.descriptor.name, expected);
       } else if let Some(yaml) = data.disk.pnpm_workspace.as_mut() {
         let instance = &data.instances[inst_idx.0];
-        crate::disk::copy_expected_specifier_yaml(yaml, instance, expected);
+        crate::disk::copy_expected_specifier_yaml(
+          yaml,
+          &instance.descriptor.dependency_type,
+          &instance.descriptor.name,
+          instance.catalog_name(),
+          expected,
+        );
       }
     }
   }

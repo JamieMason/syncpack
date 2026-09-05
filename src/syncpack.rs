@@ -56,17 +56,18 @@ fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Discovered, SyncpackError> {
 /// Fetch updates from the npm registry, if applicable.
 async fn fetch_updates(data: &Discovered, registry_client: &Arc<dyn RegistryClient>) -> Option<RegistryUpdates> {
   match data.config.cli.subcommand {
-    Subcommand::Update => Some(
-      crate::registry::updates::fetch(
-        registry_client,
-        &data.version_groups,
-        &data.dependencies,
-        &data.instances,
-        data.config.rcfile.max_concurrent_requests,
-        data.config.rcfile.minimum_release_age,
+    Subcommand::Update => {
+      let update_urls = crate::version_group::get_unique_update_urls(&data.version_groups, &data.dependencies, &data.instances);
+      Some(
+        crate::registry::updates::fetch_all(
+          registry_client,
+          update_urls,
+          data.config.rcfile.max_concurrent_requests,
+          data.config.rcfile.minimum_release_age,
+        )
+        .await,
       )
-      .await,
-    ),
+    }
     _ => None,
   }
 }

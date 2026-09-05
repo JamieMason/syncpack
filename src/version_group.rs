@@ -14,7 +14,7 @@ use {
   serde_json::Value,
   std::{
     cmp::Ordering,
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap, HashSet},
     rc::Rc,
   },
   syncpack_specifier::update_target::UpdateTarget,
@@ -248,6 +248,22 @@ pub(super) fn highest_eligible_for<'a>(
   sorted_desc
     .iter()
     .find(|u| u.is_eligible_update_for(installed, target) && installed.has_same_release_channel_as(u))
+}
+
+/// Every registry URL that should be queried for updates across all version
+/// groups. Deduplicated by `UpdateUrl`; internal names support dependency-group
+/// aliasing (many dependencies aliased as one). The registry fetcher consumes
+/// this set (`registry::updates::fetch_all`), keeping `registry` free of any
+/// dependency on the rule/model types.
+pub fn get_unique_update_urls(version_groups: &[VersionGroup], dependencies: &[Dependency], arena: &[Instance]) -> HashSet<UpdateUrl> {
+  version_groups.iter().fold(HashSet::new(), |mut unique_update_urls, group| {
+    group.get_update_urls(dependencies, arena).inspect(|update_urls| {
+      update_urls.iter().for_each(|url| {
+        unique_update_urls.insert(url.clone());
+      });
+    });
+    unique_update_urls
+  })
 }
 
 #[cfg(test)]

@@ -892,7 +892,12 @@ mod disk_ops {
       is_catalog_definition: false,
     };
     let (instance, expected) = make_instance("react", dep_type, "18.0.0");
-    copy_expected_specifier_json(&mut file, &instance, &expected);
+    copy_expected_specifier_json(
+      &mut file,
+      &instance.descriptor.dependency_type,
+      &instance.descriptor.name,
+      &expected,
+    );
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/dependencies/react"), Some(&json!("18.0.0")));
   }
@@ -909,7 +914,12 @@ mod disk_ops {
       is_catalog_definition: false,
     };
     let (instance, expected) = make_instance("@scope/lib", dep_type, "2.0.0");
-    copy_expected_specifier_json(&mut file, &instance, &expected);
+    copy_expected_specifier_json(
+      &mut file,
+      &instance.descriptor.dependency_type,
+      &instance.descriptor.name,
+      &expected,
+    );
     assert!(file.dirty, "scoped package specifier was not applied");
     let deps = file.contents.pointer("/dependencies").unwrap().as_object().unwrap();
     assert_eq!(deps.get("@scope/lib"), Some(&json!("2.0.0")));
@@ -927,7 +937,12 @@ mod disk_ops {
       is_catalog_definition: false,
     };
     let (instance, expected) = make_instance("@scope/lib", dep_type, "2.0.0");
-    copy_expected_specifier_json(&mut file, &instance, &expected);
+    copy_expected_specifier_json(
+      &mut file,
+      &instance.descriptor.dependency_type,
+      &instance.descriptor.name,
+      &expected,
+    );
     assert!(file.dirty, "deeply nested scoped package specifier was not applied");
     let deps = file.contents.pointer("/config/custom/dependencies").unwrap().as_object().unwrap();
     assert_eq!(deps.get("@scope/lib"), Some(&json!("2.0.0")));
@@ -945,7 +960,12 @@ mod disk_ops {
       is_catalog_definition: false,
     };
     let (instance, expected) = make_instance("react", dep_type, "18.0.0");
-    copy_expected_specifier_json(&mut file, &instance, &expected);
+    copy_expected_specifier_json(
+      &mut file,
+      &instance.descriptor.dependency_type,
+      &instance.descriptor.name,
+      &expected,
+    );
     assert!(!file.dirty, "same value should not mark dirty");
   }
 
@@ -961,7 +981,12 @@ mod disk_ops {
       is_catalog_definition: false,
     };
     let (instance, expected) = make_instance("pkg", dep_type, "2.0.0");
-    copy_expected_specifier_json(&mut file, &instance, &expected);
+    copy_expected_specifier_json(
+      &mut file,
+      &instance.descriptor.dependency_type,
+      &instance.descriptor.name,
+      &expected,
+    );
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/version"), Some(&json!("2.0.0")));
   }
@@ -978,7 +1003,12 @@ mod disk_ops {
       is_catalog_definition: false,
     };
     let (instance, expected) = make_instance("pnpm", dep_type, "8.0.0");
-    copy_expected_specifier_json(&mut file, &instance, &expected);
+    copy_expected_specifier_json(
+      &mut file,
+      &instance.descriptor.dependency_type,
+      &instance.descriptor.name,
+      &expected,
+    );
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/packageManager"), Some(&json!("pnpm@8.0.0")));
   }
@@ -995,7 +1025,12 @@ mod disk_ops {
       is_catalog_definition: false,
     };
     let (instance, expected) = make_instance("node", dep_type, ">=18");
-    copy_expected_specifier_json(&mut file, &instance, &expected);
+    copy_expected_specifier_json(
+      &mut file,
+      &instance.descriptor.dependency_type,
+      &instance.descriptor.name,
+      &expected,
+    );
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/engines/node"), Some(&json!(">=18")));
   }

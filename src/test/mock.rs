@@ -133,11 +133,10 @@ pub async fn context_with_registry_updates(
 ) -> (Discovered, RegistryUpdates) {
   let client: Arc<dyn RegistryClient> = Arc::new(MockRegistryClient::from_json(mock_updates));
   let data = Discovered::create(config, disk, sources, dep_types).unwrap();
-  let updates = crate::registry::updates::fetch(
+  let update_urls = crate::version_group::get_unique_update_urls(&data.version_groups, &data.dependencies, &data.instances);
+  let updates = crate::registry::updates::fetch_all(
     &client,
-    &data.version_groups,
-    &data.dependencies,
-    &data.instances,
+    update_urls,
     data.config.rcfile.max_concurrent_requests,
     data.config.rcfile.minimum_release_age,
   )

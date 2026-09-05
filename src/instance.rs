@@ -12,17 +12,10 @@ mod instance_test;
 mod source_idx_test;
 
 use {
-  crate::{disk::Disk, semver_range::SemverRange, source::Source, sources::SourceIdx, specifier::Specifier},
+  crate::{semver_range::SemverRange, sources::SourceIdx, specifier::Specifier},
   log::debug,
-  std::{
-    path::{Path, PathBuf},
-    rc::Rc,
-  },
-  syncpack_vocab::{
-    dependency_type::{DependencyType, Strategy},
-    update_policy::UpdatePolicy,
-    update_url::UpdateUrl,
-  },
+  std::rc::Rc,
+  syncpack_vocab::{dependency_type::DependencyType, update_policy::UpdatePolicy, update_url::UpdateUrl},
 };
 
 /// Index into the Context.instances arena.
@@ -103,47 +96,6 @@ impl Instance {
     }
   }
 
-  /// Check if a link: specifier resolves to the given local package's directory.
-  ///
-  /// Examples:
-  /// - "link:../package-a" from /packages/package-b/package.json -> /packages/package-a
-  /// - "link:../../elsewhere/package-a" from /packages/package-b/package.json -> /elsewhere/package-a
-  ///
-  /// pnpm catalog instances do not live in a package.json, so a `Link`
-  /// specifier sourced from one cannot resolve to a local package — this
-  /// returns `false` in that case.
-  pub fn link_resolves_to_local_package(&self, local_instance: &Instance, sources: &[Source], disk: &Disk) -> bool {
-    if let Specifier::Link(link) = &*self.descriptor.specifier {
-      let self_idx = self.source_idx();
-      let local_idx = local_instance.source_idx();
-      let Source::Package {
-        file_idx: consuming_idx, ..
-      } = &sources[self_idx.0]
-      else {
-        return false;
-      };
-      let Source::Package { file_idx: local_idx, .. } = &sources[local_idx.0] else {
-        return false;
-      };
-      let consuming_package_path = &disk.package_json_files[*consuming_idx].filepath;
-      let consuming_package_dir = consuming_package_path.parent().unwrap_or_else(|| Path::new(""));
-      let link_path = link.raw.strip_prefix("link:").unwrap_or(&link.raw);
-      let resolved_link_path = consuming_package_dir.join(link_path);
-      let local_package_path = &disk.package_json_files[*local_idx].filepath;
-      let local_package_dir = local_package_path.parent().unwrap_or_else(|| Path::new(""));
-
-      if let (Ok(resolved_canonical), Ok(local_canonical)) = (resolved_link_path.canonicalize(), local_package_dir.canonicalize()) {
-        resolved_canonical == local_canonical
-      } else {
-        let normalized_resolved = Self::normalize_path(&resolved_link_path);
-        let normalized_local = Self::normalize_path(local_package_dir);
-        normalized_resolved == normalized_local
-      }
-    } else {
-      false
-    }
-  }
-
   /// Whether this instance was sourced from a catalog (pnpm or Bun) rather
   /// than a regular package.json dependency. Reads the dep type's
   /// `is_catalog_definition` flag — set by `make_catalog_dep_types` for
@@ -179,22 +131,6 @@ impl Instance {
       };
       Specifier::new(&raw)
     })
-  }
-
-  /// Normalize a path by resolving . and .. components.
-  /// Does not require the path to exist on the filesystem.
-  fn normalize_path(path: &Path) -> PathBuf {
-    let mut components = Vec::new();
-    for component in path.components() {
-      match component {
-        std::path::Component::ParentDir => {
-          components.pop();
-        }
-        std::path::Component::CurDir => {}
-        _ => components.push(component),
-      }
-    }
-    components.iter().collect()
   }
 
   pub fn has_missing_specifier(&self) -> bool {
@@ -369,36 +305,6 @@ impl Instance {
         }
       })
       .unwrap_or(false)
-  }
-
-  /// Delete this instance from its underlying `Source`. No-op for
-  /// `PnpmYaml`-sourced instances (pnpm catalog removal lands with the
-  /// Banned-catalog work).
-  pub fn remove(&self, disk: &mut Disk, source: &Source) {
-    let Source::Package { file_idx, .. } = source else {
-      debug!("Cannot remove pnpm catalog instance from a package.json");
-      return;
-    };
-    let file = &mut disk.package_json_files[*file_idx];
-    match self.descriptor.dependency_type.strategy {
-      Strategy::NameAndVersionProps | Strategy::NamedVersionString | Strategy::UnnamedVersionString => {
-        let path_to_prop = &self.descriptor.dependency_type.path;
-        if let Some(parent_path) = path_to_prop.rfind('/') {
-          let parent_pointer = &path_to_prop[..parent_path];
-          let prop_name = &path_to_prop[parent_path + 1..];
-          syncpack_io::remove_prop(file, parent_pointer, prop_name);
-        } else if path_to_prop == "/" {
-          debug!("Cannot remove root property");
-        }
-      }
-      Strategy::VersionsByName => {
-        let path_to_obj = &self.descriptor.dependency_type.path;
-        syncpack_io::remove_prop(file, path_to_obj, &self.descriptor.name);
-      }
-      Strategy::InvalidConfig => {
-        unreachable!("unrecognised strategy");
-      }
-    };
   }
 }
 
