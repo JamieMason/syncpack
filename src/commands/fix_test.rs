@@ -52,7 +52,7 @@ fn find_package<'a>(inspected: &'a Inspected, name: &str) -> &'a syncpack_io::Fi
     .disk
     .package_json_files
     .iter()
-    .find(|f| crate::disk::package_name(f) == name)
+    .find(|f| syncpack_disk::package_name(f) == name)
     .unwrap_or_else(|| panic!("package not found: {name}"))
 }
 

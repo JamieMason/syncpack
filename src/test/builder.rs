@@ -19,10 +19,8 @@
 use {
   super::mock,
   crate::{
-    catalogs,
     cli::UpdateTarget,
     context::{Discovered, Inspected},
-    disk::Disk,
     sources::Sources,
     test::mock_tui::MockTui,
   },
@@ -31,6 +29,7 @@ use {
     collections::{BTreeMap, HashMap},
     path::PathBuf,
   },
+  syncpack_disk::{Disk, catalogs},
   syncpack_io::{File, detect_formatting, parse_yaml_file},
   syncpack_vocab::package_manager::PackageManager,
 };

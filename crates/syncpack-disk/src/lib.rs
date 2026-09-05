@@ -1,5 +1,4 @@
 use {
-  crate::specifier::Specifier,
   serde_json::Value as JsonValue,
   std::{
     path::{Path, PathBuf},
@@ -9,12 +8,15 @@ use {
     DetectedFormatting, DiskIo, File, PendingYamlOp, YamlFile, ensure_yaml_block, get_or_insert_mapping, parse_json_file, set_nested_prop,
     set_prop,
   },
+  syncpack_specifier::Specifier,
   syncpack_vocab::{
     dependency_type::{DependencyType, Strategy},
     package_manager::PackageManager,
   },
   yaml_serde::{Mapping, Value as YamlValue},
 };
+
+pub mod catalogs;
 
 #[cfg(test)]
 #[path = "disk_test.rs"]

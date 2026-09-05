@@ -1,8 +1,4 @@
-use {
-  crate::{context::Config, disk::Disk},
-  log::debug,
-  syncpack_vocab::source_mode::SourceMode,
-};
+use {crate::context::Config, log::debug, syncpack_disk::Disk, syncpack_vocab::source_mode::SourceMode};
 
 #[cfg(test)]
 #[path = "source_patterns_test.rs"]

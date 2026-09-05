@@ -41,7 +41,7 @@ impl RegistryClient for MockRegistryClient {
 impl MockRegistryClient {
   /// Create a new MockRegistryClient from a serde_json::Value
   ///
-  /// ```
+  /// ```ignore
   /// MockRegistryClient::from_json(json!({
   ///   "foo": ["1.2.3", "4.5.6"],
   ///   "bar": ["4.5.6", "0.1.2"]

@@ -1,7 +1,6 @@
 use {
   crate::{
     cli::Cli,
-    disk::{Disk, package_name},
     group_selector::GroupSelector,
     inspection::Inspection,
     instance::{Instance, InstanceDescriptor, InstanceIdx},
@@ -25,6 +24,7 @@ use {
     path::{Path, PathBuf},
     rc::Rc,
   },
+  syncpack_disk::{Disk, package_name},
   syncpack_io::json_view,
   syncpack_specifier::update_target::UpdateTarget,
   syncpack_vocab::{

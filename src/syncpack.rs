@@ -1,6 +1,5 @@
 use {
   crate::{
-    catalogs,
     cli::{Cli, ReporterKind, Subcommand},
     commands::{
       self, fix, fix_mismatches, format, json, lint, lint_semver_ranges, list, list_mismatches, prompt,
@@ -8,7 +7,6 @@ use {
       set_semver_ranges, update,
     },
     context::{Config, Discovered, Inspected},
-    disk::Disk,
     errors::SyncpackError,
     inspection::{FormatConfig, Inspection, RuleInput, RuleInputCfg},
     logger,
@@ -21,6 +19,7 @@ use {
   },
   serde_json::Value,
   std::sync::Arc,
+  syncpack_disk::{Disk, catalogs},
   syncpack_io::DiskIo,
   syncpack_registry::client::RegistryClient,
   syncpack_vocab::registry_updates::RegistryUpdates,

@@ -1,8 +1,5 @@
 use {
   crate::{
-    catalogs::make_catalog_dep_types,
-    disk::Disk,
-    errors::SyncpackError,
     instance::{InstanceState, ValidInstance::*},
     test::{
       builder::TestBuilder,
@@ -11,6 +8,10 @@ use {
   },
   serde_json::json,
   std::path::PathBuf,
+  syncpack_disk::{
+    Disk,
+    catalogs::{CatalogError, make_catalog_dep_types},
+  },
   syncpack_io::{parse_json_file, parse_yaml_file},
   syncpack_vocab::{package_manager::PackageManager, source_kind::SourceKind},
 };
@@ -91,7 +92,7 @@ fn make_catalog_dep_types_errors_on_bun_dual_path() {
   disk.package_json_root_idx = Some(0);
 
   let err = make_catalog_dep_types(&disk).unwrap_err();
-  assert!(matches!(err, SyncpackError::BunDualCatalogPath));
+  assert!(matches!(err, CatalogError::BunDualCatalogPath));
 }
 
 #[test]

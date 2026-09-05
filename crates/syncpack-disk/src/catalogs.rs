@@ -1,5 +1,5 @@
 use {
-  crate::{disk::Disk, errors::SyncpackError},
+  crate::Disk,
   log::debug,
   serde_json::Value as JsonValue,
   std::time::Instant,
@@ -9,8 +9,19 @@ use {
     package_manager::PackageManager,
     source_kind::SourceKind,
   },
+  thiserror::Error,
   yaml_serde::Value as YamlValue,
 };
+
+/// Error raised during catalog discovery. A leaf error so `catalogs` stays in
+/// the disk crate; the bin maps it into its `SyncpackError`.
+#[derive(Debug, Error)]
+pub enum CatalogError {
+  #[error(
+    "Bun catalog blocks were found at both top-level (/catalog or /catalogs/*) and nested under /workspaces (/workspaces/catalog or /workspaces/catalogs/*) in the root package.json. Only one location can be used."
+  )]
+  BunDualCatalogPath,
+}
 
 /// All catalog dep types implied by what's parsed onto Disk (pnpm + Bun).
 ///
@@ -21,7 +32,7 @@ use {
 /// `detect_bun_catalogs` (the single source of truth shared with fix-time)
 /// to scan top + `/workspaces`; picks the location with content; errors when
 /// both have content.
-pub fn make_catalog_dep_types(disk: &Disk) -> Result<Vec<DependencyType>, SyncpackError> {
+pub fn make_catalog_dep_types(disk: &Disk) -> Result<Vec<DependencyType>, CatalogError> {
   let start = Instant::now();
   let mut dep_types = Vec::new();
   if let Some(yaml) = &disk.pnpm_workspace {
@@ -45,14 +56,14 @@ pub fn make_catalog_dep_types(disk: &Disk) -> Result<Vec<DependencyType>, Syncpa
 /// the prefix and names of the location with content; errors if both have
 /// content. Single source of truth for "where do Bun catalogs live in this
 /// root"; fix-time uses the same helper so discovery and writes agree.
-pub fn detect_bun_catalogs(root_contents: &JsonValue) -> Result<Option<(&'static str, Vec<String>)>, SyncpackError> {
+pub fn detect_bun_catalogs(root_contents: &JsonValue) -> Result<Option<(&'static str, Vec<String>)>, CatalogError> {
   let top = collect_bun_catalog_names(root_contents, "");
   let nested = collect_bun_catalog_names(root_contents, "/workspaces");
   match (top.is_empty(), nested.is_empty()) {
     (true, true) => Ok(None),
     (false, true) => Ok(Some(("", top))),
     (true, false) => Ok(Some(("/workspaces", nested))),
-    (false, false) => Err(SyncpackError::BunDualCatalogPath),
+    (false, false) => Err(CatalogError::BunDualCatalogPath),
   }
 }
 

@@ -1,5 +1,11 @@
 [workspace]
-members = ["crates/syncpack-specifier", "crates/syncpack-vocab", "crates/syncpack-io", "crates/syncpack-registry"]
+members = [
+  "crates/syncpack-specifier",
+  "crates/syncpack-vocab",
+  "crates/syncpack-io",
+  "crates/syncpack-registry",
+  "crates/syncpack-disk",
+]
 
 [package]
 name = "syncpack"
@@ -36,6 +42,7 @@ detect-indent = "0.1.0"
 detect-newline-style = "0.1.2"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
+syncpack-disk = { path = "crates/syncpack-disk" }
 syncpack-io = { path = "crates/syncpack-io" }
 syncpack-registry = { path = "crates/syncpack-registry" }
 syncpack-specifier = { path = "crates/syncpack-specifier" }
@@ -50,6 +57,7 @@ unicode-width = "0.2"
 [dev-dependencies]
 # Enable io's in-memory test doubles (MockDiskIo) for the bin's tests only.
 syncpack-io = { path = "crates/syncpack-io", features = ["test-support"] }
+syncpack-disk = { path = "crates/syncpack-disk", features = ["test-support"] }
 # Enable registry's MockRegistryClient for the bin's tests only.
 syncpack-registry = { path = "crates/syncpack-registry", features = ["test-support"] }
 

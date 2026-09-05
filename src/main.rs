@@ -13,7 +13,6 @@ use {
   },
 };
 
-mod catalogs;
 #[cfg(test)]
 #[path = "catalogs_test.rs"]
 mod catalogs_test;
@@ -21,7 +20,6 @@ mod cli;
 mod commands;
 mod context;
 mod dependency;
-mod disk;
 mod errors;
 mod group_selector;
 mod inspection;

@@ -319,7 +319,7 @@ fn context_disk_field_present() {
     .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
     .with_npm_package_manager()
     .build();
-  let _: &crate::disk::Disk = &ctx.disk;
+  let _: &syncpack_disk::Disk = &ctx.disk;
   assert_eq!(ctx.package_manager(), Some(PackageManager::Npm));
 }
 

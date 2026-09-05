@@ -1,0 +1,22 @@
+[package]
+name = "syncpack-disk"
+version = "15.3.3"
+authors = ["Jamie Mason <jamie@foldleft.io>"]
+edition = "2024"
+description = "Project manifests (package.json + pnpm-workspace.yaml) as a discovered aggregate for syncpack"
+license = "MIT"
+
+[features]
+test-support = []
+
+[dependencies]
+log = "0.4.33"
+serde_json = { version = "1.0.151", features = ["preserve_order"] }
+syncpack-io = { path = "../syncpack-io" }
+syncpack-specifier = { path = "../syncpack-specifier" }
+syncpack-vocab = { path = "../syncpack-vocab" }
+thiserror = "2.0.20"
+yaml_serde = "0.10"
+
+[dev-dependencies]
+syncpack-io = { path = "../syncpack-io", features = ["test-support"] }

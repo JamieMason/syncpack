@@ -4,10 +4,8 @@ mod fix_test;
 
 use {
   crate::{
-    catalogs::detect_bun_catalogs,
     commands::{InstanceAction, action_of, reporter::FixReporter},
     context::{Discovered, Inspected},
-    disk::{copy_expected_specifier_json, insert_catalog_definition},
     errors::SyncpackError,
     inspection::Inspection,
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
@@ -17,6 +15,7 @@ use {
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
+  syncpack_disk::{catalogs::detect_bun_catalogs, copy_expected_specifier_json, insert_catalog_definition},
   syncpack_io::{DiskIo, empty_yaml_file, ensure_object_path, set_nested_prop, write_json_file, write_yaml_file},
   syncpack_vocab::{package_manager::PackageManager, severity::Severity},
 };
@@ -130,7 +129,7 @@ fn apply_fix_actions(data: &mut Discovered, inspection: &Inspection, actions: &[
       } else if let Some(yaml) = data.disk.pnpm_workspace.as_mut() {
         let instance = &data.instances[inst_idx.0];
         if let Some(catalog_name) = instance.catalog_name() {
-          crate::disk::remove_catalog_definition(yaml, catalog_name, &instance.descriptor.name);
+          syncpack_disk::remove_catalog_definition(yaml, catalog_name, &instance.descriptor.name);
         }
       }
     } else if let Some(expected) = inspection.expected(inst_idx) {
@@ -140,7 +139,7 @@ fn apply_fix_actions(data: &mut Discovered, inspection: &Inspection, actions: &[
         copy_expected_specifier_json(file, &instance.descriptor.dependency_type, &instance.descriptor.name, expected);
       } else if let Some(yaml) = data.disk.pnpm_workspace.as_mut() {
         let instance = &data.instances[inst_idx.0];
-        crate::disk::copy_expected_specifier_yaml(
+        syncpack_disk::copy_expected_specifier_yaml(
           yaml,
           &instance.descriptor.dependency_type,
           &instance.descriptor.name,

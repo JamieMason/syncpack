@@ -1,14 +1,13 @@
 use {
-  crate::{
-    disk::{Disk, PackageManager, insert_catalog_definition, remove_catalog_definition},
-    specifier::Specifier,
-  },
+  crate::{Disk, insert_catalog_definition, remove_catalog_definition},
   serde_json::json,
   std::path::PathBuf,
   syncpack_io::{
     File, PendingYamlOp, empty_yaml_file, ensure_object_path, json_view, mock::MockDiskIo, parse_yaml_file, remove_prop, render_yaml_bytes,
     set_nested_prop, set_prop,
   },
+  syncpack_specifier::Specifier,
+  syncpack_vocab::package_manager::PackageManager,
 };
 
 fn json_file_from_value(value: serde_json::Value) -> File<serde_json::Value> {
@@ -674,11 +673,7 @@ fn json_view_returns_owned_eager() {
 mod disk_ops {
   use {
     super::*,
-    crate::{
-      disk::{copy_expected_specifier_json, package_name},
-      instance::{Instance, InstanceDescriptor},
-      sources::SourceIdx,
-    },
+    crate::{copy_expected_specifier_json, package_name},
     serde_json::{Map, Value},
     syncpack_io::{DetectedFormatting, detect_formatting, get_pretty_json_bytes, has_prop, parse_json_file},
     syncpack_vocab::{
@@ -701,18 +696,10 @@ mod disk_ops {
     String::from_utf8(get_pretty_json_bytes(&snapshot).unwrap()).unwrap()
   }
 
-  fn make_instance(name: &str, dep_type: DependencyType, expected: &str) -> (Instance, std::rc::Rc<Specifier>) {
-    let expected_specifier = Specifier::new(expected);
-    let descriptor = InstanceDescriptor {
-      dependency_type: std::rc::Rc::new(dep_type),
-      internal_name: name.to_string(),
-      is_local_dependency: false,
-      name: name.to_string(),
-      source_idx: SourceIdx(0),
-      specifier: Specifier::new("0.0.0"),
-    };
-    let instance = Instance::new(descriptor, "test-pkg", None, None);
-    (instance, expected_specifier)
+  /// Build the (dependency_type, name, expected) triple the copy_* helpers
+  /// take — no `Instance` needed, keeping disk_test model-free.
+  fn make_case(name: &str, dep_type: DependencyType, expected: &str) -> (DependencyType, String, std::rc::Rc<Specifier>) {
+    (dep_type, name.to_string(), Specifier::new(expected))
   }
 
   #[test]
@@ -890,13 +877,8 @@ mod disk_ops {
       source: SourceKind::PackageJson,
       is_catalog_definition: false,
     };
-    let (instance, expected) = make_instance("react", dep_type, "18.0.0");
-    copy_expected_specifier_json(
-      &mut file,
-      &instance.descriptor.dependency_type,
-      &instance.descriptor.name,
-      &expected,
-    );
+    let (dep_type, name, expected) = make_case("react", dep_type, "18.0.0");
+    copy_expected_specifier_json(&mut file, &dep_type, &name, &expected);
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/dependencies/react"), Some(&json!("18.0.0")));
   }
@@ -912,13 +894,8 @@ mod disk_ops {
       source: SourceKind::PackageJson,
       is_catalog_definition: false,
     };
-    let (instance, expected) = make_instance("@scope/lib", dep_type, "2.0.0");
-    copy_expected_specifier_json(
-      &mut file,
-      &instance.descriptor.dependency_type,
-      &instance.descriptor.name,
-      &expected,
-    );
+    let (dep_type, name, expected) = make_case("@scope/lib", dep_type, "2.0.0");
+    copy_expected_specifier_json(&mut file, &dep_type, &name, &expected);
     assert!(file.dirty, "scoped package specifier was not applied");
     let deps = file.contents.pointer("/dependencies").unwrap().as_object().unwrap();
     assert_eq!(deps.get("@scope/lib"), Some(&json!("2.0.0")));
@@ -935,13 +912,8 @@ mod disk_ops {
       source: SourceKind::PackageJson,
       is_catalog_definition: false,
     };
-    let (instance, expected) = make_instance("@scope/lib", dep_type, "2.0.0");
-    copy_expected_specifier_json(
-      &mut file,
-      &instance.descriptor.dependency_type,
-      &instance.descriptor.name,
-      &expected,
-    );
+    let (dep_type, name, expected) = make_case("@scope/lib", dep_type, "2.0.0");
+    copy_expected_specifier_json(&mut file, &dep_type, &name, &expected);
     assert!(file.dirty, "deeply nested scoped package specifier was not applied");
     let deps = file.contents.pointer("/config/custom/dependencies").unwrap().as_object().unwrap();
     assert_eq!(deps.get("@scope/lib"), Some(&json!("2.0.0")));
@@ -958,13 +930,8 @@ mod disk_ops {
       source: SourceKind::PackageJson,
       is_catalog_definition: false,
     };
-    let (instance, expected) = make_instance("react", dep_type, "18.0.0");
-    copy_expected_specifier_json(
-      &mut file,
-      &instance.descriptor.dependency_type,
-      &instance.descriptor.name,
-      &expected,
-    );
+    let (dep_type, name, expected) = make_case("react", dep_type, "18.0.0");
+    copy_expected_specifier_json(&mut file, &dep_type, &name, &expected);
     assert!(!file.dirty, "same value should not mark dirty");
   }
 
@@ -979,13 +946,8 @@ mod disk_ops {
       source: SourceKind::PackageJson,
       is_catalog_definition: false,
     };
-    let (instance, expected) = make_instance("pkg", dep_type, "2.0.0");
-    copy_expected_specifier_json(
-      &mut file,
-      &instance.descriptor.dependency_type,
-      &instance.descriptor.name,
-      &expected,
-    );
+    let (dep_type, name, expected) = make_case("pkg", dep_type, "2.0.0");
+    copy_expected_specifier_json(&mut file, &dep_type, &name, &expected);
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/version"), Some(&json!("2.0.0")));
   }
@@ -1001,13 +963,8 @@ mod disk_ops {
       source: SourceKind::PackageJson,
       is_catalog_definition: false,
     };
-    let (instance, expected) = make_instance("pnpm", dep_type, "8.0.0");
-    copy_expected_specifier_json(
-      &mut file,
-      &instance.descriptor.dependency_type,
-      &instance.descriptor.name,
-      &expected,
-    );
+    let (dep_type, name, expected) = make_case("pnpm", dep_type, "8.0.0");
+    copy_expected_specifier_json(&mut file, &dep_type, &name, &expected);
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/packageManager"), Some(&json!("pnpm@8.0.0")));
   }
@@ -1023,13 +980,8 @@ mod disk_ops {
       source: SourceKind::PackageJson,
       is_catalog_definition: false,
     };
-    let (instance, expected) = make_instance("node", dep_type, ">=18");
-    copy_expected_specifier_json(
-      &mut file,
-      &instance.descriptor.dependency_type,
-      &instance.descriptor.name,
-      &expected,
-    );
+    let (dep_type, name, expected) = make_case("node", dep_type, ">=18");
+    copy_expected_specifier_json(&mut file, &dep_type, &name, &expected);
     assert!(file.dirty);
     assert_eq!(file.contents.pointer("/engines/node"), Some(&json!(">=18")));
   }

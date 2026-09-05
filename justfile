@@ -52,7 +52,7 @@ lint:
 
 # Run cargo check
 check-cargo:
-    cargo check --locked
+    cargo check --workspace --locked
 
 # Check for formatting issues
 check-formatting:
@@ -154,7 +154,7 @@ serve-coverage:
 
 # Run all tests
 test:
-    cargo test -- --nocapture --color=always
+    cargo test --workspace -- --nocapture --color=always
 
 # Run test in watch mode
 watch pattern=no_pattern:

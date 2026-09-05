@@ -1,10 +1,10 @@
 use {
   crate::{
-    disk::Disk,
     rcfile::{DEFAULT_MINIMUM_RELEASE_AGE, from_disk::resolve_minimum_release_age},
     test::mock::pnpm_yaml_file_from_str,
   },
   std::path::PathBuf,
+  syncpack_disk::Disk,
 };
 
 fn empty_disk() -> Disk {

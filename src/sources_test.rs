@@ -1,11 +1,11 @@
 use {
   crate::{
     context::{iter_instances, sources_from_disk},
-    disk::Disk,
     sources::parse_catalog_name,
   },
   serde_json::json,
   std::path::PathBuf,
+  syncpack_disk::Disk,
   syncpack_io::{File, detect_formatting, parse_yaml_file},
   syncpack_vocab::{
     dependency_type::{DependencyType, Strategy},

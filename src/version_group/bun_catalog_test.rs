@@ -1,8 +1,5 @@
 use {
   crate::{
-    catalogs,
-    disk::Disk,
-    errors::SyncpackError,
     instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
     test::{
       builder::TestBuilder,
@@ -10,6 +7,7 @@ use {
     },
   },
   serde_json::json,
+  syncpack_disk::{Disk, catalogs},
   syncpack_io::mock::MockDiskIo,
   syncpack_vocab::package_manager::PackageManager,
 };
@@ -193,7 +191,7 @@ async fn bun_dual_path_aborts() {
   let disk = Disk::from_workspace(&io, std::env::current_dir().unwrap().as_path());
   assert_eq!(disk.package_manager, Some(PackageManager::Bun));
   let err = catalogs::make_catalog_dep_types(&disk).unwrap_err();
-  assert!(matches!(err, SyncpackError::BunDualCatalogPath));
+  assert!(matches!(err, catalogs::CatalogError::BunDualCatalogPath));
 }
 
 #[tokio::test]

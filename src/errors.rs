@@ -22,8 +22,6 @@ pub enum SyncpackError {
   NoSubcommand,
   #[error(transparent)]
   RcfileError(RcfileError),
-  #[error(
-    "Bun catalog blocks were found at both top-level (/catalog or /catalogs/*) and nested under /workspaces (/workspaces/catalog or /workspaces/catalogs/*) in the root package.json. Only one location can be used."
-  )]
-  BunDualCatalogPath,
+  #[error(transparent)]
+  CatalogError(#[from] syncpack_disk::catalogs::CatalogError),
 }

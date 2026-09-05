@@ -67,12 +67,12 @@ mod source_mode {
     super::get_source_patterns,
     crate::{
       context::Config,
-      disk::Disk,
       rcfile::{RawRcfile, Rcfile},
       test::mock,
     },
     serde_json::{Value, json},
     std::path::PathBuf,
+    syncpack_disk::Disk,
     syncpack_io::{File, detect_formatting},
     syncpack_vocab::source_mode::SourceMode,
   };
