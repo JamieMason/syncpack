@@ -7,9 +7,10 @@ use {
       reporter::{JsonFixReporter, JsonFormatReporter, PrettyFixReporter, PrettyFormatReporter},
       set_semver_ranges, update,
     },
-    context::{Config, Context},
+    context::{Config, Discovered, Inspected},
     disk::{Disk, DiskIo},
     errors::SyncpackError,
+    inspection::{Inspection, RuleInput, RuleInputCfg},
     logger,
     rcfile::Rcfile,
     registry::{client::RegistryClient, updates::RegistryUpdates},
@@ -22,21 +23,19 @@ use {
   std::sync::Arc,
 };
 
-/// Run the full syncpack CLI using injected dependencies
-pub async fn syncpack<D: DiskIo>(
-  cli: Cli,
-  io: &D,
-  registry_client: &Arc<dyn RegistryClient>,
-) -> Result<(Context, Option<RegistryUpdates>), SyncpackError> {
-  let ctx = analyse(cli, io)?;
-  let registry_updates = fetch_updates(&ctx, registry_client).await;
-  let ctx = inspect(ctx, &registry_updates);
-  Ok((ctx, registry_updates))
+/// Run the full syncpack CLI using injected dependencies. Discovers the
+/// project, fetches registry updates when needed, inspects, and returns the
+/// bound `Inspected` phase.
+pub async fn syncpack<D: DiskIo>(cli: Cli, io: &D, registry_client: &Arc<dyn RegistryClient>) -> Result<Inspected, SyncpackError> {
+  let data = analyse(cli, io)?;
+  let updates = fetch_updates(&data, registry_client).await;
+  let inspection = inspect(&data, &updates);
+  Ok(Inspected { data, inspection, updates })
 }
 
-/// Analyse the project, discover config and packages, and return a `Context`.
-/// All disk reads happen here.
-fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Context, SyncpackError> {
+/// Analyse the project, discover config and packages, and return a
+/// `Discovered`. All disk reads happen here.
+fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Discovered, SyncpackError> {
   logger::configure(&cli);
   let mut disk = Disk::from_workspace(io, &cli.cwd);
   let rcfile = Rcfile::from_disk(&disk, io, &cli).map_err(SyncpackError::RcfileError)?;
@@ -49,71 +48,76 @@ fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Context, SyncpackError> {
   disk.load_package_files(io, &file_paths);
   let dep_types = catalogs::make_catalog_dep_types(&disk)?;
   let sources = Sources::from_disk(&disk, &file_paths);
-  Context::create(config, disk, sources, dep_types).map_err(SyncpackError::ContextError)
+  Discovered::create(config, disk, sources, dep_types).map_err(SyncpackError::ContextError)
 }
 
-/// Fetch updates from the npm registry, if applicable
-async fn fetch_updates(ctx: &Context, registry_client: &Arc<dyn RegistryClient>) -> Option<RegistryUpdates> {
-  match ctx.config.cli.subcommand {
-    Subcommand::Update => {
-      let registry_updates = RegistryUpdates::fetch(
+/// Fetch updates from the npm registry, if applicable.
+async fn fetch_updates(data: &Discovered, registry_client: &Arc<dyn RegistryClient>) -> Option<RegistryUpdates> {
+  match data.config.cli.subcommand {
+    Subcommand::Update => Some(
+      RegistryUpdates::fetch(
         registry_client,
-        &ctx.version_groups,
-        &ctx.instances,
-        ctx.config.rcfile.max_concurrent_requests,
-        ctx.config.rcfile.minimum_release_age,
+        &data.version_groups,
+        &data.dependencies,
+        &data.instances,
+        data.config.rcfile.max_concurrent_requests,
+        data.config.rcfile.minimum_release_age,
       )
-      .await;
-      Some(registry_updates)
-    }
+      .await,
+    ),
     _ => None,
   }
 }
 
-/// Inspect every instance of every dependency within every version group and
-/// semver group, and based on the rules of those groups, assign a status code
-/// to every instance which represents whether it matches the group's rules.
-fn inspect(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context {
-  match ctx.config.cli.subcommand {
-    Subcommand::Fix => visit_packages(ctx, &None),
-    Subcommand::Format => visit_formatting(ctx),
-    Subcommand::Json => visit_packages(ctx, &None),
-    Subcommand::Lint => visit_packages(ctx, &None),
-    Subcommand::List => visit_packages(ctx, &None),
-    Subcommand::Update => visit_packages(ctx, registry_updates),
-    _ => ctx,
-  }
+/// Inspect every instance and every source, returning one `Inspection` value.
+/// Pure: reads discovered data (including already-loaded file contents) and
+/// mutates only the accumulator; no disk I/O, no model mutation.
+pub fn inspect(data: &Discovered, registry_updates: &Option<RegistryUpdates>) -> Inspection {
+  let input = RuleInput {
+    instances: &data.instances,
+    dependencies: &data.dependencies,
+    sources: &data.sources,
+    cfg: RuleInputCfg {
+      target: data.config.cli.target,
+      strict: data.config.rcfile.strict,
+      package_manager: data.disk.package_manager,
+    },
+  };
+  let mut inspection = Inspection::new(data.instances.len(), data.dependencies.len(), data.sources.all.len());
+  visit_packages(&data.version_groups, &input, registry_updates, &mut inspection);
+  visit_formatting(data, &mut inspection);
+  inspection
 }
 
-/// Run the side-effects of the chosen subcommand
-pub fn run<D: DiskIo>(ctx: Context, registry_updates: Option<RegistryUpdates>, io: &D, tui: &dyn Tui) -> Result<Context, SyncpackError> {
-  match ctx.config.cli.subcommand {
+/// Run the side-effects of the chosen subcommand. The sole disk writer.
+pub fn run<D: DiskIo>(inspected: Inspected, io: &D, tui: &dyn Tui) -> Result<Inspected, SyncpackError> {
+  match inspected.data.config.cli.subcommand {
     Subcommand::Fix => {
       let pretty = PrettyFixReporter;
       let json_reporter = JsonFixReporter;
-      let reporter: &dyn commands::reporter::FixReporter = match ctx.config.cli.reporter {
+      let reporter: &dyn commands::reporter::FixReporter = match inspected.data.config.cli.reporter {
         ReporterKind::Pretty => &pretty,
         ReporterKind::Json => &json_reporter,
       };
-      fix::run(ctx, reporter, io)
+      fix::run(inspected, reporter, io)
     }
-    Subcommand::FixMismatches => fix_mismatches::run(ctx),
+    Subcommand::FixMismatches => fix_mismatches::run(inspected),
     Subcommand::Format => {
       let pretty = PrettyFormatReporter;
       let json_reporter = JsonFormatReporter;
-      let reporter: &dyn commands::reporter::FormatReporter = match ctx.config.cli.reporter {
+      let reporter: &dyn commands::reporter::FormatReporter = match inspected.data.config.cli.reporter {
         ReporterKind::Pretty => &pretty,
         ReporterKind::Json => &json_reporter,
       };
-      format::run(ctx, reporter, io)
+      format::run(inspected, reporter, io)
     }
-    Subcommand::Json => json::run(ctx),
-    Subcommand::Lint => lint::run(ctx),
-    Subcommand::LintSemverRanges => lint_semver_ranges::run(ctx),
-    Subcommand::List => list::run(ctx),
-    Subcommand::ListMismatches => list_mismatches::run(ctx),
-    Subcommand::Prompt => prompt::run(ctx),
-    Subcommand::SetSemverRanges => set_semver_ranges::run(ctx),
-    Subcommand::Update => update::run(ctx, registry_updates.expect("registry_updates is None"), io, tui),
+    Subcommand::Json => json::run(inspected),
+    Subcommand::Lint => lint::run(inspected),
+    Subcommand::LintSemverRanges => lint_semver_ranges::run(inspected),
+    Subcommand::List => list::run(inspected),
+    Subcommand::ListMismatches => list_mismatches::run(inspected),
+    Subcommand::Prompt => prompt::run(inspected),
+    Subcommand::SetSemverRanges => set_semver_ranges::run(inspected),
+    Subcommand::Update => update::run(inspected, io, tui),
   }
 }

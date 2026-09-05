@@ -28,6 +28,7 @@ mod dependency;
 mod disk;
 mod errors;
 mod group_selector;
+mod inspection;
 mod instance;
 mod logger;
 mod rcfile;
@@ -62,9 +63,9 @@ async fn main() {
       ))
     };
     let tui = LiveTui::new();
-    let (ctx, registry_updates) = syncpack::syncpack(cli, &*io, &registry_client).await?;
-    debug!("config: {:#?}", ctx.config);
-    syncpack::run(ctx, registry_updates, &*io, &tui)
+    let inspected = syncpack::syncpack(cli, &*io, &registry_client).await?;
+    debug!("config: {:#?}", inspected.data.config);
+    syncpack::run(inspected, &*io, &tui)
   }
   .await;
 

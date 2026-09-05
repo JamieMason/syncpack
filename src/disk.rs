@@ -691,9 +691,9 @@ pub fn ensure_object_path(file: &mut File<JsonValue>, pointer: &str) {
 /// Apply an instance's `expected_specifier` to the package.json. Dispatches
 /// over the dependency type's `Strategy`. Marks the file dirty only when the
 /// stored value actually changed.
-pub fn copy_expected_specifier_json(file: &mut File<JsonValue>, instance: &Instance) {
+pub fn copy_expected_specifier_json(file: &mut File<JsonValue>, instance: &Instance, expected: &Rc<Specifier>) {
   let path_to_prop_str = &instance.descriptor.dependency_type.path.as_str();
-  let raw_specifier = instance.expected_specifier.borrow().as_ref().unwrap().get_raw().to_string();
+  let raw_specifier = expected.get_raw().to_string();
   match instance.descriptor.dependency_type.strategy {
     Strategy::NameAndVersionProps => {
       set_prop(file, path_to_prop_str, JsonValue::String(raw_specifier));
@@ -911,20 +911,17 @@ pub fn remove_catalog_definition(file: &mut YamlFile, catalog_name: &str, dep_na
 /// `versionsByName` strategy) write into the top-level block named by the
 /// dep type's `path` (e.g. `overrides`). No-op when the instance has no
 /// expected specifier.
-pub fn copy_expected_specifier_yaml(file: &mut YamlFile, instance: &Instance) {
-  let Some(expected) = instance.expected_specifier.borrow().clone() else {
-    return;
-  };
+pub fn copy_expected_specifier_yaml(file: &mut YamlFile, instance: &Instance, expected: &Rc<Specifier>) {
   let dep_name = instance.descriptor.name.clone();
   if let Some(catalog_name) = instance.catalog_name() {
-    insert_catalog_definition(file, catalog_name, &dep_name, &expected);
+    insert_catalog_definition(file, catalog_name, &dep_name, expected);
     return;
   }
   // `overrides` is a flat `name: version` block — the same shape as the
   // default `catalog:` block. `path` is its JSON pointer, e.g. `/overrides`.
   if matches!(instance.descriptor.dependency_type.strategy, Strategy::VersionsByName) {
     let block_key = instance.descriptor.dependency_type.path.trim_start_matches('/');
-    insert_into_target(file, YamlTarget::Block(block_key), &dep_name, &expected);
+    insert_into_target(file, YamlTarget::Block(block_key), &dep_name, expected);
   }
 }
 

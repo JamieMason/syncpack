@@ -1,13 +1,13 @@
 use {
   crate::{
-    context::Context,
+    context::Discovered,
     version_group::{VersionGroup, VersionGroupBehavior},
   },
   colored::*,
   log::info,
 };
 
-pub fn print_header(_ctx: &Context, group: &VersionGroup) {
+pub fn print_header(_ctx: &Discovered, group: &VersionGroup) {
   let print_width = 80;
   let label = &group.selector().label;
   let header = format!("= {label} ");

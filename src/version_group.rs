@@ -1,11 +1,11 @@
 use {
   crate::{
     cli::SortBy,
-    context::Context,
     dependency::UpdateUrl,
     errors::UnsupportedConfigError,
     group_selector::GroupSelector,
-    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, Severity, SuspectInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{Instance, InstanceIdx, InstanceState, Severity, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     source::Source,
     sources::Sources,
@@ -16,7 +16,6 @@ use {
   serde::Deserialize,
   serde_json::Value,
   std::{
-    cell::RefCell,
     cmp::Ordering,
     collections::{BTreeMap, HashMap},
     rc::Rc,
@@ -95,22 +94,30 @@ pub(crate) const L8: &str = "                ";
 pub(crate) const L9: &str = "                  ";
 pub(crate) const L10: &str = "                    ";
 
+/// Index into the `Discovered.dependencies` arena.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct DependencyIdx(pub usize);
+
+/// One dependency within one version group: the set of instances of a single
+/// `internal_name` that group claims. Immutable discovery data — inspection
+/// outputs (expected specifier, states) are held in `Inspection`, keyed by
+/// `DependencyIdx` / `InstanceIdx`.
 #[derive(Debug)]
-pub struct DependencyCore {
-  pub expected: RefCell<Option<Rc<Specifier>>>,
+pub struct Dependency {
   pub has_alias: bool,
   pub instances: Vec<InstanceIdx>,
-  pub local_instance: RefCell<Option<InstanceIdx>>,
+  /// The `/version` instance of this dependency when the dependency is a
+  /// package developed locally in this monorepo.
+  pub local_instance: Option<InstanceIdx>,
   pub internal_name: String,
 }
 
-impl DependencyCore {
+impl Dependency {
   fn new(internal_name: String) -> Self {
     Self {
-      expected: RefCell::new(None),
       has_alias: false,
       instances: vec![],
-      local_instance: RefCell::new(None),
+      local_instance: None,
       internal_name,
     }
   }
@@ -123,28 +130,19 @@ impl DependencyCore {
     }
   }
 
-  pub fn get_state(&self, arena: &[Instance]) -> InstanceState {
+  pub fn get_state(&self, inspection: &Inspection) -> InstanceState {
     self
       .instances
       .iter()
-      .fold(InstanceState::Unknown, |acc, idx| acc.max(arena[idx.0].state.borrow().clone()))
+      .fold(InstanceState::Unknown, |acc, idx| acc.max(inspection.state(*idx).clone()))
   }
 
-  pub fn get_states(&self, arena: &[Instance]) -> Vec<InstanceState> {
-    self.instances.iter().map(|idx| arena[idx.0].state.borrow().clone()).collect()
-  }
-
-  pub fn set_expected_specifier(&self, specifier: &Rc<Specifier>) -> &Self {
-    *self.expected.borrow_mut() = Some(Rc::clone(specifier));
-    self
+  pub fn get_states(&self, inspection: &Inspection) -> Vec<InstanceState> {
+    self.instances.iter().map(|idx| inspection.state(*idx).clone()).collect()
   }
 
   pub fn get_local_specifier(&self, arena: &[Instance]) -> Option<Rc<Specifier>> {
-    self
-      .local_instance
-      .borrow()
-      .as_ref()
-      .map(|idx| Rc::clone(&arena[idx.0].descriptor.specifier))
+    self.local_instance.map(|idx| Rc::clone(&arena[idx.0].descriptor.specifier))
   }
 
   pub fn internal_name_is_supported(&self) -> bool {
@@ -152,7 +150,7 @@ impl DependencyCore {
   }
 
   pub fn has_local_instance(&self) -> bool {
-    self.local_instance.borrow().is_some()
+    self.local_instance.is_some()
   }
 
   pub fn has_local_instance_with_invalid_specifier(&self, arena: &[Instance]) -> bool {
@@ -189,14 +187,17 @@ impl DependencyCore {
 
   pub fn get_sorted_instances<'a>(
     &'a self,
+    inspection: &Inspection,
     instances: &'a [Instance],
     sources: &'a [Source],
   ) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
-    self.get_instances(instances).sorted_by(|(_, a), (_, b)| {
-      if a.is_valid() && !b.is_valid() {
+    self.get_instances(instances).sorted_by(|(a_idx, a), (b_idx, b)| {
+      let a_valid = inspection.state(*a_idx).is_valid();
+      let b_valid = inspection.state(*b_idx).is_valid();
+      if a_valid && !b_valid {
         return Ordering::Less;
       }
-      if b.is_valid() && !a.is_valid() {
+      if b_valid && !a_valid {
         return Ordering::Greater;
       }
       if a.has_missing_specifier() {
@@ -217,13 +218,16 @@ impl DependencyCore {
   }
 }
 
-pub(crate) fn add_instance_to_dependencies(dependencies: &mut BTreeMap<String, DependencyCore>, idx: InstanceIdx, instance: &Instance) {
+/// Group discovered instances into a per-group map of `Dependency`, keyed by
+/// `internal_name`. Called at discovery time; the map is later flattened into
+/// the global dependency arena.
+pub(crate) fn add_instance_to_dep_map(dependencies: &mut BTreeMap<String, Dependency>, idx: InstanceIdx, instance: &Instance) {
   let dep = dependencies
     .entry(instance.descriptor.internal_name.clone())
-    .or_insert_with(|| DependencyCore::new(instance.descriptor.internal_name.clone()));
+    .or_insert_with(|| Dependency::new(instance.descriptor.internal_name.clone()));
   dep.instances.push(idx);
   if instance.is_local_instance {
-    *dep.local_instance.borrow_mut() = Some(idx);
+    dep.local_instance = Some(idx);
   }
   if instance.descriptor.name != dep.internal_name {
     dep.has_alias = true;
@@ -251,45 +255,14 @@ pub(super) fn highest_eligible_for<'a>(
 }
 
 #[cfg(test)]
-mod dependency_core_test {
-  use super::DependencyCore;
-
-  #[test]
-  fn internal_name_is_supported() {
-    let scenarios = vec![
-      (true, "@fluid-private/changelog-generator-wrapper"),
-      (true, "@fluid-tools/markdown-magic"),
-      (true, "@types/events_pkg"),
-      (true, "@types/node"),
-      (true, "get-tsconfig"),
-      (true, "node-fetch"),
-      (true, "nodegit"),
-      (true, "qs"),
-      (true, "sharp"),
-      (true, "socket.io-client"),
-      (true, "socket.io-parser"),
-      (false, "@fluentui/react-positioning>@floating-ui/dom"),
-      (false, "@types/node@<18"),
-      (false, "good-fences>nodegit"),
-      (false, "json5@<1.0.2"),
-      (false, "json5@>=2.0.0 <2.2.2"),
-      (false, "oclif>@aws-sdk/client-cloudfront"),
-      (false, "oclif>@aws-sdk/client-s3"),
-      (false, "simplemde>codemirror"),
-      (false, "simplemde>marked"),
-    ];
-    for (expected, name) in scenarios {
-      let dep = DependencyCore::new(name.to_string());
-      assert_eq!(expected, dep.internal_name_is_supported(), "failed for {name}");
-    }
-  }
-}
+#[path = "version_group/dependency_test.rs"]
+mod dependency_test;
 
 pub trait VersionGroupBehavior {
   fn selector(&self) -> &GroupSelector;
-  fn dependencies(&self) -> &BTreeMap<String, DependencyCore>;
-  fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance);
-  fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>);
+  fn dependency_indices(&self) -> &[DependencyIdx];
+  fn set_dependency_indices(&mut self, indices: Vec<DependencyIdx>);
+  fn visit(&self, input: &RuleInput, registry_updates: &Option<RegistryUpdates>, out: &mut Inspection);
 }
 
 #[derive(Debug)]
@@ -327,7 +300,7 @@ impl VersionGroupBehavior for VersionGroup {
     }
   }
 
-  fn dependencies(&self) -> &BTreeMap<String, DependencyCore> {
+  fn dependency_indices(&self) -> &[DependencyIdx] {
     match self {
       Self::Banned(g) => &g.dependencies,
       Self::Catalog(g) => &g.dependencies,
@@ -342,38 +315,53 @@ impl VersionGroupBehavior for VersionGroup {
     }
   }
 
-  fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
+  fn set_dependency_indices(&mut self, indices: Vec<DependencyIdx>) {
     match self {
-      Self::Banned(g) => g.add_instance(idx, instance),
-      Self::Catalog(g) => g.add_instance(idx, instance),
-      Self::CatalogDefs(g) => g.add_instance(idx, instance),
-      Self::Ignored(g) => g.add_instance(idx, instance),
-      Self::Pinned(g) => g.add_instance(idx, instance),
-      Self::PreferredSemver(g) => g.add_instance(idx, instance),
-      Self::SameMinor(g) => g.add_instance(idx, instance),
-      Self::SameRange(g) => g.add_instance(idx, instance),
-      Self::SemverRangeOnly(g) => g.add_instance(idx, instance),
-      Self::SnappedTo(g) => g.add_instance(idx, instance),
+      Self::Banned(g) => g.dependencies = indices,
+      Self::Catalog(g) => g.dependencies = indices,
+      Self::CatalogDefs(g) => g.dependencies = indices,
+      Self::Ignored(g) => g.dependencies = indices,
+      Self::Pinned(g) => g.dependencies = indices,
+      Self::PreferredSemver(g) => g.dependencies = indices,
+      Self::SameMinor(g) => g.dependencies = indices,
+      Self::SameRange(g) => g.dependencies = indices,
+      Self::SemverRangeOnly(g) => g.dependencies = indices,
+      Self::SnappedTo(g) => g.dependencies = indices,
     }
   }
 
-  fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
+  /// Stage-1 inspection: every non-`SnappedTo` group classifies its
+  /// instances. `SnappedTo` is visited via `visit_snapped` after this pass.
+  fn visit(&self, input: &RuleInput, registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
     match self {
-      Self::Banned(g) => g.visit(ctx, registry_updates),
-      Self::Catalog(g) => g.visit(ctx, registry_updates),
-      Self::CatalogDefs(g) => g.visit(ctx, registry_updates),
-      Self::Ignored(g) => g.visit(ctx, registry_updates),
-      Self::Pinned(g) => g.visit(ctx, registry_updates),
-      Self::PreferredSemver(g) => g.visit(ctx, registry_updates),
-      Self::SameMinor(g) => g.visit(ctx, registry_updates),
-      Self::SameRange(g) => g.visit(ctx, registry_updates),
-      Self::SemverRangeOnly(g) => g.visit(ctx, registry_updates),
-      Self::SnappedTo(g) => g.visit(ctx, registry_updates),
+      Self::Banned(g) => g.visit(input, registry_updates, out),
+      Self::Catalog(g) => g.visit(input, registry_updates, out),
+      Self::CatalogDefs(g) => g.visit(input, registry_updates, out),
+      Self::Ignored(g) => g.visit(input, registry_updates, out),
+      Self::Pinned(g) => g.visit(input, registry_updates, out),
+      Self::PreferredSemver(g) => g.visit(input, registry_updates, out),
+      Self::SameMinor(g) => g.visit(input, registry_updates, out),
+      Self::SameRange(g) => g.visit(input, registry_updates, out),
+      Self::SemverRangeOnly(g) => g.visit(input, registry_updates, out),
+      Self::SnappedTo(_) => unreachable!("SnappedTo groups are visited via visit_snapped in stage 2"),
     }
   }
 }
 
 impl VersionGroup {
+  pub fn is_snapped_to(&self) -> bool {
+    matches!(self, Self::SnappedTo(_))
+  }
+
+  /// Stage-2 inspection: `SnappedTo` groups snap their followers to the
+  /// target's stage-1 computed expected value, read from `out`.
+  pub fn visit_snapped(&self, input: &RuleInput, out: &mut Inspection) {
+    match self {
+      Self::SnappedTo(g) => g.visit_snapped(input, out),
+      _ => unreachable!("visit_snapped is only valid for SnappedTo groups"),
+    }
+  }
+
   pub fn variant_label(&self) -> &str {
     match self {
       Self::Banned(_) => "Banned",
@@ -399,18 +387,39 @@ impl VersionGroup {
     matches!(self, Self::Ignored(_))
   }
 
-  pub fn get_sorted_dependencies(&self, sort: &SortBy) -> impl Iterator<Item = &DependencyCore> {
-    self.dependencies().values().sorted_by(|a, b| match sort {
-      SortBy::Count => b.instances.len().cmp(&a.instances.len()),
-      SortBy::Name => Ordering::Equal,
-    })
+  pub fn severity_map(&self) -> &SeverityMap {
+    match self {
+      Self::Banned(g) => &g.severity,
+      Self::Catalog(g) => &g.severity,
+      Self::CatalogDefs(g) => &g.severity,
+      Self::Ignored(g) => &g.severity,
+      Self::Pinned(g) => &g.severity,
+      Self::PreferredSemver(g) => &g.severity,
+      Self::SameMinor(g) => &g.severity,
+      Self::SameRange(g) => &g.severity,
+      Self::SemverRangeOnly(g) => &g.severity,
+      Self::SnappedTo(g) => &g.severity,
+    }
   }
 
-  pub fn get_update_urls(&self, arena: &[Instance]) -> Option<Vec<UpdateUrl>> {
+  pub fn get_sorted_dependencies(&self, arena: &[Dependency], sort: &SortBy) -> Vec<DependencyIdx> {
+    self
+      .dependency_indices()
+      .iter()
+      .copied()
+      .sorted_by(|a, b| match sort {
+        SortBy::Count => arena[b.0].instances.len().cmp(&arena[a.0].instances.len()),
+        SortBy::Name => Ordering::Equal,
+      })
+      .collect()
+  }
+
+  pub fn get_update_urls(&self, deps: &[Dependency], arena: &[Instance]) -> Option<Vec<UpdateUrl>> {
+    let collect = |group_deps: &[DependencyIdx]| group_deps.iter().filter_map(|d| deps[d.0].get_update_url(arena)).collect();
     match self {
-      Self::PreferredSemver(g) if g.prefer_highest => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
-      Self::CatalogDefs(g) => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
-      Self::SemverRangeOnly(g) => Some(g.dependencies.values().filter_map(|d| d.get_update_url(arena)).collect()),
+      Self::PreferredSemver(g) if g.prefer_highest => Some(collect(&g.dependencies)),
+      Self::CatalogDefs(g) => Some(collect(&g.dependencies)),
+      Self::SemverRangeOnly(g) => Some(collect(&g.dependencies)),
       _ => None,
     }
   }
@@ -418,7 +427,7 @@ impl VersionGroup {
   pub fn get_catch_all() -> Self {
     Self::PreferredSemver(PreferredSemverGroup {
       selector: GroupSelector::new(vec![], vec![], "Default Version Group".into(), vec![], vec![]),
-      dependencies: BTreeMap::new(),
+      dependencies: vec![],
       prefer_highest: true,
       severity: SeverityMap::new(),
     })
@@ -437,7 +446,7 @@ impl VersionGroup {
       let severity = validate_severity(group.severity, "Banned", index, BANNED_KEYS)?;
       return Ok(Self::Banned(BannedGroup {
         selector,
-        dependencies: BTreeMap::new(),
+        dependencies: vec![],
         severity,
       }));
     }
@@ -445,7 +454,7 @@ impl VersionGroup {
       // Ignored produces no statuses; severity is accepted and discarded.
       return Ok(Self::Ignored(IgnoredGroup {
         selector,
-        dependencies: BTreeMap::new(),
+        dependencies: vec![],
         severity: SeverityMap::new(),
       }));
     }
@@ -453,7 +462,7 @@ impl VersionGroup {
       let severity = validate_severity(group.severity, "Pinned", index, PINNED_KEYS)?;
       return Ok(Self::Pinned(PinnedGroup {
         selector,
-        dependencies: BTreeMap::new(),
+        dependencies: vec![],
         pin_version: Specifier::new(pin_version),
         severity,
       }));
@@ -463,7 +472,7 @@ impl VersionGroup {
         let severity = validate_severity(group.severity, "SameRange", index, SAME_RANGE_KEYS)?;
         return Ok(Self::SameRange(SameRangeGroup {
           selector,
-          dependencies: BTreeMap::new(),
+          dependencies: vec![],
           severity,
         }));
       } else if policy == "sameMinor" {
@@ -477,7 +486,7 @@ impl VersionGroup {
         });
         return Ok(Self::SameMinor(SameMinorGroup {
           selector,
-          dependencies: BTreeMap::new(),
+          dependencies: vec![],
           prefer_version,
           severity,
         }));
@@ -485,14 +494,14 @@ impl VersionGroup {
         let severity = validate_severity(group.severity, "Catalog", index, CATALOG_KEYS)?;
         return Ok(Self::Catalog(CatalogGroup {
           selector,
-          dependencies: BTreeMap::new(),
+          dependencies: vec![],
           severity,
         }));
       } else if policy == "semverRangeOnly" {
         let severity = validate_severity(group.severity, "SemverRangeOnly", index, SEMVER_RANGE_ONLY_KEYS)?;
         return Ok(Self::SemverRangeOnly(SemverRangeOnlyGroup {
           selector,
-          dependencies: BTreeMap::new(),
+          dependencies: vec![],
           severity,
         }));
       } else {
@@ -503,7 +512,7 @@ impl VersionGroup {
       let severity = validate_severity(group.severity, "SnappedTo", index, SNAPPED_TO_KEYS)?;
       return Ok(Self::SnappedTo(SnappedToGroup {
         selector,
-        dependencies: BTreeMap::new(),
+        dependencies: vec![],
         snap_to: snap_to
           .iter()
           .flat_map(|name| {
@@ -522,7 +531,7 @@ impl VersionGroup {
       let severity = validate_severity(group.severity, group_type, index, PREFERRED_SEMVER_KEYS)?;
       return Ok(Self::PreferredSemver(PreferredSemverGroup {
         selector,
-        dependencies: BTreeMap::new(),
+        dependencies: vec![],
         prefer_highest,
         severity,
       }));
@@ -530,61 +539,20 @@ impl VersionGroup {
     let severity = validate_severity(group.severity, "HighestSemver", index, PREFERRED_SEMVER_KEYS)?;
     Ok(Self::PreferredSemver(PreferredSemverGroup {
       selector,
-      dependencies: BTreeMap::new(),
+      dependencies: vec![],
       prefer_highest: true,
       severity,
     }))
   }
+}
 
-  /// Resolve the action and severity for `instance` against this group's
-  /// configured severity map and the rcfile's `strict` flag. Writes the
-  /// resolved severity onto `instance.severity` as a side effect so reporters,
-  /// JSON output, and `to_have_instances` test assertions can read it
-  /// directly without re-invoking the resolver. See `.plans/severity.md` §3.5.
-  pub fn resolve_action(&self, instance: &Instance, strict: bool) -> InstanceAction {
-    let severity = self.compute_severity(instance, strict);
-    *instance.severity.borrow_mut() = Some(severity);
-    match severity {
-      Severity::None => InstanceAction::Valid,
-      Severity::Fix => InstanceAction::Fix(Severity::Fix),
-      Severity::Warn | Severity::Error => InstanceAction::Render(severity),
-    }
-  }
-
-  fn compute_severity(&self, instance: &Instance, strict: bool) -> Severity {
-    let state = instance.state.borrow();
-    match &*state {
-      InstanceState::Unknown | InstanceState::Valid(_) => Severity::None,
-      InstanceState::Invalid(InvalidInstance::Unfixable(_)) | InstanceState::Invalid(InvalidInstance::Conflict(_)) => Severity::Error,
-      InstanceState::Invalid(InvalidInstance::Fixable(_)) => {
-        let key = state.get_name();
-        self.severity_map().get(&key).copied().unwrap_or(Severity::Fix)
-      }
-      InstanceState::Suspect(SuspectInstance::RefuseToPinLocal) | InstanceState::Suspect(SuspectInstance::RefuseToSnapLocal) => {
-        let key = state.get_name();
-        let default = if strict { Severity::Error } else { Severity::Warn };
-        self.severity_map().get(&key).copied().unwrap_or(default)
-      }
-      InstanceState::Suspect(_) => {
-        // Other Suspect variants are not user-configurable; strict promotes Warn → Error.
-        if strict { Severity::Error } else { Severity::Warn }
-      }
-    }
-  }
-
-  fn severity_map(&self) -> &SeverityMap {
-    match self {
-      Self::Banned(g) => &g.severity,
-      Self::Catalog(g) => &g.severity,
-      Self::CatalogDefs(g) => &g.severity,
-      Self::Ignored(g) => &g.severity,
-      Self::Pinned(g) => &g.severity,
-      Self::PreferredSemver(g) => &g.severity,
-      Self::SameMinor(g) => &g.severity,
-      Self::SameRange(g) => &g.severity,
-      Self::SemverRangeOnly(g) => &g.severity,
-      Self::SnappedTo(g) => &g.severity,
-    }
+/// Map a resolved severity to the action a command should take. Pure function
+/// of `severity` — commands branch on this at report/apply time.
+pub fn action_of(severity: Severity) -> InstanceAction {
+  match severity {
+    Severity::None => InstanceAction::Valid,
+    Severity::Fix => InstanceAction::Fix(Severity::Fix),
+    Severity::Warn | Severity::Error => InstanceAction::Render(severity),
   }
 }
 
@@ -640,47 +608,4 @@ fn validate_severity(
     }
   }
   Ok(severity)
-}
-
-#[cfg(test)]
-pub(crate) fn visit_groups(ctx: &Context, version_group_configs: &[serde_json::Value]) {
-  visit_groups_with_registry(ctx, version_group_configs, &None);
-}
-
-#[cfg(test)]
-pub(crate) fn visit_groups_with_registry(
-  ctx: &Context,
-  version_group_configs: &[serde_json::Value],
-  registry_updates: &Option<RegistryUpdates>,
-) {
-  let mut groups: Vec<VersionGroup> = version_group_configs
-    .iter()
-    .enumerate()
-    .map(|(index, json)| {
-      let cfg: AnyVersionGroup = serde_json::from_value(json.clone()).unwrap();
-      VersionGroup::from_config(cfg, index, &ctx.sources).unwrap()
-    })
-    .collect();
-  groups.push(VersionGroup::get_catch_all());
-
-  for (i, instance) in ctx.instances.iter().enumerate() {
-    let idx = InstanceIdx(i);
-    let package_name = ctx.sources.all[instance.source_idx().0].name();
-    if let Some(group) = groups.iter_mut().find(|g| g.selector().can_add(&instance.descriptor, package_name)) {
-      group.add_instance(idx, instance);
-    }
-  }
-
-  let mut snapped_to_indices = Vec::new();
-  let mut other_indices = Vec::new();
-  for (i, group) in groups.iter().enumerate() {
-    if matches!(group, VersionGroup::SnappedTo(_)) {
-      snapped_to_indices.push(i);
-    } else {
-      other_indices.push(i);
-    }
-  }
-  for &i in other_indices.iter().chain(snapped_to_indices.iter()) {
-    groups[i].visit(ctx, registry_updates);
-  }
 }

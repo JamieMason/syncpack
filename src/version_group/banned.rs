@@ -1,14 +1,14 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, add_instance_to_dependencies},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{FixableInstance, InstanceState, InvalidInstance, SuspectInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     specifier::Specifier,
+    version_group::{DependencyIdx, L1, L2, L3, L4, L5},
   },
   log::debug,
-  std::collections::BTreeMap,
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -18,18 +18,16 @@ mod banned_test;
 #[derive(Debug)]
 pub struct BannedGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub severity: SeverityMap,
 }
 
 impl BannedGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    for dep in self.dependencies.values() {
+  pub fn visit(&self, input: &RuleInput, _registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit banned version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       for &idx in &dep.instances {
@@ -40,11 +38,23 @@ impl BannedGroup {
           debug!("{L3}it is the local instance of a package developed locally in this monorepo");
           debug!("{L4}refuse to change it");
           debug!("{L5}mark as suspect, user should change their config");
-          instance.mark_suspect(SuspectInstance::RefuseToBanLocal);
+          out.classify(
+            idx,
+            InstanceState::Suspect(SuspectInstance::RefuseToBanLocal),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         } else {
           debug!("{L3}it should be removed");
           debug!("{L4}mark as error");
-          instance.mark_fixable(FixableInstance::IsBanned, &Specifier::new(""));
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::IsBanned)),
+            Some(Specifier::new("")),
+            &self.severity,
+            strict,
+          );
         }
       }
     }

@@ -1,11 +1,12 @@
 use {
   crate::{
     commands::{fix, reporter::FixReporter},
-    context::Context,
+    context::{Discovered, Inspected},
     errors::SyncpackError,
-    instance::Instance,
+    inspection::Inspection,
+    instance::{Instance, InstanceIdx},
     test::{builder::TestBuilder, mock_disk::MockDiskIo},
-    version_group::{DependencyCore, VersionGroup},
+    version_group::{Dependency, DependencyIdx, VersionGroup},
   },
   serde_json::json,
 };
@@ -13,29 +14,30 @@ use {
 /// Silent reporter — fix tests assert state, not console output.
 struct SilentReporter;
 impl FixReporter for SilentReporter {
-  fn on_group_header(&self, _: &Context, _: &VersionGroup) {}
+  fn on_group_header(&self, _: &Discovered, _: &VersionGroup) {}
 
-  fn on_dependency(&self, _: &Context, _: &DependencyCore, _: &str) {}
+  fn on_dependency(&self, _: &Discovered, _: &Inspection, _: DependencyIdx, _: &Dependency, _: &str) {}
 
-  fn on_instance(&self, _: &Context, _: &Instance, _: &str) {}
+  fn on_instance(&self, _: &Discovered, _: &Inspection, _: InstanceIdx, _: &Instance, _: &str) {}
 
   fn on_no_issues(&self) {}
 
   fn on_unfixable_warning(&self) {}
 }
 
-/// Runs `fix::run`. On `Ok`, returns the post-fix `Context`. On
-/// `Err(IssuesFound)`, the ctx was consumed; tests that need to inspect it
+/// Runs `fix::run`. On `Ok`, returns the post-fix `Inspected`. On
+/// `Err(IssuesFound)`, the value was consumed; tests that need to inspect it
 /// after an unfixable issue should structure their setup so all issues are
 /// fixable.
-fn run_fix_ok(ctx: Context) -> Context {
+fn run_fix_ok(inspected: Inspected) -> Inspected {
   let disk = MockDiskIo::new();
-  fix::run(ctx, &SilentReporter, &disk).expect("fix should succeed")
+  fix::run(inspected, &SilentReporter, &disk).expect("fix should succeed")
 }
 
 /// Find a consumer instance by id. Convenience used across the tests.
-fn find_instance<'a>(ctx: &'a Context, id: &str) -> &'a Instance {
-  ctx
+fn find_instance<'a>(inspected: &'a Inspected, id: &str) -> &'a Instance {
+  inspected
+    .data
     .instances
     .iter()
     .find(|i| i.id == id)
@@ -43,8 +45,9 @@ fn find_instance<'a>(ctx: &'a Context, id: &str) -> &'a Instance {
 }
 
 /// Find the package.json by name from disk.
-fn find_package<'a>(ctx: &'a Context, name: &str) -> &'a crate::disk::File<serde_json::Value> {
-  ctx
+fn find_package<'a>(inspected: &'a Inspected, name: &str) -> &'a crate::disk::File<serde_json::Value> {
+  inspected
+    .data
     .disk
     .package_json_files
     .iter()
@@ -52,10 +55,9 @@ fn find_package<'a>(ctx: &'a Context, name: &str) -> &'a crate::disk::File<serde
     .unwrap_or_else(|| panic!("package not found: {name}"))
 }
 
-/// Locate the loaded yaml from disk. Tests that asserted on the v2
-/// `ctx.catalogs` field now reach in here.
-fn pnpm_yaml(ctx: &Context) -> Option<&crate::disk::YamlFile> {
-  ctx.disk.pnpm_workspace.as_ref()
+/// Locate the loaded yaml from disk.
+fn pnpm_yaml(inspected: &Inspected) -> Option<&crate::disk::YamlFile> {
+  inspected.data.disk.pnpm_workspace.as_ref()
 }
 
 #[test]
@@ -258,7 +260,7 @@ fn pnpm_fix_writes_yaml_to_disk() {
       "policy": "catalog",
     }))
     .build_and_visit_packages();
-  ctx.config.cli.dry_run = false;
+  ctx.data.config.cli.dry_run = false;
 
   let disk = recording_disk();
   let _ = fix::run(ctx, &SilentReporter, &disk).expect("fix should succeed");
@@ -313,7 +315,7 @@ fn pnpm_fix_in_memory_state_visible_with_dry_run() {
       "policy": "catalog",
     }))
     .build_and_visit_packages();
-  assert!(ctx.config.cli.dry_run, "test mock CLI should default to dry_run = true");
+  assert!(ctx.data.config.cli.dry_run, "test mock CLI should default to dry_run = true");
   let ctx = run_fix_ok(ctx);
 
   // Both mutations visible because write_to_disk was skipped.
@@ -630,9 +632,12 @@ fn cannot_infer_catalog_file_when_zero_catalogs_npm_yarn_or_unknown() {
     }))
     .build_and_visit_packages();
   // Verify the unfixable state survives a fix run (no auto-create).
-  let consumer = find_instance(&ctx, "react in /dependencies of pkg-a");
+  let consumer = ctx
+    .instance_views()
+    .find(|view| view.instance.id == "react in /dependencies of pkg-a")
+    .expect("consumer instance not found");
   assert_eq!(
-    consumer.state.borrow().get_status_type(),
+    consumer.state.get_status_type(),
     "Unfixable",
     "consumer should already be Unfixable::CannotInferCatalogFile",
   );
@@ -649,7 +654,7 @@ fn cannot_infer_catalog_file_when_zero_catalogs_npm_yarn_or_unknown() {
 
 #[test]
 fn fix_bun_catalog_routes_to_root_idx_no_fallback() {
-  // Bun fix-time uses ctx.disk.package_json_root_idx directly. The synthetic
+  // Bun fix-time uses ctx.data.disk.package_json_root_idx directly. The synthetic
   // root is at disk.package_json_root_idx, so insert lands there.
   let ctx = TestBuilder::new()
     .with_bun_catalogs(json!({"name": "bun-root"}))
@@ -666,12 +671,13 @@ fn fix_bun_catalog_routes_to_root_idx_no_fallback() {
     .build_and_visit_packages();
   // Precondition: root_idx is set on disk.
   let root_idx = ctx
+    .data
     .disk
     .package_json_root_idx
     .expect("synthetic Bun root must populate disk.package_json_root_idx");
   let ctx = run_fix_ok(ctx);
   // The insert lands on the file at the disk's root_idx slot.
-  let root_file = &ctx.disk.package_json_files[root_idx];
+  let root_file = &ctx.data.disk.package_json_files[root_idx];
   assert_eq!(
     root_file.contents.pointer("/catalog/react").and_then(|v| v.as_str()),
     Some("^18.0.0"),
@@ -697,10 +703,11 @@ fn fix_pnpm_catalog_creates_yaml_when_absent() {
     }))
     .build_and_visit_packages();
   // Precondition: no yaml on disk.
-  assert!(ctx.disk.pnpm_workspace.is_none(), "no yaml on disk pre-fix");
+  assert!(ctx.data.disk.pnpm_workspace.is_none(), "no yaml on disk pre-fix");
   let ctx = run_fix_ok(ctx);
   // The auto-created yaml lives on disk; sources arena does NOT gain an entry.
   let yaml = ctx
+    .data
     .disk
     .pnpm_workspace
     .as_ref()

@@ -1,6 +1,6 @@
 use {
   crate::{
-    context::Context,
+    context::Discovered,
     disk::PackageManager,
     instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
     test::{
@@ -80,7 +80,7 @@ fn context_package_manager_reflects_disk_package_manager_after_create() {
       "version": "0.0.0"
     })]);
     disk.package_manager = Some(pm);
-    let ctx = Context::create(config, disk, sources, vec![]).unwrap();
+    let ctx = Discovered::create(config, disk, sources, vec![]).unwrap();
     assert_eq!(ctx.package_manager(), Some(pm));
   }
 
@@ -89,7 +89,7 @@ fn context_package_manager_reflects_disk_package_manager_after_create() {
     "name": "pkg-a",
     "version": "0.0.0"
   })]);
-  let ctx = Context::create(config, disk, sources, vec![]).unwrap();
+  let ctx = Discovered::create(config, disk, sources, vec![]).unwrap();
   assert!(ctx.package_manager().is_none());
 }
 
@@ -389,7 +389,7 @@ fn catalog_defs_group_not_injected_when_no_catalog_dep_types() {
     "version": "0.0.0",
     "dependencies": { "react": "18.0.0" }
   })]);
-  let ctx = Context::create(config, disk, sources, vec![]).unwrap();
+  let ctx = Discovered::create(config, disk, sources, vec![]).unwrap();
 
   let has_catalog_defs = ctx.version_groups.iter().any(|g| matches!(g, VersionGroup::CatalogDefs(_)));
   assert!(

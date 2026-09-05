@@ -1,15 +1,15 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, add_instance_to_dependencies, highest_eligible_for, sort_updates_desc},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, ValidInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{FixableInstance, InstanceState, InvalidInstance, ValidInstance, severity::SeverityMap},
     rcfile::update_group::UpdatePolicy,
     registry::updates::RegistryUpdates,
     semver_range::SemverRange,
+    version_group::{DependencyIdx, L1, L2, L3, L4, highest_eligible_for, sort_updates_desc},
   },
   log::debug,
-  std::collections::BTreeMap,
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -19,18 +19,16 @@ mod semver_range_only_test;
 #[derive(Debug)]
 pub struct SemverRangeOnlyGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub severity: SeverityMap,
 }
 
 impl SemverRangeOnlyGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    for dep in self.dependencies.values() {
+  pub fn visit(&self, input: &RuleInput, registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit semver range only version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       let sorted_desc = registry_updates
@@ -48,11 +46,17 @@ impl SemverRangeOnlyGroup {
           let effective = match &instance.preferred_update_policy {
             Some(UpdatePolicy::Skip) => {
               debug!("{L3}updateGroup policy is Skip; mark as ignored");
-              instance.mark_valid(ValidInstance::IsIgnored, &instance.descriptor.specifier);
+              out.classify(
+                idx,
+                InstanceState::Valid(ValidInstance::IsIgnored),
+                Some(Rc::clone(actual_specifier)),
+                &self.severity,
+                strict,
+              );
               continue;
             }
-            Some(UpdatePolicy::UpTo(t)) => ctx.config.cli.target.stricter(*t),
-            None => ctx.config.cli.target,
+            Some(UpdatePolicy::UpTo(t)) => input.cfg.target.stricter(*t),
+            None => input.cfg.target,
           };
           if let Some(highest_update) = highest_eligible_for(sorted_desc, actual_specifier, &effective) {
             debug!("{L3}an eligible update {highest_update:?} is available");
@@ -66,7 +70,13 @@ impl SemverRangeOnlyGroup {
               && let Some(with_preferred_range) = with_updated_version.with_range(range)
             {
               debug!("{L4}with semver group applied update becomes {with_preferred_range:?}");
-              instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, &with_preferred_range);
+              out.classify(
+                idx,
+                InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToNpmRegistry)),
+                Some(with_preferred_range),
+                &self.severity,
+                strict,
+              );
               continue;
             }
           }
@@ -78,16 +88,34 @@ impl SemverRangeOnlyGroup {
           && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
         {
           debug!("{L3}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-          instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SemverRangeMismatch)),
+            Some(corrected),
+            &self.severity,
+            strict,
+          );
           continue;
         }
 
         if instance.is_local_instance {
           debug!("{L3}local instance is valid");
-          instance.mark_valid(ValidInstance::IsLocalAndValid, actual_specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::IsLocalAndValid),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         } else {
           debug!("{L3}matches semver group");
-          instance.mark_valid(ValidInstance::MatchesSemverGroup, actual_specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::MatchesSemverGroup),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         }
       }
     }

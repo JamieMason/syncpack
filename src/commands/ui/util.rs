@@ -1,5 +1,5 @@
 use {
-  crate::{commands::ui, context::Context},
+  crate::{commands::ui, context::Discovered},
   colored::*,
   itertools::Itertools,
   log::info,
@@ -28,7 +28,7 @@ pub fn count_column(count: usize) -> String {
 }
 
 /// Render the reason code as a clickable link
-pub fn get_status_code_link(ctx: &Context, pascal_case: &str) -> String {
+pub fn get_status_code_link(ctx: &Discovered, pascal_case: &str) -> String {
   let base_url = "https://syncpack.dev/status";
   let kebab_case = pascal_case
     .chars()
@@ -47,7 +47,7 @@ pub fn get_status_code_link(ctx: &Context, pascal_case: &str) -> String {
 }
 
 /// Render a clickable link
-pub fn get_link(ctx: &Context, url: impl Into<String>, text: impl Into<ColoredString>) -> String {
+pub fn get_link(ctx: &Discovered, url: impl Into<String>, text: impl Into<ColoredString>) -> String {
   if ctx.config.cli.disable_ansi {
     text.into().to_string()
   } else {

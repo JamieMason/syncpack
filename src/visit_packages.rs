@@ -1,45 +1,23 @@
-use {
-  crate::{
-    context::Context,
-    registry::updates::RegistryUpdates,
-    version_group::{VersionGroup, VersionGroupBehavior},
-  },
-  itertools::Itertools,
-  std::cmp::Ordering,
+use crate::{
+  inspection::{Inspection, RuleInput},
+  registry::updates::RegistryUpdates,
+  version_group::{VersionGroup, VersionGroupBehavior},
 };
 
-/// Iterate version groups (SnappedTo last) and assign `InstanceState` to every
-/// instance via each group's `visit()`. Then call `resolve_action` for every
-/// instance against its claiming group so `instance.severity` is populated and
-/// reporters / JSON output / test assertions can read it directly without
-/// re-invoking the resolver. Takes ownership of `Context` and returns it.
-pub fn visit_packages(ctx: Context, registry_updates: &Option<RegistryUpdates>) -> Context {
-  ctx
-    .version_groups
-    .iter()
-    // SnappedTo groups depend on other groups' visit results, so they must be
-    // visited last.
-    .sorted_by(|a: &&VersionGroup, b: &&VersionGroup| -> Ordering {
-      if matches!(a, VersionGroup::SnappedTo(_)) {
-        Ordering::Greater
-      } else if matches!(b, VersionGroup::SnappedTo(_)) {
-        Ordering::Less
-      } else {
-        Ordering::Equal
-      }
-    })
-    .for_each(|group| {
-      group.visit(&ctx, registry_updates);
-    });
-
-  let strict = ctx.config.rcfile.strict;
-  for group in ctx.version_groups.iter() {
-    for dep in group.dependencies().values() {
-      for &idx in &dep.instances {
-        let instance = &ctx.instances[idx.0];
-        group.resolve_action(instance, strict);
-      }
-    }
+/// Two-stage version inspection. Stage 1 classifies every non-`SnappedTo`
+/// group's instances into `out`. Stage 2 visits `SnappedTo` groups, which read
+/// their targets' stage-1 computed expected values back out of `out`. The
+/// stage dependency is encoded in the two passes, not a sort.
+pub fn visit_packages(
+  version_groups: &[VersionGroup],
+  input: &RuleInput,
+  registry_updates: &Option<RegistryUpdates>,
+  out: &mut Inspection,
+) {
+  for group in version_groups.iter().filter(|group| !group.is_snapped_to()) {
+    group.visit(input, registry_updates, out);
   }
-  ctx
+  for group in version_groups.iter().filter(|group| group.is_snapped_to()) {
+    group.visit_snapped(input, out);
+  }
 }

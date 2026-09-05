@@ -1,14 +1,14 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, L6, L7, L8, add_instance_to_dependencies},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, ValidInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{FixableInstance, InstanceState, InvalidInstance, SuspectInstance, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
     specifier::Specifier,
+    version_group::{DependencyIdx, L1, L2, L3, L4, L5, L6, L7, L8},
   },
   log::debug,
-  std::{collections::BTreeMap, rc::Rc},
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -18,23 +18,21 @@ mod pinned_test;
 #[derive(Debug)]
 pub struct PinnedGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub pin_version: Rc<Specifier>,
   pub severity: SeverityMap,
 }
 
 impl PinnedGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
+  pub fn visit(&self, input: &RuleInput, _registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
     let pinned_specifier = &self.pin_version;
-    for dep in self.dependencies.values() {
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit pinned version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
-      dep.set_expected_specifier(pinned_specifier);
+      out.set_dep_expected(dep_idx, Rc::clone(pinned_specifier));
       for &idx in &dep.instances {
         let instance = &arena[idx.0];
         let actual_specifier = &instance.descriptor.specifier;
@@ -43,13 +41,25 @@ impl PinnedGroup {
           debug!("{L3}it is the local instance of a package developed locally in this monorepo");
           debug!("{L4}refuse to change it");
           debug!("{L5}mark as error, user should change their config");
-          instance.mark_suspect_with_expected(SuspectInstance::RefuseToPinLocal, pinned_specifier);
+          out.classify(
+            idx,
+            InstanceState::Suspect(SuspectInstance::RefuseToPinLocal),
+            Some(Rc::clone(pinned_specifier)),
+            &self.severity,
+            strict,
+          );
           continue;
         }
         if instance.already_equals(pinned_specifier) {
           debug!("{L3}it is identical to the pinned version");
           debug!("{L4}mark as valid");
-          instance.mark_valid(ValidInstance::IsIdenticalToPin, pinned_specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::IsIdenticalToPin),
+            Some(Rc::clone(pinned_specifier)),
+            &self.severity,
+            strict,
+          );
           continue;
         }
         debug!("{L3}it depends on the local instance");
@@ -57,7 +67,13 @@ impl PinnedGroup {
         if !instance.descriptor.specifier.has_same_version_number_as(pinned_specifier) {
           debug!("{L5}differs to the pinned version");
           debug!("{L6}mark as error");
-          instance.mark_fixable(FixableInstance::DiffersToPin, pinned_specifier);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToPin)),
+            Some(Rc::clone(pinned_specifier)),
+            &self.severity,
+            strict,
+          );
           continue;
         }
         debug!("{L5}is the same as the pinned version");
@@ -68,19 +84,37 @@ impl PinnedGroup {
             debug!("{L7}its semver range matches its semver group");
             debug!("{L8}1. pin it and ignore the semver group");
             debug!("{L8}2. mark as suspect (the config is asking for a different range AND they want to pin it)");
-            instance.mark_fixable(FixableInstance::PinOverridesSemverRange, pinned_specifier);
+            out.classify(
+              idx,
+              InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::PinOverridesSemverRange)),
+              Some(Rc::clone(pinned_specifier)),
+              &self.severity,
+              strict,
+            );
           } else {
             debug!("{L7}its semver range does not match its semver group or the pinned version's");
             debug!("{L8}1. pin it and ignore the semver group");
             debug!("{L8}2. mark as suspect (the config is asking for a different range AND they want to pin it)");
-            instance.mark_fixable(FixableInstance::PinOverridesSemverRangeMismatch, pinned_specifier);
+            out.classify(
+              idx,
+              InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::PinOverridesSemverRangeMismatch)),
+              Some(Rc::clone(pinned_specifier)),
+              &self.severity,
+              strict,
+            );
           }
           continue;
         }
         debug!("{L6}it is not in a semver group which prefers a different semver range to the pinned version");
         debug!("{L7}it differs to the pinned version");
         debug!("{L8}mark as error");
-        instance.mark_fixable(FixableInstance::DiffersToPin, pinned_specifier);
+        out.classify(
+          idx,
+          InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToPin)),
+          Some(Rc::clone(pinned_specifier)),
+          &self.severity,
+          strict,
+        );
       }
     }
   }

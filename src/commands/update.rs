@@ -1,9 +1,10 @@
 use {
   crate::{
     commands::ui::{self, LINE_ENDING, update_row},
-    context::Context,
+    context::{Discovered, Inspected},
     disk::{DiskIo, copy_expected_specifier_json, copy_expected_specifier_yaml, write_json_file, write_yaml_file},
     errors::SyncpackError,
+    inspection::Inspection,
     instance::InstanceIdx,
     registry::updates::RegistryUpdates,
     source::Source,
@@ -24,10 +25,15 @@ mod update_test;
 /// current specifier (e.g. `^6.2.1` and `~6.2.1` are two buckets).
 /// Each bucket becomes one `UpdateRow`. Buckets sort by count desc,
 /// then by current version desc.
-pub fn build_update_rows(ctx: &Context, registry_updates: &RegistryUpdates, now_unix_seconds: i64) -> Vec<UpdateRow> {
+pub fn build_update_rows(
+  data: &Discovered,
+  inspection: &Inspection,
+  registry_updates: &RegistryUpdates,
+  now_unix_seconds: i64,
+) -> Vec<UpdateRow> {
   let mut rows: Vec<UpdateRow> = Vec::new();
 
-  for (group_idx, group) in ctx.version_groups.iter().enumerate() {
+  for (group_idx, group) in data.version_groups.iter().enumerate() {
     let is_relevant_group = matches!(group, VersionGroup::PreferredSemver(g) if g.prefer_highest)
       || matches!(group, VersionGroup::CatalogDefs(_))
       || matches!(group, VersionGroup::SemverRangeOnly(_));
@@ -36,10 +42,11 @@ pub fn build_update_rows(ctx: &Context, registry_updates: &RegistryUpdates, now_
     }
     let group_label = group.selector().label.clone();
 
-    for dep in group.get_sorted_dependencies(&ctx.config.cli.sort) {
+    for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
+      let dep = &data.dependencies[dep_idx.0];
       let outdated: Vec<(InstanceIdx, &crate::instance::Instance)> = dep
-        .get_sorted_instances(&ctx.instances, &ctx.sources.all)
-        .filter(|(_, instance)| instance.is_outdated())
+        .get_sorted_instances(inspection, &data.instances, &data.sources.all)
+        .filter(|(idx, _)| inspection.state(*idx).is_outdated())
         .collect();
       if outdated.is_empty() {
         continue;
@@ -57,8 +64,7 @@ pub fn build_update_rows(ctx: &Context, registry_updates: &RegistryUpdates, now_
           b.indices.push(idx);
           continue;
         }
-        let expected = instance.expected_specifier.borrow();
-        let expected_specifier = expected.as_ref().expect("outdated instance must have an expected specifier");
+        let expected_specifier = inspection.expected(idx).expect("outdated instance must have an expected specifier");
         let target_raw = expected_specifier.get_raw().to_string();
         let current_version = instance.descriptor.specifier.get_semver_number().map(String::from);
         let target_version = expected_specifier.get_semver_number().map(String::from);
@@ -140,15 +146,18 @@ pub fn filter_rows_for_display(rows: &[UpdateRow], selection: &[bool]) -> Vec<Up
   filtered
 }
 
-pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &D, tui: &dyn Tui) -> Result<Context, SyncpackError> {
+pub fn run<D: DiskIo>(mut inspected: Inspected, io: &D, tui: &dyn Tui) -> Result<Inspected, SyncpackError> {
   let now = update_row::unix_now();
-  let rows = build_update_rows(&ctx, &registry_updates, now);
+  let rows = {
+    let registry_updates = inspected.updates.as_ref().expect("registry_updates is None");
+    build_update_rows(&inspected.data, &inspected.inspection, registry_updates, now)
+  };
   let was_outdated = !rows.is_empty();
 
   // Resolve which rows the user actually wants to apply.
-  let (selection, applying): (Option<Vec<bool>>, Vec<usize>) = if !was_outdated || ctx.config.cli.check {
+  let (selection, applying): (Option<Vec<bool>>, Vec<usize>) = if !was_outdated || inspected.data.config.cli.check {
     (None, vec![])
-  } else if ctx.config.cli.interactive {
+  } else if inspected.data.config.cli.interactive {
     match tui.readiness(rows.len()) {
       TuiReadiness::Empty => (None, vec![]),
       TuiReadiness::NotTty => {
@@ -197,19 +206,24 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
   }
 
   for inst_idx in copy_actions {
-    let source_idx = ctx.instances[inst_idx.0].source_idx();
-    let consumer_file_idx: Option<usize> = match &ctx.sources.all[source_idx.0] {
+    let source_idx = inspected.data.instances[inst_idx.0].source_idx();
+    let consumer_file_idx: Option<usize> = match &inspected.data.sources.all[source_idx.0] {
       Source::Package { file_idx, .. } => Some(*file_idx),
       Source::PnpmYaml => None,
     };
-    let instance = &ctx.instances[inst_idx.0];
+    let Some(expected) = inspected.inspection.expected(inst_idx) else {
+      continue;
+    };
     if let Some(fi) = consumer_file_idx {
-      copy_expected_specifier_json(&mut ctx.disk.package_json_files[fi], instance);
-    } else if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
-      copy_expected_specifier_yaml(yaml, instance);
+      let instance = &inspected.data.instances[inst_idx.0];
+      copy_expected_specifier_json(&mut inspected.data.disk.package_json_files[fi], instance, expected);
+    } else if let Some(yaml) = inspected.data.disk.pnpm_workspace.as_mut() {
+      let instance = &inspected.data.instances[inst_idx.0];
+      copy_expected_specifier_yaml(yaml, instance, expected);
     }
   }
 
+  let registry_updates = inspected.updates.as_ref().expect("registry_updates is None");
   if !registry_updates.failed.is_empty() {
     info!(" ");
     registry_updates.failed.iter().for_each(|name| {
@@ -222,20 +236,24 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
     ui::util::print_no_issues_found();
   }
 
-  if ctx.config.cli.check {
-    return if was_outdated { Err(SyncpackError::IssuesFound) } else { Ok(ctx) };
+  if inspected.data.config.cli.check {
+    return if was_outdated {
+      Err(SyncpackError::IssuesFound)
+    } else {
+      Ok(inspected)
+    };
   }
 
-  if !ctx.config.cli.dry_run {
-    let indent = ctx.config.rcfile.indent.as_deref();
-    let fallback = ctx.disk.formatting_fallback();
-    for file in ctx.disk.package_json_files.iter_mut() {
+  if !inspected.data.config.cli.dry_run {
+    let indent = inspected.data.config.rcfile.indent.as_deref();
+    let fallback = inspected.data.disk.formatting_fallback();
+    for file in inspected.data.disk.package_json_files.iter_mut() {
       write_json_file(file, io, indent, &fallback)?;
     }
-    if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
+    if let Some(yaml) = inspected.data.disk.pnpm_workspace.as_mut() {
       write_yaml_file(yaml, io, indent, &fallback)?;
     }
   }
 
-  Ok(ctx)
+  Ok(inspected)
 }

@@ -1,28 +1,29 @@
 use {
   crate::{
     commands::ui,
-    context::Context,
-    instance::{Instance, InstanceState, InvalidInstance, Severity, ValidInstance},
+    context::Discovered,
+    inspection::Inspection,
+    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, Severity, ValidInstance},
   },
   colored::*,
   log::{error, info},
 };
 
-pub fn print(ctx: &Context, instance: &Instance) {
-  match &instance.state.borrow().clone() {
-    InstanceState::Valid(ValidInstance::IsIgnored) => print_ignored(ctx, instance),
-    InstanceState::Valid(_) => print_valid(ctx, instance),
-    InstanceState::Invalid(InvalidInstance::Unfixable(_)) => print_unfixable(ctx, instance),
-    InstanceState::Invalid(InvalidInstance::Conflict(_)) => print_unfixable(ctx, instance),
-    InstanceState::Invalid(InvalidInstance::Fixable(_)) => match *instance.severity.borrow() {
-      Some(Severity::Warn) => print_suspect(ctx, instance),
-      Some(Severity::Error) => print_unfixable(ctx, instance),
-      _ => print_fixable(ctx, instance),
+pub fn print(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
+  match inspection.state(idx) {
+    InstanceState::Valid(ValidInstance::IsIgnored) => print_ignored(ctx, inspection, idx, instance),
+    InstanceState::Valid(_) => print_valid(ctx, inspection, idx, instance),
+    InstanceState::Invalid(InvalidInstance::Unfixable(_)) => print_unfixable(ctx, inspection, idx, instance),
+    InstanceState::Invalid(InvalidInstance::Conflict(_)) => print_unfixable(ctx, inspection, idx, instance),
+    InstanceState::Invalid(InvalidInstance::Fixable(_)) => match inspection.severity(idx) {
+      Some(Severity::Warn) => print_suspect(ctx, inspection, idx, instance),
+      Some(Severity::Error) => print_unfixable(ctx, inspection, idx, instance),
+      _ => print_fixable(ctx, inspection, idx, instance),
     },
-    InstanceState::Suspect(_) => match *instance.severity.borrow() {
-      Some(Severity::Error) => print_unfixable(ctx, instance),
-      Some(Severity::Fix) => print_fixable(ctx, instance),
-      _ => print_suspect(ctx, instance),
+    InstanceState::Suspect(_) => match inspection.severity(idx) {
+      Some(Severity::Error) => print_unfixable(ctx, inspection, idx, instance),
+      Some(Severity::Fix) => print_fixable(ctx, inspection, idx, instance),
+      _ => print_suspect(ctx, inspection, idx, instance),
     },
     InstanceState::Unknown => {
       let location = get_location(ctx, instance);
@@ -32,88 +33,88 @@ pub fn print(ctx: &Context, instance: &Instance) {
   }
 }
 
-pub fn print_ignored(ctx: &Context, instance: &Instance) {
+pub fn print_ignored(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = "-".dimmed().to_string();
-  let (actual, location, state_link, local_hint) = get_common_parts(ctx, instance);
+  let (actual, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
   let actual = actual.dimmed().to_string();
   let location = location.dimmed().to_string();
   let line = ui::util::join_line(vec![&indent, &icon, &actual, &location, &state_link, &local_hint]);
   info!("{line}");
 }
 
-pub fn print_valid(ctx: &Context, instance: &Instance) {
+pub fn print_valid(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = "-".dimmed().to_string();
-  let (actual, location, state_link, local_hint) = get_common_parts(ctx, instance);
+  let (actual, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
   let location = location.dimmed().to_string();
   let line = ui::util::join_line(vec![&indent, &icon, &actual, &location, &state_link, &local_hint]);
   info!("{line}");
 }
 
-pub fn print_unfixable(ctx: &Context, instance: &Instance) {
+pub fn print_unfixable(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::err();
-  let (actual, location, state_link, local_hint) = get_common_parts(ctx, instance);
+  let (actual, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
   let actual = actual.red().to_string();
   let location = location.dimmed().to_string();
   let line = ui::util::join_line(vec![&indent, &icon, &actual, &location, &state_link, &local_hint]);
   info!("{line}");
 }
 
-pub fn print_fixable(ctx: &Context, instance: &Instance) {
+pub fn print_fixable(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::err();
   let actual = get_actual(instance).red();
   let arrow = ui::icon::dim_right_arrow();
-  let expected = get_expected(instance).dimmed();
+  let expected = get_expected(inspection, idx).dimmed();
   let suggested_fix = format!("{actual} {arrow} {expected}");
-  let (_, location, state_link, local_hint) = get_common_parts(ctx, instance);
+  let (_, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
   let location = location.dimmed().to_string();
   let line = ui::util::join_line(vec![&indent, &icon, &suggested_fix, &location, &state_link, &local_hint]);
   info!("{line}");
 }
 
-pub fn print_outdated(ctx: &Context, instance: &Instance) {
+pub fn print_outdated(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::blue_err();
-  let expected = get_expected(instance).blue();
+  let expected = get_expected(inspection, idx).blue();
   let arrow = ui::icon::dim_left_arrow();
   let actual = get_actual(instance).dimmed();
   let suggested_fix = format!("{expected} {arrow} {actual}");
-  let (_, location, state_link, local_hint) = get_common_parts(ctx, instance);
+  let (_, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
   let location = location.dimmed().to_string();
   let line = ui::util::join_line(vec![&indent, &icon, &suggested_fix, &location, &state_link, &local_hint]);
   info!("{line}");
 }
 
-pub fn print_suspect(ctx: &Context, instance: &Instance) {
+pub fn print_suspect(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::warn();
-  let (actual, location, state_link, local_hint) = get_common_parts(ctx, instance);
+  let (actual, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
   let actual = actual.yellow().to_string();
   let location = location.dimmed().to_string();
   let line = ui::util::join_line(vec![&indent, &icon, &actual, &location, &state_link, &local_hint]);
   info!("{line}");
 }
 
-pub fn print_fixed(ctx: &Context, instance: &Instance) {
+pub fn print_fixed(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::ok();
-  let expected = get_expected(instance);
+  let expected = get_expected(inspection, idx);
   let arrow = ui::icon::dim_left_arrow();
   let actual = get_actual(instance).dimmed();
   let applied_fix = format!("{expected} {arrow} {actual}");
-  let (_, location, state_link, local_hint) = get_common_parts(ctx, instance);
+  let (_, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
   let location = location.dimmed().to_string();
   let line = ui::util::join_line(vec![&indent, &icon, &applied_fix, &location, &state_link, &local_hint]);
   info!("{line}");
 }
 
-fn get_common_parts(ctx: &Context, instance: &Instance) -> (String, String, String, String) {
+fn get_common_parts(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) -> (String, String, String, String) {
   let actual = get_actual(instance);
   let location = get_location(ctx, instance);
-  let state_link = get_state_link_in_parens(ctx, instance);
+  let state_link = get_state_link_in_parens(ctx, inspection, idx);
   let local_hint = get_local_hint(ctx, instance);
   (actual, location, state_link, local_hint)
 }
@@ -127,7 +128,7 @@ pub fn get_actual(instance: &Instance) -> String {
   }
 }
 
-fn get_local_hint(ctx: &Context, instance: &Instance) -> String {
+fn get_local_hint(ctx: &Discovered, instance: &Instance) -> String {
   if ctx.config.cli.show_hints && instance.is_local_instance {
     "(local)".purple().to_string()
   } else {
@@ -135,11 +136,11 @@ fn get_local_hint(ctx: &Context, instance: &Instance) -> String {
   }
 }
 
-pub fn get_expected(instance: &Instance) -> String {
-  instance.expected_specifier.borrow().as_ref().unwrap().get_raw().to_string()
+pub fn get_expected(inspection: &Inspection, idx: InstanceIdx) -> String {
+  inspection.expected(idx).unwrap().get_raw().to_string()
 }
 
-pub fn get_location(ctx: &Context, instance: &Instance) -> String {
+pub fn get_location(ctx: &Discovered, instance: &Instance) -> String {
   let alias_info = if instance.descriptor.name != instance.descriptor.internal_name {
     format!("of {}", instance.descriptor.name)
   } else {
@@ -155,23 +156,22 @@ pub fn get_location(ctx: &Context, instance: &Instance) -> String {
   ui::util::join_line(vec![&alias_info, &"in".to_string(), &file_link, &"at".to_string(), &path_to_prop])
 }
 
-fn get_state_name(instance: &Instance) -> String {
-  let state = instance.state.borrow().clone();
-  state.get_name()
+fn get_state_name(inspection: &Inspection, idx: InstanceIdx) -> String {
+  inspection.state(idx).get_name()
 }
 
 /// If enabled, render the reason code as a clickable link
-pub fn get_state_link(ctx: &Context, instance: &Instance) -> String {
+pub fn get_state_link(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx) -> String {
   if ctx.config.cli.show_status_codes {
-    let state_name = get_state_name(instance);
+    let state_name = get_state_name(inspection, idx);
     ui::util::get_status_code_link(ctx, &state_name)
   } else {
     "".to_string()
   }
 }
 
-pub fn get_state_link_in_parens(ctx: &Context, instance: &Instance) -> String {
-  let state_link = get_state_link(ctx, instance);
+pub fn get_state_link_in_parens(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx) -> String {
+  let state_link = get_state_link(ctx, inspection, idx);
   if !state_link.is_empty() {
     format!("({state_link})").dimmed().to_string()
   } else {

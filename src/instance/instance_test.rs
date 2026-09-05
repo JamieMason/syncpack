@@ -1,6 +1,6 @@
 use {
   crate::{
-    context::Context,
+    context::Discovered,
     dependency::UpdateUrl,
     test::{self},
   },
@@ -23,7 +23,7 @@ fn returns_correct_registry_update_url() {
     }
   })]);
 
-  let ctx = Context::create(config, disk, sources, vec![]).unwrap();
+  let ctx = Discovered::create(config, disk, sources, vec![]).unwrap();
 
   let get_update_url_by_name = |name: &str| {
     ctx

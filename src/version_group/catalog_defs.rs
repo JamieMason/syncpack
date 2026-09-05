@@ -1,32 +1,30 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, add_instance_to_dependencies, highest_eligible_for, sort_updates_desc},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, ValidInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{FixableInstance, Instance, InstanceState, InvalidInstance, ValidInstance, severity::SeverityMap},
     rcfile::update_group::UpdatePolicy,
     registry::updates::RegistryUpdates,
     semver_range::SemverRange,
+    version_group::{DependencyIdx, L1, L2, L3, L4, L5, highest_eligible_for, sort_updates_desc},
   },
   log::debug,
-  std::{collections::BTreeMap, rc::Rc},
+  std::rc::Rc,
 };
 
 #[derive(Debug)]
 pub struct CatalogDefsGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub severity: SeverityMap,
 }
 
 impl CatalogDefsGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    for dep in self.dependencies.values() {
+  pub fn visit(&self, input: &RuleInput, registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit catalog defs version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       let sorted_desc = registry_updates
@@ -39,31 +37,54 @@ impl CatalogDefsGroup {
         debug!("{L2}visit instance '{}' ({def_specifier:?})", instance.id);
 
         let effective_target = match &instance.preferred_update_policy {
-          Some(UpdatePolicy::UpTo(t)) => Some(ctx.config.cli.target.stricter(*t)),
+          Some(UpdatePolicy::UpTo(t)) => Some(input.cfg.target.stricter(*t)),
           Some(UpdatePolicy::Skip) => None,
-          None => Some(ctx.config.cli.target),
+          None => Some(input.cfg.target),
         };
         let target = effective_target.and_then(|t| sorted_desc.as_deref().and_then(|s| pick_outdated_target(instance, s, t)));
 
         if let Some(target) = target {
           debug!("{L3}an eligible registry update applies; mark as DiffersToNpmRegistry ({target:?})");
-          instance.mark_fixable(FixableInstance::DiffersToNpmRegistry, &target);
-          dep.set_expected_specifier(&target);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToNpmRegistry)),
+            Some(Rc::clone(&target)),
+            &self.severity,
+            strict,
+          );
+          out.set_dep_expected(dep_idx, target);
         } else if instance.must_match_preferred_semver_range() && !instance.matches_preferred_semver_range() {
-          // a semver group prefers a range different to the def's actual range
           if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
             debug!("{L3}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-            instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-            dep.set_expected_specifier(&corrected);
+            out.classify(
+              idx,
+              InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SemverRangeMismatch)),
+              Some(Rc::clone(&corrected)),
+              &self.severity,
+              strict,
+            );
+            out.set_dep_expected(dep_idx, corrected);
           } else {
             debug!("{L3}semver group's preferred range cannot be applied to this specifier; mark as catalog definition");
-            instance.mark_valid(ValidInstance::IsCatalogDefinition, def_specifier);
-            dep.set_expected_specifier(def_specifier);
+            out.classify(
+              idx,
+              InstanceState::Valid(ValidInstance::IsCatalogDefinition),
+              Some(Rc::clone(def_specifier)),
+              &self.severity,
+              strict,
+            );
+            out.set_dep_expected(dep_idx, Rc::clone(def_specifier));
           }
         } else {
           debug!("{L3}mark as catalog definition");
-          instance.mark_valid(ValidInstance::IsCatalogDefinition, def_specifier);
-          dep.set_expected_specifier(def_specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::IsCatalogDefinition),
+            Some(Rc::clone(def_specifier)),
+            &self.severity,
+            strict,
+          );
+          out.set_dep_expected(dep_idx, Rc::clone(def_specifier));
         }
       }
     }

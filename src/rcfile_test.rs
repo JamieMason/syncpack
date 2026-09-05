@@ -199,7 +199,7 @@ fn validate_unknown_fields_ok_when_valid() {
 
 #[test]
 fn try_from_no_longer_rejects_invalid_dependency_type() {
-  // Dep-type validation lives in `Context::create`, not `TryFrom<RawRcfile>`,
+  // Dep-type validation lives in `Discovered::create`, not `TryFrom<RawRcfile>`,
   // so user-referenced catalog dep types resolve after discovery. A `RawRcfile`
   // referencing an unknown dep type parses cleanly here.
   let raw: RawRcfile = serde_json::from_value(json!({
@@ -215,7 +215,7 @@ fn try_from_no_longer_rejects_invalid_dependency_type() {
 #[test]
 fn context_create_rejects_invalid_dependency_type() {
   use crate::{
-    context::{Context, ContextError},
+    context::{ContextError, Discovered},
     rcfile::from_disk::RcfileError,
     test::mock,
   };
@@ -226,7 +226,7 @@ fn context_create_rejects_invalid_dependency_type() {
     }]
   }));
   let (disk, sources) = mock::disk_and_sources_from_mocks(vec![json!({"name": "pkg-a", "version": "0.0.0"})]);
-  let err = Context::create(config, disk, sources, vec![]).unwrap_err();
+  let err = Discovered::create(config, disk, sources, vec![]).unwrap_err();
   let ContextError::RcfileError(RcfileError::UnsupportedConfig(errs)) = err else {
     panic!("expected RcfileError::UnsupportedConfig");
   };

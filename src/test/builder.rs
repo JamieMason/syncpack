@@ -21,13 +21,10 @@ use {
   crate::{
     catalogs,
     cli::UpdateTarget,
-    context::Context,
+    context::{Discovered, Inspected},
     disk::{Disk, File, PackageManager, detect_formatting, parse_yaml_file},
-    registry::updates::RegistryUpdates,
     sources::Sources,
     test::mock_tui::MockTui,
-    visit_formatting::visit_formatting,
-    visit_packages::visit_packages,
   },
   serde_json::{Value, json},
   std::{
@@ -258,14 +255,7 @@ impl TestBuilder {
     config
   }
 
-  pub async fn run(self) -> Context {
-    self.run_with_updates().await.0
-  }
-
-  /// Like `run`, but also returns the `RegistryUpdates` that drove
-  /// `visit_packages`. Use when a test needs the per-version time data
-  /// (e.g. `update::build_update_rows` consumers).
-  pub async fn run_with_updates(self) -> (Context, Option<RegistryUpdates>) {
+  pub async fn run(self) -> Inspected {
     use {
       crate::{
         cli::Cli,
@@ -351,17 +341,16 @@ impl TestBuilder {
     let registry_client: Arc<dyn RegistryClient> = Arc::new(mock);
 
     let cli = Cli::parse(&args).expect("Cli::parse failed");
-    let (ctx, registry_updates) = syncpack::syncpack(cli, &disk, &registry_client)
+    syncpack::syncpack(cli, &disk, &registry_client)
       .await
-      .expect("syncpack analyse/inspect failed");
-    (ctx, registry_updates)
+      .expect("syncpack analyse/inspect failed")
   }
 
-  pub fn build(self) -> Context {
+  pub fn build(self) -> Discovered {
     self.try_build().unwrap()
   }
 
-  pub fn try_build(self) -> Result<Context, crate::context::ContextError> {
+  pub fn try_build(self) -> Result<Discovered, crate::context::ContextError> {
     let mut config = mock::config_from_mock(self.build_config());
     let disk = self.build_disk();
     let sources = build_sources(&disk);
@@ -373,20 +362,20 @@ impl TestBuilder {
       }
     }
     let dep_types = catalogs::make_catalog_dep_types(&disk).unwrap_or_default();
-    Context::create(config, disk, sources, dep_types)
+    Discovered::create(config, disk, sources, dep_types)
   }
 
-  pub fn build_and_visit_packages(self) -> Context {
-    let ctx = self.build();
-    visit_packages(ctx, &None)
+  pub fn build_and_visit_packages(self) -> Inspected {
+    let data = self.build();
+    let inspection = crate::syncpack::inspect(&data, &None);
+    Inspected {
+      data,
+      inspection,
+      updates: None,
+    }
   }
 
-  pub fn build_and_visit_formatting(self) -> Context {
-    let ctx = self.build();
-    visit_formatting(ctx)
-  }
-
-  pub async fn build_with_registry_and_visit(self) -> Context {
+  pub async fn build_with_registry_and_visit(self) -> Inspected {
     let mut config = mock::config_from_mock(self.build_config());
     let disk = self.build_disk();
     let sources = build_sources(&disk);
@@ -401,11 +390,18 @@ impl TestBuilder {
     }
 
     if let Some(mock_updates) = self.registry_updates {
-      let (ctx, updates) = mock::context_with_registry_updates(config, disk, sources, mock_updates, dep_types).await;
-      visit_packages(ctx, &Some(updates))
+      let (data, updates) = mock::context_with_registry_updates(config, disk, sources, mock_updates, dep_types).await;
+      let updates = Some(updates);
+      let inspection = crate::syncpack::inspect(&data, &updates);
+      Inspected { data, inspection, updates }
     } else {
-      let ctx = Context::create(config, disk, sources, dep_types).unwrap();
-      visit_packages(ctx, &None)
+      let data = Discovered::create(config, disk, sources, dep_types).unwrap();
+      let inspection = crate::syncpack::inspect(&data, &None);
+      Inspected {
+        data,
+        inspection,
+        updates: None,
+      }
     }
   }
 

@@ -1,13 +1,13 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, add_instance_to_dependencies},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, UnfixableInstance, ValidInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{FixableInstance, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
+    version_group::{DependencyIdx, L1, L2, L3, L4, L5},
   },
   log::debug,
-  std::collections::BTreeMap,
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -17,18 +17,16 @@ mod same_range_test;
 #[derive(Debug)]
 pub struct SameRangeGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub severity: SeverityMap,
 }
 
 impl SameRangeGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    for dep in self.dependencies.values() {
+  pub fn visit(&self, input: &RuleInput, _registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit same range version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       for &idx in &dep.instances {
@@ -41,21 +39,42 @@ impl SameRangeGroup {
             debug!("{L4}it belongs to a semver group");
             if instance.matches_preferred_semver_range() {
               debug!("{L5}its specifier matches its semver group");
-              instance.mark_valid(ValidInstance::SatisfiesSameRangeGroup, actual_specifier);
+              out.classify(
+                idx,
+                InstanceState::Valid(ValidInstance::SatisfiesSameRangeGroup),
+                Some(Rc::clone(actual_specifier)),
+                &self.severity,
+                strict,
+              );
             } else {
               debug!("{L5}its specifier mismatches its semver group");
-              instance.mark_fixable(
-                FixableInstance::SemverRangeMismatch,
-                &instance.get_specifier_with_preferred_semver_range().unwrap(),
+              out.classify(
+                idx,
+                InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SemverRangeMismatch)),
+                Some(instance.get_specifier_with_preferred_semver_range().unwrap()),
+                &self.severity,
+                strict,
               );
             }
           } else {
             debug!("{L4}it does not belong to a semver group");
-            instance.mark_valid(ValidInstance::SatisfiesSameRangeGroup, actual_specifier);
+            out.classify(
+              idx,
+              InstanceState::Valid(ValidInstance::SatisfiesSameRangeGroup),
+              Some(Rc::clone(actual_specifier)),
+              &self.severity,
+              strict,
+            );
           }
         } else {
           debug!("{L3}its specifier does not satisfy all other instances in the group");
-          instance.mark_unfixable(UnfixableInstance::SameRangeMismatch);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::SameRangeMismatch)),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         }
       }
     }

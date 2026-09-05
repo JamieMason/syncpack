@@ -2,14 +2,16 @@ use {
   crate::{
     cli::Cli,
     dependency::DependencyType,
-    disk::{Disk, PackageManager},
+    disk::Disk,
     errors::{UnsupportedConfigError, UnsupportedConfigErrors},
+    inspection::Inspection,
     instance::{Instance, InstanceDescriptor, InstanceIdx},
     rcfile::{Rcfile, from_disk::RcfileError, validate_raw_dep_types},
+    registry::updates::RegistryUpdates,
     sources::Sources,
-    version_group::{VersionGroup, VersionGroupBehavior},
+    version_group::{Dependency, DependencyIdx, VersionGroup, VersionGroupBehavior, add_instance_to_dep_map},
   },
-  std::mem,
+  std::{collections::BTreeMap, mem},
   thiserror::Error,
 };
 
@@ -29,65 +31,73 @@ pub struct Config {
   pub rcfile: Rcfile,
 }
 
-/// The central data structure that owns all project data.
+/// The project after discovery: config, package files, every instance and
+/// dependency, and the version groups they belong to. Immutable for the
+/// purposes of inspection — `inspect` reads it and returns an `Inspection`
+/// value; only `apply` (in the bin) mutates `disk`.
 #[derive(Debug)]
-pub struct Context {
+pub struct Discovered {
   pub config: Config,
-  /// Mutation goes through `ctx.disk.package_json_files[idx]` or
-  /// `ctx.disk.pnpm_workspace`.
+  /// Mutation goes through `disk.package_json_files[idx]` or
+  /// `disk.pnpm_workspace` at apply time only.
   pub disk: Disk,
   pub instances: Vec<Instance>,
+  /// The global dependency arena; version groups hold `Vec<DependencyIdx>`
+  /// into this.
+  pub dependencies: Vec<Dependency>,
   /// Sole owner of every `Source` reference. Pnpm yaml is a unit-variant
   /// slot; the actual file lives on `disk.pnpm_workspace`.
   pub sources: Sources,
   pub version_groups: Vec<VersionGroup>,
 }
 
-impl Context {
+/// The project after inspection: the discovered data, the `Inspection` value
+/// carrying every per-entity result, and any registry payload. Binding these
+/// together stops a caller reading results early or pairing the wrong
+/// `Inspection` with the wrong data.
+#[derive(Debug)]
+pub struct Inspected {
+  pub data: Discovered,
+  pub inspection: Inspection,
+  pub updates: Option<RegistryUpdates>,
+}
+
+impl Discovered {
   /// Read all configuration and package.json files, collect all dependency
-  /// instances, and assign them to version groups.
+  /// instances, group them into version groups, and precompute link
+  /// resolution. Reports every config error at once (B4).
   pub fn create(mut config: Config, disk: Disk, sources: Sources, dep_types: Vec<DependencyType>) -> Result<Self, ContextError> {
     // Append catalog dep types BEFORE validation or version-group construction
     // — user-referenced catalog dep types (e.g. `pnpmCatalog:react18`) must
     // resolve here.
     config.rcfile.all_dependency_types.extend(dep_types);
 
-    // Validate every dep-type-filter selector against the post-discovery list.
-    validate_post_discovery(&config.rcfile)
-      .map_err(|err| vec![err])
-      .map_err(UnsupportedConfigErrors)
-      .map_err(RcfileError::UnsupportedConfig)
-      .map_err(ContextError::RcfileError)?;
+    let mut errors: Vec<UnsupportedConfigError> = validate_post_discovery(&config.rcfile);
 
-    // Auto-injects `CatalogDefs` when catalog dep types exist.
     let dependency_groups = mem::take(&mut config.rcfile.dependency_groups);
     let semver_groups = mem::take(&mut config.rcfile.semver_groups);
     let update_groups = mem::take(&mut config.rcfile.update_groups);
-    let mut version_groups = config
-      .rcfile
-      .get_version_groups(&sources) // @TODO: Return every error
-      .map_err(|err| vec![err])
-      .map_err(UnsupportedConfigErrors)
-      .map_err(RcfileError::UnsupportedConfig)
-      .map_err(ContextError::RcfileError)?;
+    let (mut version_groups, version_group_errors) = config.rcfile.get_version_groups(&sources);
+    errors.extend(version_group_errors);
     let all_dependency_types = config.rcfile.all_dependency_types.clone();
-    if let Some(ref filters) = config.cli.filters {
-      filters
-        .validate_dependency_types(&all_dependency_types) // @TODO: Return every error
-        .map_err(|err| vec![err])
-        .map_err(UnsupportedConfigErrors)
-        .map_err(RcfileError::UnsupportedConfig)
-        .map_err(ContextError::RcfileError)?;
+    if let Some(ref filters) = config.cli.filters
+      && let Err(error) = filters.validate_dependency_types(&all_dependency_types)
+    {
+      errors.push(error);
+    }
+    if !errors.is_empty() {
+      return Err(ContextError::RcfileError(RcfileError::UnsupportedConfig(UnsupportedConfigErrors(
+        errors,
+      ))));
     }
 
     // Single uniform iteration. Each dep type's `source` field gates which
-    // source kinds it's invoked against. Catalog vs non-catalog branching
-    // reads `dependency_type.is_catalog_definition` at use sites. Descriptors
-    // are owned and consumed directly; package_name is looked up at each use
-    // site via `sources.all[idx].name()` (no String clone per descriptor).
+    // source kinds it's invoked against. Descriptors are owned and consumed
+    // directly; package_name is looked up at each use site.
     let descriptors: Vec<InstanceDescriptor> = sources.iter_instances(&disk, &all_dependency_types).collect();
 
     let mut instances: Vec<Instance> = Vec::with_capacity(descriptors.len());
+    let mut group_dep_maps: Vec<BTreeMap<String, Dependency>> = version_groups.iter().map(|_| BTreeMap::new()).collect();
     for mut descriptor in descriptors {
       let package_name = sources.all[descriptor.source_idx.0].name();
       let dependency_group = dependency_groups.iter().find(|alias| alias.can_add(&descriptor, package_name));
@@ -111,70 +121,100 @@ impl Context {
         .find(|group| group.selector.can_add(&descriptor, package_name))
         .map(|group| group.policy.clone());
 
-      let version_group = version_groups
-        .iter_mut()
-        .find(|group| group.selector().can_add(&descriptor, package_name));
+      let group_index = version_groups
+        .iter()
+        .position(|group| group.selector().can_add(&descriptor, package_name));
 
       let instance = Instance::new(descriptor, package_name, preferred_semver_range, preferred_update_policy);
       let idx = InstanceIdx(instances.len());
       instances.push(instance);
 
-      if let Some(group) = version_group {
-        group.add_instance(idx, &instances[idx.0]);
+      if let Some(group_index) = group_index {
+        add_instance_to_dep_map(&mut group_dep_maps[group_index], idx, &instances[idx.0]);
       }
+    }
+
+    // Flatten the per-group dependency maps into one global arena, preserving
+    // the BTreeMap's sorted-by-internal-name order within each group, and give
+    // each group the indices of the dependencies it claims.
+    let mut dependencies: Vec<Dependency> = Vec::new();
+    for (group_index, dep_map) in group_dep_maps.into_iter().enumerate() {
+      let mut dep_indices: Vec<DependencyIdx> = Vec::with_capacity(dep_map.len());
+      for (_internal_name, dep) in dep_map {
+        dep_indices.push(DependencyIdx(dependencies.len()));
+        dependencies.push(dep);
+      }
+      version_groups[group_index].set_dependency_indices(dep_indices);
+    }
+
+    for (idx, resolves) in compute_link_resolution(&dependencies, &instances, &sources, &disk) {
+      instances[idx.0].link_resolves_to_local = resolves;
     }
 
     Ok(Self {
       config,
       disk,
       instances,
+      dependencies,
       sources,
       version_groups,
     })
   }
 
   /// Detected package manager (lives on Disk; accessor preserves call-site
-  /// ergonomics through the field migration).
-  pub fn package_manager(&self) -> Option<PackageManager> {
+  /// ergonomics).
+  pub fn package_manager(&self) -> Option<crate::disk::PackageManager> {
     self.disk.package_manager
-  }
-
-  /// All catalog-def instances for this internal dep name (one per catalog the
-  /// dep appears in across pnpm and Bun). Keys by `descriptor.internal_name`
-  /// so callers inside a `DependencyCore` visit can pass `dep.internal_name`
-  /// directly — this works under `dependency_groups` aliasing because the
-  /// def and its consumers share the same alias label.
-  pub fn catalog_defs_for<'a>(&'a self, internal_name: &'a str) -> impl Iterator<Item = &'a Instance> + 'a {
-    self
-      .instances
-      .iter()
-      .filter(move |i| i.is_catalog_instance() && i.descriptor.internal_name == internal_name)
-  }
-
-  /// Distinct catalog names across the whole project (`"default"` + named).
-  pub fn distinct_catalog_names(&self) -> Vec<&str> {
-    let mut names: Vec<&str> = self.instances.iter().filter_map(|i| i.catalog_name()).collect();
-    names.sort_unstable();
-    names.dedup();
-    names
   }
 }
 
-/// Validate every dep-type-filter selector (`dependency_groups`,
-/// `semver_groups`, raw `version_groups`) against the post-discovery list of
-/// dependency types.
-fn validate_post_discovery(rcfile: &Rcfile) -> Result<(), UnsupportedConfigError> {
+/// Resolve, at discovery time, whether each `link:` instance of a
+/// locally-developed dependency resolves to that package's directory, so
+/// inspection needs no disk I/O.
+fn compute_link_resolution(
+  dependencies: &[Dependency],
+  instances: &[Instance],
+  sources: &Sources,
+  disk: &Disk,
+) -> Vec<(InstanceIdx, bool)> {
+  let mut resolutions = Vec::new();
+  for dep in dependencies {
+    if let Some(local_idx) = dep.local_instance {
+      let local_instance = &instances[local_idx.0];
+      for &idx in &dep.instances {
+        let instance = &instances[idx.0];
+        if instance.descriptor.specifier.is_link() {
+          resolutions.push((idx, instance.link_resolves_to_local_package(local_instance, &sources.all, disk)));
+        }
+      }
+    }
+  }
+  resolutions
+}
+
+/// Validate every dep-type-filter selector against the post-discovery list of
+/// dependency types, collecting every error rather than failing on the first.
+fn validate_post_discovery(rcfile: &Rcfile) -> Vec<UnsupportedConfigError> {
+  let mut errors = Vec::new();
   for selector in &rcfile.dependency_groups {
-    selector.validate_dependency_types(&rcfile.all_dependency_types)?;
+    if let Err(error) = selector.validate_dependency_types(&rcfile.all_dependency_types) {
+      errors.push(error);
+    }
   }
   for group in &rcfile.semver_groups {
-    group.selector.validate_dependency_types(&rcfile.all_dependency_types)?;
+    if let Err(error) = group.selector.validate_dependency_types(&rcfile.all_dependency_types) {
+      errors.push(error);
+    }
   }
   for group in &rcfile.update_groups {
-    group.selector.validate_dependency_types(&rcfile.all_dependency_types)?;
+    if let Err(error) = group.selector.validate_dependency_types(&rcfile.all_dependency_types) {
+      errors.push(error);
+    }
   }
   for group in &rcfile.version_groups {
-    validate_raw_dep_types(&group.dependency_types, &rcfile.all_dependency_types)?;
+    if let Err(error) = validate_raw_dep_types(&group.dependency_types, &rcfile.all_dependency_types) {
+      errors.push(error);
+    }
   }
-  Ok(())
+  errors
 }

@@ -769,11 +769,14 @@ mod severity {
       .run()
       .await;
     let mut by_id: std::collections::HashMap<String, serde_json::Value> = Default::default();
-    for group in &ctx.version_groups {
+    let data = &ctx.data;
+    let inspection = &ctx.inspection;
+    for group in &data.version_groups {
       let label = group.variant_label();
-      for dep in group.dependencies().values() {
-        for (_, instance) in dep.get_instances(&ctx.instances) {
-          let json = instance_to_json(&ctx, instance, label);
+      for dep_idx in group.dependency_indices() {
+        let dep = &data.dependencies[dep_idx.0];
+        for (idx, instance) in dep.get_instances(&data.instances) {
+          let json = instance_to_json(data, inspection, idx, instance, label);
           let severity = json
             .get("severity")
             .unwrap_or_else(|| panic!("instance JSON missing 'severity' field: {json}"));

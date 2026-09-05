@@ -4,7 +4,7 @@ use {
     instance::Instance,
     registry::client::{AllPackageVersions, RegistryClient, RegistryError},
     specifier::Specifier,
-    version_group::VersionGroup,
+    version_group::{Dependency, VersionGroup},
   },
   indicatif::{MultiProgress, ProgressBar, ProgressStyle},
   log::debug,
@@ -27,6 +27,7 @@ mod updates_test;
 type FetchHandle = JoinHandle<Result<Arc<AllPackageVersions>, RegistryError>>;
 
 /// The result of fetching package versions from the npm registry.
+#[derive(Debug)]
 pub struct RegistryUpdates {
   /// All updates from the npm registry keyed by internal dependency name
   pub updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>>,
@@ -44,6 +45,7 @@ impl RegistryUpdates {
   pub async fn fetch(
     client: &Arc<dyn RegistryClient>,
     version_groups: &[VersionGroup],
+    dependencies: &[Dependency],
     arena: &[Instance],
     max_concurrent_requests: usize,
     minimum_release_age_minutes: u64,
@@ -57,7 +59,7 @@ impl RegistryUpdates {
     let mut failed: Vec<String> = vec![];
     let cutoff_unix_seconds = age_cutoff_unix_seconds(minimum_release_age_minutes);
 
-    for update_url in get_unique_update_urls(version_groups, arena) {
+    for update_url in get_unique_update_urls(version_groups, dependencies, arena) {
       let permit = Arc::clone(&semaphore).acquire_owned().await;
       let client = Arc::clone(&client);
       let progress_bars = Arc::clone(&progress_bars);
@@ -182,9 +184,9 @@ pub(crate) fn parse_rfc3339_to_unix_seconds(s: &str) -> Option<i64> {
 /// Return a list of every dependency we should query the registry for
 /// updates. We use internal names in order to support dependency groups,
 /// where many dependencies can be aliased as one.
-fn get_unique_update_urls(version_groups: &[VersionGroup], arena: &[Instance]) -> HashSet<UpdateUrl> {
+fn get_unique_update_urls(version_groups: &[VersionGroup], dependencies: &[Dependency], arena: &[Instance]) -> HashSet<UpdateUrl> {
   version_groups.iter().fold(HashSet::new(), |mut unique_update_urls, group| {
-    group.get_update_urls(arena).inspect(|update_urls| {
+    group.get_update_urls(dependencies, arena).inspect(|update_urls| {
       update_urls.iter().for_each(|url| {
         unique_update_urls.insert(url.clone());
       });

@@ -1,7 +1,9 @@
 use {
   crate::{
-    context::Context,
-    instance::{Instance, InstanceState, Severity},
+    context::Inspected,
+    inspection::Inspection,
+    instance::{Instance, InstanceIdx, InstanceState, Severity},
+    specifier::Specifier,
   },
   log::error,
 };
@@ -38,40 +40,67 @@ pub struct ActualInstance {
 }
 
 impl ActualInstance {
-  pub fn new(instance: &Instance) -> Self {
+  pub fn new(instance: &Instance, idx: InstanceIdx, inspection: &Inspection) -> Self {
     Self {
       actual: instance.descriptor.specifier.get_raw().to_string(),
       dependency_name: instance.descriptor.internal_name.clone(),
-      expected: instance
-        .expected_specifier
-        .borrow()
-        .clone()
-        .map(|expected| expected.get_raw().to_string()),
+      expected: inspection.expected(idx).map(|expected| expected.get_raw().to_string()),
       id: instance.id.clone(),
       overridden: instance
         .get_specifier_with_preferred_semver_range()
         .map(|expected| expected.get_raw().to_string()),
-      severity: *instance.severity.borrow(),
-      state: instance.state.borrow().clone(),
+      severity: inspection.severity(idx),
+      state: inspection.state(idx).clone(),
     }
   }
 }
 
-pub fn expect(ctx: &Context) -> Expects<'_> {
-  Expects::new(ctx)
+/// One instance paired with its inspection results. Stands in for the
+/// pre-refactor `instance.state` / `instance.expected_specifier` reads.
+pub struct InstanceView<'a> {
+  pub instance: &'a Instance,
+  pub state: &'a InstanceState,
+  pub expected: Option<&'a Specifier>,
+}
+
+impl Inspected {
+  /// Every instance in discovery order with its inspected state and expected
+  /// specifier.
+  pub fn instance_views(&self) -> impl Iterator<Item = InstanceView<'_>> {
+    self.data.instances.iter().enumerate().map(|(i, instance)| {
+      let idx = InstanceIdx(i);
+      InstanceView {
+        instance,
+        state: self.inspection.state(idx),
+        expected: self.inspection.expected(idx).map(|expected| expected.as_ref()),
+      }
+    })
+  }
+}
+
+pub fn expect(inspected: &Inspected) -> Expects<'_> {
+  Expects::new(inspected)
 }
 
 pub struct Expects<'a> {
-  pub ctx: &'a Context,
+  pub inspected: &'a Inspected,
 }
 
 impl<'a> Expects<'a> {
-  pub fn new(ctx: &'a Context) -> Self {
-    Self { ctx }
+  pub fn new(inspected: &'a Inspected) -> Self {
+    Self { inspected }
   }
 
   pub fn to_have_instances(&self, expected_instances: Vec<ExpectedInstance>) -> &Self {
-    let actual_instances = &self.ctx.instances.iter().map(ActualInstance::new).collect::<Vec<ActualInstance>>();
+    let inspection = &self.inspected.inspection;
+    let actual_instances = &self
+      .inspected
+      .data
+      .instances
+      .iter()
+      .enumerate()
+      .map(|(i, instance)| ActualInstance::new(instance, InstanceIdx(i), inspection))
+      .collect::<Vec<ActualInstance>>();
     let actual_len = actual_instances.len();
     let expected_len = expected_instances.len();
     if actual_len != expected_len {

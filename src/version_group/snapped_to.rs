@@ -1,17 +1,17 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, add_instance_to_dependencies},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
+    inspection::{Inspection, RuleInput},
     instance::{
-      FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance, severity::SeverityMap,
+      FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance,
+      ValidInstance, severity::SeverityMap,
     },
-    registry::updates::RegistryUpdates,
     sources::SourceIdx,
     specifier::Specifier,
+    version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10},
   },
   log::debug,
-  std::{collections::BTreeMap, rc::Rc},
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -21,27 +21,26 @@ mod snapped_to_test;
 #[derive(Debug)]
 pub struct SnappedToGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub snap_to: Vec<SourceIdx>,
   pub severity: SeverityMap,
 }
 
 impl SnappedToGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn get_snapped_to_specifier(&self, dep: &DependencyCore, all_instances: &[Instance]) -> Option<Rc<Specifier>> {
-    for instance in all_instances {
+  /// The specifier the followers should snap to: the target instance's
+  /// stage-1 computed expected value if set, otherwise its raw on-disk
+  /// specifier (the self-snapped case, where the target was not visited in
+  /// stage 1).
+  pub fn get_snapped_to_specifier(&self, dep: &Dependency, all_instances: &[Instance], inspection: &Inspection) -> Option<Rc<Specifier>> {
+    for (i, instance) in all_instances.iter().enumerate() {
       if *instance.descriptor.internal_name == *dep.internal_name {
         let instance_idx = instance.source_idx();
         for &snapped_to_idx in &self.snap_to {
           if instance_idx == snapped_to_idx {
             return Some(
-              instance
-                .expected_specifier
-                .borrow()
-                .clone()
+              inspection
+                .expected(InstanceIdx(i))
+                .cloned()
                 .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier)),
             );
           }
@@ -51,14 +50,17 @@ impl SnappedToGroup {
     None
   }
 
-  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    for dep in self.dependencies.values() {
+  pub fn visit_snapped(&self, input: &RuleInput, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    let severity_map = &self.severity;
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit snapped to version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
-      if let Some(snapped_to_specifier) = self.get_snapped_to_specifier(dep, arena) {
+      if let Some(snapped_to_specifier) = self.get_snapped_to_specifier(dep, arena, out) {
         debug!("{L2}a target version was found ({snapped_to_specifier:?})");
-        dep.set_expected_specifier(&snapped_to_specifier);
+        out.set_dep_expected(dep_idx, Rc::clone(&snapped_to_specifier));
         for &idx in &dep.instances {
           let instance = &arena[idx.0];
           let actual_specifier = &instance.descriptor.specifier;
@@ -67,7 +69,13 @@ impl SnappedToGroup {
             debug!("{L4}it is the local instance of a package developed locally in this monorepo");
             debug!("{L5}refuse to change it");
             debug!("{L6}mark as error, user should change their config");
-            instance.mark_suspect_with_expected(SuspectInstance::RefuseToSnapLocal, &snapped_to_specifier);
+            out.classify(
+              idx,
+              InstanceState::Suspect(SuspectInstance::RefuseToSnapLocal),
+              Some(Rc::clone(&snapped_to_specifier)),
+              severity_map,
+              strict,
+            );
             continue;
           }
           debug!("{L4}it is not a local instance of a package developed locally in this monorepo");
@@ -80,7 +88,13 @@ impl SnappedToGroup {
               .as_ref()
               .and_then(|range| snapped_to_specifier.with_range(range))
               .unwrap_or_else(|| Rc::clone(&snapped_to_specifier));
-            instance.mark_fixable(FixableInstance::DiffersToSnapTarget, &fix_target);
+            out.classify(
+              idx,
+              InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToSnapTarget)),
+              Some(fix_target),
+              severity_map,
+              strict,
+            );
             continue;
           }
           debug!("{L6}is the same as the target version");
@@ -93,25 +107,50 @@ impl SnappedToGroup {
               if instance.specifier_with_preferred_semver_range_will_satisfy(&snapped_to_specifier) {
                 debug!("{L9}the semver range satisfies the target version");
                 debug!("{L10}mark as suspect (the config is asking for an inexact match)");
-                instance.mark_valid(ValidInstance::SatisfiesSnapTarget, &instance.descriptor.specifier);
+                out.classify(
+                  idx,
+                  InstanceState::Valid(ValidInstance::SatisfiesSnapTarget),
+                  Some(Rc::clone(actual_specifier)),
+                  severity_map,
+                  strict,
+                );
               } else {
                 debug!("{L9}the preferred semver range will not satisfy the target version");
                 debug!("{L10}mark as unfixable error");
-                instance.mark_conflict(SemverGroupAndVersionConflict::MatchConflictsWithSnapTarget);
+                out.classify(
+                  idx,
+                  InstanceState::Invalid(InvalidInstance::Conflict(
+                    SemverGroupAndVersionConflict::MatchConflictsWithSnapTarget,
+                  )),
+                  Some(Rc::clone(actual_specifier)),
+                  severity_map,
+                  strict,
+                );
               }
             } else {
               debug!("{L8}its semver range does not match its semver group");
               if instance.specifier_with_preferred_semver_range_will_satisfy(&snapped_to_specifier) {
                 debug!("{L9}the preferred semver range will satisfy the target version");
                 debug!("{L10}mark as fixable error");
-                instance.mark_fixable(
-                  FixableInstance::SemverRangeMismatch,
-                  &instance.get_specifier_with_preferred_semver_range().unwrap(),
+                out.classify(
+                  idx,
+                  InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SemverRangeMismatch)),
+                  Some(instance.get_specifier_with_preferred_semver_range().unwrap()),
+                  severity_map,
+                  strict,
                 );
               } else {
                 debug!("{L9}the preferred semver range will not satisfy the target version");
                 debug!("{L10}mark as unfixable error");
-                instance.mark_conflict(SemverGroupAndVersionConflict::MismatchConflictsWithSnapTarget);
+                out.classify(
+                  idx,
+                  InstanceState::Invalid(InvalidInstance::Conflict(
+                    SemverGroupAndVersionConflict::MismatchConflictsWithSnapTarget,
+                  )),
+                  Some(Rc::clone(actual_specifier)),
+                  severity_map,
+                  strict,
+                );
               }
             }
           } else {
@@ -119,11 +158,23 @@ impl SnappedToGroup {
             if instance.already_equals(&snapped_to_specifier) {
               debug!("{L6}it is identical to the target version");
               debug!("{L7}mark as valid");
-              instance.mark_valid(ValidInstance::IsIdenticalToSnapTarget, &snapped_to_specifier);
+              out.classify(
+                idx,
+                InstanceState::Valid(ValidInstance::IsIdenticalToSnapTarget),
+                Some(Rc::clone(&snapped_to_specifier)),
+                severity_map,
+                strict,
+              );
             } else {
               debug!("{L6}it is different to the target version");
               debug!("{L7}mark as error");
-              instance.mark_fixable(FixableInstance::DiffersToSnapTarget, &snapped_to_specifier);
+              out.classify(
+                idx,
+                InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToSnapTarget)),
+                Some(Rc::clone(&snapped_to_specifier)),
+                severity_map,
+                strict,
+              );
             }
           }
         }
@@ -131,7 +182,14 @@ impl SnappedToGroup {
         debug!("{L2}no target version was found");
         for &idx in &dep.instances {
           let instance = &arena[idx.0];
-          instance.mark_suspect(SuspectInstance::DependsOnMissingSnapTarget);
+          debug!("{L3}visit instance '{}'", instance.id);
+          out.classify(
+            idx,
+            InstanceState::Suspect(SuspectInstance::DependsOnMissingSnapTarget),
+            Some(Rc::clone(&instance.descriptor.specifier)),
+            severity_map,
+            strict,
+          );
         }
       }
     }

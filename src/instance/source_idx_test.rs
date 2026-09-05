@@ -1,6 +1,6 @@
 use {
   crate::{
-    context::Context,
+    context::Discovered,
     disk::PackageManager,
     instance::{InstanceState, ValidInstance::*},
     source::Source,
@@ -169,7 +169,7 @@ fn context_no_packages_or_catalogs_field_when_no_yaml() {
   let config = config_from_mock(json!({}));
   let (mut disk, sources) = crate::test::mock::disk_and_sources_from_mocks(vec![json!({"name": "pkg-a", "version": "0.0.0"})]);
   disk.package_manager = Some(PackageManager::Npm);
-  let ctx = Context::create(config, disk, sources, vec![]).unwrap();
+  let ctx = Discovered::create(config, disk, sources, vec![]).unwrap();
   assert_eq!(ctx.sources.all.len(), 1);
   assert!(matches!(ctx.sources.all[0], Source::Package { .. }));
 }
@@ -179,20 +179,25 @@ fn fix_zero_catalogs_pnpm_creates_default_on_disk() {
   // No yaml on disk pre-fix, PM=Pnpm, consumer has a real specifier. After
   // fix the auto-created yaml lands on `ctx.disk.pnpm_workspace` — NOT in
   // the sources arena.
-  use crate::commands::{fix, reporter::FixReporter};
+  use crate::{
+    commands::{fix, reporter::FixReporter},
+    inspection::Inspection,
+    instance::{Instance, InstanceIdx},
+    version_group::{Dependency, DependencyIdx, VersionGroup},
+  };
   struct Silent;
   impl FixReporter for Silent {
-    fn on_group_header(&self, _: &Context, _: &crate::version_group::VersionGroup) {}
+    fn on_group_header(&self, _: &Discovered, _: &VersionGroup) {}
 
-    fn on_dependency(&self, _: &Context, _: &crate::version_group::DependencyCore, _: &str) {}
+    fn on_dependency(&self, _: &Discovered, _: &Inspection, _: DependencyIdx, _: &Dependency, _: &str) {}
 
-    fn on_instance(&self, _: &Context, _: &crate::instance::Instance, _: &str) {}
+    fn on_instance(&self, _: &Discovered, _: &Inspection, _: InstanceIdx, _: &Instance, _: &str) {}
 
     fn on_no_issues(&self) {}
 
     fn on_unfixable_warning(&self) {}
   }
-  let ctx = TestBuilder::new()
+  let inspected = TestBuilder::new()
     .with_pnpm_package_manager()
     .with_packages(vec![json!({
       "name": "pkg-a",
@@ -206,13 +211,14 @@ fn fix_zero_catalogs_pnpm_creates_default_on_disk() {
     }))
     .build_and_visit_packages();
   // Precondition: no yaml on disk pre-fix.
-  assert!(ctx.disk.pnpm_workspace.is_none());
+  assert!(inspected.data.disk.pnpm_workspace.is_none());
 
   let disk = crate::test::mock_disk::MockDiskIo::new();
-  let ctx = fix::run(ctx, &Silent, &disk).expect("fix succeeds");
+  let inspected = fix::run(inspected, &Silent, &disk).expect("fix succeeds");
 
   // Auto-created yaml lives on disk.pnpm_workspace.
-  let yaml = ctx
+  let yaml = inspected
+    .data
     .disk
     .pnpm_workspace
     .as_ref()
@@ -227,7 +233,7 @@ async fn update_pnpm_catalog_def_writes_yaml() {
   // sources arena, not a separate catalogs field.
   use crate::commands::update;
   let yaml = "catalog:\n  react: ^18.0.0\n";
-  let mut ctx = TestBuilder::new()
+  let mut inspected = TestBuilder::new()
     .with_pnpm_catalogs(yaml)
     .with_packages(vec![json!({
       "name": "pkg-a",
@@ -242,17 +248,12 @@ async fn update_pnpm_catalog_def_writes_yaml() {
     .await;
   // Stage update writes by setting check=false. Force dry_run=true so the
   // mutation stays visible in-memory.
-  ctx.config.cli.check = false;
-  ctx.config.cli.dry_run = true;
+  inspected.data.config.cli.check = false;
+  inspected.data.config.cli.dry_run = true;
 
   let disk = crate::test::mock_disk::MockDiskIo::new();
   let tui = crate::test::mock_tui::MockTui::cancel();
-  let registry = crate::registry::updates::RegistryUpdates {
-    updates_by_internal_name: std::collections::HashMap::new(),
-    times_by_internal_name: std::collections::HashMap::new(),
-    failed: vec![],
-  };
-  let _ = update::run(ctx, registry, &disk, &tui);
+  let _ = update::run(inspected, &disk, &tui);
 }
 
 #[test]

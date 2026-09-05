@@ -1,13 +1,13 @@
 use {
-  super::{DependencyCore, L1, L2, add_instance_to_dependencies},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
-    instance::{Instance, InstanceIdx, ValidInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{InstanceState, ValidInstance, severity::SeverityMap},
     registry::updates::RegistryUpdates,
+    version_group::{DependencyIdx, L1, L2},
   },
   log::debug,
-  std::collections::BTreeMap,
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -17,25 +17,29 @@ mod ignored_test;
 #[derive(Debug)]
 pub struct IgnoredGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub severity: SeverityMap,
 }
 
 impl IgnoredGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    for dep in self.dependencies.values() {
+  pub fn visit(&self, input: &RuleInput, _registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit ignored version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       for &idx in &dep.instances {
         let instance = &arena[idx.0];
         let actual_specifier = &instance.descriptor.specifier;
         debug!("{L2}visit instance '{}' ({actual_specifier:?})", instance.id);
-        instance.mark_valid(ValidInstance::IsIgnored, &instance.descriptor.specifier);
+        out.classify(
+          idx,
+          InstanceState::Valid(ValidInstance::IsIgnored),
+          Some(Rc::clone(actual_specifier)),
+          &self.severity,
+          strict,
+        );
       }
     }
   }

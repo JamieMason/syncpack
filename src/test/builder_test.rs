@@ -44,7 +44,7 @@ async fn test_builder_with_version_group() {
     .await;
 
   // The test should show that foo gets pinned to 2.0.0
-  assert!(ctx.instances.len() > 1);
+  assert!(ctx.data.instances.len() > 1);
 }
 
 #[tokio::test]
@@ -57,7 +57,7 @@ async fn test_builder_with_multiple_packages() {
     .run()
     .await;
 
-  assert_eq!(ctx.instances.len(), 2);
+  assert_eq!(ctx.data.instances.len(), 2);
 }
 
 #[tokio::test]
@@ -73,7 +73,7 @@ async fn test_builder_with_strict_mode() {
     .await;
 
   // In strict mode, workspace protocol should be invalid when differs from local
-  assert!(ctx.instances.iter().any(|i| i.state.borrow().is_invalid()));
+  assert!(ctx.instance_views().any(|view| view.state.is_invalid()));
 }
 
 #[tokio::test]
@@ -88,7 +88,7 @@ async fn test_builder_with_registry_updates() {
     .await;
 
   // Should show registry update available
-  assert!(ctx.instances.iter().any(|i| i.state.borrow().is_outdated()));
+  assert!(ctx.instance_views().any(|view| view.state.is_outdated()));
 }
 
 #[tokio::test]
@@ -106,8 +106,11 @@ async fn test_builder_with_update_target() {
     .await;
 
   // Should target minor updates (1.1.0) not latest (2.0.0)
-  let foo_instance = ctx.instances.iter().find(|i| i.descriptor.internal_name == "foo").unwrap();
-  assert_eq!(foo_instance.expected_specifier.borrow().as_ref().unwrap().get_raw(), "1.1.0");
+  let foo = ctx
+    .instance_views()
+    .find(|view| view.instance.descriptor.internal_name == "foo")
+    .unwrap();
+  assert_eq!(foo.expected.unwrap().get_raw(), "1.1.0");
 }
 
 // Issue #333: source patterns with non-standard filenames (e.g. package.public.json)
@@ -135,7 +138,7 @@ async fn test_builder_with_non_standard_manifest_filename() {
     .run()
     .await;
 
-  let dep_names: Vec<&str> = ctx.instances.iter().map(|i| i.descriptor.internal_name.as_str()).collect();
+  let dep_names: Vec<&str> = ctx.data.instances.iter().map(|i| i.descriptor.internal_name.as_str()).collect();
   assert!(
     dep_names.contains(&"package-a"),
     "package-a self-version missing; got {dep_names:?}"

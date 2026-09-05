@@ -50,21 +50,16 @@ impl Sources {
   }
 
   /// Build the sources arena by mirroring `disk.package_json_files` 1:1.
-  /// Each file becomes one `Source::Package { file_idx, name,
-  /// formatting_mismatches: [] }`. `user_source_indices` is computed by
-  /// matching each file's `filepath` against the user-pattern-filtered
-  /// `file_paths`. Appends `Source::PnpmYaml` at the tail when
-  /// `disk.pnpm_workspace` is `Some`.
+  /// Each file becomes one `Source::Package { file_idx, name }`.
+  /// `user_source_indices` is computed by matching each file's `filepath`
+  /// against the user-pattern-filtered `file_paths`. Appends
+  /// `Source::PnpmYaml` at the tail when `disk.pnpm_workspace` is `Some`.
   pub fn from_disk(disk: &Disk, file_paths: &[PathBuf]) -> Self {
     let mut all: Vec<Source> = Vec::with_capacity(disk.package_json_files.len() + 1);
     let mut user_source_indices: Vec<usize> = Vec::new();
     for (file_idx, file) in disk.package_json_files.iter().enumerate() {
       let name = package_name(file).to_string();
-      all.push(Source::Package {
-        file_idx,
-        name,
-        formatting_mismatches: vec![],
-      });
+      all.push(Source::Package { file_idx, name });
       if file_paths.iter().any(|p| p == &file.filepath) {
         user_source_indices.push(file_idx);
       }

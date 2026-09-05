@@ -1,28 +1,29 @@
 use {
   crate::{
     commands::ui,
-    context::Context,
+    context::Discovered,
+    inspection::Inspection,
     instance::{InstanceState, Severity, ValidInstance},
-    version_group::DependencyCore,
+    version_group::{Dependency, DependencyIdx},
   },
   colored::*,
   itertools::Itertools,
   log::{error, info},
 };
 
-pub fn print(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  match &dependency.get_state(&ctx.instances) {
-    InstanceState::Valid(ValidInstance::IsIgnored) => print_ignored(ctx, dependency, group_variant),
-    InstanceState::Valid(_) => print_valid(ctx, dependency, group_variant),
-    InstanceState::Invalid(_) => match max_severity(ctx, dependency) {
+pub fn print(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
+  match &dependency.get_state(inspection) {
+    InstanceState::Valid(ValidInstance::IsIgnored) => print_ignored(ctx, inspection, dep_idx, dependency, group_variant),
+    InstanceState::Valid(_) => print_valid(ctx, inspection, dep_idx, dependency, group_variant),
+    InstanceState::Invalid(_) => match max_severity(inspection, dependency) {
       // Every Invalid instance downgraded to Warn → render the rollup yellow
       // instead of red so the dep line matches the instance lines below.
-      Some(Severity::Warn) | Some(Severity::None) | None => print_suspect(ctx, dependency, group_variant),
-      _ => print_invalid(ctx, dependency, group_variant),
+      Some(Severity::Warn) | Some(Severity::None) | None => print_suspect(ctx, inspection, dep_idx, dependency, group_variant),
+      _ => print_invalid(ctx, inspection, dep_idx, dependency, group_variant),
     },
-    InstanceState::Suspect(_) => match max_severity(ctx, dependency) {
-      Some(Severity::Error) | Some(Severity::Fix) => print_invalid(ctx, dependency, group_variant),
-      _ => print_suspect(ctx, dependency, group_variant),
+    InstanceState::Suspect(_) => match max_severity(inspection, dependency) {
+      Some(Severity::Error) | Some(Severity::Fix) => print_invalid(ctx, inspection, dep_idx, dependency, group_variant),
+      _ => print_suspect(ctx, inspection, dep_idx, dependency, group_variant),
     },
     InstanceState::Unknown => {
       let name = &dependency.internal_name;
@@ -34,11 +35,11 @@ pub fn print(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
 
 /// Highest resolved severity across this dependency's instances, ranked
 /// Error > Fix > Warn > None. `None` when no instance has been resolved.
-fn max_severity(ctx: &Context, dependency: &DependencyCore) -> Option<Severity> {
+fn max_severity(inspection: &Inspection, dependency: &Dependency) -> Option<Severity> {
   dependency
     .instances
     .iter()
-    .filter_map(|idx| *ctx.instances[idx.0].severity.borrow())
+    .filter_map(|idx| inspection.severity(*idx))
     .max_by_key(|s| severity_rank(*s))
 }
 
@@ -51,15 +52,16 @@ fn severity_rank(severity: Severity) -> u8 {
   }
 }
 
-pub fn print_ignored(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  let (count_column, name, local_hint, alias_hint, _, _) = get_common_parts(ctx, dependency, group_variant);
+pub fn print_ignored(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
+  let (count_column, name, local_hint, alias_hint, _, _) = get_common_parts(ctx, inspection, dep_idx, dependency, group_variant);
   let name = name.dimmed().to_string();
   let line = ui::util::join_line(vec![&count_column, &name, &local_hint, &alias_hint]);
   info!("{line}");
 }
 
-pub fn print_valid(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier, _) = get_common_parts(ctx, dependency, group_variant);
+pub fn print_valid(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
+  let (count_column, name, local_hint, alias_hint, expected_specifier, _) =
+    get_common_parts(ctx, inspection, dep_idx, dependency, group_variant);
   let expected_specifier = if !expected_specifier.is_empty() {
     expected_specifier.dimmed().to_string()
   } else {
@@ -69,8 +71,9 @@ pub fn print_valid(ctx: &Context, dependency: &DependencyCore, group_variant: &s
   info!("{line}");
 }
 
-pub fn print_invalid(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) = get_common_parts(ctx, dependency, group_variant);
+pub fn print_invalid(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
+  let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) =
+    get_common_parts(ctx, inspection, dep_idx, dependency, group_variant);
   let expected_specifier = if !expected_specifier.is_empty() {
     expected_specifier.red().to_string()
   } else {
@@ -92,13 +95,13 @@ pub fn print_invalid(ctx: &Context, dependency: &DependencyCore, group_variant: 
   info!("{line}");
 }
 
-pub fn print_outdated(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  print_valid(ctx, dependency, group_variant);
+pub fn print_outdated(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
+  print_valid(ctx, inspection, dep_idx, dependency, group_variant);
 }
 
-pub fn print_suspect(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) = get_common_parts(ctx, dependency, group_variant);
-  // let name = name.yellow().to_string();
+pub fn print_suspect(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
+  let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) =
+    get_common_parts(ctx, inspection, dep_idx, dependency, group_variant);
   let expected_specifier = if !expected_specifier.is_empty() {
     expected_specifier.yellow().to_string()
   } else {
@@ -120,8 +123,9 @@ pub fn print_suspect(ctx: &Context, dependency: &DependencyCore, group_variant: 
   info!("{line}");
 }
 
-pub fn print_fixed(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  let (count_column, name, local_hint, alias_hint, expected_specifier, _) = get_common_parts(ctx, dependency, group_variant);
+pub fn print_fixed(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
+  let (count_column, name, local_hint, alias_hint, expected_specifier, _) =
+    get_common_parts(ctx, inspection, dep_idx, dependency, group_variant);
   let icon = if ctx.config.cli.show_instances {
     "".to_string()
   } else {
@@ -136,12 +140,12 @@ pub fn print_fixed(ctx: &Context, dependency: &DependencyCore, group_variant: &s
   info!("{line}");
 }
 
-fn get_invalid_status_codes_in_brackets(ctx: &Context, dependency: &DependencyCore) -> String {
+fn get_invalid_status_codes_in_brackets(ctx: &Discovered, inspection: &Inspection, dependency: &Dependency) -> String {
   if !ctx.config.cli.show_status_codes {
     return "".to_string();
   }
   let links = dependency
-    .get_states(&ctx.instances)
+    .get_states(inspection)
     .iter()
     .filter(|state| matches!(state, InstanceState::Invalid(_) | InstanceState::Suspect(_)))
     .map(|state| state.get_name())
@@ -157,7 +161,13 @@ fn get_invalid_status_codes_in_brackets(ctx: &Context, dependency: &DependencyCo
   }
 }
 
-fn get_common_parts(ctx: &Context, dependency: &DependencyCore, _group_variant: &str) -> (String, String, String, String, String, String) {
+fn get_common_parts(
+  ctx: &Discovered,
+  inspection: &Inspection,
+  dep_idx: DependencyIdx,
+  dependency: &Dependency,
+  _group_variant: &str,
+) -> (String, String, String, String, String, String) {
   let instances_len = dependency.instances.len();
   let count_column = ui::util::count_column(instances_len);
   let name = dependency.internal_name.to_string();
@@ -167,18 +177,18 @@ fn get_common_parts(ctx: &Context, dependency: &DependencyCore, _group_variant: 
     // don't repeat expected specifier when we are listing every instance
     "".to_string()
   } else {
-    get_raw_expected_specifier(dependency)
+    get_raw_expected_specifier(inspection, dep_idx)
   };
   let status_codes = if ctx.config.cli.show_instances {
     // don't list statuses when we are listing every instance
     "".to_string()
   } else {
-    get_invalid_status_codes_in_brackets(ctx, dependency)
+    get_invalid_status_codes_in_brackets(ctx, inspection, dependency)
   };
   (count_column, name, local_hint, alias_hint, expected_specifier, status_codes)
 }
 
-pub fn get_alias_hint(dependency: &DependencyCore) -> String {
+pub fn get_alias_hint(dependency: &Dependency) -> String {
   if dependency.has_alias {
     "(aliased)".purple().to_string()
   } else {
@@ -186,18 +196,16 @@ pub fn get_alias_hint(dependency: &DependencyCore) -> String {
   }
 }
 
-fn get_local_hint(ctx: &Context, dependency: &DependencyCore) -> String {
-  if ctx.config.cli.show_hints && dependency.local_instance.borrow().is_some() {
+fn get_local_hint(ctx: &Discovered, dependency: &Dependency) -> String {
+  if ctx.config.cli.show_hints && dependency.local_instance.is_some() {
     "(local)".purple().to_string()
   } else {
     "".to_string()
   }
 }
 
-fn get_raw_expected_specifier(dependency: &DependencyCore) -> String {
-  dependency
-    .expected
-    .borrow()
+fn get_raw_expected_specifier(inspection: &Inspection, dep_idx: DependencyIdx) -> String {
+  inspection.dep_expected[dep_idx.0]
     .as_ref()
     .map(|expected| expected.get_raw().to_string())
     .unwrap_or_default()

@@ -18,7 +18,6 @@ fn source_kind_returns_correct_variant() {
   let pkg_source = Source::Package {
     file_idx: 0,
     name: "x".to_string(),
-    formatting_mismatches: vec![],
   };
   assert_eq!(pkg_source.kind(), SourceKind::PackageJson);
 
@@ -40,17 +39,11 @@ fn source_package_is_struct_variant() {
   let s = Source::Package {
     file_idx: 0,
     name: "pkg".to_string(),
-    formatting_mismatches: vec![],
   };
   match &s {
-    Source::Package {
-      file_idx,
-      name,
-      formatting_mismatches,
-    } => {
+    Source::Package { file_idx, name } => {
       assert_eq!(*file_idx, 0);
       assert_eq!(name, "pkg");
-      assert!(formatting_mismatches.is_empty());
     }
     Source::PnpmYaml => panic!("not yaml"),
   }

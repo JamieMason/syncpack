@@ -1,15 +1,17 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, L6, L7, L8, L9, PreferVersion, add_instance_to_dependencies},
   crate::{
-    context::Context,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, UnfixableInstance, ValidInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{
+      FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance, severity::SeverityMap,
+    },
     registry::updates::RegistryUpdates,
     semver_range::SemverRange,
     specifier::Specifier,
+    version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5, L6, L7, L8, L9, PreferVersion},
   },
   log::debug,
-  std::{collections::BTreeMap, rc::Rc},
+  std::rc::Rc,
 };
 
 #[cfg(test)]
@@ -19,7 +21,7 @@ mod same_minor_test;
 #[derive(Debug)]
 pub struct SameMinorGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub prefer_version: Option<PreferVersion>,
   pub severity: SeverityMap,
 }
@@ -29,11 +31,7 @@ fn is_safe_range(range: &SemverRange) -> bool {
 }
 
 impl SameMinorGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn get_highest_or_lowest_minor_specifier(&self, dep: &DependencyCore, arena: &[Instance]) -> Option<Rc<Specifier>> {
+  pub fn get_highest_or_lowest_minor_specifier(&self, dep: &Dependency, arena: &[Instance]) -> Option<Rc<Specifier>> {
     let prefer_highest = match &self.prefer_version {
       Some(PreferVersion::HighestSemver) => true,
       Some(PreferVersion::LowestSemver) => false,
@@ -59,9 +57,11 @@ impl SameMinorGroup {
     if prefer_highest { specifiers.max() } else { specifiers.min() }
   }
 
-  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    for dep in self.dependencies.values() {
+  pub fn visit(&self, input: &RuleInput, _registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit same minor version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
 
@@ -77,7 +77,13 @@ impl SameMinorGroup {
             let instance = &arena[idx.0];
             let actual_specifier = &instance.descriptor.specifier;
             debug!("{L4}visit instance '{}' ({actual_specifier:?})", instance.id);
-            instance.mark_valid(ValidInstance::IsNonSemverButIdentical, actual_specifier);
+            out.classify(
+              idx,
+              InstanceState::Valid(ValidInstance::IsNonSemverButIdentical),
+              Some(Rc::clone(actual_specifier)),
+              &self.severity,
+              strict,
+            );
           }
         } else {
           debug!("{L3}and they differ");
@@ -85,7 +91,13 @@ impl SameMinorGroup {
             let instance = &arena[idx.0];
             let actual_specifier = &instance.descriptor.specifier;
             debug!("{L4}visit instance '{}' ({actual_specifier:?})", instance.id);
-            instance.mark_unfixable(UnfixableInstance::NonSemverMismatch);
+            out.classify(
+              idx,
+              InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::NonSemverMismatch)),
+              Some(Rc::clone(actual_specifier)),
+              &self.severity,
+              strict,
+            );
           }
         }
         continue;
@@ -101,7 +113,13 @@ impl SameMinorGroup {
           let instance = &arena[idx.0];
           let actual_specifier = &instance.descriptor.specifier;
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
-          instance.mark_unfixable(UnfixableInstance::SameMinorHasMajorMismatch);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::SameMinorHasMajorMismatch)),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         }
         continue;
       }
@@ -114,7 +132,7 @@ impl SameMinorGroup {
         .is_some_and(|idx| arena[idx.0].already_has_same_minor_number_as_all(&dep.instances, arena));
       if all_same_minor {
         debug!("{L3}all instances share the same MAJOR.MINOR");
-        self.visit_instances_at_correct_minor(dep, arena);
+        self.visit_instances_at_correct_minor(dep, arena, strict, out);
         continue;
       }
 
@@ -126,7 +144,13 @@ impl SameMinorGroup {
           let instance = &arena[idx.0];
           let actual_specifier = &instance.descriptor.specifier;
           debug!("{L5}visit instance '{}' ({actual_specifier:?})", instance.id);
-          instance.mark_unfixable(UnfixableInstance::SameMinorMismatch);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::SameMinorMismatch)),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         }
         continue;
       }
@@ -138,7 +162,13 @@ impl SameMinorGroup {
           let instance = &arena[idx.0];
           let actual_specifier = &instance.descriptor.specifier;
           debug!("{L5}visit instance '{}' ({actual_specifier:?})", instance.id);
-          instance.mark_unfixable(UnfixableInstance::SameMinorMismatch);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::SameMinorMismatch)),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         }
         continue;
       }
@@ -155,7 +185,13 @@ impl SameMinorGroup {
           Some(v) => v,
           None => {
             debug!("{L6}instance has no semver version");
-            instance.mark_unfixable(UnfixableInstance::NonSemverMismatch);
+            out.classify(
+              idx,
+              InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::NonSemverMismatch)),
+              Some(Rc::clone(actual_specifier)),
+              &self.severity,
+              strict,
+            );
             continue;
           }
         };
@@ -164,27 +200,40 @@ impl SameMinorGroup {
 
         if is_at_target_minor {
           debug!("{L6}instance IS at the target MAJOR.MINOR");
-          Self::visit_instance_at_correct_minor(instance, actual_specifier);
+          self.visit_instance_at_correct_minor(idx, instance, actual_specifier, strict, out);
         } else {
           debug!("{L6}instance is NOT at the target MAJOR.MINOR");
           let fix_specifier = Self::determine_fix_specifier_for_wrong_minor(instance, actual_specifier, &fix_target);
           debug!("{L7}fix target with range applied: {fix_specifier:?}");
-          instance.mark_fixable(FixableInstance::DiffersToHighestOrLowestSemverMinor, &fix_specifier);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToHighestOrLowestSemverMinor)),
+            Some(fix_specifier),
+            &self.severity,
+            strict,
+          );
         }
       }
     }
   }
 
-  fn visit_instances_at_correct_minor(&self, dep: &DependencyCore, arena: &[Instance]) {
+  fn visit_instances_at_correct_minor(&self, dep: &Dependency, arena: &[Instance], strict: bool, out: &mut Inspection) {
     for &idx in &dep.instances {
       let instance = &arena[idx.0];
       let actual_specifier = &instance.descriptor.specifier;
       debug!("{L4}visit instance '{}' ({actual_specifier:?})", instance.id);
-      Self::visit_instance_at_correct_minor(instance, actual_specifier);
+      self.visit_instance_at_correct_minor(idx, instance, actual_specifier, strict, out);
     }
   }
 
-  fn visit_instance_at_correct_minor(instance: &Instance, actual_specifier: &Rc<Specifier>) {
+  fn visit_instance_at_correct_minor(
+    &self,
+    idx: InstanceIdx,
+    instance: &Instance,
+    actual_specifier: &Rc<Specifier>,
+    strict: bool,
+    out: &mut Inspection,
+  ) {
     if instance.must_match_preferred_semver_range() {
       debug!("{L5}it belongs to a semver group");
       let preferred_range = instance.preferred_semver_range.as_ref().unwrap();
@@ -192,27 +241,42 @@ impl SameMinorGroup {
         debug!("{L6}preferred range is safe ({preferred_range:?})");
         if instance.matches_preferred_semver_range() {
           debug!("{L7}instance already matches preferred range");
-          instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, actual_specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::SatisfiesSameMinorGroup),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         } else {
           debug!("{L7}instance does not match preferred range");
-          instance.mark_fixable(
-            FixableInstance::SemverRangeMismatch,
-            &instance.get_specifier_with_preferred_semver_range().unwrap(),
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SemverRangeMismatch)),
+            Some(instance.get_specifier_with_preferred_semver_range().unwrap()),
+            &self.severity,
+            strict,
           );
         }
       } else {
         debug!("{L6}preferred range is unsafe ({preferred_range:?})");
         if instance.matches_preferred_semver_range() {
           debug!("{L7}instance matches preferred (unsafe) range");
-          instance.mark_fixable(
-            FixableInstance::SameMinorOverridesSemverRange,
-            &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SameMinorOverridesSemverRange)),
+            Some(actual_specifier.with_range(&SemverRange::Patch).unwrap()),
+            &self.severity,
+            strict,
           );
         } else {
           debug!("{L7}instance does not match preferred (unsafe) range");
-          instance.mark_fixable(
-            FixableInstance::SameMinorOverridesSemverRangeMismatch,
-            &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SameMinorOverridesSemverRangeMismatch)),
+            Some(actual_specifier.with_range(&SemverRange::Patch).unwrap()),
+            &self.severity,
+            strict,
           );
         }
       }
@@ -222,18 +286,33 @@ impl SameMinorGroup {
       match on_disk_range {
         Some(ref range) if is_safe_range(range) => {
           debug!("{L6}on-disk range is safe ({range:?})");
-          instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, actual_specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::SatisfiesSameMinorGroup),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         }
         Some(ref range) => {
           debug!("{L6}on-disk range is unsafe ({range:?})");
-          instance.mark_fixable(
-            FixableInstance::SameMinorOverridesSemverRange,
-            &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::SameMinorOverridesSemverRange)),
+            Some(actual_specifier.with_range(&SemverRange::Patch).unwrap()),
+            &self.severity,
+            strict,
           );
         }
         None => {
           debug!("{L6}no semver range on disk");
-          instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, actual_specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::SatisfiesSameMinorGroup),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
         }
       }
     }

@@ -2,7 +2,7 @@ use {
   super::registry_client::MockRegistryClient,
   crate::{
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
-    context::{Config, Context},
+    context::{Config, Discovered},
     dependency::DependencyType,
     disk::{Disk, File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
     rcfile::Rcfile,
@@ -129,16 +129,17 @@ pub async fn context_with_registry_updates(
   sources: Sources,
   mock_updates: serde_json::Value,
   dep_types: Vec<DependencyType>,
-) -> (Context, RegistryUpdates) {
+) -> (Discovered, RegistryUpdates) {
   let client: Arc<dyn RegistryClient> = Arc::new(MockRegistryClient::from_json(mock_updates));
-  let ctx = Context::create(config, disk, sources, dep_types).unwrap();
+  let data = Discovered::create(config, disk, sources, dep_types).unwrap();
   let updates = RegistryUpdates::fetch(
     &client,
-    &ctx.version_groups,
-    &ctx.instances,
-    ctx.config.rcfile.max_concurrent_requests,
-    ctx.config.rcfile.minimum_release_age,
+    &data.version_groups,
+    &data.dependencies,
+    &data.instances,
+    data.config.rcfile.max_concurrent_requests,
+    data.config.rcfile.minimum_release_age,
   )
   .await;
-  (ctx, updates)
+  (data, updates)
 }

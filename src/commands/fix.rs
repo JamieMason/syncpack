@@ -6,41 +6,43 @@ use {
   crate::{
     catalogs::detect_bun_catalogs,
     commands::reporter::FixReporter,
-    context::Context,
+    context::{Discovered, Inspected},
     disk::{
       DiskIo, PackageManager, copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition,
       set_nested_prop, write_json_file, write_yaml_file,
     },
     errors::SyncpackError,
+    inspection::Inspection,
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance, Severity},
     source::Source,
     specifier::Specifier,
-    version_group::{InstanceAction, VersionGroupBehavior},
+    version_group::{InstanceAction, VersionGroupBehavior, action_of},
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
 };
 
-pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> Result<Context, SyncpackError> {
+pub fn run<D: DiskIo>(mut inspected: Inspected, reporter: &dyn FixReporter, io: &D) -> Result<Inspected, SyncpackError> {
   let mut contains_unfixable_issues = false;
   let mut was_invalid = false;
-  let strict = ctx.config.rcfile.strict;
   // Apply-time dispatch reads `instance.descriptor.source_idx`; no SourceIdx
   // is duplicated into the action tuple.
   let mut fix_actions: Vec<(InstanceIdx, bool)> = vec![];
 
-  ctx
-    .version_groups
-    .iter()
-    .filter(|group| !group.dependencies().is_empty() && !group.is_ignored())
-    .for_each(|group| {
-      let mut has_printed_group = false;
-      group.get_sorted_dependencies(&ctx.config.cli.sort).for_each(|dependency| {
-        let mut has_printed_dependency = false;
-        dependency
-          .get_sorted_instances(&ctx.instances, &ctx.sources.all)
-          .for_each(|(idx, instance)| {
-            let action = group.resolve_action(instance, strict);
+  {
+    let data = &inspected.data;
+    let inspection = &inspected.inspection;
+    data
+      .version_groups
+      .iter()
+      .filter(|group| !group.dependency_indices().is_empty() && !group.is_ignored())
+      .for_each(|group| {
+        let mut has_printed_group = false;
+        for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
+          let dependency = &data.dependencies[dep_idx.0];
+          let mut has_printed_dependency = false;
+          for (idx, instance) in dependency.get_sorted_instances(inspection, &data.instances, &data.sources.all) {
+            let action = action_of(inspection.severity(idx).unwrap_or(Severity::None));
             // `Render(Error)` from non-fixable states (Unfixable, Conflict,
             // strict-Suspect, user-configured Error on Fixable) cannot be
             // auto-fixed in this pass.
@@ -50,32 +52,33 @@ pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> R
             // Only `Fix(_)` instances are applied. `Render(Warn)` surfaces but
             // does not change state; `Skip` is silent.
             if !matches!(action, InstanceAction::Fix(_)) {
-              return;
+              continue;
             }
             was_invalid = true;
             if !has_printed_group {
-              reporter.on_group_header(&ctx, group);
+              reporter.on_group_header(data, group);
               has_printed_group = true;
             }
             if !has_printed_dependency {
-              reporter.on_dependency(&ctx, dependency, group.variant_label());
+              reporter.on_dependency(data, inspection, dep_idx, dependency, group.variant_label());
               has_printed_dependency = true;
             }
-            reporter.on_instance(&ctx, instance, group.variant_label());
-            fix_actions.push((idx, instance.is_banned()));
-          });
-      })
-    });
+            reporter.on_instance(data, inspection, idx, instance, group.variant_label());
+            fix_actions.push((idx, inspection.state(idx).is_banned()));
+          }
+        }
+      });
+  }
 
-  apply_fix_actions(&mut ctx, &fix_actions);
+  apply_fix_actions(&mut inspected.data, &inspected.inspection, &fix_actions);
 
-  if !ctx.config.cli.dry_run {
-    let indent = ctx.config.rcfile.indent.as_deref();
-    let fallback = ctx.disk.formatting_fallback();
-    for file in ctx.disk.package_json_files.iter_mut() {
+  if !inspected.data.config.cli.dry_run {
+    let indent = inspected.data.config.rcfile.indent.as_deref();
+    let fallback = inspected.data.disk.formatting_fallback();
+    for file in inspected.data.disk.package_json_files.iter_mut() {
       write_json_file(file, io, indent, &fallback)?;
     }
-    if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
+    if let Some(yaml) = inspected.data.disk.pnpm_workspace.as_mut() {
       write_yaml_file(yaml, io, indent, &fallback)?;
     }
   }
@@ -91,7 +94,7 @@ pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> R
   if contains_unfixable_issues {
     Err(SyncpackError::IssuesFound)
   } else {
-    Ok(ctx)
+    Ok(inspected)
   }
 }
 
@@ -99,9 +102,9 @@ pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> R
 /// `MissingFromCatalog` consumers ALSO trigger an upstream insert into the
 /// target catalog source (pnpm yaml on Disk, or Bun root pkg.json via
 /// `disk.package_json_root_idx`).
-fn apply_fix_actions(ctx: &mut Context, actions: &[(InstanceIdx, bool)]) {
+fn apply_fix_actions(data: &mut Discovered, inspection: &Inspection, actions: &[(InstanceIdx, bool)]) {
   for &(inst_idx, is_banned) in actions {
-    let state = ctx.instances[inst_idx.0].state.borrow().clone();
+    let state = inspection.state(inst_idx).clone();
 
     // `MissingFromCatalog` insert runs BEFORE the consumer rewrite so an
     // empty pnpm-workspace.yaml can be auto-created on the way through.
@@ -110,36 +113,35 @@ fn apply_fix_actions(ctx: &mut Context, actions: &[(InstanceIdx, bool)]) {
       winning_specifier,
     })) = &state
     {
-      apply_missing_from_catalog_insert(ctx, inst_idx, catalog_name, winning_specifier);
+      apply_missing_from_catalog_insert(data, inst_idx, catalog_name, winning_specifier);
     }
 
-    let consumer_source_idx = ctx.instances[inst_idx.0].source_idx();
+    let consumer_source_idx = data.instances[inst_idx.0].source_idx();
     // Copy the file_idx (Package) out of the source under an immutable
-    // borrow; the borrow ends before we mutate ctx.disk below.
-    let consumer_file_idx: Option<usize> = match &ctx.sources.all[consumer_source_idx.0] {
+    // borrow; the borrow ends before we mutate data.disk below.
+    let consumer_file_idx: Option<usize> = match &data.sources.all[consumer_source_idx.0] {
       Source::Package { file_idx, .. } => Some(*file_idx),
       Source::PnpmYaml => None,
     };
     if is_banned {
       if let Some(fi) = consumer_file_idx {
-        let file = &mut ctx.disk.package_json_files[fi];
-        let instance = &ctx.instances[inst_idx.0];
+        let file = &mut data.disk.package_json_files[fi];
+        let instance = &data.instances[inst_idx.0];
         remove_instance_from_disk(file, instance);
-      } else if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
-        let instance = &ctx.instances[inst_idx.0];
+      } else if let Some(yaml) = data.disk.pnpm_workspace.as_mut() {
+        let instance = &data.instances[inst_idx.0];
         if let Some(catalog_name) = instance.catalog_name() {
           crate::disk::remove_catalog_definition(yaml, catalog_name, &instance.descriptor.name);
         }
       }
-    } else if let Some(fi) = consumer_file_idx {
-      let file = &mut ctx.disk.package_json_files[fi];
-      let instance = &ctx.instances[inst_idx.0];
-      copy_expected_specifier_json(file, instance);
-    } else {
-      // PnpmYaml source — route through disk.pnpm_workspace.
-      if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
-        let instance = &ctx.instances[inst_idx.0];
-        crate::disk::copy_expected_specifier_yaml(yaml, instance);
+    } else if let Some(expected) = inspection.expected(inst_idx) {
+      if let Some(fi) = consumer_file_idx {
+        let file = &mut data.disk.package_json_files[fi];
+        let instance = &data.instances[inst_idx.0];
+        copy_expected_specifier_json(file, instance, expected);
+      } else if let Some(yaml) = data.disk.pnpm_workspace.as_mut() {
+        let instance = &data.instances[inst_idx.0];
+        crate::disk::copy_expected_specifier_yaml(yaml, instance, expected);
       }
     }
   }
@@ -148,31 +150,31 @@ fn apply_fix_actions(ctx: &mut Context, actions: &[(InstanceIdx, bool)]) {
 /// Insert `dep_name → winning_specifier` into the right catalog source
 /// before the consumer rewrite runs. Auto-creates the implicit default
 /// catalog file when none exists and PM=Pnpm/Bun. Routing follows
-/// `ctx.disk.package_manager`.
-fn apply_missing_from_catalog_insert(ctx: &mut Context, inst_idx: InstanceIdx, catalog_name: &str, winning_specifier: &Rc<Specifier>) {
-  let dep_name = ctx.instances[inst_idx.0].descriptor.name.clone();
+/// `data.disk.package_manager`.
+fn apply_missing_from_catalog_insert(data: &mut Discovered, inst_idx: InstanceIdx, catalog_name: &str, winning_specifier: &Rc<Specifier>) {
+  let dep_name = data.instances[inst_idx.0].descriptor.name.clone();
 
-  match ctx.disk.package_manager {
+  match data.disk.package_manager {
     Some(PackageManager::Pnpm) => {
-      if ctx.disk.pnpm_workspace.is_none() {
-        let path = ctx.disk.cwd.join("pnpm-workspace.yaml");
-        ctx.disk.pnpm_workspace = Some(empty_yaml_file(path));
+      if data.disk.pnpm_workspace.is_none() {
+        let path = data.disk.cwd.join("pnpm-workspace.yaml");
+        data.disk.pnpm_workspace = Some(empty_yaml_file(path));
       }
-      let yaml = ctx.disk.pnpm_workspace.as_mut().unwrap();
+      let yaml = data.disk.pnpm_workspace.as_mut().unwrap();
       insert_catalog_definition(yaml, catalog_name, &dep_name, winning_specifier);
     }
     Some(PackageManager::Bun) => {
-      let Some(idx) = ctx.disk.package_json_root_idx else {
+      let Some(idx) = data.disk.package_json_root_idx else {
         return;
       };
       // Bun prefix detection: shared with discovery via the same helper.
       // Falls back to "" when no Bun catalogs exist yet (auto-create-default).
-      let prefix = detect_bun_catalogs(&ctx.disk.package_json_files[idx].contents)
+      let prefix = detect_bun_catalogs(&data.disk.package_json_files[idx].contents)
         .ok()
         .flatten()
         .map(|(p, _)| p)
         .unwrap_or("");
-      let pkg = &mut ctx.disk.package_json_files[idx];
+      let pkg = &mut data.disk.package_json_files[idx];
       let parent_pointer = if catalog_name == "default" {
         format!("{prefix}/catalog")
       } else {

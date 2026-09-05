@@ -1,46 +1,47 @@
 use {
-  super::{DependencyCore, L1, L2, L3, L4, L5, add_instance_to_dependencies},
   crate::{
-    context::Context,
     disk::PackageManager,
     group_selector::GroupSelector,
-    instance::{FixableInstance, Instance, InstanceIdx, SuspectInstance, UnfixableInstance, ValidInstance, severity::SeverityMap},
+    inspection::{Inspection, RuleInput},
+    instance::{
+      FixableInstance, Instance, InstanceState, InvalidInstance, SuspectInstance, UnfixableInstance, ValidInstance, catalog_defs_for,
+      distinct_catalog_names, severity::SeverityMap,
+    },
     registry::updates::RegistryUpdates,
     specifier::Specifier,
+    version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5},
   },
   log::debug,
-  std::{collections::BTreeMap, rc::Rc},
+  std::rc::Rc,
 };
 
 #[derive(Debug)]
 pub struct CatalogGroup {
   pub selector: GroupSelector,
-  pub dependencies: BTreeMap<String, DependencyCore>,
+  pub dependencies: Vec<DependencyIdx>,
   pub severity: SeverityMap,
 }
 
 impl CatalogGroup {
-  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
-    add_instance_to_dependencies(&mut self.dependencies, idx, instance);
-  }
-
-  pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
-    let arena = &ctx.instances;
-    let distinct_catalog_count = ctx.distinct_catalog_names().len();
-    for dep in self.dependencies.values() {
+  pub fn visit(&self, input: &RuleInput, _registry_updates: &Option<RegistryUpdates>, out: &mut Inspection) {
+    let arena = input.instances;
+    let strict = input.cfg.strict;
+    let distinct_catalog_count = distinct_catalog_names(arena).len();
+    for &dep_idx in &self.dependencies {
+      let dep = &input.dependencies[dep_idx.0];
       debug!("visit catalog version group");
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       // Lookup keys by `internal_name` so `dependency_groups` aliasing works
       // — both the def and its consumers carry the alias label.
-      let catalog_defs: Vec<&Instance> = ctx.catalog_defs_for(&dep.internal_name).collect();
+      let catalog_defs: Vec<&Instance> = catalog_defs_for(arena, &dep.internal_name).collect();
 
       // Precompute the missing-from-catalog merge result so every non-def
       // consumer in the dep can be marked consistently. Only used by the
       // 0-catalogs (PM=pnpm/bun) and 1-catalog-without-dep branches.
       let missing_target_catalog_name: Option<String> = if catalog_defs.is_empty() {
         match distinct_catalog_count {
-          0 if matches!(ctx.package_manager(), Some(PackageManager::Pnpm) | Some(PackageManager::Bun)) => Some("default".to_string()),
-          1 => ctx.distinct_catalog_names().first().map(|s| s.to_string()),
+          0 if matches!(input.cfg.package_manager, Some(PackageManager::Pnpm) | Some(PackageManager::Bun)) => Some("default".to_string()),
+          1 => distinct_catalog_names(arena).first().map(|s| s.to_string()),
           _ => None,
         }
       } else {
@@ -58,7 +59,13 @@ impl CatalogGroup {
         if instance.is_catalog_instance() {
           debug!("{L3}it is a catalog definition");
           debug!("{L4}mark as catalog definition");
-          instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
+          out.classify(
+            idx,
+            InstanceState::Valid(ValidInstance::IsCatalogDefinition),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
           continue;
         }
 
@@ -68,7 +75,13 @@ impl CatalogGroup {
           debug!("{L3}it is the local instance of a package developed locally in this monorepo");
           debug!("{L4}refuse to catalog it");
           debug!("{L5}mark as suspect, user should change their config");
-          instance.mark_suspect(SuspectInstance::RefuseToCatalogLocal);
+          out.classify(
+            idx,
+            InstanceState::Suspect(SuspectInstance::RefuseToCatalogLocal),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
           continue;
         }
 
@@ -80,14 +93,26 @@ impl CatalogGroup {
             debug!("{L3}it uses the catalog: protocol referencing existing def '{referenced_name}'");
             let target = def.catalog_target_specifier().unwrap_or_else(|| Rc::clone(actual_specifier));
             debug!("{L4}mark as IsCatalog (target {target:?})");
-            instance.mark_valid(ValidInstance::IsCatalog, &target);
+            out.classify(
+              idx,
+              InstanceState::Valid(ValidInstance::IsCatalog),
+              Some(target),
+              &self.severity,
+              strict,
+            );
           } else {
             // catalog: consumer pointing at a missing def — covers "no such
             // catalog", "dep absent from referenced catalog", and "dep lives in
             // a different catalog".
             debug!("{L3}it references catalog '{referenced_name}' which has no matching def");
             debug!("{L4}mark as DependsOnMissingCatalogDefinition");
-            instance.mark_suspect(SuspectInstance::DependsOnMissingCatalogDefinition);
+            out.classify(
+              idx,
+              InstanceState::Suspect(SuspectInstance::DependsOnMissingCatalogDefinition),
+              Some(Rc::clone(actual_specifier)),
+              &self.severity,
+              strict,
+            );
           }
           continue;
         }
@@ -99,7 +124,13 @@ impl CatalogGroup {
           let target = def.catalog_target_specifier().unwrap_or_else(|| Rc::clone(actual_specifier));
           debug!("{L3}dep is in exactly one catalog '{target_catalog_name}'");
           debug!("{L4}mark as NotUsingCatalog (target {target:?})");
-          instance.mark_fixable(FixableInstance::NotUsingCatalog(target_catalog_name), &target);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::NotUsingCatalog(target_catalog_name))),
+            Some(target),
+            &self.severity,
+            strict,
+          );
           continue;
         }
 
@@ -112,18 +143,29 @@ impl CatalogGroup {
               let expected = catalog_target_for(catalog_name);
               debug!("{L3}dep is missing from catalog '{catalog_name}' (winning {winning_specifier:?})");
               debug!("{L4}mark as MissingFromCatalog (expected {expected:?})");
-              instance.mark_fixable(
-                FixableInstance::MissingFromCatalog {
+              out.classify(
+                idx,
+                InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::MissingFromCatalog {
                   catalog_name: catalog_name.clone(),
                   winning_specifier: Rc::clone(winning_specifier),
-                },
-                &expected,
+                })),
+                Some(expected),
+                &self.severity,
+                strict,
               );
             }
             Err(()) => {
               debug!("{L3}dep is missing from catalog '{catalog_name}' but specifiers conflict");
               debug!("{L4}mark as MissingFromCatalogAndNonSemverMismatch");
-              instance.mark_unfixable(UnfixableInstance::MissingFromCatalogAndNonSemverMismatch(catalog_name.clone()));
+              out.classify(
+                idx,
+                InstanceState::Invalid(InvalidInstance::Unfixable(
+                  UnfixableInstance::MissingFromCatalogAndNonSemverMismatch(catalog_name.clone()),
+                )),
+                Some(Rc::clone(actual_specifier)),
+                &self.severity,
+                strict,
+              );
             }
           }
           continue;
@@ -136,7 +178,13 @@ impl CatalogGroup {
         if distinct_catalog_count >= 2 {
           debug!("{L3}dep is defined in zero or 2+ of {distinct_catalog_count} catalogs — ambiguous");
           debug!("{L4}mark as NotUsingCatalogAndCatalogUnknown");
-          instance.mark_unfixable(UnfixableInstance::NotUsingCatalogAndCatalogUnknown);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::NotUsingCatalogAndCatalogUnknown)),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
           continue;
         }
 
@@ -145,10 +193,16 @@ impl CatalogGroup {
         if catalog_defs.is_empty() && distinct_catalog_count == 0 {
           debug!(
             "{L3}0 catalogs configured + PM={:?} — cannot infer catalog file location",
-            ctx.package_manager()
+            input.cfg.package_manager
           );
           debug!("{L4}mark as CannotInferCatalogFile");
-          instance.mark_unfixable(UnfixableInstance::CannotInferCatalogFile);
+          out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::CannotInferCatalogFile)),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+          );
           continue;
         }
 
@@ -172,7 +226,7 @@ fn catalog_target_for(catalog_name: &str) -> Rc<Specifier> {
 /// - All non-catalog instances agree on a single raw specifier (byte-identical) → `Ok(that specifier)`.
 /// - All non-catalog instances are simple semver → `Ok(highest semver)`.
 /// - Otherwise (mixed semver/non-semver, or all-non-semver-but-different) → `Err(())` to signal `MissingFromCatalogAndNonSemverMismatch`.
-fn pick_winning_specifier(dep: &DependencyCore, arena: &[Instance]) -> Result<Rc<Specifier>, ()> {
+fn pick_winning_specifier(dep: &Dependency, arena: &[Instance]) -> Result<Rc<Specifier>, ()> {
   let consumer_specifiers: Vec<Rc<Specifier>> = dep
     .instances
     .iter()

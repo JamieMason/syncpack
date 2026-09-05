@@ -66,9 +66,9 @@ pub enum FormatMismatchVariant {
 /// A file containing dependency declarations. Either a `package.json`
 /// (`Package`) or the workspace's `pnpm-workspace.yaml` (`PnpmYaml`, unit
 /// variant — yaml lives on `Disk.pnpm_workspace`). `Package` is a struct
-/// variant carrying an index into `disk.package_json_files`, the cached
-/// package name, and any formatting mismatches detected by
-/// `visit_formatting`.
+/// variant carrying an index into `disk.package_json_files` and the cached
+/// package name. Immutable — formatting mismatches are held in
+/// `Inspection.formatting`, keyed by `SourceIdx`.
 #[derive(Debug)]
 pub enum Source {
   Package {
@@ -76,8 +76,6 @@ pub enum Source {
     file_idx: usize,
     /// Cached `name` property value.
     name: String,
-    /// Mutated by `visit_formatting`.
-    formatting_mismatches: Vec<FormatMismatch>,
   },
   PnpmYaml,
 }

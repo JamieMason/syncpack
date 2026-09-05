@@ -10,10 +10,7 @@ use {
   semver_group::{AnySemverGroup, SemverGroup},
   serde::Deserialize,
   serde_json::Value,
-  std::{
-    collections::{BTreeMap, HashMap},
-    mem,
-  },
+  std::{collections::HashMap, mem},
   update_group::{AnyUpdateGroup, UpdateGroup},
 };
 
@@ -489,21 +486,27 @@ impl Rcfile {
   /// Auto-injects a `CatalogDefs` catch-all immediately before the default
   /// `PreferredSemver` catch-all, but only when at least one catalog dep
   /// type exists. Non-catalog projects see no injection.
-  pub fn get_version_groups(&mut self, sources: &Sources) -> Result<Vec<VersionGroup>, UnsupportedConfigError> {
-    let mut all_groups: Vec<VersionGroup> = mem::take(&mut self.version_groups)
-      .into_iter()
-      .enumerate()
-      .map(|(index, group_config)| VersionGroup::from_config(group_config, index, sources))
-      .collect::<Result<Vec<_>, _>>()?;
+  /// Build every version group, collecting *all* config errors rather than
+  /// failing on the first (B4). Always appends the auto-injected
+  /// `CatalogDefs` group (when catalog dep types exist) and the catch-all.
+  pub fn get_version_groups(&mut self, sources: &Sources) -> (Vec<VersionGroup>, Vec<UnsupportedConfigError>) {
+    let mut all_groups: Vec<VersionGroup> = Vec::new();
+    let mut errors: Vec<UnsupportedConfigError> = Vec::new();
+    for (index, group_config) in mem::take(&mut self.version_groups).into_iter().enumerate() {
+      match VersionGroup::from_config(group_config, index, sources) {
+        Ok(group) => all_groups.push(group),
+        Err(error) => errors.push(error),
+      }
+    }
     let catalog_dep_type_names = self.catalog_dep_type_names();
     if !catalog_dep_type_names.is_empty() {
       all_groups.push(VersionGroup::CatalogDefs(CatalogDefsGroup {
         selector: GroupSelector::new(vec![], catalog_dep_type_names, "Catalog Definitions".into(), vec![], vec![]),
-        dependencies: BTreeMap::new(),
+        dependencies: vec![],
         severity: SeverityMap::new(),
       }));
     }
     all_groups.push(VersionGroup::get_catch_all());
-    Ok(all_groups)
+    (all_groups, errors)
   }
 }

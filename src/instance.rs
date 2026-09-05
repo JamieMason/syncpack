@@ -27,7 +27,6 @@ use {
   },
   log::debug,
   std::{
-    cell::RefCell,
     path::{Path, PathBuf},
     rc::Rc,
   },
@@ -68,15 +67,19 @@ pub struct InstanceDescriptor {
   pub specifier: Rc<Specifier>,
 }
 
-/// A single occurrence of a dependency in the project.
+/// A single occurrence of a dependency in the project. Immutable after
+/// discovery — inspection outputs (state, expected specifier, severity) are
+/// held in `Inspection`, keyed by `InstanceIdx`.
 #[derive(Debug)]
 pub struct Instance {
   pub descriptor: InstanceDescriptor,
-  /// `None` when syncpack cannot determine the expected specifier without
-  /// user intervention.
-  pub expected_specifier: RefCell<Option<Rc<Specifier>>>,
   pub id: InstanceId,
   pub is_local_instance: bool,
+  /// Precomputed at discovery: for a `link:` instance whose dependency is a
+  /// locally-developed package, whether the link resolves to that package's
+  /// directory. `false` for non-link instances and when the dependency has no
+  /// local instance. Keeps inspection free of disk I/O.
+  pub link_resolves_to_local: bool,
   /// If this instance belongs to a `WithRange` semver group, the range used
   /// by Version Groups when determining the preferred version, so it tries
   /// to also satisfy any applicable semver group ranges.
@@ -85,14 +88,6 @@ pub struct Instance {
   /// when picking eligible registry updates (skip entirely or clamp the
   /// effective `UpdateTarget`). `None` when no group matched.
   pub preferred_update_policy: Option<UpdatePolicy>,
-  /// Resolved by `VersionGroup::resolve_action` from the instance's `state`,
-  /// the matching group's `severity` map and the rcfile's `strict` flag. Set
-  /// as a side effect of `resolve_action`; remains `None` until the resolver
-  /// has run. See `.plans/severity.md` §3.5.
-  pub severity: RefCell<Option<Severity>>,
-  /// Starts as `Unknown`, assigned during `visit_packages()`. `RefCell` so
-  /// states can be assigned without `&mut Context`.
-  pub state: RefCell<InstanceState>,
 }
 
 impl Instance {
@@ -107,13 +102,11 @@ impl Instance {
     let is_local_instance = dependency_type_name == "/version";
     Instance {
       descriptor,
-      expected_specifier: RefCell::new(None),
       id,
       is_local_instance,
+      link_resolves_to_local: false,
       preferred_semver_range,
       preferred_update_policy,
-      severity: RefCell::new(None),
-      state: RefCell::new(InstanceState::Unknown),
     }
   }
 
@@ -209,82 +202,6 @@ impl Instance {
       }
     }
     components.iter().collect()
-  }
-
-  /// Record what syncpack has determined the state of this instance is and what
-  /// its expected specifier should be
-  fn set_state(&self, state: InstanceState, expected_specifier: &Rc<Specifier>) -> &Self {
-    *self.state.borrow_mut() = state;
-    *self.expected_specifier.borrow_mut() = Some(Rc::clone(expected_specifier));
-    self
-  }
-
-  /// Mark this instance as already having a valid specifier
-  pub fn mark_valid(&self, state: ValidInstance, expected_specifier: &Rc<Specifier>) -> &Self {
-    self.set_state(InstanceState::Valid(state), expected_specifier)
-  }
-
-  /// Mark this instance as having something which doesn't look quite right, but
-  /// for the moment is not yet resulting in an issue
-  pub fn mark_suspect(&self, state: SuspectInstance) -> &Self {
-    let specifier = Rc::clone(&self.descriptor.specifier);
-    self.set_state(InstanceState::Suspect(state), &specifier)
-  }
-
-  /// Like `mark_suspect` but records an expected specifier so a user can opt
-  /// into routing the instance through the fix path via `severity: { ...: "fix" }`.
-  /// Used by `RefuseToPinLocal` and `RefuseToSnapLocal` — both rewrite a local
-  /// package's `/version` to a target specifier.
-  pub fn mark_suspect_with_expected(&self, state: SuspectInstance, expected_specifier: &Rc<Specifier>) -> &Self {
-    self.set_state(InstanceState::Suspect(state), expected_specifier)
-  }
-
-  /// Mark this instance as having a mismatch which can be auto-fixed
-  pub fn mark_fixable(&self, state: FixableInstance, expected_specifier: &Rc<Specifier>) -> &Self {
-    self.set_state(InstanceState::Invalid(InvalidInstance::Fixable(state)), expected_specifier)
-  }
-
-  /// Mark this instance as a mismatch which can't be auto-fixed, its semver
-  /// group and version group config are in conflict with one another, asking
-  /// for mutually exclusive versions
-  pub fn mark_conflict(&self, state: SemverGroupAndVersionConflict) -> &Self {
-    let specifier = Rc::clone(&self.descriptor.specifier);
-    self.set_state(InstanceState::Invalid(InvalidInstance::Conflict(state)), &specifier)
-  }
-
-  /// Mark this instance as a mismatch which can't be auto-fixed without user
-  /// input
-  pub fn mark_unfixable(&self, state: UnfixableInstance) -> &Self {
-    let specifier = Rc::clone(&self.descriptor.specifier);
-    self.set_state(InstanceState::Invalid(InvalidInstance::Unfixable(state)), &specifier)
-  }
-
-  pub fn is_valid(&self) -> bool {
-    self.state.borrow().is_valid()
-  }
-
-  pub fn is_invalid(&self) -> bool {
-    self.state.borrow().is_invalid()
-  }
-
-  pub fn is_suspect(&self) -> bool {
-    self.state.borrow().is_suspect()
-  }
-
-  pub fn is_fixable(&self) -> bool {
-    self.state.borrow().is_fixable()
-  }
-
-  pub fn is_banned(&self) -> bool {
-    self.state.borrow().is_banned()
-  }
-
-  pub fn is_unfixable(&self) -> bool {
-    self.state.borrow().is_unfixable()
-  }
-
-  pub fn is_outdated(&self) -> bool {
-    self.state.borrow().is_outdated()
   }
 
   pub fn has_missing_specifier(&self) -> bool {
@@ -490,4 +407,23 @@ impl Instance {
       }
     };
   }
+}
+
+/// All catalog-def instances for this internal dep name (one per catalog the
+/// dep appears in across pnpm and Bun). Keys by `descriptor.internal_name` so
+/// callers inside a `Dependency` visit can pass `dep.internal_name` directly —
+/// this works under `dependency_groups` aliasing because the def and its
+/// consumers share the same alias label.
+pub fn catalog_defs_for<'a>(arena: &'a [Instance], internal_name: &'a str) -> impl Iterator<Item = &'a Instance> + 'a {
+  arena
+    .iter()
+    .filter(move |i| i.is_catalog_instance() && i.descriptor.internal_name == internal_name)
+}
+
+/// Distinct catalog names across the whole project (`"default"` + named).
+pub fn distinct_catalog_names(arena: &[Instance]) -> Vec<&str> {
+  let mut names: Vec<&str> = arena.iter().filter_map(|i| i.catalog_name()).collect();
+  names.sort_unstable();
+  names.dedup();
+  names
 }
