@@ -1,11 +1,8 @@
 use {
   crate::{
-    rcfile::{
-      RawRcfile, Rcfile,
-      semver_group::AnySemverGroup,
-      update_group::{AnyUpdateGroup, UpdateGroup},
-    },
-    version_group::{AnyVersionGroup, VersionGroup},
+    context::{SemverGroup, UpdateGroup, version_group_from_config},
+    rcfile::{RawRcfile, Rcfile, semver_group::AnySemverGroup, update_group::AnyUpdateGroup},
+    version_group::AnyVersionGroup,
   },
   serde_json::json,
   syncpack_specifier::update_target::UpdateTarget,
@@ -324,7 +321,7 @@ fn semver_group_from_config_rejects_missing_required_fields() {
     "label": "bad group"
   }))
   .unwrap();
-  let err = crate::rcfile::semver_group::SemverGroup::from_config(group).unwrap_err();
+  let err = SemverGroup::from_config(group).unwrap_err();
   assert!(matches!(err, UnsupportedConfigError::InvalidSemverGroup));
 }
 
@@ -396,7 +393,7 @@ fn version_group_from_config_rejects_invalid_policy() {
   }))
   .unwrap();
   let sources = crate::sources::Sources::new();
-  let err = VersionGroup::from_config(group, 0, &sources).unwrap_err();
+  let err = version_group_from_config(group, 0, &sources).unwrap_err();
   assert!(matches!(err, UnsupportedConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
 }
 

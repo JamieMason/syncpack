@@ -1,16 +1,11 @@
 use {
-  crate::{
-    dependency::dependency_type,
-    group_selector::GroupSelector,
-    sources::Sources,
-    version_group::{AnyVersionGroup, CatalogDefsGroup, VersionGroup},
-  },
-  semver_group::{AnySemverGroup, SemverGroup},
+  crate::{dependency::dependency_type, version_group::AnyVersionGroup},
+  semver_group::AnySemverGroup,
   serde::Deserialize,
   serde_json::Value,
-  std::{collections::HashMap, mem},
-  syncpack_vocab::{config_error::UnsupportedConfigError, dependency_type::DependencyType, severity::SeverityMap, source_mode::SourceMode},
-  update_group::{AnyUpdateGroup, UpdateGroup},
+  std::collections::HashMap,
+  syncpack_vocab::{config_error::UnsupportedConfigError, dependency_type::DependencyType, source_mode::SourceMode},
+  update_group::AnyUpdateGroup,
 };
 
 pub mod from_disk;
@@ -353,30 +348,15 @@ impl TryFrom<RawRcfile> for Rcfile {
   type Error = UnsupportedConfigError;
 
   fn try_from(raw: RawRcfile) -> Result<Self, UnsupportedConfigError> {
-    // Dep-type validation for `dependency_groups`, `semver_groups`, and
-    // `version_groups` is deferred to `Context::create` so user-referenced
-    // catalog dep types like `pnpmCatalog:react18` (which only exist after
-    // catalog discovery) resolve correctly.
+    // Design C: the parsed `Rcfile` carries the RAW group configs. Selector
+    // compilation and group construction (which reference `model`) happen at
+    // discovery time in `Discovered::create`, so config depends on neither
+    // `model` nor the rules engine. Dep-type validation is likewise deferred
+    // there so user-referenced catalog dep types like `pnpmCatalog:react18`
+    // (which only exist after catalog discovery) resolve correctly.
     let all_dependency_types = compute_all_dependency_types(&raw.custom_types)?;
-    let mut dependency_groups = vec![];
-    for dg in raw.dependency_groups {
-      let selector = GroupSelector::new(dg.dependencies, dg.dependency_types, dg.alias_name, dg.packages, dg.specifier_types);
-      dependency_groups.push(selector);
-    }
-    let mut semver_groups = vec![SemverGroup::get_exact_local_specifiers()];
-    for group_config in raw.semver_groups {
-      let semver_group = SemverGroup::from_config(group_config)?;
-      semver_groups.push(semver_group);
-    }
-    semver_groups.push(SemverGroup::get_catch_all());
-
-    let mut update_groups = vec![];
-    for group_config in raw.update_groups {
-      update_groups.push(UpdateGroup::from_config(group_config)?);
-    }
-
     Ok(Rcfile {
-      dependency_groups,
+      dependency_groups: raw.dependency_groups,
       format_bugs: raw.format_bugs,
       format_repository: raw.format_repository,
       indent: raw.indent,
@@ -385,7 +365,7 @@ impl TryFrom<RawRcfile> for Rcfile {
       // `try_from`-only paths (tests, `Rcfile::default()`) get the
       // default here so consumers always see a `u64`.
       minimum_release_age: raw.minimum_release_age.unwrap_or(DEFAULT_MINIMUM_RELEASE_AGE),
-      semver_groups,
+      semver_groups: raw.semver_groups,
       sort_az: raw.sort_az,
       sort_exports: raw.sort_exports,
       sort_first: raw.sort_first,
@@ -393,16 +373,19 @@ impl TryFrom<RawRcfile> for Rcfile {
       source: raw.source,
       source_mode: raw.source_mode,
       strict: raw.strict,
-      update_groups,
+      update_groups: raw.update_groups,
       version_groups: raw.version_groups,
       all_dependency_types,
     })
   }
 }
 
+/// The parsed rcfile. Holds RAW group configs (Design C, §5.6): selectors are
+/// compiled and version/semver/update groups are constructed at discovery time
+/// in `Discovered::create`, keeping config free of any `model`/rules type.
 #[derive(Debug)]
 pub struct Rcfile {
-  pub dependency_groups: Vec<GroupSelector>,
+  pub dependency_groups: Vec<DependencyGroup>,
   pub format_bugs: bool,
   pub format_repository: bool,
   pub indent: Option<String>,
@@ -411,7 +394,7 @@ pub struct Rcfile {
   /// `0` disables age filtering. Resolved with precedence:
   /// rcfile → `pnpm-workspace.yaml` → `DEFAULT_MINIMUM_RELEASE_AGE`.
   pub minimum_release_age: u64,
-  pub semver_groups: Vec<SemverGroup>,
+  pub semver_groups: Vec<AnySemverGroup>,
   pub sort_az: Vec<String>,
   pub sort_exports: Vec<String>,
   pub sort_first: Vec<String>,
@@ -419,7 +402,7 @@ pub struct Rcfile {
   pub source: Vec<String>,
   pub source_mode: SourceMode,
   pub strict: bool,
-  pub update_groups: Vec<UpdateGroup>,
+  pub update_groups: Vec<AnyUpdateGroup>,
   pub version_groups: Vec<AnyVersionGroup>,
   /// All dependency types (built-in + custom). Computed after deserialization.
   pub all_dependency_types: Vec<DependencyType>,
@@ -453,34 +436,5 @@ impl Rcfile {
   #[cfg(test)]
   pub(crate) fn catalog_dep_type_names_for_test(&self) -> Vec<String> {
     self.catalog_dep_type_names()
-  }
-
-  /// Create every version group defined in the rcfile.
-  ///
-  /// Auto-injects a `CatalogDefs` catch-all immediately before the default
-  /// `PreferredSemver` catch-all, but only when at least one catalog dep
-  /// type exists. Non-catalog projects see no injection.
-  /// Build every version group, collecting *all* config errors rather than
-  /// failing on the first (B4). Always appends the auto-injected
-  /// `CatalogDefs` group (when catalog dep types exist) and the catch-all.
-  pub fn get_version_groups(&mut self, sources: &Sources) -> (Vec<VersionGroup>, Vec<UnsupportedConfigError>) {
-    let mut all_groups: Vec<VersionGroup> = Vec::new();
-    let mut errors: Vec<UnsupportedConfigError> = Vec::new();
-    for (index, group_config) in mem::take(&mut self.version_groups).into_iter().enumerate() {
-      match VersionGroup::from_config(group_config, index, sources) {
-        Ok(group) => all_groups.push(group),
-        Err(error) => errors.push(error),
-      }
-    }
-    let catalog_dep_type_names = self.catalog_dep_type_names();
-    if !catalog_dep_type_names.is_empty() {
-      all_groups.push(VersionGroup::CatalogDefs(CatalogDefsGroup {
-        selector: GroupSelector::new(vec![], catalog_dep_type_names, "Catalog Definitions".into(), vec![], vec![]),
-        dependencies: vec![],
-        severity: SeverityMap::new(),
-      }));
-    }
-    all_groups.push(VersionGroup::get_catch_all());
-    (all_groups, errors)
   }
 }

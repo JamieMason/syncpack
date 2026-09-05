@@ -1,39 +1,4 @@
-use {
-  crate::group_selector::GroupSelector,
-  serde::Deserialize,
-  serde_json::Value,
-  std::collections::HashMap,
-  syncpack_specifier::update_target::UpdateTarget,
-  syncpack_vocab::{config_error::UnsupportedConfigError, update_policy::UpdatePolicy},
-};
-
-#[derive(Debug)]
-pub struct UpdateGroup {
-  pub selector: GroupSelector,
-  pub policy: UpdatePolicy,
-}
-
-impl UpdateGroup {
-  pub fn from_config(group: AnyUpdateGroup) -> Result<UpdateGroup, UnsupportedConfigError> {
-    let selector = GroupSelector::new(
-      /* include_dependencies: */ group.dependencies,
-      /* include_dependency_types: */ group.dependency_types,
-      /* label: */ group.label,
-      /* include_packages: */ group.packages,
-      /* include_specifier_types: */ group.specifier_types,
-    );
-    let policy = match (group.is_ignored, group.target.as_deref()) {
-      (Some(true), None) => UpdatePolicy::Skip,
-      (None | Some(false), Some("patch")) => UpdatePolicy::UpTo(UpdateTarget::Patch),
-      (None | Some(false), Some("minor")) => UpdatePolicy::UpTo(UpdateTarget::Minor),
-      (None | Some(false), Some("latest")) => UpdatePolicy::UpTo(UpdateTarget::Latest),
-      (None | Some(false), Some(_)) => return Err(UnsupportedConfigError::InvalidUpdateGroup),
-      (Some(true), Some(_)) => return Err(UnsupportedConfigError::InvalidUpdateGroup),
-      (None | Some(false), None) => return Err(UnsupportedConfigError::InvalidUpdateGroup),
-    };
-    Ok(UpdateGroup { selector, policy })
-  }
-}
+use {serde::Deserialize, serde_json::Value, std::collections::HashMap};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]

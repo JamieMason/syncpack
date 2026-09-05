@@ -5,11 +5,9 @@ use {
     inspection::{Inspection, RuleInput},
     instance::{Instance, InstanceIdx, InstanceState},
     source::Source,
-    sources::Sources,
     specifier::Specifier,
   },
   itertools::Itertools,
-  log::warn,
   serde::Deserialize,
   serde_json::Value,
   std::{
@@ -19,8 +17,6 @@ use {
   },
   syncpack_specifier::update_target::UpdateTarget,
   syncpack_vocab::{
-    config_error::UnsupportedConfigError,
-    prefer_version::PreferVersion,
     registry_updates::RegistryUpdates,
     severity::{Severity, SeverityMap},
     update_url::UpdateUrl,
@@ -444,118 +440,6 @@ impl VersionGroup {
       severity: SeverityMap::new(),
     })
   }
-
-  pub fn from_config(group: AnyVersionGroup, index: usize, sources: &Sources) -> Result<Self, UnsupportedConfigError> {
-    let selector = GroupSelector::new(
-      group.dependencies,
-      group.dependency_types,
-      group.label,
-      group.packages,
-      group.specifier_types,
-    );
-
-    if let Some(true) = group.is_banned {
-      let severity = validate_severity(group.severity, "Banned", index, BANNED_KEYS)?;
-      return Ok(Self::Banned(BannedGroup {
-        selector,
-        dependencies: vec![],
-        severity,
-      }));
-    }
-    if let Some(true) = group.is_ignored {
-      // Ignored produces no statuses; severity is accepted and discarded.
-      return Ok(Self::Ignored(IgnoredGroup {
-        selector,
-        dependencies: vec![],
-        severity: SeverityMap::new(),
-      }));
-    }
-    if let Some(pin_version) = &group.pin_version {
-      let severity = validate_severity(group.severity, "Pinned", index, PINNED_KEYS)?;
-      return Ok(Self::Pinned(PinnedGroup {
-        selector,
-        dependencies: vec![],
-        pin_version: Specifier::new(pin_version),
-        severity,
-      }));
-    }
-    if let Some(policy) = &group.policy {
-      if policy == "sameRange" {
-        let severity = validate_severity(group.severity, "SameRange", index, SAME_RANGE_KEYS)?;
-        return Ok(Self::SameRange(SameRangeGroup {
-          selector,
-          dependencies: vec![],
-          severity,
-        }));
-      } else if policy == "sameMinor" {
-        let severity = validate_severity(group.severity, "SameMinor", index, SAME_MINOR_KEYS)?;
-        let prefer_version = group.prefer_version.as_ref().map(|pv| {
-          if pv == "lowestSemver" {
-            PreferVersion::LowestSemver
-          } else {
-            PreferVersion::HighestSemver
-          }
-        });
-        return Ok(Self::SameMinor(SameMinorGroup {
-          selector,
-          dependencies: vec![],
-          prefer_version,
-          severity,
-        }));
-      } else if policy == "catalog" {
-        let severity = validate_severity(group.severity, "Catalog", index, CATALOG_KEYS)?;
-        return Ok(Self::Catalog(CatalogGroup {
-          selector,
-          dependencies: vec![],
-          severity,
-        }));
-      } else if policy == "semverRangeOnly" {
-        let severity = validate_severity(group.severity, "SemverRangeOnly", index, SEMVER_RANGE_ONLY_KEYS)?;
-        return Ok(Self::SemverRangeOnly(SemverRangeOnlyGroup {
-          selector,
-          dependencies: vec![],
-          severity,
-        }));
-      } else {
-        return Err(UnsupportedConfigError::InvalidVersionGroupPolicy(policy.clone()));
-      }
-    }
-    if let Some(snap_to) = &group.snap_to {
-      let severity = validate_severity(group.severity, "SnappedTo", index, SNAPPED_TO_KEYS)?;
-      return Ok(Self::SnappedTo(SnappedToGroup {
-        selector,
-        dependencies: vec![],
-        snap_to: snap_to
-          .iter()
-          .flat_map(|name| {
-            sources.find_package(name).or_else(|| {
-              warn!("Invalid Snapped To Version Group: No package.json file found with a name property of '{name}'");
-              None
-            })
-          })
-          .collect(),
-        severity,
-      }));
-    }
-    if let Some(prefer_version) = &group.prefer_version {
-      let prefer_highest = prefer_version != "lowestSemver";
-      let group_type = if prefer_highest { "HighestSemver" } else { "LowestSemver" };
-      let severity = validate_severity(group.severity, group_type, index, PREFERRED_SEMVER_KEYS)?;
-      return Ok(Self::PreferredSemver(PreferredSemverGroup {
-        selector,
-        dependencies: vec![],
-        prefer_highest,
-        severity,
-      }));
-    }
-    let severity = validate_severity(group.severity, "HighestSemver", index, PREFERRED_SEMVER_KEYS)?;
-    Ok(Self::PreferredSemver(PreferredSemverGroup {
-      selector,
-      dependencies: vec![],
-      prefer_highest: true,
-      severity,
-    }))
-  }
 }
 
 /// Map a resolved severity to the action a command should take. Pure function
@@ -577,47 +461,4 @@ pub enum InstanceAction {
   Render(Severity),
   /// Apply the fix; render under `fix`/`lint`.
   Fix(Severity),
-}
-
-const BANNED_KEYS: &[&str] = &["IsBanned"];
-const PINNED_KEYS: &[&str] = &[
-  "DiffersToPin",
-  "PinOverridesSemverRange",
-  "PinOverridesSemverRangeMismatch",
-  "RefuseToPinLocal",
-];
-const PREFERRED_SEMVER_KEYS: &[&str] = &[
-  "SemverRangeMismatch",
-  "DiffersToLocal",
-  "DiffersToCatalog",
-  "DiffersToHighestOrLowestSemver",
-];
-const SAME_RANGE_KEYS: &[&str] = &["SemverRangeMismatch"];
-const SEMVER_RANGE_ONLY_KEYS: &[&str] = &["SemverRangeMismatch"];
-const SAME_MINOR_KEYS: &[&str] = &[
-  "DiffersToHighestOrLowestSemverMinor",
-  "SemverRangeMismatch",
-  "SameMinorOverridesSemverRange",
-  "SameMinorOverridesSemverRangeMismatch",
-];
-const SNAPPED_TO_KEYS: &[&str] = &["DiffersToSnapTarget", "SemverRangeMismatch", "RefuseToSnapLocal"];
-const CATALOG_KEYS: &[&str] = &["NotUsingCatalog", "MissingFromCatalog"];
-
-fn validate_severity(
-  severity: SeverityMap,
-  group_type: &'static str,
-  index: usize,
-  permitted: &'static [&'static str],
-) -> Result<SeverityMap, UnsupportedConfigError> {
-  for key in severity.keys() {
-    if !permitted.contains(&key.as_str()) {
-      return Err(UnsupportedConfigError::InvalidSeverityKey {
-        path: format!("versionGroups[{index}].severity.{key}"),
-        group_type: group_type.to_string(),
-        key: key.clone(),
-        permitted: permitted.to_vec(),
-      });
-    }
-  }
-  Ok(severity)
 }
