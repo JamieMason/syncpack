@@ -955,6 +955,77 @@ async fn differs_to_snap_target_should_apply_semver_group_range() {
   ]);
 }
 
+#[tokio::test]
+async fn snaps_follower_to_targets_corrected_version_not_its_raw_version() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "leader",   "dependencies": { "foo": "1.0.0" } }),
+      json!({ "name": "other",    "dependencies": { "foo": "2.0.0" } }),
+      json!({ "name": "follower", "dependencies": { "foo": "1.0.0" } }),
+    ])
+    .with_version_group(json!({
+      "dependencies": ["foo"], "packages": ["follower"], "snapTo": ["leader"]
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+      dependency_name: "foo",
+      id: "foo in /dependencies of leader",
+      actual: "1.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsHighestOrLowestSemver),
+      dependency_name: "foo",
+      id: "foo in /dependencies of other",
+      actual: "2.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of follower",
+      actual: "1.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "other",
+      id: "other in /version of other",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "follower",
+      id: "follower in /version of follower",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// Severity tests — opt out of auto-fix per status (issue #216), opt into
 /// snapping local (mirrors issue #325 for pin). SnappedTo permits
 /// `DiffersToSnapTarget`, `SemverRangeMismatch`, `RefuseToSnapLocal`.

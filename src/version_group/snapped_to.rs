@@ -37,7 +37,13 @@ impl SnappedToGroup {
         let instance_idx = instance.source_idx();
         for &snapped_to_idx in &self.snap_to {
           if instance_idx == snapped_to_idx {
-            return Some(Rc::clone(&instance.descriptor.specifier));
+            return Some(
+              instance
+                .expected_specifier
+                .borrow()
+                .clone()
+                .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier)),
+            );
           }
         }
       }
