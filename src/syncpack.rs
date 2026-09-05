@@ -8,7 +8,7 @@ use {
       set_semver_ranges, update,
     },
     context::{Config, Discovered, Inspected},
-    disk::{Disk, DiskIo},
+    disk::Disk,
     errors::SyncpackError,
     inspection::{Inspection, RuleInput, RuleInputCfg},
     logger,
@@ -21,6 +21,7 @@ use {
     visit_packages::visit_packages,
   },
   std::sync::Arc,
+  syncpack_io::DiskIo,
   syncpack_vocab::registry_updates::RegistryUpdates,
 };
 

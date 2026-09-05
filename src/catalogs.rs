@@ -1,11 +1,9 @@
 use {
-  crate::{
-    disk::{Disk, YamlFile},
-    errors::SyncpackError,
-  },
+  crate::{disk::Disk, errors::SyncpackError},
   log::debug,
   serde_json::Value as JsonValue,
   std::time::Instant,
+  syncpack_io::YamlFile,
   syncpack_vocab::{
     dependency_type::{DependencyType, Strategy},
     package_manager::PackageManager,

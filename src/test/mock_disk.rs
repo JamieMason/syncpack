@@ -1,10 +1,10 @@
 use {
-  crate::disk::{DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile, detect_formatting},
   std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
     path::{Path, PathBuf},
   },
+  syncpack_io::{DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile, detect_formatting},
 };
 
 /// In-memory filesystem for testing.
@@ -163,7 +163,7 @@ impl DiskIo for MockDiskIo {
   }
 
   fn write_yaml_file(&self, file: &YamlFile) -> Result<(), DiskIoError> {
-    let bytes = crate::disk::render_yaml_bytes(file)?;
+    let bytes = syncpack_io::render_yaml_bytes(file)?;
     self.record_write(&file.filepath, bytes);
     Ok(())
   }

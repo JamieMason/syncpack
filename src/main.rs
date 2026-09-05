@@ -3,7 +3,6 @@
 use {
   crate::{
     cli::Cli,
-    disk::LiveDiskIo,
     errors::SyncpackError,
     registry::{
       cache::default_cache_filepath,
@@ -15,6 +14,7 @@ use {
   clap::error::ErrorKind,
   log::{debug, error},
   std::{process::exit, sync::Arc},
+  syncpack_io::LiveDiskIo,
 };
 
 mod catalogs;

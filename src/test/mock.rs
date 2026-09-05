@@ -3,7 +3,7 @@ use {
   crate::{
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
     context::{Config, Discovered},
-    disk::{Disk, File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
+    disk::Disk,
     rcfile::Rcfile,
     registry::client::RegistryClient,
     sources::Sources,
@@ -11,6 +11,7 @@ use {
   log::LevelFilter,
   serde_json::Value,
   std::{env, path::PathBuf, sync::Arc},
+  syncpack_io::{File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
   syncpack_vocab::{dependency_type::DependencyType, registry_updates::RegistryUpdates},
 };
 

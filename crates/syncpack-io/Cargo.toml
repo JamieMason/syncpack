@@ -1,0 +1,19 @@
+[package]
+name = "syncpack-io"
+version = "15.3.3"
+authors = ["Jamie Mason <jamie@foldleft.io>"]
+edition = "2024"
+description = "Format-preserving JSON/YAML documents and filesystem port for syncpack"
+license = "MIT"
+
+[dependencies]
+detect-indent = "0.1.0"
+detect-newline-style = "0.1.2"
+ignore = "0.4.33"
+log = "0.4.33"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.151", features = ["preserve_order"] }
+thiserror = "2.0.20"
+yaml_serde = "0.10"
+yamlpatch = "1.29"
+yamlpath = "1.29"

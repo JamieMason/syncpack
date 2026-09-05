@@ -1,7 +1,7 @@
 use {
   crate::{
     catalogs::make_catalog_dep_types,
-    disk::{Disk, parse_json_file, parse_yaml_file},
+    disk::Disk,
     errors::SyncpackError,
     instance::{InstanceState, ValidInstance::*},
     test::{
@@ -11,6 +11,7 @@ use {
   },
   serde_json::json,
   std::path::PathBuf,
+  syncpack_io::{parse_json_file, parse_yaml_file},
   syncpack_vocab::{package_manager::PackageManager, source_kind::SourceKind},
 };
 

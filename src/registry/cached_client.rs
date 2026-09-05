@@ -1,13 +1,11 @@
 use {
-  crate::{
-    disk::DiskIo,
-    registry::{
-      cache::Cache,
-      client::{AllPackageVersions, RegistryClient, RegistryError},
-    },
+  crate::registry::{
+    cache::Cache,
+    client::{AllPackageVersions, RegistryClient, RegistryError},
   },
   log::debug,
   std::{path::PathBuf, sync::Arc},
+  syncpack_io::DiskIo,
   syncpack_vocab::update_url::UpdateUrl,
 };
 

@@ -1,12 +1,13 @@
 use {
   crate::{
-    disk::{Disk, json_view, package_name},
+    disk::{Disk, package_name},
     instance::InstanceDescriptor,
     source::Source,
     specifier::Specifier,
   },
   serde_json::Value,
   std::{collections::HashSet, path::PathBuf, rc::Rc},
+  syncpack_io::json_view,
   syncpack_vocab::{
     dependency_type::{DependencyType, Strategy},
     source_kind::SourceKind,

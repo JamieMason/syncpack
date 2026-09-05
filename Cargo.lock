@@ -1757,11 +1757,28 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "syncpack-io",
  "syncpack-specifier",
  "syncpack-vocab",
  "thiserror 2.0.20",
  "tokio",
  "unicode-width 0.2.2",
+ "yaml_serde",
+ "yamlpatch",
+ "yamlpath",
+]
+
+[[package]]
+name = "syncpack-io"
+version = "15.3.3"
+dependencies = [
+ "detect-indent",
+ "detect-newline-style",
+ "ignore",
+ "log",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.20",
  "yaml_serde",
  "yamlpatch",
  "yamlpath",

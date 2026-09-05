@@ -1,14 +1,15 @@
 use {
   crate::{
-    disk::{
-      Disk, File, PackageManager, PendingYamlOp, empty_yaml_file, ensure_object_path, insert_catalog_definition, json_view,
-      parse_yaml_file, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
-    },
+    disk::{Disk, PackageManager, insert_catalog_definition, remove_catalog_definition},
     specifier::Specifier,
     test::mock_disk::MockDiskIo,
   },
   serde_json::json,
   std::path::PathBuf,
+  syncpack_io::{
+    File, PendingYamlOp, empty_yaml_file, ensure_object_path, json_view, parse_yaml_file, remove_prop, render_yaml_bytes, set_nested_prop,
+    set_prop,
+  },
 };
 
 fn json_file_from_value(value: serde_json::Value) -> File<serde_json::Value> {
@@ -183,13 +184,13 @@ fn insert_catalog_definition_marks_yaml_dirty() {
 }
 
 /// Helper: build a YamlFile from a raw string for tests.
-fn yaml_from(raw: &str) -> crate::disk::YamlFile {
+fn yaml_from(raw: &str) -> syncpack_io::YamlFile {
   parse_yaml_file(raw.to_string(), PathBuf::from("/test/pnpm-workspace.yaml")).expect("yaml fixture must parse")
 }
 
 /// Helper: render a YamlFile to text using the production serialiser
 /// (yamlpatch path when raw + patches; fresh-serialize otherwise).
-fn render(yaml: &crate::disk::YamlFile) -> String {
+fn render(yaml: &syncpack_io::YamlFile) -> String {
   let bytes = render_yaml_bytes(yaml).expect("render must succeed");
   String::from_utf8(bytes).expect("output must be UTF-8")
 }
@@ -516,7 +517,7 @@ fn yamlpatch_error_surfaces_as_disk_io_error() {
   yaml.dirty = true;
   let result = render_yaml_bytes(&yaml);
   assert!(
-    matches!(result, Err(crate::disk::DiskIoError::YamlPatchApply(_))),
+    matches!(result, Err(syncpack_io::DiskIoError::YamlPatchApply(_))),
     "expected YamlPatchApply error, got: {result:?}"
   );
 }
@@ -531,13 +532,13 @@ fn indent_override_noops_on_existing_yaml() {
   let mut io = MockDiskIo::new();
   io.add_file("test/pnpm-workspace.yaml", "placeholder for path lookup".to_string());
   // Drive the public write helper with a 2-space override.
-  let fallback = crate::disk::DetectedFormatting::default();
+  let fallback = syncpack_io::DetectedFormatting::default();
   // Add a patch so the yamlpatch path runs.
   let specifier = Specifier::new("^18.0.0");
   insert_catalog_definition(&mut yaml, "default", "react", &specifier);
   // Write into the mock so we can read back.
   yaml.filepath = io.root().join("pnpm.yaml");
-  crate::disk::write_yaml_file(&mut yaml, &io, Some("  "), &fallback).expect("write must succeed");
+  syncpack_io::write_yaml_file(&mut yaml, &io, Some("  "), &fallback).expect("write must succeed");
   let written = io.written_text(&yaml.filepath).expect("yaml was written");
   assert!(
     written.contains("    react: ^18.0.0"),
@@ -553,9 +554,9 @@ fn indent_override_applies_to_fresh_yaml() {
   let specifier = Specifier::new("^18.0.0");
   insert_catalog_definition(&mut yaml, "default", "react", &specifier);
   let io = MockDiskIo::new();
-  let fallback = crate::disk::DetectedFormatting::default();
+  let fallback = syncpack_io::DetectedFormatting::default();
   yaml.filepath = io.root().join("pnpm.yaml");
-  crate::disk::write_yaml_file(&mut yaml, &io, Some("    "), &fallback).expect("write must succeed");
+  syncpack_io::write_yaml_file(&mut yaml, &io, Some("    "), &fallback).expect("write must succeed");
   let written = io.written_text(&yaml.filepath).expect("yaml was written");
   // yaml_serde's to_string respects the `formatting.indent` we set —
   // it actually uses 2 spaces by default, so the assertion targets
@@ -675,13 +676,12 @@ mod disk_ops {
   use {
     super::*,
     crate::{
-      disk::{
-        DetectedFormatting, copy_expected_specifier_json, detect_formatting, get_pretty_json_bytes, has_prop, package_name, parse_json_file,
-      },
+      disk::{copy_expected_specifier_json, package_name},
       instance::{Instance, InstanceDescriptor},
       sources::SourceIdx,
     },
     serde_json::{Map, Value},
+    syncpack_io::{DetectedFormatting, detect_formatting, get_pretty_json_bytes, has_prop, parse_json_file},
     syncpack_vocab::{
       dependency_type::{DependencyType, Strategy},
       source_kind::SourceKind,

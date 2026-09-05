@@ -45,7 +45,7 @@ fn find_instance<'a>(inspected: &'a Inspected, id: &str) -> &'a Instance {
 }
 
 /// Find the package.json by name from disk.
-fn find_package<'a>(inspected: &'a Inspected, name: &str) -> &'a crate::disk::File<serde_json::Value> {
+fn find_package<'a>(inspected: &'a Inspected, name: &str) -> &'a syncpack_io::File<serde_json::Value> {
   inspected
     .data
     .disk
@@ -56,7 +56,7 @@ fn find_package<'a>(inspected: &'a Inspected, name: &str) -> &'a crate::disk::Fi
 }
 
 /// Locate the loaded yaml from disk.
-fn pnpm_yaml(inspected: &Inspected) -> Option<&crate::disk::YamlFile> {
+fn pnpm_yaml(inspected: &Inspected) -> Option<&syncpack_io::YamlFile> {
   inspected.data.disk.pnpm_workspace.as_ref()
 }
 
@@ -742,8 +742,8 @@ fn recording_disk() -> RecordingDiskIo {
   }
 }
 
-impl crate::disk::DiskIo for RecordingDiskIo {
-  fn exec_node_command(&self, cwd: &Path, args: &[&str]) -> Result<String, crate::disk::NodeJsError> {
+impl syncpack_io::DiskIo for RecordingDiskIo {
+  fn exec_node_command(&self, cwd: &Path, args: &[&str]) -> Result<String, syncpack_io::NodeJsError> {
     self.inner.exec_node_command(cwd, args)
   }
 
@@ -751,41 +751,41 @@ impl crate::disk::DiskIo for RecordingDiskIo {
     self.inner.path_exists(p)
   }
 
-  fn read_dir(&self, p: &Path) -> Result<Vec<crate::disk::DiskDirEntry>, std::io::Error> {
+  fn read_dir(&self, p: &Path) -> Result<Vec<syncpack_io::DiskDirEntry>, std::io::Error> {
     self.inner.read_dir(p)
   }
 
-  fn read_json_file<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<crate::disk::File<V>, crate::disk::DiskIoError>> {
+  fn read_json_file<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<syncpack_io::File<V>, syncpack_io::DiskIoError>> {
     self.inner.read_json_file(p)
   }
 
-  fn read_bytes(&self, p: &Path) -> Option<Result<Vec<u8>, crate::disk::DiskIoError>> {
+  fn read_bytes(&self, p: &Path) -> Option<Result<Vec<u8>, syncpack_io::DiskIoError>> {
     self.inner.read_bytes(p)
   }
 
-  fn read_textfile(&self, p: &Path) -> Option<Result<crate::disk::File<String>, crate::disk::DiskIoError>> {
+  fn read_textfile(&self, p: &Path) -> Option<Result<syncpack_io::File<String>, syncpack_io::DiskIoError>> {
     self.inner.read_textfile(p)
   }
 
-  fn read_yaml_file(&self, p: &Path) -> Option<Result<crate::disk::YamlFile, crate::disk::DiskIoError>> {
+  fn read_yaml_file(&self, p: &Path) -> Option<Result<syncpack_io::YamlFile, syncpack_io::DiskIoError>> {
     self.inner.read_yaml_file(p)
   }
 
-  fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<crate::disk::File<V>, crate::disk::DiskIoError>> {
+  fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<syncpack_io::File<V>, syncpack_io::DiskIoError>> {
     self.inner.read_yaml_typed(p)
   }
 
-  fn write_bytes(&self, filepath: &Path, _bytes: &[u8]) -> Result<(), crate::disk::DiskIoError> {
+  fn write_bytes(&self, filepath: &Path, _bytes: &[u8]) -> Result<(), syncpack_io::DiskIoError> {
     self.writes.borrow_mut().push(filepath.to_path_buf());
     Ok(())
   }
 
-  fn write_json_file<V: serde::ser::Serialize>(&self, file: &crate::disk::File<V>) -> Result<(), crate::disk::DiskIoError> {
+  fn write_json_file<V: serde::ser::Serialize>(&self, file: &syncpack_io::File<V>) -> Result<(), syncpack_io::DiskIoError> {
     self.writes.borrow_mut().push(file.filepath.clone());
     Ok(())
   }
 
-  fn write_yaml_file(&self, file: &crate::disk::YamlFile) -> Result<(), crate::disk::DiskIoError> {
+  fn write_yaml_file(&self, file: &syncpack_io::YamlFile) -> Result<(), syncpack_io::DiskIoError> {
     self.writes.borrow_mut().push(file.filepath.clone());
     Ok(())
   }

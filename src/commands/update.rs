@@ -2,7 +2,7 @@ use {
   crate::{
     commands::ui::{self, LINE_ENDING, update_row},
     context::{Discovered, Inspected},
-    disk::{DiskIo, copy_expected_specifier_json, copy_expected_specifier_yaml, write_json_file, write_yaml_file},
+    disk::{copy_expected_specifier_json, copy_expected_specifier_yaml},
     errors::SyncpackError,
     inspection::Inspection,
     instance::InstanceIdx,
@@ -11,6 +11,7 @@ use {
     version_group::{VersionGroup, VersionGroupBehavior},
   },
   log::{error, info, warn},
+  syncpack_io::{DiskIo, write_json_file, write_yaml_file},
   syncpack_vocab::registry_updates::RegistryUpdates,
 };
 

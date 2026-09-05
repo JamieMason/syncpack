@@ -386,14 +386,14 @@ impl Instance {
         if let Some(parent_path) = path_to_prop.rfind('/') {
           let parent_pointer = &path_to_prop[..parent_path];
           let prop_name = &path_to_prop[parent_path + 1..];
-          crate::disk::remove_prop(file, parent_pointer, prop_name);
+          syncpack_io::remove_prop(file, parent_pointer, prop_name);
         } else if path_to_prop == "/" {
           debug!("Cannot remove root property");
         }
       }
       Strategy::VersionsByName => {
         let path_to_obj = &self.descriptor.dependency_type.path;
-        crate::disk::remove_prop(file, path_to_obj, &self.descriptor.name);
+        syncpack_io::remove_prop(file, path_to_obj, &self.descriptor.name);
       }
       Strategy::InvalidConfig => {
         unreachable!("unrecognised strategy");

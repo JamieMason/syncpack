@@ -22,7 +22,7 @@ use {
     catalogs,
     cli::UpdateTarget,
     context::{Discovered, Inspected},
-    disk::{Disk, File, detect_formatting, parse_yaml_file},
+    disk::Disk,
     sources::Sources,
     test::mock_tui::MockTui,
   },
@@ -31,6 +31,7 @@ use {
     collections::{BTreeMap, HashMap},
     path::PathBuf,
   },
+  syncpack_io::{File, detect_formatting, parse_yaml_file},
   syncpack_vocab::package_manager::PackageManager,
 };
 

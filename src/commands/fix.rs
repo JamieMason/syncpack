@@ -7,10 +7,7 @@ use {
     catalogs::detect_bun_catalogs,
     commands::reporter::FixReporter,
     context::{Discovered, Inspected},
-    disk::{
-      DiskIo, copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition, set_nested_prop,
-      write_json_file, write_yaml_file,
-    },
+    disk::{copy_expected_specifier_json, insert_catalog_definition},
     errors::SyncpackError,
     inspection::Inspection,
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
@@ -20,6 +17,7 @@ use {
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
+  syncpack_io::{DiskIo, empty_yaml_file, ensure_object_path, set_nested_prop, write_json_file, write_yaml_file},
   syncpack_vocab::{package_manager::PackageManager, severity::Severity},
 };
 
@@ -194,7 +192,7 @@ fn apply_missing_from_catalog_insert(data: &mut Discovered, inst_idx: InstanceId
 }
 
 /// Remove an instance's prop from the underlying file.
-fn remove_instance_from_disk(file: &mut crate::disk::File<JsonValue>, instance: &crate::instance::Instance) {
+fn remove_instance_from_disk(file: &mut syncpack_io::File<JsonValue>, instance: &crate::instance::Instance) {
   use syncpack_vocab::dependency_type::Strategy;
   match instance.descriptor.dependency_type.strategy {
     Strategy::NameAndVersionProps | Strategy::NamedVersionString | Strategy::UnnamedVersionString => {
@@ -202,12 +200,12 @@ fn remove_instance_from_disk(file: &mut crate::disk::File<JsonValue>, instance: 
       if let Some(parent_path) = path_to_prop.rfind('/') {
         let parent_pointer = &path_to_prop[..parent_path];
         let prop_name = &path_to_prop[parent_path + 1..];
-        crate::disk::remove_prop(file, parent_pointer, prop_name);
+        syncpack_io::remove_prop(file, parent_pointer, prop_name);
       }
     }
     Strategy::VersionsByName => {
       let path_to_obj = &instance.descriptor.dependency_type.path;
-      crate::disk::remove_prop(file, path_to_obj, &instance.descriptor.name);
+      syncpack_io::remove_prop(file, path_to_obj, &instance.descriptor.name);
     }
     Strategy::InvalidConfig => unreachable!("unrecognised strategy"),
   }

@@ -3,7 +3,7 @@
 mod cache_test;
 
 use {
-  crate::{disk::DiskIo, registry::client::AllPackageVersions},
+  crate::registry::client::AllPackageVersions,
   log::debug,
   serde::{Deserialize, Serialize},
   std::{
@@ -12,6 +12,7 @@ use {
     sync::{Arc, Mutex},
     time::{SystemTime, UNIX_EPOCH},
   },
+  syncpack_io::DiskIo,
 };
 
 /// 30 minutes, mirroring the taze cache TTL.

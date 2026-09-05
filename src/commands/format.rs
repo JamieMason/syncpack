@@ -1,4 +1,7 @@
-use crate::{commands::reporter::FormatReporter, context::Inspected, disk::DiskIo, errors::SyncpackError, source::Source};
+use {
+  crate::{commands::reporter::FormatReporter, context::Inspected, errors::SyncpackError, source::Source},
+  syncpack_io::DiskIo,
+};
 
 pub fn run<D: DiskIo>(inspected: Inspected, reporter: &dyn FormatReporter, io: &D) -> Result<Inspected, SyncpackError> {
   if inspected.data.config.cli.check {
@@ -68,7 +71,7 @@ fn fix_formatting<D: DiskIo>(mut inspected: Inspected, reporter: &dyn FormatRepo
     let mismatches = &inspected.inspection.formatting[source_idx];
     let file = &mut inspected.data.disk.package_json_files[file_idx];
     for mismatch in mismatches {
-      crate::disk::set_prop(file, &mismatch.property_path, mismatch.expected.clone());
+      syncpack_io::set_prop(file, &mismatch.property_path, mismatch.expected.clone());
     }
   }
 
@@ -76,7 +79,7 @@ fn fix_formatting<D: DiskIo>(mut inspected: Inspected, reporter: &dyn FormatRepo
     let indent = inspected.data.config.rcfile.indent.as_deref();
     let fallback = inspected.data.disk.formatting_fallback();
     for file in inspected.data.disk.package_json_files.iter_mut() {
-      crate::disk::write_json_file(file, io, indent, &fallback)?;
+      syncpack_io::write_json_file(file, io, indent, &fallback)?;
     }
   }
   if !was_invalid {
