@@ -10,7 +10,6 @@ use {
     errors::SyncpackError,
     inspection::{FormatConfig, Inspection, RuleInput, RuleInputCfg},
     logger,
-    rcfile::Rcfile,
     source::Source,
     source_patterns::get_source_patterns,
     tui::Tui,
@@ -40,7 +39,7 @@ pub async fn syncpack<D: DiskIo>(cli: Cli, io: &D, registry_client: &Arc<dyn Reg
 fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Discovered, SyncpackError> {
   logger::configure(&cli);
   let mut disk = Disk::from_workspace(io, &cli.cwd);
-  let rcfile = Rcfile::from_disk(&disk, io, &cli).map_err(SyncpackError::RcfileError)?;
+  let rcfile = crate::rcfile_loader::rcfile_from_disk(&disk, io, &cli).map_err(SyncpackError::RcfileError)?;
   let config = Config {
     cli,
     rcfile: rcfile.contents,

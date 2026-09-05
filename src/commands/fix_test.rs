@@ -772,10 +772,6 @@ impl syncpack_io::DiskIo for RecordingDiskIo {
     self.inner.read_yaml_file(p)
   }
 
-  fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<syncpack_io::File<V>, syncpack_io::DiskIoError>> {
-    self.inner.read_yaml_typed(p)
-  }
-
   fn write_bytes(&self, filepath: &Path, _bytes: &[u8]) -> Result<(), syncpack_io::DiskIoError> {
     self.writes.borrow_mut().push(filepath.to_path_buf());
     Ok(())

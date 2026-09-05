@@ -1,19 +1,60 @@
 use {
-  crate::dependency::dependency_type,
   semver_group::AnySemverGroup,
   serde::Deserialize,
   serde_json::Value,
   std::collections::HashMap,
-  syncpack_vocab::{config_error::UnsupportedConfigError, dependency_type::DependencyType, severity::SeverityMap, source_mode::SourceMode},
+  syncpack_vocab::{
+    config_error::{UnsupportedConfigError, UnsupportedConfigErrors},
+    dependency_type::DependencyType,
+    severity::SeverityMap,
+    source_mode::SourceMode,
+  },
   update_group::AnyUpdateGroup,
 };
 
-pub mod from_disk;
+pub mod dependency_type;
 #[cfg(test)]
 #[path = "rcfile_test.rs"]
 mod rcfile_test;
 pub mod semver_group;
 pub mod update_group;
+
+/// Error from parsing a JSON config value into a validated `Rcfile`.
+#[derive(Debug)]
+pub enum ConfigError {
+  /// The value did not deserialize into the config schema.
+  Deserialize(serde_json::Error),
+  /// The config deserialized but failed validation (unknown fields, an invalid
+  /// group, an unsupported dependency type, …).
+  Unsupported(UnsupportedConfigErrors),
+}
+
+/// Parse a JSON config value into a fully-resolved, validated `Rcfile`.
+///
+/// `pnpm_fallback` is the `minimumReleaseAge` read from `pnpm-workspace.yaml`
+/// (or `None`); the effective precedence is user value > `pnpm_fallback` >
+/// `DEFAULT_MINIMUM_RELEASE_AGE`. The caller (which owns disk access) supplies
+/// it so `config` stays free of any filesystem dependency.
+pub fn parse_value(value: serde_json::Value, pnpm_fallback: Option<u64>) -> Result<Rcfile, ConfigError> {
+  let raw: RawRcfile = serde_json::from_value(value).map_err(ConfigError::Deserialize)?;
+  if let Err(errors) = raw.validate_unknown_fields() {
+    return Err(ConfigError::Unsupported(UnsupportedConfigErrors(errors)));
+  }
+  let user_minimum_release_age = raw.minimum_release_age;
+  let mut rcfile: Rcfile = raw
+    .try_into()
+    .map_err(|error| ConfigError::Unsupported(UnsupportedConfigErrors(vec![error])))?;
+  rcfile.minimum_release_age = user_minimum_release_age.or(pnpm_fallback).unwrap_or(DEFAULT_MINIMUM_RELEASE_AGE);
+  Ok(rcfile)
+}
+
+/// Build a validated `Rcfile` straight from a JSON value. Test-support only —
+/// lets downstream crates' tests construct configs without exposing the raw
+/// parse struct.
+#[cfg(any(test, feature = "test-support"))]
+pub fn rcfile_from(value: serde_json::Value) -> Rcfile {
+  parse_value(value, None).expect("test rcfile must be valid")
+}
 
 pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) -> Result<Vec<DependencyType>, UnsupportedConfigError> {
   let default_types = HashMap::from([
@@ -452,7 +493,7 @@ impl Rcfile {
   /// Filters by the `is_catalog_definition` flag — set to `true` only for
   /// built-in auto-generated catalog dep types. User `customTypes` named
   /// like `pnpmCatalogLike` are NOT picked up.
-  pub(crate) fn catalog_dep_type_names(&self) -> Vec<String> {
+  pub fn catalog_dep_type_names(&self) -> Vec<String> {
     self
       .all_dependency_types
       .iter()

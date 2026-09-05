@@ -1,5 +1,5 @@
 use {
-  crate::rcfile::CustomType,
+  crate::CustomType,
   syncpack_vocab::{
     config_error::UnsupportedConfigError,
     dependency_type::{DependencyType, Strategy},
@@ -36,7 +36,7 @@ fn normalize_path(path: String) -> String {
 
 #[cfg(test)]
 mod dependency_type_test {
-  use {crate::rcfile::compute_all_dependency_types, std::collections::HashMap, syncpack_vocab::source_kind::SourceKind};
+  use {crate::compute_all_dependency_types, std::collections::HashMap, syncpack_vocab::source_kind::SourceKind};
 
   #[test]
   fn dependency_type_default_sources_are_correct() {

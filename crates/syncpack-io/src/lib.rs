@@ -200,11 +200,6 @@ pub trait DiskIo {
   fn read_textfile(&self, filepath: &Path) -> Option<Result<File<String>, DiskIoError>>;
   /// Read a YAML file from disk
   fn read_yaml_file(&self, filepath: &Path) -> Option<Result<YamlFile, DiskIoError>>;
-  /// Read a YAML file as a typed value. Used for read-only typed
-  /// configs (e.g. `.syncpackrc.yaml`). Distinct from `read_yaml_file`
-  /// which carries the raw text + patch queue used for format-preserving
-  /// writes — typed reads do not need that machinery.
-  fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>>;
   /// Write raw bytes to disk, creating any missing parent directories.
   /// Used by callers that don't need the `File<V>` envelope.
   fn write_bytes(&self, filepath: &Path, bytes: &[u8]) -> Result<(), DiskIoError>;
@@ -311,21 +306,6 @@ impl DiskIo for LiveDiskIo {
     self
       .read_textfile(filepath)
       .map(|res| res.and_then(|file| parse_yaml_file_strict(file.contents, file.filepath)))
-  }
-
-  fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>> {
-    self.read_textfile(filepath).map(|res| {
-      res.and_then(|file| {
-        yaml_serde::from_str::<V>(&file.contents)
-          .map_err(DiskIoError::YamlParse)
-          .map(|parsed| File {
-            filepath: file.filepath,
-            formatting: detect_formatting(&file.contents),
-            contents: parsed,
-            dirty: false,
-          })
-      })
-    })
   }
 
   fn write_bytes(&self, filepath: &Path, bytes: &[u8]) -> Result<(), DiskIoError> {

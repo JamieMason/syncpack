@@ -397,3 +397,39 @@ fn catalog_defs_group_not_injected_when_no_catalog_dep_types() {
     "CatalogDefs group should not be injected when no catalog dep types exist"
   );
 }
+
+#[tokio::test]
+async fn loads_version_group_from_yaml_config() {
+  // A `.syncpackrc.yaml` config is loaded through the yaml → Value →
+  // config::parse_value path; its versionGroup must take effect exactly as a
+  // json config would — the targeted dep ends up Ignored.
+  let ctx = TestBuilder::new()
+    .with_yaml_config("versionGroups:\n  - dependencies: [\"foo\"]\n    isIgnored: true\n")
+    .with_packages(vec![json!({
+      "name": "pkg-a",
+      "version": "0.0.0",
+      "dependencies": { "foo": "1.0.0" }
+    })])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "pkg-a",
+      id: "pkg-a in /version of pkg-a",
+      actual: "0.0.0",
+      expected: Some("0.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "foo",
+      id: "foo in /dependencies of pkg-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}

@@ -1,5 +1,5 @@
 use {
-  crate::{context::ContextError, rcfile::from_disk::RcfileError},
+  crate::{context::ContextError, rcfile_loader::RcfileError},
   syncpack_io::DiskIoError,
   thiserror::Error,
 };

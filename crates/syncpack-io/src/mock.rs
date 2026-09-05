@@ -140,17 +140,6 @@ impl DiskIo for MockDiskIo {
     })
   }
 
-  fn read_yaml_typed<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>> {
-    self.files.get(filepath).map(|raw| {
-      yaml_serde::from_str::<V>(raw).map_err(DiskIoError::YamlParse).map(|contents| File {
-        filepath: filepath.to_path_buf(),
-        formatting: detect_formatting(raw),
-        contents,
-        dirty: false,
-      })
-    })
-  }
-
   fn write_bytes(&self, filepath: &Path, bytes: &[u8]) -> Result<(), DiskIoError> {
     self.record_write(filepath, bytes.to_vec());
     Ok(())

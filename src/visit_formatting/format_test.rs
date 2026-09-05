@@ -2,10 +2,10 @@ use {
   super::*,
   crate::{
     inspection::FormatConfig,
-    rcfile::Rcfile,
     test::{self, mock},
   },
   serde_json::json,
+  syncpack_config::Rcfile,
 };
 
 /// Build the plain-data `FormatConfig` the format helpers now take from a

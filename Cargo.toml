@@ -45,6 +45,7 @@ serde_json = { version = "1.0.151", features = ["preserve_order"] }
 syncpack-disk = { path = "crates/syncpack-disk" }
 syncpack-io = { path = "crates/syncpack-io" }
 syncpack-registry = { path = "crates/syncpack-registry" }
+syncpack-config = { path = "crates/syncpack-config" }
 syncpack-specifier = { path = "crates/syncpack-specifier" }
 syncpack-vocab = { path = "crates/syncpack-vocab" }
 thiserror = "2.0.20"
@@ -60,6 +61,7 @@ syncpack-io = { path = "crates/syncpack-io", features = ["test-support"] }
 syncpack-disk = { path = "crates/syncpack-disk", features = ["test-support"] }
 # Enable registry's MockRegistryClient for the bin's tests only.
 syncpack-registry = { path = "crates/syncpack-registry", features = ["test-support"] }
+syncpack-config = { path = "crates/syncpack-config", features = ["test-support"] }
 
 [features]
 default = []

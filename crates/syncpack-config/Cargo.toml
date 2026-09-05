@@ -1,0 +1,17 @@
+[package]
+name = "syncpack-config"
+version = "15.3.3"
+authors = ["Jamie Mason <jamie@foldleft.io>"]
+edition = "2024"
+description = "syncpack rcfile schema, parsing and validation"
+license = "MIT"
+
+[features]
+# Exposes a test-support constructor (rcfile_from) for downstream tests without
+# widening the raw parse struct to pub.
+test-support = []
+
+[dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.151", features = ["preserve_order"] }
+syncpack-vocab = { path = "../syncpack-vocab" }

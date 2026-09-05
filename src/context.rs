@@ -4,9 +4,7 @@ use {
     group_selector::GroupSelector,
     inspection::Inspection,
     instance::{Instance, InstanceDescriptor, InstanceIdx},
-    rcfile::{
-      AnyVersionGroup, Rcfile, from_disk::RcfileError, semver_group::AnySemverGroup, update_group::AnyUpdateGroup, validate_raw_dep_types,
-    },
+    rcfile_loader::RcfileError,
     semver_range::SemverRange,
     source::Source,
     sources::{SourceIdx, Sources},
@@ -24,6 +22,7 @@ use {
     path::{Path, PathBuf},
     rc::Rc,
   },
+  syncpack_config::{AnyVersionGroup, Rcfile, semver_group::AnySemverGroup, update_group::AnyUpdateGroup, validate_raw_dep_types},
   syncpack_disk::{Disk, package_name},
   syncpack_io::json_view,
   syncpack_specifier::update_target::UpdateTarget,

@@ -65,13 +65,10 @@ fn normalizes_backslashes_to_forward_slashes() {
 mod source_mode {
   use {
     super::get_source_patterns,
-    crate::{
-      context::Config,
-      rcfile::{RawRcfile, Rcfile},
-      test::mock,
-    },
+    crate::{context::Config, test::mock},
     serde_json::{Value, json},
     std::path::PathBuf,
+    syncpack_config::rcfile_from,
     syncpack_disk::Disk,
     syncpack_io::{File, detect_formatting},
     syncpack_vocab::source_mode::SourceMode,
@@ -135,8 +132,7 @@ mod source_mode {
   }
 
   fn config_with(rcfile_json: Value, cli_source: &[&str], cli_mode: Option<SourceMode>) -> Config {
-    let raw: RawRcfile = serde_json::from_value(rcfile_json).unwrap();
-    let rcfile: Rcfile = raw.try_into().unwrap();
+    let rcfile = rcfile_from(rcfile_json);
     let mut cli = mock::cli();
     cli.source_patterns = cli_source.iter().map(|s| s.to_string()).collect();
     cli.source_mode = cli_mode;

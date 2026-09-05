@@ -1757,6 +1757,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "syncpack-config",
  "syncpack-disk",
  "syncpack-io",
  "syncpack-registry",
@@ -1768,6 +1769,15 @@ dependencies = [
  "yaml_serde",
  "yamlpatch",
  "yamlpath",
+]
+
+[[package]]
+name = "syncpack-config"
+version = "15.3.3"
+dependencies = [
+ "serde",
+ "serde_json",
+ "syncpack-vocab",
 ]
 
 [[package]]

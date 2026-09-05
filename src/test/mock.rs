@@ -2,12 +2,12 @@ use {
   crate::{
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
     context::{Config, Discovered},
-    rcfile::Rcfile,
     sources::Sources,
   },
   log::LevelFilter,
   serde_json::Value,
   std::{env, path::PathBuf, sync::Arc},
+  syncpack_config::Rcfile,
   syncpack_disk::Disk,
   syncpack_io::{File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
   syncpack_registry::{client::RegistryClient, mock::MockRegistryClient},
@@ -61,10 +61,7 @@ pub fn rcfile() -> Rcfile {
 
 /// Create an Rcfile struct from a mocked .syncpackrc
 pub fn rcfile_from_mock(value: serde_json::Value) -> Rcfile {
-  serde_json::from_value::<crate::rcfile::RawRcfile>(value)
-    .unwrap()
-    .try_into()
-    .unwrap()
+  syncpack_config::rcfile_from(value)
 }
 
 /// Parse a package.json value into a `File<Value>` with a synthetic file

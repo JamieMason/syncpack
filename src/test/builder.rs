@@ -45,6 +45,7 @@ pub struct TestBuilder {
   package_manager: Option<PackageManager>,
   packages: Vec<Value>,
   manifests_at: Vec<(String, Value)>,
+  syncpackrc_yaml: Option<String>,
   pnpm_yaml: Option<String>,
   bun_root: Option<Value>,
   registry_updates: Option<Value>,
@@ -67,6 +68,7 @@ impl TestBuilder {
       package_manager: None,
       packages: vec![],
       manifests_at: vec![],
+      syncpackrc_yaml: None,
       pnpm_yaml: None,
       bun_root: None,
       registry_updates: None,
@@ -230,6 +232,13 @@ impl TestBuilder {
     self
   }
 
+  /// Provide the rcfile as `.syncpackrc.yaml` rather than JSON, exercising the
+  /// yaml → `Value` → `config::parse_value` load path end-to-end.
+  pub fn with_yaml_config(mut self, yaml: &str) -> Self {
+    self.syncpackrc_yaml = Some(yaml.to_string());
+    self
+  }
+
   pub fn with_subcommand(mut self, subcommand: &str) -> Self {
     self.subcommand = Some(subcommand.to_string());
     self
@@ -306,6 +315,9 @@ impl TestBuilder {
     let config = self.build_config();
     if config != json!({}) {
       disk.add_json(".syncpackrc", &config);
+    }
+    if let Some(ref yaml) = self.syncpackrc_yaml {
+      disk.add_file(".syncpackrc.yaml", yaml.clone());
     }
 
     let subcommand = self
