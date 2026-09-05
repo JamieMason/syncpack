@@ -5,10 +5,11 @@ use {
     errors::SyncpackError,
     inspection::Inspection,
     instance::{Instance, InstanceIdx},
-    test::{builder::TestBuilder, mock_disk::MockDiskIo},
+    test::builder::TestBuilder,
     version_group::{Dependency, DependencyIdx, VersionGroup},
   },
   serde_json::json,
+  syncpack_io::mock::MockDiskIo,
 };
 
 /// Silent reporter — fix tests assert state, not console output.

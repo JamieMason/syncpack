@@ -7,10 +7,10 @@ use {
     test::{
       builder::TestBuilder,
       expect::{ExpectedInstance, expect},
-      mock_disk::MockDiskIo,
     },
   },
   serde_json::json,
+  syncpack_io::mock::MockDiskIo,
   syncpack_vocab::package_manager::PackageManager,
 };
 

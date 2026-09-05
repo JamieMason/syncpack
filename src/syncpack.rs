@@ -13,7 +13,6 @@ use {
     inspection::{Inspection, RuleInput, RuleInputCfg},
     logger,
     rcfile::Rcfile,
-    registry::client::RegistryClient,
     source_patterns::get_source_patterns,
     sources::Sources,
     tui::Tui,
@@ -22,6 +21,7 @@ use {
   },
   std::sync::Arc,
   syncpack_io::DiskIo,
+  syncpack_registry::client::RegistryClient,
   syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
@@ -59,7 +59,7 @@ async fn fetch_updates(data: &Discovered, registry_client: &Arc<dyn RegistryClie
     Subcommand::Update => {
       let update_urls = crate::version_group::get_unique_update_urls(&data.version_groups, &data.dependencies, &data.instances);
       Some(
-        crate::registry::updates::fetch_all(
+        syncpack_registry::updates::fetch_all(
           registry_client,
           update_urls,
           data.config.rcfile.max_concurrent_requests,

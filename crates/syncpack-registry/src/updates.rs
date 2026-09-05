@@ -1,8 +1,5 @@
 use {
-  crate::{
-    registry::client::{AllPackageVersions, RegistryClient, RegistryError},
-    specifier::Specifier,
-  },
+  crate::client::{AllPackageVersions, RegistryClient, RegistryError},
   indicatif::{MultiProgress, ProgressBar, ProgressStyle},
   log::debug,
   std::{
@@ -11,6 +8,7 @@ use {
     sync::Arc,
     time::{Duration, SystemTime, UNIX_EPOCH},
   },
+  syncpack_specifier::Specifier,
   syncpack_vocab::{registry_updates::RegistryUpdates, update_url::UpdateUrl},
   tokio::{
     sync::Semaphore,
@@ -123,7 +121,7 @@ pub(crate) fn is_too_recent(version: &str, times: &HashMap<String, String>, cuto
 /// (<https://howardhinnant.github.io/date_algorithms.html>) for the
 /// civil → days-since-epoch conversion so we avoid pulling in a date
 /// crate for one call site.
-pub(crate) fn parse_rfc3339_to_unix_seconds(s: &str) -> Option<i64> {
+pub fn parse_rfc3339_to_unix_seconds(s: &str) -> Option<i64> {
   let bytes = s.as_bytes();
   if bytes.len() < 20 || !s.ends_with('Z') {
     return None;

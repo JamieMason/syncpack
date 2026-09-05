@@ -114,6 +114,12 @@ impl RegistryClient for LiveRegistryClient {
   }
 }
 
+impl Default for LiveRegistryClient {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl LiveRegistryClient {
   pub fn new() -> Self {
     LiveRegistryClient {

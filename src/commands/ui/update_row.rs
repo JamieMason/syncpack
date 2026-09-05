@@ -1,9 +1,10 @@
 use {
-  crate::{commands::ui::LINE_ENDING, registry::updates::parse_rfc3339_to_unix_seconds, tui::UpdateRow},
+  crate::{commands::ui::LINE_ENDING, tui::UpdateRow},
   colored::Colorize,
   log::info,
   node_semver::{Range, Version},
   std::time::{SystemTime, UNIX_EPOCH},
+  syncpack_registry::updates::parse_rfc3339_to_unix_seconds,
   unicode_width::{UnicodeWidthChar, UnicodeWidthStr},
 };
 

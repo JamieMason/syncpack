@@ -1,20 +1,16 @@
 #![allow(dead_code)]
 
 use {
-  crate::{
-    cli::Cli,
-    errors::SyncpackError,
-    registry::{
-      cache::default_cache_filepath,
-      cached_client::CachedRegistryClient,
-      client::{LiveRegistryClient, RegistryClient},
-    },
-    tui::LiveTui,
-  },
+  crate::{cli::Cli, errors::SyncpackError, tui::LiveTui},
   clap::error::ErrorKind,
   log::{debug, error},
   std::{process::exit, sync::Arc},
   syncpack_io::LiveDiskIo,
+  syncpack_registry::{
+    cache::default_cache_filepath,
+    cached_client::CachedRegistryClient,
+    client::{LiveRegistryClient, RegistryClient},
+  },
 };
 
 mod catalogs;
@@ -32,7 +28,6 @@ mod inspection;
 mod instance;
 mod logger;
 mod rcfile;
-mod registry;
 mod source;
 mod source_patterns;
 mod sources;

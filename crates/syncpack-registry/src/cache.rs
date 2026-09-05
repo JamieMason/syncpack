@@ -3,7 +3,7 @@
 mod cache_test;
 
 use {
-  crate::registry::client::AllPackageVersions,
+  crate::client::AllPackageVersions,
   log::debug,
   serde::{Deserialize, Serialize},
   std::{

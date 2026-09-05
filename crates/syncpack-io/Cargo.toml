@@ -6,6 +6,10 @@ edition = "2024"
 description = "Format-preserving JSON/YAML documents and filesystem port for syncpack"
 license = "MIT"
 
+[features]
+# Exposes in-memory test doubles (MockDiskIo) for downstream crates' tests.
+test-support = []
+
 [dependencies]
 detect-indent = "0.1.0"
 detect-newline-style = "0.1.2"

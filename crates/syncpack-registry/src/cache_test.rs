@@ -1,10 +1,7 @@
 use {
   crate::{
-    registry::{
-      cache::{CACHE_TTL_SECS, Cache, CacheEntry, CacheState},
-      client::AllPackageVersions,
-    },
-    test::mock_disk::MockDiskIo,
+    cache::{CACHE_TTL_SECS, Cache, CacheEntry, CacheState},
+    client::AllPackageVersions,
   },
   std::{
     collections::HashMap,
@@ -12,6 +9,7 @@ use {
     sync::Arc,
     time::{SystemTime, UNIX_EPOCH},
   },
+  syncpack_io::mock::MockDiskIo,
 };
 
 fn pkg(name: &str, versions: &[&str]) -> Arc<AllPackageVersions> {

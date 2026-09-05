@@ -1,17 +1,16 @@
 use {
-  super::registry_client::MockRegistryClient,
   crate::{
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
     context::{Config, Discovered},
     disk::Disk,
     rcfile::Rcfile,
-    registry::client::RegistryClient,
     sources::Sources,
   },
   log::LevelFilter,
   serde_json::Value,
   std::{env, path::PathBuf, sync::Arc},
   syncpack_io::{File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
+  syncpack_registry::{client::RegistryClient, mock::MockRegistryClient},
   syncpack_vocab::{dependency_type::DependencyType, registry_updates::RegistryUpdates},
 };
 
@@ -134,7 +133,7 @@ pub async fn context_with_registry_updates(
   let client: Arc<dyn RegistryClient> = Arc::new(MockRegistryClient::from_json(mock_updates));
   let data = Discovered::create(config, disk, sources, dep_types).unwrap();
   let update_urls = crate::version_group::get_unique_update_urls(&data.version_groups, &data.dependencies, &data.instances);
-  let updates = crate::registry::updates::fetch_all(
+  let updates = syncpack_registry::updates::fetch_all(
     &client,
     update_urls,
     data.config.rcfile.max_concurrent_requests,

@@ -1,5 +1,5 @@
 use {
-  crate::registry::client::{AllPackageVersions, RegistryClient, RegistryError},
+  crate::client::{AllPackageVersions, RegistryClient, RegistryError},
   reqwest::StatusCode,
   std::{
     collections::{BTreeMap, HashMap},

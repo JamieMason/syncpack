@@ -213,7 +213,7 @@ fn fix_zero_catalogs_pnpm_creates_default_on_disk() {
   // Precondition: no yaml on disk pre-fix.
   assert!(inspected.data.disk.pnpm_workspace.is_none());
 
-  let disk = crate::test::mock_disk::MockDiskIo::new();
+  let disk = syncpack_io::mock::MockDiskIo::new();
   let inspected = fix::run(inspected, &Silent, &disk).expect("fix succeeds");
 
   // Auto-created yaml lives on disk.pnpm_workspace.
@@ -251,7 +251,7 @@ async fn update_pnpm_catalog_def_writes_yaml() {
   inspected.data.config.cli.check = false;
   inspected.data.config.cli.dry_run = true;
 
-  let disk = crate::test::mock_disk::MockDiskIo::new();
+  let disk = syncpack_io::mock::MockDiskIo::new();
   let tui = crate::test::mock_tui::MockTui::cancel();
   let _ = update::run(inspected, &disk, &tui);
 }

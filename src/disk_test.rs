@@ -2,13 +2,12 @@ use {
   crate::{
     disk::{Disk, PackageManager, insert_catalog_definition, remove_catalog_definition},
     specifier::Specifier,
-    test::mock_disk::MockDiskIo,
   },
   serde_json::json,
   std::path::PathBuf,
   syncpack_io::{
-    File, PendingYamlOp, empty_yaml_file, ensure_object_path, json_view, parse_yaml_file, remove_prop, render_yaml_bytes, set_nested_prop,
-    set_prop,
+    File, PendingYamlOp, empty_yaml_file, ensure_object_path, json_view, mock::MockDiskIo, parse_yaml_file, remove_prop, render_yaml_bytes,
+    set_nested_prop, set_prop,
   },
 };
 

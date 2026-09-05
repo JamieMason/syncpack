@@ -298,7 +298,8 @@ async fn filter_rows_for_display_drops_unselected_and_recomputes_dep_total() {
 mod apply {
   use {
     super::*,
-    crate::{commands::update, errors::SyncpackError, test::mock_disk::MockDiskIo},
+    crate::{commands::update, errors::SyncpackError},
+    syncpack_io::mock::MockDiskIo,
   };
 
   /// Run the full `update::run` flow with a frozen MockTui and return

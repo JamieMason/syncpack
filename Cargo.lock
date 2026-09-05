@@ -1758,6 +1758,7 @@ dependencies = [
  "serde",
  "serde_json",
  "syncpack-io",
+ "syncpack-registry",
  "syncpack-specifier",
  "syncpack-vocab",
  "thiserror 2.0.20",
@@ -1782,6 +1783,23 @@ dependencies = [
  "yaml_serde",
  "yamlpatch",
  "yamlpath",
+]
+
+[[package]]
+name = "syncpack-registry"
+version = "15.3.3"
+dependencies = [
+ "async-trait",
+ "indicatif",
+ "log",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "syncpack-io",
+ "syncpack-specifier",
+ "syncpack-vocab",
+ "thiserror 2.0.20",
+ "tokio",
 ]
 
 [[package]]

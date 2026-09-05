@@ -1,3 +1,6 @@
+#[cfg(any(test, feature = "test-support"))]
+pub mod mock;
+
 use {
   detect_indent::detect_indent,
   detect_newline_style::LineEnding,

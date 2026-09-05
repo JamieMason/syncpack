@@ -1,10 +1,10 @@
 use {
+  crate::{DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile, detect_formatting, render_yaml_bytes},
   std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
     path::{Path, PathBuf},
   },
-  syncpack_io::{DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile, detect_formatting},
 };
 
 /// In-memory filesystem for testing.
@@ -15,6 +15,12 @@ pub struct MockDiskIo {
   root: PathBuf,
   files: HashMap<PathBuf, String>,
   writes: RefCell<HashMap<PathBuf, Vec<u8>>>,
+}
+
+impl Default for MockDiskIo {
+  fn default() -> Self {
+    Self::new()
+  }
 }
 
 impl MockDiskIo {
@@ -163,7 +169,7 @@ impl DiskIo for MockDiskIo {
   }
 
   fn write_yaml_file(&self, file: &YamlFile) -> Result<(), DiskIoError> {
-    let bytes = syncpack_io::render_yaml_bytes(file)?;
+    let bytes = render_yaml_bytes(file)?;
     self.record_write(&file.filepath, bytes);
     Ok(())
   }

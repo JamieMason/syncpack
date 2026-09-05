@@ -259,13 +259,10 @@ impl TestBuilder {
 
   pub async fn run(self) -> Inspected {
     use {
-      crate::{
-        cli::Cli,
-        registry::client::RegistryClient,
-        syncpack,
-        test::{mock_disk::MockDiskIo, registry_client::MockRegistryClient},
-      },
+      crate::{cli::Cli, syncpack},
       std::sync::Arc,
+      syncpack_io::mock::MockDiskIo,
+      syncpack_registry::{client::RegistryClient, mock::MockRegistryClient},
     };
 
     let mut disk = MockDiskIo::new();

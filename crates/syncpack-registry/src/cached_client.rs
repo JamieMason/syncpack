@@ -1,5 +1,5 @@
 use {
-  crate::registry::{
+  crate::{
     cache::Cache,
     client::{AllPackageVersions, RegistryClient, RegistryError},
   },

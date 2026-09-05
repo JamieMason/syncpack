@@ -1,5 +1,5 @@
 use {
-  crate::registry::updates::{age_cutoff_unix_seconds, is_too_recent, parse_rfc3339_to_unix_seconds},
+  crate::updates::{age_cutoff_unix_seconds, is_too_recent, parse_rfc3339_to_unix_seconds},
   std::collections::HashMap,
 };
 
