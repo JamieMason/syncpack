@@ -1,9 +1,5 @@
 use crate::source::Source;
 
-#[cfg(test)]
-#[path = "sources_test.rs"]
-mod sources_test;
-
 /// Index into the `Sources.all` arena.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SourceIdx(pub usize);

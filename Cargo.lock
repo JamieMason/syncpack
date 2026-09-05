@@ -1760,6 +1760,7 @@ dependencies = [
  "syncpack-config",
  "syncpack-disk",
  "syncpack-io",
+ "syncpack-model",
  "syncpack-registry",
  "syncpack-specifier",
  "syncpack-vocab",
@@ -1807,6 +1808,16 @@ dependencies = [
  "yaml_serde",
  "yamlpatch",
  "yamlpath",
+]
+
+[[package]]
+name = "syncpack-model"
+version = "15.3.3"
+dependencies = [
+ "globset",
+ "log",
+ "syncpack-specifier",
+ "syncpack-vocab",
 ]
 
 [[package]]

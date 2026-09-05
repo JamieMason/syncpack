@@ -4,14 +4,13 @@ use {
     context::{Discovered, Inspected},
     errors::SyncpackError,
     inspection::Inspection,
-    instance::InstanceIdx,
-    source::Source,
     tui::{Tui, TuiReadiness, UpdateRow},
     version_group::{VersionGroup, VersionGroupBehavior},
   },
   log::{error, info, warn},
   syncpack_disk::{copy_expected_specifier_json, copy_expected_specifier_yaml},
   syncpack_io::{DiskIo, write_json_file, write_yaml_file},
+  syncpack_model::{instance::InstanceIdx, source::Source},
   syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
@@ -45,7 +44,7 @@ pub fn build_update_rows(
 
     for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
       let dep = &data.dependencies[dep_idx.0];
-      let outdated: Vec<(InstanceIdx, &crate::instance::Instance)> =
+      let outdated: Vec<(InstanceIdx, &syncpack_model::instance::Instance)> =
         crate::version_group::get_sorted_instances(dep, inspection, &data.instances, &data.sources.all)
           .filter(|(idx, _)| inspection.state(*idx).is_outdated())
           .collect();

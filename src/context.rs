@@ -1,17 +1,11 @@
 use {
   crate::{
     cli::Cli,
-    group_selector::GroupSelector,
     inspection::Inspection,
-    instance::{Instance, InstanceDescriptor, InstanceIdx},
     rcfile_loader::RcfileError,
-    semver_range::SemverRange,
-    source::Source,
-    sources::{SourceIdx, Sources},
-    specifier::Specifier,
     version_group::{
-      BannedGroup, CatalogDefsGroup, CatalogGroup, Dependency, DependencyIdx, IgnoredGroup, PinnedGroup, PreferredSemverGroup,
-      SameMinorGroup, SameRangeGroup, SemverRangeOnlyGroup, SnappedToGroup, VersionGroup, VersionGroupBehavior, add_instance_to_dep_map,
+      BannedGroup, CatalogDefsGroup, CatalogGroup, IgnoredGroup, PinnedGroup, PreferredSemverGroup, SameMinorGroup, SameRangeGroup,
+      SemverRangeOnlyGroup, SnappedToGroup, VersionGroup, VersionGroupBehavior,
     },
   },
   log::warn,
@@ -25,7 +19,14 @@ use {
   syncpack_config::{AnyVersionGroup, Rcfile, semver_group::AnySemverGroup, update_group::AnyUpdateGroup, validate_raw_dep_types},
   syncpack_disk::{Disk, package_name},
   syncpack_io::json_view,
-  syncpack_specifier::update_target::UpdateTarget,
+  syncpack_model::{
+    dependency::{Dependency, DependencyIdx, add_instance_to_dep_map},
+    group_selector::GroupSelector,
+    instance::{Instance, InstanceDescriptor, InstanceIdx},
+    source::Source,
+    sources::{SourceIdx, Sources},
+  },
+  syncpack_specifier::{Specifier, semver_range::SemverRange, update_target::UpdateTarget},
   syncpack_vocab::{
     config_error::{UnsupportedConfigError, UnsupportedConfigErrors},
     dependency_type::{DependencyType, Strategy},

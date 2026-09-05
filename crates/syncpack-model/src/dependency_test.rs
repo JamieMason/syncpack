@@ -1,4 +1,4 @@
-use crate::version_group::Dependency;
+use crate::dependency::Dependency;
 
 #[test]
 fn internal_name_is_supported() {

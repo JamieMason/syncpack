@@ -1,14 +1,12 @@
 use {
-  crate::{
-    instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
-    test::{
-      builder::TestBuilder,
-      expect::{ExpectedInstance, expect},
-    },
+  crate::test::{
+    builder::TestBuilder,
+    expect::{ExpectedInstance, expect},
   },
   serde_json::json,
   syncpack_disk::{Disk, catalogs},
   syncpack_io::mock::MockDiskIo,
+  syncpack_model::instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
   syncpack_vocab::package_manager::PackageManager,
 };
 

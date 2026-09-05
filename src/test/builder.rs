@@ -21,7 +21,6 @@ use {
   crate::{
     cli::UpdateTarget,
     context::{Discovered, Inspected},
-    sources::Sources,
     test::mock_tui::MockTui,
   },
   serde_json::{Value, json},
@@ -31,6 +30,7 @@ use {
   },
   syncpack_disk::{Disk, catalogs},
   syncpack_io::{File, detect_formatting, parse_yaml_file},
+  syncpack_model::sources::Sources,
   syncpack_vocab::package_manager::PackageManager,
 };
 

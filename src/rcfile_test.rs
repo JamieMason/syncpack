@@ -98,7 +98,7 @@ fn version_group_from_config_rejects_invalid_policy() {
     "policy": "notAPolicy"
   }))
   .unwrap();
-  let sources = crate::sources::Sources::new();
+  let sources = syncpack_model::sources::Sources::new();
   let err = version_group_from_config(group, 0, &sources).unwrap_err();
   assert!(matches!(err, UnsupportedConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"));
 }

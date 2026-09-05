@@ -1,7 +1,6 @@
 use {
   crate::{
     context::Discovered,
-    instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
     test::{
       self,
       builder::TestBuilder,
@@ -9,6 +8,7 @@ use {
     },
   },
   serde_json::json,
+  syncpack_model::instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
   syncpack_vocab::package_manager::PackageManager,
 };
 

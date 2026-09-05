@@ -1,14 +1,12 @@
 use {
-  crate::{
-    instance::{FixableInstance::*, InstanceState, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*},
-    specifier::Specifier,
-    test::{
-      builder::TestBuilder,
-      expect::{ExpectedInstance, expect},
-    },
+  crate::test::{
+    builder::TestBuilder,
+    expect::{ExpectedInstance, expect},
   },
   serde_json::json,
   std::rc::Rc,
+  syncpack_model::instance::{FixableInstance::*, InstanceState, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*},
+  syncpack_specifier::Specifier,
 };
 
 mod definition_and_consumer {

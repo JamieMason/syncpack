@@ -10,7 +10,6 @@ use {
     errors::SyncpackError,
     inspection::{FormatConfig, Inspection, RuleInput, RuleInputCfg},
     logger,
-    source::Source,
     source_patterns::get_source_patterns,
     tui::Tui,
     visit_formatting::visit_formatting,
@@ -20,6 +19,7 @@ use {
   std::sync::Arc,
   syncpack_disk::{Disk, catalogs},
   syncpack_io::DiskIo,
+  syncpack_model::source::Source,
   syncpack_registry::client::RegistryClient,
   syncpack_vocab::registry_updates::RegistryUpdates,
 };

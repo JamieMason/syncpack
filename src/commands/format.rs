@@ -1,6 +1,7 @@
 use {
-  crate::{commands::reporter::FormatReporter, context::Inspected, errors::SyncpackError, source::Source},
+  crate::{commands::reporter::FormatReporter, context::Inspected, errors::SyncpackError},
   syncpack_io::DiskIo,
+  syncpack_model::source::Source,
 };
 
 pub fn run<D: DiskIo>(inspected: Inspected, reporter: &dyn FormatReporter, io: &D) -> Result<Inspected, SyncpackError> {

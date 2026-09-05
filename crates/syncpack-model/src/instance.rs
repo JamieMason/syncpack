@@ -6,15 +6,12 @@ pub use instance_state::{
 
 #[cfg(test)]
 mod instance_state_test;
-#[cfg(test)]
-mod instance_test;
-#[cfg(test)]
-mod source_idx_test;
 
 use {
-  crate::{semver_range::SemverRange, sources::SourceIdx, specifier::Specifier},
+  crate::sources::SourceIdx,
   log::debug,
   std::rc::Rc,
+  syncpack_specifier::{Specifier, semver_range::SemverRange},
   syncpack_vocab::{dependency_type::DependencyType, update_policy::UpdatePolicy, update_url::UpdateUrl},
 };
 

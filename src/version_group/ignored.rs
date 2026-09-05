@@ -1,12 +1,15 @@
 use {
   crate::{
-    group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
-    instance::{InstanceState, ValidInstance},
-    version_group::{DependencyIdx, L1, L2},
+    version_group::{L1, L2},
   },
   log::debug,
   std::rc::Rc,
+  syncpack_model::{
+    dependency::DependencyIdx,
+    group_selector::GroupSelector,
+    instance::{InstanceState, ValidInstance},
+  },
   syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 

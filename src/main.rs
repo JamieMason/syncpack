@@ -20,15 +20,20 @@ mod cli;
 mod commands;
 mod context;
 mod errors;
-mod group_selector;
 mod inspection;
-mod instance;
+#[cfg(test)]
+#[path = "instance/instance_test.rs"]
+mod instance_test;
 mod javascript;
 mod logger;
 mod rcfile_loader;
-mod source;
+#[cfg(test)]
+#[path = "instance/source_idx_test.rs"]
+mod source_idx_test;
 mod source_patterns;
-mod sources;
+#[cfg(test)]
+#[path = "sources_test.rs"]
+mod sources_test;
 #[cfg(test)]
 #[path = "test/test.rs"]
 mod test;

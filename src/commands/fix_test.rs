@@ -4,12 +4,15 @@ use {
     context::{Discovered, Inspected},
     errors::SyncpackError,
     inspection::Inspection,
-    instance::{Instance, InstanceIdx},
     test::builder::TestBuilder,
-    version_group::{Dependency, DependencyIdx, VersionGroup},
+    version_group::VersionGroup,
   },
   serde_json::json,
   syncpack_io::mock::MockDiskIo,
+  syncpack_model::{
+    dependency::{Dependency, DependencyIdx},
+    instance::{Instance, InstanceIdx},
+  },
 };
 
 /// Silent reporter — fix tests assert state, not console output.

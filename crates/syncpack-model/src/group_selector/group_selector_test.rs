@@ -1,6 +1,7 @@
 use {
-  crate::{group_selector::GroupSelector, instance::InstanceDescriptor, sources::SourceIdx, specifier::Specifier},
+  crate::{group_selector::GroupSelector, instance::InstanceDescriptor, sources::SourceIdx},
   std::rc::Rc,
+  syncpack_specifier::Specifier,
   syncpack_vocab::{
     dependency_type::{DependencyType, Strategy},
     source_kind::SourceKind,

@@ -5,6 +5,8 @@ members = [
   "crates/syncpack-io",
   "crates/syncpack-registry",
   "crates/syncpack-disk",
+  "crates/syncpack-config",
+  "crates/syncpack-model",
 ]
 
 [package]
@@ -44,6 +46,7 @@ serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
 syncpack-disk = { path = "crates/syncpack-disk" }
 syncpack-io = { path = "crates/syncpack-io" }
+syncpack-model = { path = "crates/syncpack-model" }
 syncpack-registry = { path = "crates/syncpack-registry" }
 syncpack-config = { path = "crates/syncpack-config" }
 syncpack-specifier = { path = "crates/syncpack-specifier" }
@@ -62,6 +65,7 @@ syncpack-disk = { path = "crates/syncpack-disk", features = ["test-support"] }
 # Enable registry's MockRegistryClient for the bin's tests only.
 syncpack-registry = { path = "crates/syncpack-registry", features = ["test-support"] }
 syncpack-config = { path = "crates/syncpack-config", features = ["test-support"] }
+syncpack-model = { path = "crates/syncpack-model", features = ["test-support"] }
 
 [features]
 default = []

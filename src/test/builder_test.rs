@@ -1,10 +1,8 @@
 use {
   super::TestBuilder,
-  crate::{
-    instance::{InstanceState, ValidInstance::*},
-    test::expect::{ExpectedInstance, expect},
-  },
+  crate::test::expect::{ExpectedInstance, expect},
   serde_json::json,
+  syncpack_model::instance::{InstanceState, ValidInstance::*},
 };
 
 #[tokio::test]

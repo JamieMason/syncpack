@@ -1,14 +1,12 @@
 use {
-  crate::{
-    commands::ui,
-    context::Discovered,
-    inspection::Inspection,
-    instance::{InstanceState, ValidInstance},
-    version_group::{Dependency, DependencyIdx},
-  },
+  crate::{commands::ui, context::Discovered, inspection::Inspection},
   colored::*,
   itertools::Itertools,
   log::{error, info},
+  syncpack_model::{
+    dependency::{Dependency, DependencyIdx},
+    instance::{InstanceState, ValidInstance},
+  },
   syncpack_vocab::severity::Severity,
 };
 

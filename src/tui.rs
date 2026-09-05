@@ -78,7 +78,7 @@ pub struct UpdateRow {
   pub target_raw: String,
   pub target_time_label: Option<String>,
   /// Backing `InstanceIdx`s the apply step needs to write back to disk.
-  pub instance_indices: Vec<crate::instance::InstanceIdx>,
+  pub instance_indices: Vec<syncpack_model::instance::InstanceIdx>,
 }
 
 /// Minimum terminal size for the interactive picker. Smaller than this

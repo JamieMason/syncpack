@@ -1,10 +1,10 @@
 use {
-  crate::{
-    inspection::{FormatConfig, FormatMismatch, FormatMismatchVariant::*, Inspection},
+  crate::inspection::{FormatConfig, FormatMismatch, FormatMismatchVariant::*, Inspection},
+  serde_json::Value,
+  syncpack_model::{
     source::Source,
     sources::{SourceIdx, Sources},
   },
-  serde_json::Value,
 };
 
 mod format;

@@ -1,12 +1,10 @@
 use {
-  crate::{
-    context::{iter_instances, sources_from_disk},
-    sources::parse_catalog_name,
-  },
+  crate::context::{iter_instances, sources_from_disk},
   serde_json::json,
   std::path::PathBuf,
   syncpack_disk::Disk,
   syncpack_io::{File, detect_formatting, parse_yaml_file},
+  syncpack_model::sources::parse_catalog_name,
   syncpack_vocab::{
     dependency_type::{DependencyType, Strategy},
     source_kind::SourceKind,
@@ -282,14 +280,12 @@ fn sources_from_disk_mirrors_package_json_files_one_to_one() {
 
 mod via_full_pipeline {
   use {
-    crate::{
-      instance::{InstanceState, ValidInstance::*},
-      test::{
-        builder::TestBuilder,
-        expect::{ExpectedInstance, expect},
-      },
+    crate::test::{
+      builder::TestBuilder,
+      expect::{ExpectedInstance, expect},
     },
     serde_json::json,
+    syncpack_model::instance::{InstanceState, ValidInstance::*},
   };
 
   #[tokio::test]

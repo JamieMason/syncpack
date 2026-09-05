@@ -4,10 +4,12 @@ use {
     context::{Discovered, Inspected},
     errors::SyncpackError,
     inspection::Inspection,
+  },
+  serde_json::{Value, json},
+  syncpack_model::{
     instance::{Instance, InstanceIdx},
     source::Source,
   },
-  serde_json::{Value, json},
   syncpack_vocab::severity::Severity,
 };
 

@@ -1,14 +1,16 @@
 use {
   crate::{
-    group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
-    instance::{FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance},
-    semver_range::SemverRange,
-    specifier::Specifier,
-    version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5, L6, L7, L8, L9},
+    version_group::{L1, L2, L3, L4, L5, L6, L7, L8, L9},
   },
   log::debug,
   std::rc::Rc,
+  syncpack_model::{
+    dependency::{Dependency, DependencyIdx},
+    group_selector::GroupSelector,
+    instance::{FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance},
+  },
+  syncpack_specifier::{Specifier, semver_range::SemverRange},
   syncpack_vocab::{prefer_version::PreferVersion, registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 

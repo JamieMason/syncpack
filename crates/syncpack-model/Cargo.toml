@@ -1,0 +1,16 @@
+[package]
+name = "syncpack-model"
+version = "15.3.3"
+authors = ["Jamie Mason <jamie@foldleft.io>"]
+edition = "2024"
+description = "The immutable discovered project model for syncpack"
+license = "MIT"
+
+[features]
+test-support = []
+
+[dependencies]
+globset = "0.4.20"
+log = "0.4.33"
+syncpack-specifier = { path = "../syncpack-specifier" }
+syncpack-vocab = { path = "../syncpack-vocab" }

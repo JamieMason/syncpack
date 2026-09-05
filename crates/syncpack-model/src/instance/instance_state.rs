@@ -1,6 +1,6 @@
 use {
-  crate::specifier::Specifier,
   std::{cmp::Ordering, rc::Rc},
+  syncpack_specifier::Specifier,
 };
 
 /// Strip the Debug payload off an enum variant's `format!("{:?}", ..)` so
@@ -26,27 +26,27 @@ pub enum InstanceState {
 }
 
 impl InstanceState {
-  #[cfg(test)]
+  #[cfg(any(test, feature = "test-support"))]
   pub fn valid(state: ValidInstance) -> Self {
     InstanceState::Valid(state)
   }
 
-  #[cfg(test)]
+  #[cfg(any(test, feature = "test-support"))]
   pub fn suspect(state: SuspectInstance) -> Self {
     InstanceState::Suspect(state)
   }
 
-  #[cfg(test)]
+  #[cfg(any(test, feature = "test-support"))]
   pub fn fixable(state: FixableInstance) -> Self {
     InstanceState::Invalid(InvalidInstance::Fixable(state))
   }
 
-  #[cfg(test)]
+  #[cfg(any(test, feature = "test-support"))]
   pub fn conflict(state: SemverGroupAndVersionConflict) -> Self {
     InstanceState::Invalid(InvalidInstance::Conflict(state))
   }
 
-  #[cfg(test)]
+  #[cfg(any(test, feature = "test-support"))]
   pub fn unfixable(state: UnfixableInstance) -> Self {
     InstanceState::Invalid(InvalidInstance::Unfixable(state))
   }

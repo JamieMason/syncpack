@@ -1,6 +1,6 @@
-use crate::{
-  instance::{FixableInstance, InstanceState, SuspectInstance, UnfixableInstance, ValidInstance},
-  specifier::Specifier,
+use {
+  crate::instance::{FixableInstance, InstanceState, SuspectInstance, UnfixableInstance, ValidInstance},
+  syncpack_specifier::Specifier,
 };
 
 fn name_of(state: InstanceState) -> String {

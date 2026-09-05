@@ -1,9 +1,6 @@
 use {
   crate::{
     context::Discovered,
-    instance::{InstanceState, ValidInstance::*},
-    source::Source,
-    sources::SourceIdx,
     test::{
       builder::TestBuilder,
       expect::{ExpectedInstance, expect},
@@ -12,6 +9,11 @@ use {
   },
   serde_json::json,
   std::rc::Rc,
+  syncpack_model::{
+    instance::{InstanceState, ValidInstance::*},
+    source::Source,
+    sources::SourceIdx,
+  },
   syncpack_vocab::package_manager::PackageManager,
 };
 
@@ -179,11 +181,16 @@ fn fix_zero_catalogs_pnpm_creates_default_on_disk() {
   // No yaml on disk pre-fix, PM=Pnpm, consumer has a real specifier. After
   // fix the auto-created yaml lands on `ctx.disk.pnpm_workspace` — NOT in
   // the sources arena.
-  use crate::{
-    commands::{fix, reporter::FixReporter},
-    inspection::Inspection,
-    instance::{Instance, InstanceIdx},
-    version_group::{Dependency, DependencyIdx, VersionGroup},
+  use {
+    crate::{
+      commands::{fix, reporter::FixReporter},
+      inspection::Inspection,
+      version_group::VersionGroup,
+    },
+    syncpack_model::{
+      dependency::{Dependency, DependencyIdx},
+      instance::{Instance, InstanceIdx},
+    },
   };
   struct Silent;
   impl FixReporter for Silent {

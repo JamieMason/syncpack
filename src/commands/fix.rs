@@ -8,15 +8,17 @@ use {
     context::{Discovered, Inspected},
     errors::SyncpackError,
     inspection::Inspection,
-    instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
-    source::Source,
-    specifier::Specifier,
     version_group::VersionGroupBehavior,
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
   syncpack_disk::{catalogs::detect_bun_catalogs, copy_expected_specifier_json, insert_catalog_definition},
   syncpack_io::{DiskIo, empty_yaml_file, ensure_object_path, set_nested_prop, write_json_file, write_yaml_file},
+  syncpack_model::{
+    instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
+    source::Source,
+  },
+  syncpack_specifier::Specifier,
   syncpack_vocab::{package_manager::PackageManager, severity::Severity},
 };
 
@@ -197,7 +199,7 @@ fn apply_missing_from_catalog_insert(data: &mut Discovered, inst_idx: InstanceId
 }
 
 /// Remove an instance's prop from the underlying file.
-fn remove_instance_from_disk(file: &mut syncpack_io::File<JsonValue>, instance: &crate::instance::Instance) {
+fn remove_instance_from_disk(file: &mut syncpack_io::File<JsonValue>, instance: &syncpack_model::instance::Instance) {
   use syncpack_vocab::dependency_type::Strategy;
   match instance.descriptor.dependency_type.strategy {
     Strategy::NameAndVersionProps | Strategy::NamedVersionString | Strategy::UnnamedVersionString => {

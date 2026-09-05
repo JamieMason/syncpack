@@ -2,7 +2,6 @@ use {
   crate::{
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
     context::{Config, Discovered},
-    sources::Sources,
   },
   log::LevelFilter,
   serde_json::Value,
@@ -10,6 +9,7 @@ use {
   syncpack_config::Rcfile,
   syncpack_disk::Disk,
   syncpack_io::{File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
+  syncpack_model::sources::Sources,
   syncpack_registry::{client::RegistryClient, mock::MockRegistryClient},
   syncpack_vocab::{dependency_type::DependencyType, registry_updates::RegistryUpdates},
 };

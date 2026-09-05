@@ -1,12 +1,8 @@
 use {
-  crate::{
-    commands::ui,
-    context::Discovered,
-    inspection::Inspection,
-    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, ValidInstance},
-  },
+  crate::{commands::ui, context::Discovered, inspection::Inspection},
   colored::*,
   log::{error, info},
+  syncpack_model::instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, ValidInstance},
   syncpack_vocab::severity::Severity,
 };
 
@@ -149,10 +145,10 @@ pub fn get_location(ctx: &Discovered, instance: &Instance) -> String {
   };
   let path_to_prop = instance.descriptor.dependency_type.path.replace("/", ".");
   let file_link = match &ctx.sources.all[instance.source_idx().0] {
-    crate::source::Source::Package { file_idx, .. } => {
+    syncpack_model::source::Source::Package { file_idx, .. } => {
       ui::package::get_package_json_link(ctx, &ctx.disk.package_json_files[*file_idx].filepath)
     }
-    crate::source::Source::PnpmYaml => "pnpm-workspace.yaml".to_string(),
+    syncpack_model::source::Source::PnpmYaml => "pnpm-workspace.yaml".to_string(),
   };
   ui::util::join_line(vec![&alias_info, &"in".to_string(), &file_link, &"at".to_string(), &path_to_prop])
 }

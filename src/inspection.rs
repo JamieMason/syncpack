@@ -1,13 +1,12 @@
 use {
-  crate::{
-    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, SuspectInstance},
-    sources::{SourceIdx, Sources},
-    specifier::Specifier,
-    version_group::{Dependency, DependencyIdx},
-  },
   serde_json::Value,
   std::rc::Rc,
-  syncpack_specifier::update_target::UpdateTarget,
+  syncpack_model::{
+    dependency::{Dependency, DependencyIdx},
+    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, SuspectInstance},
+    sources::{SourceIdx, Sources},
+  },
+  syncpack_specifier::{Specifier, update_target::UpdateTarget},
   syncpack_vocab::{
     package_manager::PackageManager,
     severity::{Severity, SeverityMap},

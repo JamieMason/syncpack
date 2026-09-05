@@ -1,10 +1,7 @@
 use {
-  crate::{
-    instance::{InstanceState, ValidInstance::*},
-    test::{
-      builder::TestBuilder,
-      expect::{ExpectedInstance, expect},
-    },
+  crate::test::{
+    builder::TestBuilder,
+    expect::{ExpectedInstance, expect},
   },
   serde_json::json,
   std::path::PathBuf,
@@ -13,6 +10,7 @@ use {
     catalogs::{CatalogError, make_catalog_dep_types},
   },
   syncpack_io::{parse_json_file, parse_yaml_file},
+  syncpack_model::instance::{InstanceState, ValidInstance::*},
   syncpack_vocab::{package_manager::PackageManager, source_kind::SourceKind},
 };
 
@@ -497,7 +495,7 @@ async fn auto_gen_bun_catalog_dep_type_has_package_json_source_and_catalog_flag(
     .await;
   expect(&ctx).to_have_instances(vec![
     ExpectedInstance {
-      state: InstanceState::suspect(crate::instance::SuspectInstance::InvalidLocalVersion),
+      state: InstanceState::suspect(syncpack_model::instance::SuspectInstance::InvalidLocalVersion),
       dependency_name: "bun-root",
       id: "bun-root in /version of bun-root",
       actual: "",
