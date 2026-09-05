@@ -4,16 +4,15 @@ use {
     inspection::{Inspection, RuleInput},
     instance::{
       FixableInstance, Instance, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance,
-      ValidInstance, severity::SeverityMap,
+      ValidInstance,
     },
-    rcfile::update_group::UpdatePolicy,
-    registry::updates::RegistryUpdates,
     semver_range::SemverRange,
     specifier::Specifier,
     version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, highest_eligible_for, sort_updates_desc},
   },
   log::debug,
   std::rc::Rc,
+  syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap, update_policy::UpdatePolicy},
 };
 
 #[cfg(test)]

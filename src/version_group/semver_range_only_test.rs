@@ -476,7 +476,7 @@ async fn update_policy_skip_short_circuits_to_is_ignored() {
 /// Severity tests — opt out of auto-fix per status (issue #216).
 /// SemverRangeOnly permits only `SemverRangeMismatch`.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   #[tokio::test]
   async fn semver_range_mismatch_warn() {

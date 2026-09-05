@@ -1,12 +1,9 @@
 use {
   crate::{
     cli::SortBy,
-    dependency::UpdateUrl,
-    errors::UnsupportedConfigError,
     group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
-    instance::{Instance, InstanceIdx, InstanceState, Severity, severity::SeverityMap},
-    registry::updates::RegistryUpdates,
+    instance::{Instance, InstanceIdx, InstanceState},
     source::Source,
     sources::Sources,
     specifier::Specifier,
@@ -21,6 +18,13 @@ use {
     rc::Rc,
   },
   syncpack_specifier::update_target::UpdateTarget,
+  syncpack_vocab::{
+    config_error::UnsupportedConfigError,
+    prefer_version::PreferVersion,
+    registry_updates::RegistryUpdates,
+    severity::{Severity, SeverityMap},
+    update_url::UpdateUrl,
+  },
 };
 
 mod banned;
@@ -42,14 +46,6 @@ mod same_minor;
 mod same_range;
 mod semver_range_only;
 mod snapped_to;
-
-/// When a version group has `preferVersion` set, this determines the direction
-/// used to pick a winner among differing versions.
-#[derive(Clone, Debug)]
-pub enum PreferVersion {
-  HighestSemver,
-  LowestSemver,
-}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]

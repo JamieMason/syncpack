@@ -1721,7 +1721,7 @@ async fn all_same_minor_different_patches_all_valid() {
 /// `SemverRangeMismatch`, `SameMinorOverridesSemverRange`,
 /// `SameMinorOverridesSemverRangeMismatch`.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   /// Scenario: dependencies foo 21.3.0 vs devDependencies foo 21.4.1, same
   /// major different minor, preferVersion highestSemver. `21.3.0` →

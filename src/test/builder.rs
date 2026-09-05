@@ -22,7 +22,7 @@ use {
     catalogs,
     cli::UpdateTarget,
     context::{Discovered, Inspected},
-    disk::{Disk, File, PackageManager, detect_formatting, parse_yaml_file},
+    disk::{Disk, File, detect_formatting, parse_yaml_file},
     sources::Sources,
     test::mock_tui::MockTui,
   },
@@ -31,6 +31,7 @@ use {
     collections::{BTreeMap, HashMap},
     path::PathBuf,
   },
+  syncpack_vocab::package_manager::PackageManager,
 };
 
 #[cfg(test)]

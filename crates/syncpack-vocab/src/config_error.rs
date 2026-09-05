@@ -1,0 +1,41 @@
+use {std::fmt, thiserror::Error};
+
+#[derive(Debug, Error)]
+pub struct UnsupportedConfigErrors(pub Vec<UnsupportedConfigError>);
+
+impl fmt::Display for UnsupportedConfigErrors {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    for (i, e) in self.0.iter().enumerate() {
+      if i > 0 {
+        writeln!(f)?;
+      }
+      write!(f, "{e}")?;
+    }
+    Ok(())
+  }
+}
+
+#[derive(Debug, Error)]
+pub enum UnsupportedConfigError {
+  #[error("Config property '{property}' is deprecated\n{hint}")]
+  DeprecatedProperty { property: String, hint: String },
+  #[error("dependencyType '{name}' does not match any built-in or custom types")]
+  InvalidDependencyType { name: String },
+  #[error("Invalid semver group: must have isDisabled, isIgnored, or range")]
+  InvalidSemverGroup,
+  #[error("Invalid update group: must have isIgnored or target")]
+  InvalidUpdateGroup,
+  #[error("Unrecognised version group policy: '{0}'")]
+  InvalidVersionGroupPolicy(String),
+  #[error("severity key '{key}' is not valid on a {group_type} group at {path}. Permitted: {}.", permitted.join(", "))]
+  InvalidSeverityKey {
+    path: String,
+    group_type: String,
+    key: String,
+    permitted: Vec<&'static str>,
+  },
+  #[error("customTypes.<name>.source: '{value}' is not a recognised source.\nUse 'PackageJson' or 'PnpmWorkspace'.")]
+  InvalidSource { value: String },
+  #[error("Config property '{path}' is not recognised")]
+  UnrecognisedProperty { path: String },
+}

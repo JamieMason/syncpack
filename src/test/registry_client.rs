@@ -1,13 +1,11 @@
 use {
-  crate::{
-    dependency::UpdateUrl,
-    registry::client::{AllPackageVersions, RegistryClient, RegistryError},
-  },
+  crate::registry::client::{AllPackageVersions, RegistryClient, RegistryError},
   reqwest::StatusCode,
   std::{
     collections::{BTreeMap, HashMap},
     sync::Arc,
   },
+  syncpack_vocab::update_url::UpdateUrl,
 };
 
 /// A mock implementation of RegistryClient for testing

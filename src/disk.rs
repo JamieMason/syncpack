@@ -1,5 +1,5 @@
 use {
-  crate::{dependency::Strategy, instance::Instance, specifier::Specifier},
+  crate::{instance::Instance, specifier::Specifier},
   detect_indent::detect_indent,
   detect_newline_style::LineEnding,
   serde_json::Value as JsonValue,
@@ -9,6 +9,7 @@ use {
     process::Command,
     rc::Rc,
   },
+  syncpack_vocab::{dependency_type::Strategy, package_manager::PackageManager},
   thiserror::Error,
   yaml_serde::{Mapping, Value as YamlValue},
 };
@@ -93,16 +94,6 @@ pub enum DiskIoError {
   YamlPatchParse(#[source] yamlpath::QueryError),
   #[error("Failed to apply YAML patch:\n\n{0}")]
   YamlPatchApply(#[source] yamlpatch::Error),
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum PackageManager {
-  Bun,
-  Npm,
-  Pnpm,
-  /// We have looked but could not determine the package manager
-  Unknown,
-  Yarn,
 }
 
 #[derive(Debug)]

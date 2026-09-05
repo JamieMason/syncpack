@@ -1,6 +1,5 @@
 use {
   crate::{
-    dependency::UpdateUrl,
     instance::Instance,
     registry::client::{AllPackageVersions, RegistryClient, RegistryError},
     specifier::Specifier,
@@ -14,6 +13,7 @@ use {
     sync::Arc,
     time::{Duration, SystemTime, UNIX_EPOCH},
   },
+  syncpack_vocab::{registry_updates::RegistryUpdates, update_url::UpdateUrl},
   tokio::{
     sync::Semaphore,
     task::{JoinHandle, spawn},
@@ -26,89 +26,74 @@ mod updates_test;
 
 type FetchHandle = JoinHandle<Result<Arc<AllPackageVersions>, RegistryError>>;
 
-/// The result of fetching package versions from the npm registry.
-#[derive(Debug)]
-pub struct RegistryUpdates {
-  /// All updates from the npm registry keyed by internal dependency name
-  pub updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>>,
-  /// Per-version publish timestamps (ISO 8601) keyed by internal
-  /// dependency name. Used by the `update` UI to render a `~Nd` /
-  /// `~Nmo` / `~N.Ny` "how stale" hint next to each version.
-  pub times_by_internal_name: HashMap<String, HashMap<String, String>>,
-  /// The internal names of all failed updates
-  pub failed: Vec<String>,
-}
+/// Fetch every version specifier ever published for all updateable
+/// dependencies in the project.
+pub async fn fetch(
+  client: &Arc<dyn RegistryClient>,
+  version_groups: &[VersionGroup],
+  dependencies: &[Dependency],
+  arena: &[Instance],
+  max_concurrent_requests: usize,
+  minimum_release_age_minutes: u64,
+) -> RegistryUpdates {
+  let client = Arc::clone(client);
+  let semaphore = Arc::new(Semaphore::new(max_concurrent_requests));
+  let progress_bars = Arc::new(MultiProgress::new());
+  let mut handles: Vec<(String, FetchHandle)> = vec![];
+  let mut updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
+  let mut times_by_internal_name: HashMap<String, HashMap<String, String>> = HashMap::new();
+  let mut failed: Vec<String> = vec![];
+  let cutoff_unix_seconds = age_cutoff_unix_seconds(minimum_release_age_minutes);
 
-impl RegistryUpdates {
-  /// Fetch every version specifier ever published for all updateable
-  /// dependencies in the project.
-  pub async fn fetch(
-    client: &Arc<dyn RegistryClient>,
-    version_groups: &[VersionGroup],
-    dependencies: &[Dependency],
-    arena: &[Instance],
-    max_concurrent_requests: usize,
-    minimum_release_age_minutes: u64,
-  ) -> Self {
-    let client = Arc::clone(client);
-    let semaphore = Arc::new(Semaphore::new(max_concurrent_requests));
-    let progress_bars = Arc::new(MultiProgress::new());
-    let mut handles: Vec<(String, FetchHandle)> = vec![];
-    let mut updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
-    let mut times_by_internal_name: HashMap<String, HashMap<String, String>> = HashMap::new();
-    let mut failed: Vec<String> = vec![];
-    let cutoff_unix_seconds = age_cutoff_unix_seconds(minimum_release_age_minutes);
+  for update_url in get_unique_update_urls(version_groups, dependencies, arena) {
+    let permit = Arc::clone(&semaphore).acquire_owned().await;
+    let client = Arc::clone(&client);
+    let progress_bars = Arc::clone(&progress_bars);
 
-    for update_url in get_unique_update_urls(version_groups, dependencies, arena) {
-      let permit = Arc::clone(&semaphore).acquire_owned().await;
-      let client = Arc::clone(&client);
-      let progress_bars = Arc::clone(&progress_bars);
+    handles.push((
+      update_url.internal_name.clone(),
+      spawn(async move {
+        let _permit = permit;
+        let progress_bar = progress_bars.add(ProgressBar::new_spinner());
+        progress_bar.enable_steady_tick(Duration::from_millis(100));
+        progress_bar.set_style(ProgressStyle::default_spinner());
+        progress_bar.set_message(update_url.internal_name.clone());
+        let package_meta = client.fetch(&update_url).await;
+        progress_bar.finish_and_clear();
+        progress_bars.remove(&progress_bar);
+        package_meta
+      }),
+    ));
+  }
 
-      handles.push((
-        update_url.internal_name.clone(),
-        spawn(async move {
-          let _permit = permit;
-          let progress_bar = progress_bars.add(ProgressBar::new_spinner());
-          progress_bar.enable_steady_tick(Duration::from_millis(100));
-          progress_bar.set_style(ProgressStyle::default_spinner());
-          progress_bar.set_message(update_url.internal_name.clone());
-          let package_meta = client.fetch(&update_url).await;
-          progress_bar.finish_and_clear();
-          progress_bars.remove(&progress_bar);
-          package_meta
-        }),
-      ));
-    }
-
-    for (internal_name, handle) in handles {
-      match handle.await {
-        Ok(result) => match result {
-          Ok(package_meta) => {
-            let all_updates = updates_by_internal_name.entry(internal_name.clone()).or_default();
-            for version in package_meta.versions.iter() {
-              if !is_too_recent(version, &package_meta.times, cutoff_unix_seconds) {
-                all_updates.push(Specifier::new(version));
-              }
+  for (internal_name, handle) in handles {
+    match handle.await {
+      Ok(result) => match result {
+        Ok(package_meta) => {
+          let all_updates = updates_by_internal_name.entry(internal_name.clone()).or_default();
+          for version in package_meta.versions.iter() {
+            if !is_too_recent(version, &package_meta.times, cutoff_unix_seconds) {
+              all_updates.push(Specifier::new(version));
             }
-            times_by_internal_name.insert(internal_name.clone(), package_meta.times.clone());
           }
-          Err(err) => {
-            debug!("{err}");
-            failed.push(internal_name);
-          }
-        },
+          times_by_internal_name.insert(internal_name.clone(), package_meta.times.clone());
+        }
         Err(err) => {
           debug!("{err}");
           failed.push(internal_name);
         }
+      },
+      Err(err) => {
+        debug!("{err}");
+        failed.push(internal_name);
       }
     }
+  }
 
-    Self {
-      updates_by_internal_name,
-      times_by_internal_name,
-      failed,
-    }
+  RegistryUpdates {
+    updates_by_internal_name,
+    times_by_internal_name,
+    failed,
   }
 }
 

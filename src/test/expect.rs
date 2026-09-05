@@ -2,10 +2,11 @@ use {
   crate::{
     context::Inspected,
     inspection::Inspection,
-    instance::{Instance, InstanceIdx, InstanceState, Severity},
+    instance::{Instance, InstanceIdx, InstanceState},
     specifier::Specifier,
   },
   log::error,
+  syncpack_vocab::severity::Severity,
 };
 
 #[derive(Debug)]

@@ -1,11 +1,7 @@
 pub mod instance_state;
-pub mod severity;
 
-pub use {
-  instance_state::{
-    FixableInstance, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance,
-  },
-  severity::Severity,
+pub use instance_state::{
+  FixableInstance, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, UnfixableInstance, ValidInstance,
 };
 
 #[cfg(test)]
@@ -16,19 +12,16 @@ mod instance_test;
 mod source_idx_test;
 
 use {
-  crate::{
-    dependency::{DependencyType, Strategy, UpdateUrl},
-    disk::Disk,
-    rcfile::update_group::UpdatePolicy,
-    semver_range::SemverRange,
-    source::Source,
-    sources::SourceIdx,
-    specifier::Specifier,
-  },
+  crate::{disk::Disk, semver_range::SemverRange, source::Source, sources::SourceIdx, specifier::Specifier},
   log::debug,
   std::{
     path::{Path, PathBuf},
     rc::Rc,
+  },
+  syncpack_vocab::{
+    dependency_type::{DependencyType, Strategy},
+    update_policy::UpdatePolicy,
+    update_url::UpdateUrl,
   },
 };
 

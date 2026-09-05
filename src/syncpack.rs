@@ -13,7 +13,7 @@ use {
     inspection::{Inspection, RuleInput, RuleInputCfg},
     logger,
     rcfile::Rcfile,
-    registry::{client::RegistryClient, updates::RegistryUpdates},
+    registry::client::RegistryClient,
     source_patterns::get_source_patterns,
     sources::Sources,
     tui::Tui,
@@ -21,6 +21,7 @@ use {
     visit_packages::visit_packages,
   },
   std::sync::Arc,
+  syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
 /// Run the full syncpack CLI using injected dependencies. Discovers the
@@ -55,7 +56,7 @@ fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Discovered, SyncpackError> {
 async fn fetch_updates(data: &Discovered, registry_client: &Arc<dyn RegistryClient>) -> Option<RegistryUpdates> {
   match data.config.cli.subcommand {
     Subcommand::Update => Some(
-      RegistryUpdates::fetch(
+      crate::registry::updates::fetch(
         registry_client,
         &data.version_groups,
         &data.dependencies,

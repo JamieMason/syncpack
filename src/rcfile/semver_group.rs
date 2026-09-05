@@ -1,8 +1,9 @@
 use {
-  crate::{errors::UnsupportedConfigError, group_selector::GroupSelector, semver_range::SemverRange},
+  crate::{group_selector::GroupSelector, semver_range::SemverRange},
   serde::Deserialize,
   serde_json::Value,
   std::collections::HashMap,
+  syncpack_vocab::config_error::UnsupportedConfigError,
 };
 
 #[derive(Debug)]

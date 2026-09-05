@@ -3,8 +3,7 @@ use {
     group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
     instance::{
-      FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance,
-      ValidInstance, severity::SeverityMap,
+      FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance,
     },
     sources::SourceIdx,
     specifier::Specifier,
@@ -12,6 +11,7 @@ use {
   },
   log::debug,
   std::rc::Rc,
+  syncpack_vocab::severity::SeverityMap,
 };
 
 #[cfg(test)]

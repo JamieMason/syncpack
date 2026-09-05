@@ -51,7 +51,7 @@ fn config_flag_rejects_directory_with_clap_error() {
 }
 
 mod source_mode {
-  use crate::{cli::Cli, rcfile::SourceMode};
+  use {crate::cli::Cli, syncpack_vocab::source_mode::SourceMode};
 
   fn args(extra: &[&str]) -> Vec<String> {
     let mut v = vec!["syncpack".to_string(), "lint".to_string()];

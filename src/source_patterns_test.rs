@@ -68,11 +68,12 @@ mod source_mode {
     crate::{
       context::Config,
       disk::{Disk, File, detect_formatting},
-      rcfile::{RawRcfile, Rcfile, SourceMode},
+      rcfile::{RawRcfile, Rcfile},
       test::mock,
     },
     serde_json::{Value, json},
     std::path::PathBuf,
+    syncpack_vocab::source_mode::SourceMode,
   };
 
   fn empty_disk() -> Disk {

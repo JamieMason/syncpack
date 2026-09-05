@@ -1,13 +1,16 @@
 use {
   crate::{
-    dependency::{DependencyType, Strategy},
-    disk::{Disk, PackageManager, YamlFile},
+    disk::{Disk, YamlFile},
     errors::SyncpackError,
-    source::SourceKind,
   },
   log::debug,
   serde_json::Value as JsonValue,
   std::time::Instant,
+  syncpack_vocab::{
+    dependency_type::{DependencyType, Strategy},
+    package_manager::PackageManager,
+    source_kind::SourceKind,
+  },
   yaml_serde::Value as YamlValue,
 };
 

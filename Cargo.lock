@@ -1758,6 +1758,7 @@ dependencies = [
  "serde",
  "serde_json",
  "syncpack-specifier",
+ "syncpack-vocab",
  "thiserror 2.0.20",
  "tokio",
  "unicode-width 0.2.2",
@@ -1772,6 +1773,15 @@ version = "15.3.3"
 dependencies = [
  "criterion",
  "node-semver",
+]
+
+[[package]]
+name = "syncpack-vocab"
+version = "15.3.3"
+dependencies = [
+ "serde",
+ "syncpack-specifier",
+ "thiserror 2.0.20",
 ]
 
 [[package]]

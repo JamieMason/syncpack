@@ -1,7 +1,9 @@
-use crate::{
-  inspection::{Inspection, RuleInput},
-  registry::updates::RegistryUpdates,
-  version_group::{VersionGroup, VersionGroupBehavior},
+use {
+  crate::{
+    inspection::{Inspection, RuleInput},
+    version_group::{VersionGroup, VersionGroupBehavior},
+  },
+  syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
 /// Two-stage version inspection. Stage 1 classifies every non-`SnappedTo`

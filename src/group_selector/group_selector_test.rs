@@ -1,13 +1,10 @@
 use {
-  crate::{
-    dependency::{DependencyType, Strategy},
-    group_selector::GroupSelector,
-    instance::InstanceDescriptor,
-    source::SourceKind,
-    sources::SourceIdx,
-    specifier::Specifier,
-  },
+  crate::{group_selector::GroupSelector, instance::InstanceDescriptor, sources::SourceIdx, specifier::Specifier},
   std::rc::Rc,
+  syncpack_vocab::{
+    dependency_type::{DependencyType, Strategy},
+    source_kind::SourceKind,
+  },
 };
 
 fn make_dep_type() -> DependencyType {

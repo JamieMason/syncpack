@@ -1,22 +1,16 @@
 use {
-  crate::{errors::UnsupportedConfigError, group_selector::GroupSelector},
+  crate::group_selector::GroupSelector,
   serde::Deserialize,
   serde_json::Value,
   std::collections::HashMap,
   syncpack_specifier::update_target::UpdateTarget,
+  syncpack_vocab::{config_error::UnsupportedConfigError, update_policy::UpdatePolicy},
 };
 
 #[derive(Debug)]
 pub struct UpdateGroup {
   pub selector: GroupSelector,
   pub policy: UpdatePolicy,
-}
-
-#[derive(Debug, Clone)]
-pub enum UpdatePolicy {
-  Skip,
-  /// Clamp eligible registry updates to no greater than this target.
-  UpTo(UpdateTarget),
 }
 
 impl UpdateGroup {

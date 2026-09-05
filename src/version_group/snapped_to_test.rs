@@ -1030,7 +1030,7 @@ async fn snaps_follower_to_targets_corrected_version_not_its_raw_version() {
 /// snapping local (mirrors issue #325 for pin). SnappedTo permits
 /// `DiffersToSnapTarget`, `SemverRangeMismatch`, `RefuseToSnapLocal`.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   /// Scenario: leader foo 1.0.0, follower foo 1.1.0, follower snaps to
   /// leader. follower's foo → DiffersToSnapTarget Fixable. severity

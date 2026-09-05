@@ -3,10 +3,11 @@ use {
     commands::ui,
     context::Discovered,
     inspection::Inspection,
-    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, Severity, ValidInstance},
+    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, ValidInstance},
   },
   colored::*,
   log::{error, info},
+  syncpack_vocab::severity::Severity,
 };
 
 pub fn print(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {

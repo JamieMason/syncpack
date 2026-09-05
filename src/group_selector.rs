@@ -4,8 +4,9 @@ pub mod pattern_matcher;
 mod group_selector_test;
 
 use {
-  crate::{dependency::DependencyType, errors::UnsupportedConfigError, instance::InstanceDescriptor},
+  crate::instance::InstanceDescriptor,
   pattern_matcher::PatternMatcher,
+  syncpack_vocab::{config_error::UnsupportedConfigError, dependency_type::DependencyType},
 };
 
 #[derive(Clone, Debug)]

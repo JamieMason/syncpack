@@ -1,37 +1,8 @@
-use {
-  crate::errors::UnsupportedConfigError,
-  serde::{Deserialize, Serialize},
-  serde_json::Value,
-};
+use {serde_json::Value, syncpack_vocab::source_kind::SourceKind};
 
 #[cfg(test)]
 #[path = "source_test.rs"]
 mod source_test;
-
-/// Which kind of file a `DependencyType` reads from.
-///
-/// Embedded on `DependencyType` so iteration can pair sources × dep types.
-/// Default for user `customTypes` is `PackageJson`. Auto-generated catalog
-/// dep types set this explicitly (`pnpmCatalog*` → `PnpmWorkspace`,
-/// `bunCatalog*` → `PackageJson`).
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum SourceKind {
-  PackageJson,
-  PnpmWorkspace,
-}
-
-impl SourceKind {
-  /// Parse the user-facing string form of a source.
-  ///
-  /// Accepts the PascalCase form used in `customTypes.<name>.source`.
-  pub fn parse(raw: &str) -> Result<Self, UnsupportedConfigError> {
-    match raw {
-      "PackageJson" => Ok(SourceKind::PackageJson),
-      "PnpmWorkspace" => Ok(SourceKind::PnpmWorkspace),
-      other => Err(UnsupportedConfigError::InvalidSource { value: other.to_string() }),
-    }
-  }
-}
 
 /// A formatting mismatch detected against a `package.json`.
 #[derive(Debug)]

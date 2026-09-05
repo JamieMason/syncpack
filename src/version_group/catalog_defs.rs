@@ -2,14 +2,13 @@ use {
   crate::{
     group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
-    instance::{FixableInstance, Instance, InstanceState, InvalidInstance, ValidInstance, severity::SeverityMap},
-    rcfile::update_group::UpdatePolicy,
-    registry::updates::RegistryUpdates,
+    instance::{FixableInstance, Instance, InstanceState, InvalidInstance, ValidInstance},
     semver_range::SemverRange,
     version_group::{DependencyIdx, L1, L2, L3, L4, L5, highest_eligible_for, sort_updates_desc},
   },
   log::debug,
   std::rc::Rc,
+  syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap, update_policy::UpdatePolicy},
 };
 
 #[derive(Debug)]

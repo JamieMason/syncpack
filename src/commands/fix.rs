@@ -8,18 +8,19 @@ use {
     commands::reporter::FixReporter,
     context::{Discovered, Inspected},
     disk::{
-      DiskIo, PackageManager, copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition,
-      set_nested_prop, write_json_file, write_yaml_file,
+      DiskIo, copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition, set_nested_prop,
+      write_json_file, write_yaml_file,
     },
     errors::SyncpackError,
     inspection::Inspection,
-    instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance, Severity},
+    instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
     source::Source,
     specifier::Specifier,
     version_group::{InstanceAction, VersionGroupBehavior, action_of},
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
+  syncpack_vocab::{package_manager::PackageManager, severity::Severity},
 };
 
 pub fn run<D: DiskIo>(mut inspected: Inspected, reporter: &dyn FixReporter, io: &D) -> Result<Inspected, SyncpackError> {
@@ -194,7 +195,7 @@ fn apply_missing_from_catalog_insert(data: &mut Discovered, inst_idx: InstanceId
 
 /// Remove an instance's prop from the underlying file.
 fn remove_instance_from_disk(file: &mut crate::disk::File<JsonValue>, instance: &crate::instance::Instance) {
-  use crate::dependency::Strategy;
+  use syncpack_vocab::dependency_type::Strategy;
   match instance.descriptor.dependency_type.strategy {
     Strategy::NameAndVersionProps | Strategy::NamedVersionString | Strategy::UnnamedVersionString => {
       let path_to_prop = &instance.descriptor.dependency_type.path;

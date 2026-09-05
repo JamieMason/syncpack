@@ -6,12 +6,12 @@ use {
     errors::SyncpackError,
     inspection::Inspection,
     instance::InstanceIdx,
-    registry::updates::RegistryUpdates,
     source::Source,
     tui::{Tui, TuiReadiness, UpdateRow},
     version_group::{VersionGroup, VersionGroupBehavior},
   },
   log::{error, info, warn},
+  syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
 #[cfg(test)]

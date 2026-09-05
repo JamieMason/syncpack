@@ -1,6 +1,6 @@
-use crate::{
-  errors::UnsupportedConfigError,
-  source::{Source, SourceKind},
+use {
+  crate::source::Source,
+  syncpack_vocab::{config_error::UnsupportedConfigError, source_kind::SourceKind},
 };
 
 #[test]

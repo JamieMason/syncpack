@@ -1,10 +1,10 @@
 use {
   crate::{
     context::Discovered,
-    dependency::UpdateUrl,
     test::{self},
   },
   serde_json::json,
+  syncpack_vocab::update_url::UpdateUrl,
 };
 
 #[test]

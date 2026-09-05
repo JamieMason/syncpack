@@ -2,16 +2,14 @@ use {
   crate::{
     group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
-    instance::{
-      FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance, severity::SeverityMap,
-    },
-    registry::updates::RegistryUpdates,
+    instance::{FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance},
     semver_range::SemverRange,
     specifier::Specifier,
-    version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5, L6, L7, L8, L9, PreferVersion},
+    version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5, L6, L7, L8, L9},
   },
   log::debug,
   std::rc::Rc,
+  syncpack_vocab::{prefer_version::PreferVersion, registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
 #[cfg(test)]

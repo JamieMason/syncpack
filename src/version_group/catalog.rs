@@ -1,18 +1,17 @@
 use {
   crate::{
-    disk::PackageManager,
     group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
     instance::{
       FixableInstance, Instance, InstanceState, InvalidInstance, SuspectInstance, UnfixableInstance, ValidInstance, catalog_defs_for,
-      distinct_catalog_names, severity::SeverityMap,
+      distinct_catalog_names,
     },
-    registry::updates::RegistryUpdates,
     specifier::Specifier,
     version_group::{Dependency, DependencyIdx, L1, L2, L3, L4, L5},
   },
   log::debug,
   std::rc::Rc,
+  syncpack_vocab::{package_manager::PackageManager, registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
 #[derive(Debug)]

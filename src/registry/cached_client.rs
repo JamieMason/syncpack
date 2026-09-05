@@ -1,6 +1,5 @@
 use {
   crate::{
-    dependency::UpdateUrl,
     disk::DiskIo,
     registry::{
       cache::Cache,
@@ -9,6 +8,7 @@ use {
   },
   log::debug,
   std::{path::PathBuf, sync::Arc},
+  syncpack_vocab::update_url::UpdateUrl,
 };
 
 /// Wraps any `RegistryClient` with an on-disk cache. The cache is

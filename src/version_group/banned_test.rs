@@ -304,7 +304,7 @@ async fn removes_nested_property_with_unnamed_version_string_strategy() {
 /// Severity tests — opt out of auto-fix per status (issue #216).
 /// IsBanned is the only configurable key on a Banned group.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   /// `IsBanned` defaults to severity `Fix` — the resolver picks `Fix` when
   /// the user has not specified a severity for the produced status. Pins

@@ -2,12 +2,12 @@ use {
   crate::{
     group_selector::GroupSelector,
     inspection::{Inspection, RuleInput},
-    instance::{FixableInstance, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance, severity::SeverityMap},
-    registry::updates::RegistryUpdates,
+    instance::{FixableInstance, InstanceState, InvalidInstance, UnfixableInstance, ValidInstance},
     version_group::{DependencyIdx, L1, L2, L3, L4, L5},
   },
   log::debug,
   std::rc::Rc,
+  syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
 #[cfg(test)]

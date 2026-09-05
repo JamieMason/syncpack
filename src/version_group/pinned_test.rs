@@ -311,10 +311,7 @@ mod normal {
 /// `PinOverridesSemverRange`, `PinOverridesSemverRangeMismatch`,
 /// `RefuseToPinLocal`.
 mod severity {
-  use {
-    super::*,
-    crate::{commands::json::instance_to_json, instance::Severity},
-  };
+  use {super::*, crate::commands::json::instance_to_json, syncpack_vocab::severity::Severity};
 
   /// Default Fixable severity is `Fix`. Pins existing behaviour so it does
   /// not regress under the new resolver.

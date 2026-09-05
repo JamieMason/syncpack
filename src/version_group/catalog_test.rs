@@ -2073,7 +2073,7 @@ mod cannot_infer_catalog_file {
 /// Severity tests — opt out of auto-fix per status (issue #216).
 /// Catalog permits `NotUsingCatalog`, `MissingFromCatalog`.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   /// Scenario: pnpm yaml has catalog react ^18.0.0; pkg-a uses `^18.0.0`
   /// (real specifier, not `catalog:`) → `NotUsingCatalog("default")` Fixable.

@@ -3,12 +3,13 @@ use {
     commands::ui,
     context::Discovered,
     inspection::Inspection,
-    instance::{InstanceState, Severity, ValidInstance},
+    instance::{InstanceState, ValidInstance},
     version_group::{Dependency, DependencyIdx},
   },
   colored::*,
   itertools::Itertools,
   log::{error, info},
+  syncpack_vocab::severity::Severity,
 };
 
 pub fn print(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {

@@ -1,7 +1,6 @@
 use {
   crate::{
     context::Discovered,
-    disk::PackageManager,
     instance::{InstanceState, ValidInstance::*},
     source::Source,
     sources::SourceIdx,
@@ -13,6 +12,7 @@ use {
   },
   serde_json::json,
   std::rc::Rc,
+  syncpack_vocab::package_manager::PackageManager,
 };
 
 #[test]

@@ -1,7 +1,7 @@
 use {
   crate::{
     catalogs,
-    disk::{Disk, PackageManager},
+    disk::Disk,
     errors::SyncpackError,
     instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
     test::{
@@ -11,6 +11,7 @@ use {
     },
   },
   serde_json::json,
+  syncpack_vocab::package_manager::PackageManager,
 };
 
 #[tokio::test]

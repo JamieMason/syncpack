@@ -61,7 +61,7 @@ async fn all_instances_are_ignored() {
 /// Severity tests — `severity` on an Ignored group is silently discarded
 /// (the group produces no statuses to tune). No error, no effect.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   /// Any `severity` map on an Ignored group is accepted (not rejected as an
   /// unknown field) and has no observable effect — instances stay

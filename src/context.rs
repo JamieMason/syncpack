@@ -1,17 +1,19 @@
 use {
   crate::{
     cli::Cli,
-    dependency::DependencyType,
     disk::Disk,
-    errors::{UnsupportedConfigError, UnsupportedConfigErrors},
     inspection::Inspection,
     instance::{Instance, InstanceDescriptor, InstanceIdx},
     rcfile::{Rcfile, from_disk::RcfileError, validate_raw_dep_types},
-    registry::updates::RegistryUpdates,
     sources::Sources,
     version_group::{Dependency, DependencyIdx, VersionGroup, VersionGroupBehavior, add_instance_to_dep_map},
   },
   std::{collections::BTreeMap, mem},
+  syncpack_vocab::{
+    config_error::{UnsupportedConfigError, UnsupportedConfigErrors},
+    dependency_type::DependencyType,
+    registry_updates::RegistryUpdates,
+  },
   thiserror::Error,
 };
 
@@ -163,7 +165,7 @@ impl Discovered {
 
   /// Detected package manager (lives on Disk; accessor preserves call-site
   /// ergonomics).
-  pub fn package_manager(&self) -> Option<crate::disk::PackageManager> {
+  pub fn package_manager(&self) -> Option<syncpack_vocab::package_manager::PackageManager> {
     self.disk.package_manager
   }
 }

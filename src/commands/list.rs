@@ -1,9 +1,11 @@
-use crate::{
-  commands::ui,
-  context::Inspected,
-  errors::SyncpackError,
-  instance::Severity,
-  version_group::{InstanceAction, action_of},
+use {
+  crate::{
+    commands::ui,
+    context::Inspected,
+    errors::SyncpackError,
+    version_group::{InstanceAction, action_of},
+  },
+  syncpack_vocab::severity::Severity,
 };
 
 pub fn run(inspected: Inspected) -> Result<Inspected, SyncpackError> {

@@ -3,7 +3,6 @@
 mod client_test;
 
 use {
-  crate::dependency::UpdateUrl,
   log::debug,
   reqwest::{Client, StatusCode, header::ACCEPT},
   serde::{Deserialize, Serialize},
@@ -13,6 +12,7 @@ use {
     sync::Arc,
     time::Duration,
   },
+  syncpack_vocab::update_url::UpdateUrl,
   thiserror::Error,
 };
 

@@ -1,10 +1,9 @@
 use {
   crate::{
     catalogs::make_catalog_dep_types,
-    disk::{Disk, PackageManager, parse_json_file, parse_yaml_file},
+    disk::{Disk, parse_json_file, parse_yaml_file},
     errors::SyncpackError,
     instance::{InstanceState, ValidInstance::*},
-    source::SourceKind,
     test::{
       builder::TestBuilder,
       expect::{ExpectedInstance, expect},
@@ -12,6 +11,7 @@ use {
   },
   serde_json::json,
   std::path::PathBuf,
+  syncpack_vocab::{package_manager::PackageManager, source_kind::SourceKind},
 };
 
 /// Build an empty Disk with a synthetic cwd (`/test`) for catalogs unit tests.

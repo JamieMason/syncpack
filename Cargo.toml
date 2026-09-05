@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/syncpack-specifier"]
+members = ["crates/syncpack-specifier", "crates/syncpack-vocab"]
 
 [package]
 name = "syncpack"
@@ -37,6 +37,7 @@ detect-newline-style = "0.1.2"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
 syncpack-specifier = { path = "crates/syncpack-specifier" }
+syncpack-vocab = { path = "crates/syncpack-vocab" }
 thiserror = "2.0.20"
 yaml_serde = "0.10"
 yamlpatch = "1.29"

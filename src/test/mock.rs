@@ -3,15 +3,15 @@ use {
   crate::{
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
     context::{Config, Discovered},
-    dependency::DependencyType,
     disk::{Disk, File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
     rcfile::Rcfile,
-    registry::{client::RegistryClient, updates::RegistryUpdates},
+    registry::client::RegistryClient,
     sources::Sources,
   },
   log::LevelFilter,
   serde_json::Value,
   std::{env, path::PathBuf, sync::Arc},
+  syncpack_vocab::{dependency_type::DependencyType, registry_updates::RegistryUpdates},
 };
 
 pub fn cli() -> Cli {
@@ -132,7 +132,7 @@ pub async fn context_with_registry_updates(
 ) -> (Discovered, RegistryUpdates) {
   let client: Arc<dyn RegistryClient> = Arc::new(MockRegistryClient::from_json(mock_updates));
   let data = Discovered::create(config, disk, sources, dep_types).unwrap();
-  let updates = RegistryUpdates::fetch(
+  let updates = crate::registry::updates::fetch(
     &client,
     &data.version_groups,
     &data.dependencies,

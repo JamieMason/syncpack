@@ -1,10 +1,11 @@
 use {
-  crate::{errors::SyncpackError, group_selector::GroupSelector, rcfile::SourceMode},
+  crate::{errors::SyncpackError, group_selector::GroupSelector},
   clap::{Arg, ArgMatches, Command, builder::ValueParser, crate_description, crate_name, crate_version},
   color_print::cformat,
   itertools::Itertools,
   log::LevelFilter,
   std::{env, path::PathBuf, str::FromStr},
+  syncpack_vocab::source_mode::SourceMode,
 };
 
 #[cfg(test)]

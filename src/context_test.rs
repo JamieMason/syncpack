@@ -1,7 +1,6 @@
 use {
   crate::{
     context::Discovered,
-    disk::PackageManager,
     instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
     test::{
       self,
@@ -10,6 +9,7 @@ use {
     },
   },
   serde_json::json,
+  syncpack_vocab::package_manager::PackageManager,
 };
 
 #[tokio::test]

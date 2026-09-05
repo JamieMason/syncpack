@@ -4415,7 +4415,7 @@ mod update_groups {
 /// Highest/LowestSemver groups permit `SemverRangeMismatch`, `DiffersToLocal`,
 /// `DiffersToCatalog`, `DiffersToHighestOrLowestSemver`.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   /// Scenario: package-a foo 1.0.0, package-b foo 2.0.0. Highest wins.
   /// 1.0.0 → DiffersToHighestOrLowestSemver Fixable, severity `Warn`.

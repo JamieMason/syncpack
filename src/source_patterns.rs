@@ -1,6 +1,7 @@
 use {
-  crate::{context::Config, disk::Disk, rcfile::SourceMode},
+  crate::{context::Config, disk::Disk},
   log::debug,
+  syncpack_vocab::source_mode::SourceMode,
 };
 
 #[cfg(test)]

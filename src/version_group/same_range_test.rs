@@ -695,7 +695,7 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
 /// SameRange only permits `SemverRangeMismatch` (the only Fixable variant it
 /// produces). `SameRangeMismatch` itself is Unfixable and not user-tunable.
 mod severity {
-  use {super::*, crate::instance::Severity};
+  use {super::*, syncpack_vocab::severity::Severity};
 
   /// Scenario: package-a `foo: ">=1.0.0"` is `SatisfiesSameRangeGroup`;
   /// package-b `foo: "^1.2.3"` matches the same range but mismatches the

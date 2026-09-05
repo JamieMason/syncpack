@@ -675,15 +675,17 @@ mod disk_ops {
   use {
     super::*,
     crate::{
-      dependency::{DependencyType, Strategy},
       disk::{
         DetectedFormatting, copy_expected_specifier_json, detect_formatting, get_pretty_json_bytes, has_prop, package_name, parse_json_file,
       },
       instance::{Instance, InstanceDescriptor},
-      source::SourceKind,
       sources::SourceIdx,
     },
     serde_json::{Map, Value},
+    syncpack_vocab::{
+      dependency_type::{DependencyType, Strategy},
+      source_kind::SourceKind,
+    },
   };
 
   fn file_from_raw(raw: &str) -> File<Value> {

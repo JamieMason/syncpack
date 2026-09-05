@@ -3,11 +3,12 @@ use {
     context::{Discovered, Inspected},
     errors::SyncpackError,
     inspection::Inspection,
-    instance::{Instance, InstanceIdx, Severity},
+    instance::{Instance, InstanceIdx},
     source::Source,
     version_group::{InstanceAction, action_of},
   },
   serde_json::{Value, json},
+  syncpack_vocab::severity::Severity,
 };
 
 pub fn instance_to_json(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance, variant_label: &str) -> Value {

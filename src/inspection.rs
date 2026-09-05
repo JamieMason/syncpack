@@ -1,7 +1,6 @@
 use {
   crate::{
-    disk::PackageManager,
-    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, Severity, SuspectInstance, severity::SeverityMap},
+    instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, SuspectInstance},
     source::FormatMismatch,
     sources::{SourceIdx, Sources},
     specifier::Specifier,
@@ -9,6 +8,10 @@ use {
   },
   std::rc::Rc,
   syncpack_specifier::update_target::UpdateTarget,
+  syncpack_vocab::{
+    package_manager::PackageManager,
+    severity::{Severity, SeverityMap},
+  },
 };
 
 /// The read-only view passed to every rule in place of `&Context`. Rules read

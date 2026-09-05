@@ -1,15 +1,15 @@
 use {
   crate::{
-    errors::UnsupportedConfigError,
     rcfile::{
       RawRcfile, Rcfile,
       semver_group::AnySemverGroup,
-      update_group::{AnyUpdateGroup, UpdateGroup, UpdatePolicy},
+      update_group::{AnyUpdateGroup, UpdateGroup},
     },
     version_group::{AnyVersionGroup, VersionGroup},
   },
   serde_json::json,
   syncpack_specifier::update_target::UpdateTarget,
+  syncpack_vocab::{config_error::UnsupportedConfigError, update_policy::UpdatePolicy},
 };
 
 #[test]
@@ -240,7 +240,7 @@ fn context_create_rejects_invalid_dependency_type() {
 
 #[test]
 fn custom_type_with_explicit_source_parses() {
-  use crate::{rcfile::compute_all_dependency_types, source::SourceKind};
+  use {crate::rcfile::compute_all_dependency_types, syncpack_vocab::source_kind::SourceKind};
   let raw: RawRcfile = serde_json::from_value(json!({
     "customTypes": {
       "x": { "strategy": "versionsByName", "path": "/x", "source": "PnpmWorkspace" }
@@ -274,7 +274,7 @@ fn custom_type_with_invalid_source_returns_error() {
 
 #[test]
 fn custom_type_without_source_field_defaults_package_json() {
-  use crate::{rcfile::compute_all_dependency_types, source::SourceKind};
+  use {crate::rcfile::compute_all_dependency_types, syncpack_vocab::source_kind::SourceKind};
   let raw: RawRcfile = serde_json::from_value(json!({
     "customTypes": {
       "x": { "strategy": "versionsByName", "path": "/x" }
@@ -294,7 +294,7 @@ fn rcfile_catalog_dep_type_names_uses_flag() {
   // Even a customType named "pnpmCatalogLike" (matching v2's prefix filter)
   // must NOT be treated as a catalog dep type — it isn't auto-generated and
   // its `is_catalog_definition` flag is false.
-  use crate::dependency::{DependencyType, Strategy};
+  use syncpack_vocab::dependency_type::{DependencyType, Strategy};
   let mut rcfile = Rcfile::default();
   // Add a regular user dep type whose name happens to start with "pnpmCatalog".
   rcfile.all_dependency_types.push(DependencyType {
@@ -302,7 +302,7 @@ fn rcfile_catalog_dep_type_names_uses_flag() {
     name: "pnpmCatalogLike".to_string(),
     path: "/x".to_string(),
     strategy: Strategy::VersionsByName,
-    source: crate::source::SourceKind::PackageJson,
+    source: syncpack_vocab::source_kind::SourceKind::PackageJson,
     is_catalog_definition: false,
   });
   // Add an actual auto-gen catalog dep type.
@@ -311,7 +311,7 @@ fn rcfile_catalog_dep_type_names_uses_flag() {
     name: "pnpmCatalog".to_string(),
     path: "/catalog".to_string(),
     strategy: Strategy::VersionsByName,
-    source: crate::source::SourceKind::PnpmWorkspace,
+    source: syncpack_vocab::source_kind::SourceKind::PnpmWorkspace,
     is_catalog_definition: true,
   });
   let names = rcfile.catalog_dep_type_names_for_test();
@@ -453,10 +453,7 @@ mod source_mode {
 }
 
 mod comment_properties {
-  use {
-    crate::{errors::UnsupportedConfigError, rcfile::RawRcfile},
-    serde_json::json,
-  };
+  use {crate::rcfile::RawRcfile, serde_json::json, syncpack_vocab::config_error::UnsupportedConfigError};
 
   #[test]
   fn ignored_at_root() {

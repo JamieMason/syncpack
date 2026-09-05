@@ -2,7 +2,6 @@ use {
   crate::{
     cli::Cli,
     disk::{DetectedFormatting, Disk, DiskIo, DiskIoError, File, NodeJsError, detect_formatting, json_view},
-    errors::UnsupportedConfigErrors,
     rcfile::{
       DEFAULT_MINIMUM_RELEASE_AGE, RawRcfile, Rcfile,
       from_disk::javascript::{JsResult, get_javascript_contents},
@@ -10,6 +9,7 @@ use {
   },
   log::debug,
   std::{path::Path, time::Instant},
+  syncpack_vocab::config_error::UnsupportedConfigErrors,
   thiserror::Error,
 };
 

@@ -1,9 +1,7 @@
 use {
   crate::{
-    dependency::DependencyType,
-    errors::UnsupportedConfigError,
+    dependency::dependency_type,
     group_selector::GroupSelector,
-    instance::severity::SeverityMap,
     sources::Sources,
     version_group::{AnyVersionGroup, CatalogDefsGroup, VersionGroup},
   },
@@ -11,6 +9,7 @@ use {
   serde::Deserialize,
   serde_json::Value,
   std::{collections::HashMap, mem},
+  syncpack_vocab::{config_error::UnsupportedConfigError, dependency_type::DependencyType, severity::SeverityMap, source_mode::SourceMode},
   update_group::{AnyUpdateGroup, UpdateGroup},
 };
 
@@ -97,7 +96,7 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
   default_types
     .iter()
     .chain(custom_types.iter())
-    .map(|(name, custom_type)| DependencyType::new(name, custom_type))
+    .map(|(name, custom_type)| dependency_type::new(name, custom_type))
     .collect()
 }
 
@@ -167,31 +166,6 @@ fn sort_first() -> Vec<String> {
 
 fn default_source() -> Vec<String> {
   vec![]
-}
-
-/// How user-supplied source patterns combine with workspace discovery.
-///
-/// - `Replace` (default): user patterns from `--source` or rcfile `source` replace the discovered patterns entirely. Discovery is skipped.
-/// - `Extend`: user patterns are appended to discovered patterns so a project can keep its `workspaces` / `pnpm-workspace.yaml` /
-///   `lerna.json` packages *and* pull in extra paths.
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum SourceMode {
-  #[default]
-  Replace,
-  Extend,
-}
-
-impl std::str::FromStr for SourceMode {
-  type Err = String;
-
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    match s {
-      "replace" => Ok(SourceMode::Replace),
-      "extend" => Ok(SourceMode::Extend),
-      other => Err(format!("invalid value '{other}' for sourceMode: expected 'replace' or 'extend'")),
-    }
-  }
 }
 
 #[derive(Debug, Deserialize)]

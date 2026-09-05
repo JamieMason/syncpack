@@ -1,13 +1,16 @@
 use {
   crate::{
-    dependency::{DependencyType, Strategy},
     disk::{Disk, json_view, package_name},
     instance::InstanceDescriptor,
-    source::{Source, SourceKind},
+    source::Source,
     specifier::Specifier,
   },
   serde_json::Value,
   std::{collections::HashSet, path::PathBuf, rc::Rc},
+  syncpack_vocab::{
+    dependency_type::{DependencyType, Strategy},
+    source_kind::SourceKind,
+  },
 };
 
 #[cfg(test)]
