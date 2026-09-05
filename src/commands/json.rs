@@ -1,11 +1,11 @@
 use {
   crate::{
+    commands::{InstanceAction, action_of},
     context::{Discovered, Inspected},
     errors::SyncpackError,
     inspection::Inspection,
     instance::{Instance, InstanceIdx},
     source::Source,
-    version_group::{InstanceAction, action_of},
   },
   serde_json::{Value, json},
   syncpack_vocab::severity::Severity,
@@ -55,7 +55,7 @@ pub fn run(inspected: Inspected) -> Result<Inspected, SyncpackError> {
       let variant_label = group.variant_label();
       for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
         let dependency = &data.dependencies[dep_idx.0];
-        for (idx, instance) in dependency.get_sorted_instances(inspection, &data.instances, &data.sources.all) {
+        for (idx, instance) in crate::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all) {
           let action = action_of(inspection.severity(idx).unwrap_or(Severity::None));
           let instance_json = instance_to_json(data, inspection, idx, instance, variant_label);
           println!("{}", serde_json::to_string(&instance_json).unwrap());

@@ -1,7 +1,8 @@
 use {
   crate::{
+    context::{iter_instances, sources_from_disk},
     disk::Disk,
-    sources::{Sources, parse_catalog_name},
+    sources::parse_catalog_name,
   },
   serde_json::json,
   std::path::PathBuf,
@@ -92,7 +93,7 @@ fn disk_with_packages(values: &[serde_json::Value], yaml: Option<&str>) -> (Disk
 #[test]
 fn sources_packages_iter_only_yields_packages() {
   let (disk, file_paths) = disk_with_packages(&[json!({"name": "a"}), json!({"name": "b"})], Some("packages: ['*']\n"));
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let names: Vec<&str> = sources.packages_iter().map(|(_, s)| s.name()).collect();
   assert_eq!(names, vec!["a", "b"], "yaml source must be excluded");
 }
@@ -100,7 +101,7 @@ fn sources_packages_iter_only_yields_packages() {
 #[test]
 fn sources_find_package_returns_idx_or_none() {
   let (disk, file_paths) = disk_with_packages(&[json!({"name": "a"}), json!({"name": "b"})], Some("packages: ['*']\n"));
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let a_idx = sources.find_package("a").expect("found a");
   let b_idx = sources.find_package("b").expect("found b");
   assert_eq!(a_idx.0, 0, "a is at arena slot 0");
@@ -125,18 +126,18 @@ fn iter_skips_dep_type_with_mismatched_source() {
     })],
     None,
   );
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let dep_types = vec![pnpm_yaml_user_dep_type("foo", "/catalog")];
-  let descriptors: Vec<_> = sources.iter_instances(&disk, &dep_types).collect();
+  let descriptors: Vec<_> = iter_instances(&sources, &disk, &dep_types);
   assert!(descriptors.is_empty(), "package source must not be iterated by yaml dep type");
 }
 
 #[test]
 fn iter_emits_instance_for_matching_source() {
   let (disk, file_paths) = disk_with_packages(&[], Some("catalog:\n  react: ^18.0.0\n"));
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let dep_types = vec![auto_gen_pnpm_catalog_dep_type("pnpmCatalog", "/catalog")];
-  let descriptors: Vec<_> = sources.iter_instances(&disk, &dep_types).collect();
+  let descriptors: Vec<_> = iter_instances(&sources, &disk, &dep_types);
   assert_eq!(descriptors.len(), 1);
   assert_eq!(descriptors[0].name, "react");
   assert!(
@@ -149,9 +150,9 @@ fn iter_emits_instance_for_matching_source() {
 #[test]
 fn iter_emits_catalog_variant_for_is_catalog_definition_dep_type() {
   let (disk, file_paths) = disk_with_packages(&[], Some("catalogs:\n  react18:\n    react: ^18.0.0\n"));
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let dep_types = vec![auto_gen_pnpm_catalog_dep_type("pnpmCatalog:react18", "/catalogs/react18")];
-  let descriptors: Vec<_> = sources.iter_instances(&disk, &dep_types).collect();
+  let descriptors: Vec<_> = iter_instances(&sources, &disk, &dep_types);
   assert_eq!(descriptors.len(), 1);
   assert!(
     descriptors[0].dependency_type.is_catalog_definition,
@@ -163,10 +164,10 @@ fn iter_emits_catalog_variant_for_is_catalog_definition_dep_type() {
 #[test]
 fn iter_emits_package_variant_for_user_customtype_pnpm_workspace_source() {
   let (disk, file_paths) = disk_with_packages(&[], Some("foo:\n  react: ^18.0.0\n"));
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   // User customType reading yaml — is_catalog_definition is FALSE.
   let dep_types = vec![pnpm_yaml_user_dep_type("foo", "/foo")];
-  let descriptors: Vec<_> = sources.iter_instances(&disk, &dep_types).collect();
+  let descriptors: Vec<_> = iter_instances(&sources, &disk, &dep_types);
   assert_eq!(descriptors.len(), 1);
   assert!(
     !descriptors[0].dependency_type.is_catalog_definition,
@@ -177,9 +178,9 @@ fn iter_emits_package_variant_for_user_customtype_pnpm_workspace_source() {
 #[test]
 fn iter_handles_versions_by_name_strategy() {
   let (disk, file_paths) = disk_with_packages(&[], Some("catalog:\n  react: ^18.0.0\n  vue: ^3.0.0\n"));
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let dep_types = vec![auto_gen_pnpm_catalog_dep_type("pnpmCatalog", "/catalog")];
-  let mut names: Vec<String> = sources.iter_instances(&disk, &dep_types).map(|d| d.name).collect();
+  let mut names: Vec<String> = iter_instances(&sources, &disk, &dep_types).into_iter().map(|d| d.name).collect();
   names.sort();
   assert_eq!(names, vec!["react".to_string(), "vue".to_string()]);
 }
@@ -197,8 +198,8 @@ fn iter_handles_name_and_version_props_strategy() {
     })],
     None,
   );
-  let sources = Sources::from_disk(&disk, &file_paths);
-  let descriptors: Vec<_> = sources.iter_instances(&disk, &dep_types).collect();
+  let sources = sources_from_disk(&disk, &file_paths);
+  let descriptors: Vec<_> = iter_instances(&sources, &disk, &dep_types);
   assert!(descriptors.is_empty(), "no /version → silent skip");
 
   let (disk, file_paths) = disk_with_packages(
@@ -208,15 +209,15 @@ fn iter_handles_name_and_version_props_strategy() {
     })],
     None,
   );
-  let sources = Sources::from_disk(&disk, &file_paths);
-  let names: Vec<String> = sources.iter_instances(&disk, &dep_types).map(|d| d.name).collect();
+  let sources = sources_from_disk(&disk, &file_paths);
+  let names: Vec<String> = iter_instances(&sources, &disk, &dep_types).into_iter().map(|d| d.name).collect();
   assert_eq!(names, vec!["a".to_string()]);
 }
 
 #[test]
 fn iter_silent_skip_on_no_match() {
   let (disk, file_paths) = disk_with_packages(&[], Some("# empty\n"));
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let dep_types = vec![DependencyType {
     name_path: Some("/catalog/name".to_string()),
     name: "weirdo".to_string(),
@@ -225,7 +226,7 @@ fn iter_silent_skip_on_no_match() {
     source: SourceKind::PnpmWorkspace,
     is_catalog_definition: false,
   }];
-  let descriptors: Vec<_> = sources.iter_instances(&disk, &dep_types).collect();
+  let descriptors: Vec<_> = iter_instances(&sources, &disk, &dep_types);
   assert!(descriptors.is_empty());
 }
 
@@ -237,10 +238,10 @@ fn iter_local_package_names_excludes_yaml_sources() {
     &[json!({"name": "real-package"})],
     Some("catalog:\n  pnpm-workspace.yaml: ^1.0.0\n  real-package: ^2.0.0\n"),
   );
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let dep_types = vec![auto_gen_pnpm_catalog_dep_type("pnpmCatalog", "/catalog")];
-  let mut got: Vec<(String, bool)> = sources
-    .iter_instances(&disk, &dep_types)
+  let mut got: Vec<(String, bool)> = iter_instances(&sources, &disk, &dep_types)
+    .into_iter()
     .map(|d| (d.name, d.is_local_dependency))
     .collect();
   got.sort();
@@ -259,9 +260,9 @@ fn iter_pkg_json_dep_type_emits_package_variant() {
     })],
     None,
   );
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = sources_from_disk(&disk, &file_paths);
   let dep_types = vec![pkg_json_dep_type("dev", "/dependencies", Strategy::VersionsByName)];
-  let descriptors: Vec<_> = sources.iter_instances(&disk, &dep_types).collect();
+  let descriptors: Vec<_> = iter_instances(&sources, &disk, &dep_types);
   assert_eq!(descriptors.len(), 1);
   assert_eq!(descriptors[0].name, "react");
   assert!(!descriptors[0].dependency_type.is_catalog_definition);
@@ -270,11 +271,11 @@ fn iter_pkg_json_dep_type_emits_package_variant() {
 #[test]
 fn sources_from_disk_mirrors_package_json_files_one_to_one() {
   let (disk, all_paths) = disk_with_packages(&[json!({"name": "a"}), json!({"name": "b"})], None);
-  let sources = Sources::from_disk(&disk, &all_paths);
+  let sources = sources_from_disk(&disk, &all_paths);
   assert_eq!(sources.all.len(), 2, "no yaml: 1:1 with disk.package_json_files");
 
   let (disk_y, all_paths_y) = disk_with_packages(&[json!({"name": "a"}), json!({"name": "b"})], Some("packages: ['*']\n"));
-  let sources_y = Sources::from_disk(&disk_y, &all_paths_y);
+  let sources_y = sources_from_disk(&disk_y, &all_paths_y);
   assert_eq!(sources_y.all.len(), 3, "with yaml: +1 for PnpmYaml unit variant");
   assert_eq!(sources_y.pnpm_yaml_source_idx, Some(2), "yaml at tail slot");
 }

@@ -5,7 +5,7 @@ mod fix_test;
 use {
   crate::{
     catalogs::detect_bun_catalogs,
-    commands::reporter::FixReporter,
+    commands::{InstanceAction, action_of, reporter::FixReporter},
     context::{Discovered, Inspected},
     disk::{copy_expected_specifier_json, insert_catalog_definition},
     errors::SyncpackError,
@@ -13,7 +13,7 @@ use {
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
     source::Source,
     specifier::Specifier,
-    version_group::{InstanceAction, VersionGroupBehavior, action_of},
+    version_group::VersionGroupBehavior,
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
@@ -40,7 +40,7 @@ pub fn run<D: DiskIo>(mut inspected: Inspected, reporter: &dyn FixReporter, io: 
         for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
           let dependency = &data.dependencies[dep_idx.0];
           let mut has_printed_dependency = false;
-          for (idx, instance) in dependency.get_sorted_instances(inspection, &data.instances, &data.sources.all) {
+          for (idx, instance) in crate::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all) {
             let action = action_of(inspection.severity(idx).unwrap_or(Severity::None));
             // `Render(Error)` from non-fixable states (Unfixable, Conflict,
             // strict-Suspect, user-configured Error on Fixable) cannot be

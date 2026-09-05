@@ -2,9 +2,8 @@ use {
   crate::{
     commands::{json::instance_to_json, ui},
     context::Discovered,
-    inspection::Inspection,
+    inspection::{FormatMismatch, Inspection},
     instance::{Instance, InstanceIdx},
-    source::FormatMismatch,
     version_group::{Dependency, DependencyIdx, VersionGroup},
   },
   serde_json::json,

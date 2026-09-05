@@ -1,10 +1,10 @@
 use {
-  crate::{dependency::dependency_type, version_group::AnyVersionGroup},
+  crate::dependency::dependency_type,
   semver_group::AnySemverGroup,
   serde::Deserialize,
   serde_json::Value,
   std::collections::HashMap,
-  syncpack_vocab::{config_error::UnsupportedConfigError, dependency_type::DependencyType, source_mode::SourceMode},
+  syncpack_vocab::{config_error::UnsupportedConfigError, dependency_type::DependencyType, severity::SeverityMap, source_mode::SourceMode},
   update_group::AnyUpdateGroup,
 };
 
@@ -190,6 +190,34 @@ pub struct DependencyGroup {
   pub packages: Vec<String>,
   #[serde(default)]
   pub specifier_types: Vec<String>,
+  #[serde(flatten)]
+  pub unknown_fields: HashMap<String, Value>,
+}
+
+/// Raw schema of one `versionGroups` entry. Compiled into a rules
+/// `VersionGroup` at discovery time (`context::version_group_from_config`).
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnyVersionGroup {
+  #[serde(default)]
+  pub dependencies: Vec<String>,
+  #[serde(default)]
+  pub dependency_types: Vec<String>,
+  #[serde(default)]
+  pub label: String,
+  #[serde(default)]
+  pub packages: Vec<String>,
+  #[serde(default)]
+  pub specifier_types: Vec<String>,
+  //
+  pub is_banned: Option<bool>,
+  pub is_ignored: Option<bool>,
+  pub pin_version: Option<String>,
+  pub policy: Option<String>,
+  pub snap_to: Option<Vec<String>>,
+  pub prefer_version: Option<String>,
+  #[serde(default)]
+  pub severity: SeverityMap,
   #[serde(flatten)]
   pub unknown_fields: HashMap<String, Value>,
 }

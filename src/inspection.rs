@@ -1,11 +1,11 @@
 use {
   crate::{
     instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, SuspectInstance},
-    source::FormatMismatch,
     sources::{SourceIdx, Sources},
     specifier::Specifier,
     version_group::{Dependency, DependencyIdx},
   },
+  serde_json::Value,
   std::rc::Rc,
   syncpack_specifier::update_target::UpdateTarget,
   syncpack_vocab::{
@@ -13,6 +13,49 @@ use {
     severity::{Severity, SeverityMap},
   },
 };
+
+/// A formatting mismatch detected against a `package.json`. Produced by
+/// `visit_formatting`, held in `Inspection.formatting` keyed by `SourceIdx`.
+#[derive(Debug)]
+pub struct FormatMismatch {
+  /// The formatted value
+  pub expected: Value,
+  /// The path to the property that was linted
+  pub property_path: String,
+  /// The broken linting rule
+  pub variant: FormatMismatchVariant,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub enum FormatMismatchVariant {
+  /// - ✓ `rcFile.formatBugs` is enabled
+  /// - ✘ The `bugs` property is not formatted
+  BugsPropertyIsNotFormatted,
+  /// - ✓ `rcFile.formatRepository` is enabled
+  /// - ✘ The `repository` property is not formatted
+  RepositoryPropertyIsNotFormatted,
+  /// - ✓ `rcFile.sortAz` is enabled
+  /// - ✘ This property is not sorted alphabetically
+  PropertyIsNotSortedAz,
+  /// - ✓ `rcFile.sortPackages` is enabled
+  /// - ✘ This package.json's properties are not sorted
+  PackagePropertiesAreNotSorted,
+  /// - ✓ `rcFile.sortExports` is enabled
+  /// - ✘ The `exports` property is not sorted
+  ExportsPropertyIsNotSorted,
+}
+
+/// The formatting rules (lifted from the rcfile) that `visit_formatting`
+/// enforces. Plain data so the formatting pass names no config/disk type.
+#[derive(Clone, Debug)]
+pub struct FormatConfig {
+  pub sort_packages: bool,
+  pub sort_first: Vec<String>,
+  pub format_bugs: bool,
+  pub format_repository: bool,
+  pub sort_exports: Vec<String>,
+  pub sort_az: Vec<String>,
+}
 
 /// The read-only view passed to every rule in place of `&Context`. Rules read
 /// discovered project data plus the handful of config scalars they need; they

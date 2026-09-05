@@ -13,7 +13,7 @@ use {
 };
 
 pub fn print(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
-  match &dependency.get_state(inspection) {
+  match &crate::version_group::get_state(dependency, inspection) {
     InstanceState::Valid(ValidInstance::IsIgnored) => print_ignored(ctx, inspection, dep_idx, dependency, group_variant),
     InstanceState::Valid(_) => print_valid(ctx, inspection, dep_idx, dependency, group_variant),
     InstanceState::Invalid(_) => match max_severity(inspection, dependency) {
@@ -145,8 +145,7 @@ fn get_invalid_status_codes_in_brackets(ctx: &Discovered, inspection: &Inspectio
   if !ctx.config.cli.show_status_codes {
     return "".to_string();
   }
-  let links = dependency
-    .get_states(inspection)
+  let links = crate::version_group::get_states(dependency, inspection)
     .iter()
     .filter(|state| matches!(state, InstanceState::Invalid(_) | InstanceState::Suspect(_)))
     .map(|state| state.get_name())

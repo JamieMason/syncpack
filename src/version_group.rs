@@ -8,19 +8,13 @@ use {
     specifier::Specifier,
   },
   itertools::Itertools,
-  serde::Deserialize,
-  serde_json::Value,
   std::{
     cmp::Ordering,
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashSet},
     rc::Rc,
   },
   syncpack_specifier::update_target::UpdateTarget,
-  syncpack_vocab::{
-    registry_updates::RegistryUpdates,
-    severity::{Severity, SeverityMap},
-    update_url::UpdateUrl,
-  },
+  syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap, update_url::UpdateUrl},
 };
 
 mod banned;
@@ -42,32 +36,6 @@ mod same_minor;
 mod same_range;
 mod semver_range_only;
 mod snapped_to;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AnyVersionGroup {
-  #[serde(default)]
-  pub dependencies: Vec<String>,
-  #[serde(default)]
-  pub dependency_types: Vec<String>,
-  #[serde(default)]
-  pub label: String,
-  #[serde(default)]
-  pub packages: Vec<String>,
-  #[serde(default)]
-  pub specifier_types: Vec<String>,
-  //
-  pub is_banned: Option<bool>,
-  pub is_ignored: Option<bool>,
-  pub pin_version: Option<String>,
-  pub policy: Option<String>,
-  pub snap_to: Option<Vec<String>>,
-  pub prefer_version: Option<String>,
-  #[serde(default)]
-  pub severity: SeverityMap,
-  #[serde(flatten)]
-  pub unknown_fields: HashMap<String, Value>,
-}
 
 pub use {
   banned::BannedGroup, catalog::CatalogGroup, catalog_defs::CatalogDefsGroup, ignored::IgnoredGroup, pinned::PinnedGroup,
@@ -122,17 +90,6 @@ impl Dependency {
     }
   }
 
-  pub fn get_state(&self, inspection: &Inspection) -> InstanceState {
-    self
-      .instances
-      .iter()
-      .fold(InstanceState::Unknown, |acc, idx| acc.max(inspection.state(*idx).clone()))
-  }
-
-  pub fn get_states(&self, inspection: &Inspection) -> Vec<InstanceState> {
-    self.instances.iter().map(|idx| inspection.state(*idx).clone()).collect()
-  }
-
   pub fn get_local_specifier(&self, arena: &[Instance]) -> Option<Rc<Specifier>> {
     self.local_instance.map(|idx| Rc::clone(&arena[idx.0].descriptor.specifier))
   }
@@ -175,38 +132,6 @@ impl Dependency {
 
   pub fn get_instances<'a>(&'a self, arena: &'a [Instance]) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
     self.instances.iter().map(move |idx| (*idx, &arena[idx.0]))
-  }
-
-  pub fn get_sorted_instances<'a>(
-    &'a self,
-    inspection: &Inspection,
-    instances: &'a [Instance],
-    sources: &'a [Source],
-  ) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
-    self.get_instances(instances).sorted_by(|(a_idx, a), (b_idx, b)| {
-      let a_valid = inspection.state(*a_idx).is_valid();
-      let b_valid = inspection.state(*b_idx).is_valid();
-      if a_valid && !b_valid {
-        return Ordering::Less;
-      }
-      if b_valid && !a_valid {
-        return Ordering::Greater;
-      }
-      if a.has_missing_specifier() {
-        return Ordering::Greater;
-      }
-      if b.has_missing_specifier() {
-        return Ordering::Less;
-      }
-      let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
-      if matches!(specifier_order, Ordering::Equal) {
-        let a_name = sources[a.source_idx().0].name();
-        let b_name = sources[b.source_idx().0].name();
-        a_name.cmp(b_name)
-      } else {
-        specifier_order
-      }
-    })
   }
 }
 
@@ -265,6 +190,54 @@ pub fn get_unique_update_urls(version_groups: &[VersionGroup], dependencies: &[D
 #[cfg(test)]
 #[path = "version_group/dependency_test.rs"]
 mod dependency_test;
+
+/// The dependency's overall state: the highest (worst) instance state across
+/// its instances, read from `inspection`.
+pub fn get_state(dep: &Dependency, inspection: &Inspection) -> InstanceState {
+  dep
+    .instances
+    .iter()
+    .fold(InstanceState::Unknown, |acc, idx| acc.max(inspection.state(*idx).clone()))
+}
+
+/// Every instance's state for this dependency, read from `inspection`.
+pub fn get_states(dep: &Dependency, inspection: &Inspection) -> Vec<InstanceState> {
+  dep.instances.iter().map(|idx| inspection.state(*idx).clone()).collect()
+}
+
+/// The dependency's instances sorted valid-first, then by descending specifier,
+/// then by source name. Reads validity from `inspection`.
+pub fn get_sorted_instances<'a>(
+  dep: &'a Dependency,
+  inspection: &Inspection,
+  instances: &'a [Instance],
+  sources: &'a [Source],
+) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
+  dep.get_instances(instances).sorted_by(|(a_idx, a), (b_idx, b)| {
+    let a_valid = inspection.state(*a_idx).is_valid();
+    let b_valid = inspection.state(*b_idx).is_valid();
+    if a_valid && !b_valid {
+      return Ordering::Less;
+    }
+    if b_valid && !a_valid {
+      return Ordering::Greater;
+    }
+    if a.has_missing_specifier() {
+      return Ordering::Greater;
+    }
+    if b.has_missing_specifier() {
+      return Ordering::Less;
+    }
+    let specifier_order = b.descriptor.specifier.cmp(&a.descriptor.specifier);
+    if matches!(specifier_order, Ordering::Equal) {
+      let a_name = sources[a.source_idx().0].name();
+      let b_name = sources[b.source_idx().0].name();
+      a_name.cmp(b_name)
+    } else {
+      specifier_order
+    }
+  })
+}
 
 pub trait VersionGroupBehavior {
   fn selector(&self) -> &GroupSelector;
@@ -440,25 +413,4 @@ impl VersionGroup {
       severity: SeverityMap::new(),
     })
   }
-}
-
-/// Map a resolved severity to the action a command should take. Pure function
-/// of `severity` — commands branch on this at report/apply time.
-pub fn action_of(severity: Severity) -> InstanceAction {
-  match severity {
-    Severity::None => InstanceAction::Valid,
-    Severity::Fix => InstanceAction::Fix(Severity::Fix),
-    Severity::Warn | Severity::Error => InstanceAction::Render(severity),
-  }
-}
-
-/// Resolver output consumed by each command's iteration loop.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum InstanceAction {
-  /// Do nothing — instance is Valid or Unknown.
-  Valid,
-  /// Render as warning or error; never apply the fix.
-  Render(Severity),
-  /// Apply the fix; render under `fix`/`lint`.
-  Fix(Severity),
 }

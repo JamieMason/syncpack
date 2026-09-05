@@ -3,7 +3,7 @@
 mod format_test;
 
 use {
-  crate::rcfile::Rcfile,
+  crate::inspection::FormatConfig,
   regex::Regex,
   serde_json::{self, Map, Value},
   std::{cmp::Ordering, collections::HashSet},
@@ -32,7 +32,7 @@ pub fn get_formatted_repository(contents: &Value) -> Option<Value> {
 }
 
 /// Get sorted conditional exports and conditional exports subpaths
-pub fn get_sorted_exports(rcfile: &Rcfile, contents: &Value) -> Option<Value> {
+pub fn get_sorted_exports(format: &FormatConfig, contents: &Value) -> Option<Value> {
   /// Recursively visit and sort nested objects of the exports object
   fn sort_nested_objects(sort_exports: &Vec<String>, value: &mut Value) {
     if let Value::Object(obj) = value {
@@ -48,7 +48,7 @@ pub fn get_sorted_exports(rcfile: &Rcfile, contents: &Value) -> Option<Value> {
   }
   if let Some(exports) = contents.pointer("/exports") {
     let mut sorted_exports = exports.clone();
-    sort_nested_objects(&rcfile.sort_exports, &mut sorted_exports);
+    sort_nested_objects(&format.sort_exports, &mut sorted_exports);
     if !is_identical(exports, &sorted_exports) {
       return Some(sorted_exports);
     }
@@ -69,10 +69,10 @@ pub fn get_sorted_az(key: &str, contents: &Value) -> Option<Value> {
 }
 
 /// Get a new package.json with its keys sorted to match the rcfile
-pub fn get_sorted_first(rcfile: &Rcfile, contents: &Value) -> Option<Value> {
+pub fn get_sorted_first(format: &FormatConfig, contents: &Value) -> Option<Value> {
   if let Value::Object(value) = contents {
     let mut sorted = value.clone();
-    sort_keys_with_priority(&rcfile.sort_first, rcfile.sort_packages, &mut sorted);
+    sort_keys_with_priority(&format.sort_first, format.sort_packages, &mut sorted);
     if !has_same_key_order(value, &sorted) {
       return Some(serde_json::Value::Object(sorted));
     }

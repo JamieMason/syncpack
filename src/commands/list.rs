@@ -1,9 +1,8 @@
 use {
   crate::{
-    commands::ui,
+    commands::{InstanceAction, action_of, ui},
     context::Inspected,
     errors::SyncpackError,
-    version_group::{InstanceAction, action_of},
   },
   syncpack_vocab::severity::Severity,
 };
@@ -22,7 +21,7 @@ pub fn run(inspected: Inspected) -> Result<Inspected, SyncpackError> {
       for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
         let dependency = &data.dependencies[dep_idx.0];
         ui::dependency::print(data, inspection, dep_idx, dependency, group.variant_label());
-        for (idx, instance) in dependency.get_sorted_instances(inspection, &data.instances, &data.sources.all) {
+        for (idx, instance) in crate::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all) {
           let action = action_of(inspection.severity(idx).unwrap_or(Severity::None));
           if data.config.cli.show_instances {
             ui::instance::print(data, inspection, idx, instance);

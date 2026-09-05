@@ -1,8 +1,7 @@
 use {
   crate::{
     context::{SemverGroup, UpdateGroup, version_group_from_config},
-    rcfile::{RawRcfile, Rcfile, semver_group::AnySemverGroup, update_group::AnyUpdateGroup},
-    version_group::AnyVersionGroup,
+    rcfile::{AnyVersionGroup, RawRcfile, Rcfile, semver_group::AnySemverGroup, update_group::AnyUpdateGroup},
   },
   serde_json::json,
   syncpack_specifier::update_target::UpdateTarget,

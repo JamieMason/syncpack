@@ -10,15 +10,16 @@ use {
     context::{Config, Discovered, Inspected},
     disk::Disk,
     errors::SyncpackError,
-    inspection::{Inspection, RuleInput, RuleInputCfg},
+    inspection::{FormatConfig, Inspection, RuleInput, RuleInputCfg},
     logger,
     rcfile::Rcfile,
+    source::Source,
     source_patterns::get_source_patterns,
-    sources::Sources,
     tui::Tui,
     visit_formatting::visit_formatting,
     visit_packages::visit_packages,
   },
+  serde_json::Value,
   std::sync::Arc,
   syncpack_io::DiskIo,
   syncpack_registry::client::RegistryClient,
@@ -49,7 +50,7 @@ fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Discovered, SyncpackError> {
   let file_paths = io.find_package_jsons(&disk.cwd, &source_patterns);
   disk.load_package_files(io, &file_paths);
   let dep_types = catalogs::make_catalog_dep_types(&disk)?;
-  let sources = Sources::from_disk(&disk, &file_paths);
+  let sources = crate::context::sources_from_disk(&disk, &file_paths);
   Discovered::create(config, disk, sources, dep_types).map_err(SyncpackError::ContextError)
 }
 
@@ -91,8 +92,25 @@ pub fn inspect(data: &Discovered, registry_updates: &Option<RegistryUpdates>) ->
   let version_start = std::time::Instant::now();
   visit_packages(&data.version_groups, &input, registry_updates, &mut inspection);
   log::debug!("Version inspection completed in {:?}", version_start.elapsed());
+  let format = FormatConfig {
+    sort_packages: data.config.rcfile.sort_packages,
+    sort_first: data.config.rcfile.sort_first.clone(),
+    format_bugs: data.config.rcfile.format_bugs,
+    format_repository: data.config.rcfile.format_repository,
+    sort_exports: data.config.rcfile.sort_exports.clone(),
+    sort_az: data.config.rcfile.sort_az.clone(),
+  };
+  let contents: Vec<Option<&Value>> = data
+    .sources
+    .all
+    .iter()
+    .map(|source| match source {
+      Source::Package { file_idx, .. } => Some(&data.disk.package_json_files[*file_idx].contents),
+      Source::PnpmYaml => None,
+    })
+    .collect();
   let formatting_start = std::time::Instant::now();
-  visit_formatting(data, &mut inspection);
+  visit_formatting(&data.sources, &contents, &format, &mut inspection);
   log::debug!("Formatting inspection completed in {:?}", formatting_start.elapsed());
   log::debug!("Inspection (version + formatting) completed in {:?}", inspect_start.elapsed());
   inspection

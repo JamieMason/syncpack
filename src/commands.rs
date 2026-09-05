@@ -1,3 +1,26 @@
+use syncpack_vocab::severity::Severity;
+
+/// Map a resolved severity to the action a command should take. Pure function
+/// of `severity` — commands branch on this at report/apply time.
+pub fn action_of(severity: Severity) -> InstanceAction {
+  match severity {
+    Severity::None => InstanceAction::Valid,
+    Severity::Fix => InstanceAction::Fix(Severity::Fix),
+    Severity::Warn | Severity::Error => InstanceAction::Render(severity),
+  }
+}
+
+/// Resolver output consumed by each command's iteration loop.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InstanceAction {
+  /// Do nothing — instance is Valid or Unknown.
+  Valid,
+  /// Render as warning or error; never apply the fix.
+  Render(Severity),
+  /// Apply the fix; render under `fix`/`lint`.
+  Fix(Severity),
+}
+
 /// Write fixes to disk
 pub mod fix;
 

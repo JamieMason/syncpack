@@ -45,10 +45,10 @@ pub fn build_update_rows(
 
     for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
       let dep = &data.dependencies[dep_idx.0];
-      let outdated: Vec<(InstanceIdx, &crate::instance::Instance)> = dep
-        .get_sorted_instances(inspection, &data.instances, &data.sources.all)
-        .filter(|(idx, _)| inspection.state(*idx).is_outdated())
-        .collect();
+      let outdated: Vec<(InstanceIdx, &crate::instance::Instance)> =
+        crate::version_group::get_sorted_instances(dep, inspection, &data.instances, &data.sources.all)
+          .filter(|(idx, _)| inspection.state(*idx).is_outdated())
+          .collect();
       if outdated.is_empty() {
         continue;
       }

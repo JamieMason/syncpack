@@ -1,5 +1,5 @@
 use {
-  crate::{commands::ui, context::Discovered, source::FormatMismatch},
+  crate::{commands::ui, context::Discovered, inspection::FormatMismatch},
   colored::*,
   log::info,
   std::path::Path,

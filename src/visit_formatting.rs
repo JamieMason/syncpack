@@ -1,23 +1,25 @@
-use crate::{
-  context::Discovered,
-  inspection::Inspection,
-  source::{FormatMismatch, FormatMismatchVariant::*, Source},
-  sources::SourceIdx,
+use {
+  crate::{
+    inspection::{FormatConfig, FormatMismatch, FormatMismatchVariant::*, Inspection},
+    source::Source,
+    sources::{SourceIdx, Sources},
+  },
+  serde_json::Value,
 };
 
 mod format;
 
 /// Formatting inspection: read each package.json's loaded contents and record
 /// any formatting mismatches into `out.formatting`, keyed by `SourceIdx`. Pure
-/// — reads already-loaded file contents, mutates only `out`.
-pub fn visit_formatting(discovered: &Discovered, out: &mut Inspection) {
-  let rcfile = &discovered.config.rcfile;
-  for (source_idx, source) in discovered.sources.all.iter().enumerate() {
-    let Source::Package { file_idx, .. } = source else { continue };
-    let source_idx = SourceIdx(source_idx);
-    let file = &discovered.disk.package_json_files[*file_idx];
-    if (rcfile.sort_packages || !rcfile.sort_first.is_empty())
-      && let Some(expected) = format::get_sorted_first(rcfile, &file.contents)
+/// — reads already-loaded file contents (threaded in as `contents`, indexed by
+/// source position) plus the plain-data `FormatConfig`, mutates only `out`.
+pub fn visit_formatting(sources: &Sources, contents: &[Option<&Value>], format: &FormatConfig, out: &mut Inspection) {
+  for (i, source) in sources.all.iter().enumerate() {
+    let Source::Package { .. } = source else { continue };
+    let Some(file_contents) = contents[i] else { continue };
+    let source_idx = SourceIdx(i);
+    if (format.sort_packages || !format.sort_first.is_empty())
+      && let Some(expected) = format::get_sorted_first(format, file_contents)
     {
       out.add_format_mismatch(
         source_idx,
@@ -28,8 +30,8 @@ pub fn visit_formatting(discovered: &Discovered, out: &mut Inspection) {
         },
       );
     }
-    if rcfile.format_bugs
-      && let Some(expected) = format::get_formatted_bugs(&file.contents)
+    if format.format_bugs
+      && let Some(expected) = format::get_formatted_bugs(file_contents)
     {
       out.add_format_mismatch(
         source_idx,
@@ -40,8 +42,8 @@ pub fn visit_formatting(discovered: &Discovered, out: &mut Inspection) {
         },
       );
     }
-    if rcfile.format_repository
-      && let Some(expected) = format::get_formatted_repository(&file.contents)
+    if format.format_repository
+      && let Some(expected) = format::get_formatted_repository(file_contents)
     {
       out.add_format_mismatch(
         source_idx,
@@ -52,8 +54,8 @@ pub fn visit_formatting(discovered: &Discovered, out: &mut Inspection) {
         },
       );
     }
-    if !rcfile.sort_exports.is_empty()
-      && let Some(expected) = format::get_sorted_exports(rcfile, &file.contents)
+    if !format.sort_exports.is_empty()
+      && let Some(expected) = format::get_sorted_exports(format, file_contents)
     {
       out.add_format_mismatch(
         source_idx,
@@ -64,9 +66,9 @@ pub fn visit_formatting(discovered: &Discovered, out: &mut Inspection) {
         },
       );
     }
-    if !rcfile.sort_az.is_empty() {
-      for key in rcfile.sort_az.iter() {
-        if let Some(expected) = format::get_sorted_az(key, &file.contents) {
+    if !format.sort_az.is_empty() {
+      for key in format.sort_az.iter() {
+        if let Some(expected) = format::get_sorted_az(key, file_contents) {
           out.add_format_mismatch(
             source_idx,
             FormatMismatch {

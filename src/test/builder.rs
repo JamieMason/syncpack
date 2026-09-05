@@ -464,7 +464,7 @@ impl TestBuilder {
 /// sees them all). Yaml is appended at the tail when present.
 fn build_sources(disk: &Disk) -> Sources {
   let all_paths: Vec<PathBuf> = disk.package_json_files.iter().map(|f| f.filepath.clone()).collect();
-  Sources::from_disk(disk, &all_paths)
+  crate::context::sources_from_disk(disk, &all_paths)
 }
 
 impl Default for TestBuilder {

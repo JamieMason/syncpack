@@ -1,8 +1,25 @@
 use {
   super::*,
-  crate::test::{self, mock},
+  crate::{
+    inspection::FormatConfig,
+    rcfile::Rcfile,
+    test::{self, mock},
+  },
   serde_json::json,
 };
+
+/// Build the plain-data `FormatConfig` the format helpers now take from a
+/// (mocked) `Rcfile`, so these tests keep exercising the real defaults.
+fn format_config(rcfile: &Rcfile) -> FormatConfig {
+  FormatConfig {
+    sort_packages: rcfile.sort_packages,
+    sort_first: rcfile.sort_first.clone(),
+    format_bugs: rcfile.format_bugs,
+    format_repository: rcfile.format_repository,
+    sort_exports: rcfile.sort_exports.clone(),
+    sort_az: rcfile.sort_az.clone(),
+  }
+}
 
 #[test]
 fn formats_bugs_into_github_shorthand() {
@@ -64,7 +81,7 @@ fn retains_long_format_when_directory_property_used() {
 fn sorts_conditional_exports() {
   assert_eq!(
     get_sorted_exports(
-      &mock::rcfile(),
+      &format_config(&mock::rcfile()),
       &mock::package_json_from_value(json!({
         "name": "a",
         "exports": {
@@ -88,7 +105,7 @@ fn sorts_conditional_exports() {
 fn returns_none_when_conditional_exports_already_sorted() {
   assert_eq!(
     get_sorted_exports(
-      &mock::rcfile(),
+      &format_config(&mock::rcfile()),
       &mock::package_json_from_value(json!({
         "name": "a",
         "exports": {
@@ -105,7 +122,7 @@ fn returns_none_when_conditional_exports_already_sorted() {
 fn sorts_conditional_exports_sub_paths() {
   assert_eq!(
     get_sorted_exports(
-      &mock::rcfile(),
+      &format_config(&mock::rcfile()),
       &mock::package_json_from_value(json!({
         "name": "a",
         "exports": {
@@ -131,7 +148,7 @@ fn sorts_conditional_exports_sub_paths() {
 fn returns_none_when_conditional_exports_sub_paths_already_sorted() {
   assert_eq!(
     get_sorted_exports(
-      &mock::rcfile(),
+      &format_config(&mock::rcfile()),
       &mock::package_json_from_value(json!({
         "name": "a",
         "exports": {
@@ -190,10 +207,10 @@ fn sorts_array_members_alphabetically_by_value() {
 fn sorts_named_root_properties_first_leaving_the_rest_alone() {
   assert_eq!(
     get_sorted_first(
-      &test::mock::rcfile_from_mock(json!({
+      &format_config(&test::mock::rcfile_from_mock(json!({
           "sortFirst": ["name", "F", "E", "D"],
           "sortPackages": false,
-      })),
+      }))),
       &mock::package_json_from_value(json!({
           "D": "",
           "B": "",
@@ -218,10 +235,10 @@ fn sorts_named_root_properties_first_leaving_the_rest_alone() {
 fn sorts_all_root_properties_alphabetically() {
   assert_eq!(
     get_sorted_first(
-      &test::mock::rcfile_from_mock(json!({
+      &format_config(&test::mock::rcfile_from_mock(json!({
           "sortFirst": [],
           "sortPackages": true,
-      })),
+      }))),
       &mock::package_json_from_value(json!({
           "D": "",
           "B": "",
@@ -246,10 +263,10 @@ fn sorts_all_root_properties_alphabetically() {
 fn sorts_named_properties_first_then_the_rest_alphabetically() {
   assert_eq!(
     get_sorted_first(
-      &test::mock::rcfile_from_mock(json!({
+      &format_config(&test::mock::rcfile_from_mock(json!({
           "sortFirst": ["name", "F", "E", "D"],
           "sortPackages": true,
-      })),
+      }))),
       &mock::package_json_from_value(json!({
           "name": "a",
           "A": "",

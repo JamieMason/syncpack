@@ -118,7 +118,7 @@ pub fn disk_and_sources_from_mocks(values: Vec<serde_json::Value>) -> (Disk, Sou
     package_manager: None,
     pnpm_workspace: None,
   };
-  let sources = Sources::from_disk(&disk, &all_paths);
+  let sources = crate::context::sources_from_disk(&disk, &all_paths);
   (disk, sources)
 }
 
