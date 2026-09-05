@@ -1762,6 +1762,7 @@ dependencies = [
  "syncpack-io",
  "syncpack-model",
  "syncpack-registry",
+ "syncpack-rules",
  "syncpack-specifier",
  "syncpack-vocab",
  "thiserror 2.0.20",
@@ -1835,6 +1836,19 @@ dependencies = [
  "syncpack-vocab",
  "thiserror 2.0.20",
  "tokio",
+]
+
+[[package]]
+name = "syncpack-rules"
+version = "15.3.3"
+dependencies = [
+ "itertools 0.15.0",
+ "log",
+ "regex",
+ "serde_json",
+ "syncpack-model",
+ "syncpack-specifier",
+ "syncpack-vocab",
 ]
 
 [[package]]

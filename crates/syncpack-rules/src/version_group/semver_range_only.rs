@@ -14,10 +14,6 @@ use {
   syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap, update_policy::UpdatePolicy},
 };
 
-#[cfg(test)]
-#[path = "semver_range_only_test.rs"]
-mod semver_range_only_test;
-
 #[derive(Debug)]
 pub struct SemverRangeOnlyGroup {
   pub selector: GroupSelector,

@@ -98,9 +98,9 @@ impl CatalogDefsGroup {
 /// when no update is eligible or the new specifier can't be reconstructed.
 fn pick_outdated_target(
   instance: &Instance,
-  sorted_desc: &[Rc<crate::specifier::Specifier>],
+  sorted_desc: &[Rc<syncpack_specifier::Specifier>],
   target: syncpack_specifier::update_target::UpdateTarget,
-) -> Option<Rc<crate::specifier::Specifier>> {
+) -> Option<Rc<syncpack_specifier::Specifier>> {
   let actual_specifier = &instance.descriptor.specifier;
   let highest_update = highest_eligible_for(sorted_desc, actual_specifier, &target)?;
   debug!("{L4}an eligible update {highest_update:?} is available");

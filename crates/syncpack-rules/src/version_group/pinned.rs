@@ -14,10 +14,6 @@ use {
   syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
-#[cfg(test)]
-#[path = "pinned_test.rs"]
-mod pinned_test;
-
 #[derive(Debug)]
 pub struct PinnedGroup {
   pub selector: GroupSelector,

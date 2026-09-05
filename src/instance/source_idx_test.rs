@@ -182,15 +182,12 @@ fn fix_zero_catalogs_pnpm_creates_default_on_disk() {
   // fix the auto-created yaml lands on `ctx.disk.pnpm_workspace` — NOT in
   // the sources arena.
   use {
-    crate::{
-      commands::{fix, reporter::FixReporter},
-      inspection::Inspection,
-      version_group::VersionGroup,
-    },
+    crate::commands::{fix, reporter::FixReporter},
     syncpack_model::{
       dependency::{Dependency, DependencyIdx},
       instance::{Instance, InstanceIdx},
     },
+    syncpack_rules::{inspection::Inspection, version_group::VersionGroup},
   };
   struct Silent;
   impl FixReporter for Silent {

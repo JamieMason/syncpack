@@ -7,6 +7,7 @@ members = [
   "crates/syncpack-disk",
   "crates/syncpack-config",
   "crates/syncpack-model",
+  "crates/syncpack-rules",
 ]
 
 [package]
@@ -49,6 +50,7 @@ syncpack-io = { path = "crates/syncpack-io" }
 syncpack-model = { path = "crates/syncpack-model" }
 syncpack-registry = { path = "crates/syncpack-registry" }
 syncpack-config = { path = "crates/syncpack-config" }
+syncpack-rules = { path = "crates/syncpack-rules" }
 syncpack-specifier = { path = "crates/syncpack-specifier" }
 syncpack-vocab = { path = "crates/syncpack-vocab" }
 thiserror = "2.0.20"

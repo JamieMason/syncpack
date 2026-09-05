@@ -14,10 +14,6 @@ use {
   syncpack_vocab::{prefer_version::PreferVersion, registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
-#[cfg(test)]
-#[path = "same_minor_test.rs"]
-mod same_minor_test;
-
 #[derive(Debug)]
 pub struct SameMinorGroup {
   pub selector: GroupSelector,

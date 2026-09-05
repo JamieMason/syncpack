@@ -17,10 +17,6 @@ use {
   syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap, update_policy::UpdatePolicy},
 };
 
-#[cfg(test)]
-#[path = "preferred_semver_test.rs"]
-mod preferred_semver_test;
-
 #[derive(Debug)]
 pub struct PreferredSemverGroup {
   pub selector: GroupSelector,

@@ -1,0 +1,16 @@
+[package]
+name = "syncpack-rules"
+version = "15.3.3"
+authors = ["Jamie Mason <jamie@foldleft.io>"]
+edition = "2024"
+description = "Pure inspection engine for syncpack (version groups, formatting, states)"
+license = "MIT"
+
+[dependencies]
+itertools = "0.15.0"
+log = "0.4.33"
+regex = { version = "1.13.1", default-features = false, features = ["std"] }
+serde_json = { version = "1.0.151", features = ["preserve_order"] }
+syncpack-model = { path = "../syncpack-model" }
+syncpack-specifier = { path = "../syncpack-specifier" }
+syncpack-vocab = { path = "../syncpack-vocab" }

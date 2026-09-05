@@ -377,7 +377,7 @@ fn context_create_no_package_name_clone() {
 
 #[test]
 fn catalog_defs_group_not_injected_when_no_catalog_dep_types() {
-  use crate::version_group::VersionGroup;
+  use syncpack_rules::version_group::VersionGroup;
 
   let config = test::mock::config_from_mock(json!({
     "versionGroups": [

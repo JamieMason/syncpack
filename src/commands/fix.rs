@@ -7,8 +7,6 @@ use {
     commands::{InstanceAction, action_of, reporter::FixReporter},
     context::{Discovered, Inspected},
     errors::SyncpackError,
-    inspection::Inspection,
-    version_group::VersionGroupBehavior,
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,
@@ -18,6 +16,7 @@ use {
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance},
     source::Source,
   },
+  syncpack_rules::{inspection::Inspection, version_group::VersionGroupBehavior},
   syncpack_specifier::Specifier,
   syncpack_vocab::{package_manager::PackageManager, severity::Severity},
 };
@@ -38,10 +37,12 @@ pub fn run<D: DiskIo>(mut inspected: Inspected, reporter: &dyn FixReporter, io: 
       .filter(|group| !group.dependency_indices().is_empty() && !group.is_ignored())
       .for_each(|group| {
         let mut has_printed_group = false;
-        for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
+        for dep_idx in crate::commands::get_sorted_dependencies(group, &data.dependencies, &data.config.cli.sort) {
           let dependency = &data.dependencies[dep_idx.0];
           let mut has_printed_dependency = false;
-          for (idx, instance) in crate::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all) {
+          for (idx, instance) in
+            syncpack_rules::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all)
+          {
             let action = action_of(inspection.severity(idx).unwrap_or(Severity::None));
             // `Render(Error)` from non-fixable states (Unfixable, Conflict,
             // strict-Suspect, user-configured Error on Fixable) cannot be

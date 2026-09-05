@@ -1,10 +1,8 @@
 use {
-  crate::{
-    context::Discovered,
-    version_group::{VersionGroup, VersionGroupBehavior},
-  },
+  crate::context::Discovered,
   colored::*,
   log::info,
+  syncpack_rules::version_group::{VersionGroup, VersionGroupBehavior},
 };
 
 pub fn print_header(_ctx: &Discovered, group: &VersionGroup) {

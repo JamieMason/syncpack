@@ -3,13 +3,13 @@ use {
     commands::{InstanceAction, action_of},
     context::{Discovered, Inspected},
     errors::SyncpackError,
-    inspection::Inspection,
   },
   serde_json::{Value, json},
   syncpack_model::{
     instance::{Instance, InstanceIdx},
     source::Source,
   },
+  syncpack_rules::inspection::Inspection,
   syncpack_vocab::severity::Severity,
 };
 
@@ -55,9 +55,11 @@ pub fn run(inspected: Inspected) -> Result<Inspected, SyncpackError> {
     .filter(|group| !group.is_ignored() || data.config.cli.show_ignored)
     .for_each(|group| {
       let variant_label = group.variant_label();
-      for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
+      for dep_idx in crate::commands::get_sorted_dependencies(group, &data.dependencies, &data.config.cli.sort) {
         let dependency = &data.dependencies[dep_idx.0];
-        for (idx, instance) in crate::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all) {
+        for (idx, instance) in
+          syncpack_rules::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all)
+        {
           let action = action_of(inspection.severity(idx).unwrap_or(Severity::None));
           let instance_json = instance_to_json(data, inspection, idx, instance, variant_label);
           println!("{}", serde_json::to_string(&instance_json).unwrap());

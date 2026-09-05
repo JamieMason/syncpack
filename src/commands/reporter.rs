@@ -2,14 +2,16 @@ use {
   crate::{
     commands::{json::instance_to_json, ui},
     context::Discovered,
-    inspection::{FormatMismatch, Inspection},
-    version_group::VersionGroup,
   },
   serde_json::json,
   std::path::Path,
   syncpack_model::{
     dependency::{Dependency, DependencyIdx},
     instance::{Instance, InstanceIdx},
+  },
+  syncpack_rules::{
+    inspection::{FormatMismatch, Inspection},
+    version_group::VersionGroup,
   },
 };
 

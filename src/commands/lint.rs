@@ -15,10 +15,11 @@ pub fn run(inspected: Inspected) -> Result<Inspected, SyncpackError> {
 
   data.version_groups.iter().for_each(|group| {
     let mut has_printed_group = false;
-    for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
+    for dep_idx in crate::commands::get_sorted_dependencies(group, &data.dependencies, &data.config.cli.sort) {
       let dependency = &data.dependencies[dep_idx.0];
       let mut has_printed_dependency = false;
-      for (idx, instance) in crate::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all) {
+      for (idx, instance) in syncpack_rules::version_group::get_sorted_instances(dependency, inspection, &data.instances, &data.sources.all)
+      {
         let action = action_of(inspection.severity(idx).unwrap_or(Severity::None));
         if matches!(action, InstanceAction::Valid) {
           continue;

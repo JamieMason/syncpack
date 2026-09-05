@@ -1,30 +1,69 @@
 use {
-  super::*,
-  crate::{
-    inspection::FormatConfig,
-    test::{self, mock},
-  },
-  serde_json::json,
-  syncpack_config::Rcfile,
+  serde_json::{Value, json},
+  syncpack_rules::{inspection::FormatConfig, visit_formatting::format::*},
 };
 
-/// Build the plain-data `FormatConfig` the format helpers now take from a
-/// (mocked) `Rcfile`, so these tests keep exercising the real defaults.
-fn format_config(rcfile: &Rcfile) -> FormatConfig {
+/// Identity wrapper kept so the fixture call sites read naturally
+/// (`pkg(json!({…}))`). The format helpers take the package.json `Value`.
+fn pkg(value: Value) -> Value {
+  value
+}
+
+/// Build the plain-data `FormatConfig` the format helpers take, from a mock
+/// rcfile `Value`, applying the same defaults the real `Rcfile` parser uses for
+/// the six formatting fields. Keeps this suite self-contained in the rules
+/// crate (no dependency on config/bin).
+fn format_config(config: Value) -> FormatConfig {
+  let strings = |key: &str, default: &[&str]| -> Vec<String> {
+    config
+      .get(key)
+      .and_then(|v| v.as_array())
+      .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
+      .unwrap_or_else(|| default.iter().map(|s| s.to_string()).collect())
+  };
+  let boolean = |key: &str, default: bool| config.get(key).and_then(|v| v.as_bool()).unwrap_or(default);
   FormatConfig {
-    sort_packages: rcfile.sort_packages,
-    sort_first: rcfile.sort_first.clone(),
-    format_bugs: rcfile.format_bugs,
-    format_repository: rcfile.format_repository,
-    sort_exports: rcfile.sort_exports.clone(),
-    sort_az: rcfile.sort_az.clone(),
+    sort_packages: boolean("sortPackages", true),
+    sort_first: strings("sortFirst", &["name", "description", "version", "author"]),
+    format_bugs: boolean("formatBugs", false),
+    format_repository: boolean("formatRepository", false),
+    sort_exports: strings(
+      "sortExports",
+      &[
+        "types",
+        "node-addons",
+        "node",
+        "browser",
+        "module",
+        "import",
+        "require",
+        "svelte",
+        "development",
+        "production",
+        "script",
+        "default",
+      ],
+    ),
+    sort_az: strings(
+      "sortAz",
+      &[
+        "bin",
+        "contributors",
+        "dependencies",
+        "devDependencies",
+        "keywords",
+        "peerDependencies",
+        "resolutions",
+        "scripts",
+      ],
+    ),
   }
 }
 
 #[test]
 fn formats_bugs_into_github_shorthand() {
   assert_eq!(
-    get_formatted_bugs(&mock::package_json_from_value(json!({
+    get_formatted_bugs(&pkg(json!({
       "name": "a",
       "bugs": {
         "url": "https://github.com/User/repo/issues"
@@ -37,7 +76,7 @@ fn formats_bugs_into_github_shorthand() {
 #[test]
 fn formats_repository_into_gitlab_shorthand() {
   assert_eq!(
-    get_formatted_repository(&mock::package_json_from_value(json!({
+    get_formatted_repository(&pkg(json!({
       "name": "a",
       "repository": {
         "url": "git://gitlab.com/User/repo",
@@ -51,7 +90,7 @@ fn formats_repository_into_gitlab_shorthand() {
 #[test]
 fn formats_repository_into_github_shorthand() {
   assert_eq!(
-    get_formatted_repository(&mock::package_json_from_value(json!({
+    get_formatted_repository(&pkg(json!({
       "name": "a",
       "repository": {
         "url": "git://github.com/User/repo",
@@ -65,7 +104,7 @@ fn formats_repository_into_github_shorthand() {
 #[test]
 fn retains_long_format_when_directory_property_used() {
   assert_eq!(
-    get_formatted_repository(&mock::package_json_from_value(json!({
+    get_formatted_repository(&pkg(json!({
       "name": "a",
       "repository": {
         "url": "git://gitlab.com/User/repo",
@@ -81,8 +120,8 @@ fn retains_long_format_when_directory_property_used() {
 fn sorts_conditional_exports() {
   assert_eq!(
     get_sorted_exports(
-      &format_config(&mock::rcfile()),
-      &mock::package_json_from_value(json!({
+      &format_config(json!({})),
+      &pkg(json!({
         "name": "a",
         "exports": {
             "default": "./default.cjs",
@@ -105,8 +144,8 @@ fn sorts_conditional_exports() {
 fn returns_none_when_conditional_exports_already_sorted() {
   assert_eq!(
     get_sorted_exports(
-      &format_config(&mock::rcfile()),
-      &mock::package_json_from_value(json!({
+      &format_config(json!({})),
+      &pkg(json!({
         "name": "a",
         "exports": {
             "import": "./index-module.js",
@@ -122,8 +161,8 @@ fn returns_none_when_conditional_exports_already_sorted() {
 fn sorts_conditional_exports_sub_paths() {
   assert_eq!(
     get_sorted_exports(
-      &format_config(&mock::rcfile()),
-      &mock::package_json_from_value(json!({
+      &format_config(json!({})),
+      &pkg(json!({
         "name": "a",
         "exports": {
           ".": "./index.js",
@@ -148,8 +187,8 @@ fn sorts_conditional_exports_sub_paths() {
 fn returns_none_when_conditional_exports_sub_paths_already_sorted() {
   assert_eq!(
     get_sorted_exports(
-      &format_config(&mock::rcfile()),
-      &mock::package_json_from_value(json!({
+      &format_config(json!({})),
+      &pkg(json!({
         "name": "a",
         "exports": {
             ".": "./index.js",
@@ -169,7 +208,7 @@ fn sorts_object_properties_alphabetically_by_key() {
   assert_eq!(
     get_sorted_az(
       "dependencies",
-      &mock::package_json_from_value(json!({
+      &pkg(json!({
           "dependencies": {
               "B": "",
               "@B": "",
@@ -195,7 +234,7 @@ fn sorts_array_members_alphabetically_by_value() {
   assert_eq!(
     get_sorted_az(
       "keywords",
-      &mock::package_json_from_value(json!({
+      &pkg(json!({
           "keywords": ["B", "@B", "1B", "A", "@A", "1A"],
       }))
     ),
@@ -207,11 +246,11 @@ fn sorts_array_members_alphabetically_by_value() {
 fn sorts_named_root_properties_first_leaving_the_rest_alone() {
   assert_eq!(
     get_sorted_first(
-      &format_config(&test::mock::rcfile_from_mock(json!({
+      &format_config(json!({
           "sortFirst": ["name", "F", "E", "D"],
           "sortPackages": false,
-      }))),
-      &mock::package_json_from_value(json!({
+      })),
+      &pkg(json!({
           "D": "",
           "B": "",
           "name": "a",
@@ -235,11 +274,11 @@ fn sorts_named_root_properties_first_leaving_the_rest_alone() {
 fn sorts_all_root_properties_alphabetically() {
   assert_eq!(
     get_sorted_first(
-      &format_config(&test::mock::rcfile_from_mock(json!({
+      &format_config(json!({
           "sortFirst": [],
           "sortPackages": true,
-      }))),
-      &mock::package_json_from_value(json!({
+      })),
+      &pkg(json!({
           "D": "",
           "B": "",
           "name": "a",
@@ -263,11 +302,11 @@ fn sorts_all_root_properties_alphabetically() {
 fn sorts_named_properties_first_then_the_rest_alphabetically() {
   assert_eq!(
     get_sorted_first(
-      &format_config(&test::mock::rcfile_from_mock(json!({
+      &format_config(json!({
           "sortFirst": ["name", "F", "E", "D"],
           "sortPackages": true,
-      }))),
-      &mock::package_json_from_value(json!({
+      })),
+      &pkg(json!({
           "name": "a",
           "A": "",
           "F": "",
@@ -295,7 +334,7 @@ fn sorts_dependencies_like_javascript_locale_compare() {
   assert_eq!(
     get_sorted_az(
       "dependencies",
-      &mock::package_json_from_value(json!({
+      &pkg(json!({
         "dependencies": {
         "5to6-codemod": "1.0.0",
         "@babel/register": "7.0.0",

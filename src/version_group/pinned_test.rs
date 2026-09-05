@@ -751,7 +751,7 @@ mod severity {
   /// `severity` field on each emitted `instance_to_json` value. Plan §3.9.
   #[tokio::test]
   async fn json_output_carries_severity_field() {
-    use crate::version_group::VersionGroupBehavior;
+    use syncpack_rules::version_group::VersionGroupBehavior;
     let ctx = TestBuilder::new()
       .with_packages(vec![
         json!({"name": "package-a", "version": "1.0.0"}),

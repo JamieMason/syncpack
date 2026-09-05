@@ -1,4 +1,25 @@
-use syncpack_vocab::severity::Severity;
+use {
+  itertools::Itertools,
+  std::cmp::Ordering,
+  syncpack_model::dependency::{Dependency, DependencyIdx},
+  syncpack_rules::version_group::{VersionGroup, VersionGroupBehavior},
+  syncpack_vocab::severity::Severity,
+};
+
+/// Order a version group's dependencies for display. Command-time sorting keyed
+/// off the CLI's `--sort`, so it lives in the bin rather than the pure rules
+/// engine.
+pub fn get_sorted_dependencies(group: &VersionGroup, arena: &[Dependency], sort: &crate::cli::SortBy) -> Vec<DependencyIdx> {
+  group
+    .dependency_indices()
+    .iter()
+    .copied()
+    .sorted_by(|a, b| match sort {
+      crate::cli::SortBy::Count => arena[b.0].instances.len().cmp(&arena[a.0].instances.len()),
+      crate::cli::SortBy::Name => Ordering::Equal,
+    })
+    .collect()
+}
 
 /// Map a resolved severity to the action a command should take. Pure function
 /// of `severity` — commands branch on this at report/apply time.

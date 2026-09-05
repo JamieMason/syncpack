@@ -8,12 +8,9 @@ use {
     },
     context::{Config, Discovered, Inspected},
     errors::SyncpackError,
-    inspection::{FormatConfig, Inspection, RuleInput, RuleInputCfg},
     logger,
     source_patterns::get_source_patterns,
     tui::Tui,
-    visit_formatting::visit_formatting,
-    visit_packages::visit_packages,
   },
   serde_json::Value,
   std::sync::Arc,
@@ -21,6 +18,11 @@ use {
   syncpack_io::DiskIo,
   syncpack_model::source::Source,
   syncpack_registry::client::RegistryClient,
+  syncpack_rules::{
+    inspection::{FormatConfig, Inspection, RuleInput, RuleInputCfg},
+    visit_formatting::visit_formatting,
+    visit_packages::visit_packages,
+  },
   syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
@@ -56,7 +58,7 @@ fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Discovered, SyncpackError> {
 async fn fetch_updates(data: &Discovered, registry_client: &Arc<dyn RegistryClient>) -> Option<RegistryUpdates> {
   match data.config.cli.subcommand {
     Subcommand::Update => {
-      let update_urls = crate::version_group::get_unique_update_urls(&data.version_groups, &data.dependencies, &data.instances);
+      let update_urls = syncpack_rules::version_group::get_unique_update_urls(&data.version_groups, &data.dependencies, &data.instances);
       Some(
         syncpack_registry::updates::fetch_all(
           registry_client,

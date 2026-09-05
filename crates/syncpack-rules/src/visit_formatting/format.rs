@@ -1,7 +1,3 @@
-#[cfg(test)]
-#[path = "format_test.rs"]
-mod format_test;
-
 use {
   crate::inspection::FormatConfig,
   regex::Regex,

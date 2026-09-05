@@ -14,10 +14,6 @@ use {
   syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
-#[cfg(test)]
-#[path = "banned_test.rs"]
-mod banned_test;
-
 #[derive(Debug)]
 pub struct BannedGroup {
   pub selector: GroupSelector,

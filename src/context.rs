@@ -1,13 +1,5 @@
 use {
-  crate::{
-    cli::Cli,
-    inspection::Inspection,
-    rcfile_loader::RcfileError,
-    version_group::{
-      BannedGroup, CatalogDefsGroup, CatalogGroup, IgnoredGroup, PinnedGroup, PreferredSemverGroup, SameMinorGroup, SameRangeGroup,
-      SemverRangeOnlyGroup, SnappedToGroup, VersionGroup, VersionGroupBehavior,
-    },
-  },
+  crate::{cli::Cli, rcfile_loader::RcfileError},
   log::warn,
   serde_json::Value,
   std::{
@@ -25,6 +17,13 @@ use {
     instance::{Instance, InstanceDescriptor, InstanceIdx},
     source::Source,
     sources::{SourceIdx, Sources},
+  },
+  syncpack_rules::{
+    inspection::Inspection,
+    version_group::{
+      BannedGroup, CatalogDefsGroup, CatalogGroup, IgnoredGroup, PinnedGroup, PreferredSemverGroup, SameMinorGroup, SameRangeGroup,
+      SemverRangeOnlyGroup, SnappedToGroup, VersionGroup, VersionGroupBehavior,
+    },
   },
   syncpack_specifier::{Specifier, semver_range::SemverRange, update_target::UpdateTarget},
   syncpack_vocab::{

@@ -1,7 +1,8 @@
 use {
-  crate::{context::Inspected, inspection::Inspection, specifier::Specifier},
+  crate::{context::Inspected, specifier::Specifier},
   log::error,
   syncpack_model::instance::{Instance, InstanceIdx, InstanceState},
+  syncpack_rules::inspection::Inspection,
   syncpack_vocab::severity::Severity,
 };
 

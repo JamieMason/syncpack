@@ -1,8 +1,5 @@
 use {
-  crate::{
-    cli::SortBy,
-    inspection::{Inspection, RuleInput},
-  },
+  crate::inspection::{Inspection, RuleInput},
   itertools::Itertools,
   std::{cmp::Ordering, collections::HashSet, rc::Rc},
   syncpack_model::{
@@ -16,17 +13,8 @@ use {
 };
 
 mod banned;
-#[cfg(test)]
-#[path = "version_group/bun_catalog_test.rs"]
-mod bun_catalog_test;
 mod catalog;
 mod catalog_defs;
-#[cfg(test)]
-#[path = "version_group/catalog_defs_test.rs"]
-mod catalog_defs_test;
-#[cfg(test)]
-#[path = "version_group/catalog_test.rs"]
-mod catalog_test;
 mod ignored;
 mod pinned;
 mod preferred_semver;
@@ -278,18 +266,6 @@ impl VersionGroup {
       Self::SemverRangeOnly(g) => &g.severity,
       Self::SnappedTo(g) => &g.severity,
     }
-  }
-
-  pub fn get_sorted_dependencies(&self, arena: &[Dependency], sort: &SortBy) -> Vec<DependencyIdx> {
-    self
-      .dependency_indices()
-      .iter()
-      .copied()
-      .sorted_by(|a, b| match sort {
-        SortBy::Count => arena[b.0].instances.len().cmp(&arena[a.0].instances.len()),
-        SortBy::Name => Ordering::Equal,
-      })
-      .collect()
   }
 
   pub fn get_update_urls(&self, deps: &[Dependency], arena: &[Instance]) -> Option<Vec<UpdateUrl>> {

@@ -3,14 +3,16 @@ use {
     commands::ui::{self, LINE_ENDING, update_row},
     context::{Discovered, Inspected},
     errors::SyncpackError,
-    inspection::Inspection,
     tui::{Tui, TuiReadiness, UpdateRow},
-    version_group::{VersionGroup, VersionGroupBehavior},
   },
   log::{error, info, warn},
   syncpack_disk::{copy_expected_specifier_json, copy_expected_specifier_yaml},
   syncpack_io::{DiskIo, write_json_file, write_yaml_file},
   syncpack_model::{instance::InstanceIdx, source::Source},
+  syncpack_rules::{
+    inspection::Inspection,
+    version_group::{VersionGroup, VersionGroupBehavior},
+  },
   syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
@@ -42,10 +44,10 @@ pub fn build_update_rows(
     }
     let group_label = group.selector().label.clone();
 
-    for dep_idx in group.get_sorted_dependencies(&data.dependencies, &data.config.cli.sort) {
+    for dep_idx in crate::commands::get_sorted_dependencies(group, &data.dependencies, &data.config.cli.sort) {
       let dep = &data.dependencies[dep_idx.0];
       let outdated: Vec<(InstanceIdx, &syncpack_model::instance::Instance)> =
-        crate::version_group::get_sorted_instances(dep, inspection, &data.instances, &data.sources.all)
+        syncpack_rules::version_group::get_sorted_instances(dep, inspection, &data.instances, &data.sources.all)
           .filter(|(idx, _)| inspection.state(*idx).is_outdated())
           .collect();
       if outdated.is_empty() {

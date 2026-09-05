@@ -3,9 +3,7 @@ use {
     commands::{fix, reporter::FixReporter},
     context::{Discovered, Inspected},
     errors::SyncpackError,
-    inspection::Inspection,
     test::builder::TestBuilder,
-    version_group::VersionGroup,
   },
   serde_json::json,
   syncpack_io::mock::MockDiskIo,
@@ -13,6 +11,7 @@ use {
     dependency::{Dependency, DependencyIdx},
     instance::{Instance, InstanceIdx},
   },
+  syncpack_rules::{inspection::Inspection, version_group::VersionGroup},
 };
 
 /// Silent reporter — fix tests assert state, not console output.

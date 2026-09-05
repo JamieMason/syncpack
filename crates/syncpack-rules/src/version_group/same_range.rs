@@ -13,10 +13,6 @@ use {
   syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
-#[cfg(test)]
-#[path = "same_range_test.rs"]
-mod same_range_test;
-
 #[derive(Debug)]
 pub struct SameRangeGroup {
   pub selector: GroupSelector,

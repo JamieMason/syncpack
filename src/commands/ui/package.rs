@@ -1,8 +1,9 @@
 use {
-  crate::{commands::ui, context::Discovered, inspection::FormatMismatch},
+  crate::{commands::ui, context::Discovered},
   colored::*,
   log::info,
   std::path::Path,
+  syncpack_rules::inspection::FormatMismatch,
 };
 
 pub fn print_invalid_package(ctx: &Discovered, name: &str, filepath: &Path, mismatch_count: usize) {

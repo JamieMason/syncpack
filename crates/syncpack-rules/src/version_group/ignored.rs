@@ -13,10 +13,6 @@ use {
   syncpack_vocab::{registry_updates::RegistryUpdates, severity::SeverityMap},
 };
 
-#[cfg(test)]
-#[path = "ignored_test.rs"]
-mod ignored_test;
-
 #[derive(Debug)]
 pub struct IgnoredGroup {
   pub selector: GroupSelector,

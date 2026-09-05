@@ -17,10 +17,6 @@ use {
   syncpack_vocab::severity::SeverityMap,
 };
 
-#[cfg(test)]
-#[path = "snapped_to_test.rs"]
-mod snapped_to_test;
-
 #[derive(Debug)]
 pub struct SnappedToGroup {
   pub selector: GroupSelector,

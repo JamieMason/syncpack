@@ -1,8 +1,9 @@
 use {
-  crate::{commands::ui, context::Discovered, inspection::Inspection},
+  crate::{commands::ui, context::Discovered},
   colored::*,
   log::{error, info},
   syncpack_model::instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, ValidInstance},
+  syncpack_rules::inspection::Inspection,
   syncpack_vocab::severity::Severity,
 };
 
