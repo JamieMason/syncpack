@@ -84,8 +84,14 @@ pub fn inspect(data: &Discovered, registry_updates: &Option<RegistryUpdates>) ->
     },
   };
   let mut inspection = Inspection::new(data.instances.len(), data.dependencies.len(), data.sources.all.len());
+  let inspect_start = std::time::Instant::now();
+  let version_start = std::time::Instant::now();
   visit_packages(&data.version_groups, &input, registry_updates, &mut inspection);
+  log::debug!("Version inspection completed in {:?}", version_start.elapsed());
+  let formatting_start = std::time::Instant::now();
   visit_formatting(data, &mut inspection);
+  log::debug!("Formatting inspection completed in {:?}", formatting_start.elapsed());
+  log::debug!("Inspection (version + formatting) completed in {:?}", inspect_start.elapsed());
   inspection
 }
 
