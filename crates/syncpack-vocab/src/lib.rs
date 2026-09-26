@@ -1,3 +1,5 @@
+#![warn(unreachable_pub)]
+
 pub mod config_error;
 pub mod dependency_type;
 pub mod package_manager;

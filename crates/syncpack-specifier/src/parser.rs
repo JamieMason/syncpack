@@ -65,7 +65,7 @@ fn range_prefix_len(bytes: &[u8]) -> Option<usize> {
   }
 }
 
-pub fn is_simple_semver(str: &str) -> bool {
+pub(crate) fn is_simple_semver(str: &str) -> bool {
   is_exact(str) || is_latest(str) || is_major(str) || is_minor(str) || is_range(str) || is_range_major(str) || is_range_minor(str)
 }
 
@@ -76,7 +76,7 @@ pub fn is_exact(s: &str) -> bool {
   is_semver_triple(bytes, start)
 }
 
-pub fn is_latest(str: &str) -> bool {
+pub(crate) fn is_latest(str: &str) -> bool {
   str == "*" || str == "latest" || str == "x"
 }
 

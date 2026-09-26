@@ -26,7 +26,7 @@ pub struct RenderedLine {
 
 /// Visual width of `s` after stripping CSI SGR escape sequences (the only
 /// escapes the `colored` crate emits). Used to budget terminal columns.
-pub fn visible_width(s: &str) -> usize {
+fn visible_width(s: &str) -> usize {
   strip_ansi(s).width()
 }
 
@@ -50,7 +50,7 @@ fn strip_ansi(s: &str) -> String {
 
 /// Balanced middle-truncate to fit `budget` visual columns. Returns the input
 /// unchanged when it already fits. Replaces the middle with `…`.
-pub fn middle_truncate(s: &str, budget: usize) -> String {
+fn middle_truncate(s: &str, budget: usize) -> String {
   let width: usize = s.chars().map(|c| c.width().unwrap_or(0)).sum();
   if width <= budget {
     return s.to_string();
@@ -126,7 +126,7 @@ pub fn time_difference(iso: &str, now_unix_seconds: i64) -> Option<String> {
 
 /// Categorisation of the diff between a current and target version.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DiffKind {
+enum DiffKind {
   Major,
   Minor,
   Patch,
@@ -154,7 +154,7 @@ impl DiffKind {
 /// greens just the patch segment, a minor bump greens minor + patch,
 /// a major bump greens everything from major onwards. Falls back to a
 /// fully dimmed string when either side cannot be parsed.
-pub fn colorize_diff(current_raw: &str, target_raw: &str) -> String {
+fn colorize_diff(current_raw: &str, target_raw: &str) -> String {
   let (current_lead, current_body) = split_leading_range(current_raw);
   let (target_lead, target_body) = split_leading_range(target_raw);
 
@@ -220,7 +220,7 @@ pub struct DiffCounts {
 }
 
 impl DiffCounts {
-  pub fn total(&self) -> usize {
+  fn total(&self) -> usize {
     self.major + self.minor + self.patch
   }
 }
@@ -263,7 +263,7 @@ pub fn render_rows(rows: &[UpdateRow], selection: Option<&[bool]>) {
 /// Produce the lines `render_rows` would emit, without printing them.
 /// Used by `LiveTui` to drive the same visual format through crossterm
 /// (raw-mode printing won't go through the log macros).
-pub fn format_rows(rows: &[UpdateRow], selection: Option<&[bool]>) -> Vec<String> {
+fn format_rows(rows: &[UpdateRow], selection: Option<&[bool]>) -> Vec<String> {
   render_lines(rows, selection, None, None).into_iter().map(|l| l.text).collect()
 }
 

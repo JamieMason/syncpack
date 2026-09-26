@@ -77,7 +77,7 @@ impl InstanceState {
     }
   }
 
-  pub fn get_severity(&self) -> u8 {
+  pub(crate) fn get_severity(&self) -> u8 {
     match self {
       InstanceState::Unknown => 0,
       InstanceState::Valid(_) => 1,

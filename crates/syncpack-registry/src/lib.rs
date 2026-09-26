@@ -1,3 +1,5 @@
+#![warn(unreachable_pub)]
+
 pub mod cache;
 pub mod cached_client;
 pub mod client;

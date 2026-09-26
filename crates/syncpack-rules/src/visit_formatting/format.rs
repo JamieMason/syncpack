@@ -6,12 +6,12 @@ use {
 };
 
 /// Use a shorthand format for the bugs URL when possible
-pub fn get_formatted_bugs(contents: &Value) -> Option<Value> {
+pub(super) fn get_formatted_bugs(contents: &Value) -> Option<Value> {
   contents.pointer("/bugs/url").cloned()
 }
 
 /// Use a shorthand format for the repository URL when possible
-pub fn get_formatted_repository(contents: &Value) -> Option<Value> {
+pub(super) fn get_formatted_repository(contents: &Value) -> Option<Value> {
   if contents.pointer("/repository/directory").is_some() {
     return None;
   }
@@ -28,7 +28,7 @@ pub fn get_formatted_repository(contents: &Value) -> Option<Value> {
 }
 
 /// Get sorted conditional exports and conditional exports subpaths
-pub fn get_sorted_exports(format: &FormatConfig, contents: &Value) -> Option<Value> {
+pub(super) fn get_sorted_exports(format: &FormatConfig, contents: &Value) -> Option<Value> {
   /// Recursively visit and sort nested objects of the exports object
   fn sort_nested_objects(sort_exports: &Vec<String>, value: &mut Value) {
     if let Value::Object(obj) = value {
@@ -53,7 +53,7 @@ pub fn get_sorted_exports(format: &FormatConfig, contents: &Value) -> Option<Val
 }
 
 /// Get a sorted version of the given property from package.json
-pub fn get_sorted_az(key: &str, contents: &Value) -> Option<Value> {
+pub(super) fn get_sorted_az(key: &str, contents: &Value) -> Option<Value> {
   if let Some(value) = contents.pointer(format!("/{key}").as_str()) {
     let mut sorted = value.clone();
     sort_alphabetically(&mut sorted);
@@ -65,7 +65,7 @@ pub fn get_sorted_az(key: &str, contents: &Value) -> Option<Value> {
 }
 
 /// Get a new package.json with its keys sorted to match the rcfile
-pub fn get_sorted_first(format: &FormatConfig, contents: &Value) -> Option<Value> {
+pub(super) fn get_sorted_first(format: &FormatConfig, contents: &Value) -> Option<Value> {
   if let Value::Object(value) = contents {
     let mut sorted = value.clone();
     sort_keys_with_priority(&format.sort_first, format.sort_packages, &mut sorted);

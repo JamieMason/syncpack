@@ -1,6 +1,6 @@
 use {
   crate::{
-    cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
+    cli::{Cli, ReporterKind, SortBy, Subcommand},
     discovery::{Config, Discovered},
   },
   log::LevelFilter,
@@ -11,6 +11,7 @@ use {
   syncpack_io::{File, YamlFile, detect_formatting, empty_yaml_file, parse_yaml_file},
   syncpack_model::sources::Sources,
   syncpack_registry::{client::RegistryClient, mock::MockRegistryClient},
+  syncpack_specifier::update_target::UpdateTarget,
   syncpack_vocab::{dependency_type::DependencyType, registry_updates::RegistryUpdates},
 };
 

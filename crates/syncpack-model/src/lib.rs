@@ -1,3 +1,5 @@
+#![warn(unreachable_pub)]
+
 pub mod dependency;
 pub mod group_selector;
 pub mod instance;

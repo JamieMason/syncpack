@@ -1,9 +1,10 @@
 use {
-  crate::{discovery::Inspected, specifier::Specifier},
+  crate::discovery::Inspected,
   log::error,
   serde_json::Value,
   syncpack_model::instance::{Instance, InstanceIdx, InstanceState},
   syncpack_rules::inspection::{FormatMismatchVariant, Inspection},
+  syncpack_specifier::Specifier,
   syncpack_vocab::severity::Severity,
 };
 

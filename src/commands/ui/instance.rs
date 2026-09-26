@@ -50,7 +50,7 @@ pub fn print_valid(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, 
   info!("{line}");
 }
 
-pub fn print_unfixable(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
+fn print_unfixable(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::err();
   let (actual, location, state_link, local_hint) = get_common_parts(ctx, inspection, idx, instance);
@@ -60,7 +60,7 @@ pub fn print_unfixable(ctx: &Discovered, inspection: &Inspection, idx: InstanceI
   info!("{line}");
 }
 
-pub fn print_fixable(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
+fn print_fixable(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::err();
   let actual = get_actual(instance).red();
@@ -104,7 +104,7 @@ fn get_common_parts(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx,
   (actual, location, state_link, local_hint)
 }
 
-pub fn get_actual(instance: &Instance) -> String {
+fn get_actual(instance: &Instance) -> String {
   let actual = instance.descriptor.specifier.get_raw();
   if actual.is_empty() {
     "VERSION_IS_MISSING".yellow().to_string()
@@ -121,11 +121,11 @@ fn get_local_hint(ctx: &Discovered, instance: &Instance) -> String {
   }
 }
 
-pub fn get_expected(inspection: &Inspection, idx: InstanceIdx) -> String {
+fn get_expected(inspection: &Inspection, idx: InstanceIdx) -> String {
   inspection.expected(idx).unwrap().get_raw().to_string()
 }
 
-pub fn get_location(ctx: &Discovered, instance: &Instance) -> String {
+fn get_location(ctx: &Discovered, instance: &Instance) -> String {
   let alias_info = if instance.descriptor.name != instance.descriptor.internal_name {
     format!("of {}", instance.descriptor.name)
   } else {
@@ -146,7 +146,7 @@ fn get_state_name(inspection: &Inspection, idx: InstanceIdx) -> String {
 }
 
 /// If enabled, render the reason code as a clickable link
-pub fn get_state_link(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx) -> String {
+fn get_state_link(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx) -> String {
   if ctx.config.cli.show_status_codes {
     let state_name = get_state_name(inspection, idx);
     ui::util::get_status_code_link(ctx, &state_name)
@@ -155,7 +155,7 @@ pub fn get_state_link(ctx: &Discovered, inspection: &Inspection, idx: InstanceId
   }
 }
 
-pub fn get_state_link_in_parens(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx) -> String {
+fn get_state_link_in_parens(ctx: &Discovered, inspection: &Inspection, idx: InstanceIdx) -> String {
   let state_link = get_state_link(ctx, inspection, idx);
   if !state_link.is_empty() {
     format!("({state_link})").dimmed().to_string()

@@ -91,7 +91,7 @@ async fn test_builder_with_registry_updates() {
 
 #[tokio::test]
 async fn test_builder_with_update_target() {
-  use crate::cli::UpdateTarget;
+  use syncpack_specifier::update_target::UpdateTarget;
 
   let ctx = TestBuilder::new()
     .with_package(json!({

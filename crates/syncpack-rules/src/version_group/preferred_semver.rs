@@ -26,7 +26,7 @@ pub struct PreferredSemverGroup {
 }
 
 impl PreferredSemverGroup {
-  pub fn get_highest_or_lowest_specifier(&self, dep: &Dependency, arena: &[Instance]) -> Option<Rc<Specifier>> {
+  pub(crate) fn get_highest_or_lowest_specifier(&self, dep: &Dependency, arena: &[Instance]) -> Option<Rc<Specifier>> {
     let specifiers = dep
       .get_instances(arena)
       .filter(|(_, instance)| instance.descriptor.specifier.get_node_version().is_some())

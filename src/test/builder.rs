@@ -19,7 +19,6 @@
 use {
   super::mock,
   crate::{
-    cli::UpdateTarget,
     discovery::{Discovered, Inspected},
     test::mock_tui::MockTui,
   },
@@ -31,6 +30,7 @@ use {
   syncpack_disk::{Disk, catalogs},
   syncpack_io::{File, detect_formatting, parse_yaml_file},
   syncpack_model::sources::Sources,
+  syncpack_specifier::update_target::UpdateTarget,
   syncpack_vocab::package_manager::PackageManager,
 };
 
@@ -329,9 +329,9 @@ impl TestBuilder {
       args.push("--target".into());
       args.push(
         match target {
-          crate::cli::UpdateTarget::Latest => "latest",
-          crate::cli::UpdateTarget::Minor => "minor",
-          crate::cli::UpdateTarget::Patch => "patch",
+          UpdateTarget::Latest => "latest",
+          UpdateTarget::Minor => "minor",
+          UpdateTarget::Patch => "patch",
         }
         .into(),
       );

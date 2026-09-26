@@ -183,7 +183,7 @@ fn get_common_parts(
   (count_column, name, local_hint, alias_hint, expected_specifier, status_codes)
 }
 
-pub fn get_alias_hint(dependency: &Dependency) -> String {
+fn get_alias_hint(dependency: &Dependency) -> String {
   if dependency.has_alias {
     "(aliased)".purple().to_string()
   } else {

@@ -27,7 +27,7 @@ fn is_safe_range(range: &SemverRange) -> bool {
 }
 
 impl SameMinorGroup {
-  pub fn get_highest_or_lowest_minor_specifier(&self, dep: &Dependency, arena: &[Instance]) -> Option<Rc<Specifier>> {
+  pub(crate) fn get_highest_or_lowest_minor_specifier(&self, dep: &Dependency, arena: &[Instance]) -> Option<Rc<Specifier>> {
     let prefer_highest = match &self.prefer_version {
       Some(PreferVersion::HighestSemver) => true,
       Some(PreferVersion::LowestSemver) => false,

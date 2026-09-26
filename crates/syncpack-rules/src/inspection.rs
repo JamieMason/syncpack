@@ -142,7 +142,7 @@ impl Inspection {
 /// Resolve the severity for a state against a group's configured severity map
 /// and the rcfile's `strict` flag. Pure; called at the moment a rule decides a
 /// state. `None` for `Unknown`/`Valid` states.
-pub fn severity_of(state: &InstanceState, severity_map: &SeverityMap, strict: bool) -> Option<Severity> {
+pub(crate) fn severity_of(state: &InstanceState, severity_map: &SeverityMap, strict: bool) -> Option<Severity> {
   match state {
     InstanceState::Unknown | InstanceState::Valid(_) => Some(Severity::None),
     InstanceState::Invalid(InvalidInstance::Unfixable(_)) | InstanceState::Invalid(InvalidInstance::Conflict(_)) => Some(Severity::Error),

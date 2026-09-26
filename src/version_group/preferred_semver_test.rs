@@ -1,15 +1,13 @@
 use {
-  crate::{
-    cli::UpdateTarget,
-    test::{
-      builder::TestBuilder,
-      expect::{ExpectedInstance, expect},
-    },
+  crate::test::{
+    builder::TestBuilder,
+    expect::{ExpectedInstance, expect},
   },
   serde_json::json,
   syncpack_model::instance::{
     FixableInstance::*, InstanceState, SemverGroupAndVersionConflict::*, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*,
   },
+  syncpack_specifier::update_target::UpdateTarget,
 };
 
 mod local {

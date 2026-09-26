@@ -1,3 +1,5 @@
+#![warn(unreachable_pub)]
+
 use {
   crate::{
     alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, git::Git, latest::Latest, link::Link, major::Major,

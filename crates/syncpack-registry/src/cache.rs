@@ -20,12 +20,12 @@ pub(crate) const CACHE_TTL_SECS: u64 = 30 * 60;
 
 /// Persistable on-disk cache of npm registry responses, keyed by URL.
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
-pub struct CacheState {
+pub(crate) struct CacheState {
   pub entries: HashMap<String, CacheEntry>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct CacheEntry {
+pub(crate) struct CacheEntry {
   /// Seconds since UNIX epoch when this entry was written.
   pub cached_at: u64,
   pub data: Arc<AllPackageVersions>,

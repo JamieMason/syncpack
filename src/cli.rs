@@ -6,6 +6,7 @@ use {
   log::LevelFilter,
   std::{env, path::PathBuf, str::FromStr},
   syncpack_model::group_selector::GroupSelector,
+  syncpack_specifier::update_target::UpdateTarget,
   syncpack_vocab::source_mode::SourceMode,
 };
 
@@ -33,8 +34,6 @@ pub enum SortBy {
   Count,
   Name,
 }
-
-pub use syncpack_specifier::update_target::UpdateTarget;
 
 #[derive(Debug)]
 pub enum ReporterKind {

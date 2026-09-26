@@ -31,7 +31,7 @@ pub enum RegistryError {
 
 /// Registry responses such as https://registry.npmjs.org/colors
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct PackageMeta {
+pub(crate) struct PackageMeta {
   pub name: String,
   pub versions: BTreeMap<String, Value>,
   /// Per-version publish timestamps (ISO 8601). Also contains

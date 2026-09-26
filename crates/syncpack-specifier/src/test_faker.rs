@@ -1,3 +1,4 @@
+#![allow(unreachable_pub)]
 use {
   crate::{
     Specifier, alias::Alias, catalog::Catalog, complex_semver::ComplexSemver, exact::Exact, file::File, git::Git, latest::Latest,

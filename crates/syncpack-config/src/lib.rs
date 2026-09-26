@@ -1,3 +1,5 @@
+#![warn(unreachable_pub)]
+
 use {
   semver_group::AnySemverGroup,
   serde::Deserialize,
@@ -56,7 +58,9 @@ pub fn rcfile_from(value: serde_json::Value) -> Rcfile {
   parse_value(value, None).expect("test rcfile must be valid")
 }
 
-pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) -> Result<Vec<DependencyType>, UnsupportedConfigError> {
+pub(crate) fn compute_all_dependency_types(
+  custom_types: &HashMap<String, CustomType>,
+) -> Result<Vec<DependencyType>, UnsupportedConfigError> {
   let default_types = HashMap::from([
     (
       String::from("dev"),
@@ -312,7 +316,7 @@ pub(crate) struct RawRcfile {
 
 impl RawRcfile {
   /// Handle config that is no longer supported or was hallucinated by an LLM
-  pub fn validate_unknown_fields(&self) -> Result<(), Vec<UnsupportedConfigError>> {
+  pub(crate) fn validate_unknown_fields(&self) -> Result<(), Vec<UnsupportedConfigError>> {
     let mut errors: Vec<UnsupportedConfigError> = vec![];
     self.unknown_fields.iter().for_each(|(key, _)| match key.as_str() {
       "dependencyTypes" => {

@@ -30,7 +30,12 @@ impl SnappedToGroup {
   /// stage-1 computed expected value if set, otherwise its raw on-disk
   /// specifier (the self-snapped case, where the target was not visited in
   /// stage 1).
-  pub fn get_snapped_to_specifier(&self, dep: &Dependency, all_instances: &[Instance], inspection: &Inspection) -> Option<Rc<Specifier>> {
+  pub(crate) fn get_snapped_to_specifier(
+    &self,
+    dep: &Dependency,
+    all_instances: &[Instance],
+    inspection: &Inspection,
+  ) -> Option<Rc<Specifier>> {
     for (i, instance) in all_instances.iter().enumerate() {
       if *instance.descriptor.internal_name == *dep.internal_name {
         let instance_idx = instance.source_idx();

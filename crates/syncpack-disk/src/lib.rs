@@ -1,3 +1,5 @@
+#![warn(unreachable_pub)]
+
 use {
   serde_json::Value as JsonValue,
   std::{

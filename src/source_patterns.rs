@@ -125,7 +125,7 @@ fn normalise_patterns(patterns: Vec<String>) -> Vec<String> {
 /// - "apps\\*/package.json" -> "apps/*/package.json"
 /// - "!apps/test2" -> "!apps/test2/package.json"
 /// - "packages/*/package.public.json" -> "packages/*/package.public.json"
-pub fn normalise_pattern(mut pattern: String) -> String {
+fn normalise_pattern(mut pattern: String) -> String {
   let negated = pattern.starts_with('!');
   if negated {
     pattern.remove(0);

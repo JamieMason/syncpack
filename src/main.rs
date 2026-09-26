@@ -69,11 +69,10 @@ mod source_patterns;
 #[cfg(test)]
 #[path = "sources_test.rs"]
 mod sources_test;
+mod syncpack;
 #[cfg(test)]
 #[path = "test/test.rs"]
 mod test;
-pub use syncpack_specifier::{self as specifier, semver_range};
-mod syncpack;
 mod tui;
 
 #[tokio::main]

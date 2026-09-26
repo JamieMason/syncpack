@@ -163,7 +163,7 @@ impl Instance {
   }
 
   /// Is the given semver range the preferred semver range for this instance?
-  pub fn preferred_semver_range_is(&self, range: &SemverRange) -> bool {
+  pub(crate) fn preferred_semver_range_is(&self, range: &SemverRange) -> bool {
     self.preferred_semver_range.as_ref().map(|r| r == range).unwrap_or(false)
   }
 

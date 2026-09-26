@@ -27,7 +27,7 @@ mod update_test;
 /// current specifier (e.g. `^6.2.1` and `~6.2.1` are two buckets).
 /// Each bucket becomes one `UpdateRow`. Buckets sort by count desc,
 /// then by current version desc.
-pub fn build_update_rows(
+fn build_update_rows(
   data: &Discovered,
   inspection: &Inspection,
   registry_updates: &RegistryUpdates,
@@ -129,7 +129,7 @@ struct Bucket {
 /// `dependency_outdated_count` to the sum of bucket counts that survived
 /// the filter for its (group, dependency). Otherwise a multi-bucket dep
 /// with one bucket left would still print the original total.
-pub fn filter_rows_for_display(rows: &[UpdateRow], selection: &[bool]) -> Vec<UpdateRow> {
+fn filter_rows_for_display(rows: &[UpdateRow], selection: &[bool]) -> Vec<UpdateRow> {
   let mut filtered: Vec<UpdateRow> = rows
     .iter()
     .zip(selection.iter())

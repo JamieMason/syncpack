@@ -126,7 +126,7 @@ fn make_bun_dep_type(catalog_name: &str, path_prefix: &str) -> DependencyType {
 
 /// Discover the catalog names (`"default"` + named) defined in a
 /// `pnpm-workspace.yaml` file.
-pub fn pnpm_catalog_names(file: &YamlFile) -> Vec<String> {
+pub(crate) fn pnpm_catalog_names(file: &YamlFile) -> Vec<String> {
   let mut names = Vec::new();
   if let Some(YamlValue::Mapping(map)) = file.contents.get("catalog")
     && !map.is_empty()
