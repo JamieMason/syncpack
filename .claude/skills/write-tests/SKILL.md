@@ -7,9 +7,10 @@ description: Write tests for Syncpack using the TestBuilder pattern. Use when ad
 
 ## Golden rules
 
-- Use `TestBuilder` — never construct `Context` manually.
-- Assert with `expect(&ctx).to_have_instances(vec![...])` — never index `ctx.instances`.
+- Use `TestBuilder` — never construct `Discovered` / `Inspected` manually.
+- Assert with `expect(&ctx).to_have_instances(vec![...])` — never index `ctx.data.instances`. To read one instance's state or expected specifier, use `ctx.instance_views()`.
 - Async-first: `#[tokio::test]` + `.run().await` is the canonical entry.
+- Default to full-pipeline `TestBuilder` tests. Write a unit test only where the pipeline can't reach.
 
 ## TDD
 
@@ -22,14 +23,12 @@ description: Write tests for Syncpack using the TestBuilder pattern. Use when ad
 
 ```rust
 use {
-  crate::{
-    instance::{FixableInstance::*, InstanceState, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*},
-    test::{
-      builder::TestBuilder,
-      expect::{expect, ExpectedInstance},
-    },
+  crate::test::{
+    builder::TestBuilder,
+    expect::{expect, ExpectedInstance},
   },
   serde_json::json,
+  syncpack_model::instance::{FixableInstance::*, InstanceState, SuspectInstance::*, UnfixableInstance::*, ValidInstance::*},
 };
 
 #[tokio::test]
@@ -54,6 +53,7 @@ async fn pinned_version_replaces_anything_different() {
       actual: "1.0.0",
       expected: Some("1.0.0"),
       overridden: None,
+      severity: None,
     },
     ExpectedInstance {
       state: InstanceState::fixable(DiffersToPin),
@@ -62,6 +62,7 @@ async fn pinned_version_replaces_anything_different() {
       actual: "workspace:*",
       expected: Some("1.2.0"),
       overridden: None,
+      severity: None,
     },
   ]);
 }
@@ -98,6 +99,8 @@ mod registry_updates {
 | Format pass                                  | `src/visit_formatting/format_test.rs`       |
 | Other unit tests                             | Co-located: `src/foo.rs` ↔ `src/foo_test.rs` |
 
+The version-group and format suites test code in `crates/syncpack-rules` but live in the bin, so register each new file in `src/main.rs` (`#[cfg(test)] #[path = "version_group/foo_test.rs"] mod foo_test;`).
+
 ## Builder methods
 
 Source of truth: `src/test/builder.rs`.
@@ -109,7 +112,9 @@ Source of truth: `src/test/builder.rs`.
 | `.with_version_group(json!({...}))`                     | Add one version group                                                |
 | `.with_version_groups(vec![...])`                       | Add many                                                             |
 | `.with_semver_group(json!({...}))`                      | Add a semver group                                                   |
-| `.with_config(json!({...}))`                            | Base config (e.g. `customTypes`, `dependencyGroups`)                 |
+| `.with_update_group(json!({...}))`                      | Add an update group                                                  |
+| `.with_config(json!({...}))`                            | Base config (e.g. `customTypes`, `dependencyGroups`), written as `.syncpackrc` |
+| `.with_yaml_config("...")`                              | Rcfile as `.syncpackrc.yaml` — exercises the yaml load path          |
 | `.with_strict(bool)`                                    | Strict mode (Suspect → error)                                        |
 | `.with_subcommand("update")`                            | Override subcommand (default: `lint`, or `update` if registry set)   |
 | `.with_pnpm_catalogs(yaml)`                             | Inject `pnpm-workspace.yaml`; implies pnpm PM                        |
@@ -118,11 +123,13 @@ Source of truth: `src/test/builder.rs`.
 | `.with_{pnpm,bun,npm,yarn,unknown}_package_manager()`   | Force PM detection                                                   |
 | `.with_registry_updates(json!({"react":[...]}))`        | Mock npm registry; implies subcommand=`update`                       |
 | `.with_update_target(UpdateTarget::Minor)`              | Bound update target                                                  |
-| `.run().await` → `Context`                              | **Primary** end-to-end (full pipeline through disk + discovery)      |
-| `.build()`                                              | Sync, no visit — context-wiring tests                                |
-| `.build_and_visit_packages()`                           | Sync + visit_packages — fix tests, older suites                      |
-| `.build_and_visit_formatting()`                         | Sync + visit_formatting                                              |
-| `.build_with_registry_and_visit().await`                | Sync wiring + async registry mock + visit                            |
+| `.run().await` → `Inspected`                            | **Primary** end-to-end (full pipeline: disk → rcfile → discovery → inspection) |
+| `.build()` → `Discovered`                               | Sync, no inspection — discovery-wiring tests                         |
+| `.try_build()` → `Result<Discovered, DiscoveryError>`   | Config rejections: assert with `.unwrap_err()`                       |
+| `.build_and_visit_packages()` → `Inspected`             | Sync + inspection — fix tests, older suites                          |
+| `.build_with_registry_and_visit().await` → `Inspected`  | Sync wiring + async registry mock + inspection                       |
+
+`.run()` and `.build_and_visit_packages()` already run the formatting pass; assert on it with `to_have_format_mismatches` (see Format tests).
 
 ## ExpectedInstance fields
 
@@ -134,6 +141,7 @@ ExpectedInstance {
   actual: "17.0.0",                             // raw specifier on disk
   expected: Some("18.0.0"),                     // None = ignore; Some("") = remove
   overridden: None,                             // semver-group override target, if any
+  severity: None,                               // None = do not assert; Some(Severity::…) asserts
 }
 ```
 
@@ -149,20 +157,39 @@ ExpectedInstance {
 
 → [patterns.md](patterns.md): banned, pinned, sameRange, pnpm catalogs, bun catalogs, semver ranges, registry updates.
 
+## Format tests
+
+`src/visit_formatting/format_test.rs`. Each test switches off every formatting rule except the one under test (`rcfile_with(keep, overrides)` — `keep` leaves a rule at its rcfile default), then asserts the mismatches for one package:
+
+```rust
+expect(&ctx).to_have_format_mismatches(
+  "a",
+  vec![ExpectedFormatMismatch {
+    variant: ExportsPropertyIsNotSorted,
+    property_path: "/exports",
+    expected: json!({ "import": "./index.js", "default": "./default.js" }),
+  }],
+);
+```
+
+`expected` is compared including key order (`serde_json` with `preserve_order` ignores order in `Value ==`). An empty `vec![]` asserts no mismatches.
+
 ## Fix tests
 
-`src/commands/fix_test.rs` builds with `.build_and_visit_packages()` then runs `fix::run(ctx, &SilentReporter, &disk)`. `dry_run = true` is the default (set by `mock::config_from_mock`), so `is_dirty()` and post-fix contents stay observable. Set `ctx.config.cli.dry_run = false` only when asserting writes through a recording `MockDiskIo` (see `pnpm_fix_writes_yaml_to_disk`).
+`src/commands/fix_test.rs` builds with `.build_and_visit_packages()` then runs `fix::run(inspected, &SilentReporter, &disk)` with `syncpack_io::mock::MockDiskIo`. `dry_run = true` is the default (set by `mock::config_from_mock`), so `file.dirty` and post-fix contents stay observable. Set `ctx.data.config.cli.dry_run = false` only when asserting writes through a recording `MockDiskIo` (see `pnpm_fix_writes_yaml_to_disk`).
 
 ## Common mistakes
 
 | Wrong                                            | Right                                                                                  |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `#[test] fn foo()` + `.run().await`              | `#[tokio::test] async fn foo()`                                                        |
-| `use crate::instance_state::*`                   | `use crate::instance::*`                                                               |
+| `use crate::instance::*` / `crate::instance_state::*` | `use syncpack_model::instance::*`                                                 |
 | `"pinned": "1.0.0"`                              | `"pinVersion": "1.0.0"`                                                                |
-| `Context { ... }`                                | `TestBuilder::new()...`                                                                |
-| `ctx.instances[0]`                               | `expect(&ctx).to_have_instances(vec![...])`                                            |
+| `Discovered { ... }` / `Inspected { ... }`       | `TestBuilder::new()...`                                                                |
+| `ctx.data.instances[0]`                          | `expect(&ctx).to_have_instances(vec![...])`                                            |
+| `ctx.inspection.states[i]` / `expected[i]`       | `ctx.instance_views()`                                                                 |
 | `.build()` then check states                     | `.run().await` (or `.build_and_visit_packages()` for sync)                             |
+| `assert_eq!(value_a, value_b)` for key order     | `to_have_format_mismatches` — `Value ==` ignores key order under `preserve_order`      |
 | Missing `SuspectInstance::*` import              | Import all 4: `FixableInstance::*, ValidInstance::*, SuspectInstance::*, UnfixableInstance::*` |
 
 ## Running
@@ -181,3 +208,5 @@ cargo test test_name -- --nocapture  # with stdout
 - `src/version_group/catalog_test.rs` — pnpm catalogs
 - `src/version_group/bun_catalog_test.rs` — bun catalogs (sync `.build()`)
 - `src/version_group/preferred_semver_test.rs` — registry updates, update targets
+- `src/visit_formatting/format_test.rs` — formatting rules, order-sensitive assertions
+- `src/rcfile_loader_test.rs` — rcfile / pnpm-yaml config resolution through the pipeline

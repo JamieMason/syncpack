@@ -417,4 +417,4 @@ let ctx = TestBuilder::new()
 // wat → 1.3.4 (minor cap), not 2.0.0
 ```
 
-`UpdateTarget` import: `use crate::cli::UpdateTarget;`.
+`UpdateTarget` import: `use syncpack_specifier::update_target::UpdateTarget;`.
