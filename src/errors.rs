@@ -1,5 +1,5 @@
 use {
-  crate::{context::ContextError, rcfile_loader::RcfileError},
+  crate::{discovery::DiscoveryError, rcfile_loader::RcfileError},
   syncpack_io::DiskIoError,
   thiserror::Error,
 };
@@ -7,7 +7,7 @@ use {
 #[derive(Debug, Error)]
 pub enum SyncpackError {
   #[error(transparent)]
-  ContextError(ContextError),
+  DiscoveryError(DiscoveryError),
   #[error(transparent)]
   DiskIoError(#[from] DiskIoError),
   #[error("Deprecated command")]

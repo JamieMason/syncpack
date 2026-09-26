@@ -1,5 +1,5 @@
 use {
-  crate::{commands::ui, context::Discovered},
+  crate::{commands::ui, discovery::Discovered},
   colored::*,
   log::{error, info},
   syncpack_model::instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, ValidInstance},

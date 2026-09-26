@@ -1,5 +1,5 @@
 use {
-  crate::{context::Inspected, errors::SyncpackError},
+  crate::{discovery::Inspected, errors::SyncpackError},
   colored::Colorize,
 };
 

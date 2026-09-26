@@ -1,5 +1,5 @@
 use {
-  crate::{commands::reporter::FormatReporter, context::Inspected, errors::SyncpackError},
+  crate::{commands::reporter::FormatReporter, discovery::Inspected, errors::SyncpackError},
   syncpack_io::DiskIo,
   syncpack_model::source::Source,
 };

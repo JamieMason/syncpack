@@ -1,5 +1,5 @@
 use {
-  crate::context::{iter_instances, sources_from_disk},
+  crate::discovery::{iter_instances, sources_from_disk},
   serde_json::json,
   std::path::PathBuf,
   syncpack_disk::Disk,

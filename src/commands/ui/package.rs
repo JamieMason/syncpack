@@ -1,5 +1,5 @@
 use {
-  crate::{commands::ui, context::Discovered},
+  crate::{commands::ui, discovery::Discovered},
   colored::*,
   log::info,
   std::path::Path,

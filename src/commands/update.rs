@@ -1,7 +1,7 @@
 use {
   crate::{
     commands::ui::{self, LINE_ENDING, update_row},
-    context::{Discovered, Inspected},
+    discovery::{Discovered, Inspected},
     errors::SyncpackError,
     tui::{Tui, TuiReadiness, UpdateRow},
   },

@@ -1,5 +1,5 @@
 use {
-  crate::context::Discovered,
+  crate::discovery::Discovered,
   colored::*,
   log::info,
   syncpack_rules::version_group::{VersionGroup, VersionGroupBehavior},

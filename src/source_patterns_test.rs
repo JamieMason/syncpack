@@ -65,7 +65,7 @@ fn normalizes_backslashes_to_forward_slashes() {
 mod source_mode {
   use {
     super::get_source_patterns,
-    crate::{context::Config, test::mock},
+    crate::{discovery::Config, test::mock},
     serde_json::{Value, json},
     std::path::PathBuf,
     syncpack_config::rcfile_from,

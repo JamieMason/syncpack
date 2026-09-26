@@ -1,6 +1,6 @@
 use {
   crate::{
-    context::Discovered,
+    discovery::Discovered,
     test::{
       builder::TestBuilder,
       expect::{ExpectedInstance, expect},
@@ -144,8 +144,8 @@ fn descriptor_dep_type_is_rc() {
 }
 
 #[test]
-fn context_sources_arena_owns_pkg_json_and_pnpm_yaml() {
-  // `Context.sources.all` holds every loaded file (pkg.json sources first,
+fn discovery_sources_arena_owns_pkg_json_and_pnpm_yaml() {
+  // `Discovered.sources.all` holds every loaded file (pkg.json sources first,
   // then yaml appended at the tail).
   let yaml = "catalog:\n  react: ^18.0.0\n";
   let ctx = TestBuilder::new()
@@ -165,7 +165,7 @@ fn context_sources_arena_owns_pkg_json_and_pnpm_yaml() {
 }
 
 #[test]
-fn context_no_packages_or_catalogs_field_when_no_yaml() {
+fn discovery_no_packages_or_catalogs_field_when_no_yaml() {
   // Sanity: even with no catalogs, `ctx.sources.all` is the only ownership
   // path.
   let config = config_from_mock(json!({}));

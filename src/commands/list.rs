@@ -1,7 +1,7 @@
 use {
   crate::{
     commands::{InstanceAction, action_of, ui},
-    context::Inspected,
+    discovery::Inspected,
     errors::SyncpackError,
   },
   syncpack_vocab::severity::Severity,

@@ -20,7 +20,7 @@ use {
   super::mock,
   crate::{
     cli::UpdateTarget,
-    context::{Discovered, Inspected},
+    discovery::{Discovered, Inspected},
     test::mock_tui::MockTui,
   },
   serde_json::{Value, json},
@@ -360,7 +360,7 @@ impl TestBuilder {
     self.try_build().unwrap()
   }
 
-  pub fn try_build(self) -> Result<Discovered, crate::context::ContextError> {
+  pub fn try_build(self) -> Result<Discovered, crate::discovery::DiscoveryError> {
     let mut config = mock::config_from_mock(self.build_config());
     let disk = self.build_disk();
     let sources = build_sources(&disk);
@@ -400,7 +400,7 @@ impl TestBuilder {
     }
 
     if let Some(mock_updates) = self.registry_updates {
-      let (data, updates) = mock::context_with_registry_updates(config, disk, sources, mock_updates, dep_types).await;
+      let (data, updates) = mock::discovered_with_registry_updates(config, disk, sources, mock_updates, dep_types).await;
       let updates = Some(updates);
       let inspection = crate::syncpack::inspect(&data, &updates);
       Inspected { data, inspection, updates }
@@ -475,7 +475,7 @@ impl TestBuilder {
 /// sees them all). Yaml is appended at the tail when present.
 fn build_sources(disk: &Disk) -> Sources {
   let all_paths: Vec<PathBuf> = disk.package_json_files.iter().map(|f| f.filepath.clone()).collect();
-  crate::context::sources_from_disk(disk, &all_paths)
+  crate::discovery::sources_from_disk(disk, &all_paths)
 }
 
 impl Default for TestBuilder {

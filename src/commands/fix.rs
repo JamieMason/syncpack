@@ -5,7 +5,7 @@ mod fix_test;
 use {
   crate::{
     commands::{InstanceAction, action_of, reporter::FixReporter},
-    context::{Discovered, Inspected},
+    discovery::{Discovered, Inspected},
     errors::SyncpackError,
   },
   serde_json::Value as JsonValue,

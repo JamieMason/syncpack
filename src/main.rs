@@ -30,9 +30,9 @@ mod catalog_test;
 mod catalogs_test;
 mod cli;
 mod commands;
-mod context;
 #[cfg(test)]
 mod dag_guard_test;
+mod discovery;
 mod errors;
 #[cfg(test)]
 #[path = "visit_formatting/format_test.rs"]

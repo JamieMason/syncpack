@@ -1,6 +1,6 @@
 use {
   crate::{
-    context::Discovered,
+    discovery::Discovered,
     test::{
       self,
       builder::TestBuilder,
@@ -45,7 +45,7 @@ async fn instance_descriptor_source_resolves_source_idx_for_regular_dep() {
 }
 
 #[tokio::test]
-async fn context_pnpm_yaml_absent_when_no_catalogs_configured() {
+async fn discovery_pnpm_yaml_absent_when_no_catalogs_configured() {
   // No yaml on disk → no catalog instances; only the local package surfaces.
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({
@@ -66,7 +66,7 @@ async fn context_pnpm_yaml_absent_when_no_catalogs_configured() {
 }
 
 #[test]
-fn context_package_manager_reflects_disk_package_manager_after_create() {
+fn discovery_package_manager_reflects_disk_package_manager_after_create() {
   for pm in [
     PackageManager::Pnpm,
     PackageManager::Bun,
@@ -94,7 +94,7 @@ fn context_package_manager_reflects_disk_package_manager_after_create() {
 }
 
 #[tokio::test]
-async fn context_create_uses_sources_for_pkg_json_instances() {
+async fn discovery_create_uses_sources_for_pkg_json_instances() {
   // Pkg.json deps come through Sources iteration as regular instances; one
   // package fixture emits exactly local + each declared dep.
   let ctx = TestBuilder::new()
@@ -147,7 +147,7 @@ async fn context_create_uses_sources_for_pkg_json_instances() {
 }
 
 #[tokio::test]
-async fn context_create_uses_sources_for_pnpm_catalog_instances() {
+async fn discovery_create_uses_sources_for_pnpm_catalog_instances() {
   let yaml = "catalog:\n  react: ^18.0.0\ncatalogs:\n  legacy:\n    react: ^17.0.0\n";
   let ctx = TestBuilder::new()
     .with_pnpm_catalogs(yaml)
@@ -186,7 +186,7 @@ async fn context_create_uses_sources_for_pnpm_catalog_instances() {
 }
 
 #[tokio::test]
-async fn context_create_uses_sources_for_bun_catalog_instances() {
+async fn discovery_create_uses_sources_for_bun_catalog_instances() {
   // Bun catalog defs are sourced from the synthetic root package.json — both
   // default + legacy emit catalog instances against the bun-root source.
   let ctx = TestBuilder::new()
@@ -235,7 +235,7 @@ async fn context_create_uses_sources_for_bun_catalog_instances() {
 }
 
 #[tokio::test]
-async fn context_create_user_customtype_pnpm_workspace_source_emits_instance() {
+async fn discovery_create_user_customtype_pnpm_workspace_source_emits_instance() {
   // User customType reading pnpm-workspace.yaml emits a regular (non-catalog)
   // instance — observable via PreferredSemver state, not via the
   // is_catalog_definition flag.
@@ -273,7 +273,7 @@ async fn context_create_user_customtype_pnpm_workspace_source_emits_instance() {
 }
 
 #[tokio::test]
-async fn context_create_user_customtype_targetable_in_version_group_via_dependencytypes_array() {
+async fn discovery_create_user_customtype_targetable_in_version_group_via_dependencytypes_array() {
   // CAPABILITY GAP: a user `dependencyTypes: ["myStuff"]` selector claims the
   // customType instance into an `isIgnored` group; observable as Valid::IsIgnored
   // on the emitted myDep instance.
@@ -314,7 +314,7 @@ async fn context_create_user_customtype_targetable_in_version_group_via_dependen
 }
 
 #[test]
-fn context_disk_field_present() {
+fn discovery_disk_field_present() {
   let ctx = TestBuilder::new()
     .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
     .with_npm_package_manager()
@@ -324,7 +324,7 @@ fn context_disk_field_present() {
 }
 
 #[test]
-fn context_package_manager_via_disk() {
+fn discovery_package_manager_via_disk() {
   type Apply = fn(TestBuilder) -> TestBuilder;
   let cases: [(Apply, PackageManager); 5] = [
     (|b: TestBuilder| b.with_pnpm_package_manager(), PackageManager::Pnpm),
@@ -342,7 +342,7 @@ fn context_package_manager_via_disk() {
 }
 
 #[test]
-fn context_create_no_package_name_clone() {
+fn discovery_create_no_package_name_clone() {
   // Pins the invariant: every Instance.id ends with
   // "of {sources.all[source_idx].name()}" — package_name is read via that
   // lookup at use sites, not stored alongside descriptors as a String tuple.

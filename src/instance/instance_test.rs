@@ -1,6 +1,6 @@
 use {
   crate::{
-    context::Discovered,
+    discovery::Discovered,
     test::{self},
   },
   serde_json::json,

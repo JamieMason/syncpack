@@ -1,5 +1,5 @@
 use {
-  crate::{context::Inspected, specifier::Specifier},
+  crate::{discovery::Inspected, specifier::Specifier},
   log::error,
   serde_json::Value,
   syncpack_model::instance::{Instance, InstanceIdx, InstanceState},

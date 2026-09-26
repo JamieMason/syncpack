@@ -1,7 +1,7 @@
 use {
   crate::{
     commands::{InstanceAction, action_of},
-    context::{Discovered, Inspected},
+    discovery::{Discovered, Inspected},
     errors::SyncpackError,
   },
   serde_json::{Value, json},

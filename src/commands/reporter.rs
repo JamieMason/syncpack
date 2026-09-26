@@ -1,7 +1,7 @@
 use {
   crate::{
     commands::{json::instance_to_json, ui},
-    context::Discovered,
+    discovery::Discovered,
   },
   serde_json::json,
   std::path::Path,

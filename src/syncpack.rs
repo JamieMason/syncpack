@@ -6,7 +6,7 @@ use {
       reporter::{JsonFixReporter, JsonFormatReporter, PrettyFixReporter, PrettyFormatReporter},
       set_semver_ranges, update,
     },
-    context::{Config, Discovered, Inspected},
+    discovery::{Config, Discovered, Inspected},
     errors::SyncpackError,
     logger,
     source_patterns::get_source_patterns,
@@ -50,8 +50,8 @@ fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Discovered, SyncpackError> {
   let file_paths = io.find_package_jsons(&disk.cwd, &source_patterns);
   disk.load_package_files(io, &file_paths);
   let dep_types = catalogs::make_catalog_dep_types(&disk)?;
-  let sources = crate::context::sources_from_disk(&disk, &file_paths);
-  Discovered::create(config, disk, sources, dep_types).map_err(SyncpackError::ContextError)
+  let sources = crate::discovery::sources_from_disk(&disk, &file_paths);
+  Discovered::create(config, disk, sources, dep_types).map_err(SyncpackError::DiscoveryError)
 }
 
 /// Fetch updates from the npm registry, if applicable.

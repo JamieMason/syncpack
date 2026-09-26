@@ -39,11 +39,11 @@ use {
 };
 
 #[cfg(test)]
-#[path = "context_test.rs"]
-mod context_test;
+#[path = "discovery_test.rs"]
+mod discovery_test;
 
 #[derive(Debug, Error)]
-pub enum ContextError {
+pub enum DiscoveryError {
   #[error(transparent)]
   RcfileError(RcfileError),
 }
@@ -89,7 +89,7 @@ impl Discovered {
   /// Read all configuration and package.json files, collect all dependency
   /// instances, group them into version groups, and precompute link
   /// resolution. Reports every config error at once (B4).
-  pub fn create(mut config: Config, disk: Disk, sources: Sources, dep_types: Vec<DependencyType>) -> Result<Self, ContextError> {
+  pub fn create(mut config: Config, disk: Disk, sources: Sources, dep_types: Vec<DependencyType>) -> Result<Self, DiscoveryError> {
     // Append catalog dep types BEFORE validation or version-group construction
     // — user-referenced catalog dep types (e.g. `pnpmCatalog:react18`) must
     // resolve here.
@@ -120,9 +120,9 @@ impl Discovered {
       errors.push(error);
     }
     if !errors.is_empty() {
-      return Err(ContextError::RcfileError(RcfileError::UnsupportedConfig(UnsupportedConfigErrors(
-        errors,
-      ))));
+      return Err(DiscoveryError::RcfileError(RcfileError::UnsupportedConfig(
+        UnsupportedConfigErrors(errors),
+      )));
     }
 
     // Single uniform iteration. Each dep type's `source` field gates which

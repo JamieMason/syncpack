@@ -1,5 +1,5 @@
 use {
-  crate::context::{SemverGroup, UpdateGroup, version_group_from_config},
+  crate::discovery::{SemverGroup, UpdateGroup, version_group_from_config},
   serde_json::json,
   syncpack_config::{AnyVersionGroup, semver_group::AnySemverGroup, update_group::AnyUpdateGroup},
   syncpack_specifier::update_target::UpdateTarget,
@@ -9,7 +9,7 @@ use {
 #[test]
 fn context_create_rejects_invalid_dependency_type() {
   use crate::{
-    context::{ContextError, Discovered},
+    discovery::{Discovered, DiscoveryError},
     rcfile_loader::RcfileError,
     test::mock,
   };
@@ -21,7 +21,7 @@ fn context_create_rejects_invalid_dependency_type() {
   }));
   let (disk, sources) = mock::disk_and_sources_from_mocks(vec![json!({"name": "pkg-a", "version": "0.0.0"})]);
   let err = Discovered::create(config, disk, sources, vec![]).unwrap_err();
-  let ContextError::RcfileError(RcfileError::UnsupportedConfig(errs)) = err else {
+  let DiscoveryError::RcfileError(RcfileError::UnsupportedConfig(errs)) = err else {
     panic!("expected RcfileError::UnsupportedConfig");
   };
   assert!(

@@ -1,7 +1,7 @@
 use {
   crate::{
     commands::{fix, reporter::FixReporter},
-    context::{Discovered, Inspected},
+    discovery::{Discovered, Inspected},
     errors::SyncpackError,
     test::builder::TestBuilder,
   },

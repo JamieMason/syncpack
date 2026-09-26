@@ -1,7 +1,7 @@
 use {
   crate::{
     cli::{Cli, ReporterKind, SortBy, Subcommand, UpdateTarget},
-    context::{Config, Discovered},
+    discovery::{Config, Discovered},
   },
   log::LevelFilter,
   serde_json::Value,
@@ -115,12 +115,12 @@ pub fn disk_and_sources_from_mocks(values: Vec<serde_json::Value>) -> (Disk, Sou
     package_manager: None,
     pnpm_workspace: None,
   };
-  let sources = crate::context::sources_from_disk(&disk, &all_paths);
+  let sources = crate::discovery::sources_from_disk(&disk, &all_paths);
   (disk, sources)
 }
 
-/// Create a Context and RegistryUpdates from mocked npm registry data
-pub async fn context_with_registry_updates(
+/// Create a Discovered and RegistryUpdates from mocked npm registry data
+pub async fn discovered_with_registry_updates(
   config: Config,
   disk: Disk,
   sources: Sources,

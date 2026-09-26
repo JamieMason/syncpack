@@ -306,7 +306,7 @@ mod apply {
   /// the resulting `Inspected` so callers can inspect which package_json
   /// files got marked dirty by the apply step. Returns the raw `Result`
   /// so cancel-style tests can match `Err(Cancelled)` directly.
-  async fn try_run_update(builder: TestBuilder, tui: MockTui) -> Result<crate::context::Inspected, SyncpackError> {
+  async fn try_run_update(builder: TestBuilder, tui: MockTui) -> Result<crate::discovery::Inspected, SyncpackError> {
     let mut ctx = builder.run().await;
     // Force apply path: turn off --check, keep dry-run on so the
     // mutation stays visible without touching disk.
@@ -317,11 +317,11 @@ mod apply {
     update::run(ctx, &disk, &tui)
   }
 
-  async fn run_update(builder: TestBuilder, tui: MockTui) -> crate::context::Inspected {
+  async fn run_update(builder: TestBuilder, tui: MockTui) -> crate::discovery::Inspected {
     try_run_update(builder, tui).await.expect("update::run failed")
   }
 
-  fn dirty_files(ctx: &crate::context::Inspected) -> Vec<String> {
+  fn dirty_files(ctx: &crate::discovery::Inspected) -> Vec<String> {
     ctx
       .data
       .disk
