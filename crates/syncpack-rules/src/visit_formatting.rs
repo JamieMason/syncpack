@@ -7,7 +7,7 @@ use {
   },
 };
 
-pub mod format;
+mod format;
 
 /// Formatting inspection: read each package.json's loaded contents and record
 /// any formatting mismatches into `out.formatting`, keyed by `SourceIdx`. Pure

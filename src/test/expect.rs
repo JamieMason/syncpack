@@ -1,10 +1,36 @@
 use {
   crate::{context::Inspected, specifier::Specifier},
   log::error,
+  serde_json::Value,
   syncpack_model::instance::{Instance, InstanceIdx, InstanceState},
-  syncpack_rules::inspection::Inspection,
+  syncpack_rules::inspection::{FormatMismatchVariant, Inspection},
   syncpack_vocab::severity::Severity,
 };
+
+#[derive(Debug)]
+pub struct ExpectedFormatMismatch {
+  /// The formatting rule that was broken.
+  pub variant: FormatMismatchVariant,
+  /// JSON pointer to the property that was linted.
+  pub property_path: &'static str,
+  /// The formatted value. Compared including key order, because
+  /// `serde_json` with `preserve_order` ignores order in `Value` equality.
+  pub expected: Value,
+}
+
+/// Are these two values identical including key order? `Value ==` ignores
+/// order under `preserve_order`.
+#[allow(clippy::cmp_owned)]
+fn is_identical(a: &Value, b: &Value) -> bool {
+  a.to_string() == b.to_string()
+}
+
+#[derive(Debug)]
+pub struct ActualFormatMismatch {
+  pub variant: FormatMismatchVariant,
+  pub property_path: String,
+  pub expected: Value,
+}
 
 #[derive(Debug)]
 pub struct ExpectedInstance {
@@ -129,6 +155,48 @@ impl<'a> Expects<'a> {
       }
       error!("expected an instance {expected:#?} but it was not found");
       error!("actual instances: {actual_instances:#?}");
+      panic!("");
+    }
+    self
+  }
+
+  /// Assert the formatting mismatches found in the named package's
+  /// `package.json`. An empty `expected_mismatches` asserts there are none.
+  pub fn to_have_format_mismatches(&self, package_name: &str, expected_mismatches: Vec<ExpectedFormatMismatch>) -> &Self {
+    let source_idx = self
+      .inspected
+      .data
+      .sources
+      .find_package(package_name)
+      .unwrap_or_else(|| panic!("package not found: {package_name}"));
+    let actual_mismatches = self.inspected.inspection.formatting[source_idx.0]
+      .iter()
+      .map(|mismatch| ActualFormatMismatch {
+        variant: mismatch.variant.clone(),
+        property_path: mismatch.property_path.clone(),
+        expected: mismatch.expected.clone(),
+      })
+      .collect::<Vec<ActualFormatMismatch>>();
+    let actual_len = actual_mismatches.len();
+    let expected_len = expected_mismatches.len();
+    if actual_len != expected_len {
+      error!("expected {expected_len} format mismatches in {package_name} but found {actual_len}");
+      error!("expected mismatches: {expected_mismatches:#?}");
+      error!("actual mismatches: {actual_mismatches:#?}");
+      panic!("");
+    }
+
+    'expected: for expected in &expected_mismatches {
+      for actual in actual_mismatches.iter() {
+        if actual.variant == expected.variant
+          && actual.property_path == expected.property_path
+          && is_identical(&actual.expected, &expected.expected)
+        {
+          continue 'expected;
+        }
+      }
+      error!("expected a format mismatch {expected:#?} but it was not found");
+      error!("actual mismatches: {actual_mismatches:#?}");
       panic!("");
     }
     self

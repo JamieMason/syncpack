@@ -1,341 +1,428 @@
 use {
+  crate::test::{
+    builder::TestBuilder,
+    expect::{ExpectedFormatMismatch, expect},
+  },
   serde_json::{Value, json},
-  syncpack_rules::{inspection::FormatConfig, visit_formatting::format::*},
+  syncpack_rules::inspection::FormatMismatchVariant::*,
 };
 
-/// Identity wrapper kept so the fixture call sites read naturally
-/// (`pkg(json!({…}))`). The format helpers take the package.json `Value`.
-fn pkg(value: Value) -> Value {
-  value
-}
-
-/// Build the plain-data `FormatConfig` the format helpers take, from a mock
-/// rcfile `Value`, applying the same defaults the real `Rcfile` parser uses for
-/// the six formatting fields. Keeps this suite self-contained in the rules
-/// crate (no dependency on config/bin).
-fn format_config(config: Value) -> FormatConfig {
-  let strings = |key: &str, default: &[&str]| -> Vec<String> {
-    config
-      .get(key)
-      .and_then(|v| v.as_array())
-      .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
-      .unwrap_or_else(|| default.iter().map(|s| s.to_string()).collect())
-  };
-  let boolean = |key: &str, default: bool| config.get(key).and_then(|v| v.as_bool()).unwrap_or(default);
-  FormatConfig {
-    sort_packages: boolean("sortPackages", true),
-    sort_first: strings("sortFirst", &["name", "description", "version", "author"]),
-    format_bugs: boolean("formatBugs", false),
-    format_repository: boolean("formatRepository", false),
-    sort_exports: strings(
-      "sortExports",
-      &[
-        "types",
-        "node-addons",
-        "node",
-        "browser",
-        "module",
-        "import",
-        "require",
-        "svelte",
-        "development",
-        "production",
-        "script",
-        "default",
-      ],
-    ),
-    sort_az: strings(
-      "sortAz",
-      &[
-        "bin",
-        "contributors",
-        "dependencies",
-        "devDependencies",
-        "keywords",
-        "peerDependencies",
-        "resolutions",
-        "scripts",
-      ],
-    ),
+/// An rcfile with every formatting rule switched off, so a test enables only
+/// the rule it exercises. Rules named in `keep` are left at their rcfile
+/// defaults; `overrides` are layered on top.
+fn rcfile_with(keep: &[&str], overrides: Value) -> Value {
+  let mut config = json!({
+    "sortPackages": false,
+    "sortFirst": [],
+    "sortAz": [],
+    "sortExports": [],
+    "formatBugs": false,
+    "formatRepository": false,
+  });
+  let rules = config.as_object_mut().unwrap();
+  for rule in keep {
+    rules.remove(*rule);
   }
+  rules.extend(overrides.as_object().unwrap().clone());
+  config
 }
 
-#[test]
-fn formats_bugs_into_github_shorthand() {
-  assert_eq!(
-    get_formatted_bugs(&pkg(json!({
+#[tokio::test]
+async fn reports_nothing_when_every_rule_is_off() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&[], json!({})))
+    .with_package(json!({
+      "z": "",
+      "name": "a",
+      "bugs": { "url": "https://github.com/User/repo/issues" },
+      "repository": { "url": "git://github.com/User/repo", "type": "git" },
+      "keywords": ["b", "a"],
+      "exports": { "default": "./default.cjs", "import": "./index-module.js" },
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches("a", vec![]);
+}
+
+#[tokio::test]
+async fn reports_mismatches_against_the_package_that_has_them() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortAz"], json!({})))
+    .with_packages(vec![
+      json!({ "name": "a", "keywords": ["B", "A"] }),
+      json!({ "name": "b", "keywords": ["A", "B"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx)
+    .to_have_format_mismatches(
+      "a",
+      vec![ExpectedFormatMismatch {
+        variant: PropertyIsNotSortedAz,
+        property_path: "/keywords",
+        expected: json!(["A", "B"]),
+      }],
+    )
+    .to_have_format_mismatches("b", vec![]);
+}
+
+#[tokio::test]
+async fn formats_bugs_into_github_shorthand() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&[], json!({ "formatBugs": true })))
+    .with_package(json!({
       "name": "a",
       "bugs": {
         "url": "https://github.com/User/repo/issues"
       }
-    }))),
-    Some(json!("https://github.com/User/repo/issues"))
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: BugsPropertyIsNotFormatted,
+      property_path: "/bugs",
+      expected: json!("https://github.com/User/repo/issues"),
+    }],
   );
 }
 
-#[test]
-fn formats_repository_into_gitlab_shorthand() {
-  assert_eq!(
-    get_formatted_repository(&pkg(json!({
+#[tokio::test]
+async fn formats_repository_into_gitlab_shorthand() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&[], json!({ "formatRepository": true })))
+    .with_package(json!({
       "name": "a",
       "repository": {
         "url": "git://gitlab.com/User/repo",
         "type": "git",
       },
-    }))),
-    Some(json!("git://gitlab.com/User/repo"))
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: RepositoryPropertyIsNotFormatted,
+      property_path: "/repository",
+      expected: json!("git://gitlab.com/User/repo"),
+    }],
   );
 }
 
-#[test]
-fn formats_repository_into_github_shorthand() {
-  assert_eq!(
-    get_formatted_repository(&pkg(json!({
+#[tokio::test]
+async fn formats_repository_into_github_shorthand() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&[], json!({ "formatRepository": true })))
+    .with_package(json!({
       "name": "a",
       "repository": {
         "url": "git://github.com/User/repo",
         "type": "git",
       },
-    }))),
-    Some(json!("User/repo"))
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: RepositoryPropertyIsNotFormatted,
+      property_path: "/repository",
+      expected: json!("User/repo"),
+    }],
   );
 }
 
-#[test]
-fn retains_long_format_when_directory_property_used() {
-  assert_eq!(
-    get_formatted_repository(&pkg(json!({
+#[tokio::test]
+async fn retains_long_format_when_directory_property_used() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&[], json!({ "formatRepository": true })))
+    .with_package(json!({
       "name": "a",
       "repository": {
         "url": "git://gitlab.com/User/repo",
         "type": "git",
         "directory": "packages/foo",
       },
-    }))),
-    None
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches("a", vec![]);
+}
+
+#[tokio::test]
+async fn sorts_conditional_exports() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortExports"], json!({})))
+    .with_package(json!({
+      "name": "a",
+      "exports": {
+          "default": "./default.cjs",
+          "svelte": "./index.svelte",
+          "require": "./index-require.cjs",
+          "import": "./index-module.js",
+      },
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: ExportsPropertyIsNotSorted,
+      property_path: "/exports",
+      expected: json!({
+        "import": "./index-module.js",
+        "require": "./index-require.cjs",
+        "svelte": "./index.svelte",
+        "default": "./default.cjs",
+      }),
+    }],
   );
 }
 
-#[test]
-fn sorts_conditional_exports() {
-  assert_eq!(
-    get_sorted_exports(
-      &format_config(json!({})),
-      &pkg(json!({
-        "name": "a",
-        "exports": {
-            "default": "./default.cjs",
-            "svelte": "./index.svelte",
-            "require": "./index-require.cjs",
-            "import": "./index-module.js",
-        },
-      }))
-    ),
-    Some(json!({
-      "import": "./index-module.js",
-      "require": "./index-require.cjs",
-      "svelte": "./index.svelte",
-      "default": "./default.cjs",
-    })),
-  )
+#[tokio::test]
+async fn returns_none_when_conditional_exports_already_sorted() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortExports"], json!({})))
+    .with_package(json!({
+      "name": "a",
+      "exports": {
+          "import": "./index-module.js",
+          "require": "./index-require.cjs",
+      },
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches("a", vec![]);
 }
 
-#[test]
-fn returns_none_when_conditional_exports_already_sorted() {
-  assert_eq!(
-    get_sorted_exports(
-      &format_config(json!({})),
-      &pkg(json!({
-        "name": "a",
-        "exports": {
-            "import": "./index-module.js",
-            "require": "./index-require.cjs",
+#[tokio::test]
+async fn sorts_conditional_exports_sub_paths() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortExports"], json!({})))
+    .with_package(json!({
+      "name": "a",
+      "exports": {
+        ".": "./index.js",
+        "./feature.js": {
+          "default": "./feature.js",
+          "node": "./feature-node.js",
         },
-      }))
-    ),
-    None
-  )
+      },
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: ExportsPropertyIsNotSorted,
+      property_path: "/exports",
+      expected: json!({
+        ".": "./index.js",
+        "./feature.js": {
+          "node": "./feature-node.js",
+          "default": "./feature.js",
+        },
+      }),
+    }],
+  );
 }
 
-#[test]
-fn sorts_conditional_exports_sub_paths() {
-  assert_eq!(
-    get_sorted_exports(
-      &format_config(json!({})),
-      &pkg(json!({
-        "name": "a",
-        "exports": {
+#[tokio::test]
+async fn returns_none_when_conditional_exports_sub_paths_already_sorted() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortExports"], json!({})))
+    .with_package(json!({
+      "name": "a",
+      "exports": {
           ".": "./index.js",
           "./feature.js": {
-            "default": "./feature.js",
             "node": "./feature-node.js",
+            "default": "./feature.js",
           },
-        },
-      }))
-    ),
-    Some(json!({
-      ".": "./index.js",
-      "./feature.js": {
-        "node": "./feature-node.js",
-        "default": "./feature.js",
       },
-    })),
-  )
-}
-
-#[test]
-fn returns_none_when_conditional_exports_sub_paths_already_sorted() {
-  assert_eq!(
-    get_sorted_exports(
-      &format_config(json!({})),
-      &pkg(json!({
-        "name": "a",
-        "exports": {
-            ".": "./index.js",
-            "./feature.js": {
-              "node": "./feature-node.js",
-              "default": "./feature.js",
-            },
-        },
-      }))
-    ),
-    None
-  )
-}
-
-#[test]
-fn sorts_object_properties_alphabetically_by_key() {
-  assert_eq!(
-    get_sorted_az(
-      "dependencies",
-      &pkg(json!({
-          "dependencies": {
-              "B": "",
-              "@B": "",
-              "1B": "",
-              "A": "",
-              "@A": "",
-              "1A": "",
-          },
-      }))
-    ),
-    Some(json!({
-        "@A": "",
-        "@B": "",
-        "1A": "",
-        "1B": "",
-        "A": "",
-        "B": "",
     }))
-  );
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches("a", vec![]);
 }
-#[test]
-fn sorts_array_members_alphabetically_by_value() {
-  assert_eq!(
-    get_sorted_az(
-      "keywords",
-      &pkg(json!({
-          "keywords": ["B", "@B", "1B", "A", "@A", "1A"],
-      }))
-    ),
-    Some(json!(["@A", "@B", "1A", "1B", "A", "B"]))
+
+#[tokio::test]
+async fn sorts_object_properties_alphabetically_by_key() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortAz"], json!({})))
+    .with_package(json!({
+      "name": "a",
+      "dependencies": {
+          "B": "1.0.0",
+          "@B": "1.0.0",
+          "1B": "1.0.0",
+          "A": "1.0.0",
+          "@A": "1.0.0",
+          "1A": "1.0.0",
+      },
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: PropertyIsNotSortedAz,
+      property_path: "/dependencies",
+      expected: json!({
+          "@A": "1.0.0",
+          "@B": "1.0.0",
+          "1A": "1.0.0",
+          "1B": "1.0.0",
+          "A": "1.0.0",
+          "B": "1.0.0",
+      }),
+    }],
   );
 }
 
-#[test]
-fn sorts_named_root_properties_first_leaving_the_rest_alone() {
-  assert_eq!(
-    get_sorted_first(
-      &format_config(json!({
+#[tokio::test]
+async fn sorts_array_members_alphabetically_by_value() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortAz"], json!({})))
+    .with_package(json!({
+      "name": "a",
+      "keywords": ["B", "@B", "1B", "A", "@A", "1A"],
+    }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: PropertyIsNotSortedAz,
+      property_path: "/keywords",
+      expected: json!(["@A", "@B", "1A", "1B", "A", "B"]),
+    }],
+  );
+}
+
+#[tokio::test]
+async fn sorts_named_root_properties_first_leaving_the_rest_alone() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(
+      &[],
+      json!({
           "sortFirst": ["name", "F", "E", "D"],
           "sortPackages": false,
-      })),
-      &pkg(json!({
-          "D": "",
-          "B": "",
-          "name": "a",
-          "F": "",
-          "A": "",
-          "E": "",
-      }))
-    ),
-    Some(json!({
-        "name": "a",
-        "F": "",
-        "E": "",
+      }),
+    ))
+    .with_package(json!({
         "D": "",
         "B": "",
+        "name": "a",
+        "F": "",
         "A": "",
+        "E": "",
     }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: PackagePropertiesAreNotSorted,
+      property_path: "/",
+      expected: json!({
+          "name": "a",
+          "F": "",
+          "E": "",
+          "D": "",
+          "B": "",
+          "A": "",
+      }),
+    }],
   );
 }
 
-#[test]
-fn sorts_all_root_properties_alphabetically() {
-  assert_eq!(
-    get_sorted_first(
-      &format_config(json!({
+#[tokio::test]
+async fn sorts_all_root_properties_alphabetically() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(
+      &[],
+      json!({
           "sortFirst": [],
           "sortPackages": true,
-      })),
-      &pkg(json!({
-          "D": "",
-          "B": "",
-          "name": "a",
-          "F": "",
-          "A": "",
-          "E": "",
-      }))
-    ),
-    Some(json!({
-        "A": "",
-        "B": "",
+      }),
+    ))
+    .with_package(json!({
         "D": "",
-        "E": "",
-        "F": "",
+        "B": "",
         "name": "a",
+        "F": "",
+        "A": "",
+        "E": "",
     }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: PackagePropertiesAreNotSorted,
+      property_path: "/",
+      expected: json!({
+          "A": "",
+          "B": "",
+          "D": "",
+          "E": "",
+          "F": "",
+          "name": "a",
+      }),
+    }],
   );
 }
 
-#[test]
-fn sorts_named_properties_first_then_the_rest_alphabetically() {
-  assert_eq!(
-    get_sorted_first(
-      &format_config(json!({
+#[tokio::test]
+async fn sorts_named_properties_first_then_the_rest_alphabetically() {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(
+      &[],
+      json!({
           "sortFirst": ["name", "F", "E", "D"],
           "sortPackages": true,
-      })),
-      &pkg(json!({
-          "name": "a",
-          "A": "",
-          "F": "",
-          "B": "",
-          "D": "",
-          "E": "",
-      }))
-    ),
-    Some(json!({
+      }),
+    ))
+    .with_package(json!({
         "name": "a",
-        "F": "",
-        "E": "",
-        "D": "",
         "A": "",
+        "F": "",
         "B": "",
+        "D": "",
+        "E": "",
     }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: PackagePropertiesAreNotSorted,
+      property_path: "/",
+      expected: json!({
+          "name": "a",
+          "F": "",
+          "E": "",
+          "D": "",
+          "A": "",
+          "B": "",
+      }),
+    }],
   );
 }
 
-#[test]
-fn sorts_dependencies_like_javascript_locale_compare() {
+#[tokio::test]
+async fn sorts_dependencies_like_javascript_locale_compare() {
   // Sort matches npm's `localeCompare()`: scoped packages (@babel/*) come
   // before packages starting with numbers (5to6-codemod), which differs
   // from ASCII sorting.
-  assert_eq!(
-    get_sorted_az(
-      "dependencies",
-      &pkg(json!({
-        "dependencies": {
+  let ctx = TestBuilder::new()
+    .with_config(rcfile_with(&["sortAz"], json!({})))
+    .with_package(json!({
+      "name": "a",
+      "dependencies": {
         "5to6-codemod": "1.0.0",
         "@babel/register": "7.0.0",
         "zebra": "1.0.0",
@@ -344,16 +431,23 @@ fn sorts_dependencies_like_javascript_locale_compare() {
         "awesome-lib": "2.0.0",
         "@scoped/package": "1.0.0"
       },
-      }))
-    ),
-    Some(json!({
-      "@babel/register": "7.0.0",
-      "@scoped/package": "1.0.0",
-      "@types/node": "18.0.0",
-      "1package": "1.0.0",
-      "5to6-codemod": "1.0.0",
-      "awesome-lib": "2.0.0",
-      "zebra": "1.0.0"
     }))
+    .run()
+    .await;
+  expect(&ctx).to_have_format_mismatches(
+    "a",
+    vec![ExpectedFormatMismatch {
+      variant: PropertyIsNotSortedAz,
+      property_path: "/dependencies",
+      expected: json!({
+        "@babel/register": "7.0.0",
+        "@scoped/package": "1.0.0",
+        "@types/node": "18.0.0",
+        "1package": "1.0.0",
+        "5to6-codemod": "1.0.0",
+        "awesome-lib": "2.0.0",
+        "zebra": "1.0.0"
+      }),
+    }],
   );
 }
