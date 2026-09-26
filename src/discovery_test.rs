@@ -1,6 +1,7 @@
 use {
   crate::{
-    discovery::Discovered,
+    discovery::{Discovered, DiscoveryError},
+    rcfile_loader::RcfileError,
     test::{
       self,
       builder::TestBuilder,
@@ -9,7 +10,8 @@ use {
   },
   serde_json::json,
   syncpack_model::instance::{InstanceState, SuspectInstance::InvalidLocalVersion, ValidInstance::*},
-  syncpack_vocab::package_manager::PackageManager,
+  syncpack_specifier::update_target::UpdateTarget,
+  syncpack_vocab::{config_error::UnsupportedConfigError, package_manager::PackageManager, update_policy::UpdatePolicy},
 };
 
 #[tokio::test]
@@ -395,6 +397,154 @@ fn catalog_defs_group_not_injected_when_no_catalog_dep_types() {
   assert!(
     !has_catalog_defs,
     "CatalogDefs group should not be injected when no catalog dep types exist"
+  );
+}
+
+/// Extract the collected config errors from a discovery failure, panicking with
+/// the unexpected error for a readable message.
+fn config_errors(err: &DiscoveryError) -> &[UnsupportedConfigError] {
+  let DiscoveryError::RcfileError(RcfileError::UnsupportedConfig(errors)) = err else {
+    panic!("expected RcfileError::UnsupportedConfig, got {err:?}");
+  };
+  &errors.0
+}
+
+/// The update policy discovery resolved onto the first instance of
+/// `dependency_name` from a matching update group.
+fn update_policy_of(discovered: &Discovered, dependency_name: &str) -> Option<UpdatePolicy> {
+  discovered
+    .instances
+    .iter()
+    .find(|instance| instance.descriptor.name == dependency_name)
+    .and_then(|instance| instance.preferred_update_policy.clone())
+}
+
+#[test]
+fn create_rejects_invalid_dependency_type() {
+  let err = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .with_version_group(json!({ "label": "test", "dependencyTypes": ["nonexistent"] }))
+    .try_build()
+    .unwrap_err();
+  assert!(
+    config_errors(&err)
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::InvalidDependencyType { name } if name == "nonexistent"))
+  );
+}
+
+#[test]
+fn create_rejects_semver_group_missing_required_fields() {
+  let err = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .with_semver_group(json!({ "label": "bad group" }))
+    .try_build()
+    .unwrap_err();
+  assert!(
+    config_errors(&err)
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::InvalidSemverGroup))
+  );
+}
+
+#[test]
+fn create_resolves_update_group_target_patch() {
+  let discovered = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0", "dependencies": {"foo": "1.0.0"}})])
+    .with_update_group(json!({ "dependencies": ["foo"], "target": "patch" }))
+    .build();
+  assert!(matches!(
+    update_policy_of(&discovered, "foo"),
+    Some(UpdatePolicy::UpTo(UpdateTarget::Patch))
+  ));
+}
+
+#[test]
+fn create_resolves_update_group_target_minor() {
+  let discovered = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0", "dependencies": {"foo": "1.0.0"}})])
+    .with_update_group(json!({ "dependencies": ["foo"], "target": "minor" }))
+    .build();
+  assert!(matches!(
+    update_policy_of(&discovered, "foo"),
+    Some(UpdatePolicy::UpTo(UpdateTarget::Minor))
+  ));
+}
+
+#[test]
+fn create_resolves_update_group_target_latest() {
+  let discovered = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0", "dependencies": {"foo": "1.0.0"}})])
+    .with_update_group(json!({ "dependencies": ["foo"], "target": "latest" }))
+    .build();
+  assert!(matches!(
+    update_policy_of(&discovered, "foo"),
+    Some(UpdatePolicy::UpTo(UpdateTarget::Latest))
+  ));
+}
+
+#[test]
+fn create_resolves_update_group_is_ignored_to_skip() {
+  let discovered = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0", "dependencies": {"foo": "1.0.0"}})])
+    .with_update_group(json!({ "dependencies": ["foo"], "isIgnored": true }))
+    .build();
+  assert!(matches!(update_policy_of(&discovered, "foo"), Some(UpdatePolicy::Skip)));
+}
+
+#[test]
+fn create_rejects_update_group_without_target_or_ignored() {
+  let err = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .with_update_group(json!({ "label": "x" }))
+    .try_build()
+    .unwrap_err();
+  assert!(
+    config_errors(&err)
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::InvalidUpdateGroup))
+  );
+}
+
+#[test]
+fn create_rejects_update_group_with_both_target_and_ignored() {
+  let err = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .with_update_group(json!({ "isIgnored": true, "target": "patch" }))
+    .try_build()
+    .unwrap_err();
+  assert!(
+    config_errors(&err)
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::InvalidUpdateGroup))
+  );
+}
+
+#[test]
+fn create_rejects_update_group_unknown_target() {
+  let err = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .with_update_group(json!({ "target": "nope" }))
+    .try_build()
+    .unwrap_err();
+  assert!(
+    config_errors(&err)
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::InvalidUpdateGroup))
+  );
+}
+
+#[test]
+fn create_rejects_version_group_invalid_policy() {
+  let err = TestBuilder::new()
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .with_version_group(json!({ "label": "bad", "policy": "notAPolicy" }))
+    .try_build()
+    .unwrap_err();
+  assert!(
+    config_errors(&err)
+      .iter()
+      .any(|e| matches!(e, UnsupportedConfigError::InvalidVersionGroupPolicy(p) if p == "notAPolicy"))
   );
 }
 

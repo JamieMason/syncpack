@@ -17,10 +17,6 @@ use {
 #[path = "rcfile_loader_test.rs"]
 mod rcfile_loader_test;
 
-#[cfg(test)]
-#[path = "rcfile_test.rs"]
-mod rcfile_test;
-
 #[derive(Debug, Error)]
 pub enum JsRcfileError {
   #[error(transparent)]
