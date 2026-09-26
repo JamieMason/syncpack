@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use {
   crate::{cli::Cli, errors::SyncpackError, tui::LiveTui},
   clap::error::ErrorKind,

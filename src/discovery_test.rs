@@ -83,7 +83,7 @@ fn discovery_package_manager_reflects_disk_package_manager_after_create() {
     })]);
     disk.package_manager = Some(pm);
     let ctx = Discovered::create(config, disk, sources, vec![]).unwrap();
-    assert_eq!(ctx.package_manager(), Some(pm));
+    assert_eq!(ctx.disk.package_manager, Some(pm));
   }
 
   let config = test::mock::config_from_mock(json!({}));
@@ -92,7 +92,7 @@ fn discovery_package_manager_reflects_disk_package_manager_after_create() {
     "version": "0.0.0"
   })]);
   let ctx = Discovered::create(config, disk, sources, vec![]).unwrap();
-  assert!(ctx.package_manager().is_none());
+  assert!(ctx.disk.package_manager.is_none());
 }
 
 #[tokio::test]
@@ -322,7 +322,7 @@ fn discovery_disk_field_present() {
     .with_npm_package_manager()
     .build();
   let _: &syncpack_disk::Disk = &ctx.disk;
-  assert_eq!(ctx.package_manager(), Some(PackageManager::Npm));
+  assert_eq!(ctx.disk.package_manager, Some(PackageManager::Npm));
 }
 
 #[test]
@@ -338,8 +338,7 @@ fn discovery_package_manager_via_disk() {
   for (with_pm, expected) in cases {
     let builder = TestBuilder::new().with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})]);
     let ctx = with_pm(builder).build();
-    assert_eq!(ctx.package_manager(), Some(expected));
-    assert_eq!(ctx.package_manager(), ctx.disk.package_manager);
+    assert_eq!(ctx.disk.package_manager, Some(expected));
   }
 }
 

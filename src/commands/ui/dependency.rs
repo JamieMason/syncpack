@@ -95,10 +95,6 @@ pub fn print_invalid(ctx: &Discovered, inspection: &Inspection, dep_idx: Depende
   info!("{line}");
 }
 
-pub fn print_outdated(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
-  print_valid(ctx, inspection, dep_idx, dependency, group_variant);
-}
-
 pub fn print_suspect(ctx: &Discovered, inspection: &Inspection, dep_idx: DependencyIdx, dependency: &Dependency, group_variant: &str) {
   let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) =
     get_common_parts(ctx, inspection, dep_idx, dependency, group_variant);

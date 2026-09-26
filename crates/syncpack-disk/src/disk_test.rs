@@ -43,21 +43,6 @@ fn file_dirty_defaults_false() {
   let disk = Disk::from_workspace(&io, io.root());
   let pkg = disk.package_json_root().expect("root should be loaded");
   assert!(!pkg.dirty, "freshly parsed File should default dirty=false");
-  assert!(!pkg.is_dirty(), "is_dirty() should match field");
-}
-
-#[test]
-fn file_dirty_settable() {
-  let mut file: File<serde_json::Value> = File {
-    filepath: std::path::PathBuf::from("/test/package.json"),
-    formatting: Default::default(),
-    contents: serde_json::Value::Null,
-    dirty: false,
-  };
-  assert!(!file.is_dirty());
-  file.mark_dirty();
-  assert!(file.is_dirty(), "mark_dirty() should flip dirty to true");
-  assert!(file.dirty, "field should reflect mutation");
 }
 
 #[test]
@@ -675,7 +660,7 @@ mod disk_ops {
     super::*,
     crate::{copy_expected_specifier_json, package_name},
     serde_json::{Map, Value},
-    syncpack_io::{DetectedFormatting, detect_formatting, get_pretty_json_bytes, has_prop, parse_json_file},
+    syncpack_io::{DetectedFormatting, detect_formatting, get_pretty_json_bytes, parse_json_file},
     syncpack_vocab::{
       dependency_type::{DependencyType, Strategy},
       source_kind::SourceKind,
@@ -996,18 +981,6 @@ mod disk_ops {
   fn package_name_uses_fallback_when_name_missing() {
     let file = file_from_raw("{\"version\": \"1.0.0\"}");
     assert_eq!(package_name(&file), "NAME_IS_MISSING");
-  }
-
-  #[test]
-  fn has_prop_returns_true_when_exists() {
-    let file = file_from_raw("{\"name\": \"pkg\", \"version\": \"1.0.0\"}");
-    assert!(has_prop(&file, "/version"));
-  }
-
-  #[test]
-  fn has_prop_returns_false_when_missing() {
-    let file = file_from_raw("{\"name\": \"pkg\"}");
-    assert!(!has_prop(&file, "/version"));
   }
 
   #[test]

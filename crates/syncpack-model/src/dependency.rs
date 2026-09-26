@@ -74,17 +74,6 @@ impl Dependency {
     }
   }
 
-  pub fn get_unique_specifiers(&self, arena: &[Instance]) -> Vec<Rc<Specifier>> {
-    let mut unique = Vec::new();
-    for idx in &self.instances {
-      let spec = &arena[idx.0].descriptor.specifier;
-      if !unique.iter().any(|s: &Rc<Specifier>| s.get_raw() == spec.get_raw()) {
-        unique.push(Rc::clone(spec));
-      }
-    }
-    unique
-  }
-
   pub fn get_instances<'a>(&'a self, arena: &'a [Instance]) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
     self.instances.iter().map(move |idx| (*idx, &arena[idx.0]))
   }

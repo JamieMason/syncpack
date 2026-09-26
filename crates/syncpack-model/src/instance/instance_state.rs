@@ -94,20 +94,8 @@ impl InstanceState {
     matches!(self, InstanceState::Invalid(_))
   }
 
-  pub fn is_suspect(&self) -> bool {
-    matches!(self, InstanceState::Suspect(_))
-  }
-
-  pub fn is_fixable(&self) -> bool {
-    matches!(self, InstanceState::Invalid(InvalidInstance::Fixable(_)))
-  }
-
   pub fn is_banned(&self) -> bool {
     matches!(self, InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::IsBanned)))
-  }
-
-  pub fn is_unfixable(&self) -> bool {
-    matches!(self, InstanceState::Invalid(InvalidInstance::Unfixable(_)))
   }
 
   pub fn is_outdated(&self) -> bool {

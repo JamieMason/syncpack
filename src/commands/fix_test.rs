@@ -37,16 +37,6 @@ fn run_fix_ok(inspected: Inspected) -> Inspected {
   fix::run(inspected, &SilentReporter, &disk).expect("fix should succeed")
 }
 
-/// Find a consumer instance by id. Convenience used across the tests.
-fn find_instance<'a>(inspected: &'a Inspected, id: &str) -> &'a Instance {
-  inspected
-    .data
-    .instances
-    .iter()
-    .find(|i| i.id == id)
-    .unwrap_or_else(|| panic!("instance not found: {id}"))
-}
-
 /// Find the package.json by name from disk.
 fn find_package<'a>(inspected: &'a Inspected, name: &str) -> &'a syncpack_io::File<serde_json::Value> {
   inspected
@@ -90,9 +80,9 @@ fn pnpm_fix_not_using_catalog() {
     Some("catalog:"),
     "consumer should now use catalog:"
   );
-  assert!(pkg.is_dirty(), "consumer pkg should be marked dirty");
+  assert!(pkg.dirty, "consumer pkg should be marked dirty");
   assert!(
-    !pnpm_yaml(&ctx).unwrap().is_dirty(),
+    !pnpm_yaml(&ctx).unwrap().dirty,
     "yaml should NOT be dirty when only NotUsingCatalog fixes ran"
   );
 }
@@ -127,7 +117,7 @@ fn pnpm_fix_updates_overrides_in_yaml() {
     .and_then(|v| v.as_str())
     .map(str::to_string);
   assert_eq!(got, Some("19.2.7".to_string()), "override should be bumped to the pinned version");
-  assert!(yaml.is_dirty(), "yaml should be dirty after override rewrite");
+  assert!(yaml.dirty, "yaml should be dirty after override rewrite");
 
   let pkg = find_package(&ctx, "pkg-a");
   assert_eq!(
@@ -158,7 +148,7 @@ fn pnpm_fix_missing_from_catalog_inserts_definition() {
   let ctx = run_fix_ok(ctx);
 
   let yaml = pnpm_yaml(&ctx).unwrap();
-  assert!(yaml.is_dirty(), "yaml should be dirty after insert");
+  assert!(yaml.dirty, "yaml should be dirty after insert");
   let inserted = yaml
     .contents
     .get("catalog")
@@ -233,7 +223,7 @@ fn pnpm_fix_missing_from_catalog_idempotent_inserts() {
   let map = yaml.contents.get("catalog").and_then(|v| v.as_mapping()).unwrap();
   assert_eq!(map.len(), 2, "yaml catalog should have lodash + react only");
   assert_eq!(map.get("react").and_then(|v| v.as_str()), Some("^18.0.0"));
-  assert!(yaml.is_dirty(), "yaml should be dirty");
+  assert!(yaml.dirty, "yaml should be dirty");
 
   for name in ["pkg-a", "pkg-b"] {
     let pkg = find_package(&ctx, name);
@@ -295,7 +285,7 @@ fn pnpm_fix_does_not_touch_yaml_when_only_package_json_changes() {
   let ctx = run_fix_ok(ctx);
 
   assert!(
-    !pnpm_yaml(&ctx).unwrap().is_dirty(),
+    !pnpm_yaml(&ctx).unwrap().dirty,
     "yaml should be untouched when only NotUsingCatalog fixes ran"
   );
 }
@@ -322,8 +312,8 @@ fn pnpm_fix_in_memory_state_visible_with_dry_run() {
   let ctx = run_fix_ok(ctx);
 
   // Both mutations visible because write_to_disk was skipped.
-  assert!(pnpm_yaml(&ctx).unwrap().is_dirty(), "yaml dirty preserved");
-  assert!(find_package(&ctx, "pkg-a").is_dirty(), "package dirty preserved");
+  assert!(pnpm_yaml(&ctx).unwrap().dirty, "yaml dirty preserved");
+  assert!(find_package(&ctx, "pkg-a").dirty, "package dirty preserved");
 }
 
 #[test]
@@ -715,7 +705,7 @@ fn fix_pnpm_catalog_creates_yaml_when_absent() {
     .pnpm_workspace
     .as_ref()
     .expect("auto-created yaml must live on disk.pnpm_workspace");
-  assert!(yaml.is_dirty(), "auto-created yaml should be dirty after insert");
+  assert!(yaml.dirty, "auto-created yaml should be dirty after insert");
   let inserted = yaml.contents.get("catalog").and_then(|m| m.get("react")).and_then(|v| v.as_str());
   assert_eq!(inserted, Some("^18.0.0"), "react inserted into auto-created yaml");
 }
@@ -752,10 +742,6 @@ impl syncpack_io::DiskIo for RecordingDiskIo {
 
   fn path_exists(&self, p: &Path) -> bool {
     self.inner.path_exists(p)
-  }
-
-  fn read_dir(&self, p: &Path) -> Result<Vec<syncpack_io::DiskDirEntry>, std::io::Error> {
-    self.inner.read_dir(p)
   }
 
   fn read_json_file<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<syncpack_io::File<V>, syncpack_io::DiskIoError>> {
@@ -825,7 +811,7 @@ fn pnpm_fix_banned_removes_from_yaml() {
     Some("^2.0.0"),
     "non-banned `bar` should still be present"
   );
-  assert!(yaml.is_dirty(), "yaml should be marked dirty after banned removal");
+  assert!(yaml.dirty, "yaml should be marked dirty after banned removal");
 }
 
 /// Bun parity for the banned-catalog removal. Bun catalog instances are sourced
@@ -859,5 +845,5 @@ fn bun_fix_banned_removes_from_pkg_json() {
     Some("^2.0.0"),
     "non-banned `bar` should still be present"
   );
-  assert!(root.is_dirty(), "bun root should be marked dirty after banned removal");
+  assert!(root.dirty, "bun root should be marked dirty after banned removal");
 }

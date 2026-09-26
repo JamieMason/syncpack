@@ -8,10 +8,6 @@ pub fn err() -> String {
   "\u{2718}".red().to_string()
 }
 
-pub fn blue_err() -> String {
-  "\u{2718}".blue().to_string()
-}
-
 pub fn warn() -> String {
   "!".yellow().to_string()
 }

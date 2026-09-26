@@ -38,25 +38,12 @@ pub fn cli() -> Cli {
   }
 }
 
-/// Create an empty Config struct
-pub fn config() -> Config {
-  Config {
-    cli: cli(),
-    rcfile: rcfile(),
-  }
-}
-
 /// Create a Config struct from a mocked .syncpackrc
 pub fn config_from_mock(value: serde_json::Value) -> Config {
   Config {
     cli: cli(),
     rcfile: rcfile_from_mock(value),
   }
-}
-
-/// Create an empty Rcfile struct
-pub fn rcfile() -> Rcfile {
-  Rcfile::default()
 }
 
 /// Create an Rcfile struct from a mocked .syncpackrc
@@ -80,10 +67,6 @@ pub fn package_json_file_from_value(contents: Value) -> File<Value> {
     contents,
     dirty: false,
   }
-}
-
-pub fn package_json_from_value(contents: Value) -> Value {
-  contents
 }
 
 /// Parse raw yaml into a `YamlFile` with a synthetic file path

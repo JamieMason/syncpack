@@ -190,10 +190,4 @@ impl Discovered {
       version_groups,
     })
   }
-
-  /// Detected package manager (lives on Disk; accessor preserves call-site
-  /// ergonomics).
-  pub fn package_manager(&self) -> Option<syncpack_vocab::package_manager::PackageManager> {
-    self.disk.package_manager
-  }
 }

@@ -227,7 +227,7 @@ fn fix_zero_catalogs_pnpm_creates_default_on_disk() {
     .pnpm_workspace
     .as_ref()
     .expect("auto-created yaml must live on disk.pnpm_workspace");
-  assert!(yaml.is_dirty());
+  assert!(yaml.dirty);
 }
 
 #[tokio::test]

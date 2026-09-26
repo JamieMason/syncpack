@@ -144,8 +144,3 @@ pub fn is_git(s: &str) -> bool {
     || s.starts_with("git+https://")
     || s.starts_with("git+ssh://")
 }
-
-/// "link:../path"
-pub fn is_link(s: &str) -> bool {
-  s.starts_with("link:")
-}

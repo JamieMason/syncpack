@@ -4,7 +4,7 @@ use {
   syncpack_model::{
     dependency::{Dependency, DependencyIdx},
     instance::{Instance, InstanceIdx, InstanceState, InvalidInstance, SuspectInstance},
-    sources::{SourceIdx, Sources},
+    sources::SourceIdx,
   },
   syncpack_specifier::{Specifier, update_target::UpdateTarget},
   syncpack_vocab::{
@@ -62,7 +62,6 @@ pub struct FormatConfig {
 pub struct RuleInput<'a> {
   pub instances: &'a [Instance],
   pub dependencies: &'a [Dependency],
-  pub sources: &'a Sources,
   pub cfg: RuleInputCfg,
 }
 

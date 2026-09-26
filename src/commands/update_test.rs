@@ -327,7 +327,7 @@ mod apply {
       .disk
       .package_json_files
       .iter()
-      .filter(|f| f.is_dirty())
+      .filter(|f| f.dirty)
       .map(|f| f.filepath.display().to_string())
       .collect()
   }

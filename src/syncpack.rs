@@ -80,7 +80,6 @@ pub fn inspect(data: &Discovered, registry_updates: &Option<RegistryUpdates>) ->
   let input = RuleInput {
     instances: &data.instances,
     dependencies: &data.dependencies,
-    sources: &data.sources,
     cfg: RuleInputCfg {
       target: data.config.cli.target,
       strict: data.config.rcfile.strict,

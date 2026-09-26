@@ -1,8 +1,8 @@
 use {
-  crate::{DiskDirEntry, DiskIo, DiskIoError, File, NodeJsError, YamlFile, detect_formatting, render_yaml_bytes},
+  crate::{DiskIo, DiskIoError, File, NodeJsError, YamlFile, detect_formatting, render_yaml_bytes},
   std::{
     cell::RefCell,
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     path::{Path, PathBuf},
   },
 };
@@ -79,23 +79,6 @@ impl DiskIo for MockDiskIo {
 
   fn path_exists(&self, filepath: &Path) -> bool {
     self.files.contains_key(filepath) || self.has_children(filepath)
-  }
-
-  fn read_dir(&self, path: &Path) -> Result<Vec<DiskDirEntry>, std::io::Error> {
-    let mut seen = HashSet::new();
-    let mut entries = Vec::new();
-    for file_path in self.files.keys() {
-      if let Ok(relative) = file_path.strip_prefix(path)
-        && let Some(first_component) = relative.iter().next()
-      {
-        let child_path = path.join(first_component);
-        if seen.insert(child_path.clone()) {
-          let is_dir = relative.iter().count() > 1;
-          entries.push(DiskDirEntry::new(child_path, is_dir));
-        }
-      }
-    }
-    Ok(entries)
   }
 
   fn read_json_file<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>> {

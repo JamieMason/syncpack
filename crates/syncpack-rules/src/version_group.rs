@@ -253,21 +253,6 @@ impl VersionGroup {
     matches!(self, Self::Ignored(_))
   }
 
-  pub fn severity_map(&self) -> &SeverityMap {
-    match self {
-      Self::Banned(g) => &g.severity,
-      Self::Catalog(g) => &g.severity,
-      Self::CatalogDefs(g) => &g.severity,
-      Self::Ignored(g) => &g.severity,
-      Self::Pinned(g) => &g.severity,
-      Self::PreferredSemver(g) => &g.severity,
-      Self::SameMinor(g) => &g.severity,
-      Self::SameRange(g) => &g.severity,
-      Self::SemverRangeOnly(g) => &g.severity,
-      Self::SnappedTo(g) => &g.severity,
-    }
-  }
-
   pub fn get_update_urls(&self, deps: &[Dependency], arena: &[Instance]) -> Option<Vec<UpdateUrl>> {
     let collect = |group_deps: &[DependencyIdx]| group_deps.iter().filter_map(|d| deps[d.0].get_update_url(arena)).collect();
     match self {
