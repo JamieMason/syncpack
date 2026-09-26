@@ -31,7 +31,7 @@ install-system-dependencies:
 # Fix formatting, indentation etc of all files
 format:
     cargo +nightly fmt --all -- --verbose
-    cargo clippy --fix --allow-dirty
+    cargo clippy --workspace --all-targets --fix --allow-dirty
     npm exec biome -- format --write .
 
 # Update dependencies in Cargo.toml and Cargo.lock
@@ -60,7 +60,7 @@ check-formatting:
 
 # Check for clippy warnings
 check-clippy:
-    cargo clippy --tests --verbose -- -D warnings
+    cargo clippy --workspace --all-targets --verbose -- -D warnings
 
 # Look for outdated dependencies
 check-for-updates:
@@ -146,7 +146,7 @@ flamegraph:
 # Run all tests and generate a coverage report
 coverage:
     rm -rf target/llvm-cov/html
-    cargo llvm-cov test --html --ignore-run-fail --ignore-filename-regex '(_test.rs|\/test\/)'
+    cargo llvm-cov test --workspace --html --ignore-run-fail --ignore-filename-regex '(_test.rs|\/test\/)'
 
 # Open coverage report (on http server to allow Dark Reader Browser Extension)
 serve-coverage:
@@ -162,7 +162,7 @@ watch pattern=no_pattern:
 
 # Run test in watch mode with coverage
 watch-coverage:
-    tput rmam && cargo watch --clear --exec 'llvm-cov test --html --ignore-filename-regex "(_test.rs|\/test\/)" -- --nocapture --color=always'
+    tput rmam && cargo watch --clear --exec 'llvm-cov test --workspace --html --ignore-filename-regex "(_test.rs|\/test\/)" -- --nocapture --color=always'
 
 # Run the rust binary against an unformatted test fixture
 run-misc:
