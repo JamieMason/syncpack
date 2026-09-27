@@ -3,6 +3,10 @@
 #[cfg(any(test, feature = "test-support"))]
 pub mod mock;
 
+#[cfg(test)]
+#[path = "lib_test.rs"]
+mod lib_test;
+
 use {
   detect_indent::detect_indent,
   detect_newline_style::LineEnding,
