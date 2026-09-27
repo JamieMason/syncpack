@@ -1,28 +1,34 @@
 # Version Group Implementation Rules
 
 Rules and patterns which apply across all version group visitors in
-`src/visit_packages/`. Read this before implementing or modifying any visitor.
+`crates/syncpack-rules/src/version_group/`. Read this before implementing or
+modifying any visitor.
 
 ---
 
 ## The Visitor Contract
 
-Each visitor in `src/visit_packages/*.rs` receives a `&Dependency` and must
-call one of the following mark methods on **every** instance before returning:
+Each visitor in `crates/syncpack-rules/src/version_group/*.rs` receives a
+`&Dependency` and an `&mut Inspection` accumulator (`out`), and must call
+`out.classify(...)` for **every** instance before returning:
 
 ```rust
-instance.mark_valid(ValidInstance::*, specifier);
-instance.mark_fixable(FixableInstance::*, expected_specifier);
-instance.mark_unfixable(UnfixableInstance::*);
-instance.mark_conflict(SemverGroupAndVersionConflict::*);
-instance.mark_suspect(SuspectInstance::*);
+out.classify(idx, InstanceState::Valid(ValidInstance::*), Some(specifier), &self.severity, strict);
+out.classify(idx, InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::*)), Some(expected_specifier), &self.severity, strict);
+out.classify(idx, InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::*)), None, &self.severity, strict);
+out.classify(idx, InstanceState::Invalid(InvalidInstance::Conflict(SemverGroupAndVersionConflict::*)), None, &self.severity, strict);
+out.classify(idx, InstanceState::Suspect(SuspectInstance::*), None, &self.severity, strict);
 ```
+
+`Inspection` (`crates/syncpack-rules/src/inspection.rs`) is a plain value keyed
+by `InstanceIdx`/`DependencyIdx`/`SourceIdx` — `classify` writes into it rather
+than mutating the `Instance`. `Instance` itself has no interior mutability.
 
 No instance may be left in `InstanceState::Unknown` after `visit_packages()`
 completes. This is a hard invariant.
 
-States are assigned during inspection only — never during Context creation and
-never inside commands.
+States are assigned during inspection only — never during `Discovered::create`
+and never inside commands.
 
 ---
 
@@ -176,7 +182,7 @@ different semver groups with different preferred ranges.
 When selecting the highest (or lowest) specifier, each instance's preferred
 semver range is applied before comparison. This means a semver group that widens
 a range (e.g. exact → caret) can promote that instance to be the "highest" via
-range greediness. See `Dependency::get_highest_or_lowest_specifier`.
+range greediness. See `PreferredSemverGroup::get_highest_or_lowest_specifier`.
 
 ---
 

@@ -35,7 +35,7 @@ and we cannot pick a winner without asking the user → `Unfixable`.
 
 ---
 
-## Step 2: Add the variant to `src/instance_state.rs`
+## Step 2: Add the variant to `crates/syncpack-model/src/instance/instance_state.rs`
 
 Find the appropriate enum and add the variant with a multi-line doc comment.
 Every condition relevant to the state must be listed. Use these symbols:
@@ -65,113 +65,128 @@ precise — every bullet should be independently verifiable from the visitor cod
 
 ## Step 3: Check whether any `impl` blocks need updating
 
-Most additions require no changes to `impl InstanceState`. The severity, the
-`is_fixable()` / `is_unfixable()` helpers, and the `get_name()` / `get_status_type()`
+Most additions require no changes to `impl InstanceState`. Severity resolution
+and the `is_valid()` / `is_invalid()` / `get_name()` / `get_status_type()`
 methods all work by matching on the outer category (`Valid`, `Invalid`,
 `Suspect`), not on individual variants.
 
 The only time you need to touch `impl InstanceState` is if you are adding a
-variant that needs a **custom severity** (rare) or a new top-level predicate
-(e.g. `is_banned()`). For ordinary additions, no changes are needed.
+variant that needs a **custom severity** (rare) or a new top-level predicate.
+For ordinary additions, no changes are needed.
 
 ---
 
 ## Step 4: Write the detection logic in the visitor
 
-Visitor files live in `src/visit_packages/`. Each visitor receives a
-`&Dependency` and must call one of the mark methods on every instance:
+Visitor implementations live in `crates/syncpack-rules/src/version_group/`, one
+file per version-group policy (`same_minor.rs`, `pinned.rs`, `banned.rs`, ...).
+Each is a struct (e.g. `SameMinorGroup`) implementing `VersionGroupBehavior`,
+whose `visit(&self, input: &RuleInput, registry_updates, out: &mut Inspection)`
+must call `out.classify(...)` for every instance:
 
 ```rust
-instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, specifier);
-instance.mark_fixable(FixableInstance::DiffersToPin, expected_specifier);
-instance.mark_unfixable(UnfixableInstance::SameMinorHasMajorMismatch);
-instance.mark_conflict(SemverGroupAndVersionConflict::MatchConflictsWithLocal);
-instance.mark_suspect(SuspectInstance::InvalidLocalVersion);
+out.classify(idx, InstanceState::Valid(ValidInstance::SatisfiesSameMinorGroup), Some(specifier), &self.severity, strict);
+out.classify(idx, InstanceState::Invalid(InvalidInstance::Fixable(FixableInstance::DiffersToPin)), Some(expected_specifier), &self.severity, strict);
+out.classify(idx, InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::SameMinorHasMajorMismatch)), None, &self.severity, strict);
+out.classify(idx, InstanceState::Invalid(InvalidInstance::Conflict(SemverGroupAndVersionConflict::MatchConflictsWithLocal)), None, &self.severity, strict);
+out.classify(idx, InstanceState::Suspect(SuspectInstance::InvalidLocalVersion), None, &self.severity, strict);
 ```
 
-Never assign to `instance.state` directly — always use these methods.
+`Inspection` (`crates/syncpack-rules/src/inspection.rs`) is a plain value keyed
+by `InstanceIdx`/`DependencyIdx`/`SourceIdx`, returned from `inspect()` rather
+than mutated in place. `Instance` has no interior mutability — always go
+through `out.classify(...)`, never assign state anywhere else.
 
-The specifier argument to `mark_valid` and `mark_fixable` is the **expected**
-specifier — what the instance should be set to. Read the actual specifier from
+The `expected` argument to `classify` is the **expected** specifier — what the
+instance should be set to (`None` when there's nothing to fix towards, e.g.
+`Suspect`/most `Unfixable` states). Read the actual specifier from
 `instance.descriptor.specifier`.
 
 Example — marking all instances when a major mismatch is detected (computed
-once before the per-instance loop):
+once before the per-instance loop; see `crates/syncpack-rules/src/version_group/same_minor.rs`):
 
 ```rust
-let has_major_mismatch = dependency
+let all_same_major = dep
     .instances
-    .iter()
-    .any(|i| !i.already_has_same_major_as_all(&dependency.instances));
+    .first()
+    .is_some_and(|idx| arena[idx.0].already_has_same_major_as_all(&dep.instances, arena));
 
-dependency.instances.iter().for_each(|instance| {
-    let actual_specifier = &instance.descriptor.specifier;
-
-    if has_major_mismatch {
-        instance.mark_unfixable(UnfixableInstance::SameMinorHasMajorMismatch);
-        return;
+if !all_same_major {
+    for &idx in &dep.instances {
+        let instance = &arena[idx.0];
+        let actual_specifier = &instance.descriptor.specifier;
+        out.classify(
+            idx,
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::SameMinorHasMajorMismatch)),
+            Some(Rc::clone(actual_specifier)),
+            &self.severity,
+            strict,
+        );
     }
-
-    // ... rest of visitor logic ...
-});
+    continue;
+}
 ```
 
 Key rules:
 
-- **Every instance must be marked** before the visitor returns. No instance may
-  remain in `InstanceState::Unknown` after `visit_packages()` completes.
+- **Every instance must be classified** before the visitor returns. No instance
+  may remain in `InstanceState::Unknown` after `visit_packages()` completes.
 - **Compute per-dependency values once** before the loop (e.g. highest
   specifier, major-mismatch boolean) to avoid O(n²) re-checking.
-- **Do not read `instance.state` inside the visitor** to decide what to do —
-  states are write-once during inspection.
+- **Never read state back out of `out` inside the same visitor pass** to decide
+  what to do next — states are write-once per instance during inspection.
+  (The one documented exception is `SnappedTo`, which runs as a second stage
+  and reads its targets' stage-1 results back out of `out` — see
+  `crates/syncpack-rules/src/version_group.rs`.)
 
 ---
 
-## Step 5: Integrate into `visit_packages.rs` (only for new visitors)
+## Step 5: Integrate a new visitor (only for new policies)
 
 If you are adding a variant to an **existing** visitor, skip this step.
 
-If you are adding a **new visitor module**, register it in
-`src/visit_packages.rs`:
+If you are adding a **new version-group policy**, `crates/syncpack-rules/src/version_group.rs`
+requires changes in five places, all matching on the `VersionGroup` enum:
 
 ```rust
-mod banned;
-mod ignored;
-mod indent;
-mod pinned;
-mod preferred_semver;
-mod same_minor;   // ← example of an existing entry
-mod same_range;
-mod snapped_to;
-mod your_new_visitor;  // ← add here
+// 1. Declare the module and re-export the struct
+mod your_new_visitor;
+pub use { /* ... */ your_new_visitor::YourNewGroup };
 
-pub fn visit_packages(ctx: Context) -> Context {
-    ctx.version_groups.iter().sorted_by(order_snapped_to_groups_last).for_each(|group| {
-        group.dependencies.values().for_each(|dependency| match dependency.variant {
-            VersionGroupVariant::Banned => banned::visit(dependency),
-            VersionGroupVariant::SameMinor => same_minor::visit(dependency),
-            // ... add your new variant arm here if a new VersionGroupVariant was added ...
-            VersionGroupVariant::SnappedTo => snapped_to::visit(dependency, &ctx),
-        });
-    });
-    ctx
+// 2. Add a variant
+pub enum VersionGroup {
+    // ...
+    YourNew(YourNewGroup),
 }
+
+// 3-5. Add a match arm in each of:
+// impl VersionGroupBehavior for VersionGroup { fn selector(&self) -> ... }
+// impl VersionGroupBehavior for VersionGroup { fn dependency_indices(&self) -> ... }
+// impl VersionGroupBehavior for VersionGroup { fn set_dependency_indices(&mut self, ...) }
+// impl VersionGroupBehavior for VersionGroup { fn visit(&self, ...) }
 ```
+
+Also add a case to `VersionGroup::variant_label()` (used in logging/UI), and to
+`build_version_groups` (`src/discovery/groups.rs`) so the rcfile's `policy`
+string can select it. There is no single dispatch table — the compiler's
+exhaustiveness checking on each `match self { ... }` is what catches a missed
+arm, so add the enum variant first and let `cargo check` find every site.
 
 ---
 
 ## Step 6: Write tests
 
-Test files live alongside their visitor: `src/visit_packages/same_minor_test.rs`
-is declared inside `same_minor.rs` with:
+Test files live in `src/version_group/` in the **binary** crate (not alongside
+the visitor, which is in `syncpack-rules` — that crate has no unit tests of its
+own; these are its only test coverage). Each is wired into `src/main.rs`:
 
 ```rust
 #[cfg(test)]
-#[path = "same_minor_test.rs"]
+#[path = "version_group/same_minor_test.rs"]
 mod same_minor_test;
 ```
 
-Tests use `TestBuilder` and `expect(&ctx).to_have_instances(...)`. Every
+Tests use `TestBuilder` and `expect(&inspected).to_have_instances(...)`. Every
 `ExpectedInstance` must specify:
 
 - `state` — the exact `InstanceState` expected
@@ -180,22 +195,21 @@ Tests use `TestBuilder` and `expect(&ctx).to_have_instances(...)`. Every
 - `actual` — the on-disk specifier string
 - `expected` — `Some("...")` for the expected/fix-target specifier, or `None`
 - `overridden` — `Some("...")` when a semver group preference was overridden
+- `severity` — `Some(severity)` to assert resolved severity, or `None` to skip that assertion
 
 ```rust
 use {
-    crate::{
-        instance_state::{FixableInstance::*, InstanceState, UnfixableInstance::*, ValidInstance::*},
-        test::{
-            builder::TestBuilder,
-            expect::{expect, ExpectedInstance},
-        },
+    crate::test::{
+        builder::TestBuilder,
+        expect::{ExpectedInstance, expect},
     },
     serde_json::json,
+    syncpack_model::instance::{FixableInstance::*, InstanceState, UnfixableInstance::*, ValidInstance::*},
 };
 
-#[test]
-fn major_mismatch_marks_all_instances_unfixable() {
-    let ctx = TestBuilder::new()
+#[tokio::test]
+async fn major_mismatch_marks_all_instances_unfixable() {
+    let inspected = TestBuilder::new()
         .with_packages(vec![json!({
             "name": "my-project",
             "version": "1.0.0",
@@ -206,13 +220,14 @@ fn major_mismatch_marks_all_instances_unfixable() {
                 "foo": "2.1.0"
             }
         })])
-        .with_version_groups(vec![json!({
+        .with_version_group(json!({
             "dependencies": ["foo"],
             "policy": "sameMinor"
-        })])
-        .build_and_visit_packages();
+        }))
+        .run()
+        .await;
 
-    expect(&ctx).to_have_instances(vec![
+    expect(&inspected).to_have_instances(vec![
         ExpectedInstance {
             state: InstanceState::valid(IsLocalAndValid),
             dependency_name: "my-project",
@@ -220,6 +235,7 @@ fn major_mismatch_marks_all_instances_unfixable() {
             actual: "1.0.0",
             expected: Some("1.0.0"),
             overridden: None,
+            severity: None,
         },
         ExpectedInstance {
             state: InstanceState::unfixable(SameMinorHasMajorMismatch),
@@ -228,6 +244,7 @@ fn major_mismatch_marks_all_instances_unfixable() {
             actual: "1.2.0",
             expected: None,
             overridden: None,
+            severity: None,
         },
         ExpectedInstance {
             state: InstanceState::unfixable(SameMinorHasMajorMismatch),
@@ -236,10 +253,15 @@ fn major_mismatch_marks_all_instances_unfixable() {
             actual: "2.1.0",
             expected: None,
             overridden: None,
+            severity: None,
         },
     ]);
 }
 ```
+
+`.run().await` builds and runs the full pipeline including registry fetches.
+`TestBuilder` also has a sync `build_and_visit_packages()` for cases that don't
+need the registry.
 
 Cover every leaf of the decision tree. For a visitor with semver group
 interaction, the minimum test matrix is:
@@ -257,13 +279,14 @@ interaction, the minimum test matrix is:
 
 ## Step 7: Verify commands need no changes
 
-Commands (`src/commands/*.rs`) operate on states generically:
+Commands (`src/commands/*.rs`) operate on states generically, reading them out
+of `Inspection` rather than off the instance:
 
 ```rust
 // lint.rs, fix.rs etc. already handle your new variant automatically
-dependency.get_sorted_instances()
-    .filter(|instance| instance.is_invalid())  // or is_fixable(), is_unfixable() etc.
-    .for_each(|instance| { ... });
+dependency.instances.iter()
+    .filter(|idx| inspection.state(*idx).is_invalid())
+    .for_each(|idx| { ... });
 ```
 
 New variants within existing categories (`Fixable`, `Unfixable`, etc.) are
@@ -287,22 +310,23 @@ just test
 
 ## Checklist
 
-- [ ] Variant added to the correct enum in `src/instance_state.rs`
+- [ ] Variant added to the correct enum in `crates/syncpack-model/src/instance/instance_state.rs`
 - [ ] Doc comment uses `✓` `✘` `?` `!` bullets and describes every condition
-- [ ] Visitor uses `instance.mark_*()` methods — no direct state assignment
+- [ ] Visitor uses `out.classify(...)` — no direct state assignment
 - [ ] Per-dependency values computed once before the per-instance loop
-- [ ] Every instance is marked on every code path through the visitor
+- [ ] Every instance is classified on every code path through the visitor
 - [ ] Tests cover every leaf of the decision tree
-- [ ] Tests use `expect(&ctx).to_have_instances(...)` with `ExpectedInstance`
+- [ ] Tests use `expect(&inspected).to_have_instances(...)` with `ExpectedInstance`
 - [ ] No command changes needed (or bespoke fix logic added if required)
 
 ---
 
 ## Related files
 
-- `src/instance_state.rs` — all state variant definitions and annotations
-- `src/visit_packages.rs` — visitor dispatch
-- `src/visit_packages/*.rs` — visitor implementations
-- `src/visit_packages/*_test.rs` — test examples to copy patterns from
+- `crates/syncpack-model/src/instance/instance_state.rs` — all state variant definitions and annotations
+- `crates/syncpack-rules/src/visit_packages.rs` — two-stage visitor dispatch
+- `crates/syncpack-rules/src/version_group.rs` — the `VersionGroup` enum and `VersionGroupBehavior` dispatch
+- `crates/syncpack-rules/src/version_group/*.rs` — visitor implementations
+- `src/version_group/*_test.rs` — test examples to copy patterns from (wired into `src/main.rs` via `#[path]`)
 - `src/commands/fix.rs` — example of how states drive fix behaviour
 - `.notes/reference/version-group-implementation-rules.md` — cross-cutting rules for all visitors

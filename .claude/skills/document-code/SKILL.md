@@ -24,7 +24,7 @@ What are you documenting?
 
 ## Workflow
 
-1. **Read source** — `cli.rs` for commands, `rcfile.rs` for config, `instance_state.rs` for status codes
+1. **Read source** — `src/cli.rs` for commands, `crates/syncpack-config/src/lib.rs` for config, `crates/syncpack-model/src/instance/instance_state.rs` for status codes
 2. **Create/update MDX** — Match existing structure exactly
 3. **Add link identifier** — Update `globalReferenceLinks` in `astro.config.mjs`
 4. **Test locally** — `pnpm run dev` from `site/`
@@ -32,12 +32,12 @@ What are you documenting?
 
 ## Source to Docs Mapping
 
-| Source                  | Documentation                                         |
-| ----------------------- | ----------------------------------------------------- |
-| `src/cli.rs` Subcommand | `site/src/content/docs/command/*.mdx`                 |
-| `src/rcfile.rs` Rcfile  | `site/src/content/docs/config/*.mdx`                  |
-| `src/instance_state.rs` | `site/src/content/docs/status/*.mdx`                  |
-| `src/specifier.rs`      | `site/src/content/docs/reference/specifier-types.mdx` |
+| Source                                                    | Documentation                                         |
+| ----------------------------------------------------------- | ----------------------------------------------------- |
+| `src/cli.rs` Subcommand                                     | `site/src/content/docs/command/*.mdx`                 |
+| `crates/syncpack-config/src/lib.rs` Rcfile                  | `site/src/content/docs/config/*.mdx`                  |
+| `crates/syncpack-model/src/instance/instance_state.rs`      | `site/src/content/docs/status/*.mdx`                  |
+| `crates/syncpack-specifier/src/lib.rs`                      | `site/src/content/docs/reference/specifier-types.mdx` |
 
 ## Local Development
 

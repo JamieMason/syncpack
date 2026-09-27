@@ -57,17 +57,20 @@ Add targeted debug output:
 use log::debug;
 
 debug!("Instance: {:#?}", instance);
-debug!("State before: {:?}", instance.state.borrow());
+debug!("State so far: {:?}", out.state(idx));
 ```
+
+`Instance` has no interior mutability — state lives on the `Inspection`
+accumulator (`out`), keyed by `InstanceIdx`, not on the instance itself.
 
 Search for related code:
 
 ```bash
-# Find where state is assigned
-ast-grep -p 'InstanceState::fixable' src/visit_packages/
+# Find where a state is assigned
+ast-grep -p 'InstanceState::Invalid($$$)' crates/syncpack-rules/
 
 # Find similar patterns
-ast-grep -p 'PATTERN' src/
+ast-grep -p 'PATTERN' src/ crates/
 ```
 
 ## Step 4: Validate
@@ -98,22 +101,22 @@ cargo clippy     # No warnings
 
 ### By component
 
-| Issue with...    | Check...                                 |
-| ---------------- | ---------------------------------------- |
-| CLI parsing      | `src/cli.rs`                             |
-| Config loading   | `src/config.rs`, `src/rcfile.rs`         |
-| Package reading  | `src/packages.rs`, `src/package_json.rs` |
-| State assignment | `src/visit_packages/*.rs`                |
-| Command output   | `src/commands/*.rs`, `src/commands/ui/`  |
-| Version parsing  | `src/specifier/*.rs`                     |
+| Issue with...    | Check...                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| CLI parsing      | `src/cli.rs`                                                                                      |
+| Config loading   | `src/rcfile_loader.rs`, `crates/syncpack-config/src/lib.rs`                                       |
+| Package reading  | `crates/syncpack-disk/src/lib.rs` (`Disk`), `crates/syncpack-io/src/lib.rs` (`File`/`YamlFile`)    |
+| State assignment | `crates/syncpack-rules/src/version_group/*.rs`                                                     |
+| Command output   | `src/commands/*.rs`, `src/commands/ui/`                                                            |
+| Version parsing  | `crates/syncpack-specifier/src/*.rs`                                                                |
 
 ### By phase
 
-| Phase   | What happens                             | Files                                      |
-| ------- | ---------------------------------------- | ------------------------------------------ |
-| Create  | Read config, packages, collect instances | `context.rs`, `packages.rs`                |
-| Inspect | Assign InstanceState                     | `visit_packages.rs`, `visit_packages/*.rs` |
-| Run     | Process instances, output/write          | `commands/*.rs`                            |
+| Phase    | What happens                             | Files                                                                                          |
+| -------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Discover | Read config, packages, collect instances | `src/discovery/mod.rs`, `crates/syncpack-disk/src/lib.rs`                                       |
+| Inspect  | Assign InstanceState                      | `crates/syncpack-rules/src/visit_packages.rs`, `crates/syncpack-rules/src/version_group/*.rs`   |
+| Run      | Process instances, output/write           | `src/commands/*.rs`                                                                              |
 
 ## Common Fixes
 
@@ -121,7 +124,7 @@ cargo clippy     # No warnings
 
 Check:
 
-1. Is the instance's version group variant handled in `visit_packages.rs`?
+1. Is the instance's version group variant handled — check every `match self { ... }` arm in `crates/syncpack-rules/src/version_group.rs` (`selector`, `dependency_indices`, `set_dependency_indices`, `visit`)?
 2. Is there an early return skipping this instance?
 3. Is another validation assigning a state first?
 

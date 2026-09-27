@@ -19,9 +19,9 @@ What are you adding?
 
 Before adding any feature:
 
-1. Understand the 3-phase pattern: Create Context → Inspect Context → Run Command
+1. Understand the 3-phase pattern: Discover the project (→ `Discovered`) → Inspect it (→ `Inspection`/`Inspected`) → Run Command
 2. Know which phase your feature affects
-3. Check if similar code exists (use `ast-grep -p 'PATTERN' src/`)
+3. Check if similar code exists (use `ast-grep -p 'PATTERN' src/ crates/`)
 
 ## Feature Types
 
@@ -37,8 +37,8 @@ Commands are user-facing operations (`syncpack lint`, `syncpack fix`, etc.).
 **Registration points (all three required):**
 
 1. `src/cli.rs` - Add to `Subcommand` enum
-2. `src/main.rs` - Add match arm for dispatch
-3. `src/commands/*.rs` - Implement `pub fn run(ctx: Context) -> i32`
+2. `src/syncpack.rs` - Add match arm for dispatch in `run()`
+3. `src/commands/*.rs` - Implement `pub fn run(inspected: Inspected) -> Result<Inspected, SyncpackError>`
 
 → Full guide: [adding-command.md](adding-command.md)
 
@@ -52,7 +52,7 @@ InstanceState variants describe validation results (valid, fixable, unfixable, s
 - New type of error/warning to report
 - New auto-fix capability
 
-**Location:** `src/instance_state.rs` + `src/visit_packages/*.rs`
+**Location:** `crates/syncpack-model/src/instance/instance_state.rs` + `crates/syncpack-rules/src/version_group/*.rs`
 
 → Full guide: [adding-instance-state.md](adding-instance-state.md)
 

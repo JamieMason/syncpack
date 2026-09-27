@@ -42,7 +42,7 @@ The text format shows per-line execution counts:
 ```
   42|     80|        .and_then(|range| ...)     # Hit 80 times
   74|      0|        Some(preferred)            # Never hit
- 321|      0|        instance.mark_conflict(...) # Never hit
+ 321|      0|        out.classify(idx, InstanceState::Invalid(...))  # Never hit
 ```
 
 - `count > 0` = covered
