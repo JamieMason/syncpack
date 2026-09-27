@@ -13,11 +13,17 @@ use {
 };
 
 mod banned;
+#[cfg(test)]
+#[path = "version_group/banned_test.rs"]
+mod banned_test;
 mod catalog;
 mod catalog_defs;
 mod ignored;
 mod pinned;
 mod preferred_semver;
+#[cfg(test)]
+#[path = "version_group/preferred_semver_test.rs"]
+mod preferred_semver_test;
 mod same_minor;
 mod same_range;
 mod semver_range_only;
