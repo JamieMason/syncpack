@@ -2,12 +2,17 @@ use {
   crate::inspection::FormatConfig,
   regex::Regex,
   serde_json::{self, Map, Value},
-  std::{cmp::Ordering, collections::HashSet},
+  std::{cmp::Ordering, collections::HashSet, sync::OnceLock},
 };
 
 /// Use a shorthand format for the bugs URL when possible
 pub(super) fn get_formatted_bugs(contents: &Value) -> Option<Value> {
   contents.pointer("/bugs/url").cloned()
+}
+
+fn github_url_prefix() -> &'static Regex {
+  static GITHUB_URL_PREFIX: OnceLock<Regex> = OnceLock::new();
+  GITHUB_URL_PREFIX.get_or_init(|| Regex::new(r#".+github\.com/"#).unwrap())
 }
 
 /// Use a shorthand format for the repository URL when possible
@@ -17,10 +22,7 @@ pub(super) fn get_formatted_repository(contents: &Value) -> Option<Value> {
   }
   contents.pointer("/repository/url").and_then(|url| {
     if let Value::String(url) = url {
-      Regex::new(r#".+github\.com/"#)
-        .ok()
-        .map(|re| re.replace(url.as_str(), "").to_string())
-        .map(Value::String)
+      Some(Value::String(github_url_prefix().replace(url.as_str(), "").to_string()))
     } else {
       None
     }
