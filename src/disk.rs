@@ -167,7 +167,7 @@ pub struct Disk {
 }
 
 impl Disk {
-  pub fn from_workspace<T: DiskIo>(io: &T, directory: &Path) -> Self {
+  pub fn from_workspace<T: DiskIo>(io: &T, directory: &Path) -> Result<Self, DiskIoError> {
     let lerna_json = io.read_json_file(&directory.join("lerna.json"));
     let package_json_root_file = io.read_json_file(&directory.join("package.json"));
     let package_manager = if io.path_exists(&directory.join("pnpm-lock.yaml")) || io.path_exists(&directory.join("pnpm-workspace.yaml")) {
@@ -182,7 +182,7 @@ impl Disk {
       Some(PackageManager::Unknown)
     };
     let pnpm_workspace = if let Some(PackageManager::Pnpm) = package_manager {
-      io.read_yaml_file(&directory.join("pnpm-workspace.yaml"))
+      io.read_yaml_file(&directory.join("pnpm-workspace.yaml")).transpose()?
     } else {
       None
     };
@@ -194,14 +194,14 @@ impl Disk {
       package_json_files.push(root_file);
     }
 
-    Self {
+    Ok(Self {
       cwd: directory.to_path_buf(),
       lerna_json: lerna_json.and_then(Result::ok),
       package_json_files,
       package_json_root_idx,
       package_manager,
-      pnpm_workspace: pnpm_workspace.and_then(Result::ok),
-    }
+      pnpm_workspace,
+    })
   }
 
   /// Borrow the root package.json if one was loaded.

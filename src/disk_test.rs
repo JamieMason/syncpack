@@ -1,8 +1,8 @@
 use {
   crate::{
     disk::{
-      Disk, File, PackageManager, PendingYamlOp, empty_yaml_file, ensure_object_path, insert_catalog_definition, json_view,
-      parse_yaml_file, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
+      Disk, DiskIoError, File, PackageManager, PendingYamlOp, empty_yaml_file, ensure_object_path, insert_catalog_definition, json_view,
+      parse_yaml_file, parse_yaml_file_strict, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
     },
     specifier::Specifier,
     test::mock_disk::MockDiskIo,
@@ -24,7 +24,7 @@ fn json_file_from_value(value: serde_json::Value) -> File<serde_json::Value> {
 fn detects_pnpm_from_workspace_yaml_without_lockfile() {
   let mut io = MockDiskIo::new();
   io.add_file("pnpm-workspace.yaml", "packages:\n  - 'apps/*'\n".to_string());
-  let disk = Disk::from_workspace(&io, io.root());
+  let disk = Disk::from_workspace(&io, io.root()).unwrap();
   assert_eq!(disk.package_manager, Some(PackageManager::Pnpm));
   assert!(disk.pnpm_workspace.is_some(), "pnpm-workspace.yaml should be loaded");
 }
@@ -33,7 +33,7 @@ fn detects_pnpm_from_workspace_yaml_without_lockfile() {
 fn detects_bun_from_legacy_binary_lockfile() {
   let mut io = MockDiskIo::new();
   io.add_file("bun.lockb", String::new());
-  let disk = Disk::from_workspace(&io, io.root());
+  let disk = Disk::from_workspace(&io, io.root()).unwrap();
   assert_eq!(disk.package_manager, Some(PackageManager::Bun));
 }
 
@@ -41,7 +41,7 @@ fn detects_bun_from_legacy_binary_lockfile() {
 fn file_dirty_defaults_false() {
   let mut io = MockDiskIo::new();
   io.add_file("package.json", "{\"name\":\"root\"}".to_string());
-  let disk = Disk::from_workspace(&io, io.root());
+  let disk = Disk::from_workspace(&io, io.root()).unwrap();
   let pkg = disk.package_json_root().expect("root should be loaded");
   assert!(!pkg.dirty, "freshly parsed File should default dirty=false");
   assert!(!pkg.is_dirty(), "is_dirty() should match field");
@@ -65,7 +65,7 @@ fn file_dirty_settable() {
 fn disk_from_workspace_works_without_lifetime() {
   // Disk owns no borrow of `io`; returned Disk has no lifetime parameter.
   let io = MockDiskIo::new();
-  let disk: Disk = Disk::from_workspace(&io, io.root());
+  let disk: Disk = Disk::from_workspace(&io, io.root()).unwrap();
   // Drop io to prove Disk does not borrow it.
   drop(io);
   assert!(disk.package_json_root().is_none());
@@ -90,7 +90,7 @@ fn disk_constructs_without_io_field() {
 fn disk_root_idx_set_when_root_pkg_exists() {
   let mut io = MockDiskIo::new();
   io.add_file("package.json", "{\"name\":\"root\"}".to_string());
-  let disk = Disk::from_workspace(&io, io.root());
+  let disk = Disk::from_workspace(&io, io.root()).unwrap();
   assert_eq!(disk.package_json_root_idx, Some(0), "root_idx should be Some(0) when root exists");
   assert_eq!(disk.package_json_files.len(), 1, "root pkg should be in package_json_files");
   let root = disk.package_json_root().expect("root accessor returns Some");
@@ -107,7 +107,7 @@ fn disk_load_package_files_appends_after_root() {
   io.add_file("package.json", "{\"name\":\"root\"}".to_string());
   io.add_file("packages/a/package.json", "{\"name\":\"a\"}".to_string());
   io.add_file("packages/b/package.json", "{\"name\":\"b\"}".to_string());
-  let mut disk = Disk::from_workspace(&io, io.root());
+  let mut disk = Disk::from_workspace(&io, io.root()).unwrap();
   assert_eq!(disk.package_json_files.len(), 1, "starts with just root");
   let a_path = io.root().join("packages/a/package.json");
   let b_path = io.root().join("packages/b/package.json");
@@ -120,7 +120,7 @@ fn disk_load_package_files_skips_root_path() {
   let mut io = MockDiskIo::new();
   io.add_file("package.json", "{\"name\":\"root\"}".to_string());
   io.add_file("packages/a/package.json", "{\"name\":\"a\"}".to_string());
-  let mut disk = Disk::from_workspace(&io, io.root());
+  let mut disk = Disk::from_workspace(&io, io.root()).unwrap();
   let root_path = io.root().join("package.json");
   let a_path = io.root().join("packages/a/package.json");
   disk.load_package_files(&io, &[root_path, a_path]);
@@ -648,6 +648,26 @@ fn parse_yaml_file_captures_raw_text() {
   let yaml = parse_yaml_file(raw.to_string(), PathBuf::from("/test/pnpm-workspace.yaml")).expect("yaml fixture must parse");
   assert_eq!(yaml.raw, raw, "YamlFile.raw must equal the input string verbatim");
   assert!(yaml.patches.is_empty(), "fresh YamlFile starts with no pending patches");
+}
+
+#[test]
+fn parse_yaml_file_strict_returns_error_for_invalid_yaml() {
+  let filepath = PathBuf::from("/test/pnpm-workspace.yaml");
+  let err = parse_yaml_file_strict("catalogs:\n  tooling: [\n".to_string(), filepath).unwrap_err();
+  let DiskIoError::YamlParse(source) = &err else {
+    panic!("invalid YAML must return a YAML parse error");
+  };
+  let location = source.location().expect("syntax error should have a location");
+  let message = err.to_string();
+  assert!(
+    message.contains(&source.to_string()),
+    "error message should include the parser's reason"
+  );
+  assert!(message.contains(&format!("line {} column {}", location.line(), location.column())));
+  assert!(
+    std::error::Error::source(&err).is_some(),
+    "original parser error should remain in the error chain"
+  );
 }
 
 #[test]

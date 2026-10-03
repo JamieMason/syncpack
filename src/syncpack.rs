@@ -38,7 +38,7 @@ pub async fn syncpack<D: DiskIo>(
 /// All disk reads happen here.
 fn analyse<D: DiskIo>(cli: Cli, io: &D) -> Result<Context, SyncpackError> {
   logger::configure(&cli);
-  let mut disk = Disk::from_workspace(io, &cli.cwd);
+  let mut disk = Disk::from_workspace(io, &cli.cwd)?;
   let rcfile = Rcfile::from_disk(&disk, io, &cli).map_err(SyncpackError::RcfileError)?;
   let config = Config {
     cli,
