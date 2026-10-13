@@ -1024,6 +1024,81 @@ async fn snaps_follower_to_targets_corrected_version_not_its_raw_version() {
   ]);
 }
 
+/// Chain: `app` snaps to `mid`, `mid` snaps to `leader` (2.0.0). `app` must
+/// resolve to the corrected 2.0.0, not `mid`'s raw 1.0.0, despite being
+/// declared first.
+#[tokio::test]
+async fn snaps_follower_through_a_chain_to_the_corrected_version() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "leader", "dependencies": { "foo": "2.0.0" } }),
+      json!({ "name": "mid",    "dependencies": { "foo": "1.0.0" } }),
+      json!({ "name": "app",    "dependencies": { "foo": "1.0.0" } }),
+    ])
+    .with_version_groups(vec![
+      json!({ "dependencies": ["foo"], "packages": ["app"], "snapTo": ["mid"] }),
+      json!({ "dependencies": ["foo"], "packages": ["mid"], "snapTo": ["leader"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsHighestOrLowestSemver),
+      dependency_name: "foo",
+      id: "foo in /dependencies of leader",
+      actual: "2.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of mid",
+      actual: "1.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of app",
+      actual: "1.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "mid",
+      id: "mid in /version of mid",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "app",
+      id: "app in /version of app",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// Severity tests — opt out of auto-fix per status (issue #216), opt into
 /// snapping local (mirrors issue #325 for pin). SnappedTo permits
 /// `DiffersToSnapTarget`, `SemverRangeMismatch`, `RefuseToSnapLocal`.

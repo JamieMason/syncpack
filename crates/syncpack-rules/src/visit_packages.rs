@@ -6,10 +6,9 @@ use {
   syncpack_vocab::registry_updates::RegistryUpdates,
 };
 
-/// Two-stage version inspection. Stage 1 classifies every non-`SnappedTo`
-/// group's instances into `out`. Stage 2 visits `SnappedTo` groups, which read
-/// their targets' stage-1 computed expected values back out of `out`. The
-/// stage dependency is encoded in the two passes, not a sort.
+/// Two-stage version inspection: stage 1 classifies non-`SnappedTo` groups,
+/// then stage 2 resolves `SnappedTo` groups, which read their targets' expected
+/// values back out of `out`.
 pub fn visit_packages(
   version_groups: &[VersionGroup],
   input: &RuleInput,
@@ -19,7 +18,12 @@ pub fn visit_packages(
   for group in version_groups.iter().filter(|group| !group.is_snapped_to()) {
     group.visit(input, registry_updates, out);
   }
-  for group in version_groups.iter().filter(|group| group.is_snapped_to()) {
-    group.visit_snapped(input, out);
+  // A snap target can itself be a follower, so repeat: a chain of N snap groups
+  // resolves in at most N passes, and the fixed bound can't loop on a cycle.
+  let snap_groups = version_groups.iter().filter(|group| group.is_snapped_to()).collect::<Vec<_>>();
+  for _ in 0..snap_groups.len() {
+    for group in &snap_groups {
+      group.visit_snapped(input, out);
+    }
   }
 }

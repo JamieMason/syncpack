@@ -26,10 +26,8 @@ pub struct SnappedToGroup {
 }
 
 impl SnappedToGroup {
-  /// The specifier the followers should snap to: the target instance's
-  /// stage-1 computed expected value if set, otherwise its raw on-disk
-  /// specifier (the self-snapped case, where the target was not visited in
-  /// stage 1).
+  /// The target's computed expected value, or its raw specifier if no other
+  /// group corrected it (the self-snapped case).
   pub(crate) fn get_snapped_to_specifier(
     &self,
     dep: &Dependency,
