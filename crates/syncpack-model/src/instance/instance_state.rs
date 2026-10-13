@@ -304,6 +304,10 @@ pub enum UnfixableInstance {
   /// - ✘ `Disk.package_manager` is npm/yarn/Unknown — no recognized lock file
   /// - ? Cannot infer whether to create pnpm-workspace.yaml or root package.json /catalog
   CannotInferCatalogFile,
+  /// - ✘ Instance is in a snapTo group whose members form a circular relationship
+  /// - ✘ Their version numbers do not match
+  /// - ? The cycle has no fixed target, so Syncpack cannot pick a winner
+  CircularSnapToMismatch,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

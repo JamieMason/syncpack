@@ -34,22 +34,38 @@ impl SnappedToGroup {
     all_instances: &[Instance],
     inspection: &Inspection,
   ) -> Option<Rc<Specifier>> {
-    for (i, instance) in all_instances.iter().enumerate() {
-      if *instance.descriptor.internal_name == *dep.internal_name {
-        let instance_idx = instance.source_idx();
-        for &snapped_to_idx in &self.snap_to {
-          if instance_idx == snapped_to_idx {
-            return Some(
-              inspection
-                .expected(InstanceIdx(i))
-                .cloned()
-                .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier)),
-            );
-          }
-        }
-      }
-    }
-    None
+    self.target_instance_idx(dep, all_instances).map(|target| {
+      inspection
+        .expected(target)
+        .cloned()
+        .unwrap_or_else(|| Rc::clone(&all_instances[target.0].descriptor.specifier))
+    })
+  }
+
+  /// The first instance of `dep` found in a snapped-to package.
+  fn target_instance_idx(&self, dep: &Dependency, all_instances: &[Instance]) -> Option<InstanceIdx> {
+    all_instances
+      .iter()
+      .position(|instance| *instance.descriptor.internal_name == *dep.internal_name && self.snap_to.contains(&instance.source_idx()))
+      .map(InstanceIdx)
+  }
+
+  /// Every (follower, snap-target) instance pair in this group.
+  pub(crate) fn snap_edges<'a>(
+    &'a self,
+    dependencies: &'a [Dependency],
+    all_instances: &'a [Instance],
+  ) -> impl Iterator<Item = (InstanceIdx, InstanceIdx)> + 'a {
+    self
+      .dependencies
+      .iter()
+      .filter_map(move |dep_idx| {
+        let dep = &dependencies[dep_idx.0];
+        self
+          .target_instance_idx(dep, all_instances)
+          .map(move |target| dep.instances.iter().map(move |&follower| (follower, target)))
+      })
+      .flatten()
   }
 
   pub fn visit_snapped(&self, input: &RuleInput, out: &mut Inspection) {

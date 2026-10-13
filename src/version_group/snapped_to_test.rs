@@ -4,7 +4,9 @@ use {
     expect::{ExpectedInstance, expect},
   },
   serde_json::json,
-  syncpack_model::instance::{FixableInstance::*, InstanceState, SemverGroupAndVersionConflict::*, SuspectInstance::*, ValidInstance::*},
+  syncpack_model::instance::{
+    FixableInstance::*, InstanceState, SemverGroupAndVersionConflict::*, SuspectInstance::*, UnfixableInstance, ValidInstance::*,
+  },
 };
 
 #[tokio::test]
@@ -1091,6 +1093,246 @@ async fn snaps_follower_through_a_chain_to_the_corrected_version() {
       state: InstanceState::suspect(InvalidLocalVersion),
       dependency_name: "app",
       id: "app in /version of app",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+/// Circular snap `a`↔`b` with differing versions: both `CircularSnapToMismatch`.
+#[tokio::test]
+async fn circular_snap_with_mismatched_versions_is_unfixable() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "a", "dependencies": { "foo": "1.0.0" } }),
+      json!({ "name": "b", "dependencies": { "foo": "2.0.0" } }),
+    ])
+    .with_version_groups(vec![
+      json!({ "dependencies": ["foo"], "packages": ["a"], "snapTo": ["b"] }),
+      json!({ "dependencies": ["foo"], "packages": ["b"], "snapTo": ["a"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::unfixable(UnfixableInstance::CircularSnapToMismatch),
+      dependency_name: "foo",
+      id: "foo in /dependencies of a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::unfixable(UnfixableInstance::CircularSnapToMismatch),
+      dependency_name: "foo",
+      id: "foo in /dependencies of b",
+      actual: "2.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "a",
+      id: "a in /version of a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "b",
+      id: "b in /version of b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+/// Circular snap `a`↔`b` with identical versions stays valid `IsIdenticalToSnapTarget`.
+#[tokio::test]
+async fn circular_snap_with_identical_versions_is_valid() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "a", "dependencies": { "foo": "1.0.0" } }),
+      json!({ "name": "b", "dependencies": { "foo": "1.0.0" } }),
+    ])
+    .with_version_groups(vec![
+      json!({ "dependencies": ["foo"], "packages": ["a"], "snapTo": ["b"] }),
+      json!({ "dependencies": ["foo"], "packages": ["b"], "snapTo": ["a"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of b",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "a",
+      id: "a in /version of a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "b",
+      id: "b in /version of b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+/// Circular snap `a`↔`b`, same version number but differing ranges that each
+/// satisfy: both stay valid `SatisfiesSnapTarget`.
+#[tokio::test]
+async fn circular_snap_with_satisfying_versions_is_valid() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "a", "dependencies": { "foo": "~1.0.0" } }),
+      json!({ "name": "b", "dependencies": { "foo": "^1.0.0" } }),
+    ])
+    .with_semver_group(json!({ "packages": ["a"], "range": "~" }))
+    .with_semver_group(json!({ "packages": ["b"], "range": "^" }))
+    .with_version_groups(vec![
+      json!({ "dependencies": ["foo"], "packages": ["a"], "snapTo": ["b"] }),
+      json!({ "dependencies": ["foo"], "packages": ["b"], "snapTo": ["a"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of a",
+      actual: "~1.0.0",
+      expected: Some("~1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of b",
+      actual: "^1.0.0",
+      expected: Some("^1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "a",
+      id: "a in /version of a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "b",
+      id: "b in /version of b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+/// Three-member cycle `a`→`b`→`c`→`a` with mismatched versions: all three
+/// `CircularSnapToMismatch` (detection is not limited to pairs).
+#[tokio::test]
+async fn circular_snap_of_three_with_mismatch_is_unfixable() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "a", "dependencies": { "foo": "1.0.0" } }),
+      json!({ "name": "b", "dependencies": { "foo": "2.0.0" } }),
+      json!({ "name": "c", "dependencies": { "foo": "3.0.0" } }),
+    ])
+    .with_version_groups(vec![
+      json!({ "dependencies": ["foo"], "packages": ["a"], "snapTo": ["b"] }),
+      json!({ "dependencies": ["foo"], "packages": ["b"], "snapTo": ["c"] }),
+      json!({ "dependencies": ["foo"], "packages": ["c"], "snapTo": ["a"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::unfixable(UnfixableInstance::CircularSnapToMismatch),
+      dependency_name: "foo",
+      id: "foo in /dependencies of a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::unfixable(UnfixableInstance::CircularSnapToMismatch),
+      dependency_name: "foo",
+      id: "foo in /dependencies of b",
+      actual: "2.0.0",
+      expected: Some("2.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::unfixable(UnfixableInstance::CircularSnapToMismatch),
+      dependency_name: "foo",
+      id: "foo in /dependencies of c",
+      actual: "3.0.0",
+      expected: Some("3.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "a",
+      id: "a in /version of a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "b",
+      id: "b in /version of b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "c",
+      id: "c in /version of c",
       actual: "",
       expected: Some(""),
       overridden: None,
