@@ -28,6 +28,8 @@ itertools = "0.15.0"
 log = "0.4.33"
 node-semver = "2.2.0"
 reqwest = { version = "0.12", features = [
+  "brotli",
+  "gzip",
   "json",
   "rustls-tls",
 ], default-features = false }
