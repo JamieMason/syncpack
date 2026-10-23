@@ -1,8 +1,8 @@
 use {
   crate::{
     disk::{
-      Disk, File, PackageManager, PendingYamlOp, empty_yaml_file, ensure_object_path, insert_catalog_definition, json_view,
-      parse_yaml_file, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
+      Disk, File, PackageManager, PendingYamlOp, detect_formatting, empty_yaml_file, ensure_object_path, insert_catalog_definition,
+      json_values_differ, json_view, parse_yaml_file, remove_catalog_definition, remove_prop, render_yaml_bytes, set_nested_prop, set_prop,
     },
     specifier::Specifier,
     test::mock_disk::MockDiskIo,
@@ -669,6 +669,50 @@ fn json_view_returns_owned_eager() {
   let second_ptr = &second as *const serde_json::Value;
   assert_ne!(first_ptr, second_ptr, "owned Values must occupy distinct addresses");
   assert_eq!(first, second, "owned Values must contain equal data");
+}
+
+#[test]
+fn detects_tab_indent_and_crlf_newline() {
+  let formatting = detect_formatting("{\r\n\t\"a\": 1\r\n}\r\n");
+  assert_eq!(formatting.indent, "\t");
+  assert_eq!(formatting.newline, "\r\n");
+}
+
+#[test]
+fn falls_back_to_two_spaces_when_indent_cannot_be_detected() {
+  // A single-line file gives detect_indent nothing to infer an indent from.
+  let formatting = detect_formatting("{\"a\":1}");
+  assert_eq!(formatting.indent, "  ");
+}
+
+#[test]
+fn json_values_differ_is_order_aware_for_objects() {
+  // serde_json's `preserve_order` `Value::eq` ignores key order, but
+  // syncpack's sort rules care about it — hence this separate helper.
+  assert!(json_values_differ(&json!({ "a": 1, "b": 2 }), &json!({ "b": 2, "a": 1 })));
+  assert!(!json_values_differ(&json!({ "a": 1, "b": 2 }), &json!({ "a": 1, "b": 2 })));
+}
+
+#[test]
+fn json_values_differ_detects_array_order_changes() {
+  assert!(json_values_differ(&json!(["react", "vue"]), &json!(["vue", "react"])));
+}
+
+#[test]
+fn render_yaml_bytes_skips_a_remove_whose_route_no_longer_resolves() {
+  // Removing the only key under `catalog:` collapses the parent block, so a
+  // second Remove that still targets `catalog` no longer resolves. Per
+  // `render_yaml_bytes`'s documented contract this is skipped, not an error.
+  let mut yaml = yaml_from("catalog:\n  react: ^18.0.0\n");
+  yaml.patches.push(PendingYamlOp::Remove {
+    segments: vec!["catalog".to_string(), "react".to_string()],
+  });
+  yaml.patches.push(PendingYamlOp::Remove {
+    segments: vec!["catalog".to_string()],
+  });
+  yaml.dirty = true;
+  let result = render_yaml_bytes(&yaml);
+  assert!(result.is_ok(), "dangling remove should be skipped, not error: {result:?}");
 }
 
 mod disk_ops {
