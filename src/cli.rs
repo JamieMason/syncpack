@@ -270,9 +270,10 @@ fn create() -> Command {
             .long_help(cformat!(
               r#"Bypass the on-disk cache of npm registry responses
 
-By default Syncpack caches registry responses in the system temp
-directory for 30 minutes to avoid repeat network calls. Pass this flag
-to skip both reading and writing the cache."#
+By default Syncpack caches registry responses for 30 minutes in
+$XDG_CACHE_HOME/syncpack, else $HOME/.cache/syncpack, else the system
+temp directory, to avoid repeat network calls. Pass this flag to skip
+both reading and writing the cache."#
             ))
             .action(clap::ArgAction::SetTrue),
         )

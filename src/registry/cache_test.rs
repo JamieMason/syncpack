@@ -1,7 +1,7 @@
 use {
   crate::{
     registry::{
-      cache::{CACHE_TTL_SECS, Cache, CacheEntry, CacheState},
+      cache::{CACHE_TTL_SECS, Cache, CacheEntry, CacheState, cache_filepath},
       client::AllPackageVersions,
     },
     test::mock_disk::MockDiskIo,
@@ -147,4 +147,28 @@ fn save_prunes_expired_entries() {
   let parsed: CacheState = serde_json::from_slice(&written).expect("valid JSON");
   assert!(parsed.entries.contains_key("https://registry.npmjs.org/fresh"));
   assert!(!parsed.entries.contains_key("https://registry.npmjs.org/stale"));
+}
+
+#[test]
+fn cache_filepath_prefers_xdg_cache_home() {
+  let path = cache_filepath(Some(PathBuf::from("/xdg")), Some(PathBuf::from("/home/u")), PathBuf::from("/tmp"));
+  assert_eq!(path, PathBuf::from("/xdg/syncpack/cache.json"));
+}
+
+#[test]
+fn cache_filepath_falls_back_to_home_dot_cache() {
+  let path = cache_filepath(None, Some(PathBuf::from("/home/u")), PathBuf::from("/tmp"));
+  assert_eq!(path, PathBuf::from("/home/u/.cache/syncpack/cache.json"));
+}
+
+#[test]
+fn cache_filepath_treats_empty_env_as_unset() {
+  let path = cache_filepath(Some(PathBuf::new()), Some(PathBuf::new()), PathBuf::from("/tmp"));
+  assert_eq!(path, PathBuf::from("/tmp/syncpack/cache.json"));
+}
+
+#[test]
+fn cache_filepath_falls_back_to_temp_dir() {
+  let path = cache_filepath(None, None, PathBuf::from("/tmp"));
+  assert_eq!(path, PathBuf::from("/tmp/syncpack/cache.json"));
 }
