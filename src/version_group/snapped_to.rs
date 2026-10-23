@@ -31,13 +31,21 @@ impl SnappedToGroup {
     add_instance_to_dependencies(&mut self.dependencies, idx, instance);
   }
 
+  /// The target's expected specifier as corrected by its own version group,
+  /// or its raw specifier if no group has visited it (the self-snapped case).
   pub fn get_snapped_to_specifier(&self, dep: &DependencyCore, all_instances: &[Instance]) -> Option<Rc<Specifier>> {
     for instance in all_instances {
       if *instance.descriptor.internal_name == *dep.internal_name {
         let instance_idx = instance.source_idx();
         for &snapped_to_idx in &self.snap_to {
           if instance_idx == snapped_to_idx {
-            return Some(Rc::clone(&instance.descriptor.specifier));
+            return Some(
+              instance
+                .expected_specifier
+                .borrow()
+                .clone()
+                .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier)),
+            );
           }
         }
       }
