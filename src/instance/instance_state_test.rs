@@ -70,3 +70,48 @@ fn state_get_name_strips_payload_for_pre_existing_tuple_variants() {
 fn state_get_name_unknown_unchanged() {
   assert_eq!(name_of(InstanceState::Unknown), "Unknown");
 }
+
+/// `StatusCode` in `npm/syncpack.ts` is the public type of the `statusCode` printed by
+/// `syncpack json`, so it must name every status the enums below can produce.
+#[test]
+fn typescript_status_code_type_matches_the_status_enums() {
+  use std::collections::BTreeSet;
+  let rust = include_str!("instance_state.rs");
+  let typescript = include_str!("../../npm/syncpack.ts");
+
+  let mut rust_names = BTreeSet::new();
+  for enum_name in [
+    "ValidInstance",
+    "FixableInstance",
+    "UnfixableInstance",
+    "SemverGroupAndVersionConflict",
+    "SuspectInstance",
+  ] {
+    let start = rust.find(&format!("pub enum {enum_name} {{")).expect(enum_name);
+    // variants are the lines indented by exactly two spaces which start with a capital
+    rust_names.extend(
+      rust[start..]
+        .lines()
+        .skip(1)
+        .take_while(|line| *line != "}")
+        .filter_map(|line| line.strip_prefix("  "))
+        .filter(|line| line.starts_with(|c: char| c.is_ascii_uppercase()))
+        .map(|line| line.chars().take_while(|c| c.is_ascii_alphanumeric()).collect::<String>()),
+    );
+  }
+
+  let type_body = typescript
+    .split("export type StatusCode =")
+    .nth(1)
+    .and_then(|rest| rest.split(';').next())
+    .expect("npm/syncpack.ts defines StatusCode");
+  // the names are the text between each pair of single quotes
+  let typescript_names: BTreeSet<String> = type_body.split('\'').skip(1).step_by(2).map(String::from).collect();
+
+  let missing: Vec<_> = rust_names.difference(&typescript_names).collect();
+  let unknown: Vec<_> = typescript_names.difference(&rust_names).collect();
+  assert!(
+    missing.is_empty() && unknown.is_empty(),
+    "npm/syncpack.ts StatusCode is out of sync. Missing: {missing:?}. Not a real status: {unknown:?}"
+  );
+}
