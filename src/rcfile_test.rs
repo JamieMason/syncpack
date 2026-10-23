@@ -626,3 +626,10 @@ mod comment_properties {
     assert!(raw.validate_unknown_fields().is_ok());
   }
 }
+
+#[test]
+fn max_concurrent_requests_of_zero_is_an_error() {
+  let raw: RawRcfile = serde_json::from_value(json!({ "maxConcurrentRequests": 0 })).unwrap();
+  let err = Rcfile::try_from(raw).unwrap_err();
+  assert!(matches!(err, UnsupportedConfigError::InvalidMaxConcurrentRequests));
+}

@@ -29,6 +29,8 @@ pub enum UnsupportedConfigError {
   InvalidSemverGroup,
   #[error("Invalid update group: must have isIgnored or target")]
   InvalidUpdateGroup,
+  #[error("maxConcurrentRequests must be at least 1")]
+  InvalidMaxConcurrentRequests,
   #[error("Unrecognised version group policy: '{0}'")]
   InvalidVersionGroupPolicy(String),
   #[error("severity key '{key}' is not valid on a {group_type} group at {path}. Permitted: {}.", permitted.join(", "))]

@@ -386,6 +386,9 @@ impl TryFrom<RawRcfile> for Rcfile {
     // `version_groups` is deferred to `Context::create` so user-referenced
     // catalog dep types like `pnpmCatalog:react18` (which only exist after
     // catalog discovery) resolve correctly.
+    if raw.max_concurrent_requests == 0 {
+      return Err(UnsupportedConfigError::InvalidMaxConcurrentRequests);
+    }
     let all_dependency_types = compute_all_dependency_types(&raw.custom_types)?;
     let mut dependency_groups = vec![];
     for dg in raw.dependency_groups {
