@@ -4,7 +4,6 @@ mod format_test;
 
 use {
   crate::rcfile::Rcfile,
-  regex::Regex,
   serde_json::{self, Map, Value},
   std::{cmp::Ordering, collections::HashSet},
 };
@@ -21,10 +20,9 @@ pub fn get_formatted_repository(contents: &Value) -> Option<Value> {
   }
   contents.pointer("/repository/url").and_then(|url| {
     if let Value::String(url) = url {
-      Regex::new(r#".+github\.com/"#)
-        .ok()
-        .map(|re| re.replace(url.as_str(), "").to_string())
-        .map(Value::String)
+      // strip everything up to and including the last "github.com/"
+      let shorthand = url.rfind("github.com/").map(|i| &url[i + "github.com/".len()..]).unwrap_or(url);
+      Some(Value::String(shorthand.to_string()))
     } else {
       None
     }

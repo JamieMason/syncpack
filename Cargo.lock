@@ -1753,7 +1753,6 @@ dependencies = [
  "itertools 0.15.0",
  "log",
  "node-semver",
- "regex",
  "reqwest",
  "serde",
  "serde_json",
