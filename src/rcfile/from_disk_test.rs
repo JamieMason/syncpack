@@ -58,3 +58,20 @@ fn falls_back_to_default_when_no_pnpm_yaml() {
   let disk = empty_disk();
   assert_eq!(resolve_minimum_release_age(None, &disk), DEFAULT_MINIMUM_RELEASE_AGE);
 }
+
+#[test]
+fn unreadable_config_file_is_an_error_not_defaults() {
+  use crate::{
+    disk::DiskIoError,
+    rcfile::{Rcfile, from_disk::RcfileError},
+    test::{mock, mock_disk::MockDiskIo},
+  };
+  let mut io = MockDiskIo::new();
+  io.add_file(".syncpackrc", "{ not json".to_string());
+  let disk = Disk::from_workspace(&io, io.root());
+  let result = Rcfile::from_disk(&disk, &io, &mock::cli());
+  assert!(
+    matches!(result, Err(RcfileError::DiskIoError(DiskIoError::JsonParse(_)))),
+    "expected a JSON parse error, got {result:?}"
+  );
+}

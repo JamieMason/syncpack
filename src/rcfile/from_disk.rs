@@ -157,9 +157,10 @@ impl Rcfile {
       .or_else(|| from_javascript_path(&disk.cwd.join("syncpack.config.ts")))
       .or_else(|| from_javascript_path(&disk.cwd.join("syncpack.config.mjs")))
       .or_else(|| from_javascript_path(&disk.cwd.join("syncpack.config.cjs")))
-      .or_else(from_package_json_config_property);
+      .or_else(from_package_json_config_property)
+      .transpose()?;
 
-    if let Some(Ok(file)) = raw_rcfile {
+    if let Some(file) = raw_rcfile {
       let filepath = file.filepath;
       let raw_rcfile = file.contents;
 
