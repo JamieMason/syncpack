@@ -2,7 +2,7 @@
 // Used by:
 //   - site/src/_partials/severity/group-section.mdx (per-group page rendering)
 //   - site/src/content/docs/config/severity.mdx ('Configurable keys per group' table)
-// When the Rust validation in src/version_group/severity.rs changes, update this map.
+// When the Rust validation in src/version_group.rs changes, update this map.
 
 export const KEYS = {
   banned: [{ name: 'IsBanned', slug: 'is-banned' }],
