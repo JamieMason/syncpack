@@ -16,7 +16,18 @@ Ensure all dependencies within this group have the specified semver range.
 
 ### range <Badge text="Required" variant="danger" />
 
-Which of the Supported Ranges this group should use.
+Which semver range every dependency in this group should use.
+
+| Value  | Example   |
+| ------ | --------- |
+| `""`   | `1.2.3`   |
+| `"^"`  | `^1.2.3`  |
+| `"~"`  | `~1.2.3`  |
+| `">="` | `>=1.2.3` |
+| `">"`  | `>1.2.3`  |
+| `"<="` | `<=1.2.3` |
+| `"<"`  | `<1.2.3`  |
+| `"*"`  | `*`       |
 
 ```json title=".syncpackrc.json"
 {
