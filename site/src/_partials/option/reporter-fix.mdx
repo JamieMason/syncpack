@@ -2,7 +2,7 @@ import { Code } from "astro:components";
 
 Set the output format. Defaults to `pretty` which prints human-readable output with colours and formatting. Use `json` to output one line of newline-delimited JSON (NDJSON) per fixable instance, with the same shape as the [json](COMMAND_JSON) command.
 
-Each line has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blob/14.1.0/npm/syncpack.ts#L174-L194):
+Each line has the type [`JsonOutput`](https://github.com/search?q=repo%3AJamieMason%2Fsyncpack%20%2FJsonOutput%2F%20path%3Anpm%2Fsyncpack.ts&type=code):
 
 ```jsonc
 // This JSON has been formatted but appears on a single line in syncpack
@@ -17,8 +17,9 @@ Each line has the type [`JsonOutput`](https://github.com/JamieMason/syncpack/blo
   "strategy": "versionsByName",
   "versionGroup": "HighestSemver",
   "preferredSemverRange": "",
-  "statusCode": "DiffersToHighestSemver",
+  "statusCode": "DiffersToHighestOrLowestSemver",
   "statusType": "Fixable",
+  "severity": "fix",
   "actual": {
     "raw": "4.1.4",
     "type": "exact"
@@ -36,7 +37,7 @@ syncpack ${props.command} --reporter pretty
 # Machine-readable NDJSON output
 syncpack ${props.command} --reporter json
 # Pipe to jq to filter fixable instances
-syncpack ${props.command} --reporter json | jq 'select(.statusCode == "DiffersToHighestSemver")'
+syncpack ${props.command} --reporter json | jq 'select(.statusCode == "DiffersToHighestOrLowestSemver")'
 # Filter by statusType to get all fixable instances
 syncpack ${props.command} --reporter json | jq 'select(.statusType == "Fixable")'
 # Get only unfixable instances that need manual intervention
