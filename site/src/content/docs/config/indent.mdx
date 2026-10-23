@@ -7,8 +7,12 @@ When syncpack writes to package.json files, determines which characters to inden
 
 ## Default value
 
+Unset. Syncpack detects the indentation each file already uses and preserves it, falling back to two spaces only when a file has none to detect. Set `indent` to force one style everywhere.
+
+## Example
+
 ```json title=".syncpackrc.json"
 {
-  "indent": "  "
+  "indent": "    "
 }
 ```
