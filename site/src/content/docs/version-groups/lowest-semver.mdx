@@ -82,12 +82,34 @@ These are all the issues that a {frontmatter.title} Version Group can find:
 
 - [IsHighestOrLowestSemver](STATUS_IS_HIGHEST_OR_LOWEST_SEMVER)
 - [SatisfiesHighestOrLowestSemver](STATUS_SATISFIES_HIGHEST_OR_LOWEST_SEMVER)
+- [IsIdenticalToLocal](STATUS_IS_IDENTICAL_TO_LOCAL)
+- [SatisfiesLocal](STATUS_SATISFIES_LOCAL)
+- [IsLocalAndValid](STATUS_IS_LOCAL_AND_VALID)
+- [IsNonSemverButIdentical](STATUS_IS_NON_SEMVER_BUT_IDENTICAL)
+- [IsCatalog](STATUS_IS_CATALOG)
+- [IsCatalogDefinition](STATUS_IS_CATALOG_DEFINITION)
+- [IsIgnored](STATUS_IS_IGNORED)
 
 ### Fixable
 
 - [DiffersToHighestOrLowestSemver](STATUS_DIFFERS_TO_HIGHEST_OR_LOWEST_SEMVER)
+- [DiffersToLocal](STATUS_DIFFERS_TO_LOCAL)
+- [DiffersToCatalog](STATUS_DIFFERS_TO_CATALOG)
+- [DiffersToNpmRegistry](STATUS_DIFFERS_TO_NPM_REGISTRY)
+- [SemverRangeMismatch](STATUS_SEMVER_RANGE_MISMATCH)
+
+### Unfixable
+
+- [DependsOnInvalidLocalPackage](STATUS_DEPENDS_ON_INVALID_LOCAL_PACKAGE)
+- [NonSemverMismatch](STATUS_NON_SEMVER_MISMATCH)
+
+### Suspect
+
+- [InvalidLocalVersion](STATUS_INVALID_LOCAL_VERSION)
 
 ### Conflict
 
 - [MatchConflictsWithHighestOrLowestSemver](STATUS_MATCH_CONFLICTS_WITH_HIGHEST_OR_LOWEST_SEMVER)
 - [MismatchConflictsWithHighestOrLowestSemver](STATUS_MISMATCH_CONFLICTS_WITH_HIGHEST_OR_LOWEST_SEMVER)
+- [MatchConflictsWithLocal](STATUS_MATCH_CONFLICTS_WITH_LOCAL)
+- [MismatchConflictsWithLocal](STATUS_MISMATCH_CONFLICTS_WITH_LOCAL)
