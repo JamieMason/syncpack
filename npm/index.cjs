@@ -12,13 +12,18 @@ const binaryName = `syncpack${extension}`;
 
 const pathToBinary = resolveBinaryPath();
 
-process.exit(
-  spawnSync(pathToBinary, args, {
-    cwd: process.cwd(),
-    stdio: 'inherit',
-    env: process.env,
-  }).status || 0,
-);
+const result = spawnSync(pathToBinary, args, {
+  cwd: process.cwd(),
+  stdio: 'inherit',
+  env: process.env,
+});
+
+if (result.error) {
+  throw result.error;
+}
+
+// status is null when the binary was killed by a signal
+process.exit(result.status ?? 1);
 
 function isMusl() {
   try {
