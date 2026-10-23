@@ -633,3 +633,31 @@ fn max_concurrent_requests_of_zero_is_an_error() {
   let err = Rcfile::try_from(raw).unwrap_err();
   assert!(matches!(err, UnsupportedConfigError::InvalidMaxConcurrentRequests));
 }
+
+#[test]
+fn dependency_types_are_in_a_stable_order() {
+  use crate::rcfile::compute_all_dependency_types;
+  let raw: RawRcfile = serde_json::from_value(json!({
+    "customTypes": {
+      "b": { "strategy": "versionsByName", "path": "b" },
+      "a": { "strategy": "versionsByName", "path": "a" }
+    }
+  }))
+  .unwrap();
+  let dep_types = compute_all_dependency_types(&raw.custom_types).expect("compute should succeed");
+  let names: Vec<&str> = dep_types.iter().map(|dt| dt.name.as_str()).collect();
+  assert_eq!(
+    names,
+    [
+      "dev",
+      "local",
+      "overrides",
+      "peer",
+      "pnpmOverrides",
+      "prod",
+      "resolutions",
+      "a",
+      "b"
+    ]
+  );
+}
