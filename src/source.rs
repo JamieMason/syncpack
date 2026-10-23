@@ -92,6 +92,7 @@ impl Source {
     }
   }
 
+  #[cfg(test)]
   pub fn kind(&self) -> SourceKind {
     match self {
       Source::Package { .. } => SourceKind::PackageJson,

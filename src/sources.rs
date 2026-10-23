@@ -81,14 +81,6 @@ impl Sources {
     }
   }
 
-  /// Append a source to the arena and return its index. Test-only helper
-  /// that bypasses `user_source_indices` bookkeeping.
-  pub fn add_source(&mut self, source: Source) -> SourceIdx {
-    let idx = SourceIdx(self.all.len());
-    self.all.push(source);
-    idx
-  }
-
   /// Iterate the package.json sources only. Pnpm yaml is excluded.
   /// Used by `format`, `find_package`, name lookups.
   pub fn packages_iter(&self) -> impl Iterator<Item = (SourceIdx, &Source)> {
@@ -101,11 +93,6 @@ impl Sources {
   /// Look up a package.json source by its package name.
   pub fn find_package(&self, name: &str) -> Option<SourceIdx> {
     self.packages_iter().find(|(_, s)| s.name() == name).map(|(idx, _)| idx)
-  }
-
-  /// Slot in `all` holding the parse-time PnpmYaml entry, if any.
-  pub fn find_pnpm_yaml_idx(&self) -> Option<SourceIdx> {
-    self.pnpm_yaml_source_idx.map(SourceIdx)
   }
 
   /// Two-pass iteration: catalog dep types iterate the canonical source

@@ -744,10 +744,6 @@ impl crate::disk::DiskIo for RecordingDiskIo {
     self.inner.path_exists(p)
   }
 
-  fn read_dir(&self, p: &Path) -> Result<Vec<crate::disk::DiskDirEntry>, std::io::Error> {
-    self.inner.read_dir(p)
-  }
-
   fn read_json_file<V: serde::de::DeserializeOwned>(&self, p: &Path) -> Option<Result<crate::disk::File<V>, crate::disk::DiskIoError>> {
     self.inner.read_json_file(p)
   }
