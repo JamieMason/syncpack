@@ -83,9 +83,9 @@ Renamed for consistency.
 
 ```bash frame="none"
 # v13
-syncpack format --specs exact,range
+syncpack list --specs exact,range
 # v14
-syncpack format --specifier-types exact,range
+syncpack list --specifier-types exact,range
 ```
 
 ### `--filter` → `--dependencies`
@@ -113,7 +113,7 @@ The `dependencyTypes` config has been removed in favour of using `versionGroups`
   "versionGroups": [
     {
       "label": "Ignore everything except dependencies, devDependencies, and peerDependencies",
-      "dependencies": ["!prod", "!dev", "!peer"],
+      "dependencyTypes": ["!prod", "!dev", "!peer"],
       "isIgnored": true,
     },
   ],
@@ -133,12 +133,12 @@ The `specifierTypes` config has been removed in favour of using `versionGroups` 
 ```jsonc
 {
   // Removed in v14
-  "specifierTypes": ["exact", "range"]
+  "specifierTypes": ["exact", "range"],
   // Use instead
   "versionGroups": [
     {
       "label": "Ignore everything except exact (1.2.3) or range (>=1.2.3, ~1.2.3 etc) specifier types",
-      "specifierTypes": ["!exact", "!range"]
+      "specifierTypes": ["!exact", "!range"],
       "isIgnored": true,
     },
   ],
@@ -148,7 +148,7 @@ The `specifierTypes` config has been removed in favour of using `versionGroups` 
 Or use the `--specifier-types` CLI option to filter on an ad hoc basis:
 
 ```bash frame="none"
-syncpack format --specifier-types exact,range
+syncpack list --specifier-types exact,range
 ```
 
 ### `lintFormatting` removed
