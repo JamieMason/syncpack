@@ -207,10 +207,15 @@ impl Disk {
     self.package_json_root_idx.and_then(|i| self.package_json_files.get(i))
   }
 
-  /// Default formatting fallback used when a file's own formatting is empty.
-  /// Prefers the root pkg.json's formatting; falls back to defaults.
-  pub fn formatting_fallback(&self) -> DetectedFormatting {
-    self.package_json_root().map(|f| f.formatting.clone()).unwrap_or_default()
+  /// Write every dirty package.json and the pnpm workspace yaml, if any.
+  pub fn write_dirty<D: DiskIo>(&mut self, io: &D, indent: Option<&str>) -> Result<(), DiskIoError> {
+    for file in self.package_json_files.iter_mut() {
+      write_json_file(file, io, indent)?;
+    }
+    if let Some(yaml) = self.pnpm_workspace.as_mut() {
+      write_yaml_file(yaml, io, indent)?;
+    }
+    Ok(())
   }
 
   /// Read every package.json named in `paths`. Skips a path that equals the
@@ -884,12 +889,7 @@ pub fn copy_expected_specifier_yaml(file: &mut YamlFile, instance: &Instance) {
 
 /// Persist a JSON file when dirty. Returns `Ok(true)` on actual write,
 /// `Ok(false)` when no-op. Resets `dirty = false` post-write.
-pub fn write_json_file<D: DiskIo>(
-  file: &mut File<JsonValue>,
-  io: &D,
-  indent_override: Option<&str>,
-  formatting_fallback: &DetectedFormatting,
-) -> Result<bool, DiskIoError> {
+pub fn write_json_file<D: DiskIo>(file: &mut File<JsonValue>, io: &D, indent_override: Option<&str>) -> Result<bool, DiskIoError> {
   if !file.dirty {
     return Ok(false);
   }
@@ -898,7 +898,6 @@ pub fn write_json_file<D: DiskIo>(
       indent: indent.to_string(),
       newline: file.formatting.newline.clone(),
     },
-    None if file.formatting.indent.is_empty() => formatting_fallback.clone(),
     None => file.formatting.clone(),
   };
   let snapshot = File {
@@ -919,12 +918,7 @@ pub fn write_json_file<D: DiskIo>(
 /// when the file is being serialised fresh because there's no original
 /// text to preserve. For existing files the on-disk indent is kept by
 /// `yamlpatch`.
-pub fn write_yaml_file<D: DiskIo>(
-  file: &mut YamlFile,
-  io: &D,
-  indent_override: Option<&str>,
-  formatting_fallback: &DetectedFormatting,
-) -> Result<bool, DiskIoError> {
+pub fn write_yaml_file<D: DiskIo>(file: &mut YamlFile, io: &D, indent_override: Option<&str>) -> Result<bool, DiskIoError> {
   if !file.dirty {
     return Ok(false);
   }
@@ -934,7 +928,6 @@ pub fn write_yaml_file<D: DiskIo>(
         indent: indent.to_string(),
         newline: file.formatting.newline.clone(),
       },
-      None if file.formatting.indent.is_empty() => formatting_fallback.clone(),
       None => file.formatting.clone(),
     };
     file.formatting = effective_formatting;

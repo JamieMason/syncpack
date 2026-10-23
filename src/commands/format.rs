@@ -78,11 +78,7 @@ fn fix_formatting<D: DiskIo>(mut ctx: Context, reporter: &dyn FormatReporter, io
   }
 
   if !ctx.config.cli.dry_run {
-    let indent = ctx.config.rcfile.indent.as_deref();
-    let fallback = ctx.disk.formatting_fallback();
-    for file in ctx.disk.package_json_files.iter_mut() {
-      crate::disk::write_json_file(file, io, indent, &fallback)?;
-    }
+    ctx.disk.write_dirty(io, ctx.config.rcfile.indent.as_deref())?;
   }
   if !was_invalid {
     reporter.on_no_issues();
