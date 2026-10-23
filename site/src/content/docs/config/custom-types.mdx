@@ -15,9 +15,9 @@ Custom types behave indentically to the default [dependency types](REF_DEPENDENC
 - `--dependency-types` CLI option
 - `dependencyTypes` property of [Version Groups](CONFIG_VERSION_GROUPS), [Semver Groups](CONFIG_SEMVER_GROUPS), and [Dependency Groups](CONFIG_DEPENDENCY_GROUPS).
 
-This is how the default dependency types are defined:
+This is how the built-in dependency types are defined. They are shown for reference, do not copy them into your config as their names are reserved:
 
-```json title=".syncpackrc.json"
+```json title="Built-in definitions"
 {
   "$schema": "./node_modules/syncpack/schema.json",
   "customTypes": {
@@ -54,6 +54,8 @@ This is how the default dependency types are defined:
   }
 }
 ```
+
+The names of the built-in types are reserved. Defining a custom type called `dev`, `prod`, `pnpmOverrides` or any other built-in name is a configuration error, so choose a different name. The same applies to the [catalog names](REF_DEPENDENCY_TYPES#catalog-names) `pnpmCatalog` and `bunCatalog`, and to any name starting with `pnpmCatalog:` or `bunCatalog:`.
 
 Pick a strategy below based on the shape of your data.
 
@@ -195,7 +197,7 @@ A typical dependency object where keys are package names and values are version 
 
 ```json title="package.json"
 {
-  "dependencies": {
+  "tools": {
     "pnpm": "10.10.0",
     "prettier": "3.5.3"
   }
@@ -205,9 +207,9 @@ A typical dependency object where keys are package names and values are version 
 ```json title=".syncpackrc.json"
 {
   "customTypes": {
-    "prod": {
+    "tools": {
       "strategy": "versionsByName",
-      "path": "dependencies"
+      "path": "tools"
     }
   }
 }
@@ -224,7 +226,7 @@ The name of the new dependency type you are adding to syncpack. Syncpack ships w
 
 ### \[name\].path <Badge text="Required" variant="danger" />
 
-The location in each package.json of the `{ "name": "version" }` object. Use dot notation for nested properties (eg. `dependencies`, `pnpm.overrides`).
+The location in each package.json of the `{ "name": "version" }` object. Use dot notation for nested properties (eg. `tools`, `config.tools`).
 
 ### \[name\].strategy <Badge text="Required" variant="danger" />
 

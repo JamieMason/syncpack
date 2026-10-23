@@ -97,11 +97,28 @@ pub fn compute_all_dependency_types(custom_types: &BTreeMap<String, CustomType>)
       },
     ),
   ]);
+  if let Some(name) = custom_types
+    .keys()
+    .find(|name| default_types.contains_key(name.as_str()) || is_catalog_dependency_type_name(name))
+  {
+    return Err(UnsupportedConfigError::BuiltInCustomTypeName { name: name.clone() });
+  }
   default_types
     .iter()
     .chain(custom_types.iter())
     .map(|(name, custom_type)| DependencyType::new(name, custom_type))
     .collect()
+}
+
+/// Names syncpack generates for catalogs it discovers: `pnpmCatalog`, `bunCatalog`,
+/// `pnpmCatalog:<name>` and `bunCatalog:<name>`. Reserved even when the repo has no
+/// catalog yet, so a config does not start failing the day one is added.
+fn is_catalog_dependency_type_name(name: &str) -> bool {
+  ["pnpmCatalog", "bunCatalog"].iter().any(|prefix| {
+    name
+      .strip_prefix(prefix)
+      .is_some_and(|rest| rest.is_empty() || rest.starts_with(':'))
+  })
 }
 
 fn empty_custom_types() -> BTreeMap<String, CustomType> {

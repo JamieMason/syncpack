@@ -25,6 +25,10 @@ pub enum UnsupportedConfigError {
   DeprecatedProperty { property: String, hint: String },
   #[error("dependencyType '{name}' does not match any built-in or custom types")]
   InvalidDependencyType { name: String },
+  #[error(
+    "customTypes.{name} is reserved for a built-in dependency type and cannot be redefined.\nChoose a different name for your custom type."
+  )]
+  BuiltInCustomTypeName { name: String },
   #[error("Invalid semver group: must have isDisabled, isIgnored, or range")]
   InvalidSemverGroup,
   #[error("Invalid update group: must have isIgnored or target")]

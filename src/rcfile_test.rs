@@ -628,6 +628,49 @@ mod comment_properties {
 }
 
 #[test]
+fn custom_type_with_built_in_name_is_an_error() {
+  use crate::rcfile::compute_all_dependency_types;
+  for name in [
+    "dev",
+    "local",
+    "overrides",
+    "peer",
+    "pnpmOverrides",
+    "prod",
+    "resolutions",
+    "pnpmCatalog",
+    "bunCatalog",
+    "pnpmCatalog:react18",
+    "bunCatalog:react18",
+  ] {
+    let raw: RawRcfile = serde_json::from_value(json!({
+      "customTypes": {
+        name: { "strategy": "versionsByName", "path": "x" }
+      }
+    }))
+    .unwrap();
+    let err = compute_all_dependency_types(&raw.custom_types).unwrap_err();
+    assert!(
+      matches!(&err, UnsupportedConfigError::BuiltInCustomTypeName { name: n } if n == name),
+      "expected BuiltInCustomTypeName for {name}, got {err:?}"
+    );
+  }
+}
+
+#[test]
+fn custom_type_named_like_a_catalog_type_is_allowed() {
+  use crate::rcfile::compute_all_dependency_types;
+  let raw: RawRcfile = serde_json::from_value(json!({
+    "customTypes": {
+      "pnpmCatalogLike": { "strategy": "versionsByName", "path": "x" },
+      "bunCatalogue": { "strategy": "versionsByName", "path": "y" }
+    }
+  }))
+  .unwrap();
+  assert!(compute_all_dependency_types(&raw.custom_types).is_ok());
+}
+
+#[test]
 fn max_concurrent_requests_of_zero_is_an_error() {
   let raw: RawRcfile = serde_json::from_value(json!({ "maxConcurrentRequests": 0 })).unwrap();
   let err = Rcfile::try_from(raw).unwrap_err();

@@ -11,6 +11,10 @@ import { Badge } from "@astrojs/starlight/components";
 
 [Snapped To](VERSION_GROUP_SNAPPED_TO) followers now use their target's corrected version, even through a chain of snapTo groups. A cycle whose members disagree on a version is reported as [CircularSnapToMismatch](STATUS_CIRCULAR_SNAP_TO_MISMATCH), and packages which would have to change to follow it are reported as [DependsOnCircularSnapToMismatch](STATUS_DEPENDS_ON_CIRCULAR_SNAP_TO_MISMATCH) instead of being rewritten to a version chosen by group order.
 
+## Custom types cannot reuse built-in names <Badge text="Unreleased" variant="note" />
+
+A [`customTypes`](CONFIG_CUSTOM_TYPES) entry named after a built-in dependency type, such as `dev` or `pnpmOverrides`, or after a catalog type such as `pnpmCatalog` or `bunCatalog:react18`, is now a configuration error instead of being silently added alongside the built-in. Rename the custom type.
+
 ## Range Only version group <Badge text="15.3.0" variant="note" />
 
 [`semverRangeOnly`](VERSION_GROUP_RANGE_ONLY) enforces a consistent semver range prefix (`^`, `~`, exact) across instances without syncing the version numbers themselves.
