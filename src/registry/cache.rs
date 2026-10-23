@@ -30,9 +30,26 @@ pub struct CacheEntry {
   pub data: Arc<AllPackageVersions>,
 }
 
-/// Default location for the cache file: `<tmpdir>/syncpack/cache.json`.
+/// Per-user cache location: `$XDG_CACHE_HOME/syncpack/cache.json`, else
+/// `$HOME/.cache/syncpack/cache.json`, else `<tmpdir>/syncpack/cache.json`.
+/// The temp dir is world-shared on Linux, so it is a last resort.
 pub fn default_cache_filepath() -> PathBuf {
-  std::env::temp_dir().join("syncpack").join("cache.json")
+  cache_filepath(
+    std::env::var_os("XDG_CACHE_HOME").map(PathBuf::from),
+    std::env::var_os("HOME").map(PathBuf::from),
+    std::env::temp_dir(),
+  )
+}
+
+/// Empty env vars count as unset, as the XDG spec requires.
+pub(crate) fn cache_filepath(xdg_cache_home: Option<PathBuf>, home: Option<PathBuf>, temp_dir: PathBuf) -> PathBuf {
+  let non_empty = |p: PathBuf| (!p.as_os_str().is_empty()).then_some(p);
+  xdg_cache_home
+    .and_then(non_empty)
+    .or_else(|| home.and_then(non_empty).map(|h| h.join(".cache")))
+    .unwrap_or(temp_dir)
+    .join("syncpack")
+    .join("cache.json")
 }
 
 /// In-memory cache backed by a JSON file on disk. Read and write

@@ -7,6 +7,10 @@ sidebar:
 
 import { Badge } from "@astrojs/starlight/components";
 
+## Registry cache moves to a per-user directory <Badge text="Unreleased" variant="note" />
+
+Responses are cached in `$XDG_CACHE_HOME/syncpack`, else `$HOME/.cache/syncpack`, else the system temp directory.
+
 ## Failed writes are listed and exit 1 <Badge text="Unreleased" variant="note" />
 
 When [`fix`](COMMAND_FIX), [`format`](COMMAND_FORMAT) or [`update`](COMMAND_UPDATE) cannot write a file, syncpack still writes the others, lists every file it failed to write with its path, such as `Failed to write /repo/packages/a/package.json: Permission denied (os error 13)`, and exits 1. Before, the first failure stopped the run and the files after it were not written.
