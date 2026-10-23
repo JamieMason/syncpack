@@ -135,7 +135,10 @@ impl LiveRegistryClient {
     LiveRegistryClient {
       client: Client::builder()
         .connect_timeout(Duration::from_secs(5))
-        .timeout(Duration::from_secs(30))
+        // Per read, so a large packument that is still arriving is not cut off.
+        .read_timeout(Duration::from_secs(30))
+        // Overall cap, so a server sending a byte at a time cannot hang `update`.
+        .timeout(Duration::from_secs(300))
         .build()
         .expect("Failed to build reqwest client"),
     }
