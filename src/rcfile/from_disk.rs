@@ -75,7 +75,9 @@ impl Rcfile {
             debug!("Raw output from {:?}: {}", filepath, stdout.trim());
           })
           .and_then(|stdout| {
-            serde_json::from_str::<JsResult>(&stdout)
+            // the result is the last line; anything before it is the config's own console output
+            let result = stdout.lines().rev().find(|line| !line.trim().is_empty()).unwrap_or_default();
+            serde_json::from_str::<JsResult>(result)
               .map_err(DiskIoError::JsonParse)
               .map_err(JsRcfileError::DiskIoError)
           })

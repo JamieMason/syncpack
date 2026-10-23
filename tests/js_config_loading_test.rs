@@ -25,3 +25,10 @@ fn loads_cjs_config_without_error() {
     "regression of issue #327:\n{stderr}"
   );
 }
+
+#[test]
+fn ignores_stray_stdout_from_config() {
+  let config = fixture_dir().join("logs-to-stdout.config.cjs");
+  let (_stdout, stderr, code) = run_syncpack(&["list", "--config", config.to_str().unwrap()]);
+  assert_eq!(code, 0, "syncpack list exited {code}\nstderr:\n{stderr}");
+}
