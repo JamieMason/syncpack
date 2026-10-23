@@ -27,7 +27,7 @@ Fix version mismatches in your monorepo. When the same dependency has different 
 ```bash frame="none"
 # Preview changes without modifying files
 syncpack fix --dry-run
-# Fix only dependencies and devDependencies (exclude peer, optional)
+# Fix only dependencies and devDependencies (exclude peer)
 syncpack fix --dependency-types prod,dev
 # Fix inconsistencies with exact versions only (eg "1.2.3", not "^1.2.3")
 syncpack fix --specifier-types exact

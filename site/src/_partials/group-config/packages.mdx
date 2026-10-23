@@ -1,6 +1,6 @@
 - An array of strings which should match the `name` properties of your package.json files.
 - If omitted, the default behaviour is to match every package.
-- Negated types are also supported, so a value of `["!my-client", "!my-server"]` would assign everything **except** the packages `my-client` and `my-server` to this group.
+- Negated names are also supported, so a value of `["!my-client", "!my-server"]` would assign everything **except** the packages `my-client` and `my-server` to this group.
 - The strings can be any combination of exact matches or [glob](HREF_GLOB) patterns:
 
 ```json title="Examples of valid values"
@@ -14,7 +14,7 @@ packages: ["@my-repo/**"]
 packages: ["my-server", "my-client"]
 
 // ✅ match all packages except negated ones
-packages: ["!my-server", "!@my-repo/**]
+packages: ["!my-server", "!@my-repo/**"]
 
 // ❌ no mixing of specific and negated packages
 packages: ["my-client", "!@my-repo/**"]
