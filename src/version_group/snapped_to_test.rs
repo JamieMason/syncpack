@@ -1344,6 +1344,61 @@ async fn circular_snap_of_three_with_mismatch_is_unfixable() {
   ]);
 }
 
+/// A banned target's expected specifier is empty (it is to be removed), which
+/// must not leak into its followers: they snap to the target's raw version.
+#[tokio::test]
+async fn snaps_follower_to_raw_version_when_target_is_banned() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "leader",   "dependencies": { "foo": "1.0.0" } }),
+      json!({ "name": "follower", "dependencies": { "foo": "1.0.0" } }),
+    ])
+    .with_version_groups(vec![
+      json!({ "dependencies": ["foo"], "packages": ["leader"], "isBanned": true }),
+      json!({ "dependencies": ["foo"], "packages": ["follower"], "snapTo": ["leader"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::fixable(IsBanned),
+      dependency_name: "foo",
+      id: "foo in /dependencies of leader",
+      actual: "1.0.0",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of follower",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "leader",
+      id: "leader in /version of leader",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "follower",
+      id: "follower in /version of follower",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// `(package, state, expected)` of every `foo` instance in package order, so the cycle
 /// tests need not list each package's local `version` instance.
 fn foo_states(ctx: &Context) -> Vec<(String, InstanceState, Option<String>)> {

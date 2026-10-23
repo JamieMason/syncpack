@@ -33,7 +33,8 @@ impl SnappedToGroup {
   }
 
   /// The target's expected specifier as corrected by its own version group,
-  /// or its raw specifier if no group has visited it (the self-snapped case).
+  /// or its raw specifier if no group has visited it (the self-snapped case)
+  /// or it is being removed (a banned target expects an empty specifier).
   pub fn get_snapped_to_specifier(&self, dep: &DependencyCore, all_instances: &[Instance]) -> Option<Rc<Specifier>> {
     self.target_instance_idx(dep, all_instances).map(|target| {
       let instance = &all_instances[target.0];
@@ -41,6 +42,7 @@ impl SnappedToGroup {
         .expected_specifier
         .borrow()
         .clone()
+        .filter(|expected| !matches!(**expected, Specifier::None))
         .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier))
     })
   }
