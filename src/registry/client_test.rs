@@ -1,4 +1,8 @@
-use {crate::registry::client::PackageMeta, serde_json::json, std::collections::BTreeMap};
+use {
+  crate::registry::client::{PackageMeta, RegistryError},
+  serde_json::json,
+  std::collections::BTreeMap,
+};
 
 #[test]
 fn filters_out_deprecated_versions() {
@@ -55,4 +59,30 @@ fn includes_all_versions_when_none_deprecated() {
   assert!(versions.contains(&"1.0.0".to_string()));
   assert!(versions.contains(&"2.0.0".to_string()));
   assert!(versions.contains(&"3.0.0".to_string()));
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("operation timed out")]
+struct TimedOut;
+
+#[derive(Debug, thiserror::Error)]
+#[error("error decoding response body")]
+struct DecodeFailed(#[source] TimedOut);
+
+#[test]
+fn reason_joins_every_nested_cause() {
+  let err = RegistryError::FetchError {
+    url: "https://registry.npmjs.org/typescript".to_string(),
+    source: Box::new(DecodeFailed(TimedOut)),
+  };
+  assert_eq!(err.reason(), "error decoding response body: operation timed out");
+}
+
+#[test]
+fn reason_for_an_http_error_is_the_status() {
+  let err = RegistryError::HttpError {
+    url: "https://registry.npmjs.org/typescript".to_string(),
+    status: reqwest::StatusCode::INTERNAL_SERVER_ERROR,
+  };
+  assert_eq!(err.reason(), "HTTP 500 Internal Server Error");
 }

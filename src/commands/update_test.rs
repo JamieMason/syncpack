@@ -504,7 +504,7 @@ mod registry_failures {
     let client: Arc<dyn RegistryClient> = Arc::new(FlakyClient);
     let updates = RegistryUpdates::fetch(&client, &ctx.version_groups, &ctx.instances, 1, 0).await;
     assert_eq!(updates.not_found, vec!["lodash"]);
-    assert_eq!(updates.failed, vec!["left-pad"]);
+    assert_eq!(updates.failed, vec![("left-pad".to_string(), "connection refused".to_string())]);
   }
 
   fn run_with(failed: Vec<&str>, not_found: Vec<&str>) -> Result<crate::context::Context, SyncpackError> {
@@ -514,7 +514,10 @@ mod registry_failures {
     let updates = RegistryUpdates {
       updates_by_internal_name: Default::default(),
       times_by_internal_name: Default::default(),
-      failed: failed.into_iter().map(String::from).collect(),
+      failed: failed
+        .into_iter()
+        .map(|name| (name.to_string(), "connection refused".to_string()))
+        .collect(),
       not_found: not_found.into_iter().map(String::from).collect(),
     };
     update::run(ctx, updates, &MockDiskIo::new(), &MockTui::select_all())

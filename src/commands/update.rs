@@ -221,8 +221,8 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
   }
   if !registry_updates.failed.is_empty() {
     info!(" ");
-    registry_updates.failed.iter().for_each(|name| {
-      error!("Failed to fetch {name}");
+    registry_updates.failed.iter().for_each(|(name, reason)| {
+      error!("Failed to fetch {name}: {reason}");
     });
   }
   if registry_updates.failed.is_empty() && registry_updates.not_found.is_empty() && !was_outdated {

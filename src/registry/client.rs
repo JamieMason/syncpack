@@ -29,6 +29,22 @@ pub enum RegistryError {
   HttpError { url: String, status: StatusCode },
 }
 
+impl RegistryError {
+  /// Why the request failed, including every nested cause, such as
+  /// `error decoding response body: ...: operation timed out`.
+  pub fn reason(&self) -> String {
+    match self {
+      RegistryError::FetchError { source, .. } => {
+        std::iter::successors(Some(source.as_ref() as &dyn std::error::Error), |err| err.source())
+          .map(ToString::to_string)
+          .collect::<Vec<_>>()
+          .join(": ")
+      }
+      RegistryError::HttpError { status, .. } => format!("HTTP {status}"),
+    }
+  }
+}
+
 /// Registry responses such as https://registry.npmjs.org/colors
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PackageMeta {
