@@ -10,7 +10,7 @@ import Details from "@site/components/details.astro";
 
 Extend syncpack to manage other parts of package.json files than those provided by default.
 
-Custom types behave indentically to the default [dependency types](REF_DEPENDENCY_TYPES) (such as `prod` or `peer`). When you define a custom type, you are adding to the list of valid names that can be passed to the:
+Custom types behave identically to the default [dependency types](REF_DEPENDENCY_TYPES) (such as `prod` or `peer`). When you define a custom type, you are adding to the list of valid names that can be passed to the:
 
 - `--dependency-types` CLI option
 - `dependencyTypes` property of [Version Groups](CONFIG_VERSION_GROUPS), [Semver Groups](CONFIG_SEMVER_GROUPS), and [Dependency Groups](CONFIG_DEPENDENCY_GROUPS).
@@ -231,3 +231,28 @@ The location in each package.json of the `{ "name": "version" }` object. Use dot
 ### \[name\].strategy <Badge text="Required" variant="danger" />
 
 Must be `"versionsByName"`.
+
+## Reading from pnpm-workspace.yaml
+
+By default a custom type reads from each `package.json`. Set `source` to `"PnpmWorkspace"` to read from `pnpm-workspace.yaml` instead, which is how the built-in `pnpmOverrides` type is defined.
+
+```yaml title="pnpm-workspace.yaml"
+trustedDependencies:
+  lodash: 4.17.21
+```
+
+```json title=".syncpackrc.json"
+{
+  "customTypes": {
+    "trusted": {
+      "strategy": "versionsByName",
+      "path": "trustedDependencies",
+      "source": "PnpmWorkspace"
+    }
+  }
+}
+```
+
+### \[name\].source <Badge text="Optional" variant="note" />
+
+Which file the custom type reads from. One of `"PackageJson"` (the default) or `"PnpmWorkspace"`.
