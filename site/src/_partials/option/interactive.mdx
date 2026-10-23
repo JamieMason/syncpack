@@ -4,10 +4,12 @@ Pick which updates to apply through an interactive prompt instead of writing eve
 
 Keys:
 
-- `↑` `↓`: navigate
+- `↑` `↓` or `k` `j`: navigate
+- `PageUp` `PageDown`: move a page at a time
+- `Home` `End`: jump to the first or last row
 - `space`: toggle the highlighted row
 - `a`: toggle all rows
 - `enter`: confirm and write selected updates
-- `esc`: cancel without writing
+- `esc` or `q`: cancel without writing
 
 <Code code={`syncpack ${props.command} --interactive`} lang="bash" />
