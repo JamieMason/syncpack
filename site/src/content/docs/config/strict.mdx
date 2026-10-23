@@ -1,7 +1,9 @@
 ---
 title: strict
-description: Configure whether syncpack exits with an error when version mismatches are found
+description: Report Suspect status codes as errors instead of warnings
 ---
+
+[Suspect](REF_STATUS_CODES_SUSPECT) status codes are reported as warnings and do not affect the exit code. With `strict: true` they are reported as errors and `lint` and `fix` exit 1. An explicit entry in a group's [severity](REF_SEVERITY) map always wins over this default.
 
 ## Default Value
 
