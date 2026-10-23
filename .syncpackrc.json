@@ -1,5 +1,13 @@
 {
   "$schema": "npm/packages/syncpack/schema.json",
+  "versionGroups": [
+    {
+      "label": "astro check does not support TypeScript 7 yet",
+      "packages": ["syncpack-docs"],
+      "dependencies": ["typescript"],
+      "pinVersion": "^6.0.3"
+    }
+  ],
   "semverGroups": [
     {
       "dependencyTypes": ["prod", "dev"],
