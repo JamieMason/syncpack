@@ -31,13 +31,10 @@ pub struct YamlFile {
   pub dirty: bool,
 }
 
+#[cfg(test)]
 impl YamlFile {
   pub fn is_dirty(&self) -> bool {
     self.dirty
-  }
-
-  pub fn mark_dirty(&mut self) {
-    self.dirty = true;
   }
 }
 
@@ -114,6 +111,7 @@ pub struct File<T> {
   pub dirty: bool,
 }
 
+#[cfg(test)]
 impl<T> File<T> {
   pub fn is_dirty(&self) -> bool {
     self.dirty
@@ -259,38 +257,12 @@ pub fn parse_json_file(raw: String, filepath: PathBuf) -> Option<File<serde_json
   }
 }
 
-/// Abstract directory entry returned by DiskIo::read_dir
-pub struct DiskDirEntry {
-  path: PathBuf,
-  is_dir: bool,
-}
-
-impl DiskDirEntry {
-  pub fn new(path: PathBuf, is_dir: bool) -> Self {
-    Self { path, is_dir }
-  }
-
-  pub fn path(&self) -> &Path {
-    &self.path
-  }
-
-  pub fn file_name(&self) -> std::ffi::OsString {
-    self.path.file_name().unwrap_or_default().to_owned()
-  }
-
-  pub fn is_dir(&self) -> bool {
-    self.is_dir
-  }
-}
-
 /// Allow DI of the disk IO layer
 pub trait DiskIo {
   /// Execute a NodeJS command and return the stdout
   fn exec_node_command(&self, current_dir: &Path, args: &[&str]) -> Result<String, NodeJsError>;
   /// Check if a file exists on disk
   fn path_exists(&self, filepath: &Path) -> bool;
-  /// Returns the entries within a directory.
-  fn read_dir(&self, path: &Path) -> Result<Vec<DiskDirEntry>, std::io::Error>;
   /// Read a JSON file from disk
   fn read_json_file<V: serde::de::DeserializeOwned>(&self, filepath: &Path) -> Option<Result<File<V>, DiskIoError>>;
   /// Read a file from disk as raw bytes. Used by callers (e.g. the
@@ -354,20 +326,6 @@ impl DiskIo for LiveDiskIo {
 
   fn path_exists(&self, filepath: &Path) -> bool {
     filepath.exists()
-  }
-
-  fn read_dir(&self, path: &Path) -> Result<Vec<DiskDirEntry>, std::io::Error> {
-    let entries = fs::read_dir(path)?;
-    Ok(
-      entries
-        .flatten()
-        .map(|entry| {
-          let path = entry.path();
-          let is_dir = path.is_dir();
-          DiskDirEntry::new(path, is_dir)
-        })
-        .collect(),
-    )
   }
 
   fn read_bytes(&self, filepath: &Path) -> Option<Result<Vec<u8>, DiskIoError>> {
@@ -573,6 +531,7 @@ fn yaml_quote_key(key: &str) -> String {
 /// the yaml fails to parse; the error is logged. The original `raw`
 /// text is stored on the returned `YamlFile` so writes can preserve
 /// formatting via `yamlpatch`.
+#[cfg(test)]
 pub fn parse_yaml_file(raw: String, filepath: PathBuf) -> Option<YamlFile> {
   match parse_yaml_file_strict(raw, filepath.clone()) {
     Ok(file) => Some(file),
@@ -624,14 +583,9 @@ pub fn package_name(file: &File<JsonValue>) -> &str {
 }
 
 /// Does a property exist at the given JSON pointer?
+#[cfg(test)]
 pub fn has_prop(file: &File<JsonValue>, pointer: &str) -> bool {
   file.contents.pointer(pointer).is_some()
-}
-
-/// Read the JSON value at the given pointer (cloned, so callers don't hold
-/// a borrow on the file).
-pub fn get_prop(file: &File<JsonValue>, pointer: &str) -> Option<JsonValue> {
-  file.contents.pointer(pointer).cloned()
 }
 
 /// Deeply set a property in the parsed JSON. Marks the file dirty only when

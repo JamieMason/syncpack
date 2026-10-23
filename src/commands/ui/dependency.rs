@@ -92,10 +92,6 @@ pub fn print_invalid(ctx: &Context, dependency: &DependencyCore, group_variant: 
   info!("{line}");
 }
 
-pub fn print_outdated(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
-  print_valid(ctx, dependency, group_variant);
-}
-
 pub fn print_suspect(ctx: &Context, dependency: &DependencyCore, group_variant: &str) {
   let (count_column, name, local_hint, alias_hint, expected_specifier, status_codes) = get_common_parts(ctx, dependency, group_variant);
   // let name = name.yellow().to_string();

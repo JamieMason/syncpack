@@ -74,19 +74,6 @@ pub fn print_fixable(ctx: &Context, instance: &Instance) {
   info!("{line}");
 }
 
-pub fn print_outdated(ctx: &Context, instance: &Instance) {
-  let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
-  let icon = ui::icon::blue_err();
-  let expected = get_expected(instance).blue();
-  let arrow = ui::icon::dim_left_arrow();
-  let actual = get_actual(instance).dimmed();
-  let suggested_fix = format!("{expected} {arrow} {actual}");
-  let (_, location, state_link, local_hint) = get_common_parts(ctx, instance);
-  let location = location.dimmed().to_string();
-  let line = ui::util::join_line(vec![&indent, &icon, &suggested_fix, &location, &state_link, &local_hint]);
-  info!("{line}");
-}
-
 pub fn print_suspect(ctx: &Context, instance: &Instance) {
   let indent = " ".repeat(ui::DEFAULT_INDENT + 1);
   let icon = ui::icon::warn();

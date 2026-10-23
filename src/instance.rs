@@ -17,7 +17,7 @@ mod source_idx_test;
 
 use {
   crate::{
-    dependency::{DependencyType, Strategy, UpdateUrl},
+    dependency::{DependencyType, UpdateUrl},
     disk::Disk,
     rcfile::update_group::UpdatePolicy,
     semver_range::SemverRange,
@@ -263,24 +263,8 @@ impl Instance {
     self.state.borrow().is_valid()
   }
 
-  pub fn is_invalid(&self) -> bool {
-    self.state.borrow().is_invalid()
-  }
-
-  pub fn is_suspect(&self) -> bool {
-    self.state.borrow().is_suspect()
-  }
-
-  pub fn is_fixable(&self) -> bool {
-    self.state.borrow().is_fixable()
-  }
-
   pub fn is_banned(&self) -> bool {
     self.state.borrow().is_banned()
-  }
-
-  pub fn is_unfixable(&self) -> bool {
-    self.state.borrow().is_unfixable()
   }
 
   pub fn is_outdated(&self) -> bool {
@@ -459,35 +443,5 @@ impl Instance {
         }
       })
       .unwrap_or(false)
-  }
-
-  /// Delete this instance from its underlying `Source`. No-op for
-  /// `PnpmYaml`-sourced instances (pnpm catalog removal lands with the
-  /// Banned-catalog work).
-  pub fn remove(&self, disk: &mut Disk, source: &Source) {
-    let Source::Package { file_idx, .. } = source else {
-      debug!("Cannot remove pnpm catalog instance from a package.json");
-      return;
-    };
-    let file = &mut disk.package_json_files[*file_idx];
-    match self.descriptor.dependency_type.strategy {
-      Strategy::NameAndVersionProps | Strategy::NamedVersionString | Strategy::UnnamedVersionString => {
-        let path_to_prop = &self.descriptor.dependency_type.path;
-        if let Some(parent_path) = path_to_prop.rfind('/') {
-          let parent_pointer = &path_to_prop[..parent_path];
-          let prop_name = &path_to_prop[parent_path + 1..];
-          crate::disk::remove_prop(file, parent_pointer, prop_name);
-        } else if path_to_prop == "/" {
-          debug!("Cannot remove root property");
-        }
-      }
-      Strategy::VersionsByName => {
-        let path_to_obj = &self.descriptor.dependency_type.path;
-        crate::disk::remove_prop(file, path_to_obj, &self.descriptor.name);
-      }
-      Strategy::InvalidConfig => {
-        unreachable!("unrecognised strategy");
-      }
-    };
   }
 }

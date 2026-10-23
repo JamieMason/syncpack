@@ -172,17 +172,6 @@ impl DependencyCore {
     }
   }
 
-  pub fn get_unique_specifiers(&self, arena: &[Instance]) -> Vec<Rc<Specifier>> {
-    let mut unique = Vec::new();
-    for idx in &self.instances {
-      let spec = &arena[idx.0].descriptor.specifier;
-      if !unique.iter().any(|s: &Rc<Specifier>| s.get_raw() == spec.get_raw()) {
-        unique.push(Rc::clone(spec));
-      }
-    }
-    unique
-  }
-
   pub fn get_instances<'a>(&'a self, arena: &'a [Instance]) -> impl Iterator<Item = (InstanceIdx, &'a Instance)> {
     self.instances.iter().map(move |idx| (*idx, &arena[idx.0]))
   }
@@ -640,47 +629,4 @@ fn validate_severity(
     }
   }
   Ok(severity)
-}
-
-#[cfg(test)]
-pub(crate) fn visit_groups(ctx: &Context, version_group_configs: &[serde_json::Value]) {
-  visit_groups_with_registry(ctx, version_group_configs, &None);
-}
-
-#[cfg(test)]
-pub(crate) fn visit_groups_with_registry(
-  ctx: &Context,
-  version_group_configs: &[serde_json::Value],
-  registry_updates: &Option<RegistryUpdates>,
-) {
-  let mut groups: Vec<VersionGroup> = version_group_configs
-    .iter()
-    .enumerate()
-    .map(|(index, json)| {
-      let cfg: AnyVersionGroup = serde_json::from_value(json.clone()).unwrap();
-      VersionGroup::from_config(cfg, index, &ctx.sources).unwrap()
-    })
-    .collect();
-  groups.push(VersionGroup::get_catch_all());
-
-  for (i, instance) in ctx.instances.iter().enumerate() {
-    let idx = InstanceIdx(i);
-    let package_name = ctx.sources.all[instance.source_idx().0].name();
-    if let Some(group) = groups.iter_mut().find(|g| g.selector().can_add(&instance.descriptor, package_name)) {
-      group.add_instance(idx, instance);
-    }
-  }
-
-  let mut snapped_to_indices = Vec::new();
-  let mut other_indices = Vec::new();
-  for (i, group) in groups.iter().enumerate() {
-    if matches!(group, VersionGroup::SnappedTo(_)) {
-      snapped_to_indices.push(i);
-    } else {
-      other_indices.push(i);
-    }
-  }
-  for &i in other_indices.iter().chain(snapped_to_indices.iter()) {
-    groups[i].visit(ctx, registry_updates);
-  }
 }

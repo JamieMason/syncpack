@@ -38,14 +38,6 @@ pub fn cli() -> Cli {
   }
 }
 
-/// Create an empty Config struct
-pub fn config() -> Config {
-  Config {
-    cli: cli(),
-    rcfile: rcfile(),
-  }
-}
-
 /// Create a Config struct from a mocked .syncpackrc
 pub fn config_from_mock(value: serde_json::Value) -> Config {
   Config {
