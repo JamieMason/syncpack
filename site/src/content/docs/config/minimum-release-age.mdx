@@ -1,8 +1,6 @@
 ---
 title: minimumReleaseAge
 description: Skip updates to dependency versions published more recently than this threshold
-sidebar:
-  badge: New
 ---
 
 When using the [update](COMMAND_UPDATE) command, the minimum age (in minutes) a published version must reach before syncpack will consider it as an available update. Reduces supply chain attack risk by ignoring versions that have been on the registry for less time than the configured window. Most malicious releases are detected and unpublished within an hour.

@@ -102,7 +102,6 @@ export default defineConfig({
         },
         {
           label: 'Update Groups',
-          badge: 'New',
           items: [{ autogenerate: { directory: 'update-groups' } }],
         },
         {
@@ -125,7 +124,7 @@ export default defineConfig({
             'config/source',
             'config/source-mode',
             'config/strict',
-            { label: 'updateGroups', link: '/update-groups/', badge: 'New' },
+            { label: 'updateGroups', link: '/update-groups/' },
             { label: 'versionGroups', link: '/version-groups/' },
           ],
         },
