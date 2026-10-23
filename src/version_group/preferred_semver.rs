@@ -78,16 +78,7 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range()
-              && !instance.matches_preferred_semver_range()
-              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
-            {
-              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-              continue;
-            }
-            debug!("{L5}mark as catalog definition");
-            instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
+            mark_catalog_definition(instance);
             continue;
           }
           if instance.is_local_instance {
@@ -192,16 +183,7 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range()
-              && !instance.matches_preferred_semver_range()
-              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
-            {
-              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-              continue;
-            }
-            debug!("{L5}mark as catalog definition");
-            instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
+            mark_catalog_definition(instance);
           } else if instance.descriptor.specifier.is_catalog() {
             debug!("{L4}it uses the catalog: protocol");
             debug!("{L5}mark as valid");
@@ -228,16 +210,7 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range()
-              && !instance.matches_preferred_semver_range()
-              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
-            {
-              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-              continue;
-            }
-            debug!("{L5}mark as catalog definition");
-            instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
+            mark_catalog_definition(instance);
             continue;
           }
 
@@ -276,16 +249,7 @@ impl PreferredSemverGroup {
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
-            if instance.must_match_preferred_semver_range()
-              && !instance.matches_preferred_semver_range()
-              && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
-            {
-              debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-              continue;
-            }
-            debug!("{L5}mark as catalog definition");
-            instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
+            mark_catalog_definition(instance);
             continue;
           }
           debug!("{L4}its version number (without a range):");
@@ -367,16 +331,7 @@ impl PreferredSemverGroup {
             debug!("{L4}visit instance '{}' ({actual_specifier:?})", instance.id);
             if instance.is_catalog_instance() {
               debug!("{L5}it is a catalog definition (defensive short-circuit)");
-              if instance.must_match_preferred_semver_range()
-                && !instance.matches_preferred_semver_range()
-                && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
-              {
-                debug!("{L6}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                continue;
-              }
-              debug!("{L6}mark as catalog definition");
-              instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
+              mark_catalog_definition(instance);
               continue;
             }
             debug!("{L5}it is identical to every other instance");
@@ -391,16 +346,7 @@ impl PreferredSemverGroup {
             debug!("{L4}visit instance '{}' ({actual_specifier:?})", instance.id);
             if instance.is_catalog_instance() {
               debug!("{L5}it is a catalog definition (defensive short-circuit)");
-              if instance.must_match_preferred_semver_range()
-                && !instance.matches_preferred_semver_range()
-                && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
-              {
-                debug!("{L6}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
-                instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
-                continue;
-              }
-              debug!("{L6}mark as catalog definition");
-              instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
+              mark_catalog_definition(instance);
               continue;
             }
             debug!("{L5}it depends on a currently unknowable correct version from a set of unsupported version specifiers");
@@ -411,4 +357,18 @@ impl PreferredSemverGroup {
       }
     }
   }
+}
+
+/// A catalog definition is valid unless its semver group prefers a different range.
+fn mark_catalog_definition(instance: &Instance) {
+  if instance.must_match_preferred_semver_range()
+    && !instance.matches_preferred_semver_range()
+    && let Some(corrected) = instance.get_specifier_with_preferred_semver_range()
+  {
+    debug!("{L5}semver group prefers a different range; mark as SemverRangeMismatch ({corrected:?})");
+    instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+    return;
+  }
+  debug!("{L5}mark as catalog definition");
+  instance.mark_valid(ValidInstance::IsCatalogDefinition, &instance.descriptor.specifier);
 }
