@@ -97,6 +97,12 @@ impl SnappedToGroup {
           debug!("{L4}it is not a local instance of a package developed locally in this monorepo");
           debug!("{L5}its version number (without a range):");
           if !instance.descriptor.specifier.has_same_version_number_as(&snapped_to_specifier) {
+            if instance.already_equals(&snapped_to_specifier) {
+              debug!("{L6}has no comparable version but is identical to the target");
+              debug!("{L7}mark as valid");
+              instance.mark_valid(ValidInstance::IsIdenticalToSnapTarget, &snapped_to_specifier);
+              continue;
+            }
             debug!("{L6}differs to the target version");
             debug!("{L7}mark as error");
             let fix_target = instance

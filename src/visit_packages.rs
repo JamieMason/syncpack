@@ -120,10 +120,10 @@ fn mark_circular_snap_mismatches(ctx: &Context) -> Vec<usize> {
 /// Returns whether they did.
 fn mark_cycle(members: &[usize], ctx: &Context) -> bool {
   let first = &ctx.instances[members[0]].descriptor.specifier;
-  if members
-    .iter()
-    .all(|&m| ctx.instances[m].descriptor.specifier.has_same_version_number_as(first))
-  {
+  if members.iter().all(|&m| {
+    let specifier = &ctx.instances[m].descriptor.specifier;
+    specifier.has_same_version_number_as(first) || specifier.get_raw() == first.get_raw()
+  }) {
     return false;
   }
   for &m in members {

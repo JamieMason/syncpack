@@ -1557,6 +1557,61 @@ async fn followers_of_an_agreeing_cycle_are_still_fixed() {
   );
 }
 
+/// Circular snap `a`↔`b` on identical non-semver specifiers: nothing to
+/// choose between, so both are `IsIdenticalToSnapTarget`.
+#[tokio::test]
+async fn circular_snap_with_identical_non_semver_specifiers_is_valid() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "a", "dependencies": { "foo": "github:user/repo" } }),
+      json!({ "name": "b", "dependencies": { "foo": "github:user/repo" } }),
+    ])
+    .with_version_groups(vec![
+      json!({ "dependencies": ["foo"], "packages": ["a"], "snapTo": ["b"] }),
+      json!({ "dependencies": ["foo"], "packages": ["b"], "snapTo": ["a"] }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of a",
+      actual: "github:user/repo",
+      expected: Some("github:user/repo"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIdenticalToSnapTarget),
+      dependency_name: "foo",
+      id: "foo in /dependencies of b",
+      actual: "github:user/repo",
+      expected: Some("github:user/repo"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "a",
+      id: "a in /version of a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::suspect(InvalidLocalVersion),
+      dependency_name: "b",
+      id: "b in /version of b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// Severity tests — opt out of auto-fix per status (issue #216), opt into
 /// snapping local (mirrors issue #325 for pin). SnappedTo permits
 /// `DiffersToSnapTarget`, `SemverRangeMismatch`, `RefuseToSnapLocal`.
