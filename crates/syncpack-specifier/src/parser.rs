@@ -122,7 +122,8 @@ pub fn is_complex_range(specifier: &str) -> bool {
   let or_parts = specifier.split(" || ");
   let mut total_parts = 0;
   for or_part in or_parts {
-    let tokens: Vec<_> = or_part.split([' ', '-']).map(|s| s.trim()).filter(|s| !s.is_empty()).collect();
+    // split on space only: a `-` inside a token is a prerelease tag, a bare `-` is a hyphen range
+    let tokens: Vec<_> = or_part.split(' ').filter(|s| !s.is_empty() && *s != "-").collect();
     total_parts += tokens.len();
     if !tokens.iter().all(|s| is_simple_semver(s)) {
       return false;

@@ -48,7 +48,10 @@ fn valid_exact() {
 #[test]
 fn valid_complex_semver() {
   for (value, expected) in faker::get_complex_semver() {
-    assert_eq!(*Specifier::new(value), Specifier::ComplexSemver(expected));
+    let actual = Specifier::new(value);
+    // PartialEq compares raw strings only, so also check the variant
+    assert!(matches!(*actual, Specifier::ComplexSemver(_)), "{value} parsed as {actual:?}");
+    assert_eq!(*actual, Specifier::ComplexSemver(expected));
   }
 }
 

@@ -7,6 +7,10 @@ sidebar:
 
 import { Badge } from "@astrojs/starlight/components";
 
+## Complex ranges with prerelease versions <Badge text="Unreleased" variant="note" />
+
+Specifiers such as `>=1.0.0-rc.1 <2.0.0` are parsed as [`range-complex`](REF_SPECIFIER_TYPES) instead of being marked `unsupported`.
+
 ## `update` skips local packages and fully ignored dependencies <Badge text="Unreleased" variant="note" />
 
 [`update`](COMMAND_UPDATE) no longer sends a dependency named like a package in your monorepo to the npm registry, nor one which an [ignored](UPDATE_GROUP_IGNORED) update group matches in every instance. Before, a public package with the same name could have its version written into a [`semverRangeOnly`](VERSION_GROUP_RANGE_ONLY) group or a pnpm or bun catalog definition. See [`update`](COMMAND_UPDATE) for the full rules.

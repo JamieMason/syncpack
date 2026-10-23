@@ -158,6 +158,27 @@ pub fn get_complex_semver() -> Vec<(&'static str, ComplexSemver)> {
         node_range: Rc::new(node_semver::Range::parse(">=2.3.4 || <=1.2.3").unwrap()),
       },
     ),
+    (
+      ">=1.0.0-rc.1 <2.0.0",
+      ComplexSemver {
+        raw: ">=1.0.0-rc.1 <2.0.0".to_string(),
+        node_range: Rc::new(node_semver::Range::parse(">=1.0.0-rc.1 <2.0.0").unwrap()),
+      },
+    ),
+    (
+      "^1.2.3-alpha || ~1.2.3-rc.1",
+      ComplexSemver {
+        raw: "^1.2.3-alpha || ~1.2.3-rc.1".to_string(),
+        node_range: Rc::new(node_semver::Range::parse("^1.2.3-alpha || ~1.2.3-rc.1").unwrap()),
+      },
+    ),
+    (
+      "1.0.0-rc.1 - 2.0.0",
+      ComplexSemver {
+        raw: "1.0.0-rc.1 - 2.0.0".to_string(),
+        node_range: Rc::new(node_semver::Range::parse("1.0.0-rc.1 - 2.0.0").unwrap()),
+      },
+    ),
   ]
 }
 
