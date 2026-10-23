@@ -7,6 +7,10 @@ sidebar:
 
 import { Badge } from "@astrojs/starlight/components";
 
+## `formatRepository` shortens bare `github.com/` URLs <Badge text="Unreleased" variant="note" />
+
+[`formatRepository`](CONFIG_FORMAT_REPOSITORY) now shortens a `repository.url` which starts with `github.com/`, such as `github.com/foo/bar`, to `foo/bar`, as it already did for `https://github.com/foo/bar`.
+
 ## Invalid custom types are an error <Badge text="Unreleased" variant="note" />
 
 A [`customTypes`](CONFIG_CUSTOM_TYPES) entry with an unrecognised `strategy`, or with `strategy: "name~version"` and no `namePath`, now exits 1 with a message naming the entry, such as `customTypes.x.namePath is required when strategy is 'name~version'.`, instead of crashing.
