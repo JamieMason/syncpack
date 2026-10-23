@@ -210,23 +210,26 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
     }
   }
 
+  if !registry_updates.not_found.is_empty() {
+    info!(" ");
+    registry_updates.not_found.iter().for_each(|name| {
+      warn!("{name} was not found on the npm registry");
+    });
+    warn!(
+      "Syncpack does not yet support custom npm registries{LINE_ENDING}  Subscribe to https://github.com/JamieMason/syncpack/issues/220"
+    );
+  }
   if !registry_updates.failed.is_empty() {
     info!(" ");
     registry_updates.failed.iter().for_each(|name| {
       error!("Failed to fetch {name}");
     });
-    warn!(
-      "Syncpack does not yet support custom npm registries{LINE_ENDING}  Subscribe to https://github.com/JamieMason/syncpack/issues/220"
-    );
-  } else if !was_outdated {
+  }
+  if registry_updates.failed.is_empty() && registry_updates.not_found.is_empty() && !was_outdated {
     ui::util::print_no_issues_found();
   }
 
-  if ctx.config.cli.check {
-    return if was_outdated { Err(SyncpackError::IssuesFound) } else { Ok(ctx) };
-  }
-
-  if !ctx.config.cli.dry_run {
+  if !ctx.config.cli.check && !ctx.config.cli.dry_run {
     let indent = ctx.config.rcfile.indent.as_deref();
     let fallback = ctx.disk.formatting_fallback();
     for file in ctx.disk.package_json_files.iter_mut() {
@@ -237,5 +240,13 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
     }
   }
 
+  // Updates that did arrive are already written; a failed fetch still
+  // means the result is incomplete, so the exit code must say so.
+  if !registry_updates.failed.is_empty() {
+    return Err(SyncpackError::RegistryUnavailable);
+  }
+  if ctx.config.cli.check && was_outdated {
+    return Err(SyncpackError::IssuesFound);
+  }
   Ok(ctx)
 }

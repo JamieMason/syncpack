@@ -62,6 +62,8 @@ pub enum SyncpackError {
   IssuesFound,
   #[error("Cancelled, no changes written")]
   Cancelled,
+  #[error("Some npm registry requests failed")]
+  RegistryUnavailable,
   #[error("{0}")]
   CliError(clap::Error),
   #[error("No subcommand specified")]

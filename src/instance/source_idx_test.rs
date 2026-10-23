@@ -251,6 +251,7 @@ async fn update_pnpm_catalog_def_writes_yaml() {
     updates_by_internal_name: std::collections::HashMap::new(),
     times_by_internal_name: std::collections::HashMap::new(),
     failed: vec![],
+    not_found: vec![],
   };
   let _ = update::run(ctx, registry, &disk, &tui);
 }

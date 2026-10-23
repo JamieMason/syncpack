@@ -317,6 +317,7 @@ mod apply {
       updates_by_internal_name: Default::default(),
       times_by_internal_name: Default::default(),
       failed: vec![],
+      not_found: vec![],
     });
     update::run(ctx, updates, &disk, &tui)
   }
@@ -445,5 +446,90 @@ mod apply {
       .with_registry_updates(json!({"foo": ["1.0.0", "1.0.1"]}));
     let ctx = run_update(builder, MockTui::cannot_measure()).await;
     assert!(dirty_files(&ctx).is_empty());
+  }
+}
+
+mod registry_failures {
+  use {
+    super::*,
+    crate::{
+      commands::update,
+      dependency::UpdateUrl,
+      errors::SyncpackError,
+      registry::{
+        client::{AllPackageVersions, RegistryClient, RegistryError},
+        updates::RegistryUpdates,
+      },
+      test::mock_disk::MockDiskIo,
+    },
+    reqwest::StatusCode,
+    std::sync::Arc,
+  };
+
+  /// 404 for lodash, a network error for everything else.
+  #[derive(Debug)]
+  struct FlakyClient;
+
+  #[async_trait::async_trait]
+  impl RegistryClient for FlakyClient {
+    async fn fetch(&self, update_url: &UpdateUrl) -> Result<Arc<AllPackageVersions>, RegistryError> {
+      let url = update_url.url.clone();
+      if update_url.internal_name == "lodash" {
+        Err(RegistryError::HttpError {
+          url,
+          status: StatusCode::NOT_FOUND,
+        })
+      } else {
+        Err(RegistryError::FetchError {
+          url,
+          source: "connection refused".into(),
+        })
+      }
+    }
+  }
+
+  fn ctx_with_two_deps() -> crate::context::Context {
+    TestBuilder::new()
+      .with_packages(vec![json!({
+        "name": "a",
+        "version": "1.0.0",
+        "dependencies": { "lodash": "1.0.0", "left-pad": "1.0.0" }
+      })])
+      .build()
+  }
+
+  #[tokio::test]
+  async fn a_404_is_recorded_as_not_found_and_other_errors_as_failed() {
+    let ctx = ctx_with_two_deps();
+    let client: Arc<dyn RegistryClient> = Arc::new(FlakyClient);
+    let updates = RegistryUpdates::fetch(&client, &ctx.version_groups, &ctx.instances, 1, 0).await;
+    assert_eq!(updates.not_found, vec!["lodash"]);
+    assert_eq!(updates.failed, vec!["left-pad"]);
+  }
+
+  fn run_with(failed: Vec<&str>, not_found: Vec<&str>) -> Result<crate::context::Context, SyncpackError> {
+    let mut ctx = ctx_with_two_deps();
+    ctx.config.cli.check = false;
+    ctx.config.cli.dry_run = true;
+    let updates = RegistryUpdates {
+      updates_by_internal_name: Default::default(),
+      times_by_internal_name: Default::default(),
+      failed: failed.into_iter().map(String::from).collect(),
+      not_found: not_found.into_iter().map(String::from).collect(),
+    };
+    update::run(ctx, updates, &MockDiskIo::new(), &MockTui::select_all())
+  }
+
+  #[test]
+  fn a_failed_fetch_is_an_error() {
+    assert!(matches!(
+      run_with(vec!["left-pad"], vec![]),
+      Err(SyncpackError::RegistryUnavailable)
+    ));
+  }
+
+  #[test]
+  fn a_404_alone_is_not_an_error() {
+    assert!(run_with(vec![], vec!["lodash"]).is_ok());
   }
 }

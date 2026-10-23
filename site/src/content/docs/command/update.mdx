@@ -24,7 +24,7 @@ import SourceModeOption from "@partials/option/source-mode.mdx";
 import SpecifierTypesOption from "@partials/option/specifier-types.mdx";
 import TargetOption from "@partials/option/target.mdx";
 
-Update dependencies in your monorepo to newer versions from the npm registry. Checks for available updates and modifies package.json files (and `pnpm-workspace.yaml` catalog entries when present) to use them. Unlike `fix` which synchronises versions across packages, `update` fetches the latest published versions. Use `--target` to control update strategy (latest, minor, patch), or define [updateGroups](CONFIG_UPDATE_GROUPS) for per-dependency control. Versions newer than [minimumReleaseAge](CONFIG_MINIMUM_RELEASE_AGE) are excluded by default to reduce supply chain attack risk.
+Update dependencies in your monorepo to newer versions from the npm registry. Checks for available updates and modifies package.json files (and `pnpm-workspace.yaml` catalog entries when present) to use them. Unlike `fix` which synchronises versions across packages, `update` fetches the latest published versions. Use `--target` to control update strategy (latest, minor, patch), or define [updateGroups](CONFIG_UPDATE_GROUPS) for per-dependency control. Versions newer than [minimumReleaseAge](CONFIG_MINIMUM_RELEASE_AGE) are excluded by default to reduce supply chain attack risk. If a registry request fails, `update` exits with status 1 after writing the updates it did receive; a package that is not on the registry only produces a warning.
 
 ## Examples
 

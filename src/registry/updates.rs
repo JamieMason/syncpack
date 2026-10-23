@@ -8,6 +8,7 @@ use {
   },
   indicatif::{MultiProgress, ProgressBar, ProgressStyle},
   log::debug,
+  reqwest::StatusCode,
   std::{
     collections::{HashMap, HashSet},
     rc::Rc,
@@ -36,6 +37,8 @@ pub struct RegistryUpdates {
   pub times_by_internal_name: HashMap<String, HashMap<String, String>>,
   /// The internal names of all failed updates
   pub failed: Vec<String>,
+  /// The internal names of packages the registry answered 404 for
+  pub not_found: Vec<String>,
 }
 
 impl RegistryUpdates {
@@ -55,6 +58,7 @@ impl RegistryUpdates {
     let mut updates_by_internal_name: HashMap<String, Vec<Rc<Specifier>>> = HashMap::new();
     let mut times_by_internal_name: HashMap<String, HashMap<String, String>> = HashMap::new();
     let mut failed: Vec<String> = vec![];
+    let mut not_found: Vec<String> = vec![];
     let cutoff_unix_seconds = age_cutoff_unix_seconds(minimum_release_age_minutes);
 
     for update_url in get_unique_update_urls(version_groups, arena) {
@@ -90,6 +94,10 @@ impl RegistryUpdates {
             }
             times_by_internal_name.insert(internal_name.clone(), package_meta.times.clone());
           }
+          Err(RegistryError::HttpError {
+            status: StatusCode::NOT_FOUND,
+            ..
+          }) => not_found.push(internal_name),
           Err(err) => {
             debug!("{err}");
             failed.push(internal_name);
@@ -106,6 +114,7 @@ impl RegistryUpdates {
       updates_by_internal_name,
       times_by_internal_name,
       failed,
+      not_found,
     }
   }
 }
