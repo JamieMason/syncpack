@@ -24,8 +24,8 @@ mod rcfile_test;
 pub mod semver_group;
 pub mod update_group;
 
-pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) -> Result<Vec<DependencyType>, UnsupportedConfigError> {
-  let default_types = HashMap::from([
+pub fn compute_all_dependency_types(custom_types: &BTreeMap<String, CustomType>) -> Result<Vec<DependencyType>, UnsupportedConfigError> {
+  let default_types = BTreeMap::from([
     (
       String::from("dev"),
       CustomType {
@@ -219,7 +219,7 @@ pub(crate) struct RawRcfile {
   #[serde(rename = "$schema", skip_serializing)]
   _schema: Option<serde::de::IgnoredAny>,
   #[serde(default)]
-  pub custom_types: HashMap<String, CustomType>,
+  pub custom_types: BTreeMap<String, CustomType>,
   #[serde(default)]
   pub dependency_groups: Vec<DependencyGroup>,
   #[serde(default)]

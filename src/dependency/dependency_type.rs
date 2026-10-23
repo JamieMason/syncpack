@@ -77,12 +77,12 @@ fn normalize_path(path: String) -> String {
 mod dependency_type_test {
   use {
     crate::{rcfile::compute_all_dependency_types, source::SourceKind},
-    std::collections::HashMap,
+    std::collections::BTreeMap,
   };
 
   #[test]
   fn dependency_type_default_sources_are_correct() {
-    let dep_types = compute_all_dependency_types(&HashMap::new()).expect("default dep types compute");
+    let dep_types = compute_all_dependency_types(&BTreeMap::new()).expect("default dep types compute");
     assert!(!dep_types.is_empty());
     for dt in &dep_types {
       let expected_source = if dt.name == "pnpmOverrides" {
