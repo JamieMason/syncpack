@@ -2,7 +2,7 @@ use {
   crate::{
     commands::ui::{self, LINE_ENDING, update_row},
     context::Context,
-    disk::{DiskIo, copy_expected_specifier_json, copy_expected_specifier_yaml, write_json_file, write_yaml_file},
+    disk::{DiskIo, copy_expected_specifier_json, copy_expected_specifier_yaml},
     errors::SyncpackError,
     instance::InstanceIdx,
     registry::updates::RegistryUpdates,
@@ -230,14 +230,7 @@ pub fn run<D: DiskIo>(mut ctx: Context, registry_updates: RegistryUpdates, io: &
   }
 
   if !ctx.config.cli.check && !ctx.config.cli.dry_run {
-    let indent = ctx.config.rcfile.indent.as_deref();
-    let fallback = ctx.disk.formatting_fallback();
-    for file in ctx.disk.package_json_files.iter_mut() {
-      write_json_file(file, io, indent, &fallback)?;
-    }
-    if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
-      write_yaml_file(yaml, io, indent, &fallback)?;
-    }
+    ctx.disk.write_dirty(io, ctx.config.rcfile.indent.as_deref())?;
   }
 
   // Updates that did arrive are already written; a failed fetch still

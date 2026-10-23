@@ -8,8 +8,7 @@ use {
     commands::reporter::FixReporter,
     context::Context,
     disk::{
-      DiskIo, PackageManager, copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition,
-      set_nested_prop, write_json_file, write_yaml_file,
+      DiskIo, PackageManager, copy_expected_specifier_json, empty_yaml_file, ensure_object_path, insert_catalog_definition, set_nested_prop,
     },
     errors::SyncpackError,
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance, Severity},
@@ -70,14 +69,7 @@ pub fn run<D: DiskIo>(mut ctx: Context, reporter: &dyn FixReporter, io: &D) -> R
   apply_fix_actions(&mut ctx, &fix_actions);
 
   if !ctx.config.cli.dry_run {
-    let indent = ctx.config.rcfile.indent.as_deref();
-    let fallback = ctx.disk.formatting_fallback();
-    for file in ctx.disk.package_json_files.iter_mut() {
-      write_json_file(file, io, indent, &fallback)?;
-    }
-    if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
-      write_yaml_file(yaml, io, indent, &fallback)?;
-    }
+    ctx.disk.write_dirty(io, ctx.config.rcfile.indent.as_deref())?;
   }
 
   if contains_unfixable_issues {

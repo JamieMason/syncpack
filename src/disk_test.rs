@@ -531,13 +531,12 @@ fn indent_override_noops_on_existing_yaml() {
   let mut io = MockDiskIo::new();
   io.add_file("test/pnpm-workspace.yaml", "placeholder for path lookup".to_string());
   // Drive the public write helper with a 2-space override.
-  let fallback = crate::disk::DetectedFormatting::default();
   // Add a patch so the yamlpatch path runs.
   let specifier = Specifier::new("^18.0.0");
   insert_catalog_definition(&mut yaml, "default", "react", &specifier);
   // Write into the mock so we can read back.
   yaml.filepath = io.root().join("pnpm.yaml");
-  crate::disk::write_yaml_file(&mut yaml, &io, Some("  "), &fallback).expect("write must succeed");
+  crate::disk::write_yaml_file(&mut yaml, &io, Some("  ")).expect("write must succeed");
   let written = io.written_text(&yaml.filepath).expect("yaml was written");
   assert!(
     written.contains("    react: ^18.0.0"),
@@ -553,9 +552,8 @@ fn indent_override_applies_to_fresh_yaml() {
   let specifier = Specifier::new("^18.0.0");
   insert_catalog_definition(&mut yaml, "default", "react", &specifier);
   let io = MockDiskIo::new();
-  let fallback = crate::disk::DetectedFormatting::default();
   yaml.filepath = io.root().join("pnpm.yaml");
-  crate::disk::write_yaml_file(&mut yaml, &io, Some("    "), &fallback).expect("write must succeed");
+  crate::disk::write_yaml_file(&mut yaml, &io, Some("    ")).expect("write must succeed");
   let written = io.written_text(&yaml.filepath).expect("yaml was written");
   // yaml_serde's to_string respects the `formatting.indent` we set —
   // it actually uses 2 spaces by default, so the assertion targets
@@ -1116,4 +1114,36 @@ mod disk_ops {
     let m_pos = result.find("\"m\"").unwrap();
     assert!(z_pos < a_pos && a_pos < m_pos, "key order not preserved, got:\n{result}");
   }
+}
+
+#[test]
+fn write_dirty_writes_only_dirty_files_and_resets_flags() {
+  let io = MockDiskIo::new();
+  let mut clean = json_file_from_value(json!({ "name": "clean" }));
+  clean.filepath = io.root().join("clean/package.json");
+  let mut dirty = json_file_from_value(json!({ "name": "dirty" }));
+  dirty.filepath = io.root().join("dirty/package.json");
+  dirty.dirty = true;
+  let mut yaml = empty_yaml_file(io.root().join("pnpm-workspace.yaml"));
+  insert_catalog_definition(&mut yaml, "default", "react", &Specifier::new("^18.0.0"));
+  let mut disk = Disk {
+    cwd: PathBuf::from("/test"),
+    lerna_json: None,
+    package_json_files: vec![clean, dirty],
+    package_json_root_idx: None,
+    package_manager: None,
+    pnpm_workspace: Some(yaml),
+  };
+  disk.write_dirty(&io, None).expect("write must succeed");
+  assert!(
+    io.written_text(&disk.package_json_files[0].filepath).is_none(),
+    "clean file not written"
+  );
+  assert!(
+    io.written_text(&disk.package_json_files[1].filepath).is_some(),
+    "dirty file written"
+  );
+  let yaml = disk.pnpm_workspace.as_ref().unwrap();
+  assert!(io.written_text(&yaml.filepath).is_some(), "dirty yaml written");
+  assert!(!disk.package_json_files[1].dirty && !yaml.dirty, "dirty flags reset");
 }
