@@ -4,7 +4,8 @@ use {
     context::Context,
     group_selector::GroupSelector,
     instance::{
-      FixableInstance, Instance, InstanceIdx, SemverGroupAndVersionConflict, SuspectInstance, ValidInstance, severity::SeverityMap,
+      FixableInstance, Instance, InstanceIdx, InstanceState, InvalidInstance, SemverGroupAndVersionConflict, SuspectInstance,
+      UnfixableInstance, ValidInstance, severity::SeverityMap,
     },
     registry::updates::RegistryUpdates,
     sources::SourceIdx,
@@ -34,23 +35,32 @@ impl SnappedToGroup {
   /// The target's expected specifier as corrected by its own version group,
   /// or its raw specifier if no group has visited it (the self-snapped case).
   pub fn get_snapped_to_specifier(&self, dep: &DependencyCore, all_instances: &[Instance]) -> Option<Rc<Specifier>> {
-    for instance in all_instances {
-      if *instance.descriptor.internal_name == *dep.internal_name {
-        let instance_idx = instance.source_idx();
-        for &snapped_to_idx in &self.snap_to {
-          if instance_idx == snapped_to_idx {
-            return Some(
-              instance
-                .expected_specifier
-                .borrow()
-                .clone()
-                .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier)),
-            );
-          }
-        }
-      }
-    }
-    None
+    self.target_instance_idx(dep, all_instances).map(|target| {
+      let instance = &all_instances[target.0];
+      instance
+        .expected_specifier
+        .borrow()
+        .clone()
+        .unwrap_or_else(|| Rc::clone(&instance.descriptor.specifier))
+    })
+  }
+
+  /// The first instance of `dep` found in a snapped-to package.
+  fn target_instance_idx(&self, dep: &DependencyCore, all_instances: &[Instance]) -> Option<InstanceIdx> {
+    all_instances
+      .iter()
+      .position(|instance| *instance.descriptor.internal_name == *dep.internal_name && self.snap_to.contains(&instance.source_idx()))
+      .map(InstanceIdx)
+  }
+
+  /// Every (follower, snap-target) instance pair in this group.
+  pub fn snap_edges<'a>(&'a self, all_instances: &'a [Instance]) -> impl Iterator<Item = (InstanceIdx, InstanceIdx)> + 'a {
+    self.dependencies.values().flat_map(move |dep| {
+      self
+        .target_instance_idx(dep, all_instances)
+        .into_iter()
+        .flat_map(move |target| dep.instances.iter().map(move |&follower| (follower, target)))
+    })
   }
 
   pub fn visit(&self, ctx: &Context, _registry_updates: &Option<RegistryUpdates>) {
@@ -63,6 +73,16 @@ impl SnappedToGroup {
         dep.set_expected_specifier(&snapped_to_specifier);
         for &idx in &dep.instances {
           let instance = &arena[idx.0];
+          if matches!(
+            *instance.state.borrow(),
+            InstanceState::Invalid(InvalidInstance::Unfixable(UnfixableInstance::CircularSnapToMismatch))
+          ) {
+            debug!(
+              "{L3}'{}' is a member of a mismatched snap cycle, frozen by visit_packages",
+              instance.id
+            );
+            continue;
+          }
           let actual_specifier = &instance.descriptor.specifier;
           debug!("{L3}visit instance '{}' ({actual_specifier:?})", instance.id);
           if instance.is_local_instance && !instance.already_equals(&snapped_to_specifier) {

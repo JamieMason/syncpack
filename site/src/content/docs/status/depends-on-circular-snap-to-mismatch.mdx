@@ -1,0 +1,23 @@
+---
+title: DependsOnCircularSnapToMismatch
+status: unfixable
+description: Dependency snaps into a circular snapTo relationship whose versions disagree, so there is no version to rewrite it to
+---
+
+import SeverityUnfixable from "@partials/severity/unfixable.mdx";
+
+## When this happens
+
+- ✓ Instance is in a [Snapped To](VERSION_GROUP_SNAPPED_TO) version group
+- ✓ Following its [snapTo](VERSION_GROUP_SNAPPED_TO#snapto) targets, directly or through a chain of other followers, leads into a circular relationship which it is not part of
+- ✘ The [Semver Numbers](REF_GLOSSARY#semver-number) of the instances in that cycle do not all match, so they are reported as [CircularSnapToMismatch](STATUS_CIRCULAR_SNAP_TO_MISMATCH)
+- ✘ Instance does not match the version of the cycle member it reaches first, so it would have to be rewritten
+- ? The cycle has no fixed source of truth, so Syncpack will not rewrite the instance until the cycle is resolved
+
+An instance which already matches the cycle member it reaches first needs no rewrite and is reported as [IsIdenticalToSnapTarget](STATUS_IS_IDENTICAL_TO_SNAP_TARGET) or [SatisfiesSnapTarget](STATUS_SATISFIES_SNAP_TARGET) as usual. When the instances in the cycle share the same [Semver Number](REF_GLOSSARY#semver-number) there is a source of truth, and instances which snap into the cycle are fixed as usual.
+
+To resolve it, change the [snapTo](VERSION_GROUP_SNAPPED_TO#snapto) values so that they no longer form a cycle, or make the versions in the cycle match.
+
+## Severity
+
+<SeverityUnfixable />

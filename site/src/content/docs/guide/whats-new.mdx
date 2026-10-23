@@ -7,6 +7,10 @@ sidebar:
 
 import { Badge } from "@astrojs/starlight/components";
 
+## Circular snapTo relationships are flagged <Badge text="Unreleased" variant="note" />
+
+[Snapped To](VERSION_GROUP_SNAPPED_TO) followers now use their target's corrected version, even through a chain of snapTo groups. A cycle whose members disagree on a version is reported as [CircularSnapToMismatch](STATUS_CIRCULAR_SNAP_TO_MISMATCH), and packages which would have to change to follow it are reported as [DependsOnCircularSnapToMismatch](STATUS_DEPENDS_ON_CIRCULAR_SNAP_TO_MISMATCH) instead of being rewritten to a version chosen by group order.
+
 ## Range Only version group <Badge text="15.3.0" variant="note" />
 
 [`semverRangeOnly`](VERSION_GROUP_RANGE_ONLY) enforces a consistent semver range prefix (`^`, `~`, exact) across instances without syncing the version numbers themselves.

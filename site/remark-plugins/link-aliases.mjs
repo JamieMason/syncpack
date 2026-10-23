@@ -95,6 +95,8 @@ export function linkAliases() {
     SEMVER_GROUP_WITH_RANGE: '/semver-groups/with-range/',
 
     STATUS_CANNOT_INFER_CATALOG_FILE: '/status/cannot-infer-catalog-file/',
+    STATUS_CIRCULAR_SNAP_TO_MISMATCH: '/status/circular-snap-to-mismatch/',
+    STATUS_DEPENDS_ON_CIRCULAR_SNAP_TO_MISMATCH: '/status/depends-on-circular-snap-to-mismatch/',
     STATUS_DEPENDS_ON_INVALID_LOCAL_PACKAGE: '/status/depends-on-invalid-local-package/',
     STATUS_DEPENDS_ON_MISSING_CATALOG_DEFINITION: '/status/depends-on-missing-catalog-definition/',
     STATUS_DEPENDS_ON_MISSING_SNAP_TARGET: '/status/depends-on-missing-snap-target/',
