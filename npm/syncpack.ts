@@ -314,6 +314,8 @@ export type VersionGroupVariant =
   | 'SnappedTo';
 
 export type StatusCode =
+  | 'IsCatalog'
+  | 'IsCatalogDefinition'
   | 'IsHighestOrLowestSemver'
   | 'IsIdenticalToLocal'
   | 'IsIdenticalToPin'
@@ -346,7 +348,13 @@ export type StatusCode =
   | 'NonSemverMismatch'
   | 'SameRangeMismatch'
   | 'SameMinorMismatch'
+  | 'SameMinorHasMajorMismatch'
+  | 'NotUsingCatalogAndCatalogUnknown'
+  | 'MissingFromCatalogAndNonSemverMismatch'
+  | 'CannotInferCatalogFile'
   | 'DependsOnMissingSnapTarget'
+  | 'DependsOnMissingCatalogDefinition'
+  | 'RefuseToCatalogLocal'
   | 'InvalidLocalVersion'
   | 'RefuseToBanLocal'
   | 'RefuseToPinLocal'
