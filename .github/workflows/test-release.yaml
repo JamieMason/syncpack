@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-matrix:
@@ -26,6 +30,8 @@ jobs:
           echo "matrix.build.TARGET : ${{ matrix.build.TARGET }}"
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up Node
         uses: ./.github/actions/setup-node
       - name: Set up Rust build
@@ -49,6 +55,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up Node
         uses: ./.github/actions/setup-node
       - name: Install just
@@ -58,5 +66,6 @@ jobs:
       - name: (Test) Publish the package
         shell: bash
         run: |
-          npm install
+          corepack enable
+          pnpm install --frozen-lockfile --filter syncpack --ignore-scripts
           just --dotenv-filename .env.linux-x64-glibc create-npm-root-package

@@ -346,8 +346,8 @@ build-npm-types:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    npm exec tsc -- --declaration --emitDeclarationOnly --outDir "$NODE_ROOT_PKG_DIR_PATH" npm/syncpack.ts
-    npm exec ts-json-schema-generator -- --path 'npm/syncpack.ts' --type 'RcFile' --jsDoc extended --validation-keywords see --out "$NODE_ROOT_PKG_DIR_PATH/schema.json"
+    npm exec --no -- tsc --declaration --emitDeclarationOnly --outDir "$NODE_ROOT_PKG_DIR_PATH" npm/syncpack.ts
+    npm exec --no -- ts-json-schema-generator --path 'npm/syncpack.ts' --type 'RcFile' --jsDoc extended --validation-keywords see --out "$NODE_ROOT_PKG_DIR_PATH/schema.json"
 
 # Create the package.json file for the parent npm package
 create-npm-root-package-json:

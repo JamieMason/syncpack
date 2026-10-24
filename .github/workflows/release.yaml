@@ -5,8 +5,7 @@ on:
     types: [published]
 
 permissions:
-  contents: write
-  id-token: write # Required for OIDC
+  contents: read
 
 jobs:
   build-matrix:
@@ -15,6 +14,9 @@ jobs:
   publish-npm-binaries:
     name: Publish npm binaries
     needs: build-matrix
+    permissions:
+      contents: read
+      id-token: write # Required for OIDC
     runs-on: ${{ matrix.build.OS }}
     strategy:
       fail-fast: true
@@ -29,6 +31,8 @@ jobs:
           echo "matrix.build.TARGET : ${{ matrix.build.TARGET }}"
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up Node
         uses: ./.github/actions/setup-node
       - name: Set up Rust build
@@ -54,10 +58,15 @@ jobs:
   publish-npm-base:
     name: Publish npm package
     needs: publish-npm-binaries
+    permissions:
+      contents: read
+      id-token: write # Required for OIDC
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up Node
         uses: ./.github/actions/setup-node
       - name: Install just
@@ -67,6 +76,7 @@ jobs:
       - name: Publish the package
         shell: bash
         run: |
-          npm install
+          corepack enable
+          pnpm install --frozen-lockfile --filter syncpack --ignore-scripts
           just --dotenv-filename .env.linux-x64-glibc create-npm-root-package
           just --dotenv-filename .env.linux-x64-glibc publish-npm-root-package
