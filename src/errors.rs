@@ -67,6 +67,12 @@ pub enum UnsupportedConfigError {
   },
   #[error("customTypes.<name>.source: '{value}' is not a recognised source.\nUse 'PackageJson' or 'PnpmWorkspace'.")]
   InvalidSource { value: String },
+  #[error(
+    "customTypes.{name}.strategy: '{value}' is not a recognised strategy.\nUse 'name@version', 'name~version', 'version' or 'versionsByName'."
+  )]
+  InvalidStrategy { name: String, value: String },
+  #[error("customTypes.{name}.namePath is required when strategy is 'name~version'.")]
+  MissingNamePath { name: String },
   #[error("Config property '{path}' is not recognised")]
   UnrecognisedProperty { path: String },
 }

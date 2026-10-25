@@ -2,7 +2,7 @@ use {
   crate::{
     errors::UnsupportedConfigError,
     rcfile::{
-      RawRcfile, Rcfile,
+      RawRcfile, Rcfile, compute_all_dependency_types,
       semver_group::AnySemverGroup,
       update_group::{AnyUpdateGroup, UpdateGroup, UpdatePolicy},
     },
@@ -633,6 +633,81 @@ mod comment_properties {
     }))
     .unwrap();
     assert!(raw.validate_unknown_fields().is_ok());
+  }
+}
+
+fn raw_with_custom_types(custom_types: serde_json::Value) -> RawRcfile {
+  serde_json::from_value(json!({ "customTypes": custom_types })).unwrap()
+}
+
+const RECOGNISED_STRATEGIES: [&str; 4] = ["name@version", "name~version", "version", "versionsByName"];
+
+#[test]
+fn custom_type_with_unrecognised_strategy_is_an_error_naming_the_type_and_the_valid_strategies() {
+  let raw = raw_with_custom_types(json!({ "myType": { "strategy": "bogus", "path": "x" } }));
+  let message = compute_all_dependency_types(&raw.custom_types).unwrap_err().to_string();
+  for expected in ["myType", "bogus"].into_iter().chain(RECOGNISED_STRATEGIES) {
+    assert!(message.contains(expected), "should mention '{expected}', got: {message}");
+  }
+}
+
+#[test]
+fn custom_type_strategy_must_match_exactly() {
+  for strategy in ["", "VersionsByName", "versionsbyname", " version", "name~Version", "name@version "] {
+    let raw = raw_with_custom_types(json!({ "myType": { "strategy": strategy, "path": "x" } }));
+    let err = compute_all_dependency_types(&raw.custom_types).expect_err(&format!("strategy '{strategy}' should be rejected"));
+    assert!(
+      err.to_string().contains("myType"),
+      "'{strategy}' error should name the type, got: {err}"
+    );
+  }
+}
+
+#[test]
+fn every_recognised_strategy_is_valid() {
+  for strategy in RECOGNISED_STRATEGIES {
+    let raw = raw_with_custom_types(json!({ "myType": { "strategy": strategy, "namePath": "n", "path": "x" } }));
+    assert!(
+      compute_all_dependency_types(&raw.custom_types).is_ok(),
+      "strategy '{strategy}' should be valid"
+    );
+  }
+}
+
+#[test]
+fn name_path_is_not_required_by_strategies_that_do_not_read_it() {
+  for strategy in ["name@version", "version", "versionsByName"] {
+    let raw = raw_with_custom_types(json!({ "myType": { "strategy": strategy, "path": "x" } }));
+    assert!(
+      compute_all_dependency_types(&raw.custom_types).is_ok(),
+      "strategy '{strategy}' should be valid without namePath"
+    );
+  }
+}
+
+#[test]
+fn a_bad_custom_type_fails_the_config_even_beside_a_good_one() {
+  let raw = raw_with_custom_types(json!({
+    "good": { "strategy": "versionsByName", "path": "a" },
+    "bad": { "strategy": "bogus", "path": "b" }
+  }));
+  let message = compute_all_dependency_types(&raw.custom_types).unwrap_err().to_string();
+  assert!(message.contains("bad"), "should name the bad type, got: {message}");
+  assert!(!message.contains("good"), "should not name the good type, got: {message}");
+}
+
+#[test]
+fn invalid_custom_type_strategy_fails_rcfile_try_from() {
+  for (custom_type, expected) in [
+    (json!({ "strategy": "bogus", "path": "x" }), "bogus"),
+    (json!({ "strategy": "name~version", "path": "x" }), "namePath"),
+  ] {
+    let raw = raw_with_custom_types(json!({ "myType": custom_type }));
+    let message = Rcfile::try_from(raw).unwrap_err().to_string();
+    assert!(
+      message.contains("myType") && message.contains(expected),
+      "should mention 'myType' and '{expected}', got: {message}"
+    );
   }
 }
 

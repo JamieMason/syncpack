@@ -697,9 +697,6 @@ pub fn copy_expected_specifier_json(file: &mut File<JsonValue>, instance: &Insta
     Strategy::VersionsByName => {
       set_nested_prop(file, path_to_prop_str, &instance.descriptor.name, JsonValue::String(raw_specifier));
     }
-    Strategy::InvalidConfig => {
-      unreachable!("unrecognised strategy");
-    }
   };
 }
 

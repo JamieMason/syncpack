@@ -271,8 +271,5 @@ fn collect_descriptors_for_dep_type(
         }
       }
     }
-    Strategy::InvalidConfig => {
-      unreachable!("unrecognised strategy");
-    }
   }
 }

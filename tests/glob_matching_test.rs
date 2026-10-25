@@ -251,6 +251,62 @@ fn fix_keeps_crlf_when_it_adds_a_catalog_entry_to_pnpm_workspace_yaml() {
 
 const ROOT_WITH_PACKAGES_STAR: &str = r#"{"name":"root","version":"1.0.0","workspaces":["packages/*"]}"#;
 
+/// Packages `a` and `b` disagree on `react`; `rcfile` is the `.syncpackrc.json`.
+fn disagreeing_react_with_rcfile(name: &str, rcfile: &str) -> Workspace {
+  Workspace::new(
+    name,
+    &[
+      ("package.json", ROOT_WITH_PACKAGES_STAR),
+      (
+        "packages/a/package.json",
+        r#"{"name":"a","version":"1.0.0","dependencies":{"react":"17.0.0"}}"#,
+      ),
+      (
+        "packages/b/package.json",
+        r#"{"name":"b","version":"1.0.0","dependencies":{"react":"18.0.0"}}"#,
+      ),
+      (".syncpackrc.json", rcfile),
+    ],
+  )
+}
+
+/// `lint` and `fix` must stop with the config error on stderr and leave every package untouched.
+fn assert_config_error_leaves_packages_untouched(ws: &Workspace, expected_in_stderr: &[&str]) {
+  let read_packages = || {
+    [
+      fs::read_to_string(ws.0.join("packages/a/package.json")).unwrap(),
+      fs::read_to_string(ws.0.join("packages/b/package.json")).unwrap(),
+    ]
+  };
+  let before = read_packages();
+  for args in [&["lint"][..], &["fix"]] {
+    let (_stdout, stderr, code) = ws.run(args);
+    assert_eq!(code, 1, "{args:?} stderr:\n{stderr}");
+    for expected in expected_in_stderr {
+      assert!(stderr.contains(expected), "{args:?} should mention '{expected}', stderr:\n{stderr}");
+    }
+    assert_eq!(read_packages(), before, "{args:?} must not write any package");
+  }
+}
+
+#[test]
+fn unrecognised_custom_type_strategy_fails_instead_of_panicking() {
+  let ws = disagreeing_react_with_rcfile(
+    "unrecognised-custom-type-strategy",
+    r#"{"customTypes":{"x":{"strategy":"bogus","path":"x","source":"PnpmWorkspace"}}}"#,
+  );
+  assert_config_error_leaves_packages_untouched(&ws, &["customTypes.x", "bogus", "versionsByName"]);
+}
+
+#[test]
+fn custom_type_name_and_version_props_without_name_path_fails_instead_of_panicking() {
+  let ws = disagreeing_react_with_rcfile(
+    "custom-type-without-name-path",
+    r#"{"customTypes":{"x":{"strategy":"name~version","path":"x"}}}"#,
+  );
+  assert_config_error_leaves_packages_untouched(&ws, &["customTypes.x", "namePath"]);
+}
+
 #[cfg(unix)]
 mod unix_filesystem {
   use {super::*, std::os::unix::fs::PermissionsExt};

@@ -13,18 +13,18 @@ pub enum Strategy {
   UnnamedVersionString,
   /// "versionsByName"
   VersionsByName,
-  /// Not recognised
-  InvalidConfig,
 }
 
 impl Strategy {
-  pub fn new(strategy: &str) -> Strategy {
+  /// `None` when the configured strategy string is not recognised; the caller
+  /// attaches the custom type name to build the config error.
+  pub fn new(strategy: &str) -> Option<Strategy> {
     match strategy {
-      "name~version" => Strategy::NameAndVersionProps,
-      "name@version" => Strategy::NamedVersionString,
-      "version" => Strategy::UnnamedVersionString,
-      "versionsByName" => Strategy::VersionsByName,
-      _ => Strategy::InvalidConfig,
+      "name~version" => Some(Strategy::NameAndVersionProps),
+      "name@version" => Some(Strategy::NamedVersionString),
+      "version" => Some(Strategy::UnnamedVersionString),
+      "versionsByName" => Some(Strategy::VersionsByName),
+      _ => None,
     }
   }
 }
@@ -49,6 +49,13 @@ pub struct DependencyType {
 
 impl DependencyType {
   pub fn new(name: &str, config: &CustomType) -> Result<DependencyType, UnsupportedConfigError> {
+    let strategy = Strategy::new(&config.strategy).ok_or_else(|| UnsupportedConfigError::InvalidStrategy {
+      name: name.to_string(),
+      value: config.strategy.clone(),
+    })?;
+    if matches!(strategy, Strategy::NameAndVersionProps) && config.name_path.is_none() {
+      return Err(UnsupportedConfigError::MissingNamePath { name: name.to_string() });
+    }
     let source = config
       .source
       .as_deref()
@@ -59,7 +66,7 @@ impl DependencyType {
       name_path: config.name_path.clone().map(normalize_path),
       name: name.to_string(),
       path: normalize_path(config.path.clone()),
-      strategy: Strategy::new(config.strategy.as_str()),
+      strategy,
       source,
       is_catalog_definition: false,
     })

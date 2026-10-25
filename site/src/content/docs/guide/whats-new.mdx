@@ -7,6 +7,10 @@ sidebar:
 
 import { Badge } from "@astrojs/starlight/components";
 
+## Invalid custom types are an error <Badge text="Unreleased" variant="note" />
+
+A [`customTypes`](CONFIG_CUSTOM_TYPES) entry with an unrecognised `strategy`, or with `strategy: "name~version"` and no `namePath`, now exits 1 with a message naming the entry, such as `customTypes.x.namePath is required when strategy is 'name~version'.`, instead of crashing.
+
 ## Complex ranges with prerelease versions <Badge text="Unreleased" variant="note" />
 
 Specifiers such as `>=1.0.0-rc.1 <2.0.0` are parsed as [`range-complex`](REF_SPECIFIER_TYPES) instead of being marked `unsupported`.

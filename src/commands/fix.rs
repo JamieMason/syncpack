@@ -195,6 +195,5 @@ fn remove_instance_from_disk(file: &mut crate::disk::File<JsonValue>, instance: 
       let path_to_obj = &instance.descriptor.dependency_type.path;
       crate::disk::remove_prop(file, path_to_obj, &instance.descriptor.name);
     }
-    Strategy::InvalidConfig => unreachable!("unrecognised strategy"),
   }
 }
