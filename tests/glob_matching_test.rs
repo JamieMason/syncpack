@@ -1,6 +1,7 @@
 use {
   serde_json::Value,
   std::{
+    env, fs,
     path::{Path, PathBuf},
     process::Command,
   },
@@ -154,4 +155,96 @@ fn defaults_pick_up_root_and_packages_star_package_json() {
     !ends_with(&paths, "defaults/other/bar/package.json"),
     "expected 'other/bar/package.json' to NOT match defaults, got: {paths:?}",
   );
+}
+
+/// A throwaway workspace on the real filesystem, removed on drop.
+struct Workspace(PathBuf);
+
+impl Workspace {
+  fn new(name: &str, files: &[(&str, &str)]) -> Self {
+    let path = env::temp_dir().join(format!("syncpack-load-errors-{}-{name}", std::process::id()));
+    let _ = fs::remove_dir_all(&path);
+    fs::create_dir_all(&path).expect("create workspace");
+    let workspace = Self(path);
+    for (relative_path, contents) in files {
+      workspace.write(relative_path, contents);
+    }
+    workspace
+  }
+
+  fn write(&self, relative_path: &str, contents: &str) {
+    let path = self.0.join(relative_path);
+    fs::create_dir_all(path.parent().unwrap()).expect("create parent dir");
+    fs::write(path, contents).expect("write file");
+  }
+
+  fn run(&self, args: &[&str]) -> (String, String, i32) {
+    let output = Command::new(env!("CARGO_BIN_EXE_syncpack"))
+      .args(args)
+      .current_dir(&self.0)
+      .output()
+      .expect("failed to run syncpack");
+    (
+      String::from_utf8(output.stdout).unwrap(),
+      String::from_utf8(output.stderr).unwrap(),
+      output.status.code().unwrap_or(1),
+    )
+  }
+}
+
+impl Drop for Workspace {
+  fn drop(&mut self) {
+    let _ = fs::remove_dir_all(&self.0);
+  }
+}
+
+// — line endings —
+
+fn crlf(lines: &[&str]) -> String {
+  lines.iter().map(|line| format!("{line}\r\n")).collect()
+}
+
+fn assert_every_break_is_crlf(file: &str, text: &str) {
+  let breaks = text.matches('\n').count();
+  assert!(breaks > 1, "{file} should span several lines, got {text:?}");
+  assert_eq!(text.matches("\r\n").count(), breaks, "{file} has a bare LF: {text:?}");
+  assert_eq!(text.matches('\r').count(), breaks, "{file} has a lone CR: {text:?}");
+}
+
+#[test]
+fn fix_keeps_crlf_when_it_adds_a_catalog_entry_to_pnpm_workspace_yaml() {
+  let ws = Workspace::new(
+    "fix-crlf-pnpm-workspace",
+    &[
+      ("package.json", r#"{"name":"root","version":"1.0.0"}"#),
+      ("pnpm-workspace.yaml", &crlf(&["packages:", "  - 'packages/*'"])),
+      (
+        ".syncpackrc.json",
+        r#"{"versionGroups":[{"policy":"catalog","dependencies":["react"]}]}"#,
+      ),
+      (
+        "packages/a/package.json",
+        &crlf(&[
+          "{",
+          r#"  "name": "a","#,
+          r#"  "version": "1.0.0","#,
+          r#"  "dependencies": {"#,
+          r#"    "react": "^17.0.0""#,
+          "  }",
+          "}",
+        ]),
+      ),
+    ],
+  );
+  let (_stdout, stderr, code) = ws.run(&["fix"]);
+  assert_eq!(code, 0, "stderr:\n{stderr}");
+  let yaml = fs::read_to_string(ws.0.join("pnpm-workspace.yaml")).unwrap();
+  assert!(yaml.contains("react: ^17.0.0"), "react was not added to the catalog: {yaml:?}");
+  assert_every_break_is_crlf("pnpm-workspace.yaml", &yaml);
+  let package = fs::read_to_string(ws.0.join("packages/a/package.json")).unwrap();
+  assert!(
+    package.contains(r#""react": "catalog:""#),
+    "react was not moved to the catalog: {package:?}"
+  );
+  assert_every_break_is_crlf("packages/a/package.json", &package);
 }

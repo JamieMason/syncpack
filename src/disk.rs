@@ -457,9 +457,10 @@ pub(crate) fn get_pretty_json_bytes<V: serde::ser::Serialize>(file: &File<V>) ->
   let formatter = serde_json::ser::PrettyFormatter::with_indent(indent.as_bytes());
   let mut serializer = serde_json::ser::Serializer::with_formatter(buffer, formatter);
   file.contents.serialize(&mut serializer).map_err(DiskIoError::JsonSerialize)?;
-  let mut bytes = serializer.into_inner();
-  bytes.extend(file.formatting.newline.as_bytes());
-  Ok(bytes)
+  // serde escapes LF/CR inside string values and emits valid UTF-8, so every \n below is a real line break and the lossy decode is
+  // identity.
+  let json = format!("{}\n", String::from_utf8_lossy(&serializer.into_inner()));
+  Ok(normalise_newlines(&json, &file.formatting.newline).into_bytes())
 }
 
 /// Render a `YamlFile` to bytes for writing.
@@ -481,10 +482,9 @@ pub(crate) fn get_pretty_json_bytes<V: serde::ser::Serialize>(file: &File<V>) ->
 /// instead of silently degrading.
 pub fn render_yaml_bytes(file: &YamlFile) -> Result<Vec<u8>, DiskIoError> {
   if file.raw.is_empty() || file.patches.is_empty() {
-    let yaml = yaml_serde::to_string(&file.contents).map_err(DiskIoError::YamlSerialize)?;
-    let mut bytes = yaml.into_bytes();
-    bytes.extend(file.formatting.newline.as_bytes());
-    return Ok(bytes);
+    return yaml_serde::to_string(&file.contents)
+      .map_err(DiskIoError::YamlSerialize)
+      .map(|yaml| normalise_newlines(&yaml, &file.formatting.newline).into_bytes());
   }
   let mut document = yamlpath::Document::new(file.raw.clone()).map_err(DiskIoError::YamlPatchParse)?;
   for patch in file.patches.iter().map(pending_op_to_patch) {
@@ -495,7 +495,17 @@ pub fn render_yaml_bytes(file: &YamlFile) -> Result<Vec<u8>, DiskIoError> {
       Err(err) => return Err(DiskIoError::YamlPatchApply(err)),
     }
   }
-  Ok(document.source().as_bytes().to_vec())
+  Ok(normalise_newlines(document.source(), &file.formatting.newline).into_bytes())
+}
+
+/// Rewrite every line break in `text` to `newline`. A no-op for LF files;
+/// for a CRLF file existing `\r\n` lines are unchanged and bare `\n` lines
+/// (e.g. yamlpatch-added lines) become `\r\n`.
+fn normalise_newlines(text: &str, newline: &str) -> String {
+  match newline {
+    "\n" => text.to_string(),
+    _ => text.replace("\r\n", "\n").replace('\n', newline),
+  }
 }
 
 /// Convert a syncpack-side `PendingYamlOp` into a `yamlpatch::Patch`

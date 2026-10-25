@@ -194,6 +194,36 @@ fn render(yaml: &crate::disk::YamlFile) -> String {
   String::from_utf8(bytes).expect("output must be UTF-8")
 }
 
+/// Pretty-printed package.json text with `newline` between every line and after the last (10 breaks).
+fn nested_json_raw(newline: &str) -> String {
+  [
+    "{",
+    "  \"name\": \"pkg\",",
+    "  \"version\": \"1.0.0\",",
+    "  \"dependencies\": {",
+    "    \"react\": \"17.0.0\"",
+    "  },",
+    "  \"files\": [",
+    "    \"dist\"",
+    "  ]",
+    "}",
+    "",
+  ]
+  .join(newline)
+}
+
+/// Fails on a bare LF or a lone CR, and when fewer than `at_least` breaks exist.
+fn assert_all_breaks_are_crlf(text: &str, at_least: usize) {
+  let crlf = text.matches("\r\n").count();
+  assert!(
+    crlf >= at_least,
+    "expected at least {at_least} CRLF breaks, found {crlf} in {text:?}"
+  );
+  assert_eq!(text.matches('\n').count(), crlf, "bare LF among the CRLF breaks in {text:?}");
+  assert_eq!(text.matches('\r').count(), crlf, "lone CR among the CRLF breaks in {text:?}");
+  assert!(text.ends_with("\r\n"), "expected a trailing CRLF in {text:?}");
+}
+
 #[test]
 fn insert_into_existing_default_block_records_add_patch() {
   // Default block exists; new dep absent. Expect a single Add patch
@@ -498,6 +528,54 @@ fn yamlpatch_add_creates_missing_named_catalog_parent() {
   assert!(out.contains("catalogs:"), "catalogs parent created:\n{out}");
   assert!(out.contains("legacy:"), "named catalog created:\n{out}");
   assert!(out.contains("react: ^16.0.0"), "legacy.react inserted:\n{out}");
+}
+
+/// (label, raw with `\n` breaks, catalog to insert `lodash` into)
+const YAML_ADD_CASES: [(&str, &str, &str); 4] = [
+  (
+    "entry added to an existing default block",
+    "packages:\n  - \"p/*\"\ncatalog:\n  react: ^18.0.0\n",
+    "default",
+  ),
+  ("missing default block created", "packages:\n  - \"p/*\"\n", "default"),
+  (
+    "entry added to an existing named catalog",
+    "catalogs:\n  legacy:\n    react: ^16.0.0\n",
+    "legacy",
+  ),
+  ("missing named catalog created", "catalog:\n  react: ^18.0.0\n", "legacy"),
+];
+
+#[test]
+fn yamlpatch_add_to_crlf_file_writes_crlf_on_every_added_line() {
+  for (label, lf_raw, catalog) in YAML_ADD_CASES {
+    let mut yaml = yaml_from(&lf_raw.replace('\n', "\r\n"));
+    insert_catalog_definition(&mut yaml, catalog, "lodash", &Specifier::new("^4.0.0"));
+    let out = render(&yaml);
+    assert!(out.contains("lodash: ^4.0.0"), "{label}: lodash inserted:\n{out:?}");
+    assert_all_breaks_are_crlf(&out, 3);
+  }
+}
+
+#[test]
+fn yamlpatch_replace_and_remove_in_crlf_file_keep_crlf() {
+  let raw = "catalog:\r\n  react: ^17.0.0\r\n  lodash: ^4.0.0\r\n";
+  let mut replaced = yaml_from(raw);
+  insert_catalog_definition(&mut replaced, "default", "react", &Specifier::new("^18.0.0"));
+  assert_eq!(render(&replaced), "catalog:\r\n  react: ^18.0.0\r\n  lodash: ^4.0.0\r\n");
+  let mut removed = yaml_from(raw);
+  remove_catalog_definition(&mut removed, "default", "react");
+  assert_eq!(render(&removed), "catalog:\r\n  lodash: ^4.0.0\r\n");
+}
+
+#[test]
+fn fresh_yaml_ends_with_exactly_one_newline() {
+  let mut created = empty_yaml_file(PathBuf::from("/test/pnpm-workspace.yaml"));
+  insert_catalog_definition(&mut created, "default", "react", &Specifier::new("^18.0.0"));
+  assert_eq!(render(&created), "catalog:\n  react: ^18.0.0\n", "auto-created file");
+  // No recorded patches also takes the fresh-serialise path.
+  let unpatched = yaml_from("catalog:\n  react: ^18.0.0\n");
+  assert_eq!(render(&unpatched), "catalog:\n  react: ^18.0.0\n", "existing file without patches");
 }
 
 #[test]
@@ -824,30 +902,77 @@ mod disk_ops {
 
   #[test]
   fn serialize_preserves_lf_newline() {
-    let raw = "{\n  \"name\": \"pkg\"\n}\n";
-    let file = file_from_raw(raw);
-    let fmt = detect_formatting(raw);
-    let result = serialise_file(&file, fmt);
-    assert!(result.ends_with('\n'), "expected trailing LF");
-    assert!(
-      !result.ends_with("\r\n"),
-      "expected LF only, not CRLF, got bytes: {:?}",
-      result.as_bytes().iter().rev().take(4).collect::<Vec<_>>()
-    );
+    let raw = nested_json_raw("\n");
+    let file = file_from_raw(&raw);
+    let result = serialise_file(&file, detect_formatting(&raw));
+    assert_eq!(result, raw);
   }
 
   #[test]
   fn serialize_preserves_crlf_newline() {
-    let raw = "{\n  \"name\": \"pkg\"\n}\n";
-    let raw = raw.replace('\n', "\r\n");
+    let raw = nested_json_raw("\r\n");
     let file = file_from_raw(&raw);
-    let fmt = detect_formatting(&raw);
+    let result = serialise_file(&file, detect_formatting(&raw));
+    assert_eq!(result, raw);
+  }
+
+  #[test]
+  fn serialize_follows_the_dominant_newline_of_mixed_input() {
+    // 4 CRLF against 1 LF.
+    let raw = "{\r\n  \"name\": \"pkg\",\r\n  \"version\": \"1.0.0\",\r\n  \"private\": true\n}\r\n";
+    let file = file_from_raw(raw);
+    let result = serialise_file(&file, detect_formatting(raw));
+    assert_all_breaks_are_crlf(&result, 5);
+  }
+
+  #[test]
+  fn serialize_uses_lf_for_lf_majority_and_tied_input() {
+    let lf_majority = "{\n  \"name\": \"pkg\",\r\n  \"version\": \"1.0.0\",\n  \"private\": true\n}\n";
+    let tied = "{\r\n  \"name\": \"pkg\",\n  \"version\": \"1.0.0\",\r\n  \"private\": true\n}";
+    for raw in [lf_majority, tied] {
+      let file = file_from_raw(raw);
+      let result = serialise_file(&file, detect_formatting(raw));
+      assert!(!result.contains('\r'), "expected all LF for {raw:?}, got: {result:?}");
+      assert!(result.ends_with("}\n"), "expected a trailing LF, got: {result:?}");
+    }
+  }
+
+  /// Guard: no inner break to convert, only the trailing one.
+  #[test]
+  fn serialize_empty_object_is_one_line_plus_the_detected_newline() {
+    for newline in ["\r\n", "\n"] {
+      let raw = format!("{{}}{newline}");
+      let file = file_from_raw(&raw);
+      assert_eq!(serialise_file(&file, detect_formatting(&raw)), raw);
+    }
+  }
+
+  #[test]
+  fn serialize_keeps_newlines_inside_string_values_escaped() {
+    let raw = nested_json_raw("\r\n");
+    let mut file = file_from_raw(&raw);
+    file.contents["description"] = json!("a\r\nb\nc\rd");
+    let result = serialise_file(&file, detect_formatting(&raw));
+    assert_eq!(
+      serde_json::from_str::<Value>(&result).unwrap(),
+      file.contents,
+      "value must round-trip"
+    );
+    assert_all_breaks_are_crlf(&result, 11);
+  }
+
+  #[test]
+  fn serialize_applies_an_indent_override_with_crlf() {
+    let raw = nested_json_raw("\r\n");
+    let file = file_from_raw(&raw);
+    let mut fmt = detect_formatting(&raw);
+    fmt.indent = "    ".to_string();
     let result = serialise_file(&file, fmt);
     assert!(
-      result.ends_with("\r\n"),
-      "expected trailing CRLF, got bytes: {:?}",
-      result.as_bytes().iter().rev().take(4).collect::<Vec<_>>()
+      result.contains("\r\n    \"name\""),
+      "expected the 4-space override, got: {result:?}"
     );
+    assert_all_breaks_are_crlf(&result, 10);
   }
 
   #[test]
@@ -1163,4 +1288,16 @@ fn write_dirty_writes_only_dirty_files_and_resets_flags() {
   let yaml = disk.pnpm_workspace.as_ref().unwrap();
   assert!(io.written_text(&yaml.filepath).is_some(), "dirty yaml written");
   assert!(!disk.package_json_files[1].dirty && !yaml.dirty, "dirty flags reset");
+}
+
+#[test]
+fn write_json_file_keeps_crlf_on_every_line_of_a_package_json() {
+  let io = MockDiskIo::new();
+  let path = io.root().join("crlf/package.json");
+  let mut file = crate::disk::parse_json_file(nested_json_raw("\r\n"), path.clone()).expect("fixture must parse");
+  set_prop(&mut file, "/dependencies/react", json!("18.0.0"));
+  crate::disk::write_json_file(&mut file, &io, None).expect("write must succeed");
+  let written = io.written_text(&path).expect("dirty file written");
+  assert!(written.contains("\"react\": \"18.0.0\""), "edit applied:\n{written:?}");
+  assert_all_breaks_are_crlf(&written, 10);
 }

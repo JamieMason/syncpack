@@ -134,13 +134,7 @@ impl DiskIo for MockDiskIo {
   }
 
   fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError> {
-    let buffer: Vec<u8> = Vec::new();
-    let indent = file.formatting.indent.replace("\\t", "\t");
-    let formatter = serde_json::ser::PrettyFormatter::with_indent(indent.as_bytes());
-    let mut serializer = serde_json::ser::Serializer::with_formatter(buffer, formatter);
-    file.contents.serialize(&mut serializer).map_err(DiskIoError::JsonSerialize)?;
-    let mut bytes = serializer.into_inner();
-    bytes.extend(file.formatting.newline.as_bytes());
+    let bytes = crate::disk::get_pretty_json_bytes(file)?;
     self.record_write(&file.filepath, bytes);
     Ok(())
   }
