@@ -17,7 +17,7 @@ process.exit(
     cwd: process.cwd(),
     stdio: 'inherit',
     env: process.env,
-  }).status || 0,
+  }).status ?? 1,
 );
 
 function isMusl() {
