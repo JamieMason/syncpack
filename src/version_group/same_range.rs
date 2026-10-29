@@ -42,12 +42,12 @@ impl SameRangeGroup {
             if instance.matches_preferred_semver_range() {
               debug!("{L5}its specifier matches its semver group");
               instance.mark_valid(ValidInstance::SatisfiesSameRangeGroup, actual_specifier);
-            } else {
+            } else if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
               debug!("{L5}its specifier mismatches its semver group");
-              instance.mark_fixable(
-                FixableInstance::SemverRangeMismatch,
-                &instance.get_specifier_with_preferred_semver_range().unwrap(),
-              );
+              instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+            } else {
+              debug!("{L5}its specifier mismatches its semver group but cannot take the preferred range");
+              instance.mark_valid(ValidInstance::SatisfiesSameRangeGroup, actual_specifier);
             }
           } else {
             debug!("{L4}it does not belong to a semver group");

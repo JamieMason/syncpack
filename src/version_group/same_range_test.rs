@@ -691,6 +691,80 @@ async fn three_ranges_where_one_does_not_overlap_with_others() {
   ]);
 }
 
+/// A specifier such as `*` has no version to apply a range prefix to, so the
+/// semver group cannot correct it. It must be left as-is instead of panicking.
+#[tokio::test]
+async fn instance_whose_specifier_cannot_take_its_semver_group_range_is_left_as_is() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({
+        "name": "package-a",
+        "dependencies": {
+          "foo": "^1.2.3"
+        }
+      }),
+      json!({
+        "name": "package-b",
+        "dependencies": {
+          "foo": "*"
+        }
+      }),
+    ])
+    .with_semver_group(json!({
+      "range": "^"
+    }))
+    .with_version_groups(vec![
+      json!({
+        "dependencyTypes": ["local"],
+        "isIgnored": true
+      }),
+      json!({
+        "dependencies": ["foo"],
+        "policy": "sameRange"
+      }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "package-b",
+      id: "package-b in /version of package-b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "foo",
+      id: "foo in /dependencies of package-a",
+      actual: "^1.2.3",
+      expected: Some("^1.2.3"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameRangeGroup),
+      dependency_name: "foo",
+      id: "foo in /dependencies of package-b",
+      actual: "*",
+      expected: Some("*"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// Severity tests — opt out of auto-fix per status (issue #216).
 /// SameRange only permits `SemverRangeMismatch` (the only Fixable variant it
 /// produces). `SameRangeMismatch` itself is Unfixable and not user-tunable.
