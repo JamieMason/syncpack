@@ -3,6 +3,7 @@ use {
   crate::tui::UpdateRow,
   colored::Colorize,
   node_semver::Version,
+  unicode_segmentation::UnicodeSegmentation,
 };
 
 mod time_difference {
@@ -243,6 +244,62 @@ mod middle_truncate_helper {
     let result = middle_truncate("@scoped/very-long-package-name", 14);
     assert!(visible_width(&result) <= 14, "result {result:?} exceeds budget");
     assert!(result.contains('…'));
+  }
+
+  /// A terminal draws each of these as one character, out of several chars.
+  const GLYPHS: [&str; 4] = [
+    "\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466}", // family
+    "\u{1F3F3}\u{FE0F}\u{200D}\u{1F308}",                          // rainbow flag
+    "\u{1F44D}\u{1F3FD}",                                          // thumb, skin tone
+    "1\u{FE0F}\u{20E3}",                                           // keycap
+  ];
+
+  /// Glyphs placed where a cut from either end lands on one.
+  fn glyph_name(glyph: &str) -> String {
+    format!("ab{}cd", glyph.repeat(6))
+  }
+
+  #[test]
+  fn multi_char_glyph_fits_in_budget() {
+    for glyph in GLYPHS {
+      let name = glyph_name(glyph);
+      for budget in 2..=20 {
+        let result = middle_truncate(&name, budget);
+        assert!(
+          visible_width(&result) <= budget,
+          "{glyph:?} at budget {budget}: {result:?} is {} columns",
+          visible_width(&result)
+        );
+      }
+    }
+  }
+
+  #[test]
+  fn truncation_does_not_cut_a_glyph_in_half() {
+    for glyph in GLYPHS {
+      let name = glyph_name(glyph);
+      let whole: Vec<&str> = name.graphemes(true).collect();
+      for budget in 2..=20 {
+        let result = middle_truncate(&name, budget);
+        for part in result.split('…') {
+          for g in part.graphemes(true) {
+            assert!(
+              whole.contains(&g),
+              "{glyph:?} at budget {budget}: {result:?} holds {g:?}, a piece of a glyph"
+            );
+          }
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn name_that_already_fits_is_left_alone() {
+    for glyph in GLYPHS {
+      let name = format!("@scope/pkg-{glyph}-ui");
+      let budget = visible_width(&name);
+      assert_eq!(middle_truncate(&name, budget), name, "{glyph:?} fits {budget} columns");
+    }
   }
 }
 
