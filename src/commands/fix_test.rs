@@ -784,11 +784,7 @@ impl crate::disk::DiskIo for RecordingDiskIo {
   }
 }
 
-/// RED: Banned pnpm catalog defs are correctly marked `IsBanned` by visit, but
-/// `apply_fix_actions` skips the `PnpmYaml` branch (`if let Some(fi) =
-/// consumer_file_idx` returns None for yaml-sourced instances). Result: fix
-/// reports success but the yaml is unchanged. After the fix, the yaml should
-/// have the banned dep removed via `disk::remove_catalog_definition`.
+/// Fix removes banned catalog entries from pnpm-workspace.yaml, keeping the rest.
 #[test]
 fn pnpm_fix_banned_removes_from_yaml() {
   let yaml = "catalog:\n  foo: ^1.0.0\n  bar: ^2.0.0\n";
@@ -850,4 +846,126 @@ fn bun_fix_banned_removes_from_pkg_json() {
     "non-banned `bar` should still be present"
   );
   assert!(root.is_dirty(), "bun root should be marked dirty after banned removal");
+}
+
+/// Runs `fix` over a pnpm-workspace.yaml with `group` (a version group) and the
+/// extra `config` (e.g. custom types) applied. No package.json declares the deps.
+fn fix_yaml_with_group(yaml: &str, config: serde_json::Value, group: serde_json::Value) -> Context {
+  let ctx = TestBuilder::new()
+    .with_pnpm_catalogs(yaml)
+    .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+    .with_config(config)
+    .with_version_group(group)
+    .build_and_visit_packages();
+  run_fix_ok(ctx)
+}
+
+/// Bans `deps` in the pnpm `overrides` block and runs `fix`.
+fn fix_banned_overrides(yaml: &str, deps: &[&str]) -> Context {
+  fix_yaml_with_group(
+    yaml,
+    json!({}),
+    json!({"dependencies": deps, "dependencyTypes": ["pnpmOverrides"], "isBanned": true}),
+  )
+}
+
+/// The yaml text `fix` would write, via the production renderer.
+fn rendered_yaml(ctx: &Context) -> String {
+  let bytes = crate::disk::render_yaml_bytes(pnpm_yaml(ctx).expect("yaml loaded")).expect("render must succeed");
+  String::from_utf8(bytes).expect("output must be UTF-8")
+}
+
+#[test]
+fn pnpm_fix_banned_override_is_removed_from_yaml_keeping_siblings_and_comments() {
+  let ctx = fix_banned_overrides(
+    "packages:\n  - \"packages/*\"\n\n# overrides comment\noverrides:\n  # first\n  lodash: ^4.17.0 # trailing\n  react: ^18.0.0 # keep\n\nother: 1\n",
+    &["lodash"],
+  );
+
+  assert_eq!(
+    rendered_yaml(&ctx),
+    "packages:\n  - \"packages/*\"\n\n# overrides comment\noverrides:\n  # first\n  react: ^18.0.0 # keep\n\nother: 1\n"
+  );
+}
+
+#[test]
+fn pnpm_fix_banned_sole_flow_style_override_removes_the_overrides_key() {
+  let ctx = fix_banned_overrides(
+    "packages:\n  - \"packages/*\"\noverrides: {lodash: ^4.17.0}\nother: 1\n",
+    &["lodash"],
+  );
+
+  assert_eq!(rendered_yaml(&ctx), "packages:\n  - \"packages/*\"\nother: 1\n");
+}
+
+#[test]
+fn pnpm_fix_banned_override_keys_with_special_characters_are_removed_and_the_emptied_block_pruned() {
+  let ctx = fix_banned_overrides(
+    "overrides:\n  \"foo>bar\": ^1.0.0\n  \"foo@1>bar\": ^2.0.0\n  \"@scope/pkg\": ^3.0.0\nother: 1\n",
+    &["foo>bar", "foo@1>bar", "@scope/pkg"],
+  );
+
+  assert_eq!(rendered_yaml(&ctx), "other: 1\n");
+}
+
+#[test]
+fn pnpm_fix_banned_sole_override_in_crlf_yaml_keeps_crlf_line_endings() {
+  let ctx = fix_banned_overrides(
+    "packages:\r\n  - \"packages/*\"\r\noverrides:\r\n  lodash: ^4.17.0\r\n",
+    &["lodash"],
+  );
+  assert_eq!(rendered_yaml(&ctx), "packages:\r\n  - \"packages/*\"\r\n");
+}
+
+#[test]
+fn pnpm_fix_banned_entry_in_nested_custom_block_keeps_ancestor_with_other_keys() {
+  let ctx = fix_yaml_with_group(
+    "config:\n  keep: true\n  tools:\n    lodash: ^4.17.0\n",
+    json!({"customTypes": {"tools": {"strategy": "versionsByName", "path": "config.tools", "source": "PnpmWorkspace"}}}),
+    json!({"dependencies": ["lodash"], "dependencyTypes": ["tools"], "isBanned": true}),
+  );
+
+  assert_eq!(rendered_yaml(&ctx), "config:\n  keep: true\n");
+}
+
+#[test]
+fn pnpm_fix_banned_dep_is_removed_from_package_json_and_override_and_only_those_are_written() {
+  // Real write (dry_run = false): the banned dep goes from a package.json
+  // `dependencies` AND the pnpm `overrides`; files without it are not written.
+  let mut ctx = TestBuilder::new()
+    .with_pnpm_catalogs("catalog:\n  lodash: ^4.17.0\noverrides:\n  lodash: ^4.17.0\n  react: ^18.0.0\n")
+    .with_packages(vec![
+      json!({"name": "pkg-a", "version": "0.0.0", "dependencies": {"lodash": "^4.17.0", "react": "^18.0.0"}}),
+      json!({"name": "pkg-b", "version": "0.0.0", "dependencies": {"react": "^18.0.0"}}),
+    ])
+    .with_version_group(json!({"dependencies": ["lodash"], "isBanned": true}))
+    .build_and_visit_packages();
+  ctx.config.cli.dry_run = false;
+
+  let disk = recording_disk();
+  let ctx = fix::run(ctx, &SilentReporter, &disk).expect("fix should succeed");
+
+  let writes = disk.recorded_writes();
+  assert!(
+    writes.iter().any(|p| p.ends_with("pnpm-workspace.yaml")),
+    "expected a write to pnpm-workspace.yaml; got {writes:?}"
+  );
+  assert!(
+    writes.iter().any(|p| p.ends_with("pkg-a/package.json")),
+    "expected a write to pkg-a/package.json; got {writes:?}"
+  );
+  assert!(
+    !writes.iter().any(|p| p.ends_with("pkg-b/package.json")),
+    "pkg-b has no banned dep and must not be rewritten; got {writes:?}"
+  );
+  assert!(find_package(&ctx, "pkg-a").contents.pointer("/dependencies/lodash").is_none());
+  assert_eq!(
+    find_package(&ctx, "pkg-a")
+      .contents
+      .pointer("/dependencies/react")
+      .and_then(|v| v.as_str()),
+    Some("^18.0.0"),
+    "unrelated dependency in the same package.json is untouched"
+  );
+  assert_eq!(rendered_yaml(&ctx), "overrides:\n  react: ^18.0.0\n");
 }

@@ -826,58 +826,51 @@ fn build_insert_patch(file: &YamlFile, segments: &[String], dep_name: &str, next
 /// the dep first, then any parent that became empty as a result. This
 /// keeps the `yamlpatch` replay aligned with the in-memory state.
 pub fn remove_catalog_definition(file: &mut YamlFile, catalog_name: &str, dep_name: &str) -> bool {
-  let key_dep = YamlValue::String(dep_name.to_string());
-  let key_name = YamlValue::String(catalog_name.to_string());
+  remove_from_block(file, &YamlTarget::catalog(catalog_name).segments(), dep_name)
+}
+
+/// Remove `dep_name` from the mapping at `segments`, pruning every ancestor
+/// mapping left empty (never the root). Returns `true` when anything was
+/// removed.
+fn remove_from_block(file: &mut YamlFile, segments: &[String], dep_name: &str) -> bool {
+  let root = file.contents.as_mapping();
+  if !descend_to_block(root, segments).is_some_and(|block| block.contains_key(dep_name)) {
+    return false;
+  }
+  let mut path = segments.to_vec();
+  path.push(dep_name.to_string());
+  let mut cut = path.len();
+  while cut > 1 && descend_to_block(root, &path[..cut - 1]).is_some_and(|block| block.len() == 1) {
+    cut -= 1;
+  }
   let YamlValue::Mapping(ref mut root) = file.contents else {
     return false;
   };
-  let mut new_patches: Vec<PendingYamlOp> = Vec::new();
-  let removed = if catalog_name == "default" {
-    let block = root.get_mut("catalog").and_then(|v| v.as_mapping_mut());
-    let Some(block) = block else { return false };
-    let removed = block.remove(&key_dep).is_some();
-    if removed {
-      new_patches.push(PendingYamlOp::Remove {
-        segments: vec!["catalog".to_string(), dep_name.to_string()],
-      });
-    }
-    if removed && block.is_empty() {
-      root.remove("catalog");
-      new_patches.push(PendingYamlOp::Remove {
-        segments: vec!["catalog".to_string()],
-      });
-    }
-    removed
-  } else {
-    let catalogs = root.get_mut("catalogs").and_then(|v| v.as_mapping_mut());
-    let Some(catalogs) = catalogs else { return false };
-    let block = catalogs.get_mut(&key_name).and_then(|v| v.as_mapping_mut());
-    let Some(block) = block else { return false };
-    let removed = block.remove(&key_dep).is_some();
-    if removed {
-      new_patches.push(PendingYamlOp::Remove {
-        segments: vec!["catalogs".to_string(), catalog_name.to_string(), dep_name.to_string()],
-      });
-    }
-    if removed && block.is_empty() {
-      catalogs.remove(&key_name);
-      new_patches.push(PendingYamlOp::Remove {
-        segments: vec!["catalogs".to_string(), catalog_name.to_string()],
-      });
-    }
-    if catalogs.is_empty() {
-      root.remove("catalogs");
-      new_patches.push(PendingYamlOp::Remove {
-        segments: vec!["catalogs".to_string()],
-      });
-    }
-    removed
-  };
-  if removed {
-    file.patches.extend(new_patches);
-    file.dirty = true;
+  if let Some(parent) = path[..cut - 1]
+    .iter()
+    .try_fold(root, |node, seg| node.get_mut(seg).and_then(|value| value.as_mapping_mut()))
+  {
+    parent.remove(&path[cut - 1]);
   }
-  removed
+  file.patches.extend((cut..=path.len()).rev().map(|n| PendingYamlOp::Remove {
+    segments: path[..n].to_vec(),
+  }));
+  file.dirty = true;
+  true
+}
+
+/// Remove a banned instance from the yaml: catalog instances from their
+/// catalog block, `versionsByName` instances (pnpm `overrides`) from the block
+/// at the dep type's `path`.
+pub fn remove_instance_yaml(file: &mut YamlFile, instance: &Instance) {
+  let dep_name = &instance.descriptor.name;
+  let dep_type = &instance.descriptor.dependency_type;
+  if let Some(catalog_name) = instance.catalog_name() {
+    remove_catalog_definition(file, catalog_name, dep_name);
+  } else if matches!(dep_type.strategy, Strategy::VersionsByName) {
+    let segments: Vec<String> = dep_type.path.trim_start_matches('/').split('/').map(str::to_string).collect();
+    remove_from_block(file, &segments, dep_name);
+  }
 }
 
 /// Apply a consumer instance's `expected_specifier` to the yaml. Catalog

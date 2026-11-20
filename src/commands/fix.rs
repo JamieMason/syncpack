@@ -118,10 +118,7 @@ fn apply_fix_actions(ctx: &mut Context, actions: &[(InstanceIdx, bool)]) {
         let instance = &ctx.instances[inst_idx.0];
         remove_instance_from_disk(file, instance);
       } else if let Some(yaml) = ctx.disk.pnpm_workspace.as_mut() {
-        let instance = &ctx.instances[inst_idx.0];
-        if let Some(catalog_name) = instance.catalog_name() {
-          crate::disk::remove_catalog_definition(yaml, catalog_name, &instance.descriptor.name);
-        }
+        crate::disk::remove_instance_yaml(yaml, &ctx.instances[inst_idx.0]);
       }
     } else if let Some(fi) = consumer_file_idx {
       let file = &mut ctx.disk.package_json_files[fi];

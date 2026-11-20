@@ -417,6 +417,15 @@ fn remove_absent_dep_records_no_patch() {
 }
 
 #[test]
+fn remove_from_non_mapping_block_records_no_patch() {
+  let mut yaml = yaml_from("catalog: ~\n");
+  let removed = remove_catalog_definition(&mut yaml, "default", "react");
+  assert!(!removed, "remove returns false when block is not a mapping");
+  assert!(yaml.patches.is_empty(), "no patch pushed when nothing removed");
+  assert!(!yaml.dirty, "dirty stays false on no-op remove");
+}
+
+#[test]
 fn yamlpatch_add_quotes_keys_with_reserved_chars() {
   // Keys that start with reserved YAML chars (`@`, `` ` ``) or contain
   // syntactically significant punctuation must be quoted on output,
