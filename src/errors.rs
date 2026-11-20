@@ -1,6 +1,7 @@
 use {
   crate::{context::ContextError, disk::DiskIoError, rcfile::from_disk::RcfileError},
-  std::fmt,
+  itertools::Itertools,
+  std::{fmt, path::PathBuf},
   thiserror::Error,
 };
 
@@ -16,6 +17,32 @@ impl fmt::Display for UnsupportedConfigErrors {
       write!(f, "{e}")?;
     }
     Ok(())
+  }
+}
+
+/// Every dirty file which could not be written.
+#[derive(Debug, Error)]
+pub struct WriteErrors(pub Vec<WriteError>);
+
+impl fmt::Display for WriteErrors {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{}", self.0.iter().join("\n"))
+  }
+}
+
+#[derive(Debug)]
+pub struct WriteError {
+  pub path: PathBuf,
+  pub error: DiskIoError,
+}
+
+impl fmt::Display for WriteError {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    let path = self.path.display();
+    match &self.error {
+      DiskIoError::FileWrite(err) => write!(f, "Failed to write {path}: {err}"),
+      err => write!(f, "{path}: {err}"),
+    }
   }
 }
 
@@ -50,6 +77,8 @@ pub enum SyncpackError {
   ContextError(ContextError),
   #[error(transparent)]
   DiskIoError(#[from] DiskIoError),
+  #[error(transparent)]
+  WriteErrors(#[from] WriteErrors),
   #[error("Deprecated command")]
   DeprecatedCommand,
   #[error("Issues found")]

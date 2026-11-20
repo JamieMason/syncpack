@@ -248,3 +248,60 @@ fn fix_keeps_crlf_when_it_adds_a_catalog_entry_to_pnpm_workspace_yaml() {
   );
   assert_every_break_is_crlf("packages/a/package.json", &package);
 }
+
+const ROOT_WITH_PACKAGES_STAR: &str = r#"{"name":"root","version":"1.0.0","workspaces":["packages/*"]}"#;
+
+#[cfg(unix)]
+mod unix_filesystem {
+  use {super::*, std::os::unix::fs::PermissionsExt};
+
+  fn read_json(ws: &Workspace, relative_path: &str) -> Value {
+    serde_json::from_str(&fs::read_to_string(ws.0.join(relative_path)).unwrap()).unwrap()
+  }
+
+  #[test]
+  fn fix_writes_every_writable_package_json_and_names_each_one_it_could_not_write() {
+    let package = |name: &str| format!(r#"{{"name":"{name}","version":"1.0.0","dependencies":{{"react":"^17.0.0"}}}}"#);
+    let ws = Workspace::new(
+      "fix-with-unwritable-files",
+      &[
+        ("package.json", ROOT_WITH_PACKAGES_STAR),
+        (
+          ".syncpackrc.json",
+          r#"{"versionGroups":[{"dependencies":["react"],"pinVersion":"18.0.0"}]}"#,
+        ),
+        ("packages/a/package.json", &package("a")),
+        ("packages/b/package.json", &package("b")),
+        ("packages/c/package.json", &package("c")),
+        ("packages/d/package.json", &package("d")),
+      ],
+    );
+    for name in ["b", "d"] {
+      fs::set_permissions(
+        ws.0.join(format!("packages/{name}/package.json")),
+        fs::Permissions::from_mode(0o444),
+      )
+      .unwrap();
+    }
+    if fs::OpenOptions::new()
+      .write(true)
+      .open(ws.0.join("packages/b/package.json"))
+      .is_ok()
+    {
+      eprintln!("skipped: permissions are not enforced for this user (running as root?)");
+      return;
+    }
+    let (_stdout, stderr, code) = ws.run(&["fix"]);
+    assert_eq!(code, 1, "stderr:\n{stderr}");
+    // The reporter prints workspace-relative paths, so only the error can contain the full path.
+    let root = ws.0.canonicalize().unwrap();
+    for name in ["b", "d"] {
+      let path = root.join(format!("packages/{name}/package.json"));
+      assert!(stderr.contains(&path.display().to_string()), "stderr:\n{stderr}");
+    }
+    for name in ["a", "c"] {
+      let written = read_json(&ws, &format!("packages/{name}/package.json"));
+      assert_eq!(written["dependencies"]["react"], "18.0.0", "{name} after fix:\n{written}");
+    }
+  }
+}

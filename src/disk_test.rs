@@ -1300,6 +1300,51 @@ fn write_dirty_writes_only_dirty_files_and_resets_flags() {
 }
 
 #[test]
+fn write_dirty_writes_every_file_it_can_and_names_each_which_failed() {
+  let mut io = MockDiskIo::new();
+  io.fail_write_at("b/package.json");
+  io.fail_write_at("pnpm-workspace.yaml");
+  let dirty_package_json = |dir: &str| {
+    let mut file = json_file_from_value(json!({ "name": dir }));
+    file.filepath = io.root().join(dir).join("package.json");
+    file.dirty = true;
+    file
+  };
+  let mut yaml = empty_yaml_file(io.root().join("pnpm-workspace.yaml"));
+  insert_catalog_definition(&mut yaml, "default", "react", &Specifier::new("^18.0.0"));
+  let mut disk = Disk {
+    cwd: PathBuf::from("/test"),
+    lerna_json: None,
+    package_json_files: ["a", "b", "c"].map(dirty_package_json).into(),
+    package_json_root_idx: None,
+    package_manager: None,
+    pnpm_workspace: Some(yaml),
+  };
+  let err = disk
+    .write_dirty(&io, None)
+    .expect_err("a failed write must be an error")
+    .to_string();
+  let [a, b, c] = [0, 1, 2].map(|i| disk.package_json_files[i].filepath.clone());
+  let yaml_path = disk.pnpm_workspace.as_ref().unwrap().filepath.clone();
+  assert!(io.written_text(&a).is_some(), "file before the failure written");
+  assert!(io.written_text(&c).is_some(), "file after the failure written");
+  assert!(io.written_text(&b).is_none(), "failed file not written");
+  assert!(
+    err.contains(&b.display().to_string()),
+    "error must name the failed file, got: {err}"
+  );
+  assert!(
+    err.contains(&yaml_path.display().to_string()),
+    "error must name the failed yaml, got: {err}"
+  );
+  assert!(
+    !err.contains(&a.display().to_string()),
+    "error must not name a written file, got: {err}"
+  );
+  assert!(err.contains("permission denied"), "error must keep the cause, got: {err}");
+}
+
+#[test]
 fn write_json_file_keeps_crlf_on_every_line_of_a_package_json() {
   let io = MockDiskIo::new();
   let path = io.root().join("crlf/package.json");

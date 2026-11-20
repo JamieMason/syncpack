@@ -1,5 +1,10 @@
 use {
-  crate::{dependency::Strategy, instance::Instance, specifier::Specifier},
+  crate::{
+    dependency::Strategy,
+    errors::{WriteError, WriteErrors},
+    instance::Instance,
+    specifier::Specifier,
+  },
   detect_indent::detect_indent,
   serde_json::Value as JsonValue,
   std::{
@@ -214,14 +219,23 @@ impl Disk {
   }
 
   /// Write every dirty package.json and the pnpm workspace yaml, if any.
-  pub fn write_dirty<D: DiskIo>(&mut self, io: &D, indent: Option<&str>) -> Result<(), DiskIoError> {
-    for file in self.package_json_files.iter_mut() {
-      write_json_file(file, io, indent)?;
-    }
-    if let Some(yaml) = self.pnpm_workspace.as_mut() {
-      write_yaml_file(yaml, io, indent)?;
-    }
-    Ok(())
+  /// A failed write does not stop the others; `Err` lists every file which
+  /// could not be written.
+  pub fn write_dirty<D: DiskIo>(&mut self, io: &D, indent: Option<&str>) -> Result<(), WriteErrors> {
+    let json_errors = self.package_json_files.iter_mut().filter_map(|file| {
+      write_json_file(file, io, indent).err().map(|error| WriteError {
+        path: file.filepath.clone(),
+        error,
+      })
+    });
+    let yaml_errors = self.pnpm_workspace.iter_mut().filter_map(|yaml| {
+      write_yaml_file(yaml, io, indent).err().map(|error| WriteError {
+        path: yaml.filepath.clone(),
+        error,
+      })
+    });
+    let errors: Vec<WriteError> = json_errors.chain(yaml_errors).collect();
+    if errors.is_empty() { Ok(()) } else { Err(WriteErrors(errors)) }
   }
 
   /// Read every package.json named in `paths`. Skips a path that equals the

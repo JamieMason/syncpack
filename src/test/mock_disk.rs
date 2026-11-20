@@ -14,6 +14,7 @@ use {
 pub struct MockDiskIo {
   root: PathBuf,
   files: HashMap<PathBuf, String>,
+  unwritable_files: Vec<PathBuf>,
   writes: RefCell<HashMap<PathBuf, Vec<u8>>>,
 }
 
@@ -22,6 +23,7 @@ impl MockDiskIo {
     Self {
       root: std::env::current_dir().unwrap(),
       files: HashMap::new(),
+      unwritable_files: Vec::new(),
       writes: RefCell::new(HashMap::new()),
     }
   }
@@ -34,6 +36,11 @@ impl MockDiskIo {
   pub fn add_file(&mut self, relative_path: &str, contents: String) {
     let abs_path = self.root.join(relative_path);
     self.files.insert(abs_path, contents);
+  }
+
+  /// Make every write to `relative_path` fail with a permission error.
+  pub fn fail_write_at(&mut self, relative_path: &str) {
+    self.unwritable_files.push(self.root.join(relative_path));
   }
 
   pub fn add_json<V: serde::Serialize>(&mut self, relative_path: &str, value: &V) {
@@ -61,8 +68,12 @@ impl MockDiskIo {
     self.files.keys().any(|f| f.starts_with(dir) && f != dir)
   }
 
-  fn record_write(&self, path: &Path, bytes: Vec<u8>) {
+  fn record_write(&self, path: &Path, bytes: Vec<u8>) -> Result<(), DiskIoError> {
+    if self.unwritable_files.iter().any(|unwritable| unwritable == path) {
+      return Err(DiskIoError::FileWrite(std::io::ErrorKind::PermissionDenied.into()));
+    }
     self.writes.borrow_mut().insert(path.to_path_buf(), bytes);
+    Ok(())
   }
 }
 
@@ -129,20 +140,17 @@ impl DiskIo for MockDiskIo {
   }
 
   fn write_bytes(&self, filepath: &Path, bytes: &[u8]) -> Result<(), DiskIoError> {
-    self.record_write(filepath, bytes.to_vec());
-    Ok(())
+    self.record_write(filepath, bytes.to_vec())
   }
 
   fn write_json_file<V: serde::ser::Serialize>(&self, file: &File<V>) -> Result<(), DiskIoError> {
     let bytes = crate::disk::get_pretty_json_bytes(file)?;
-    self.record_write(&file.filepath, bytes);
-    Ok(())
+    self.record_write(&file.filepath, bytes)
   }
 
   fn write_yaml_file(&self, file: &YamlFile) -> Result<(), DiskIoError> {
     let bytes = crate::disk::render_yaml_bytes(file)?;
-    self.record_write(&file.filepath, bytes);
-    Ok(())
+    self.record_write(&file.filepath, bytes)
   }
 
   fn find_package_jsons(&self, root: &Path, patterns: &[String]) -> Vec<PathBuf> {
