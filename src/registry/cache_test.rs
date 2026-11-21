@@ -75,6 +75,17 @@ fn save_writes_cache_to_disk() {
 }
 
 #[test]
+fn save_without_store_writes_nothing() {
+  let disk = MockDiskIo::new();
+  let path = cache_path();
+  let cache = Cache::load(&disk, path.clone());
+
+  cache.save(&disk);
+
+  assert!(disk.written_bytes(&path).is_none());
+}
+
+#[test]
 fn load_uses_existing_cache_file() {
   let mut disk = MockDiskIo::new();
   let mut state = CacheState::default();

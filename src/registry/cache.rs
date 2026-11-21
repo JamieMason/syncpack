@@ -9,7 +9,10 @@ use {
   std::{
     collections::HashMap,
     path::PathBuf,
-    sync::{Arc, Mutex},
+    sync::{
+      Arc, Mutex,
+      atomic::{AtomicBool, Ordering},
+    },
     time::{SystemTime, UNIX_EPOCH},
   },
 };
@@ -59,6 +62,7 @@ pub(crate) fn cache_filepath(xdg_cache_home: Option<PathBuf>, home: Option<PathB
 pub struct Cache {
   state: Mutex<CacheState>,
   filepath: PathBuf,
+  dirty: AtomicBool,
 }
 
 impl Cache {
@@ -85,12 +89,16 @@ impl Cache {
     Self {
       state: Mutex::new(state),
       filepath,
+      dirty: AtomicBool::new(false),
     }
   }
 
   /// Prune expired entries, then write the in-memory cache to disk via
-  /// `io`. Errors are swallowed.
+  /// `io`. Does nothing unless `store` was called. Errors are swallowed.
   pub fn save<D: DiskIo + ?Sized>(&self, io: &D) {
+    if !self.dirty.load(Ordering::Relaxed) {
+      return;
+    }
     let snapshot = match self.state.lock() {
       Ok(mut guard) => {
         let now = unix_now();
@@ -140,6 +148,7 @@ impl Cache {
         data,
       },
     );
+    self.dirty.store(true, Ordering::Relaxed);
   }
 }
 

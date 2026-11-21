@@ -1,6 +1,6 @@
 use {
   crate::{
-    cli::Cli,
+    cli::{Cli, Subcommand},
     disk::LiveDiskIo,
     errors::SyncpackError,
     registry::{
@@ -50,14 +50,14 @@ async fn main() {
     let args: Vec<String> = std::env::args().collect();
     let cli = Cli::parse(&args)?;
     let io = Arc::new(LiveDiskIo::new());
-    let registry_client: Arc<dyn RegistryClient> = if cli.no_cache {
-      Arc::new(LiveRegistryClient::new())
-    } else {
+    let registry_client: Arc<dyn RegistryClient> = if matches!(cli.subcommand, Subcommand::Update) && !cli.no_cache {
       Arc::new(CachedRegistryClient::new(
         LiveRegistryClient::new(),
         Arc::clone(&io),
         default_cache_filepath(),
       ))
+    } else {
+      Arc::new(LiveRegistryClient::new())
     };
     let tui = LiveTui::new();
     let (ctx, registry_updates) = syncpack::syncpack(cli, &*io, &registry_client).await?;
