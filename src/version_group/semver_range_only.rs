@@ -35,6 +35,7 @@ impl SemverRangeOnlyGroup {
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       let sorted_desc = registry_updates
         .as_ref()
+        .filter(|_| !dep.has_local_dependency(arena))
         .and_then(|r| r.updates_by_internal_name.get(&dep.internal_name))
         .map(|u| sort_updates_desc(u));
       for &idx in &dep.instances {
@@ -42,9 +43,7 @@ impl SemverRangeOnlyGroup {
         let actual_specifier = &instance.descriptor.specifier;
         debug!("{L2}visit instance '{}' ({actual_specifier:?})", instance.id);
 
-        if !instance.is_local_instance
-          && let Some(sorted_desc) = &sorted_desc
-        {
+        if !instance.is_local_instance && registry_updates.is_some() {
           let effective = match &instance.preferred_update_policy {
             Some(UpdatePolicy::Skip) => {
               debug!("{L3}updateGroup policy is Skip; mark as ignored");
@@ -54,7 +53,9 @@ impl SemverRangeOnlyGroup {
             Some(UpdatePolicy::UpTo(t)) => ctx.config.cli.target.stricter(*t),
             None => ctx.config.cli.target,
           };
-          if let Some(highest_update) = highest_eligible_for(sorted_desc, actual_specifier, &effective) {
+          if let Some(sorted_desc) = &sorted_desc
+            && let Some(highest_update) = highest_eligible_for(sorted_desc, actual_specifier, &effective)
+          {
             debug!("{L3}an eligible update {highest_update:?} is available");
             let range = &instance
               .preferred_semver_range

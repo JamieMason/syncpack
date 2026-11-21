@@ -12,7 +12,7 @@ use {
     specifier::Specifier,
   },
   itertools::Itertools,
-  log::warn,
+  log::{debug, warn},
   serde::Deserialize,
   serde_json::Value,
   std::{
@@ -115,8 +115,16 @@ impl DependencyCore {
     }
   }
 
+  pub fn has_local_dependency(&self, arena: &[Instance]) -> bool {
+    self.instances.iter().any(|idx| arena[idx.0].descriptor.is_local_dependency)
+  }
+
   pub fn get_update_url(&self, arena: &[Instance]) -> Option<UpdateUrl> {
-    if self.internal_name_is_supported() {
+    if self.has_local_dependency(arena) {
+      let internal_name = &self.internal_name;
+      debug!("'{internal_name}' includes a local package, skipping registry request");
+      None
+    } else if self.internal_name_is_supported() {
       self.instances.iter().find_map(|idx| arena[idx.0].get_update_url())
     } else {
       None

@@ -447,3 +447,62 @@ mod apply {
     assert!(dirty_files(&ctx).is_empty());
   }
 }
+
+/// Which dependency names `update` asks the registry about.
+mod registry_requests {
+  use {
+    crate::{context::Context, test::builder::TestBuilder},
+    serde_json::json,
+  };
+
+  fn requested_urls(ctx: &Context) -> Vec<String> {
+    let mut urls: Vec<String> = ctx
+      .version_groups
+      .iter()
+      .filter_map(|group| group.get_update_urls(&ctx.instances))
+      .flatten()
+      .map(|update_url| update_url.url)
+      .collect();
+    urls.sort();
+    urls
+  }
+
+  #[test]
+  fn a_package_from_this_monorepo_is_never_requested() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "acme-local", "version": "1.0.0"}),
+        json!({
+          "name": "consumer",
+          "version": "1.0.0",
+          "dependencies": { "acme-local": "^1.0.0", "foo": "^1.0.0" }
+        }),
+      ])
+      .build();
+    assert_eq!(requested_urls(&ctx), vec!["https://registry.npmjs.org/foo"]);
+  }
+
+  #[test]
+  fn a_dependency_is_not_requested_when_every_instance_is_ignored_by_an_update_group() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "a", "version": "1.0.0", "dependencies": { "foo": "^1.0.0", "bar": "^1.0.0" }}),
+        json!({"name": "b", "version": "1.0.0", "devDependencies": { "foo": "^1.0.0" }}),
+      ])
+      .with_update_group(json!({"dependencies": ["foo"], "isIgnored": true}))
+      .build();
+    assert_eq!(requested_urls(&ctx), vec!["https://registry.npmjs.org/bar"]);
+  }
+
+  #[test]
+  fn a_dependency_is_requested_when_only_some_instances_are_ignored_by_an_update_group() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "a", "version": "1.0.0", "dependencies": { "foo": "^1.0.0" }}),
+        json!({"name": "b", "version": "1.0.0", "dependencies": { "foo": "^1.0.0" }}),
+      ])
+      .with_update_group(json!({"dependencies": ["foo"], "packages": ["a"], "isIgnored": true}))
+      .build();
+    assert_eq!(requested_urls(&ctx), vec!["https://registry.npmjs.org/foo"]);
+  }
+}

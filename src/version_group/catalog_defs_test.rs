@@ -330,6 +330,37 @@ mod registry_updates {
   }
 
   #[tokio::test]
+  async fn pnpm_catalog_def_named_like_a_local_package_is_not_updated_from_registry() {
+    let yaml = "catalog:\n  acme-local: ^1.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({"name": "acme-local", "version": "1.0.0"})])
+      .with_registry_updates(json!({"acme-local": ["1.0.0", "9.9.9"]}))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "acme-local",
+        id: "acme-local in /version of acme-local",
+        actual: "1.0.0",
+        expected: Some("1.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalogDefinition),
+        dependency_name: "acme-local",
+        id: "acme-local in /catalog of pnpm-workspace.yaml",
+        actual: "^1.0.0",
+        expected: Some("^1.0.0"),
+        overridden: None,
+        severity: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
   async fn pnpm_named_catalog_def_marked_outdated_when_registry_has_newer_version() {
     let yaml = "catalogs:\n  react18:\n    react: ^17.0.0\n";
     let ctx = TestBuilder::new()
@@ -468,6 +499,47 @@ mod registry_updates {
         id: "react in /catalog of pnpm-workspace.yaml",
         actual: "^18.5.0",
         expected: Some("^18.5.0"),
+        overridden: None,
+        severity: None,
+      },
+    ]);
+  }
+
+  #[tokio::test]
+  async fn update_group_ignores_one_catalog_def_while_the_same_dependency_is_updated_in_another() {
+    let yaml = "catalog:\n  react: ^17.0.0\ncatalogs:\n  react18:\n    react: ^17.0.0\n";
+    let ctx = TestBuilder::new()
+      .with_pnpm_catalogs(yaml)
+      .with_packages(vec![json!({"name": "pkg-a", "version": "0.0.0"})])
+      .with_update_group(json!({"dependencyTypes": ["pnpmCatalog:react18"], "isIgnored": true}))
+      .with_registry_updates(json!({"react": ["17.0.0", "18.5.0"]}))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "pkg-a",
+        id: "pkg-a in /version of pkg-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "react",
+        id: "react in /catalog of pnpm-workspace.yaml",
+        actual: "^17.0.0",
+        expected: Some("^18.5.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsCatalogDefinition),
+        dependency_name: "react",
+        id: "react in /catalogs/react18 of pnpm-workspace.yaml",
+        actual: "^17.0.0",
+        expected: Some("^17.0.0"),
         overridden: None,
         severity: None,
       },

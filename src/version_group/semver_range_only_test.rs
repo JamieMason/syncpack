@@ -433,6 +433,186 @@ async fn registry_update_overrides_range_mismatch() {
   ]);
 }
 
+/// A package from this monorepo never takes versions from the registry, so a
+/// public package of the same name cannot overwrite the specifier.
+#[tokio::test]
+async fn local_package_name_is_not_updated_from_registry() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({"name": "acme-local", "version": "1.0.0"}),
+      json!({
+        "name": "consumer",
+        "version": "1.0.0",
+        "dependencies": {"acme-local": "^1.0.0"}
+      }),
+    ])
+    .with_version_group(json!({"dependencies": ["acme-local"], "policy": "semverRangeOnly"}))
+    .with_registry_updates(json!({"acme-local": ["1.0.0", "9.9.9"]}))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "acme-local",
+      id: "acme-local in /version of acme-local",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "consumer",
+      id: "consumer in /version of consumer",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(MatchesSemverGroup),
+      dependency_name: "acme-local",
+      id: "acme-local in /dependencies of consumer",
+      actual: "^1.0.0",
+      expected: Some("^1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+/// A dependency group mixing a local package with a public one never takes
+/// registry versions, so the public member cannot overwrite the local one.
+#[tokio::test]
+async fn dependency_group_with_local_package_is_not_updated_from_registry() {
+  let ctx = TestBuilder::new()
+    .with_config(json!({"dependencyGroups": [{"aliasName": "mix", "dependencies": ["acme-local", "react"]}]}))
+    .with_packages(vec![
+      json!({"name": "acme-local", "version": "1.0.0"}),
+      json!({
+        "name": "consumer",
+        "version": "1.0.0",
+        "dependencies": {"acme-local": "^1.0.0", "react": "^17.0.0"}
+      }),
+    ])
+    .with_version_group(json!({"dependencies": ["**"], "dependencyTypes": ["!local"], "policy": "semverRangeOnly"}))
+    .with_registry_updates(json!({"mix": ["17.0.0", "19.3.1"]}))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "mix",
+      id: "acme-local in /version of acme-local",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "consumer",
+      id: "consumer in /version of consumer",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(MatchesSemverGroup),
+      dependency_name: "mix",
+      id: "acme-local in /dependencies of consumer",
+      actual: "^1.0.0",
+      expected: Some("^1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(MatchesSemverGroup),
+      dependency_name: "mix",
+      id: "react in /dependencies of consumer",
+      actual: "^17.0.0",
+      expected: Some("^17.0.0"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+#[tokio::test]
+async fn dependency_group_split_across_version_groups_does_not_leak_registry_data_to_local_package() {
+  let ctx = TestBuilder::new()
+    .with_config(json!({"dependencyGroups": [{"aliasName": "mix", "dependencies": ["acme-local", "react"]}]}))
+    .with_packages(vec![
+      json!({"name": "acme-local", "version": "1.0.0"}),
+      json!({"name": "consumer-a", "version": "1.0.0", "dependencies": {"acme-local": "^1.0.0", "react": "^17.0.0"}}),
+      json!({"name": "consumer-b", "version": "1.0.0", "dependencies": {"react": "^17.0.0"}}),
+    ])
+    .with_version_groups(vec![
+      json!({"packages": ["consumer-a"], "dependencyTypes": ["!local"], "policy": "semverRangeOnly"}),
+      json!({"packages": ["consumer-b"], "dependencyTypes": ["!local"], "policy": "semverRangeOnly"}),
+    ])
+    .with_registry_updates(json!({"mix": ["17.0.0", "19.3.1"]}))
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "mix",
+      id: "acme-local in /version of acme-local",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "consumer-a",
+      id: "consumer-a in /version of consumer-a",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsLocalAndValid),
+      dependency_name: "consumer-b",
+      id: "consumer-b in /version of consumer-b",
+      actual: "1.0.0",
+      expected: Some("1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(MatchesSemverGroup),
+      dependency_name: "mix",
+      id: "acme-local in /dependencies of consumer-a",
+      actual: "^1.0.0",
+      expected: Some("^1.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(MatchesSemverGroup),
+      dependency_name: "mix",
+      id: "react in /dependencies of consumer-a",
+      actual: "^17.0.0",
+      expected: Some("^17.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(DiffersToNpmRegistry),
+      dependency_name: "mix",
+      id: "react in /dependencies of consumer-b",
+      actual: "^17.0.0",
+      expected: Some("^19.3.1"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// UpdatePolicy::Skip short-circuits to IsIgnored — matches HighestSemver.
 #[tokio::test]
 async fn update_policy_skip_short_circuits_to_is_ignored() {
@@ -467,6 +647,45 @@ async fn update_policy_skip_short_circuits_to_is_ignored() {
       id: "foo in /dependencies of package-a",
       actual: "~1.2.3",
       expected: Some("~1.2.3"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
+/// Update groups only apply to `update`; `lint` still checks what they ignore.
+#[tokio::test]
+async fn update_policy_skip_does_not_stop_lint_reporting_a_range_mismatch() {
+  let ctx = TestBuilder::new()
+    .with_package(json!({
+      "name": "package-a",
+      "version": "0.0.0",
+      "dependencies": {"foo": "~1.2.3"}
+    }))
+    .with_semver_group(json!({"packages": ["package-a"], "range": "^"}))
+    .with_update_group(json!({"dependencies": ["foo"], "isIgnored": true}))
+    .with_version_groups(vec![
+      json!({"dependencyTypes": ["local"], "isIgnored": true}),
+      json!({"dependencies": ["foo"], "policy": "semverRangeOnly"}),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "0.0.0",
+      expected: Some("0.0.0"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::fixable(SemverRangeMismatch),
+      dependency_name: "foo",
+      id: "foo in /dependencies of package-a",
+      actual: "~1.2.3",
+      expected: Some("^1.2.3"),
       overridden: None,
       severity: None,
     },

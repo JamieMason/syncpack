@@ -196,6 +196,7 @@ impl PreferredSemverGroup {
         }
       } else if let Some(updates) = registry_updates
         .as_ref()
+        .filter(|_| !dep.has_local_dependency(arena))
         .and_then(|r| r.updates_by_internal_name.get(&dep.internal_name))
       {
         let sorted_desc = sort_updates_desc(updates);
@@ -250,6 +251,11 @@ impl PreferredSemverGroup {
           if instance.is_catalog_instance() {
             debug!("{L4}it is a catalog definition (defensive short-circuit)");
             mark_catalog_definition(instance);
+            continue;
+          }
+          if registry_updates.is_some() && matches!(instance.preferred_update_policy, Some(UpdatePolicy::Skip)) {
+            debug!("{L4}updateGroup policy is Skip; mark as ignored");
+            instance.mark_valid(ValidInstance::IsIgnored, &instance.descriptor.specifier);
             continue;
           }
           debug!("{L4}its version number (without a range):");

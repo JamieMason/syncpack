@@ -31,6 +31,7 @@ impl CatalogDefsGroup {
       debug!("{L1}visit dependency '{}'", dep.internal_name);
       let sorted_desc = registry_updates
         .as_ref()
+        .filter(|_| !dep.has_local_dependency(arena))
         .and_then(|r| r.updates_by_internal_name.get(&dep.internal_name))
         .map(|updates| sort_updates_desc(updates));
       for &idx in &dep.instances {

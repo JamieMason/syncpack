@@ -328,7 +328,7 @@ impl Instance {
   }
 
   pub fn get_update_url(&self) -> Option<UpdateUrl> {
-    if !self.is_local_instance {
+    if !self.is_local_instance && !matches!(self.preferred_update_policy, Some(UpdatePolicy::Skip)) {
       let internal_name = &self.descriptor.internal_name;
       let actual_name = &self.descriptor.name;
       let raw = self.descriptor.specifier.get_raw();

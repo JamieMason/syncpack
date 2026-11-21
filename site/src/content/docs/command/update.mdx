@@ -26,6 +26,11 @@ import TargetOption from "@partials/option/target.mdx";
 
 Update dependencies in your monorepo to newer versions from the npm registry. Checks for available updates and modifies package.json files (and `pnpm-workspace.yaml` catalog entries when present) to use them. Unlike `fix` which synchronises versions across packages, `update` fetches the latest published versions. Use `--target` to control update strategy (latest, minor, patch), or define [updateGroups](CONFIG_UPDATE_GROUPS) for per-dependency control. Versions newer than [minimumReleaseAge](CONFIG_MINIMUM_RELEASE_AGE) are excluded by default to reduce supply chain attack risk.
 
+`update` makes no registry request for:
+
+- A dependency named like a package in your monorepo, even when it is a third-party package which shares that name. A [dependency group](CONFIG_DEPENDENCY_GROUPS) alias is skipped when any package it groups is local. Packages excluded by [`--source`](COMMAND_UPDATE#--source) are not loaded, so they are not known to be local.
+- A dependency whose every instance is matched by an [ignored](UPDATE_GROUP_IGNORED) update group. It is still looked up when only some of its instances are ignored.
+
 ## Examples
 
 ```bash frame="none"

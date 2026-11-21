@@ -4409,6 +4409,117 @@ mod update_groups {
       },
     ]);
   }
+
+  #[tokio::test]
+  async fn is_ignored_leaves_its_own_instances_alone_while_others_of_the_same_dependency_are_updated() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "version": "0.0.0", "dependencies": {"foo": "^1.0.0"}}),
+        json!({"name": "package-b", "version": "0.0.0", "dependencies": {"foo": "^1.0.0"}}),
+      ])
+      .with_update_group(json!({
+        "dependencies": ["foo"],
+        "packages": ["package-a"],
+        "isIgnored": true
+      }))
+      .with_registry_updates(json!({
+        "foo": ["1.0.0", "2.0.0"],
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsIgnored),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "^1.0.0",
+        expected: Some("^1.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToNpmRegistry),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "^1.0.0",
+        expected: Some("^2.0.0"),
+        overridden: None,
+        severity: None,
+      },
+    ]);
+  }
+
+  /// Update groups only apply to `update`; `lint` still checks what they ignore.
+  #[tokio::test]
+  async fn is_ignored_does_not_stop_lint_reporting_a_mismatch() {
+    let ctx = TestBuilder::new()
+      .with_packages(vec![
+        json!({"name": "package-a", "version": "0.0.0", "dependencies": {"foo": "1.0.0"}}),
+        json!({"name": "package-b", "version": "0.0.0", "dependencies": {"foo": "2.0.0"}}),
+      ])
+      .with_update_group(json!({
+        "dependencies": ["foo"],
+        "isIgnored": true
+      }))
+      .run()
+      .await;
+    expect(&ctx).to_have_instances(vec![
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-a",
+        id: "package-a in /version of package-a",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsLocalAndValid),
+        dependency_name: "package-b",
+        id: "package-b in /version of package-b",
+        actual: "0.0.0",
+        expected: Some("0.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::fixable(DiffersToHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-a",
+        actual: "1.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+        severity: None,
+      },
+      ExpectedInstance {
+        state: InstanceState::valid(IsHighestOrLowestSemver),
+        dependency_name: "foo",
+        id: "foo in /dependencies of package-b",
+        actual: "2.0.0",
+        expected: Some("2.0.0"),
+        overridden: None,
+        severity: None,
+      },
+    ]);
+  }
 }
 
 /// Severity tests — opt out of auto-fix per status (issue #216).
