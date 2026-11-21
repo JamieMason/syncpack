@@ -38,6 +38,15 @@ fn try_from_falls_back_to_default_when_user_did_not_set() {
 }
 
 #[test]
+fn raw_rcfile_defaults_when_every_key_is_omitted() {
+  let raw: RawRcfile = serde_json::from_value(json!({})).unwrap();
+  assert!(raw.custom_types.is_empty());
+  assert_eq!(raw.indent, None);
+  assert!(raw.source.is_empty());
+  assert!(!raw.strict);
+}
+
+#[test]
 fn try_from_uses_user_value_when_set() {
   let raw: RawRcfile = serde_json::from_value(json!({ "minimumReleaseAge": 60 })).unwrap();
   let rcfile = Rcfile::try_from(raw).unwrap();

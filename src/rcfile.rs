@@ -104,10 +104,6 @@ pub fn compute_all_dependency_types(custom_types: &HashMap<String, CustomType>) 
     .collect()
 }
 
-fn empty_custom_types() -> HashMap<String, CustomType> {
-  HashMap::new()
-}
-
 fn default_max_concurrent_requests() -> usize {
   12
 }
@@ -119,14 +115,6 @@ pub(crate) const DEFAULT_MINIMUM_RELEASE_AGE: u64 = 1440;
 
 fn default_true() -> bool {
   true
-}
-
-fn default_false() -> bool {
-  false
-}
-
-fn default_indent() -> Option<String> {
-  None
 }
 
 fn default_sort_az() -> Vec<String> {
@@ -166,10 +154,6 @@ fn sort_first() -> Vec<String> {
     "version".to_string(),
     "author".to_string(),
   ]
-}
-
-fn default_source() -> Vec<String> {
-  vec![]
 }
 
 /// How user-supplied source patterns combine with workspace discovery.
@@ -234,15 +218,15 @@ pub struct DependencyGroup {
 pub(crate) struct RawRcfile {
   #[serde(rename = "$schema", skip_serializing)]
   _schema: Option<serde::de::IgnoredAny>,
-  #[serde(default = "empty_custom_types")]
+  #[serde(default)]
   pub custom_types: HashMap<String, CustomType>,
   #[serde(default)]
   pub dependency_groups: Vec<DependencyGroup>,
-  #[serde(default = "default_false")]
+  #[serde(default)]
   pub format_bugs: bool,
-  #[serde(default = "default_false")]
+  #[serde(default)]
   pub format_repository: bool,
-  #[serde(default = "default_indent")]
+  #[serde(default)]
   pub indent: Option<String>,
   #[serde(default = "default_max_concurrent_requests")]
   pub max_concurrent_requests: usize,
@@ -263,11 +247,11 @@ pub(crate) struct RawRcfile {
   pub sort_first: Vec<String>,
   #[serde(default = "default_true")]
   pub sort_packages: bool,
-  #[serde(default = "default_source")]
+  #[serde(default)]
   pub source: Vec<String>,
   #[serde(default)]
   pub source_mode: SourceMode,
-  #[serde(default = "default_false")]
+  #[serde(default)]
   pub strict: bool,
   #[serde(default)]
   pub version_groups: Vec<AnyVersionGroup>,
