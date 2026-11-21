@@ -333,7 +333,7 @@ fn redraw(state: &mut PickerState) -> std::io::Result<()> {
 }
 
 /// RAII guard that toggles raw mode + alt-screen + cursor visibility.
-/// Restores terminal state on Drop, including panic unwinds.
+/// Restores terminal state on Drop. Release builds use `panic = "abort"`, so a panic skips Drop and can leave the terminal in raw mode.
 struct TermGuard;
 
 impl TermGuard {
