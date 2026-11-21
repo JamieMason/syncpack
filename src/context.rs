@@ -7,7 +7,7 @@ use {
     instance::{Instance, InstanceDescriptor, InstanceIdx},
     rcfile::{Rcfile, from_disk::RcfileError, validate_raw_dep_types},
     sources::Sources,
-    version_group::{VersionGroup, VersionGroupBehavior},
+    version_group::VersionGroup,
   },
   std::mem,
   thiserror::Error,

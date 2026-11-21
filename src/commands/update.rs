@@ -8,7 +8,7 @@ use {
     registry::updates::RegistryUpdates,
     source::Source,
     tui::{Tui, TuiReadiness, UpdateRow},
-    version_group::{VersionGroup, VersionGroupBehavior},
+    version_group::VersionGroup,
   },
   log::{error, info, warn},
 };

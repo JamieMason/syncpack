@@ -1,9 +1,5 @@
 use {
-  crate::{
-    context::Context,
-    registry::updates::RegistryUpdates,
-    version_group::{VersionGroup, VersionGroupBehavior},
-  },
+  crate::{context::Context, registry::updates::RegistryUpdates, version_group::VersionGroup},
   itertools::Itertools,
   std::cmp::Ordering,
 };

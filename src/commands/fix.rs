@@ -14,7 +14,7 @@ use {
     instance::{FixableInstance, InstanceIdx, InstanceState, InvalidInstance, Severity},
     source::Source,
     specifier::Specifier,
-    version_group::{InstanceAction, VersionGroupBehavior},
+    version_group::InstanceAction,
   },
   serde_json::Value as JsonValue,
   std::rc::Rc,

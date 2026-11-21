@@ -274,13 +274,6 @@ mod dependency_core_test {
   }
 }
 
-pub trait VersionGroupBehavior {
-  fn selector(&self) -> &GroupSelector;
-  fn dependencies(&self) -> &BTreeMap<String, DependencyCore>;
-  fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance);
-  fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>);
-}
-
 #[derive(Debug)]
 pub enum VersionGroup {
   Banned(BannedGroup),
@@ -300,8 +293,8 @@ pub enum VersionGroup {
   SnappedTo(SnappedToGroup),
 }
 
-impl VersionGroupBehavior for VersionGroup {
-  fn selector(&self) -> &GroupSelector {
+impl VersionGroup {
+  pub fn selector(&self) -> &GroupSelector {
     match self {
       Self::Banned(g) => &g.selector,
       Self::Catalog(g) => &g.selector,
@@ -316,7 +309,7 @@ impl VersionGroupBehavior for VersionGroup {
     }
   }
 
-  fn dependencies(&self) -> &BTreeMap<String, DependencyCore> {
+  pub fn dependencies(&self) -> &BTreeMap<String, DependencyCore> {
     match self {
       Self::Banned(g) => &g.dependencies,
       Self::Catalog(g) => &g.dependencies,
@@ -331,7 +324,7 @@ impl VersionGroupBehavior for VersionGroup {
     }
   }
 
-  fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
+  pub fn add_instance(&mut self, idx: InstanceIdx, instance: &Instance) {
     match self {
       Self::Banned(g) => g.add_instance(idx, instance),
       Self::Catalog(g) => g.add_instance(idx, instance),
@@ -346,7 +339,7 @@ impl VersionGroupBehavior for VersionGroup {
     }
   }
 
-  fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
+  pub fn visit(&self, ctx: &Context, registry_updates: &Option<RegistryUpdates>) {
     match self {
       Self::Banned(g) => g.visit(ctx, registry_updates),
       Self::Catalog(g) => g.visit(ctx, registry_updates),
@@ -360,9 +353,7 @@ impl VersionGroupBehavior for VersionGroup {
       Self::SnappedTo(g) => g.visit(ctx, registry_updates),
     }
   }
-}
 
-impl VersionGroup {
   pub fn variant_label(&self) -> &str {
     match self {
       Self::Banned(_) => "Banned",
