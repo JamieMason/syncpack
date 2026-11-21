@@ -1,7 +1,6 @@
 use {
   crate::{dependency::Strategy, instance::Instance, specifier::Specifier},
   detect_indent::detect_indent,
-  detect_newline_style::LineEnding,
   serde_json::Value as JsonValue,
   std::{
     fs,
@@ -144,11 +143,18 @@ impl Default for DetectedFormatting {
 pub fn detect_formatting(raw: &str) -> DetectedFormatting {
   let indent = detect_indent(raw).indent().to_string();
   let indent = if indent.is_empty() { "  ".to_string() } else { indent };
-  let newline = match LineEnding::find_or_use_lf(raw) {
-    LineEnding::CRLF => "\r\n".to_string(),
-    LineEnding::CR => "\r".to_string(),
-    LineEnding::LF => "\n".to_string(),
-  };
+  // Strict plurality of CRLF, LF and CR; ties and empty input fall back to LF.
+  let crlf = raw.matches("\r\n").count();
+  let lf = raw.matches('\n').count() - crlf;
+  let cr = raw.matches('\r').count() - crlf;
+  let newline = if crlf > lf && crlf > cr {
+    "\r\n"
+  } else if cr > lf && cr > crlf {
+    "\r"
+  } else {
+    "\n"
+  }
+  .to_string();
   DetectedFormatting { indent, newline }
 }
 

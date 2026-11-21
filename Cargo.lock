@@ -461,15 +461,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "detect-newline-style"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1124f25c3615ab547669f878088cef84850679327f79eccc70412c25a6643749"
-dependencies = [
- "regex",
-]
-
-[[package]]
 name = "displaydoc"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1745,7 +1736,6 @@ dependencies = [
  "colored",
  "crossterm",
  "detect-indent",
- "detect-newline-style",
  "env_logger",
  "globset",
  "ignore",

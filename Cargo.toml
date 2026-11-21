@@ -33,7 +33,6 @@ reqwest = { version = "0.12", features = [
   "rustls-tls",
 ], default-features = false }
 detect-indent = "0.1.0"
-detect-newline-style = "0.1.2"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
 syncpack-specifier = { path = "crates/syncpack-specifier" }

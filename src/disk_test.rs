@@ -677,6 +677,23 @@ fn detects_tab_indent_and_crlf_newline() {
 }
 
 #[test]
+fn detects_newline_by_strict_plurality_of_crlf_lf_and_cr() {
+  let cases: [(&str, &str, &str); 4] = [
+    ("cr only", "{\r  \"a\": 1\r}\r", "\r"),
+    ("lf-cr pairs tie lf against cr", "{\n\r  \"a\": 1,\n\r  \"b\": 2\n\r}\n\r", "\n"),
+    (
+      "cr plurality over one lf and one crlf",
+      "{\r  \"a\": 1,\r  \"b\": 2,\r  \"c\": 3,\n  \"d\": 4\r\n}",
+      "\r",
+    ),
+    ("empty", "", "\n"),
+  ];
+  for (name, raw, expected) in cases {
+    assert_eq!(detect_formatting(raw).newline, expected, "{name}: {raw:?}");
+  }
+}
+
+#[test]
 fn falls_back_to_two_spaces_when_indent_cannot_be_detected() {
   // A single-line file gives detect_indent nothing to infer an indent from.
   let formatting = detect_formatting("{\"a\":1}");
