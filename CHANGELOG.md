@@ -1,5 +1,27 @@
 # Changelog
 
+## [15.3.4](https://github.com/JamieMason/syncpack/compare/15.3.3...15.3.4) (2026-11-22)
+
+### Bug Fixes
+
+* **config:** keep dependency types in a stable order between runs ([214a196](https://github.com/JamieMason/syncpack/commit/214a1967b7e49e94e24e504704a36498dd5a6cf4))
+* **config:** report invalid custom type strategy instead of panicking ([e6f62da](https://github.com/JamieMason/syncpack/commit/e6f62da4dde0a9c90a8a73d62ca7dbbb6e735a7b))
+* **disk:** keep writing after a failed write and list every failed path ([a6eb4d0](https://github.com/JamieMason/syncpack/commit/a6eb4d039c6df9503f0987f6e86c09a2526c5900))
+* **disk:** preserve crlf line endings when rewriting files ([68e2996](https://github.com/JamieMason/syncpack/commit/68e2996fa586060bc432247634c933b1876fbaad))
+* **disk:** remove banned pnpm overrides from pnpm-workspace.yaml ([ead05e2](https://github.com/JamieMason/syncpack/commit/ead05e2d058098e183a1130c5493c2ce7cd6fdc3))
+* **format:** shorten bare github.com repository urls ([9e86207](https://github.com/JamieMason/syncpack/commit/9e8620768239342db155b5b79a39db502a5591e8))
+* **npm:** list every status code in the StatusCode type ([fff8a4b](https://github.com/JamieMason/syncpack/commit/fff8a4b696389eb1cdea21f0b946b0857e0b7b12))
+* **registry:** time out per read instead of per request ([d4bfc86](https://github.com/JamieMason/syncpack/commit/d4bfc8683a66b7048f597f777557ccbfce1532ca))
+* **specifier:** parse complex ranges containing prerelease versions ([ee23767](https://github.com/JamieMason/syncpack/commit/ee23767b6d544e46255ae611fd369b0cd578d93c))
+* **update:** never look up local or ignored dependencies on the registry ([6fbe5ea](https://github.com/JamieMason/syncpack/commit/6fbe5ea7a478878b61ac058c6aed45d4cd48c0f7))
+* **update:** only load and save the registry cache for update ([4296d89](https://github.com/JamieMason/syncpack/commit/4296d895d585c68819bea73f1b4a8eadf98a09ed))
+* **update:** store registry cache in a user dir ([a4f5d16](https://github.com/JamieMason/syncpack/commit/a4f5d1667a1e96693c25e878b4dbd7d02971d646))
+
+### Performance Improvements
+
+* **disk:** detect newline style without a regex ([36b4fae](https://github.com/JamieMason/syncpack/commit/36b4fae9ebdaa06d6134f4fafacd39358531c888))
+* **registry:** request gzip and brotli compressed responses ([0b70739](https://github.com/JamieMason/syncpack/commit/0b70739e39710c9c3de487525dc81ca5def9b0b1))
+
 ## [15.3.3](https://github.com/JamieMason/syncpack/compare/15.3.2...15.3.3) (2026-08-09)
 
 ### Bug Fixes
