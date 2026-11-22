@@ -9,13 +9,11 @@ import { Badge } from "@astrojs/starlight/components";
 
 ## `update` skips local packages and fully ignored dependencies <Badge text="Unreleased" variant="note" />
 
-[`update`](COMMAND_UPDATE) no longer sends a dependency named like a package in your monorepo to the npm registry. Before, a public package with the same name could have its version written into a [`semverRangeOnly`](VERSION_GROUP_RANGE_ONLY) group or a pnpm or bun catalog definition. A third-party dependency which shares a name with a local package is skipped too, and so is a [`dependencyGroups`](CONFIG_DEPENDENCY_GROUPS) alias containing any local package. When [`--source`](COMMAND_UPDATE#--source) or [`source`](CONFIG_SOURCE) narrows the run, packages which are not loaded are not known to be local.
-
-A dependency is also not looked up when an [ignored](UPDATE_GROUP_IGNORED) update group matches every one of its instances. It is still looked up when only some are ignored.
+[`update`](COMMAND_UPDATE) no longer sends a dependency named like a package in your monorepo to the npm registry, nor one which an [ignored](UPDATE_GROUP_IGNORED) update group matches in every instance. Before, a public package with the same name could have its version written into a [`semverRangeOnly`](VERSION_GROUP_RANGE_ONLY) group or a pnpm or bun catalog definition. See [`update`](COMMAND_UPDATE) for the full rules.
 
 ## Registry cache moves to a per-user directory <Badge text="Unreleased" variant="note" />
 
-Responses are cached in `$XDG_CACHE_HOME/syncpack`, else `$HOME/.cache/syncpack`, else the system temp directory.
+Responses are cached in `$XDG_CACHE_HOME/syncpack`, else `$HOME/.cache/syncpack`, else the system temp directory. Only [`update`](COMMAND_UPDATE) reads or writes the cache, and it writes the file only when it fetched a response.
 
 ## Failed writes are listed and exit 1 <Badge text="Unreleased" variant="note" />
 
