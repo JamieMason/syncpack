@@ -2,6 +2,7 @@
 *.log
 *.log.*
 .astro/
+.claude/
 .DS_Store
 .idea
 coverage/
