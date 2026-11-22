@@ -7,6 +7,18 @@ sidebar:
 
 import { Badge } from "@astrojs/starlight/components";
 
+## Failed writes are listed and exit 1 <Badge text="Unreleased" variant="note" />
+
+When [`fix`](COMMAND_FIX), [`format`](COMMAND_FORMAT) or [`update`](COMMAND_UPDATE) cannot write a file, syncpack still writes the others, lists every file it failed to write with its path, such as `Failed to write /repo/packages/a/package.json: Permission denied (os error 13)`, and exits 1. Before, the first failure stopped the run and the files after it were not written.
+
+## `fix` removes banned pnpm overrides <Badge text="Unreleased" variant="note" />
+
+[`fix`](COMMAND_FIX) now deletes a dependency matched by a [Banned](VERSION_GROUP_BANNED) version group from `overrides` in `pnpm-workspace.yaml`, as it already did for package.json files and catalogs. Before, the `IsBanned` status was reported as fixed but the override stayed in the file.
+
+## Line endings are preserved <Badge text="Unreleased" variant="note" />
+
+Files syncpack rewrites keep their line endings on every line. A CRLF package.json or `pnpm-workspace.yaml` used to come out with a mix of LF and CRLF. A file which mixes them is rewritten with the most common ending, and LF wins a tie.
+
 ## Range Only version group <Badge text="15.3.0" variant="note" />
 
 [`semverRangeOnly`](VERSION_GROUP_RANGE_ONLY) enforces a consistent semver range prefix (`^`, `~`, exact) across instances without syncing the version numbers themselves.

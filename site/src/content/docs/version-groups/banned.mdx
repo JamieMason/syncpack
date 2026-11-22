@@ -12,7 +12,7 @@ import SeverityGroupSection from "@partials/severity/group-section.mdx";
 import { Badge } from "@astrojs/starlight/components";
 import Details from "@site/components/details.astro";
 
-Prevent dependencies from being used anywhere in your monorepo, or only in specific packages. Common cases are blocking legacy packages, conflicting libraries, or packages that violate your security or licensing policy. When syncpack finds a banned dependency, it flags it as an issue that must be removed.
+Prevent dependencies from being used anywhere in your monorepo, or only in specific packages. Common cases are blocking legacy packages, conflicting libraries, or packages that violate your security or licensing policy. When syncpack finds a banned dependency, it flags it as an issue that must be removed. `fix` deletes it from package.json files and from `pnpm-workspace.yaml` catalogs and `overrides`.
 
 ## Configuration
 
