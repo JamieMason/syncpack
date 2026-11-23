@@ -4,7 +4,8 @@ use {
   log::info,
   node_semver::{Range, Version},
   std::time::{SystemTime, UNIX_EPOCH},
-  unicode_width::{UnicodeWidthChar, UnicodeWidthStr},
+  unicode_segmentation::UnicodeSegmentation,
+  unicode_width::UnicodeWidthStr,
 };
 
 #[cfg(test)]
@@ -50,7 +51,7 @@ fn strip_ansi(s: &str) -> String {
 /// Balanced middle-truncate to fit `budget` visual columns. Returns the input
 /// unchanged when it already fits. Replaces the middle with `…`.
 pub fn middle_truncate(s: &str, budget: usize) -> String {
-  let width: usize = s.chars().map(|c| c.width().unwrap_or(0)).sum();
+  let width = s.width();
   if width <= budget {
     return s.to_string();
   }
@@ -62,27 +63,32 @@ pub fn middle_truncate(s: &str, budget: usize) -> String {
   }
   let head_budget = (budget - 1) / 2;
   let tail_budget = budget - 1 - head_budget;
+  // Step by grapheme cluster, not by char. A cluster is what a terminal
+  // draws as one character and can be several chars: an emoji with a skin
+  // tone, a flag, a family joined by zero-width joiners. Measured per char a
+  // family counts as eight columns where it occupies two, and a cut between
+  // its chars leaves a dangling joiner.
   let mut head = String::new();
   let mut head_w = 0;
-  for c in s.chars() {
-    let w = c.width().unwrap_or(0);
+  for g in s.graphemes(true) {
+    let w = g.width();
     if head_w + w > head_budget {
       break;
     }
-    head.push(c);
+    head.push_str(g);
     head_w += w;
   }
-  let mut tail_chars: Vec<char> = Vec::new();
+  let mut tail_parts: Vec<&str> = Vec::new();
   let mut tail_w = 0;
-  for c in s.chars().rev() {
-    let w = c.width().unwrap_or(0);
+  for g in s.graphemes(true).rev() {
+    let w = g.width();
     if tail_w + w > tail_budget {
       break;
     }
-    tail_chars.push(c);
+    tail_parts.push(g);
     tail_w += w;
   }
-  let tail: String = tail_chars.into_iter().rev().collect();
+  let tail: String = tail_parts.into_iter().rev().collect();
   format!("{head}…{tail}")
 }
 
@@ -316,7 +322,7 @@ pub fn render_lines(rows: &[UpdateRow], selection: Option<&[bool]>, cursor: Opti
 
 fn format_group_header(label: &str, max_width: Option<usize>) -> String {
   let cap = max_width.map(|w| w.min(80)).unwrap_or(80);
-  let label_w: usize = label.chars().map(|c| c.width().unwrap_or(0)).sum();
+  let label_w = label.width();
   // header = `= {label} ` so 3 framing columns around the label.
   let frame = 3;
   let header_w = label_w + frame;
@@ -389,7 +395,7 @@ fn format_solo_line(row: &UpdateRow, selected: Option<bool>, focused: bool, max_
     return line;
   }
   let overflow = line_w - max_w;
-  let name_w: usize = row.dependency_name.chars().map(|c| c.width().unwrap_or(0)).sum();
+  let name_w = row.dependency_name.width();
   let name_budget = name_w.saturating_sub(overflow);
   build(&middle_truncate(&row.dependency_name, name_budget))
 }
@@ -415,7 +421,7 @@ fn format_dep_header(row: &UpdateRow, interactive: bool, max_width: Option<usize
     return line;
   }
   let overflow = line_w - max_w;
-  let name_w: usize = row.dependency_name.chars().map(|c| c.width().unwrap_or(0)).sum();
+  let name_w = row.dependency_name.width();
   let name_budget = name_w.saturating_sub(overflow);
   build(&middle_truncate(&row.dependency_name, name_budget))
 }
