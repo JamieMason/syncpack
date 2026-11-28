@@ -189,7 +189,7 @@ async fn bun_dual_path_aborts() {
     }),
   );
   io.add_file("bun.lock", "{}".to_string());
-  let disk = Disk::from_workspace(&io, std::env::current_dir().unwrap().as_path());
+  let disk = Disk::from_workspace(&io, std::env::current_dir().unwrap().as_path()).unwrap();
   assert_eq!(disk.package_manager, Some(PackageManager::Bun));
   let err = catalogs::make_catalog_dep_types(&disk).unwrap_err();
   assert!(matches!(err, SyncpackError::BunDualCatalogPath));
