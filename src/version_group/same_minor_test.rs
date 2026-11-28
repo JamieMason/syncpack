@@ -1716,6 +1716,63 @@ async fn all_same_minor_different_patches_all_valid() {
   ]);
 }
 
+/// A specifier such as `*` has no version to apply a range prefix to, so the
+/// sameMinor group cannot correct it. It must be left as-is instead of
+/// panicking, both when it is in a semver group and when it is not.
+#[tokio::test]
+async fn instance_whose_specifier_cannot_take_a_range_is_left_as_is() {
+  let ctx = TestBuilder::new()
+    .with_packages(vec![
+      json!({ "name": "package-a", "dependencies": { "foo": "*" } }),
+      json!({ "name": "package-b", "dependencies": { "foo": "*" } }),
+    ])
+    .with_semver_group(json!({ "range": "~" }))
+    .with_version_groups(vec![
+      json!({ "dependencyTypes": ["local"], "isIgnored": true }),
+      json!({ "dependencies": ["foo"], "policy": "sameMinor" }),
+    ])
+    .run()
+    .await;
+  expect(&ctx).to_have_instances(vec![
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "package-a",
+      id: "package-a in /version of package-a",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(IsIgnored),
+      dependency_name: "package-b",
+      id: "package-b in /version of package-b",
+      actual: "",
+      expected: Some(""),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameMinorGroup),
+      dependency_name: "foo",
+      id: "foo in /dependencies of package-a",
+      actual: "*",
+      expected: Some("*"),
+      overridden: None,
+      severity: None,
+    },
+    ExpectedInstance {
+      state: InstanceState::valid(SatisfiesSameMinorGroup),
+      dependency_name: "foo",
+      id: "foo in /dependencies of package-b",
+      actual: "*",
+      expected: Some("*"),
+      overridden: None,
+      severity: None,
+    },
+  ]);
+}
+
 /// Severity tests — opt out of auto-fix per status (issue #216).
 /// SameMinor permits `DiffersToHighestOrLowestSemverMinor`,
 /// `SemverRangeMismatch`, `SameMinorOverridesSemverRange`,

@@ -193,28 +193,25 @@ impl SameMinorGroup {
         if instance.matches_preferred_semver_range() {
           debug!("{L7}instance already matches preferred range");
           instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, actual_specifier);
-        } else {
+        } else if let Some(corrected) = instance.get_specifier_with_preferred_semver_range() {
           debug!("{L7}instance does not match preferred range");
-          instance.mark_fixable(
-            FixableInstance::SemverRangeMismatch,
-            &instance.get_specifier_with_preferred_semver_range().unwrap(),
-          );
+          instance.mark_fixable(FixableInstance::SemverRangeMismatch, &corrected);
+        } else {
+          debug!("{L7}instance mismatches its semver group but cannot take the preferred range");
+          instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, actual_specifier);
         }
-      } else {
+      } else if let Some(patched) = actual_specifier.with_range(&SemverRange::Patch) {
         debug!("{L6}preferred range is unsafe ({preferred_range:?})");
         if instance.matches_preferred_semver_range() {
           debug!("{L7}instance matches preferred (unsafe) range");
-          instance.mark_fixable(
-            FixableInstance::SameMinorOverridesSemverRange,
-            &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
-          );
+          instance.mark_fixable(FixableInstance::SameMinorOverridesSemverRange, &patched);
         } else {
           debug!("{L7}instance does not match preferred (unsafe) range");
-          instance.mark_fixable(
-            FixableInstance::SameMinorOverridesSemverRangeMismatch,
-            &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
-          );
+          instance.mark_fixable(FixableInstance::SameMinorOverridesSemverRangeMismatch, &patched);
         }
+      } else {
+        debug!("{L6}preferred range is unsafe but the specifier cannot take a patch range");
+        instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, actual_specifier);
       }
     } else {
       debug!("{L5}it does not belong to a semver group");
@@ -226,10 +223,11 @@ impl SameMinorGroup {
         }
         Some(ref range) => {
           debug!("{L6}on-disk range is unsafe ({range:?})");
-          instance.mark_fixable(
-            FixableInstance::SameMinorOverridesSemverRange,
-            &actual_specifier.with_range(&SemverRange::Patch).unwrap(),
-          );
+          if let Some(patched) = actual_specifier.with_range(&SemverRange::Patch) {
+            instance.mark_fixable(FixableInstance::SameMinorOverridesSemverRange, &patched);
+          } else {
+            instance.mark_valid(ValidInstance::SatisfiesSameMinorGroup, actual_specifier);
+          }
         }
         None => {
           debug!("{L6}no semver range on disk");
