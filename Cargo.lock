@@ -1879,6 +1879,7 @@ dependencies = [
  "syncpack-specifier",
  "thiserror 2.0.21",
  "tokio",
+ "unicode-segmentation",
  "unicode-width 0.2.2",
  "yaml_serde",
  "yamlpatch",

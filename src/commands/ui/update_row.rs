@@ -4,7 +4,8 @@ use {
   log::info,
   node_semver::{Range, Version},
   std::time::{SystemTime, UNIX_EPOCH},
-  unicode_width::{UnicodeWidthChar, UnicodeWidthStr},
+  unicode_segmentation::UnicodeSegmentation,
+  unicode_width::UnicodeWidthStr,
 };
 
 #[cfg(test)]
@@ -50,8 +51,7 @@ fn strip_ansi(s: &str) -> String {
 /// Balanced middle-truncate to fit `budget` visual columns. Returns the input
 /// unchanged when it already fits. Replaces the middle with `…`.
 pub fn middle_truncate(s: &str, budget: usize) -> String {
-  let width: usize = s.chars().map(|c| c.width().unwrap_or(0)).sum();
-  if width <= budget {
+  if s.width() <= budget {
     return s.to_string();
   }
   if budget == 0 {
@@ -62,28 +62,29 @@ pub fn middle_truncate(s: &str, budget: usize) -> String {
   }
   let head_budget = (budget - 1) / 2;
   let tail_budget = budget - 1 - head_budget;
-  let mut head = String::new();
-  let mut head_w = 0;
-  for c in s.chars() {
-    let w = c.width().unwrap_or(0);
-    if head_w + w > head_budget {
-      break;
-    }
-    head.push(c);
-    head_w += w;
-  }
-  let mut tail_chars: Vec<char> = Vec::new();
-  let mut tail_w = 0;
-  for c in s.chars().rev() {
-    let w = c.width().unwrap_or(0);
-    if tail_w + w > tail_budget {
-      break;
-    }
-    tail_chars.push(c);
-    tail_w += w;
-  }
-  let tail: String = tail_chars.into_iter().rev().collect();
+  let head: String = take_graphemes(s.graphemes(true), head_budget).concat();
+  let mut tail = take_graphemes(s.graphemes(true).rev(), tail_budget);
+  tail.reverse();
+  let tail = tail.concat();
   format!("{head}…{tail}")
+}
+
+/// Take whole grapheme clusters until the next would exceed `budget` columns.
+/// A cluster is what a terminal draws as one character and may span several
+/// chars (an emoji with a skin tone, a flag, a family joined by zero-width
+/// joiners). Stepping by char splits such a glyph and miscounts its width.
+fn take_graphemes<'a>(graphemes: impl Iterator<Item = &'a str>, budget: usize) -> Vec<&'a str> {
+  let mut out = Vec::new();
+  let mut width = 0;
+  for g in graphemes {
+    let w = g.width();
+    if width + w > budget {
+      break;
+    }
+    out.push(g);
+    width += w;
+  }
+  out
 }
 
 /// Wall-clock UNIX seconds. Suspect callers should freeze this value
@@ -316,7 +317,7 @@ pub fn render_lines(rows: &[UpdateRow], selection: Option<&[bool]>, cursor: Opti
 
 fn format_group_header(label: &str, max_width: Option<usize>) -> String {
   let cap = max_width.map(|w| w.min(80)).unwrap_or(80);
-  let label_w: usize = label.chars().map(|c| c.width().unwrap_or(0)).sum();
+  let label_w = label.width();
   // header = `= {label} ` so 3 framing columns around the label.
   let frame = 3;
   let header_w = label_w + frame;
@@ -389,7 +390,7 @@ fn format_solo_line(row: &UpdateRow, selected: Option<bool>, focused: bool, max_
     return line;
   }
   let overflow = line_w - max_w;
-  let name_w: usize = row.dependency_name.chars().map(|c| c.width().unwrap_or(0)).sum();
+  let name_w = row.dependency_name.width();
   let name_budget = name_w.saturating_sub(overflow);
   build(&middle_truncate(&row.dependency_name, name_budget))
 }
@@ -415,7 +416,7 @@ fn format_dep_header(row: &UpdateRow, interactive: bool, max_width: Option<usize
     return line;
   }
   let overflow = line_w - max_w;
-  let name_w: usize = row.dependency_name.chars().map(|c| c.width().unwrap_or(0)).sum();
+  let name_w = row.dependency_name.width();
   let name_budget = name_w.saturating_sub(overflow);
   build(&middle_truncate(&row.dependency_name, name_budget))
 }
