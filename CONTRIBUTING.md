@@ -4,7 +4,7 @@ Syncpack is a Rust binary crate that creates a command line application for ensu
 
 ## LLM-Assisted Development
 
-If you're using an LLM (like Claude, ChatGPT, or Copilot) to assist with development, see **[.notes/index.md](./.notes/index.md)** for a comprehensive development hub optimised for LLM context. It includes:
+If you're using an LLM (like Claude, ChatGPT, or Copilot) to assist with development, see **[.notes/context.md](./.notes/context.md)** for a comprehensive development hub optimised for LLM context. It includes:
 
 - Essential file locations and their purposes
 - Core data structures and their relationships
